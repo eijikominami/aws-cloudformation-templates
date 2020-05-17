@@ -1,7 +1,7 @@
 [**English**](README.md) / 日本語
 
 # AWSCloudFormationTemplates/monitoring
-![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoidzhOZGpLeGpGQ1FmTVlkNkxTTGxIWFhMZk5BRXBmR1pVVHhWbWVIdmIzRyttcmw2RUF3YkxTWStMWTVReXJ2UkhhTUFlSitia3REVGFBcTAvR29uZ1pVPSIsIml2UGFyYW1ldGVyU3BlYyI6IjRLV2tpS0lhWDc1aDJpU1AiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiLzdYc1dVbmpHY1IvdnVCK2FrTS85dFhHMytNS2kzdEJ1YnE0MFhlc0ttanVIWWRhL1dBOTltSFZERGtZYWlmdlZnWElXWTBjcjdzSldHT0YyaGkxd01rPSIsIml2UGFyYW1ldGVyU3BlYyI6InF5RTZQQTBEYUNBVUJZU0kiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
