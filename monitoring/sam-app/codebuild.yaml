@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for CodeBuild
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+  ProjectName:
+    Type: String
+    AllowedPattern: .+
+    Description: CodeBuild project name [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmCodeBuildForNestedStack:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*${ProjectName}* で *ビルドが失敗* しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-CodeBuild-${ProjectName}-FailedBuilds'
+        - !Sub 'Notice-CodeBuild-${ProjectName}-FailedBuilds'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ProjectName
+          Value: !Ref ProjectName
+      EvaluationPeriods: 1
+      MetricName: FailedBuilds
+      Namespace: AWS/CodeBuild
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

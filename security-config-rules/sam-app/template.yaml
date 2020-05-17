@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/security-config-rules sets extended Config rules.
+
+Globals:
+  Function:
+    Handler: lambda_function.lambda_handler
+    Runtime: python3.8
+
+Parameters:
+  AutoRemediation:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable auto remendentions [required]
+  RequiredTagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+    Description: Required tag key [required]
+  RequiredTagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+    Description: Required tag key [required]
+    
+Conditions:
+  CreateRemediationResources:
+    !Equals [ !Ref AutoRemediation, Enabled ]
+
+Resources:
+  IAMRoleForLambda:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for Lambda to access API Gateway, CloudFront, Lambda and Config.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/service-role/AWSConfigRulesExecutionRole
+      Policies:
+        - PolicyName: !Sub 'RequiredTags-AWSLambdaPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'apigateway:GET'
+                  - 'cloudfront:ListTagsForResource'
+                  - 'iam:GetRole'
+                  - 'lambda:ListTags'
+                  - 'config:*'
+                Resource:
+                  - '*'
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:ListObjects'
+                  - 's3:DeleteObject'
+                  - 's3:DeleteBucket'
+                  - 'dynamodb:deletetable'
+                  - 'apigateway:DELETE'
+                  - 'iam:ListRoles'
+                  - 'lambda:DeleteFunction'
+                Resource:
+                  - '*'
+        - PolicyName: !Sub 'RequiredTags-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:PutLogEvents'
+                Resource: '*' 
+      RoleName: !Sub 'RequiredTags-ConfigRules-${AWS::Region}'
+      Tags:
+        - Key: !Ref RequiredTagKey
+          Value: !Ref RequiredTagValue
+  ConfigRequiredTags:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: required-tags
+      Description: 指定したタグがリソースにあるかどうかを確認します。
+      InputParameters:
+        tag1Key: !Ref RequiredTagKey
+        tag1Value: !Ref RequiredTagValue
+      Source:
+        Owner: AWS
+        SourceIdentifier: REQUIRED_TAGS
+  ConfigRequiredTagsExpanded:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: required-tags-expanded
+      Description: 指定したタグがリソースにあるかどうかを確認します。
+      InputParameters:
+        tagKey: !Ref RequiredTagKey
+        tagValue: !Ref RequiredTagValue
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+        SourceIdentifier: !GetAtt LambdaCheckRequiredTags.Arn
+  LambdaCheckRequiredTags:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: checkRequiredTags/
+      Description: 指定したタグがリソースにあるかどうかを確認します。
+      FunctionName: checkRequiredTags
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Timeout: 30
+      Tracing: Active
+  LambdaCheckRequiredTagsPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaCheckRequiredTags
+      Principal: config.amazonaws.com
+  LambdaCheckRequiredTagsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/${LambdaCheckRequiredTags}
+      RetentionInDays: 60
+  CloudWatchEventsForConfigRequiredTags:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for Config Required Tags created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.config
+        detail-type: 
+          - Config Rules Compliance Change
+        # Events fired when status has been changed from PASSED to ARCHIVED.
+        detail:
+          messageType:
+            - ComplianceChangeNotification
+          newEvaluationResult:
+            complianceType:
+              - NON_COMPLIANT
+      Name: AWS_Config_Custom_Rules
+      State: !If
+       - CreateRemediationResources
+       - ENABLED
+       - DISABLED
+      Targets:
+        - Arn: !GetAtt LambdaDeleteUnapplicableResources.Arn
+          Id: lambda
+  LambdaDeleteUnapplicableResources:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: deleteUnapplicableResources/
+      Description: 指定したタグがないリソースを削除します。
+      FunctionName: deleteUnapplicableResources
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Timeout: 30
+      Tracing: Active
+  LambdaDeleteUnapplicableResourcesPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaDeleteUnapplicableResources
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt CloudWatchEventsForConfigRequiredTags.Arn
+  LambdaDeleteUnapplicableResourcesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/${LambdaDeleteUnapplicableResources}
+      RetentionInDays: 60

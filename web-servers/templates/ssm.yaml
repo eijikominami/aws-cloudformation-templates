@@ -1,0 +1,315 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/web-servers/ssm executes Systems Manager Quick Setup and creates a System Manager Maintenance Window and related resources.
+
+Parameters:
+  IgnoreResourceConflicts:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+      - Enabled
+      - Disabled  
+  PatchingAt:
+    Type: Number
+    Default: 3
+    MinValue: 0
+    MaxValue: 23
+    Description: Daily patching time (H) [required]
+  PrefixOfLogicalName:
+    Type: String
+    Default: WebServers
+    Description: Custom prefix name [required]
+  SNSTopicARN:
+    Type: String
+    AllowedPattern: .+
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateResource:
+    !Equals [ !Ref IgnoreResourceConflicts, Disabled ]
+
+Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForSSM:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: ssm.amazonaws.com
+      Description: Provides access to AWS Resources managed or used by Amazon SSM.
+  # Document
+  CloudWatchAgentInstallAndConfigure:
+    Type: 'AWS::SSM::Document'
+    Properties: 
+      Content:
+        schemaVersion: "2.2"
+        description: A composite document for installing and configuring CloudWatchAgent.
+        mainSteps:
+          - name: installCWAgent
+            action: aws:runDocument
+            inputs:
+              documentType: SSMDocument
+              documentPath: AWS-ConfigureAWSPackage
+              documentParameters:
+                action: Install
+                name: AmazonCloudWatchAgent
+          - name: second
+            action: aws:runDocument
+            inputs:
+              documentType: SSMDocument
+              documentPath: AmazonCloudWatch-ManageAgent
+              documentParameters:
+                action: configure
+                mode: ec2
+                optionalConfigurationSource: default
+                optionalRestart: yes
+      DocumentType: Command
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchAgentUpdate:
+    Type: 'AWS::SSM::Document'
+    Properties: 
+      Content:
+        schemaVersion: "2.2"
+        description: A composite document for updating CloudWatchAgent.
+        mainSteps:
+          - name: first
+            action: aws:runShellScript
+            inputs:
+              runCommand:
+                - sleep 1800
+            precondition:
+              StringEquals:
+                - platformType
+                - Linux
+          - name: second
+            action: aws:runPowerShellScript
+            inputs:
+              runCommand:
+                - Start-Sleep –Seconds 1800
+            precondition:
+              StringEquals:
+                - platformType
+                - Linux
+          - name: installCWAgent
+            action: aws:runDocument
+            inputs:
+              documentType: SSMDocument
+              documentPath: AWS-ConfigureAWSPackage
+              documentParameters:
+                action: Install
+                name: AmazonCloudWatchAgent
+      DocumentType: Command
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # State Manager
+  # Install and configure the CloudWatch agent
+  SystemAssociationForInstallAndConfigureCloudWatchAgent:
+    Type: 'AWS::SSM::Association'
+    Properties: 
+      AssociationName: SystemAssociationForInstallAndConfigureCloudWatchAgent
+      Name: !Ref CloudWatchAgentInstallAndConfigure
+      Targets: 
+        - Key: InstanceIds
+          Values:
+            - '*'
+  # Update Systems Manager (SSM) Agent every two weeks
+  SystemAssociationForSsmAgentUpdate:
+    Type: 'AWS::SSM::Association'
+    Properties: 
+      AssociationName: SystemAssociationForSsmAgentUpdate
+      Name: AWS-UpdateSSMAgent
+      ScheduleExpression: rate(14 days)
+      Targets: 
+        - Key: InstanceIds
+          Values:
+            - '*'
+  # Collect inventory from your instances every 30 minutes
+  SystemAssociationForInventoryCollection:
+    Condition: CreateResource
+    Type: 'AWS::SSM::Association'
+    Properties: 
+      AssociationName: SystemAssociationForInventoryCollection
+      Name: AWS-GatherSoftwareInventory
+      Parameters:
+          applications:
+            - Enabled
+          awsComponents:
+            - Enabled
+          customInventory:
+            - Enabled
+          instanceDetailedInformation:
+            - Enabled
+          networkConfig:
+            - Enabled
+          services:
+            - Enabled
+          windowsRoles:
+            - Enabled
+          windowsUpdates:
+            - Enabled
+      ScheduleExpression: rate(30 minutes)
+      Targets: 
+        - Key: InstanceIds
+          Values:
+            - '*'
+  # Scan instances for missing patches daily
+  SystemAssociationForScanningPatches:
+    Type: 'AWS::SSM::Association'
+    Properties: 
+      AssociationName: SystemAssociationForScanningPatches
+      Name: AWS-RunPatchBaseline
+      ScheduleExpression: rate(1 day)
+      Parameters:
+          Operation:
+            - Scan
+      Targets: 
+        - Key: InstanceIds
+          Values:
+            - '*'
+  # Update the CloudWatch agent every 30 days
+  SystemAssociationForUpdateCloudWatchAgent:
+    Type: 'AWS::SSM::Association'
+    Properties: 
+      AssociationName: SystemAssociationForUpdateCloudWatchAgent
+      Name: !Ref CloudWatchAgentUpdate
+      ScheduleExpression: rate(30 days)
+      Targets: 
+        - Key: InstanceIds
+          Values:
+            - '*'
+  # Install the Inspector agent two weeks
+  SystemAssociationForAmazonInspector:
+    Type: 'AWS::SSM::Association'
+    Properties: 
+      AssociationName: SystemAssociationForAmazonInspector
+      Name: AmazonInspector-ManageAWSAgent
+      ScheduleExpression: rate(14 days)
+      Parameters:
+          Operation:
+            - Install
+      Targets: 
+        - Key: InstanceIds
+          Values:
+            - '*'
+  # Maintenance Window
+  MaintenanceWindow:
+    Type: 'AWS::SSM::MaintenanceWindow'
+    Properties: 
+      AllowUnassociatedTargets: false
+      Cutoff: 1
+      Description: !Sub Patching to ${PrefixOfLogicalName} EC2 instances at ${PatchingAt}:00 every day.
+      Duration: 2
+      Name: DailyMaintenance
+      Schedule: !Sub cron(0 ${PatchingAt} * * ? *)
+      ScheduleTimezone: Asia/Tokyo
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MaintenanceWindowTarget:
+    Type: 'AWS::SSM::MaintenanceWindowTarget'
+    Properties: 
+      Description: !Sub EC2 instances createdby ${PrefixOfLogicalName}.
+      Name: !Ref PrefixOfLogicalName
+      ResourceType: INSTANCE
+      Targets:
+        - Key: !Join
+          - ':'
+          - - tag
+            - !Ref TagKey
+          Values:
+            - !Ref TagValue
+      WindowId: !Ref MaintenanceWindow
+  MaintenanceWindowTask:
+    DependsOn:
+      - ServiceLinkedRoleForSSM
+    Type: 'AWS::SSM::MaintenanceWindowTask'
+    Properties: 
+      Description: !Sub Patching for ${PrefixOfLogicalName} EC2 instances.
+      MaxConcurrency: '50'
+      MaxErrors: '0'
+      Name: !Sub PatchingTaskFor${PrefixOfLogicalName}
+      Priority: 0
+      ServiceRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM
+      Targets:  
+        - Key: WindowTargetIds
+          Values: 
+            - !Ref MaintenanceWindowTarget
+      TaskArn: AWS-RunPatchBaseline
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          NotificationConfig:
+              NotificationArn: !Ref SNSTopicARN
+          Parameters: 
+            Operation:
+              - Install
+          ServiceRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM
+          TimeoutSeconds: 600
+      TaskType: RUN_COMMAND
+      WindowId: !Ref MaintenanceWindow
+  EventBridgeForSSM:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for System Manager created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.ssm
+        detail-type: 
+          - EC2 Command Invocation Status-change Notification
+          - EC2 Automation Step Status-change Notification
+          - EC2 Automation Execution Status-change Notification
+      Name: SystemManager
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSTopicARN
+          Id: SNSForAlert
+  EventBridgeForSSMConfigurationCompliance:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for System Manager Configuration Compliance created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.ssm
+        detail-type: 
+          - Configuration Compliance State Change
+      Name: SystemManagerConfigurationCompliance
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSTopicARN
+          Id: SNSForAlert
+  EventBridgeForSSMMaintenanceWindow:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for System Manager Maintenance Window created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.ssm
+        detail-type: 
+          - Maintenance Window Target Registration Notification
+      Name: SystemManagerMaintenanceWindow
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSTopicARN
+          Id: SNSForAlert
+  EventBridgeForSSMParameterStore:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for System Manager Parameter Store created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.ssm
+        detail-type: 
+          - Parameter Store Change
+      Name: SystemManagerParameterStore
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSTopicARN
+          Id: SNSForAlert

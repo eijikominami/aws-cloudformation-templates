@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/web-servers/dlm creates a DataLifecycleManager.
+
+Parameters:
+  DailySnapshotScheduledAt:
+    Type: String
+    Default: '17:00'
+    AllowedPattern: ^[0-1][0-9]:[0-9][0-9]$
+    Description: Daily Snapshot time (HH:MM) [required]
+  PrefixOfLogicalName:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
+  SnapshotInterval:
+    Type: Number
+    Default: 24
+    AllowedValues:
+      - 2
+      - 3
+      - 4 
+      - 6
+      - 8
+      - 12
+      - 24
+    Description: The interval between snapshots [required]
+  SnapshotRetainRule:
+    Type: Number
+    Default: 7
+    MinValue: 1
+    Description: The number of snapshots to retain for each volume [required]  
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Resources:
+  # IAM
+  IAMRoleForDLM:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: dlm.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for DLM.
+      Policies:
+        - PolicyName: !Sub '${PrefixOfLogicalName}-DataLifecycleManagerEC2Access-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ec2:CreateSnapshot'
+                  - 'ec2:CreateSnapshots'
+                  - 'ec2:DeleteSnapshot'
+                  - 'ec2:DescribeVolumes'
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:DescribeSnapshots'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'ec2:CreateTags'
+                Resource: 'arn:aws:ec2:*::snapshot/*'
+      RoleName: !Sub '${PrefixOfLogicalName}-DataLifecycleManager-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # DLM
+  DataLifecycleManager:
+    Type: AWS::DLM::LifecyclePolicy
+    Properties: 
+      Description: Lifecycle Policy
+      ExecutionRoleArn: !GetAtt IAMRoleForDLM.Arn
+      PolicyDetails: 
+        ResourceTypes: 
+          - VOLUME
+        Schedules:
+          - CopyTags: true
+            CreateRule:
+              Interval: !Ref SnapshotInterval
+              IntervalUnit: HOURS
+              Times:
+                - !Ref DailySnapshotScheduledAt
+            Name: Daily Snapshots
+            RetainRule:
+              Count: !Ref SnapshotRetainRule
+        TargetTags: 
+          - Key: !Ref TagKey
+            Value: !Ref TagValue
+      State: ENABLED

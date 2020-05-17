@@ -1,0 +1,551 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/CloudTrail sets AWS CloudTrail.
+
+Parameters:
+  AuditOtherRegions:
+    Type: String
+    Default: Enabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable cross region audit [required]
+  LogBacketName:
+    Type: String
+    AllowedPattern: .+
+    Description: LogBacket Name [required]
+  PrefixOfLogicalName:
+    Type: String
+    Default: DefaultSecuritySettings
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
+  SnsTopicARN:
+    Type: String
+    AllowedPattern: .+
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+ 
+Conditions:
+  CreateCentralizedResources:
+    !Equals [ !Ref AuditOtherRegions, Enabled ]
+
+Resources:
+  # IAM Role
+  IAMRoleForCloudTrail:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for CloudTrail to access CloudWatch Logs.
+      # Allow CloudTrail 'logs:PutLogEvents' and 'logs:CreateLogStream' permission.
+      Policies:
+        - PolicyName: !Sub '${PrefixOfLogicalName}-AWSCloudTrailCloudWatchLogsPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:PutLogEvents'
+                  - 'logs:CreateLogStream'
+                Resource:
+                  - !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
+      RoleName: !Sub '${PrefixOfLogicalName}-CloudTrail-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CloudTrail
+  CloudTrail:
+    DependsOn:
+      - S3BucketPolicyForCloudTrail
+    Condition: CreateCentralizedResources
+    Type: 'AWS::CloudTrail::Trail'
+    Properties:
+      CloudWatchLogsLogGroupArn: !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
+      CloudWatchLogsRoleArn: !GetAtt IAMRoleForCloudTrail.Arn
+      EnableLogFileValidation: true
+      EventSelectors:
+        - DataResources: 
+            # All S3 buckets
+            - Type: AWS::S3::Object
+              Values: 
+                - arn:aws:s3
+            # All Lambda functions.
+            - Type: AWS::Lambda::Function
+              Values: 
+                - arn:aws:lambda
+      IncludeGlobalServiceEvents: true
+      IsLogging: true
+      IsMultiRegionTrail: true
+      S3BucketName: !Ref S3ForCloudTrail
+      TrailName: !Sub ${PrefixOfLogicalName}
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # S3
+  S3ForCloudTrail:
+    Type: 'AWS::S3::Bucket'
+    # Retain this bucket when a stack is deleted.
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: aws:kms
+      BucketName: !Sub defaultsecuritysettings-cloudtrail-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      LoggingConfiguration:
+        DestinationBucketName: !Ref LogBacketName
+        LogFilePrefix: CloudTrail/
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Set a S3 bucket policy in order to avoid 'InsufficientS3BucketPolicyException'.
+  S3BucketPolicyForCloudTrail:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties: 
+      Bucket: !Ref S3ForCloudTrail
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForCloudTrail
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - 's3:GetBucketAcl'
+            Resource:
+              - !GetAtt S3ForCloudTrail.Arn
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - 's3:PutObject'
+            Resource:
+              - !Join
+                - ''
+                - - !GetAtt S3ForCloudTrail.Arn
+                  - /AWSLogs/
+                  - !Sub ${AWS::AccountId}
+                  - /*
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+  # CloudWatch Logs
+  CloudWatchLogsGroupForCloudTrail:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/cloudtrail/${PrefixOfLogicalName}'
+      RetentionInDays: 365
+  # CIS 3.1 a log metric filter and alarm exist for unauthorized API calls 
+  CloudWatchLogsMetricFilterCloudTrailUnauthorizedAPICalls:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: UnauthorizedAPICalls 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailUnauthorizedAPICalls:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *不正なAPIコールを検知* しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの *権限設定に問題が無いかを確認してください* 。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-Unauthorized-API-Calls'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 6
+      EvaluationPeriods: 60
+      MetricName: UnauthorizedAPICalls
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.2 a log metric filter and alarm exist for AWS Management Console sign-in without MFA
+  CloudWatchLogsMetricFilterCloudTrailLoginWithoutMFA:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{($.eventName="ConsoleLogin") && ($.additionalEventData.MFAUsed !="Yes")}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: LoginWithoutMFA 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailLoginWithoutMFA:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *MFAなしのログインを検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-Login-Without-MFA'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: LoginWithoutMFA
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.3 a log metric filter and alarm exist for usage of "root" account 
+  CloudWatchLogsMetricFilterCloudTrailForRootAcount:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{$.userIdentity.type="Root" && $.userIdentity.invokedBy NOT EXISTS && $.eventType !="AwsServiceEvent"}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: ForRootAcount 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailForRootAcount:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *ルートアカウントに対する変更を検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-For-RootAcount'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: ForRootAcount
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.4 a log metric filter and alarm exist for IAM policy changes 
+  CloudWatchLogsMetricFilterCloudTrailIamPolicyChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{($.eventName=DeleteGroupPolicy) || ($.eventName=DeleteRolePolicy) || ($.eventName=DeleteUserPolicy) || ($.eventName=PutGroupPolicy) || ($.eventName=PutRolePolicy) || ($.eventName=PutUserPolicy) || ($.eventName=CreatePolicy) || ($.eventName=DeletePolicy) || ($.eventName=CreatePolicyVersion) || ($.eventName=DeletePolicyVersion) || ($.eventName=AttachRolePolicy) || ($.eventName=DetachRolePolicy) || ($.eventName=AttachUserPolicy) || ($.eventName=DetachUserPolicy) || ($.eventName=AttachGroupPolicy) || ($.eventName=DetachGroupPolicy)}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: IamPolicyChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailIamPolicyChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *IAMポリシーの変更を検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-IamPolicy-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: IamPolicyChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.5 a log metric filter and alarm exist for CloudTrail configuration changes 
+  CloudWatchLogsMetricFilterCloudTrailCloudTrailConfigurationChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{($.eventName=CreateTrail) || ($.eventName=UpdateTrail) || ($.eventName=DeleteTrail) || ($.eventName=StartLogging) || ($.eventName=StopLogging)}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: CloudTrailConfigurationChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailCloudTrailConfigurationChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *CloudTrailの設定変更を検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-CloudTrailConfiguration-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: CloudTrailConfigurationChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.6 a log metric filter and alarm exist for AWS Management Console authentication failures
+  CloudWatchLogsMetricFilterCloudTrailAuthenticationFailuresDetected:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{($.eventName=ConsoleLogin) && ($.errorMessage="Failed authentication")}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: AuthenticationFailuresDetected 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailAuthenticationFailuresDetected:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *ログイン認証失敗を検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-AuthenticationFailures-Detected'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: AuthenticationFailuresDetected
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.7 a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs 
+  CloudWatchLogsMetricFilterCloudTrailCustomerCreatedCMKsChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{($.eventSource=kms.amazonaws.com) && (($.eventName=DisableKey) || ($.eventName=ScheduleKeyDeletion))}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: CustomerCreatedCMKsChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailCustomerCreatedCMKsChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *カスタマー作成CMKの無効化もしくは削除を検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-CustomerCreatedCMKs-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: CustomerCreatedCMKsChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.8 a log metric filter and alarm exist for S3 bucket policy changes 
+  CloudWatchLogsMetricFilterCloudTrailS3BucketPolicyChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '{($.eventSource=s3.amazonaws.com) && (($.eventName=PutBucketAcl) || ($.eventName=PutBucketPolicy) || ($.eventName=PutBucketCors) || ($.eventName=PutBucketLifecycle) || ($.eventName=PutBucketReplication) || ($.eventName=DeleteBucketPolicy) || ($.eventName=DeleteBucketCors) || ($.eventName=DeleteBucketLifecycle) || ($.eventName=DeleteBucketReplication))}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: S3BucketPolicyChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailS3BucketPolicyChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *S3のバケットポリシーの変更を検知* しました。'
+      AlarmName: !Sub 'Notice-${PrefixOfLogicalName}-CloudTrail-S3BucketPolicy-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: S3BucketPolicyChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.9 a log metric filter and alarm exist for AWS Config configuration changes 
+  CloudWatchLogsMetricFilterCloudTrailConfigConfigurationChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: '{($.eventSource=config.amazonaws.com) && (($.eventName=StopConfigurationRecorder) || ($.eventName=DeleteDeliveryChannel) || ($.eventName=PutDeliveryChannel) || ($.eventName=PutConfigurationRecorder))}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: ConfigConfigurationChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailConfigConfigurationChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *Configの設定変更を検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-ConfigConfiguration-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: ConfigConfigurationChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.10 a log metric filter and alarm exist for changes to Security Group 
+  CloudWatchLogsMetricFilterCloudTrailSecurityGroupChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: '{($.eventName=AuthorizeSecurityGroupIngress) || ($.eventName=AuthorizeSecurityGroupEgress) || ($.eventName=RevokeSecurityGroupIngress) || ($.eventName=RevokeSecurityGroupEgress) || ($.eventName=CreateSecurityGroup) || ($.eventName=DeleteSecurityGroup)}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: SecurityGroupChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailSecurityGroupChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *セキュリティグループの変更を検知* しました。'
+      AlarmName: !Sub 'Warning-${PrefixOfLogicalName}-CloudTrail-SecurityGroup-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: SecurityGroupChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.11 a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
+  CloudWatchLogsMetricFilterCloudTrailNACLChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: '{($.eventName=CreateNetworkAcl) || ($.eventName=CreateNetworkAclEntry) || ($.eventName=DeleteNetworkAcl) || ($.eventName=DeleteNetworkAclEntry) || ($.eventName=ReplaceNetworkAclEntry) || ($.eventName=ReplaceNetworkAclAssociation)}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: NACLChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailNACLChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *NACLの変更を検知* しました。'
+      AlarmName: !Sub 'Notice-${PrefixOfLogicalName}-CloudTrail-NACL-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: NACLChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.12 a log metric filter and alarm exist for changes to network gateways
+  CloudWatchLogsMetricFilterCloudTrailNetworkGatewayChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: '{($.eventName=CreateCustomerGateway) || ($.eventName=DeleteCustomerGateway) || ($.eventName=AttachInternetGateway) || ($.eventName=CreateInternetGateway) || ($.eventName=DeleteInternetGateway) || ($.eventName=DetachInternetGateway)}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: NetworkGatewayChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailNetworkGatewayChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *ネットワークゲートウェイの変更を検知* しました。'
+      AlarmName: !Sub 'Notice-${PrefixOfLogicalName}-CloudTrail-NetworkGateway-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: NetworkGatewayChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.13 a log metric filter and alarm exist for route table changes
+  CloudWatchLogsMetricFilterCloudTrailRouteTableChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: '{($.eventName=CreateRoute) || ($.eventName=CreateRouteTable) || ($.eventName=ReplaceRoute) || ($.eventName=ReplaceRouteTableAssociation) || ($.eventName=DeleteRouteTable) || ($.eventName=DeleteRoute) || ($.eventName=DisassociateRouteTable)}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: RouteTableChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailRouteTableChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *ルートテーブルの変更を検知* しました。'
+      AlarmName: !Sub 'Notice-${PrefixOfLogicalName}-CloudTrail-RouteTable-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: RouteTableChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # CIS 3.14 a log metric filter and alarm exist for VPC changes 
+  CloudWatchLogsMetricFilterCloudTrailVpcChanges:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties: 
+      FilterPattern: '{($.eventName=CreateVpc) || ($.eventName=DeleteVpc) || ($.eventName=ModifyVpcAttribute) || ($.eventName=AcceptVpcPeeringConnection) || ($.eventName=CreateVpcPeeringConnection) || ($.eventName=DeleteVpcPeeringConnection) || ($.eventName=RejectVpcPeeringConnection) || ($.eventName=AttachClassicLinkVpc) || ($.eventName=DetachClassicLinkVpc) || ($.eventName=DisableVpcClassicLink) || ($.eventName=EnableVpcClassicLink)}'
+      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      MetricTransformations:
+        - MetricName: VpcChanges 
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  CloudWatchAlarmMetricFilterCloudTrailVpcChanges:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SnsTopicARN
+      AlarmDescription: '*CloudTrail* が *VPCの変更を検知* しました。'
+      AlarmName: !Sub 'Notice-${PrefixOfLogicalName}-CloudTrail-Vpc-Changes'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: VpcChanges
+      Namespace: LogMetrics
+      OKActions:
+        - !Ref SnsTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching

@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Lambda
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+  FunctionResouceName:
+    Type: String
+    AllowedPattern: .+
+    Description: Resource name of the Lambda function [required]
+  TimeoutMilliseconds:
+    Type: Number
+    Default: 24000
+    MinValue: 0
+    Description: Threshold of Duration [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmLambdaErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でエラーが発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Errors'
+        - !Sub 'Warning-Lambda-${FunctionResouceName}-Errors'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref FunctionResouceName
+        - Name: Resource
+          Value: !Ref FunctionResouceName
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      OKActions: 
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmLambdaClientError:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でクライアントエラーが発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ClientError'
+        - !Sub 'Warning-Lambda-${FunctionResouceName}-ClientError'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref FunctionResouceName
+        - Name: Resource
+          Value: !Ref FunctionResouceName
+      EvaluationPeriods: 1
+      MetricName: ClientError
+      Namespace: AWS/Lambda
+      OKActions: 
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmLambdaTypeError:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でタイプエラーが発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-TypeError'
+        - !Sub 'Warning-Lambda-${FunctionResouceName}-TypeError'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref FunctionResouceName
+        - Name: Resource
+          Value: !Ref FunctionResouceName
+      EvaluationPeriods: 1
+      MetricName: TypeError
+      Namespace: AWS/Lambda
+      OKActions: 
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  MetricFilterErrorLog:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      FilterPattern: '?Error ?Exception'
+      LogGroupName: !Sub /aws/lambda/${FunctionResouceName}
+      MetricTransformations:
+        - MetricName: !Sub ${FunctionResouceName}-ErrorLog
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
+  AlarmLambdaMetricFilterError:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* からエラーログが出力されています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ErrorLog'
+        - !Sub 'Warning-Lambda-${FunctionResouceName}-ErrorLog'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: !Sub ${FunctionResouceName}-ErrorLog
+      Namespace: LogMetrics
+      OKActions: 
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmLambdaTimeoutWillOccur:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* の実行時間がタイムアウト値に近づいています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Timeout-Will-Occur'
+        - !Sub 'Warning-Lambda-${FunctionResouceName}-Timeout-Will-Occur'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref FunctionResouceName
+        - Name: Resource
+          Value: !Ref FunctionResouceName
+      EvaluationPeriods: 1
+      MetricName: Duration
+      Namespace: AWS/Lambda
+      OKActions:
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Maximum
+      Threshold: !Ref TimeoutMilliseconds
+      TreatMissingData: notBreaching
+  AlarmLambdaThrottles:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でスロットリングが発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Throttles'
+        - !Sub 'Warning-Lambda-${FunctionResouceName}-Throttles'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref FunctionResouceName
+        - Name: Resource
+          Value: !Ref FunctionResouceName
+      EvaluationPeriods: 1
+      MetricName: Throttles
+      Namespace: AWS/Lambda
+      OKActions:
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

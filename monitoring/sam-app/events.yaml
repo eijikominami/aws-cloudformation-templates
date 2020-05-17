@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for CloudWatch Events
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+  EventsRuleName:
+    Type: String
+    AllowedPattern: .+
+    Description: CloudWatch Events rule name [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmEventsCodeCommitFailedInvocations:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*${EventsRuleName}* の *呼び出しが失敗* しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${SNSTopicArn}-Events-${EventsRuleName}-FailedInvocations'
+        - !Sub 'Notice-Events-${EventsRuleName}-FailedInvocations'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: RuleName
+          Value: !Ref EventsRuleName
+      EvaluationPeriods: 1
+      MetricName: FailedInvocations
+      Namespace: AWS/Events
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

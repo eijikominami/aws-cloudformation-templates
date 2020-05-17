@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/iam sets IAM.
+
+Parameters:
+  SnsTopicARN:
+    Type: String
+    AllowedPattern: .+
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForAccessAnalyzer:
+    Type: AWS::IAM::ServiceLinkedRole
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: access-analyzer.amazonaws.com 
+      Description: A service-linked role required for Access Analyzer to access your resources.
+  # AccessAnalyzer
+  AccessAnalyzer:
+    DependsOn:
+      - ServiceLinkedRoleForAccessAnalyzer
+    Type: AWS::AccessAnalyzer::Analyzer
+    Properties: 
+      Tags: 
+      - Key: !Ref TagKey
+        Value: !Ref TagValue
+      Type: ACCOUNT
+  EventBridgeForAccessAnalyzer:    
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for AccessAnalyzer created by ${AWS::StackName}.
+      EventPattern:
+        source:
+           - aws.access-analyzer
+        detail-type:
+           - Access Analyzer Finding
+      Name: AccessAnalyzer
+      State: ENABLED
+      Targets: 
+        - Arn: !Ref SnsTopicARN
+          Id: SNS

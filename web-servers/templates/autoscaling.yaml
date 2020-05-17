@@ -1,0 +1,234 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/static-web-hosting/autoscaling creates Auto Scaling Group and Application Load Balancer or Network Load Balancer.
+
+Parameters:
+  AutoScalingDesiredCapacity:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Desired Capacity [required]
+  AutoScalingMaxSize:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Max Size [required]
+  EC2ImageId:
+    Type: AWS::EC2::Image::Id
+    Default: ami-068a6cefc24c301d2
+    AllowedPattern: ^ami-.+$
+    Description: EC2 Image Id [required]
+  EC2InstanceType:
+    Type: String
+    Default: t3.micro
+    Description: EC2 Instance Type [required]
+  EC2IamInstanceProfileArn:
+    Type: String
+    AllowedPattern: .+
+    Description: Instance Profile ARN to attach the instances [required]
+  EC2KeyName:
+    Type: String
+    Default: ''
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+  EC2SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security Group Id to attach the instances [required]
+  EC2VolumeSize:
+    Type: Number
+    Default: 8
+    MinValue: 8
+    Description: EC2 Volume Size [required]
+  EipAllocationId1ForNLB:     
+    Type: String 
+    AllowedPattern: .+
+    Description: Elastic Ip Allocation Id1 for Network LoadBalancer
+  EipAllocationId2ForNLB:     
+    Type: String 
+    AllowedPattern: .+
+    Description: Elastic Ip Allocation Id2 for Network LoadBalancer
+  PrefixOfLogicalName:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
+  LoadBalancerType:
+    Type: String
+    Default: application
+    AllowedValues:
+      - application
+      - network
+    Description: LoadBalancer Type [required]
+  SubnetId1ForELB:
+    Type: String
+    AllowedPattern: .+
+    Description: Subnet Id1 for Network LoadBalancer
+  SubnetId2ForELB:
+    Type: String
+    AllowedPattern: .+
+    Description: Subnet Id2 for Network LoadBalancer
+  SNSTopicARN:
+    Type: String
+    AllowedPattern: .+
+  VPCId:
+    Type: String
+    AllowedPattern: .+
+    Description: VPC Id [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  KeyExists:
+    !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
+  CreateNetworkLoadBalancer:
+    !Equals [ !Ref LoadBalancerType, network ]
+
+Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForAutoScaling:
+    Type: AWS::IAM::ServiceLinkedRole
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: autoscaling.amazonaws.com
+      Description: Default Service-Linked Role enables access to AWS Services and Resources used or managed by Auto Scaling
+  ServiceLinkedRoleForElasticLoadBalancing:
+    Type: AWS::IAM::ServiceLinkedRole
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: elasticloadbalancing.amazonaws.com 
+      Description: Allows ELB to call AWS services on your behalf.
+  # ELB
+  LoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Name: !Sub elb-${PrefixOfLogicalName}
+      Scheme: internet-facing
+      # For Network Load Balaner
+      SubnetMappings: !If
+        - CreateNetworkLoadBalancer
+        - - SubnetId: !Ref SubnetId1ForELB
+            AllocationId: !Ref EipAllocationId1ForNLB
+          - SubnetId: !Ref SubnetId2ForELB
+            AllocationId: !Ref EipAllocationId2ForNLB
+        - !Ref AWS::NoValue
+      # For Application Load Balaner
+      Subnets: !If
+        - CreateNetworkLoadBalancer
+        - !Ref AWS::NoValue
+        - - !Ref SubnetId1ForELB
+          - !Ref SubnetId2ForELB
+      Tags:
+        - Key: Name
+          Value: !Sub elb-${PrefixOfLogicalName}-${AWS::Region}
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: !Ref LoadBalancerType
+  LoadBalancerTargetGroupHttp:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      Name: !Sub target-${PrefixOfLogicalName}
+      Port: 80
+      Protocol: !If
+        - CreateNetworkLoadBalancer
+        - TCP
+        - HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub target-${PrefixOfLogicalName}-${AWS::Region}
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TargetType: instance
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref VPCId
+  LoadBalancerListenerHttp:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties: 
+      DefaultActions:
+        - TargetGroupArn: !Ref LoadBalancerTargetGroupHttp
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: !If
+        - CreateNetworkLoadBalancer
+        - TCP
+        - HTTP
+  # Auto Scaling Group
+  AutoScalingLaunchConfiguration:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties: 
+      AssociatePublicIpAddress: false
+      BlockDeviceMappings: 
+        - DeviceName: /dev/xvda
+          Ebs: 
+            DeleteOnTermination: true
+            VolumeSize: !Ref EC2VolumeSize
+            VolumeType: gp2
+      EbsOptimized: true
+      IamInstanceProfile: !Ref EC2IamInstanceProfileArn
+      ImageId: !Ref EC2ImageId
+      InstanceMonitoring: true
+      InstanceType: !Ref EC2InstanceType
+      KeyName: !If
+        - KeyExists
+        - !Ref EC2KeyName
+        - !Ref AWS::NoValue
+      LaunchConfigurationName: !Sub autoscalinglaunchconfiguration-${PrefixOfLogicalName}
+      SecurityGroups: 
+        - !Ref EC2SecurityGroupId
+  AutoScalingGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties: 
+      AutoScalingGroupName: !Sub autoscalinggroup-${PrefixOfLogicalName}
+      Cooldown: '300'
+      DesiredCapacity: !Ref AutoScalingDesiredCapacity
+      HealthCheckGracePeriod: 300
+      HealthCheckType: EC2
+      LaunchConfigurationName: !Ref AutoScalingLaunchConfiguration
+      MaxSize: !Ref AutoScalingMaxSize
+      MetricsCollection: 
+        - Granularity: 1Minute
+          Metrics:
+            - GroupMinSize
+            - GroupMaxSize
+            - GroupDesiredCapacity
+            - GroupInServiceInstances
+            - GroupPendingInstances
+            - GroupStandbyInstances
+            - GroupTerminatingInstances
+            - GroupTotalInstances
+      MinSize: '1'
+      NotificationConfigurations: 
+        - NotificationTypes: 
+            - autoscaling:EC2_INSTANCE_LAUNCH
+            - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+            - autoscaling:EC2_INSTANCE_TERMINATE
+            - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+            - autoscaling:TEST_NOTIFICATION
+          TopicARN: !Ref SNSTopicARN
+      ServiceLinkedRoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling
+      Tags:
+        - Key: !Ref TagKey
+          PropagateAtLaunch: true
+          Value: !Ref TagValue
+      TargetGroupARNs:
+        - !Join
+          - ''
+          - - !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:'
+            - !GetAtt LoadBalancerTargetGroupHttp.TargetGroupFullName
+      TerminationPolicies: 
+        - Default
+      VPCZoneIdentifier: 
+        - !Ref SubnetId1ForELB
+        - !Ref SubnetId2ForELB
+        
+Outputs:
+  LoadBalancerArn:
+    Description: LoadBalancer ARN
+    Value: !Ref LoadBalancer

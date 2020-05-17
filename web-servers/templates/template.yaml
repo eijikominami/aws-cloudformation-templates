@@ -1,0 +1,653 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/web-servers creates a Network Load Balancer and EC2 instances for Web Servers.
+
+Parameters:
+  AutoScalingDesiredCapacity:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Desired Capacity [required]
+  AutoScalingMaxSize:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Max Size [required]
+  AutoScalingLoadBalancerType:
+    Type: String
+    Default: None
+    AllowedValues:
+      - None
+      - application
+      - network  
+    Description: AutoScaling LoadBalancer Type [required]
+  EC2DailySnapshotScheduledAt:
+    Type: String
+    Default: '17:00'  
+    AllowedPattern: ^[0-1][0-9]:[0-9][0-9]$
+    Description: Daily Snapshot time (HH:MM) [required]
+  EC2ImageId:
+    Type: AWS::EC2::Image::Id
+    Default: ami-068a6cefc24c301d2
+    AllowedPattern: ^ami-.+$
+    Description: EC2 Image Id [required]
+  EC2InstanceType:
+    Type: String
+    Default: t3.micro
+    Description: EC2 Instance Type [required]
+  EC2KeyName:
+    Type: String
+    Default: ''
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+  EC2VolumeSize:
+    Type: Number
+    Default: 8
+    MinValue: 8
+    Description: EC2 Volume Size [required]
+  IgnoreResourceConflicts:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+      - Enabled
+      - Disabled
+  SSMPatchingAt:
+    Type: Number
+    Default: 3
+    MinValue: 0
+    MaxValue: 23
+    Description: Daily patching time (H) [required]
+  SubnetPublicCidrBlockForAz1:
+    Type: String
+    Default: 10.0.0.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: Public Subnet CidrBlock at AZ1 [required]
+  SubnetExternalCidrBlockForAz1:
+    Type: String
+    Default: 10.0.1.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: Private Subnet CidrBlock at AZ1
+  SubnetPublicCidrBlockForAz2:
+    Type: String
+    Default: 10.0.4.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: Public Subnet CidrBlock at AZ2 [required]
+  SubnetExternalCidrBlockForAz2:
+    Type: String
+    Default: 10.0.5.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: Private Subnet CidrBlock at AZ2
+  VPCCidrBlock:
+    Type: String
+    Default: 10.0.0.0/21
+    AllowedPattern: ^[0-9./]*$
+    Description: VPC CidrBlock [required]
+  WebACL:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+      - Enabled
+      - Disabled
+    Description: Enable or disable WebACL [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''   
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''  
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  AutoScalingEnabled: !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ] 
+  AutoScalingDisabled: !Equals [ !Ref AutoScalingLoadBalancerType, None ]
+  NetworkLoadBalancerEnabled: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
+  PrivateSubnet1Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz1, '' ] ]
+  PrivateSubnet2Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz2, '' ] ]
+  WebAclEnabled: !And [!Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, Enabled ] ]
+  KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+
+Resources:
+  # Nested Stack
+  Az1:
+    DependsOn:
+      # NATGateway requires provisioned Internet Gateway.
+      - InternetGatewayAttachment
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select 
+          - 0
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !Ref InternetGateway
+        NetworkLoadBalancer: !If 
+         - NetworkLoadBalancerEnabled
+         - Enabled
+         - Disabled
+        PrefixOfLogicalName: !Ref AWS::StackName
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
+        SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz1
+        SNSTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        VPCId: !Ref VPC
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+  Az2:
+    DependsOn:
+      # NATGateway requires provisioned Internet Gateway.
+      - InternetGatewayAttachment
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 1
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !Ref InternetGateway
+        NetworkLoadBalancer: !If 
+         - NetworkLoadBalancerEnabled
+         - Enabled
+         - Disabled
+        PrefixOfLogicalName: !Ref AWS::StackName
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
+        SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz2
+        SNSTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        VPCId: !Ref VPC
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+  AutoScaling:
+    Condition: AutoScalingEnabled
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AutoScalingDesiredCapacity: !Ref AutoScalingDesiredCapacity
+        AutoScalingMaxSize: !Ref AutoScalingMaxSize
+        EC2ImageId: !Ref EC2ImageId
+        EC2InstanceType: !Ref EC2InstanceType
+        EC2IamInstanceProfileArn: !GetAtt IamInstanceProfileForIAMRoleForEC2.Arn
+        EC2KeyName: !Ref EC2KeyName
+        EC2SecurityGroupId: !Ref SecurityGroupWeb
+        EC2VolumeSize: !Ref EC2VolumeSize
+        EipAllocationId1ForNLB: !If 
+          - NetworkLoadBalancerEnabled
+          - !GetAtt Az1.Outputs.NetworkLoadBalancerIPAllocationId
+          - ''
+        EipAllocationId2ForNLB: !If 
+          - NetworkLoadBalancerEnabled
+          - !GetAtt Az2.Outputs.NetworkLoadBalancerIPAllocationId
+          - ''
+        LoadBalancerType: !Ref AutoScalingLoadBalancerType
+        PrefixOfLogicalName: !Ref AWS::StackName
+        SubnetId1ForELB: !GetAtt Az1.Outputs.SubnetId
+        SubnetId2ForELB: !GetAtt Az2.Outputs.SubnetId
+        SNSTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        VPCId: !Ref VPC
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
+  DataLifecycleManager:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        DailySnapshotScheduledAt: !Ref EC2DailySnapshotScheduledAt
+        PrefixOfLogicalName: !Ref AWS::StackName
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
+  SystemManager:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        IgnoreResourceConflicts: !Ref IgnoreResourceConflicts
+        PatchingAt: !Ref SSMPatchingAt
+        PrefixOfLogicalName: !Ref AWS::StackName
+        SNSTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ssm.yaml
+  WAF:
+    Condition: WebAclEnabled
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        PrefixOfLogicalName: !Ref AWS::StackName
+        TargetResourceArn: !GetAtt AutoScaling.Outputs.LoadBalancerArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/sns.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters: 
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/sns.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # IAM
+  IAMRoleForEC2:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for Managed Instances.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      RoleName: !Sub '${AWS::StackName}-AWSEC2Role-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForVPCFlowLog:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for VPC FlowLog.
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-AWSVPCFlowLogCloudWatchAccess-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'logs:DescribeLogGroups'
+                  - 'logs:DescribeLogStreams'
+                Resource: '*'
+      RoleName: !Sub '${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # InstanceProfile
+  IamInstanceProfileForIAMRoleForEC2:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName: !Ref IAMRoleForEC2
+      Roles: 
+        - !Ref IAMRoleForEC2
+  # VPC
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties: 
+      CidrBlock: !Ref VPCCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Internet GW
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties: 
+      Tags:
+        - Key: Name
+          Value: !Sub igw-${AWS::StackName}-${AWS::Region}
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  InternetGatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  # Elastic IP
+  EIPForEC2Instance:
+    Condition: AutoScalingDisabled
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub eip-${AWS::StackName}-${AWS::Region}-ec2
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  EIPAssociation:
+    Condition: AutoScalingDisabled
+    Type: AWS::EC2::EIPAssociation
+    Properties: 
+      AllocationId: !GetAtt EIPForEC2Instance.AllocationId
+      InstanceId: !Ref EC2
+  # EC2
+  EC2:
+    Condition: AutoScalingDisabled
+    Type: AWS::EC2::Instance
+    Properties:
+      BlockDeviceMappings: 
+        - DeviceName: /dev/xvda
+          Ebs: 
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: !Ref EC2VolumeSize
+            VolumeType: gp2
+      EbsOptimized: true
+      ImageId: !Ref EC2ImageId
+      IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForEC2
+      InstanceInitiatedShutdownBehavior: stop
+      InstanceType: !Ref EC2InstanceType
+      KeyName: !If
+        - KeyExists
+        - !Ref EC2KeyName
+        - !Ref AWS::NoValue
+      Monitoring: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupWeb
+      SubnetId: !GetAtt Az1.Outputs.SubnetId
+      Tags: 
+        - Key: Name
+          Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Security Group
+  SecurityGroupWeb:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties: 
+      # 'sg-' prefix is NOT permitted.
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
+      GroupDescription: Security Group for Web Server
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: http
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: TCP
+        - CidrIp: 0.0.0.0/0
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: 0.0.0.0/0
+          Description: icmp
+          FromPort: -1
+          ToPort: -1
+          IpProtocol: ICMP
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPC
+  # VPC FlowLog
+  VPCFlowLog:
+    Type: 'AWS::EC2::FlowLog'
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+  CloudWatchLogsGroupForVPCFlowLog:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
+      RetentionInDays: 60
+  EC2StatusCheckFailed:
+    Condition: AutoScalingDisabled
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        - !Sub arn:aws:automate:${AWS::Region}:ec2:reboot
+      AlarmDescription: '*EC2* で *ステータスチェックエラー* が発生しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-EC2-StatusCheckFailed'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref EC2
+      EvaluationPeriods: 1
+      MetricName: StatusCheckFailed
+      Namespace: AWS/EC2
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  EC2CPUUtilization:
+    Condition: AutoScalingDisabled
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        - !Sub arn:aws:automate:${AWS::Region}:ec2:reboot
+      AlarmDescription: '*EC2* で *CPU使用率が上昇* しています。'
+      AlarmName: !Sub 'Notice-${AWS::StackName}-EC2-CPU-Overloaded'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref EC2
+      EvaluationPeriods: 1
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: 60
+      Statistic: Average
+      Threshold: 70
+      TreatMissingData: notBreaching
+  EC2MemoryUsage:
+    Condition: AutoScalingDisabled
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        - !Sub arn:aws:automate:${AWS::Region}:ec2:reboot
+      AlarmDescription: '*EC2* で *メモリ使用率が上昇* しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-EC2-Memory-Overrun'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref EC2
+        - Name: ImageId
+          Value: !Ref EC2ImageId
+        - Name: InstanceType
+          Value: !Ref EC2InstanceType
+      EvaluationPeriods: 1
+      MetricName: mem_used_percent
+      Namespace: CWAgent
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: 60
+      Statistic: Average
+      Threshold: 80
+      TreatMissingData: notBreaching
+  EC2DiskUsage:
+    Condition: AutoScalingDisabled
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: '*EC2* で *ディスク使用率が上昇* しています。'
+      AlarmName: !Sub 'Notice-${AWS::StackName}-EC2-Disk-Usage'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref EC2
+        - Name: ImageId
+          Value: !Ref EC2ImageId
+        - Name: InstanceType
+          Value: !Ref EC2InstanceType
+        - Name: path
+          Value: /
+        - Name: device
+          Value: nvme0n1p1
+        - Name: fstype
+          Value: xfs
+      EvaluationPeriods: 1
+      MetricName: disk_used_percent
+      Namespace: CWAgent
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: 60
+      Statistic: Average
+      Threshold: 90
+      TreatMissingData: notBreaching
+
+Outputs:
+  VPCCidrBlock:
+    Description: VPC CIDR Block
+    Value: !GetAtt VPC.CidrBlock   
+  EC2IP:
+    Condition: AutoScalingDisabled
+    Description: EC2 IP address
+    Value: !Ref EIPForEC2Instance
+  NatGatewayIP1:
+    Condition: PrivateSubnet1Exists
+    Description: NatGateway IP address
+    Value: !GetAtt Az1.Outputs.NatGatewayIP
+  NetworkLoadBalancerIP1:
+    Condition: NetworkLoadBalancerEnabled
+    Description: NetworkLoadBalancer IP
+    Value: !GetAtt Az1.Outputs.NetworkLoadBalancerIP
+  NatGatewayIP2:
+    Condition: PrivateSubnet2Exists
+    Description: NatGateway IP address
+    Value: !GetAtt Az2.Outputs.NatGatewayIP
+  NetworkLoadBalancerIP2:
+    Condition: NetworkLoadBalancerEnabled
+    Description: NetworkLoadBalancer IP address
+    Value: !GetAtt Az2.Outputs.NetworkLoadBalancerIP
+  SNSForAlertArn:
+    Description: SNS ARN for Alert
+    Value: !If
+      - CreateSNSForAlert
+      - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+      - !Ref SNSForAlertArn
+  SNSForDeploymentArn:
+    Description: SNS ARN for Deployment
+    Value: !If
+      - CreateSNSForDeployment
+      - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+      - !Ref SNSForDeploymentArn

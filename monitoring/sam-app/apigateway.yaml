@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for API Gateway
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+  ApiName:
+    Type: String
+    AllowedPattern: .+
+    Description: API name [required]
+  ApiStageName:
+    Type: String
+    AllowedPattern: .+
+    Description: API stage name [required] 
+  ApiCount:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    Description: Threshold of ApiCount per minute [required] 
+  LatencyThreshold:
+    Type: Number
+    Default: 2000
+    MinValue: 0
+    Description: Threshold of Latency [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmApi4XXError:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmDescription: !Sub '*API Gateway* (${ApiName}) の GET メソッドで *4XX エラー* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-ApiGateway-${ApiName}-4XX-Error-Occured'
+        - !Sub 'Notice-ApiGateway-${ApiName}-4XX-Error-Occured'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref ApiName
+        - Name: Stage
+          Value: !Ref ApiStageName
+      EvaluationPeriods: 1
+      MetricName: 4XXError
+      Namespace: AWS/ApiGateway
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmApi5XXError:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*API Gateway* (${ApiName}) の GET メソッドで *5XX エラー* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-ApiGateway-${ApiName}-5XX-Error-Occured'
+        - !Sub 'Notice-ApiGateway-${ApiName}-5XX-Error-Occured'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref ApiName
+        - Name: Stage
+          Value: !Ref ApiStageName
+      EvaluationPeriods: 1
+      MetricName: 5XXError
+      Namespace: AWS/ApiGateway
+      OKActions:
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmApiLatency:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*API Gateway* (${ApiName}) の GET メソッドで *Latencyの値が増加* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-ApiGateway-${ApiName}-Latency'
+        - !Sub 'Notice-ApiGateway-${ApiName}-Latency'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref ApiName
+        - Name: Stage
+          Value: !Ref ApiStageName
+      EvaluationPeriods: 1
+      MetricName: Latency
+      Namespace: AWS/ApiGateway
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: !Ref LatencyThreshold
+      TreatMissingData: notBreaching
+  AlarmApiCount:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*API Gateway* (${ApiName}) で *分間リクエスト数がシステムが処理可能な上限値に近づいています* 。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-ApiGateway-${ApiName}-Count'
+        - !Sub 'Notice-ApiGateway-${ApiName}-Count'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref ApiName
+        - Name: Stage
+          Value: !Ref ApiStageName
+      EvaluationPeriods: 1
+      MetricName: Count
+      Namespace: AWS/ApiGateway
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: !Ref ApiCount
+      TreatMissingData: notBreaching

@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for SNS
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+  SNSTopicName:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic name [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmSNSNumberOfNotificationsFailed:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*SNS* (${CustomAlarmName}) で *通知エラー* が発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - Warning-SNS-NumberOfNotificationsFailed-Occured
+        - !Sub 'Warning-${CustomAlarmName}-SNS-NumberOfNotificationsFailed-Occured'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions: 
+        - Name: TopicName
+          Value: !Ref SNSTopicName
+      EvaluationPeriods: 1
+      MetricName: NumberOfNotificationsFailed
+      Namespace: AWS/SNS
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

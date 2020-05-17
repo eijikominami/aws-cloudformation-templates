@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/chatbot creates AWS Chatbot.
+
+Parameters:
+  IAMRoleForChatbotArn:
+    Type: String
+    AllowedPattern: .+
+    Description: IAM Role ARN for Chatbot [required]
+  PrefixOfLogicalName:
+    Type: String
+    Default: Default
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
+  SlackWorkspaceId:
+    Type: String
+    AllowedPattern: .+
+    Description: Slack Workspace Name [required]
+  SlackChannelId:
+    Type: String
+    Description: Slack Channel Id [required]
+  SNSArn:
+    Type: String
+    AllowedPattern: .+
+    Description: Amazon SNS Topic ARN [required]
+
+Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForChatbot:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: management.chatbot.amazonaws.com
+      Description: The Service Linked Role used by AWS Chatbot.
+  Chatbot:
+    Type: 'AWS::Chatbot::SlackChannelConfiguration'
+    Properties: 
+      ConfigurationName: !Sub ${PrefixOfLogicalName}-${AWS::StackName}-${AWS::Region}
+      IamRoleArn: !Ref IAMRoleForChatbotArn
+      LoggingLevel: NONE
+      SlackChannelId: !Ref SlackChannelId
+      SlackWorkspaceId: !Ref SlackWorkspaceId
+      SnsTopicArns: 
+        - !Ref SNSArn
+
+Outputs:
+  ChatbotArn:
+    Description: Chatbot ARN for Deployment
+    Value: !Ref Chatbot

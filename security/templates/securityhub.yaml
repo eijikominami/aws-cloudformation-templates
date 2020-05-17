@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/SecurityHub sets AWS Security Hub.
+
+Parameters:
+  SnsTopicARN:
+    Type: String
+    AllowedPattern: .+
+
+Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForSecurityHub:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: securityhub.amazonaws.com
+      Description: A service-linked role required for AWS Security Hub to access your resources.
+  # SecurityHub
+  SecurityHub:
+    DependsOn:
+      - ServiceLinkedRoleForSecurityHub
+    Type: 'AWS::SecurityHub::Hub'
+  # CloudWatch Events for SecurityHub
+  CloudWatchEventsForSecurityHubFindings:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for SecurityHub created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.securityhub
+        detail-type: 
+          - Security Hub Findings - Imported
+        # Events fired when status has been changed from PASSED to ARCHIVED.
+        detail:
+          findings:
+            Compliance:
+              Status:
+                - PASSED
+            RecordState:
+              - ARCHIVED
+      Name: SecurityHub-Findings
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SnsTopicARN
+          Id: CloudWatchEventsForSecurityHub
+  CloudWatchEventsForSecurityHubInsightResults:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for SecurityHub created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.securityhub
+        detail-type: 
+          - Security Hub Insight Results
+      Name: SecurityHub-InsightResults
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SnsTopicARN
+          Id: CloudWatchEventsForSecurityHub

@@ -1,0 +1,61 @@
+English / [**日本語**](README_JP.md)
+
+# AWSCloudFormationTemplates/web-servers
+![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoidzhOZGpLeGpGQ1FmTVlkNkxTTGxIWFhMZk5BRXBmR1pVVHhWbWVIdmIzRyttcmw2RUF3YkxTWStMWTVReXJ2UkhhTUFlSitia3REVGFBcTAvR29uZ1pVPSIsIml2UGFyYW1ldGVyU3BlYyI6IjRLV2tpS0lhWDc1aDJpU1AiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
+ 
+``AWSCloudFormationTemplates/web-servers`` builds ``Network Load Balancer``, ``VPC`` and ``EC2`` instances and related resources for **EC2-based website hosting**.
+
+## TL;DR
+
+If you just want to deploy the stack, click the button below.
+
+[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WebServers&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/template.yaml) 
+
+If you want to deploy each service individually, click the buttons below.
+
+| Services | Launchers |
+| --- | --- |
+| Data Lifecycle Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DataLifecycleManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/dlm.yaml&param_PrefixOfLogicalName=DataLifecycleManager) |
+| Systems Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/ssm.yaml&param_PrefixOfLogicalName=SystemsManager) |
+
+## Architecture
+
+The following sections describe the individual components of the architecture.
+
+![](../images/architecture-web-servers.png)
+
+## Deployment
+
+Execute the command to deploy.
+
+```bash
+aws cloudformation deploy --template-file template.yaml --stack-name WebServers --capabilities CAPABILITY_NAMED_IAM
+```
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| AutoScalingDesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created. | 
+| AutoScalingMaxSize | Number | 1 | ○ | |
+| AutoScalingLoadBalancerType | None, application, network | None | ○ | If you set 'None', an ELB is NOT created. |
+| EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
+| EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2InstanceType | String | t3.micro | ○ | | 
+| EC2PatchingAt | Number | 3 | ○ | Starting time of patching process. |
+| EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set. |
+| EC2VolumeSize | Number | 8 | ○ | |
+| IgnoreResourceConflicts | Enabled / Diasbled | Disabled | ○ | If **Enabled** is set, the resources does NOT created. |
+| SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
+| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | Public subnet of AZ1 |
+| SubnetExternalCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | Private subnet of AZ1 |
+| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | Public subnet of AZ2 |
+| SubnetExternalCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | Private subnet of AZ2 |
+| WebACL | Enabled / Diasbled | Disabled | ○ | If **Disabled** is set, AWS WAF does NOT created. |
+| VPCCidrBlock | String | 10.0.0.0/21 | ○ | |
+
+## Trouble Shooting
+
+If `SSM State Manager Association` already has `AWS-GatherSoftwareInventory`, the template will **fail**. Deploy this template with the `IgnoreResourceConflicts` option enabled.

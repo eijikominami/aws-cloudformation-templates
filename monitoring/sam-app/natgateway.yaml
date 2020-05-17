@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Nat Gateway
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  NatGatewayPacketsDropCount:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*NatGateway* で *パケット破棄* が発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-NatGateway-PacketsDropCount'
+        - Notice-NatGateway-PacketsDropCount
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: PacketsDropCount
+      Namespace: AWS/NATGateway
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  NatGatewayErrorPortAllocation:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*NatGateway* で *送信先ポートが割り当てられませんでした* 。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-NatGateway-ErrorPortAllocation'
+        - Notice-NatGateway-ErrorPortAllocation
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: ErrorPortAllocation
+      Namespace: AWS/NATGateway
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching

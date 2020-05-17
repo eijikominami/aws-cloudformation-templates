@@ -1,0 +1,189 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudSAMTemplates/notification/eventbridge creates Amazon EventBridge to support events from AWS Services.
+
+Parameters:
+  ScheduledEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Scheduled Events [required]
+  EBSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about EBS [required]
+  AutoScalingEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about AutoScaling [required]
+  EC2EventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about EC2 [required]
+  KMSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about KMS [required]
+  ManagementConsoleEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Management Console [required]
+  TagEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Tag [required]
+  TrustedAdvisorEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Trusted Advisor [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: Amazon SNS Topic ARN for alert
+
+Resources:
+  EventBridgeForScheduledEvents:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for Scheduled Events created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.events
+        detail-type: 
+          - Scheduled Event
+      Name: ScheduledEvents
+      State: !Ref ScheduledEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForEBS:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for EBS created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type: 
+          - EBS Volume Notification
+          - EBS Snapshot Notification
+          - EBS Multi-Volume Snapshots Completion Status
+          - EBS Fast Snapshot Restore State-change Notification
+      Name: EBS
+      State: !Ref EBSEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForAutoScaling:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for AutoScaling created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.autoscaling
+        detail-type: 
+          - EC2 Instance-launch Lifecycle Action
+          - EC2 Instance Launch Successful
+          - EC2 Instance Launch Unsuccessful
+          - EC2 Instance-terminate Lifecycle Action
+          - EC2 Instance Terminate Successful
+          - EC2 Instance Terminate Unsuccessful
+      Name: AutoScaling
+      State: !Ref AutoScalingEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForEC2:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for EC2 created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type: 
+          - EC2 Instance State-change Notification
+      Name: EC2
+      State: !Ref EC2EventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForKMS:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for KMS created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.kms
+        detail-type: 
+          - KMS CMK Rotations
+          - KMS Imported Key Material Expiration
+          - KMS CMK Deletion
+      Name: KMS
+      State: !Ref KMSEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForManagementConsole:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for Management Console created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.signin
+        detail-type: 
+          - AWS Console Sign In via CloudTrail
+      Name: ManagementConsole
+      State: !Ref ManagementConsoleEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForTag:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for Tag created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.tag
+        detail-type: 
+          - Tag Change on Resource
+      Name: Tag
+      State: !Ref TagEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForTrustedAdvisor:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for Trusted Advisor created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.trustedadvisor
+        detail-type: 
+          - Trusted Advisor Check Item Refresh Notification
+      Name: TrustedAdvisor
+      State: !Ref TrustedAdvisorEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert

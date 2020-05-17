@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for DynamoDB
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmDynamoDBUserErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*DynamoDB* で *ユーザエラー* が発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-DynamoDB-UserErrors'
+        - Warning-DynamoDB-UserErrors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      # Not Needed
+      # DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: UserErrors
+      Namespace: AWS/DynamoDB
+      OKActions:
+        - !Ref SNSTopicArn
+      # Alert when Sum is 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmDynamoDBSystemErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*DynamoDB* で *システムエラー* が発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-DynamoDB-SystemErrors'
+        - Warning-DynamoDB-SystemErrors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: GetRecords
+      EvaluationPeriods: 1
+      MetricName: SystemErrors
+      Namespace: AWS/DynamoDB
+      OKActions:
+        - !Ref SNSTopicArn
+      # Alert when Sum is 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

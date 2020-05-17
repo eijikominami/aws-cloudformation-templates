@@ -1,0 +1,319 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/global creates global settings on N.Virginia Region.
+
+Parameters:
+  ACMValidationMethod:
+    Type: String
+    Default: DNS
+    AllowedValues:
+     - DNS
+     - EMAIL
+    Description: Validation method that you own or control the domain [required]
+  ACMDomainName:
+    Type: String
+    Default: ''
+    Description: Domain name created by Certification Manager
+  BillingAlertThreshold:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    Description: CloudWatch alarm threshold about Billing [required]
+  CloudFrontErrorRateThreshold:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    Description: CloudWatch alarm threshold about CloudFront ErrorRate [required]
+  CloudFrontErrorRequestPerMinuteThreshold:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    Description: CloudWatch alarm threshold about CloudFront ErrorRequestPerMinute [required]
+  CloudFrontBytesDownloadedPerMinuteThreshold:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    Description: CloudWatch alarm threshold about CloudFront BytesDownloadedPerMinute [required]
+  CloudFrontDistributionId:
+    Type: String
+    Default: ''
+    Description: Target distribution ID monitored by CloudWatch Alarm
+  SnsTopicArn:
+    Type: String
+    Default: ''
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateACMCertificate: !Not [ !Equals [ !Ref ACMDomainName, '' ] ]
+  DefaultSNSTopic: !Equals [ !Ref SnsTopicArn, '']
+  CreateCloudWatchAlarmBilling: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
+  CreateCloudWatchAlarmCloudFrontErrorRate: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRateThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
+  CreateCloudWatchAlarmCloudFrontRequests: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRequestPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
+  CreateCloudWatchAlarmCloudFrontBytesDownloaded: !And [ !Not [ !Equals [ !Ref CloudFrontBytesDownloadedPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
+
+Resources:
+  Budget:
+    Type: 'AWS::Budgets::Budget'
+    Properties: 
+      Budget: 
+        BudgetLimit: 
+          Amount: !Ref BillingAlertThreshold
+          Unit: USD
+        BudgetName: Total
+        BudgetType: COST
+        TimeUnit: MONTHLY
+      NotificationsWithSubscribers: 
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: 50
+            ThresholdType: PERCENTAGE
+          Subscribers: 
+            - Address: !If
+              - DefaultSNSTopic
+              - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+              - !Ref SnsTopicArn
+              SubscriptionType: SNS
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers: 
+            - Address: !If
+              - DefaultSNSTopic
+              - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+              - !Ref SnsTopicArn
+              SubscriptionType: SNS
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers: 
+            - Address: !If
+              - DefaultSNSTopic
+              - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+              - !Ref SnsTopicArn
+              SubscriptionType: SNS
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: 150
+            ThresholdType: PERCENTAGE
+          Subscribers: 
+            - Address: !If
+              - DefaultSNSTopic
+              - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+              - !Ref SnsTopicArn
+              SubscriptionType: SNS
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: 200
+            ThresholdType: PERCENTAGE
+          Subscribers: 
+            - Address: !If
+              - DefaultSNSTopic
+              - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+              - !Ref SnsTopicArn
+              SubscriptionType: SNS
+  CertificateManager:
+    Condition: CreateACMCertificate
+    Type: 'AWS::CertificateManager::Certificate'
+    Properties: 
+      DomainName: !Ref ACMDomainName
+      ValidationMethod: !Ref ACMValidationMethod
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchAlarmBilling:
+    Condition: CreateCloudWatchAlarmBilling
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      AlarmDescription: !Sub '*概算請求金額* が *${BillingAlertThreshold}00円を超過* しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-EstimatedCharges-is-Over-${BillingAlertThreshold}00-Yen'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Currency
+          Value: USD
+      EvaluationPeriods: 1
+      MetricName: EstimatedCharges
+      Namespace: AWS/Billing
+      OKActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      Period: 21600
+      Statistic: Maximum
+      Threshold: !Ref BillingAlertThreshold
+      TreatMissingData: notBreaching
+  CloudWatchAlarmCloudFront4xxErrorRate:
+    Condition: CreateCloudWatchAlarmCloudFrontErrorRate
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      AlarmDescription: '*CloudFront* の *4XXエラー率が増加* しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-4XXErrorRate-Increased'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Region
+          Value: Global
+        - Name: DistributionId
+          Value: !Ref CloudFrontDistributionId 
+      EvaluationPeriods: 1
+      MetricName: 4xxErrorRate
+      Namespace: AWS/CloudFront
+      OKActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      Period: 300
+      Statistic: Average
+      Threshold: !Ref CloudFrontErrorRateThreshold
+      TreatMissingData: notBreaching
+  CloudWatchAlarmCloudFront5xxErrorRate:
+    Condition: CreateCloudWatchAlarmCloudFrontErrorRate
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      AlarmDescription: '*CloudFront* の *5XXエラー率が増加* しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-5XXErrorRate-Increased'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Region
+          Value: Global
+        - Name: DistributionId
+          Value: !Ref CloudFrontDistributionId 
+      EvaluationPeriods: 1
+      MetricName: 5xxErrorRate
+      Namespace: AWS/CloudFront
+      OKActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      Period: 300
+      Statistic: Average
+      Threshold: !Ref CloudFrontErrorRateThreshold
+      TreatMissingData: notBreaching
+  CloudWatchAlarmCloudFrontTotalErrorRate:
+    Condition: CreateCloudWatchAlarmCloudFrontErrorRate
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      AlarmDescription: '*CloudFront* の *エラー率が増加* しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-TotalErrorRate-Increased'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Region
+          Value: Global
+        - Name: DistributionId
+          Value: !Ref CloudFrontDistributionId 
+      EvaluationPeriods: 1
+      MetricName: TotalErrorRate
+      Namespace: AWS/CloudFront
+      OKActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      Period: 300
+      Statistic: Average
+      Threshold: !Ref CloudFrontErrorRateThreshold
+      TreatMissingData: notBreaching
+  CloudWatchAlarmCloudFrontRequests:
+    Condition: CreateCloudWatchAlarmCloudFrontRequests
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      AlarmDescription: '*CloudFront* の *リクエスト数が増加* しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-Requests-Increased'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Region
+          Value: Global
+        - Name: DistributionId
+          Value: !Ref CloudFrontDistributionId 
+      EvaluationPeriods: 1
+      MetricName: Requests
+      Namespace: AWS/CloudFront
+      OKActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: !Ref CloudFrontErrorRequestPerMinuteThreshold
+      TreatMissingData: notBreaching
+  CloudWatchAlarmCloudFrontBytesDownloaded:
+    Condition: CreateCloudWatchAlarmCloudFrontBytesDownloaded
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      AlarmDescription: '*CloudFront* の *ダウンロードサイズが増加* しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-BytesDownloaded-Increased'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Region
+          Value: Global
+        - Name: DistributionId
+          Value: !Ref CloudFrontDistributionId 
+      EvaluationPeriods: 1
+      MetricName: BytesDownloaded
+      Namespace: AWS/CloudFront
+      OKActions:
+        - !If
+          - DefaultSNSTopic
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
+          - !Ref SnsTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: !Ref CloudFrontBytesDownloadedPerMinuteThreshold
+      TreatMissingData: notBreaching
+    
+Outputs:
+  CertificationARN:
+    Condition: CreateACMCertificate
+    Description: Certification ARN
+    Value: !Ref CertificateManager

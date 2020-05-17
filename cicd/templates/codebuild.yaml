@@ -1,0 +1,448 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description:  AWSCloudFormationTemplates/cicd creates CodePipeline for building AWSCloudFormationTemplates.
+
+Parameters:
+  BuildSpecForCommits:
+    Type: String
+    Default: buildspec.yml
+    AllowedPattern: .+
+    Description: The build specification file for new commits [required]
+  BuildSpecForTags:
+    Type: String
+    Default: buildspec.yml
+    AllowedPattern: .+
+    Description: The build specification file for new tags [required]
+  DestinationBucketNameForMasterBranch:
+    Type: String
+    AllowedPattern: .+
+    Description: The name of the bucket where Amazon S3 should store production artifacts. [required]  
+  DestinationBucketNameForTargetBranch:
+    Type: String
+    AllowedPattern: .+
+    Description: The name of the bucket where Amazon S3 should store development artifacts. [required]  
+  Image:
+    Type: String
+    Default: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+    AllowedPattern: ^aws/codebuild/.+$
+    Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
+  GitHubOAuthToken:
+    Type: String
+    AllowedPattern: .+
+    Description: OAuth token to access GitHub [required]
+  GitHubCloneUrl:
+    Type: String
+    AllowedPattern: ^https://github.com/.+$
+    Description: The HTTPS clone URL to the repository that contains the source and the build spec [required]
+  GitHubBranchName:
+    Type: String
+    AllowedPattern: .+
+    Description: Branch name [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: Amazon SNS Topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: Amazon SNS Topic ARN for deployment information
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.7
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  # Service-linked Role
+  ServiceLinkedRoleForCodeStar:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: codestar-notifications.amazonaws.com
+      Description: Allows AWS CodeStar Notifications to access Amazon CloudWatch Events on your behalf
+  # IAM
+  IAMRoleForCodeBuild:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
+      Policies:
+        - PolicyName: !Sub 'UploadArtifacts-CodeBuildS3CloudWatchLogs-${AWS::Region}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Required for `sam build`
+              - Action:
+                  - iam:ListPolicies
+                Resource: "*"
+                Effect: Allow
+              # Required for `AWS::Serverless::Application`
+              - Action:
+                  - serverlessrepo:SearchApplications
+                  - serverlessrepo:GetApplication
+                  - serverlessrepo:GetCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationChangeSet
+                  - serverlessrepo:ListApplicationVersions
+                  - serverlessrepo:ListApplicationDependencies
+                Resource: "*"
+                Effect: Allow
+              # Required for creating the new application version in AWS Serverless Application Repository
+              - Action:
+                  - serverlessrepo:CreateApplicationVersion
+                Resource: "*"
+                Effect: Allow
+              # Required for uploading artifacts to S3 buckets
+              - Action:
+                  - s3:DeleteObject
+                  - s3:PutObjectAcl
+                  - s3:ListBucket
+                Resource: 
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForMasterBranch}
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForMasterBranch}/*
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForTargetBranch}
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForTargetBranch}/*
+                Effect: Allow
+              # Default Policy
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource: 
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForMasterBranch}
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForMasterBranch}/*
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForTargetBranch}
+                  - !Sub arn:aws:s3:::${DestinationBucketNameForTargetBranch}/*
+                Effect: Allow
+              - Action:
+                  - codebuild:CreateReportGroup
+                  - codebuild:CreateReport
+                  - codebuild:UpdateReport
+                  - codebuild:BatchPutTestCases
+                Resource:
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
+                Effect: Allow
+      RoleName: !Sub 'UploadArtifacts-CodeBuild-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CodeBuild
+  CodeBuildForMasterBranch:
+    DependsOn:
+      - CodeBuildSourceCredential
+    Type: 'AWS::CodeBuild::Project'
+    Properties: 
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: true
+      Description: Upload artifacts from master branch to the specified S3 bucket. 
+      Environment: 
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        EnvironmentVariables:
+          - Name: BUCKET_NAME
+            Type: PLAINTEXT
+            Value: !Ref DestinationBucketNameForMasterBranch
+        Image: !Ref Image
+        Type: LINUX_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-master
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: !Ref BuildSpecForCommits
+        Location: !Ref GitHubCloneUrl
+        Type: GITHUB
+      SourceVersion: refs/heads/master
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/master$
+              ExcludeMatchedPattern: false
+          - - Type: EVENT
+              Pattern: PULL_REQUEST_MERGED
+            - Type: BASE_REF
+              Pattern: ^refs/heads/master$
+              ExcludeMatchedPattern: false
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
+  CodeBuildForTargetBranch:
+    DependsOn:
+      - CodeBuildSourceCredential
+    Type: 'AWS::CodeBuild::Project'
+    Properties: 
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: true
+      Description: !Sub Upload artifacts from ${GitHubBranchName} branch to the specified S3 bucket. 
+      Environment: 
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        EnvironmentVariables:
+          - Name: BUCKET_NAME
+            Type: PLAINTEXT
+            Value: !Ref DestinationBucketNameForTargetBranch
+        Image: !Ref Image
+        Type: LINUX_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-${GitHubBranchName}
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: !Ref BuildSpecForCommits
+        Location: !Ref GitHubCloneUrl
+        Type: GITHUB
+      SourceVersion: !Sub refs/heads/${GitHubBranchName}
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: !Sub ^refs/heads/${GitHubBranchName}$
+              ExcludeMatchedPattern: false
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
+  CodeBuildForTags:
+    DependsOn:
+      - CodeBuildSourceCredential
+    Type: 'AWS::CodeBuild::Project'
+    Properties: 
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: true
+      Description: Building process for git tags. 
+      Environment: 
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: !Ref Image
+        Type: LINUX_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-Tags
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: !Ref BuildSpecForTags
+        Location: !Ref GitHubCloneUrl
+        Type: GITHUB
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/tags/.*-rc.*$
+              ExcludeMatchedPattern: false
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
+  CodeBuildSourceCredential:
+    Type: AWS::CodeBuild::SourceCredential
+    Properties: 
+      AuthType: PERSONAL_ACCESS_TOKEN
+      ServerType: GITHUB
+      Token: !Ref GitHubOAuthToken
+  # CloudWatch Logs
+  CodeBuildLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties: 
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
+      RetentionInDays: 60
+  # CloudWatch Alarm
+  AlarmCodeBuildForMasterBranch:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        ProjectName: !Ref CodeBuildForMasterBranch
+      Tags:
+        createdby: !Ref TagValue
+  AlarmCodeBuildForTargetBranch:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        ProjectName: !Ref CodeBuildForTargetBranch
+      Tags:
+        createdby: !Ref TagValue
+  AlarmCodeBuildForTags:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        ProjectName: !Ref CodeBuildForTags
+      Tags:
+        createdby: !Ref TagValue
+  # CodeStar
+  NotificationRuleForMasterBranch:
+    DependsOn:
+      - ServiceLinkedRoleForCodeStar
+    Type: 'AWS::CodeStarNotifications::NotificationRule'
+    Properties: 
+      DetailType: FULL
+      EventTypeIds:
+        # Build state
+        - codebuild-project-build-state-failed
+        - codebuild-project-build-state-succeeded
+        - codebuild-project-build-state-in-progress
+        - codebuild-project-build-state-stopped
+        # Build state
+        - codebuild-project-build-phase-failure
+        - codebuild-project-build-phase-success
+      Name: !Sub UploadArtifacts-started-succeeded-${AWS::Region}-master
+      Resource: !GetAtt CodeBuildForMasterBranch.Arn
+      Targets: 
+        - TargetAddress: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+          TargetType: SNS
+      Tags:
+        createdby: !Ref TagValue
+  NotificationRuleForTargetBranch:
+    DependsOn:
+      - ServiceLinkedRoleForCodeStar
+    Type: 'AWS::CodeStarNotifications::NotificationRule'
+    Properties: 
+      DetailType: FULL
+      EventTypeIds:
+        # Build state
+        - codebuild-project-build-state-failed
+        - codebuild-project-build-state-succeeded
+        - codebuild-project-build-state-in-progress
+        - codebuild-project-build-state-stopped
+        # Build state
+        - codebuild-project-build-phase-failure
+        - codebuild-project-build-phase-success
+      Name: !Sub UploadArtifacts-started-succeeded-${AWS::Region}-${GitHubBranchName}
+      Resource: !GetAtt CodeBuildForTargetBranch.Arn
+      Targets: 
+        - TargetAddress: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+          TargetType: SNS
+      Tags:
+        createdby: !Ref TagValue
+  NotificationRuleForTags:
+    DependsOn:
+      - ServiceLinkedRoleForCodeStar
+    Type: 'AWS::CodeStarNotifications::NotificationRule'
+    Properties: 
+      DetailType: FULL
+      EventTypeIds:
+        # Build state
+        - codebuild-project-build-state-failed
+        - codebuild-project-build-state-succeeded
+        - codebuild-project-build-state-in-progress
+        - codebuild-project-build-state-stopped
+        # Build state
+        - codebuild-project-build-phase-failure
+        - codebuild-project-build-phase-success
+      Name: !Sub UploadArtifacts-started-succeeded-${AWS::Region}-Tags
+      Resource: !GetAtt CodeBuildForTags.Arn
+      Targets: 
+        - TargetAddress: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+          TargetType: SNS
+      Tags:
+        createdby: !Ref TagValue

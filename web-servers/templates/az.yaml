@@ -1,0 +1,220 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/static-web-hosting/az creates a VPC Subnet and related resources.
+
+Parameters:
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    AllowedPattern: .+
+    Description: Availability Zone Name [required]
+  InternetGatewayId:
+    Type: String
+    AllowedPattern: .+
+    Description: Internet Gateway Id [required]
+  NetworkLoadBalancer:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+      - Enabled
+      - Disabled
+    Description: Enable or disable Network LoadBalaner [required]
+  PrefixOfLogicalName:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
+  SNSTopicARN:
+    Type: String
+    AllowedPattern: .+
+  SubnetPublicCidrBlock:
+    Type: String
+    Default: 10.0.0.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: Public Subnet CidrBlock [required]
+  SubnetExternalCidrBlock:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Description: Private Subnet CidrBlock
+  VPCId:
+    Type: String
+    AllowedPattern: .+
+    Description: VPC Id [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  PrivateSubnetExists:
+    !Not [ !Equals [ !Ref SubnetExternalCidrBlock, '' ] ]
+  NetworkLoadBalancerExists:
+    !Equals [ !Ref NetworkLoadBalancer, Enabled ]
+
+Resources:
+  # Subnet
+  SubnetExternal:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      CidrBlock: !Ref SubnetExternalCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub subnet-${PrefixOfLogicalName}-${AvailabilityZone}-ext
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  SubnetPublic:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      CidrBlock: !Ref SubnetPublicCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub subnet-${PrefixOfLogicalName}-${AvailabilityZone}-pub
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  # Route Table
+  RouteTableExternal:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::EC2::RouteTable'
+    Properties: 
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub rtb-${PrefixOfLogicalName}-${AvailabilityZone}-ext
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  RouteExternalToNATGateway:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+      RouteTableId: !Ref RouteTableExternal
+  RouteTablePublic:
+    Type: 'AWS::EC2::RouteTable'
+    Properties: 
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub rtb-${PrefixOfLogicalName}-${AvailabilityZone}-pub
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  RoutePublicToInternetGateway:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGatewayId
+      RouteTableId: !Ref RouteTablePublic
+  RouteTableExternalAssociation:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties: 
+      RouteTableId: !Ref RouteTableExternal
+      SubnetId: !Ref SubnetExternal
+  RouteTablePublicAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties: 
+      RouteTableId: !Ref RouteTablePublic
+      SubnetId: !Ref SubnetPublic
+  # Elastic IP
+  EIPForNatGateway:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub eip-${PrefixOfLogicalName}-${AvailabilityZone}-natgateway
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  EIPForNLB:
+    Condition: NetworkLoadBalancerExists
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub eip-${PrefixOfLogicalName}-${AvailabilityZone}-nlb
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # NatGateway
+  NatGateway:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::EC2::NatGateway'
+    Properties: 
+      AllocationId: !GetAtt EIPForNatGateway.AllocationId
+      SubnetId: !Ref SubnetPublic
+      Tags: 
+        - Key: Name
+          Value: !Sub nat-${PrefixOfLogicalName}-${AvailabilityZone}
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CloudWatch Alarm
+  NatGatewayPacketsDropCount:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicARN
+      AlarmDescription: '*NatGateway* で *パケット破棄* が発生しています。'
+      AlarmName: !Sub 'Notice-${AWS::StackName}-NatGateway-PacketsDropCount'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: NatGatewayId
+          Value: !Ref NatGateway
+      EvaluationPeriods: 1
+      MetricName: PacketsDropCount
+      Namespace: AWS/NATGateway
+      OKActions:
+        - !Ref SNSTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  NatGatewayErrorPortAllocation:
+    Condition: PrivateSubnetExists
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicARN
+      AlarmDescription: '*NatGateway* で *送信先ポートが割り当てられませんでした* 。'
+      AlarmName: !Sub 'Notice-${AWS::StackName}-NatGateway-ErrorPortAllocation'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: NatGatewayId
+          Value: !Ref NatGateway
+      EvaluationPeriods: 1
+      MetricName: ErrorPortAllocation
+      Namespace: AWS/NATGateway
+      OKActions:
+        - !Ref SNSTopicARN
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+Outputs:
+  SubnetId:
+    Description: Subnet ID
+    Value: !Ref SubnetPublic
+  NetworkLoadBalancerIPAllocationId:
+    Condition: NetworkLoadBalancerExists
+    Description: Internet GW IP address
+    Value: !GetAtt EIPForNLB.AllocationId
+  NetworkLoadBalancerIP:
+    Condition: NetworkLoadBalancerExists
+    Description: Internet GW IP address
+    Value: !Ref EIPForNLB
+  NatGatewayIP:
+    Condition: PrivateSubnetExists
+    Description: NAT GW IP address
+    Value: !Ref EIPForNatGateway

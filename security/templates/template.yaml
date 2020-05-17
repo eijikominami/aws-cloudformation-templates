@@ -1,0 +1,240 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security sets basic configurations for security.
+
+Parameters:
+  AuditOtherAccounts:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable cross account audit [required]
+  AuditOtherRegions:
+    Type: String
+    Default: Enabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable cross region audit [required]
+  AutoRemediation:
+    Type: String
+    Default: Enabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable auto remediation [required]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+
+Resources:
+  # Nested Stack
+  IAM:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        SnsTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/iam.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SecurityHub:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        SnsTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securityhub.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Inspector:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        PrefixOfLogicalName: !Ref AWS::StackName
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/inspector.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  GuardDuty:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        SnsTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/guardduty.yaml 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudTrail:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        AuditOtherRegions: !Ref AuditOtherRegions
+        LogBacketName: !Ref S3ForAccessLog
+        PrefixOfLogicalName: !Ref AWS::StackName
+        SnsTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/cloudtrail.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Config:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        AuditOtherAccounts: !Ref AuditOtherAccounts
+        AuditOtherRegions: !Ref AuditOtherRegions
+        AutoRemediation: !Ref AutoRemediation
+        SnsTopicARN: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        PrefixOfLogicalName: !Ref AWS::StackName
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/sns.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters: 
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/sns.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # S3
+  S3ForAccessLog:
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: aws:kms
+      BucketName: !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CloudWatch Events for Health
+  CloudWatchEventsForHealth:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for AWS Health created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.health
+      Name: Health
+      State: ENABLED
+      Targets:
+        - Arn: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
+          Id: CloudWatchEventsForHealth
+
+Outputs:
+  SNSForAlertArn:
+    Description: SNS ARN for Alert
+    Value: !If
+      - CreateSNSForAlert
+      - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+      - !Ref SNSForAlertArn
+  SNSForDeploymentArn:
+    Description: SNS ARN for Deployment
+    Value: !If
+      - CreateSNSForDeployment
+      - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+      - !Ref SNSForDeploymentArn

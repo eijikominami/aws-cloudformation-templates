@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/static-web-hosting/waf creates an AWS WAF.
+
+Parameters:
+  PrefixOfLogicalName:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
+  TargetResourceArn:
+    Type: String
+    Default: ''  
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateWebACLAssociation: !Not  [ !Equals [ !Ref TargetResourceArn, '']]
+
+Resources:
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties: 
+      DefaultAction: 
+        Allow: {}
+      Description: !Sub ACL for ${PrefixOfLogicalName}
+      Name: !Ref PrefixOfLogicalName
+      Rules: 
+        - Name: AWSManagedRulesCommonRuleSet
+          OverrideAction:
+            Count: {}
+          Priority: 1
+          Statement: 
+            ManagedRuleGroupStatement: 
+              Name: AWSManagedRulesCommonRuleSet
+              VendorName: AWS
+          VisibilityConfig: 
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSet
+            SampledRequestsEnabled: false
+        - Name: AWSManagedRulesAdminProtectionRuleSet
+          OverrideAction:
+            Count: {}
+          Priority: 2
+          Statement: 
+            ManagedRuleGroupStatement: 
+              Name: AWSManagedRulesAdminProtectionRuleSet
+              VendorName: AWS
+          VisibilityConfig: 
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesAdminProtectionRuleSet
+            SampledRequestsEnabled: false
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          OverrideAction:
+            Count: {}
+          Priority: 3
+          Statement: 
+            ManagedRuleGroupStatement: 
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+              VendorName: AWS
+          VisibilityConfig: 
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSet
+            SampledRequestsEnabled: false
+        - Name: AWSManagedRulesAmazonIpReputationList
+          OverrideAction:
+            Count: {}
+          Priority: 4
+          Statement: 
+            ManagedRuleGroupStatement: 
+              Name: AWSManagedRulesAmazonIpReputationList
+              VendorName: AWS
+          VisibilityConfig: 
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesAmazonIpReputationList
+            SampledRequestsEnabled: false
+      Scope: REGIONAL
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VisibilityConfig: 
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref PrefixOfLogicalName
+        SampledRequestsEnabled: false
+  WebACLAssociation:
+    Condition: CreateWebACLAssociation
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties: 
+      ResourceArn: !Ref TargetResourceArn
+      WebACLArn: !GetAtt WebACL.Arn
+
+Outputs:
+  WebACLId:
+    Description: WebACL Id
+    Value: !GetAtt WebACL.Id  

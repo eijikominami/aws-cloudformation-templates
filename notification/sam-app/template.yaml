@@ -1,0 +1,528 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/notification sends notifications to Slack.
+
+Globals:
+  Function:
+    Handler: lambda_function.lambda_handler
+    Runtime: python3.8
+    Tracing: Active
+
+Parameters: 
+  Encrypt:
+    Type: String
+    Default: false
+    AllowedValues:
+     - true
+     - false
+    Description: Enable or disable encryption [required]
+  HookUrlForDeployment:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Slack Hook Url for deployment information without schema string (e.g. hooks.slack.com/services/XXXXX)
+  HookUrlForAlert:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Slack Hook Url for alert without schema string (e.g. hooks.slack.com/services/XXXXX)
+  SlackWorkspaceId:
+    Type: String
+    Default: ''
+    Description: Slack Workspace Name
+  SlackChannelIdForDeployment:
+    Type: String
+    Default: ''
+    Description: Slack Channel Id for deployment information
+  SlackChannelIdForAlert:
+    Type: String
+    Default: ''
+    Description: Slack Channel Id for alert
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: Amazon SNS Topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: Amazon SNS Topic ARN for deployment information
+  ScheduledEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Scheduled Events [required]
+  EBSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about EBS [required]
+  AutoScalingEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about AutoScaling [required]
+  EC2EventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about EC2 [required]
+  KMSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about KMS [required]
+  ManagementConsoleEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Management Console [required]
+  TagEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Tag [required]
+  TrustedAdvisorEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Trusted Advisor [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateKMSKey: !Equals [ !Ref Encrypt, 'true'] 
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateChatbotForDeployment: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForDeploymentArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForDeployment, ''] ] ]
+  CreateChatbot: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForAlertArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForAlert, ''] ] ]
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.7
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  EventsRule:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        AutoScalingEventsRule: !Ref AutoScalingEventsRule
+        EBSEventsRule: !Ref EBSEventsRule
+        EC2EventsRule: !Ref EC2EventsRule
+        KMSEventsRule: !Ref KMSEventsRule
+        ManagementConsoleEventsRule: !Ref ManagementConsoleEventsRule
+        ScheduledEventsRule: !Ref ScheduledEventsRule
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        TagEventsRule: !Ref TagEventsRule
+        TrustedAdvisorEventsRule: !Ref TrustedAdvisorEventsRule
+      Tags:
+        createdby: !Ref TagValue
+  # IAM
+  IAMRoleForLambda:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for Lambda to access X-Ray, KMS and CloudWatch Logs.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-AWSLambdaBasicExecutionRole-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - !If
+                - CreateKMSKey
+                - Effect: Allow
+                  Action:
+                    - 'kms:Decrypt'
+                  Resource: !GetAtt KMSKey.Arn
+                - !Ref AWS::NoValue
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+      RoleName: !Sub '${AWS::StackName}-ExecuteLambda-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForChatbot:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: chatbot.amazonaws.com 
+            Action: 'sts:AssumeRole'
+      Description: A role required for Chatbot to access CloudWatch.
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-ChatbotCloudWatch-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'cloudwatch:Describe*'
+                  - 'cloudwatch:Get*'
+                  - 'cloudwatch:List*'
+                Resource: '*'
+      RoleName: !Sub '${AWS::StackName}-Chatbot-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # KMS
+  KMSKey:
+    Condition: CreateKMSKey
+    Type: AWS::KMS::Key
+    Properties: 
+      Description: String
+      Enabled: true
+      EnableKeyRotation: true
+      KeyPolicy: 
+        Version: 2012-10-17
+        Id: DefaultKeyPolicy
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 'kms:*'
+            Resource: '*'
+      KeyUsage: ENCRYPT_DECRYPT
+      PendingWindowInDays: 30
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Lambda
+  LambdaSendNotificationToSlack:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: sendNotificationToSlack/
+      Description: SNSの内容をSlackに送信します
+      Environment:
+        Variables:
+          ENCRYPT: !Ref Encrypt
+          ALERT_HOOK_URL: !Ref HookUrlForAlert
+          DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
+          SLACK_CHANNEL_NAME: !Ref SlackChannelIdForAlert
+      Events:
+        SNSForAlert:
+          Properties:
+            Topic: !If
+              - CreateSNSForAlert
+              - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+              - !Ref SNSForAlertArn
+          Type: SNS
+        SNSForDeployment:
+          Properties:
+            Topic: !If
+              - CreateSNSForDeployment
+              - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+              - !Ref SNSForDeploymentArn
+          Type: SNS
+      FunctionName: sendNotificationToSlack
+      KmsKeyArn: !If
+        - CreateKMSKey
+        - !GetAtt KMSKey.Arn
+        - !Ref AWS::NoValue
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Timeout: 30
+  LogGroupForLambdaSendNotificationToSlack:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
+      RetentionInDays: 60
+  SNSSubscriptionForDeployment:
+    Type: AWS::SNS::Subscription
+    Properties: 
+      Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
+      Protocol: lambda
+      TopicArn: !If
+        - CreateSNSForDeployment
+        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !Ref SNSForDeploymentArn
+  SNSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties: 
+      Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
+      Protocol: lambda
+      TopicArn: !If
+        - CreateSNSForAlert
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        - !Ref SNSForAlertArn
+  # CloudWatch Alarm for Lambda
+  AlarmLambdaSendNotificationToSlackErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でエラーが発生しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Errors'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaSendNotificationToSlack
+        - Name: Resource
+          Value: !Ref LambdaSendNotificationToSlack
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      OKActions: 
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmLambdaSendNotificationToSlackClientError:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でクライアントエラーが発生しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-ClientError'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaSendNotificationToSlack
+        - Name: Resource
+          Value: !Ref LambdaSendNotificationToSlack
+      EvaluationPeriods: 1
+      MetricName: ClientError
+      Namespace: AWS/Lambda
+      OKActions: 
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmLambdaSendNotificationToSlackTypeError:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でタイプエラーが発生しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-TypeError'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaSendNotificationToSlack
+        - Name: Resource
+          Value: !Ref LambdaSendNotificationToSlack
+      EvaluationPeriods: 1
+      MetricName: TypeError
+      Namespace: AWS/Lambda
+      OKActions: 
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmLambdaSendNotificationToSlackTimeoutWillOccur:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* の実行時間がタイムアウト値に近づいています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Timeout-Will-Occur'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaSendNotificationToSlack
+        - Name: Resource
+          Value: !Ref LambdaSendNotificationToSlack
+      EvaluationPeriods: 1
+      MetricName: Duration
+      Namespace: AWS/Lambda
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Maximum
+      Threshold: 24000
+      TreatMissingData: notBreaching
+  AlarmLambdaSendNotificationToSlackThrottles:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でスロットリングが発生しています。'
+      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Throttles'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaSendNotificationToSlack
+        - Name: Resource
+          Value: !Ref LambdaSendNotificationToSlack
+      EvaluationPeriods: 1
+      MetricName: Throttles
+      Namespace: AWS/Lambda
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      # Alert when Sum is over 1 count in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  # Chatbot
+  ChatbotForDeployment:
+    Condition: CreateChatbotForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
+        PrefixOfLogicalName: Deployment
+        SlackWorkspaceId: !Ref SlackWorkspaceId
+        SlackChannelId: !Ref SlackChannelIdForDeployment
+        SNSArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Tags:
+        createdby: !Ref TagValue
+  ChatbotForAlert:
+    Condition: CreateChatbot
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
+        PrefixOfLogicalName: Alert
+        SlackWorkspaceId: !Ref SlackWorkspaceId
+        SlackChannelId: !Ref SlackChannelIdForAlert
+        SNSArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Tags:
+        createdby: !Ref TagValue
+
+Outputs:
+  LambdaSendNotificationToSlackARN:
+    Description: Lambda ARN of sendNotificationToSlack()
+    Value: !GetAtt LambdaSendNotificationToSlack.Arn
+  ChatbotForDeployment:
+    Condition: CreateChatbotForDeployment
+    Description: Chatbot ARN for Deployment
+    Value: !GetAtt ChatbotForDeployment.Outputs.ChatbotArn
+  ChatbotForAlert:
+    Condition: CreateChatbot
+    Description: Chatbot ARN
+    Value: !GetAtt ChatbotForAlert.Outputs.ChatbotArn

@@ -1,0 +1,935 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description:  AWSCloudFormationTemplates/cicd creates CodePipeline for building AWSCloudFormationTemplates.
+
+Parameters: 
+  ArtifactBacketInVirginia:
+    Type: String
+    Default: ''  
+    Description: S3 artifact bucket name in N.Verginia region
+  CodeBuildImageName:
+    Type: String
+    Default: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+    AllowedPattern: ^aws/codebuild/.+$
+    Description: Docker image name for CodeBuild [required]
+  GitHubOAuthToken:
+    Type: String
+    Default: ''
+    Description: OAuth token to access GitHub
+  GitHubOwnerNameForTemplateConfiguration:
+    Type: String
+    Default: ''
+    Description: GitHub owner name for CloudFormation Template Configuration files
+  GitHubRepoNameForTemplateConfiguration:
+    Type: String
+    Default: ''
+    Description: GitHub repository name for CloudFormation Template Configuration files
+  GitHubBranchName:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: Branch name of CloudFormation template [required]
+  StaticWebsiteHosting:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable deployment of StaticWebsiteHosting template [required]
+  GlobalSettings:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable deployment of GlobalSettings template [required]
+  Notification:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable deployment of Notification template [required]
+  WebServers:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - SystemManager-Only
+     - Disabled
+    Description: Enable or disable deployment of WebServers template [required]
+  UploadArtifacts:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable deployment of UploadArtifacts template [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: Amazon SNS Topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: Amazon SNS Topic ARN for deployment information
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateCodePipeline: !Not [ !Equals [ !Ref GitHubOAuthToken, ''] ]
+  CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  DeployStaticWebsiteHosting: !And [ !Equals [ !Ref StaticWebsiteHosting, Enabled], !Equals [ !Ref GlobalSettings, Enabled], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
+  DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, Enabled], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
+  DeployNotification: !Equals [ !Ref Notification, Enabled]
+  DeployWebServers: !Equals [ !Ref WebServers, Enabled]
+  DeploySystemManager: !Equals [ !Ref WebServers, SystemManager-Only]
+  DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, Enabled]
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.7
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  # Service-linked Role
+  ServiceLinkedRoleForCodeStar:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: codestar-notifications.amazonaws.com
+      Description: Allows AWS CodeStar Notifications to access Amazon CloudWatch Events on your behalf
+  # IAM
+  IAMRoleForCodeBuild:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
+      Policies:
+        - PolicyName: !Sub 'CICD-CodeBuildS3CloudWatchLogs-${AWS::Region}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Required for `sam build`
+              - Action:
+                  - iam:ListPolicies
+                Resource: "*"
+                Effect: Allow
+              # Default Policy
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource: 
+                  - !Sub arn:aws:s3:::${S3ForArtifact}
+                  - !Sub arn:aws:s3:::${S3ForArtifact}/*
+                Effect: Allow
+              - Action:
+                  - serverlessrepo:SearchApplications
+                  - serverlessrepo:GetApplication
+                  - serverlessrepo:GetCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationChangeSet
+                  - serverlessrepo:ListApplicationVersions
+                  - serverlessrepo:ListApplicationDependencies
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - codebuild:CreateReportGroup
+                  - codebuild:CreateReport
+                  - codebuild:UpdateReport
+                  - codebuild:BatchPutTestCases
+                Resource:
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
+                Effect: Allow
+      RoleName: !Sub 'CICD-CodeBuild-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCloudWatchEvents:
+    Condition: CreateCodePipeline
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com 
+            Action: 'sts:AssumeRole'
+      Description: A role required for CloudWatch Events to access CodePipeline.
+      Policies:
+        - PolicyName: !Sub 'CICD-CloudWatchEventsCodePipeline-${AWS::Region}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - codepipeline:StartPipelineExecution
+                Resource:
+                  - !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}'
+                Effect: Allow
+      RoleName: !Sub 'CICD-CloudWatchEvents-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCodePipeline:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com 
+            Action: 'sts:AssumeRole'
+      Description: A role required for CodePipeline to access related resources.
+      Policies:
+        - PolicyName: !Sub 'CICD-CodePipeline-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - iam:PassRole
+                Resource: "*"
+                Effect: Allow
+                Condition:
+                  StringEqualsIfExists:
+                    iam:PassedToService:
+                      - cloudformation.amazonaws.com
+                      - elasticbeanstalk.amazonaws.com
+                      - ec2.amazonaws.com
+                      - ecs-tasks.amazonaws.com
+              - Action:
+                  - codecommit:CancelUploadArchive
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:GetUploadArchiveStatus
+                  - codecommit:UploadArchive
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - codedeploy:CreateDeployment
+                  - codedeploy:GetApplication
+                  - codedeploy:GetApplicationRevision
+                  - codedeploy:GetDeployment
+                  - codedeploy:GetDeploymentConfig
+                  - codedeploy:RegisterApplicationRevision
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - codestar-connections:UseConnection
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - elasticbeanstalk:*
+                  - ec2:*
+                  - elasticloadbalancing:*
+                  - autoscaling:*
+                  - cloudwatch:*
+                  - s3:*
+                  - sns:*
+                  - cloudformation:*
+                  - rds:*
+                  - sqs:*
+                  - ecs:*
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - lambda:InvokeFunction
+                  - lambda:ListFunctions
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - opsworks:CreateDeployment
+                  - opsworks:DescribeApps
+                  - opsworks:DescribeCommands
+                  - opsworks:DescribeDeployments
+                  - opsworks:DescribeInstances
+                  - opsworks:DescribeStacks
+                  - opsworks:UpdateApp
+                  - opsworks:UpdateStack
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:SetStackPolicy
+                  - cloudformation:ValidateTemplate
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - serverlessrepo:SearchApplications
+                  - serverlessrepo:GetApplication
+                  - serverlessrepo:GetCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationChangeSet
+                  - serverlessrepo:ListApplicationVersions
+                  - serverlessrepo:ListApplicationDependencies
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - devicefarm:ListProjects
+                  - devicefarm:ListDevicePools
+                  - devicefarm:GetRun
+                  - devicefarm:GetUpload
+                  - devicefarm:CreateUpload
+                  - devicefarm:ScheduleRun
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - servicecatalog:ListProvisioningArtifacts
+                  - servicecatalog:CreateProvisioningArtifact
+                  - servicecatalog:DescribeProvisioningArtifact
+                  - servicecatalog:DeleteProvisioningArtifact
+                  - servicecatalog:UpdateProduct
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - cloudformation:ValidateTemplate
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                  - ecr:DescribeImages
+                Resource: "*"
+                Effect: Allow
+      RoleName: !Sub 'CICD-CodePipeline-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCloudFormation:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for CloudFormation to access related resources.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AdministratorAccess
+      RoleName: !Sub 'CICD-CloudFormation-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CodeBuild
+  CodeBuildForSAM:
+    Type: 'AWS::CodeBuild::Project'
+    Properties: 
+      Artifacts:
+        Type: CODEPIPELINE
+      Description: !Sub Builds SAM teplate of ${AWS::StackName}
+      Environment: 
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: !Ref CodeBuildImageName
+        Type: LINUX_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-SAM
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: buildspec-sam.yml
+        Type: CODEPIPELINE
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
+  CodeBuildForNestedStack:
+    Type: 'AWS::CodeBuild::Project'
+    Properties: 
+      Artifacts:
+        Type: CODEPIPELINE
+      Description: !Sub Builds CloudFormation nested teplate of ${AWS::StackName}
+      Environment: 
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: !Ref CodeBuildImageName
+        Type: LINUX_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-CFn
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: buildspec-cfn.yml
+        Type: CODEPIPELINE
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
+  # CodePipeline
+  CodePipeline:
+    Condition: CreateCodePipeline
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties: 
+      ArtifactStores:
+        - ArtifactStore: 
+            Location: !Ref S3ForArtifact
+            Type: S3
+          Region: !Ref AWS::Region
+        - !If
+          - DeployGlobalSettings
+          - ArtifactStore:
+              Location: !Ref ArtifactBacketInVirginia
+              Type: S3
+            Region: us-east-1
+          - !Ref AWS::NoValue
+      Name: DefaultSettings
+      RestartExecutionOnUpdate: true
+      RoleArn: !GetAtt IAMRoleForCodePipeline.Arn
+      Stages: 
+        # Source
+        - Actions: 
+            - ActionTypeId: 
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Owner: eijikominami
+                Repo: aws-cloudformation-templates
+                Branch: !Ref GitHubBranchName
+                OAuthToken: !Ref GitHubOAuthToken
+                PollForSourceChanges: true
+              Name: AWSCloudFormationTemplates
+              OutputArtifacts: 
+                - Name: Source-CloudFormationTemplatesArtifact
+              RunOrder: 1
+            - !If
+              - CreateCloudFormationConfigurationArtifact
+              - ActionTypeId: 
+                  Category: Source
+                  Owner: ThirdParty
+                  Provider: GitHub
+                  Version: '1'
+                Configuration:
+                  Owner: !Ref GitHubOwnerNameForTemplateConfiguration
+                  Repo: !Ref GitHubRepoNameForTemplateConfiguration
+                  Branch: master
+                  OAuthToken: !Ref GitHubOAuthToken
+                  PollForSourceChanges: true
+                Name: AWSCloudFormationConfiguration
+                OutputArtifacts: 
+                  - Name: Source-CloudFormationConfigurationArtifact
+                RunOrder: 1
+              - !Ref AWS::NoValue
+          Name: Source
+        # Build
+        - Actions:
+            - ActionTypeId: 
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                EnvironmentVariables: !Sub '[{"name": "TEMPLATE_FILE_PATH", "value": "security-config-rules/sam-app/", "type": "PLAINTEXT"},{"name": "PACKAGE_BUCKET", "value": "${S3ForArtifact}", "type": "PLAINTEXT"}]'
+                ProjectName: !Ref CodeBuildForSAM
+              InputArtifacts:
+                - Name: Source-CloudFormationTemplatesArtifact
+              Name: DefaultSecuritySettings-ConfigRules
+              OutputArtifacts: 
+                - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
+              RunOrder: 1
+            - !If
+              - DeployNotification
+              - ActionTypeId: 
+                  Category: Build
+                  Owner: AWS
+                  Provider: CodeBuild
+                  Version: '1'
+                Configuration:
+                  EnvironmentVariables: !Sub '[{"name": "TEMPLATE_FILE_PATH", "value": "notification/sam-app/", "type": "PLAINTEXT"},{"name": "PACKAGE_BUCKET", "value": "${S3ForArtifact}", "type": "PLAINTEXT"}]'
+                  ProjectName: !Ref CodeBuildForSAM
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                Name: Notification
+                OutputArtifacts: 
+                  - Name: BuildArtifact-Notification
+                RunOrder: 1
+              - !Ref AWS::NoValue
+          Name: Build
+        # Deploy
+        - Actions:
+            # Deploy CICD
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: !Ref AWS::StackName
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                TemplatePath: Source-CloudFormationTemplatesArtifact::cicd/templates/template.yaml
+                ParameterOverrides: !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - !Ref AWS::NoValue
+                  - !Sub '{"ArtifactBacketInVirginia": "${ArtifactBacketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                TemplateConfiguration: !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Source-CloudFormationConfigurationArtifact::CICD.json  
+                  - !Ref AWS::NoValue   
+                OutputFileName: Output.json    
+              InputArtifacts:
+                - Name: Source-CloudFormationTemplatesArtifact
+                - !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Name: Source-CloudFormationConfigurationArtifact
+                  - !Ref AWS::NoValue
+              Name: !Ref AWS::StackName
+              OutputArtifacts: 
+                - Name: DeployArtifact-CICD
+              RunOrder: 1
+            # Deploy GlobalSettings
+            - !If
+              - DeployGlobalSettings
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: GlobalSettings
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::global/templates/template.yaml
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Source-CloudFormationConfigurationArtifact::GlobalSettings.json
+                    - !Ref AWS::NoValue
+                  OutputFileName: Output.json
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                Name: GlobalSettings
+                OutputArtifacts: 
+                  - Name: GlobalSettings
+                Region: us-east-1
+                RunOrder: 2
+              - !Ref AWS::NoValue
+            # Deploy DefaultSecuritySettings
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: DefaultSecuritySettings
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                TemplatePath: Source-CloudFormationTemplatesArtifact::security/templates/template.yaml
+                ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}}'
+                TemplateConfiguration: !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Source-CloudFormationConfigurationArtifact::DefaultSecuritySettings.json
+                  - !Ref AWS::NoValue
+              InputArtifacts:
+                - Name: Source-CloudFormationTemplatesArtifact
+                - !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Name: Source-CloudFormationConfigurationArtifact
+                  - !Ref AWS::NoValue
+                - Name: DeployArtifact-CICD
+              Name: DefaultSecuritySettings
+              OutputArtifacts: 
+                - Name: DeployArtifact-DefaultSecuritySettings
+              RunOrder: 2
+            # Deploy DefaultSecuritySettings-ConfigRules
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: DefaultSecuritySettings-ConfigRules
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
+                TemplateConfiguration: !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Source-CloudFormationConfigurationArtifact::DefaultSecuritySettings-ConfigRules.json
+                  - !Ref AWS::NoValue
+              InputArtifacts:
+                - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
+                - !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Name: Source-CloudFormationConfigurationArtifact
+                  - !Ref AWS::NoValue
+              Name: DefaultSecuritySettings-ConfigRules
+              OutputArtifacts: 
+                - Name: DeployArtifact-DefaultSecuritySettings-ConfigRules
+              RunOrder: 3
+            # Deploy Notification
+            - !If
+              - DeployNotification
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: Notification
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: BuildArtifact-Notification::packaged.yaml
+                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Source-CloudFormationConfigurationArtifact::Notification.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: BuildArtifact-Notification
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: Notification
+                OutputArtifacts:
+                  - Name: DeployArtifact-Notification
+                RunOrder: 3
+              - !Ref AWS::NoValue
+            # Deploy StaticWebsiteHosting
+            - !If
+              - DeployStaticWebsiteHosting
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: StaticWebsiteHosting
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
+                  ParameterOverrides: '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Source-CloudFormationConfigurationArtifact::StaticWebsiteHosting.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: GlobalSettings
+                  - Name: DeployArtifact-CICD
+                Name: StaticWebsiteHosting
+                OutputArtifacts: 
+                  - Name: DeployArtifact-StaticWebsiteHosting
+                RunOrder: 3
+              - !Ref AWS::NoValue
+            # Deploy WebServers
+            - !If
+              - DeployWebServers
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: WebServers
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/template.yaml
+                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Source-CloudFormationConfigurationArtifact::WebServers.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: WebServers
+                OutputArtifacts: 
+                  - Name: DeployArtifact-WebServers
+                RunOrder: 3
+              - !Ref AWS::NoValue
+            # Deploy SystemManager
+            - !If
+              - DeploySystemManager
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: SystemManager
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/ssm.yaml
+                  ParameterOverrides: '{"SNSTopicARN": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Source-CloudFormationConfigurationArtifact::SystemManager.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: SystemManager
+                OutputArtifacts: 
+                  - Name: DeployArtifact-SystemManager
+                RunOrder: 3
+              - !Ref AWS::NoValue
+            # Deploy UploadArtifacts
+            - !If
+              - DeployUploadArtifacts
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: UploadArtifacts
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::cicd/templates/codebuild.yaml
+                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Source-CloudFormationConfigurationArtifact::UploadArtifacts.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: UploadArtifacts
+                OutputArtifacts: 
+                  - Name: DeployArtifact-UploadArtifacts
+                RunOrder: 3
+              - !Ref AWS::NoValue
+          Name: Deploy
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CloudWatch Alarm
+  AlarmCodeBuildForSAM:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        ProjectName: !Ref CodeBuildForSAM
+      Tags:
+        createdby: !Ref TagValue
+  AlarmCodeBuildForNestedStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        ProjectName: !Ref CodeBuildForNestedStack
+      Tags:
+        createdby: !Ref TagValue
+  AlarmEventsForCodePipeline:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 1.0.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        EventsRuleName: !Ref CodePipelineEvents
+      Tags:
+        createdby: !Ref TagValue
+  # CodeStar
+  NotificationRule:
+    Condition: CreateCodePipeline
+    DependsOn:
+      - ServiceLinkedRoleForCodeStar
+    Type: 'AWS::CodeStarNotifications::NotificationRule'
+    Properties: 
+      DetailType: FULL
+      EventTypeIds:
+        # Action
+        - codepipeline-pipeline-action-execution-failed
+        # Stage
+        - codepipeline-pipeline-stage-execution-started
+        # Pipeline
+        - codepipeline-pipeline-pipeline-execution-started
+        - codepipeline-pipeline-pipeline-execution-succeeded
+        - codepipeline-pipeline-pipeline-execution-failed
+      Name: !Sub CICD-started-succeeded-${AWS::Region}
+      Resource: !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}'
+      Targets: 
+        - TargetAddress: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+          TargetType: SNS
+      Tags:
+        createdby: !Ref TagValue
+  # S3
+  S3ForArtifact:
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub cicd-artifact-${AWS::Region}-${AWS::AccountId}
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CloudWatch Events
+  CodePipelineEvents:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: !Sub Rule for CodePipeline created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.codepipeline
+        detail-type:
+          - CodePipeline Pipeline Execution State Change
+        detail:
+          state:
+            - SUCCEEDED
+            - FAILED
+      Name: !Sub CodePipeline-${AWS::StackName}
+      State: ENABLED
+      Targets:
+        - Arn: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+          Id: CloudWatchEventsForCodePipeline
+  # CloudWatch Logs
+  CodeBuildLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties: 
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
+      RetentionInDays: 60
+
+Outputs:
+  SNSForAlertArn:
+    Description: SNS ARN for Alert
+    Value: !If
+      - CreateSNSForAlert
+      - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+      - !Ref SNSForAlertArn
+  SNSForDeploymentArn:
+    Description: SNS ARN for Deployment
+    Value: !If
+      - CreateSNSForDeployment
+      - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+      - !Ref SNSForDeploymentArn

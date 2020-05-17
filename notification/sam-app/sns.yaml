@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudSAMTemplates/notification/sns creates Amazon SNS and related CloudWatch Alarm.
+
+Parameters:
+  TopicName:
+    Type: String
+    Default: Default
+    Description: Amazon SNS Topic name
+
+Resources:
+  SNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      DisplayName: !Ref TopicName
+      TopicName: !Ref TopicName
+  SNSTopicPolicy:
+    Type: 'AWS::SNS::TopicPolicy'
+    Properties:
+      Topics: 
+        - !Ref SNSTopic
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            # All AWS Services
+            Principal:
+              AWS: '*'
+            Resource: '*'
+            Action: 'SNS:Publish'
+  CloudWatchAlarmSNSNumberOfNotificationsFailed:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopic
+      AlarmDescription: !Join 
+        - ''
+        - - '*SNS* ('
+          - !GetAtt SNSTopic.TopicName
+          - ') で *通知エラー* が発生しています。'
+      AlarmName: !Sub 'Warning-${TopicName}-SNS-NumberOfNotificationsFailed-Occured'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions: 
+        - Name: TopicName
+          Value: !GetAtt SNSTopic.TopicName
+      EvaluationPeriods: 1
+      MetricName: NumberOfNotificationsFailed
+      Namespace: AWS/SNS
+      OKActions:
+        - !Ref SNSTopic
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+Outputs:
+  SNSTopicArn:
+    Description: SNS Topic ARN
+    Value: !Ref SNSTopic
+  SNSTopicName:
+    Description: SNS Topic Name
+    Value: !GetAtt SNSTopic.TopicName

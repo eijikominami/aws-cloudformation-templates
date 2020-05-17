@@ -1,0 +1,172 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/Inspector sets Amazon Inspector.
+
+Parameters:
+  PrefixOfLogicalName:
+    Type: String
+    Default: DefaultSecuritySettings
+    Description: Custom prefix name [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Mappings:
+  RulePackages:
+    us-east-1:
+      CVE: arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7
+      CIS: arn:aws:inspector:us-east-1:316112463485:rulespackage/0-rExsr2X8
+      NetworkReachability: arn:aws:inspector:us-east-1:316112463485:rulespackage/0-PmNV0Tcd
+      Security: arn:aws:inspector:us-east-1:316112463485:rulespackage/0-R01qwB5Q
+    us-east-2:
+      CVE: arn:aws:inspector:us-east-2:646659390643:rulespackage/0-JnA8Zp85
+      CIS: arn:aws:inspector:us-east-2:646659390643:rulespackage/0-m8r61nnh
+      NetworkReachability: arn:aws:inspector:us-east-2:646659390643:rulespackage/0-cE4kTR30
+      Security: arn:aws:inspector:us-east-2:646659390643:rulespackage/0-AxKmMHPX
+    us-west-1:
+      CVE: arn:aws:inspector:us-west-1:166987590008:rulespackage/0-TKgzoVOa
+      CIS: arn:aws:inspector:us-west-1:166987590008:rulespackage/0-xUY8iRqX
+      NetworkReachability: arn:aws:inspector:us-west-1:166987590008:rulespackage/0-TxmXimXF
+      Security: arn:aws:inspector:us-west-1:166987590008:rulespackage/0-byoQRFYm
+    us-west-2:
+      CVE: arn:aws:inspector:us-west-2:758058086616:rulespackage/0-9hgA516p
+      CIS: arn:aws:inspector:us-west-2:758058086616:rulespackage/0-H5hpSawc
+      NetworkReachability: arn:aws:inspector:us-west-2:758058086616:rulespackage/0-rD1z6dpl
+      Security: arn:aws:inspector:us-west-2:758058086616:rulespackage/0-JJOtZiqQ
+    ap-northeast-1:
+      CVE: arn:aws:inspector:ap-northeast-1:406045910587:rulespackage/0-gHP9oWNT
+      CIS: arn:aws:inspector:ap-northeast-1:406045910587:rulespackage/0-7WNjqgGu
+      NetworkReachability: arn:aws:inspector:ap-northeast-1:406045910587:rulespackage/0-YI95DVd7
+      Security: arn:aws:inspector:ap-northeast-1:406045910587:rulespackage/0-bBUQnxMq
+    ap-northeast-2:
+      CVE: arn:aws:inspector:ap-northeast-2:526946625049:rulespackage/0-PoGHMznc
+      CIS: arn:aws:inspector:ap-northeast-2:526946625049:rulespackage/0-T9srhg1z
+      NetworkReachability: arn:aws:inspector:ap-northeast-2:526946625049:rulespackage/0-s3OmLzhL
+      Security: arn:aws:inspector:ap-northeast-2:526946625049:rulespackage/0-2WRpmi4n
+    ap-southeast-2:
+      CVE: arn:aws:inspector:ap-southeast-2:454640832652:rulespackage/0-D5TGAxiR
+      CIS: arn:aws:inspector:ap-southeast-2:454640832652:rulespackage/0-Vkd2Vxjq
+      NetworkReachability: arn:aws:inspector:ap-southeast-2:454640832652:rulespackage/0-FLcuV4Gz
+      Security: arn:aws:inspector:ap-southeast-2:454640832652:rulespackage/0-asL6HRgN
+    ap-south-1:
+      CVE: arn:aws:inspector:ap-south-1:162588757376:rulespackage/0-LqnJE9dO
+      CIS: arn:aws:inspector:ap-south-1:162588757376:rulespackage/0-PSUlX14m
+      NetworkReachability: arn:aws:inspector:ap-south-1:162588757376:rulespackage/0-YxKfjFu1
+      Security: arn:aws:inspector:ap-south-1:162588757376:rulespackage/0-fs0IZZBj
+    eu-central-1:
+      CVE: arn:aws:inspector:eu-central-1:537503971621:rulespackage/0-wNqHa8M9
+      CIS: arn:aws:inspector:eu-central-1:537503971621:rulespackage/0-nZrAVuv8
+      NetworkReachability: arn:aws:inspector:eu-central-1:537503971621:rulespackage/0-6yunpJ91
+      Security: arn:aws:inspector:eu-central-1:537503971621:rulespackage/0-ZujVHEPB
+    eu-west-1:
+      CVE: arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-ubA5XvBh
+      CIS: arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-sJBhCr0F
+      NetworkReachability: arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-SPzU33xe
+      Security: arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-SnojL3Z6
+    eu-west-2:
+      CVE: arn:aws:inspector:eu-west-2:146838936955:rulespackage/0-kZGCqcE1
+      CIS: arn:aws:inspector:eu-west-2:146838936955:rulespackage/0-IeCjwf1W
+      NetworkReachability: arn:aws:inspector:eu-west-2:146838936955:rulespackage/0-AizSYyNq
+      Security: arn:aws:inspector:eu-west-2:146838936955:rulespackage/0-XApUiSaP
+    eu-north-1:
+      CVE: arn:aws:inspector:eu-north-1:453420244670:rulespackage/0-IgdgIewd
+      CIS: arn:aws:inspector:eu-north-1:453420244670:rulespackage/0-Yn8jlX7f
+      NetworkReachability: arn:aws:inspector:eu-north-1:453420244670:rulespackage/0-52Sn74uu
+      Security: arn:aws:inspector:eu-north-1:453420244670:rulespackage/0-HfBQSbSf
+ 
+Conditions:
+  # Supports limited regions as follows.
+  IsSupportedRegion:
+    !Or [!Equals [ !Ref "AWS::Region", us-east-1 ],
+         !Equals [ !Ref "AWS::Region", us-east-2 ],
+         !Equals [ !Ref "AWS::Region", us-west-1 ],
+         !Equals [ !Ref "AWS::Region", us-west-2 ],
+         !Equals [ !Ref "AWS::Region", ap-northeast-1 ],
+         !Equals [ !Ref "AWS::Region", ap-northeast-2 ],
+         !Equals [ !Ref "AWS::Region", ap-southeast-2 ],
+         !Equals [ !Ref "AWS::Region", eu-west-1 ],
+         !Equals [ !Ref "AWS::Region", eu-west-2 ],
+         !Equals [ !Ref "AWS::Region", eu-north-1 ]]
+
+Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForInspector:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: inspector.amazonaws.com
+      Description: A service-linked role required for Amazon Inspector to access your resources.   
+  # IAM Role
+  IAMRoleForInspectorEvents:
+    Condition: IsSupportedRegion
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for CloudWatch Events to access Inspector.
+      Policies:
+        - PolicyName: !Sub '${PrefixOfLogicalName}-AWSEventsInspectorPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'inspector:StartAssessmentRun'
+                Resource: '*'
+      RoleName: !Sub '${PrefixOfLogicalName}-InspectorEvents-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Inspector
+  InspectorAssessmentTarget:
+    DependsOn:
+      - ServiceLinkedRoleForInspector
+    Condition: IsSupportedRegion
+    Type: 'AWS::Inspector::AssessmentTarget'
+    Properties:
+      AssessmentTargetName: !Sub ${PrefixOfLogicalName}-Assessment-Target-All-Instances-All-Rules
+  InspectorAssessmentTemplate:
+    Condition: IsSupportedRegion
+    Type: 'AWS::Inspector::AssessmentTemplate'
+    Properties:
+      AssessmentTargetArn: !GetAtt InspectorAssessmentTarget.Arn
+      DurationInSeconds: 3600
+      AssessmentTemplateName: !Sub ${PrefixOfLogicalName}-Assessment-Template-Default-All-Rules
+      RulesPackageArns:
+      # Rules Package for 'ap-northeast-1'
+        # 共通脆弱性識別子
+        - !FindInMap [RulePackages, !Ref "AWS::Region", CVE]
+        # CIS オペレーティングシステムのセキュリティ設定ベンチマーク
+        - !FindInMap [RulePackages, !Ref "AWS::Region", CIS]
+        # ネットワーク到達可能性
+        - !FindInMap [RulePackages, !Ref "AWS::Region", NetworkReachability]
+        # セキュリティのベストプラクティス
+        - !FindInMap [RulePackages, !Ref "AWS::Region", Security]
+  # CloudWatch Events for Inspector
+  CloudWatchEventsForInspector:
+    Condition: IsSupportedRegion
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Join
+        - ''
+        - - 'Scheduled Inspector Assessment for '
+          - !GetAtt InspectorAssessmentTemplate.Arn
+          - ' running every 7 day(s)'
+      Name: Inspector-Assessment
+      # Every Monday 9AM
+      ScheduleExpression: cron(0 9 ? * 1 *)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt InspectorAssessmentTemplate.Arn
+          Id: CloudWatchEventsForInspector
+          RoleArn: !GetAtt IAMRoleForInspectorEvents.Arn

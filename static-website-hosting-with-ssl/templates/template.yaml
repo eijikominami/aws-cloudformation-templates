@@ -1,0 +1,348 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/static-web-hosting creates environment of static web hosting.
+
+Parameters:
+  CertificateManagerARN:
+    Default: ''
+    Type: String
+    Description: ARN of an SSL Certifiation attached to CloudFront
+  DomainName:
+    Type: String
+    AllowedPattern: .+
+    Description: CNAME attached to CloudFront [required]
+  CloudFrontDefaultTTL:
+    Default: 86400
+    MinValue: 0
+    Type: Number
+    Description: CloudFront Default TTL [required]
+  CloudFrontMinimumTTL:
+    Default: 0
+    MinValue: 0
+    Type: Number
+    Description: CloudFront Minimum TTL [required]
+  CloudFrontMaximumTTL:
+    Default: 31536000
+    MinValue: 0
+    Type: Number
+    Description: CloudFront Maximum TTL [required]
+  CloudFrontViewerProtocolPolicy:
+    Type: String
+    Default: redirect-to-https
+    AllowedValues:
+     - allow-all
+     - redirect-to-https
+     - https-only
+    Description: CloudFront Viewer Protocol Policy [required]
+  CloudFrontDefaultRootObject:
+    Type: String
+    Default: index.html
+    AllowedPattern: .+
+    Description: CloudFront Viewer Protocol Policy [required]
+  CloudFrontAdditionalName:
+    Type: String
+    Default: ''
+    Description: CNAME attached to CloudFront
+  CloudFrontSecondaryOriginId:
+    Type: String
+    Default: ''
+    Description: S3 bucket name for Secondary Origin
+  S3DestinationBucketArnOfCrossRegionReplication:
+    Type: String
+    Default: ''
+    Description: S3 bucket name for Cross Region Replication
+  LoggingEnabled:
+    Type: String
+    Default: Enabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable logging [required]
+  LogBacketName:
+    Type: String
+    Default: ''
+    Description: Custom S3 bucket name for access logging
+  WebACL:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+      - Enabled
+      - Disabled
+    Description: Enable or disable WebACL [required]
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''  
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  AdditionalNameExists: !Not [ !Equals [ !Ref CloudFrontAdditionalName, '' ]]
+  BundleSSLCertification: !Not [ !Equals [ !Ref CertificateManagerARN, '' ]]
+  DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ]]
+  SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
+  CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
+  CreateLog: !Equals [ !Ref LoggingEnabled, Enabled ]
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateWebACL: !Equals [ !Ref WebACL, Enabled ]
+  CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
+
+Resources:
+  # Nested Stack
+  WAF:
+    Condition: CreateWebACL
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        PrefixOfLogicalName: !Ref AWS::StackName
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters: 
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/sns.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # IAM
+  IAMRoleForCrossRegionReplication:
+    Condition: CrossRegionReplication
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-S3Replication-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetReplicationConfiguration'
+                  - 's3:ListBucket'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - !Ref DomainName
+              - Effect: Allow
+                Action:
+                  - 's3:GetObjectVersion'
+                  - 's3:GetObjectVersionAcl'
+                  - 's3:GetObjectVersionTagging'
+                  - 's3:GetObjectRetention'
+                  - 's3:GetObjectLegalHold'
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - !Ref DomainName
+                    - /*
+              - Effect: Allow
+                Action:
+                  - 's3:ReplicateObject'
+                  - 's3:ReplicateDelete'
+                  - 's3:ReplicateTags'
+                Resource: !Join
+                  - ''
+                  - - !Ref S3DestinationBucketArnOfCrossRegionReplication
+                    - /*
+      RoleName: !Sub '${AWS::StackName}-S3ReplicationRole-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # S3
+  S3ForAccessLog:
+    Condition: CustomLogBucketName
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: aws:kms
+      BucketName: !Ref LogBacketName
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3ForWebHosting:
+    Type: 'AWS::S3::Bucket'
+    # Retain this bucket when a stack is deleted.
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: aws:kms
+      BucketName: !Ref DomainName
+      LifecycleConfiguration:
+        Rules:
+          - Id: NonCurrentVersionExpiration
+            NoncurrentVersionExpirationInDays: 90
+            Status: Enabled
+      LoggingConfiguration: !If
+        - CreateLog
+        - DestinationBucketName: !If
+          - CustomLogBucketName
+          - !Ref S3ForAccessLog
+          - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}
+          LogFilePrefix: !Sub S3-${DomainName}/
+        - !Ref AWS::NoValue
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      ReplicationConfiguration: !If
+       - CrossRegionReplication
+       - Role: !GetAtt IAMRoleForCrossRegionReplication.Arn
+         Rules:
+           - Destination: 
+               Bucket: !Ref S3DestinationBucketArnOfCrossRegionReplication
+             Id: !Ref S3DestinationBucketArnOfCrossRegionReplication
+             # All Objects
+             Prefix: ''
+             Status: Enabled
+       - !Ref AWS::NoValue
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VersioningConfiguration:
+        Status: Enabled
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties: 
+      Bucket: !Ref S3ForWebHosting
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForWebHosting
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}
+            Action:
+              - 's3:GetObject'
+            Resource: !Sub arn:aws:s3:::${S3ForWebHosting}/*
+  # CloudFront
+  CloudFront:
+    Type: 'AWS::CloudFront::Distribution'
+    Properties:
+      DistributionConfig:
+        Aliases: !If
+          - BundleSSLCertification
+          - !If 
+            - AdditionalNameExists
+            - - !Ref DomainName
+              - !Ref CloudFrontAdditionalName
+            - - !Ref DomainName
+          - !Ref AWS::NoValue
+        Comment: !Sub CDN for ${DomainName}
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          DefaultTTL: !Ref CloudFrontDefaultTTL
+          ForwardedValues:
+            QueryString: false
+          MaxTTL: !Ref CloudFrontMaximumTTL
+          MinTTL: !Ref CloudFrontMinimumTTL
+          SmoothStreaming: false
+          TargetOriginId: !Ref S3ForWebHosting
+          ViewerProtocolPolicy: !Ref CloudFrontViewerProtocolPolicy
+        DefaultRootObject : !If
+          - DefaultRootObjectExists
+          - !Ref CloudFrontDefaultRootObject
+          - !Ref AWS::NoValue
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: false
+        Logging: !If
+          - CreateLog
+          - Bucket: !If
+            - CustomLogBucketName
+            - !Ref S3ForAccessLog
+            - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}.s3.amazonaws.com
+            Prefix: !Sub CloudFront-${DomainName}/
+          - !Ref AWS::NoValue
+        Origins: !If
+          - SingleOrigin
+          - - DomainName: !GetAtt S3ForWebHosting.DomainName
+              Id: !Ref S3ForWebHosting
+              S3OriginConfig:
+                OriginAccessIdentity: !Join
+                 - ''
+                 - - origin-access-identity/cloudfront/
+                   - !Ref CloudFrontOriginAccessIdentity
+          - - DomainName: !GetAtt S3ForWebHosting.DomainName
+              Id: !Ref S3ForWebHosting
+              S3OriginConfig:
+                OriginAccessIdentity: !Join
+                 - ''
+                 - - origin-access-identity/cloudfront/
+                   - !Ref CloudFrontOriginAccessIdentity
+            - DomainName: !Sub ${CloudFrontSecondaryOriginId}.s3.amazonaws.com
+              Id: !Ref CloudFrontSecondaryOriginId
+              S3OriginConfig:
+                OriginAccessIdentity: !Join
+                 - ''
+                 - - origin-access-identity/cloudfront/
+                   - !Ref CloudFrontOriginAccessIdentity
+        ViewerCertificate: !If
+          - BundleSSLCertification
+          - AcmCertificateArn: !Ref CertificateManagerARN
+            MinimumProtocolVersion: TLSv1.1_2016
+            SslSupportMethod: sni-only
+          - !Ref AWS::NoValue
+        WebACLId: !If
+          - CreateWebACL
+          - !GetAtt WAF.Outputs.WebACLId
+          - !Ref AWS::NoValue
+  CloudFrontOriginAccessIdentity:
+    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+    Properties:
+      CloudFrontOriginAccessIdentityConfig: 
+        Comment: !Sub access-identity-${DomainName}
+  # CloudWatch Dashboard
+  Dashboard:
+    Type: 'AWS::CloudWatch::Dashboard'
+    Properties:
+      DashboardName: !Sub ${AWS::StackName}-${CloudFront}
+      DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "# CloudFront\n${DomainName} のパフォーマンスを確認できます。"}},{"type": "metric","x": 0,"y": 2,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "4xxErrorRate", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Average", "period": 60, "color": "#ff7f0e" } ],[ ".", "TotalErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#9467bd" } ],[ ".", "5xxErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#d62728" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "ErrorRate","period": 300}},{"type": "metric","x": 0,"y": 8,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "BytesUploaded", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Sum", "period": 60 } ],[ ".", "BytesDownloaded", ".", ".", ".", ".", { "stat": "Sum", "period": 60, "color": "#2ca02c" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "Bytes","period": 300}},{"type": "metric","x": 0,"y": 14,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "Requests", "Region", "Global", "DistributionId", "${CloudFront}", { "period": 60, "stat": "Sum" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","period": 300}}]}'
+
+Outputs:
+  CloudFrontURL:
+    Description: CloudFront URL
+    Value: !GetAtt CloudFront.DomainName

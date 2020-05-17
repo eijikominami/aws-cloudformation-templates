@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for EC2
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+  CPUUtilizationThreshold:
+    Type: Number
+    Default: 100
+    MinValue: 0
+    MaxValue: 100
+    Description: Threshold of CPU Utilization [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  EC2StatusCheckFailed:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*EC2* で *ステータスチェックエラー* が発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-EC2-StatusCheckFailed'
+        - Warning-EC2-StatusCheckFailed
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: StatusCheckFailed
+      Namespace: AWS/EC2
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  EC2CPUUtilization:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*EC2* で *CPU使用率が上昇* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-EC2-CPU-Overloaded'
+        - Warning-EC2-CPU-Overloaded
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Average
+      Threshold: !Ref CPUUtilizationThreshold
+      TreatMissingData: notBreaching

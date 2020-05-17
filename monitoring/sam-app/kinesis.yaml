@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Kinesis
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: Custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: SNS topic ARN [required]
+  KinesisStreamName:
+    Type: String
+    AllowedPattern: .+
+    Description: Kinesis stream name [required]
+  IteratorAgeMillisecondsThreshold:
+    Type: Number
+    Default: 30000
+    MinValue: 0
+    Description: Threshold of IteratorAgeMilliseconds [required]
+  NumberOfPutRecordThreshold:
+    Type: Number
+    Default: 1000
+    MinValue: 0
+    Description: Threshold of PutRecord per minute [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmKinesisIteratorAgeMilliseconds:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Kinesis* (${KinesisStreamName}) で *GetRecords.IteratorAgeMillisecondsの値が増加* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Kinesis-${KinesisStreamName}-IteratorAgeMilliseconds-is-Too-Long'
+        - !Sub 'Notice-Kinesis-${KinesisStreamName}-IteratorAgeMilliseconds-is-Too-Long'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 3
+      Dimensions:
+        - Name: StreamName
+          Value: !Ref KinesisStreamName
+      EvaluationPeriods: 3
+      MetricName: GetRecords.IteratorAgeMilliseconds
+      Namespace: AWS/Kinesis
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: !Ref IteratorAgeMillisecondsThreshold
+      TreatMissingData: notBreaching
+  AlarmKinesisPutRecordSuccess:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Kinesis* (${KinesisStreamName}) で *入力レコード数が増加* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Kinesis-${KinesisStreamName}-PutRecord-Success-is-Too-High'
+        - !Sub 'Warning-Kinesis-${KinesisStreamName}-PutRecord-Success-is-Too-High'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: StreamName
+          Value: !Ref KinesisStreamName
+      EvaluationPeriods: 1
+      MetricName: PutRecord.Success
+      Namespace: AWS/Kinesis
+      OKActions:
+        - !Ref SNSTopicArn
+      # Alert when Sum is over 600000 msec in 60 seconds.
+      Period: 60
+      Statistic: Sum
+      Threshold: !Ref NumberOfPutRecordThreshold
+      TreatMissingData: notBreaching
+  AlarmKinesisWriteProvisionedThroughputExceeded:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Kinesis* (${KinesisStreamName}) で *スロットリングが発生* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-Kinesis-${KinesisStreamName}-WriteProvisionedThroughputExceeded'
+        - !Sub 'Warning-Kinesis-${KinesisStreamName}-WriteProvisionedThroughputExceeded'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: StreamName
+          Value: !Ref KinesisStreamName
+      EvaluationPeriods: 1
+      MetricName: WriteProvisionedThroughputExceeded
+      Namespace: AWS/Kinesis
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
