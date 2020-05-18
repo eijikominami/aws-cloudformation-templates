@@ -74,7 +74,7 @@ Resources:
           - aws.events
         detail-type: 
           - Scheduled Event
-      Name: ScheduledEvents
+      Name: !Sub ${AWS::StackName}-ScheduledEvents
       State: !Ref ScheduledEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -91,7 +91,7 @@ Resources:
           - EBS Snapshot Notification
           - EBS Multi-Volume Snapshots Completion Status
           - EBS Fast Snapshot Restore State-change Notification
-      Name: EBS
+      Name: !Sub ${AWS::StackName}-EBS
       State: !Ref EBSEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -110,7 +110,7 @@ Resources:
           - EC2 Instance-terminate Lifecycle Action
           - EC2 Instance Terminate Successful
           - EC2 Instance Terminate Unsuccessful
-      Name: AutoScaling
+      Name: !Sub ${AWS::StackName}-AutoScaling
       State: !Ref AutoScalingEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -124,7 +124,7 @@ Resources:
           - aws.ec2
         detail-type: 
           - EC2 Instance State-change Notification
-      Name: EC2
+      Name: !Sub ${AWS::StackName}-EC2
       State: !Ref EC2EventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -140,7 +140,7 @@ Resources:
           - KMS CMK Rotations
           - KMS Imported Key Material Expiration
           - KMS CMK Deletion
-      Name: KMS
+      Name: !Sub ${AWS::StackName}-KMS
       State: !Ref KMSEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -154,7 +154,7 @@ Resources:
           - aws.signin
         detail-type: 
           - AWS Console Sign In via CloudTrail
-      Name: ManagementConsole
+      Name: !Sub ${AWS::StackName}-ManagementConsole
       State: !Ref ManagementConsoleEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -182,7 +182,7 @@ Resources:
           - aws.trustedadvisor
         detail-type: 
           - Trusted Advisor Check Item Refresh Notification
-      Name: TrustedAdvisor
+      Name: !Sub ${AWS::StackName}-TrustedAdvisor
       State: !Ref TrustedAdvisorEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
