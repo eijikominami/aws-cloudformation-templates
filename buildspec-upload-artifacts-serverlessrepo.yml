@@ -40,7 +40,7 @@ phases:
       - aws s3 cp monitoring/cloudwatch-alarm-about-events.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-events --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-events.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-kinesis-data-streams.md s3://${BUCKET_NAME}/readme/
-      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/ --readme-url s3://${BUCKET_NAME}/readme/.md --region us-east-1
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-kinesis-data-streams --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-kinesis-data-streams.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-lambda.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-lambda --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-lambda.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-natgateway.md s3://${BUCKET_NAME}/readme/
