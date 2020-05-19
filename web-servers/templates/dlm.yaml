@@ -7,7 +7,7 @@ Parameters:
     Default: '17:00'
     AllowedPattern: ^[0-1][0-9]:[0-9][0-9]$
     Description: Daily Snapshot time (HH:MM) [required]
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: WebServers
     AllowedPattern: .+
@@ -52,7 +52,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for DLM.
       Policies:
-        - PolicyName: !Sub '${PrefixOfLogicalName}-DataLifecycleManagerEC2Access-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-DataLifecycleManagerEC2Access-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -69,7 +69,7 @@ Resources:
                 Action:
                   - 'ec2:CreateTags'
                 Resource: 'arn:aws:ec2:*::snapshot/*'
-      RoleName: !Sub '${PrefixOfLogicalName}-DataLifecycleManager-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-DataLifecycleManager-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue

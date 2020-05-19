@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/Inspector sets Amazon Inspector.
 
 Parameters:
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
     Description: Custom prefix name [required]
@@ -115,7 +115,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for CloudWatch Events to access Inspector.
       Policies:
-        - PolicyName: !Sub '${PrefixOfLogicalName}-AWSEventsInspectorPolicy-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSEventsInspectorPolicy-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -123,7 +123,7 @@ Resources:
                 Action:
                   - 'inspector:StartAssessmentRun'
                 Resource: '*'
-      RoleName: !Sub '${PrefixOfLogicalName}-InspectorEvents-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-InspectorEvents-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -134,14 +134,14 @@ Resources:
     Condition: IsSupportedRegion
     Type: 'AWS::Inspector::AssessmentTarget'
     Properties:
-      AssessmentTargetName: !Sub ${PrefixOfLogicalName}-Assessment-Target-All-Instances-All-Rules
+      AssessmentTargetName: !Sub ${LogicalNamePrefix}-Assessment-Target-All-Instances-All-Rules
   InspectorAssessmentTemplate:
     Condition: IsSupportedRegion
     Type: 'AWS::Inspector::AssessmentTemplate'
     Properties:
       AssessmentTargetArn: !GetAtt InspectorAssessmentTarget.Arn
       DurationInSeconds: 3600
-      AssessmentTemplateName: !Sub ${PrefixOfLogicalName}-Assessment-Template-Default-All-Rules
+      AssessmentTemplateName: !Sub ${LogicalNamePrefix}-Assessment-Template-Default-All-Rules
       RulesPackageArns:
       # Rules Package for 'ap-northeast-1'
         # 共通脆弱性識別子

@@ -1,7 +1,7 @@
 [**English**](README.md) / 日本語
 
 # AWSCloudFormationTemplates/monitoring
-![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoidzhOZGpLeGpGQ1FmTVlkNkxTTGxIWFhMZk5BRXBmR1pVVHhWbWVIdmIzRyttcmw2RUF3YkxTWStMWTVReXJ2UkhhTUFlSitia3REVGFBcTAvR29uZ1pVPSIsIml2UGFyYW1ldGVyU3BlYyI6IjRLV2tpS0lhWDc1aDJpU1AiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiT1o3djE0RFpweWErRDl6SkpwTGsySVJKbWk0ajhreUlEaXAvTHh3ZzdaS2wzNVR5V1hpZkZRRVRtcFIvNncydWdad2w4TG9MRVMzVGFvMlZKY2RNYUowPSIsIml2UGFyYW1ldGVyU3BlYyI6Ik0vOGVWdGFEWTlyYVdDZUwiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
@@ -54,11 +54,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -110,11 +110,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -162,11 +162,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -212,11 +212,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -263,11 +263,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -314,11 +314,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -371,11 +371,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -430,11 +430,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -481,11 +481,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 
@@ -531,11 +531,11 @@ Properties:
 ```
 
 ```yaml
-Type: AWS::Serverless::Application
+Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 1.0.7
+    SemanticVersion: 1.0.10
   NotificationARNs: 
     - String
   Parameters: 

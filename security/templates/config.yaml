@@ -23,7 +23,7 @@ Parameters:
      - Enabled
      - Disabled
     Description: Enable or disable auto remediation [required]
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
     Description: Custom prefix name [required]
@@ -82,7 +82,7 @@ Resources:
         - arn:aws:iam::aws:policy/ReadOnlyAccess
       # Allow CloudFormation 'cloudformation:DetectStackDrift' and 'cloudformation:DetectStackResourceDrift' permission.
       Policies:
-        - PolicyName: !Sub '${PrefixOfLogicalName}-ConfigCloudformationCheckPolicy-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-ConfigCloudformationCheckPolicy-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -92,7 +92,7 @@ Resources:
                   - 'cloudformation:DetectStackResourceDrift'
                 Resource:
                   - '*'
-      RoleName: !Sub '${PrefixOfLogicalName}-IAMRoleForConfigRules-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForConfigRules-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -110,7 +110,7 @@ Resources:
       Description: A role required for Config to access Organizations.
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSConfigRoleForOrganizations
-      RoleName: !Sub '${PrefixOfLogicalName}-IAMRoleForAggregator-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForAggregator-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -128,7 +128,7 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
-        - PolicyName: !Sub '${PrefixOfLogicalName}-AWSLambdaIAMAccessKeyPolicy-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaIAMAccessKeyPolicy-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -139,7 +139,7 @@ Resources:
                   - 'iam:DeleteAccessKey'
                 Resource:
                   - '*'
-        - PolicyName: !Sub '${PrefixOfLogicalName}-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -152,7 +152,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-      RoleName: !Sub '${PrefixOfLogicalName}-LambdaIAM-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-LambdaIAM-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -168,7 +168,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for SSM to access IAM.
       Policies:
-        - PolicyName: !Sub '${PrefixOfLogicalName}-AWSSystemManagerIAMRole-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSSystemManagerIAMRole-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -183,7 +183,7 @@ Resources:
                   - 'ec2:DescribeSecurityGroups'
                 Resource:
                   - '*'
-      RoleName: !Sub '${PrefixOfLogicalName}-SSM-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-SSM-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -199,7 +199,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for VPC flow logs to access CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub '${PrefixOfLogicalName}-AWSVPCFlowLogCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSVPCFlowLogCloudWatchLogsPolicy-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -211,7 +211,7 @@ Resources:
                   - 'logs:DescribeLogGroups'
                   - 'logs:DescribeLogStreams'
                 Resource: '*'
-      RoleName: !Sub '${PrefixOfLogicalName}-AWSVPCFlowLogRole-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-AWSVPCFlowLogRole-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue

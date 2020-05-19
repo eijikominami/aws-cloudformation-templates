@@ -17,7 +17,7 @@ Parameters:
       - Enabled
       - Disabled
     Description: Enable or disable Network LoadBalaner [required]
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: WebServers
     AllowedPattern: .+
@@ -63,7 +63,7 @@ Resources:
       CidrBlock: !Ref SubnetExternalCidrBlock
       Tags:
         - Key: Name
-          Value: !Sub subnet-${PrefixOfLogicalName}-${AvailabilityZone}-ext
+          Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-ext
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
@@ -74,7 +74,7 @@ Resources:
       CidrBlock: !Ref SubnetPublicCidrBlock
       Tags:
         - Key: Name
-          Value: !Sub subnet-${PrefixOfLogicalName}-${AvailabilityZone}-pub
+          Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-pub
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
@@ -86,7 +86,7 @@ Resources:
       VpcId: !Ref VPCId
       Tags:
         - Key: Name
-          Value: !Sub rtb-${PrefixOfLogicalName}-${AvailabilityZone}-ext
+          Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-ext
         - Key: !Ref TagKey
           Value: !Ref TagValue
   RouteExternalToNATGateway:
@@ -102,7 +102,7 @@ Resources:
       VpcId: !Ref VPCId
       Tags:
         - Key: Name
-          Value: !Sub rtb-${PrefixOfLogicalName}-${AvailabilityZone}-pub
+          Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-pub
         - Key: !Ref TagKey
           Value: !Ref TagValue
   RoutePublicToInternetGateway:
@@ -130,7 +130,7 @@ Resources:
       Domain: !Ref VPCId
       Tags:
         - Key: Name
-          Value: !Sub eip-${PrefixOfLogicalName}-${AvailabilityZone}-natgateway
+          Value: !Sub eip-${LogicalNamePrefix}-${AvailabilityZone}-natgateway
         - Key: !Ref TagKey
           Value: !Ref TagValue
   EIPForNLB:
@@ -140,7 +140,7 @@ Resources:
       Domain: !Ref VPCId
       Tags:
         - Key: Name
-          Value: !Sub eip-${PrefixOfLogicalName}-${AvailabilityZone}-nlb
+          Value: !Sub eip-${LogicalNamePrefix}-${AvailabilityZone}-nlb
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # NatGateway
@@ -152,7 +152,7 @@ Resources:
       SubnetId: !Ref SubnetPublic
       Tags: 
         - Key: Name
-          Value: !Sub nat-${PrefixOfLogicalName}-${AvailabilityZone}
+          Value: !Sub nat-${LogicalNamePrefix}-${AvailabilityZone}
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm

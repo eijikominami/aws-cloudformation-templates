@@ -15,7 +15,7 @@ Parameters:
     MinValue: 0
     MaxValue: 23
     Description: Daily patching time (H) [required]
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: WebServers
     Description: Custom prefix name [required]
@@ -206,7 +206,7 @@ Resources:
     Properties: 
       AllowUnassociatedTargets: false
       Cutoff: 1
-      Description: !Sub Patching to ${PrefixOfLogicalName} EC2 instances at ${PatchingAt}:00 every day.
+      Description: !Sub Patching to ${LogicalNamePrefix} EC2 instances at ${PatchingAt}:00 every day.
       Duration: 2
       Name: DailyMaintenance
       Schedule: !Sub cron(0 ${PatchingAt} * * ? *)
@@ -217,8 +217,8 @@ Resources:
   MaintenanceWindowTarget:
     Type: 'AWS::SSM::MaintenanceWindowTarget'
     Properties: 
-      Description: !Sub EC2 instances createdby ${PrefixOfLogicalName}.
-      Name: !Ref PrefixOfLogicalName
+      Description: !Sub EC2 instances createdby ${LogicalNamePrefix}.
+      Name: !Ref LogicalNamePrefix
       ResourceType: INSTANCE
       Targets:
         - Key: !Join
@@ -233,10 +233,10 @@ Resources:
       - ServiceLinkedRoleForSSM
     Type: 'AWS::SSM::MaintenanceWindowTask'
     Properties: 
-      Description: !Sub Patching for ${PrefixOfLogicalName} EC2 instances.
+      Description: !Sub Patching for ${LogicalNamePrefix} EC2 instances.
       MaxConcurrency: '50'
       MaxErrors: '0'
-      Name: !Sub PatchingTaskFor${PrefixOfLogicalName}
+      Name: !Sub PatchingTaskFor${LogicalNamePrefix}
       Priority: 0
       ServiceRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM
       Targets:  

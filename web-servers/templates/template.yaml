@@ -135,7 +135,7 @@ Resources:
          - NetworkLoadBalancerEnabled
          - Enabled
          - Disabled
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
         SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz1
         SNSTopicARN: !If
@@ -169,7 +169,7 @@ Resources:
          - NetworkLoadBalancerEnabled
          - Enabled
          - Disabled
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
         SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz2
         SNSTopicARN: !If
@@ -210,7 +210,7 @@ Resources:
           - !GetAtt Az2.Outputs.NetworkLoadBalancerIPAllocationId
           - ''
         LoadBalancerType: !Ref AutoScalingLoadBalancerType
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         SubnetId1ForELB: !GetAtt Az1.Outputs.SubnetId
         SubnetId2ForELB: !GetAtt Az2.Outputs.SubnetId
         SNSTopicARN: !If
@@ -234,7 +234,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         DailySnapshotScheduledAt: !Ref EC2DailySnapshotScheduledAt
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -252,7 +252,7 @@ Resources:
       Parameters:
         IgnoreResourceConflicts: !Ref IgnoreResourceConflicts
         PatchingAt: !Ref SSMPatchingAt
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         SNSTopicARN: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -273,7 +273,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         TargetResourceArn: !GetAtt AutoScaling.Outputs.LoadBalancerArn
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 

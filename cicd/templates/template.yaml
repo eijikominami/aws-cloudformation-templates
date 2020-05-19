@@ -98,11 +98,11 @@ Resources:
   # Nested Stack
   SNSForAlert:
     Condition: CreateSNSForAlert
-    Type: AWS::Serverless::Application
+    Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.7
+        SemanticVersion: 1.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -114,11 +114,11 @@ Resources:
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: AWS::Serverless::Application
+    Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.7
+        SemanticVersion: 1.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -788,11 +788,11 @@ Resources:
           Value: !Ref TagValue
   # CloudWatch Alarm
   AlarmCodeBuildForSAM:
-    Type: AWS::Serverless::Application
+    Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.0.7
+        SemanticVersion: 1.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -808,11 +808,11 @@ Resources:
       Tags:
         createdby: !Ref TagValue
   AlarmCodeBuildForNestedStack:
-    Type: AWS::Serverless::Application
+    Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.0.7
+        SemanticVersion: 1.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -828,11 +828,11 @@ Resources:
       Tags:
         createdby: !Ref TagValue
   AlarmEventsForCodePipeline:
-    Type: AWS::Serverless::Application
+    Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 1.0.7
+        SemanticVersion: 1.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

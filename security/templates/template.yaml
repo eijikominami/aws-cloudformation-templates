@@ -89,7 +89,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/inspector.yaml
@@ -124,7 +124,7 @@ Resources:
       Parameters: 
         AuditOtherRegions: !Ref AuditOtherRegions
         LogBacketName: !Ref S3ForAccessLog
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         SnsTopicARN: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -151,7 +151,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-        PrefixOfLogicalName: !Ref AWS::StackName
+        LogicalNamePrefix: !Ref AWS::StackName
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml

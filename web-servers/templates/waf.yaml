@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/static-web-hosting/waf creates an AWS WAF.
 
 Parameters:
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: WebServers
     AllowedPattern: .+
@@ -28,8 +28,8 @@ Resources:
     Properties: 
       DefaultAction: 
         Allow: {}
-      Description: !Sub ACL for ${PrefixOfLogicalName}
-      Name: !Ref PrefixOfLogicalName
+      Description: !Sub ACL for ${LogicalNamePrefix}
+      Name: !Ref LogicalNamePrefix
       Rules: 
         - Name: AWSManagedRulesCommonRuleSet
           OverrideAction:
@@ -85,7 +85,7 @@ Resources:
           Value: !Ref TagValue
       VisibilityConfig: 
         CloudWatchMetricsEnabled: true
-        MetricName: !Ref PrefixOfLogicalName
+        MetricName: !Ref LogicalNamePrefix
         SampledRequestsEnabled: false
   WebACLAssociation:
     Condition: CreateWebACLAssociation

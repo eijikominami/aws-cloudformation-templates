@@ -3,6 +3,11 @@ Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudSAMTemplates/notification/eventbridge creates Amazon EventBridge to support events from AWS Services.
 
 Parameters:
+  LogicalNamePrefix:
+    Type: String
+    Default: Notification-
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
   ScheduledEventsRule:
     Type: String
     Default: ENABLED
@@ -74,7 +79,7 @@ Resources:
           - aws.events
         detail-type: 
           - Scheduled Event
-      Name: ScheduledEvents
+      Name: !Sub ${LogicalNamePrefix}-ScheduledEvents
       State: !Ref ScheduledEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -91,7 +96,7 @@ Resources:
           - EBS Snapshot Notification
           - EBS Multi-Volume Snapshots Completion Status
           - EBS Fast Snapshot Restore State-change Notification
-      Name: EBS
+      Name: !Sub ${LogicalNamePrefix}-EBS
       State: !Ref EBSEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -110,7 +115,7 @@ Resources:
           - EC2 Instance-terminate Lifecycle Action
           - EC2 Instance Terminate Successful
           - EC2 Instance Terminate Unsuccessful
-      Name: AutoScaling
+      Name: !Sub ${LogicalNamePrefix}-AutoScaling
       State: !Ref AutoScalingEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -124,7 +129,7 @@ Resources:
           - aws.ec2
         detail-type: 
           - EC2 Instance State-change Notification
-      Name: EC2
+      Name: !Sub ${LogicalNamePrefix}-EC2
       State: !Ref EC2EventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -140,7 +145,7 @@ Resources:
           - KMS CMK Rotations
           - KMS Imported Key Material Expiration
           - KMS CMK Deletion
-      Name: KMS
+      Name: !Sub ${LogicalNamePrefix}-KMS
       State: !Ref KMSEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -154,7 +159,7 @@ Resources:
           - aws.signin
         detail-type: 
           - AWS Console Sign In via CloudTrail
-      Name: ManagementConsole
+      Name: !Sub ${LogicalNamePrefix}-ManagementConsole
       State: !Ref ManagementConsoleEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -182,7 +187,7 @@ Resources:
           - aws.trustedadvisor
         detail-type: 
           - Trusted Advisor Check Item Refresh Notification
-      Name: TrustedAdvisor
+      Name: !Sub ${LogicalNamePrefix}-TrustedAdvisor
       State: !Ref TrustedAdvisorEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn

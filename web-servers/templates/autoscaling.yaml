@@ -45,7 +45,7 @@ Parameters:
     Type: String 
     AllowedPattern: .+
     Description: Elastic Ip Allocation Id2 for Network LoadBalancer
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: WebServers
     AllowedPattern: .+
@@ -105,7 +105,7 @@ Resources:
   LoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
-      Name: !Sub elb-${PrefixOfLogicalName}
+      Name: !Sub elb-${LogicalNamePrefix}
       Scheme: internet-facing
       # For Network Load Balaner
       SubnetMappings: !If
@@ -123,7 +123,7 @@ Resources:
           - !Ref SubnetId2ForELB
       Tags:
         - Key: Name
-          Value: !Sub elb-${PrefixOfLogicalName}-${AWS::Region}
+          Value: !Sub elb-${LogicalNamePrefix}-${AWS::Region}
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Type: !Ref LoadBalancerType
@@ -133,7 +133,7 @@ Resources:
       HealthCheckIntervalSeconds: 30
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
-      Name: !Sub target-${PrefixOfLogicalName}
+      Name: !Sub target-${LogicalNamePrefix}
       Port: 80
       Protocol: !If
         - CreateNetworkLoadBalancer
@@ -141,7 +141,7 @@ Resources:
         - HTTP
       Tags:
         - Key: Name
-          Value: !Sub target-${PrefixOfLogicalName}-${AWS::Region}
+          Value: !Sub target-${LogicalNamePrefix}-${AWS::Region}
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TargetType: instance
@@ -179,13 +179,13 @@ Resources:
         - KeyExists
         - !Ref EC2KeyName
         - !Ref AWS::NoValue
-      LaunchConfigurationName: !Sub autoscalinglaunchconfiguration-${PrefixOfLogicalName}
+      LaunchConfigurationName: !Sub autoscalinglaunchconfiguration-${LogicalNamePrefix}
       SecurityGroups: 
         - !Ref EC2SecurityGroupId
   AutoScalingGroup:
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     Properties: 
-      AutoScalingGroupName: !Sub autoscalinggroup-${PrefixOfLogicalName}
+      AutoScalingGroupName: !Sub autoscalinggroup-${LogicalNamePrefix}
       Cooldown: '300'
       DesiredCapacity: !Ref AutoScalingDesiredCapacity
       HealthCheckGracePeriod: 300

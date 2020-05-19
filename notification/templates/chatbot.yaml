@@ -7,7 +7,7 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: IAM Role ARN for Chatbot [required]
-  PrefixOfLogicalName:
+  LogicalNamePrefix:
     Type: String
     Default: Default
     AllowedPattern: .+
@@ -36,7 +36,7 @@ Resources:
   Chatbot:
     Type: 'AWS::Chatbot::SlackChannelConfiguration'
     Properties: 
-      ConfigurationName: !Sub ${PrefixOfLogicalName}-${AWS::StackName}-${AWS::Region}
+      ConfigurationName: !Sub ${LogicalNamePrefix}-${AWS::StackName}-${AWS::Region}
       IamRoleArn: !Ref IAMRoleForChatbotArn
       LoggingLevel: NONE
       SlackChannelId: !Ref SlackChannelId
