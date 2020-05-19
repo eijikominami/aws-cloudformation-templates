@@ -113,11 +113,11 @@ def createCloudWatchAlarmMessage(message):
             'text': "%s" % (alarm_description),
             'fields': [
                     {
-                        'title': "名前",
+                        'title': "Alarm Name",
                         'value': "%s" % (alarm_name)
                     },
                     {
-                        'title': "原因",
+                        'title': "Cause",
                         'value': "%s" % (reason)
                     }
                 ]

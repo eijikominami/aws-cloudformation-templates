@@ -280,6 +280,10 @@ Resources:
           - aws.ssm
         detail-type: 
           - Configuration Compliance State Change
+        # EC2 only
+        detail:
+          resource-id:
+            - prefix: i-
       Name: SystemManagerConfigurationCompliance
       State: ENABLED
       Targets:
