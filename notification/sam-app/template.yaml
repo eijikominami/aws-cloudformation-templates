@@ -289,7 +289,7 @@ Resources:
               - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
               - !Ref SNSForDeploymentArn
           Type: SNS
-      FunctionName: sendNotificationToSlack
+      FunctionName: !Sub sendNotificationToSlack-${AWS::StackName}
       KmsKeyArn: !If
         - CreateKMSKey
         - !GetAtt KMSKey.Arn
