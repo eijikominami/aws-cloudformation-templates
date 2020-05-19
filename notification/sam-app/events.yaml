@@ -173,7 +173,7 @@ Resources:
           - aws.tag
         detail-type: 
           - Tag Change on Resource
-      Name: Tag
+      Name: !Sub ${LogicalNamePrefix}-Tag
       State: !Ref TagEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
