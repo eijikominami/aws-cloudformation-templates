@@ -1,5 +1,10 @@
 version: 0.2
 
+env:
+  variables:
+    SOURCE_CODE_URL: https://github.com/eijikominami/aws-cloudformation-templates
+    APP_ARN_PREFIX: arn:aws:serverlessrepo:us-east-1:172664222583:applications
+
 phases:
   pre_build:
     commands:
@@ -7,16 +12,44 @@ phases:
       - echo $SEMANTIC_VERSION
   build:
     commands:
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/apigateway.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/codebuild.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/dynamodb.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2 --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/ec2.yaml --region us-east-1  
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/events.yaml --region us-east-1    
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/kinesis.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/lambda.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/natgateway.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/monitoring/sns.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/sns.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/events.yaml --region us-east-1
-      - aws serverlessrepo create-application-version --source-code-url https://github.com/eijikominami/aws-cloudformation-templates --application-id arn:aws:serverlessrepo:us-east-1:172664222583:applications/delete-resources-without-required-tags --semantic-version ${SEMANTIC_VERSION} --template-url https://${BUCKET_NAME}.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security-config-rules/packaged.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-apigateway --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/apigateway.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-codebuild --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/codebuild.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb-throttle --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/dynamodb.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ec2 --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/ec2.yaml --region us-east-1  
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-events --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/events.yaml --region us-east-1    
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-kinesis-data-streams --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/kinesis.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-lambda --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/lambda.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-natgateway --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/natgateway.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-sns --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/sns.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/sns-topic --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/notification/sns.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/eventbridge-rules --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/notification/events.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/delete-resources-without-required-tags --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/security-config-rules/packaged.yaml --region us-east-1
+  post_build:
+    commands:
+      - aws s3 cp monitoring/cloudwatch-alarm-about-apigateway.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-apigateway --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-apigateway.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-codebuild.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-codebuild --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-codebuild.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-dynamodb-throttle.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb-throttle --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-dynamodb-throttle.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-dynamodb.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-dynamodb.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-ec2.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ec2 --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-ec2.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-events.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-events --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-events.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-kinesis-data-streams.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-kinesis-data-streams --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-kinesis-data-streams.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-lambda.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-lambda --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-lambda.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-natgateway.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-natgateway --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-natgateway.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-sns.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-sns --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-sns.md --region us-east-1
+      - aws s3 cp notification/eventbridge-rules.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/eventbridge-rules --readme-url s3://${BUCKET_NAME}/readme/eventbridge-rules.md --region us-east-1
+      - aws s3 cp notification/sns-topic.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/sns-topic --readme-url s3://${BUCKET_NAME}/readme/sns-topic.md --region us-east-1
+      - aws s3 cp security-config-rules/delete-resources-without-required-tags.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/delete-resources-without-required-tags --readme-url s3://${BUCKET_NAME}/readme/delete-resources-without-required-tags.md --region us-east-1
