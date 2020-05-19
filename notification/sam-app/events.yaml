@@ -173,7 +173,6 @@ Resources:
           - aws.tag
         detail-type: 
           - Tag Change on Resource
-      Name: Tag
       State: !Ref TagEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn

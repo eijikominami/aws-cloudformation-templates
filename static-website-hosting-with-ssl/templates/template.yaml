@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/static-web-hosting creates environment of static web hosting.
 
 Parameters:
@@ -112,14 +113,15 @@ Resources:
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: AWS::CloudFormation::Stack
+    Type: 'AWS::Serverless::Application'
     Properties:
-      Parameters: 
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.11
+      Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/sns.yaml
       Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+        createdby: !Ref TagValue
   # IAM
   IAMRoleForCrossRegionReplication:
     Condition: CrossRegionReplication
