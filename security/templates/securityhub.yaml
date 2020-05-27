@@ -30,14 +30,17 @@ Resources:
           - aws.securityhub
         detail-type: 
           - Security Hub Findings - Imported
-        # Events fired when status has been changed from PASSED to ARCHIVED.
+        # MEDIUM or higher
         detail:
           findings:
             Compliance:
               Status:
-                - PASSED
-            RecordState:
-              - ARCHIVED
+                - FAILED
+            Severity:
+              Label:
+                - CRITICAL
+                - HIGH
+                - MEDIUM
       Name: SecurityHub-Findings
       State: ENABLED
       Targets:
