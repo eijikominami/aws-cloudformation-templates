@@ -27,11 +27,21 @@ Resources:
     Type: 'AWS::Events::Rule'
     Properties: 
       Description: !Sub Rule for GuardDuty created by ${AWS::StackName}.
-      EventPattern:
-        source:
-          - aws.guardduty
-        detail-type: 
-          - GuardDuty Finding
+      # MEDIUM or higher
+      EventPattern: |
+        {
+           "source": [
+              "aws.guardduty"
+           ],
+           "detail-type": [
+              "GuardDuty Finding"
+           ],
+           "detail": {
+              "severity": [
+                 { "numeric": [ ">=", 4 ] }
+              ]
+           }
+        }
       Name: GuardDuty
       State: ENABLED
       Targets:
