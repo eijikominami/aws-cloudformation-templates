@@ -164,7 +164,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 このテンプレートを実行することで、PCI DSS セキュリティ標準の以下の項目に準拠します。
 
-| No. | Rules | Remediation |
+| No. | ルール | 実行内容 |
 | --- | --- | --- |
 | PCI.CloudTrail.1 | CloudTrail ログは、AWS KMS CMK を使用して保存時に暗号化する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
 | PCI.CloudTrail.2 | CloudTrail を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
@@ -180,7 +180,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 このテンプレートを実行することで、AWS の基本的なセキュリティのベストプラクティス標準の以下の項目に準拠します。
 
-| No. | Rules | Remediation |
+| No. | ルール | 実行内容 |
 | --- | --- | --- |
 | CloudTrail.1 | CloudTrail を有効にし、少なくとも 1 つのマルチリージョンの証跡で設定する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
 | CloudTrail.2 | CloudTrail は保管時の暗号化を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
