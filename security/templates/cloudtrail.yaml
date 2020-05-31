@@ -86,9 +86,32 @@ Resources:
       IncludeGlobalServiceEvents: true
       IsLogging: true
       IsMultiRegionTrail: true
+      KMSKeyId: !GetAtt KMSKey.Arn
       S3BucketName: !Ref S3ForCloudTrail
       TrailName: !Sub ${LogicalNamePrefix}
       Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # KMS
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties: 
+      Description: Encrypt CloudTrail Logs
+      Enabled: true
+      EnableKeyRotation: true
+      KeyPolicy: 
+        Version: 2012-10-17
+        Id: DefaultKeyPolicy
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 'kms:*'
+            Resource: '*'
+      KeyUsage: ENCRYPT_DECRYPT
+      PendingWindowInDays: 30
+      Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # S3

@@ -244,7 +244,7 @@ Resources:
     Condition: CreateKMSKey
     Type: AWS::KMS::Key
     Properties: 
-      Description: String
+      Description: Encrypt Slack Webhook URL
       Enabled: true
       EnableKeyRotation: true
       KeyPolicy: 
