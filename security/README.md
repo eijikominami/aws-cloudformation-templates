@@ -111,6 +111,7 @@ You can provide optional parameters as follows:
 | AuditOtherAccounts | Enabled / Disabled | Disabled | ○ | If it is Enabled, **Config Aggregator** is enabled. |
 | AuditOtherRegions | Enabled / Disabled | Enabled | ○ | If it is Enabled, **CloudTrail** and **Include Global Resource Types** option in Config are enabled. |
 | AutoRemediation | Enabled / Disabled | Enabled | ○ | If it is Enabled, **AutoRemediation** by SSM Automation and Lambda are enabled. |
+| IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 
 ## Comply with Center for Internet Security (CIS) Benchmarks
 
