@@ -406,6 +406,7 @@ Properties:
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | |
 | `FunctionResouceName` | String | | ○ | |
+| `MetricFilterPattern` | String | ?Error ?Exception | ○ | メトリックフィルタパターン | 
 | `SNSTopicArn` | String | | ○ | |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | |
 

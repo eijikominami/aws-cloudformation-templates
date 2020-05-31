@@ -49,6 +49,7 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 ### AWS CloudTrail
 
 このテンプレートは、 ``AWS CloudTrail`` を有効化し、ログを蓄積する ``S3バケット`` を生成します。
+S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``CMK`` によって暗号化されます。
 
 ### Amazon Inspector
 
@@ -87,6 +88,7 @@ Amazon Inspector は、``Amazon CloudWatch Events``　によって **毎週月�
 
 + [iam-password-policy](https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html)
 + [iam-root-access-key-check](https://docs.aws.amazon.com/config/latest/developerguide/iam-root-access-key-check.html)
++ [s3-bucket-server-side-encryption-enabled](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html)
 + [vpc-flow-logs-enabled](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
 + [vpc-sg-open-only-to-authorized-ports](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
 + [vpc-default-security-group-closed](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
@@ -157,3 +159,34 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | 4.1| どのセキュリティグループでも 0.0.0.0/0 からポート 22 への入力を許可しないようにします | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
 | 4.2| どのセキュリティグループでも 0.0.0.0/0 からポート 3389 への入力を許可しないようにします | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
 | 4.3| すべての VPC のデフォルトセキュリティグループがすべてのトラフィックを制限するようにします | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+
+## PCI DSS セキュリティ標準への準拠
+
+このテンプレートを実行することで、PCI DSS セキュリティ標準の以下の項目に準拠します。
+
+| No. | Rules | Remediation |
+| --- | --- | --- |
+| PCI.CloudTrail.1 | CloudTrail ログは、AWS KMS CMK を使用して保存時に暗号化する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
+| PCI.CloudTrail.2 | CloudTrail を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
+| PCI.CloudTrail.3 | CloudTrail ログファイルの検証を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
+| PCI.CloudTrail.4 | CloudTrail 証跡は CloudWatch ログと統合する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
+| PCI.Config.1 | AWS Config を有効にする必要があります。 | **Config** と関連サービスを有効化します。 |
+| PCI.CW.1 | 「root」ユーザーの使用には、ログメトリクスフィルターとアラームが存在する必要があります。 | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| PCI.EC2.2 | VPC のデフォルトのセキュリティグループでは、インバウンドトラフィックとアウトバウンドトラフィックが禁止されます。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| PCI.IAM.1 | IAM ルートユーザーアクセスキーが存在してはいけません。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| PCI.S3.4 | S3 バケットでは、サーバー側の暗号化を有効にする必要があります。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+
+## AWS の基本的なセキュリティのベストプラクティス標準への準拠
+
+このテンプレートを実行することで、AWS の基本的なセキュリティのベストプラクティス標準の以下の項目に準拠します。
+
+| No. | Rules | Remediation |
+| --- | --- | --- |
+| CloudTrail.1 | CloudTrail を有効にし、少なくとも 1 つのマルチリージョンの証跡で設定する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
+| CloudTrail.2 | CloudTrail は保管時の暗号化を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
+| Config.1 | AWS Config を有効にする必要があります。 | **Config** と関連サービスを有効化します。 |
+| EC2.2 | VPC のデフォルトのセキュリティグループでは、インバウンドトラフィックとアウトバウンドトラフィックが禁止されます。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| GuardDuty.1 | GuardDuty を有効にする必要があります。 | **GuardDuty** と関連サービスを有効化します。 |
+| IAM.3 | IAM ユーザーのアクセスキーは 90 日ごとに更新する必要があります。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| IAM.4 | IAM ルートユーザーアクセスキーが存在してはいけません。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| S3.4 | S3 バケットでは、サーバー側の暗号化を有効にする必要があります。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
