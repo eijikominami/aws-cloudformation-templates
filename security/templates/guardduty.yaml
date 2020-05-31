@@ -28,6 +28,7 @@ Resources:
     Properties: 
       Description: !Sub Rule for GuardDuty created by ${AWS::StackName}.
       # MEDIUM or higher
+      # https://github.com/aws-cloudformation/aws-cloudformation-coverage-roadmap/issues/251
       EventPattern: |
         {
            "source": [

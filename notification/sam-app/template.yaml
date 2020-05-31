@@ -126,7 +126,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.14
+        SemanticVersion: 1.0.15
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -142,7 +142,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.14
+        SemanticVersion: 1.0.15
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -152,7 +152,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.0.14
+        SemanticVersion: 1.0.15
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -244,7 +244,7 @@ Resources:
     Condition: CreateKMSKey
     Type: AWS::KMS::Key
     Properties: 
-      Description: String
+      Description: Encrypt Slack Webhook URL
       Enabled: true
       EnableKeyRotation: true
       KeyPolicy: 

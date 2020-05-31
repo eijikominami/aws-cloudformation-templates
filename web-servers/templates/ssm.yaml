@@ -263,9 +263,14 @@ Resources:
         source:
           - aws.ssm
         detail-type: 
+          - EC2 Command Status-change Notification
           - EC2 Command Invocation Status-change Notification
           - EC2 Automation Step Status-change Notification
           - EC2 Automation Execution Status-change Notification
+          - EC2 State Manager Association State Change
+          - EC2 State Manager Instance Association State Change
+        detail:
+          status: Failed
       Name: SystemManager
       State: ENABLED
       Targets:
@@ -298,6 +303,13 @@ Resources:
           - aws.ssm
         detail-type: 
           - Maintenance Window Target Registration Notification
+        detail:
+          status:
+            - CANCELLED 
+            - CANCELLING 
+            - FAILED 
+            - SKIPPED_OVERLAPPING 
+            - TIMED_OUT
       Name: SystemManagerMaintenanceWindow
       State: ENABLED
       Targets:

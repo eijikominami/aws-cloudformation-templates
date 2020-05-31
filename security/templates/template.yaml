@@ -24,6 +24,10 @@ Parameters:
      - Enabled
      - Disabled
     Description: Enable or disable auto remediation [required]
+  IAMUserArnToAssumeAWSSupportRole:
+    Type: String
+    AllowedPattern: ^arn:aws:iam::.+$
+    Description: IAM User ARN to assume AWS Support role
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -42,6 +46,7 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
 
 Resources:
   # Nested Stack
@@ -165,7 +170,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.14
+        SemanticVersion: 1.0.15
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -181,11 +186,30 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.14
+        SemanticVersion: 1.0.15
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
         createdby: !Ref TagValue
+  # IAM Role
+  IAMRoleForAWSSupport:
+    Condition: CreateIAMRoleForAWSSupport
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref IAMUserArnToAssumeAWSSupportRole
+            Action: 'sts:AssumeRole'
+      Description: A role required for CIS AWS Foundations to access AWS Support.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSSupportAccess
+      RoleName: !Sub '${AWS::StackName}-AWSSupport-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # S3
   S3ForAccessLog:
     Type: 'AWS::S3::Bucket'
