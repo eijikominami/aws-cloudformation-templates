@@ -26,7 +26,7 @@ Parameters:
     Description: Enable or disable auto remediation [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
-    AllowedPattern: ^arn:aws:iam::.+$
+    Default: ''
     Description: IAM User ARN to assume AWS Support role
   SNSForAlertArn:
     Type: String

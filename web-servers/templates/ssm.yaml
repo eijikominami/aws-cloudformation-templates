@@ -270,7 +270,8 @@ Resources:
           - EC2 State Manager Association State Change
           - EC2 State Manager Instance Association State Change
         detail:
-          status: Failed
+          status: 
+            - Failed
       Name: SystemManager
       State: ENABLED
       Targets:

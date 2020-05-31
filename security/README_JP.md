@@ -39,10 +39,12 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
 また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon CloudWatch Events`` 経由でメッセージを受け取ります。
+``AWS Security Hub`` は、**MEDIUM以上の検出結果を検出時に通知を送信** します。
 
 ### Amazon GuardDuty
 
 このテンプレートは、 ``Amazon GuardDuty`` を有効化します。
+``Amazon GuardDuty`` は、**MEDIUM以上の検出結果を検出時に通知を送信** します。
 
 ### AWS CloudTrail
 
@@ -129,6 +131,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | 1.8 | IAM パスワードポリシーには少なくとも 1 つの数字が必要です | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
 | 1.9 | IAM パスワードポリシーは 14 文字以上の長さが必要です | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
 | 1.10 | IAM パスワードポリシーはパスワードの再使用を禁止しています | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| 1.20 | AWS でインシデントを管理するためのサポートロールが作成されていることを確認します | AWS Support 用のIAM Roleを作成します。 |
 | 2.1 | CloudTrail はすべてのリージョンで有効になっています | **CloudTrail** と関連サービスを有効化します。 |
 | 2.2 | CloudTrail ログファイルの検証は有効になっています | **CloudTrail** と関連サービスを有効化します。 |
 | 2.3 | CloudTrail が記録する S3 バケットはパブリックアクセスできません | **CloudTrail** と関連サービスを有効化します。 |

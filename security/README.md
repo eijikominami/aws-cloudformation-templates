@@ -36,11 +36,11 @@ This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results
 
 ### AWS Security Hub
 
-This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon CloudWatch Events`` to receive a message when the result of a compliance check changes to Failure.
+This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon CloudWatch Events`` to receive a message when the result of a compliance check changes to Failure. ``AWS Security Hub`` only sends notifications when it detects findings of **MEDIUM or higher level**.
 
 ### Amazon GuardDuty
 
-This template enables ``Amazon GuardDuty``.
+This template enables ``Amazon GuardDuty``. ``Amazon GuardDuty`` only sends notifications when it detects findings of **MEDIUM or higher level**.
 
 ### AWS CloudTrail
 
@@ -127,6 +127,7 @@ This template helps you to comply with the Center for Internet Security (CIS) Be
 | 1.8 | Ensure IAM password policy requires at least one number | **Config** checks it and **SSM Automation** remediates the policy automatically. |
 | 1.9 | Ensure IAM password policy requires a minimum length of 14 or greater | **Config** checks it and **SSM Automation** remediates the policy automatically. |
 | 1.10 | Ensure IAM password policy prevents password reuse | **Config** checks it and **SSM Automation** remediates the policy automatically. |
+| 1.20 | Ensure a support role has been created to manage incidents with AWS Support | This template creates IAM Role for AWS Support. |
 | 2.1 | Ensure CloudTrail is enabled in all Regions | This template enables **CloudTrail** and related resources in all Regions. |
 | 2.2 | Ensure CloudTrail log file validation is enabled | This template enables **CloudTrail** and related resources in all Regions. |
 | 2.3 | Ensure the S3 bucket CloudTrail logs to is not publicly accessible | This template enables **CloudTrail** and related resources in all Regions. |
