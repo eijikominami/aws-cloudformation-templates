@@ -9,7 +9,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 ## AWS SAM ベースのサーバレスアプリーケーション
 
-本プロジェクトには、以下の **AWS SAM ベースのサーバレスアプリーケーション** が存在し、これらのアプリケーションは、`AWS Serverless Application Repository`` で公開されています。
+本プロジェクトには、以下の **AWS SAM ベースのサーバレスアプリーケーション** が存在し、これらのアプリケーションは、``AWS Serverless Application Repository`` で公開されています。
 
 | アプリケーション名 | リンク |
 | --- | --- |

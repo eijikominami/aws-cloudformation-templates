@@ -94,6 +94,7 @@ Resources:
           Value: !Ref TagValue
   # KMS
   KMSKey:
+    Condition: CreateCentralizedResources
     Type: AWS::KMS::Key
     Properties: 
       Description: Encrypt CloudTrail Logs
@@ -109,6 +110,24 @@ Resources:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
             Action: 'kms:*'
             Resource: '*'
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - 'kms:GenerateDataKey*'
+            Resource:
+              - '*'
+            Condition:
+              StringLike:
+                kms:EncryptionContext:aws:cloudtrail:arn:
+                  - !Sub arn:aws:cloudtrail:*:${AWS::AccountId}:trail/*
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - 'kms:DescribeKey'
+            Resource:
+              - '*'
       KeyUsage: ENCRYPT_DECRYPT
       PendingWindowInDays: 30
       Tags: 
