@@ -126,7 +126,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.15
+        SemanticVersion: 1.0.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -142,7 +142,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.15
+        SemanticVersion: 1.0.16
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -152,7 +152,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.0.15
+        SemanticVersion: 1.0.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -320,157 +320,6 @@ Resources:
         - CreateSNSForAlert
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
         - !Ref SNSForAlertArn
-  # CloudWatch Alarm for Lambda
-  AlarmLambdaSendNotificationToSlackErrors:
-    Type: 'AWS::CloudWatch::Alarm'
-    Properties:
-      ActionsEnabled: true
-      AlarmActions: 
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でエラーが発生しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Errors'
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref LambdaSendNotificationToSlack
-        - Name: Resource
-          Value: !Ref LambdaSendNotificationToSlack
-      EvaluationPeriods: 1
-      MetricName: Errors
-      Namespace: AWS/Lambda
-      OKActions: 
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      # Alert when Sum is over 1 count in 60 seconds.
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-  AlarmLambdaSendNotificationToSlackClientError:
-    Type: 'AWS::CloudWatch::Alarm'
-    Properties:
-      ActionsEnabled: true
-      AlarmActions: 
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でクライアントエラーが発生しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-ClientError'
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref LambdaSendNotificationToSlack
-        - Name: Resource
-          Value: !Ref LambdaSendNotificationToSlack
-      EvaluationPeriods: 1
-      MetricName: ClientError
-      Namespace: AWS/Lambda
-      OKActions: 
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      # Alert when Sum is over 1 count in 60 seconds.
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-  AlarmLambdaSendNotificationToSlackTypeError:
-    Type: 'AWS::CloudWatch::Alarm'
-    Properties:
-      ActionsEnabled: true
-      AlarmActions: 
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でタイプエラーが発生しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-TypeError'
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref LambdaSendNotificationToSlack
-        - Name: Resource
-          Value: !Ref LambdaSendNotificationToSlack
-      EvaluationPeriods: 1
-      MetricName: TypeError
-      Namespace: AWS/Lambda
-      OKActions: 
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      # Alert when Sum is over 1 count in 60 seconds.
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-  AlarmLambdaSendNotificationToSlackTimeoutWillOccur:
-    Type: 'AWS::CloudWatch::Alarm'
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* の実行時間がタイムアウト値に近づいています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Timeout-Will-Occur'
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref LambdaSendNotificationToSlack
-        - Name: Resource
-          Value: !Ref LambdaSendNotificationToSlack
-      EvaluationPeriods: 1
-      MetricName: Duration
-      Namespace: AWS/Lambda
-      OKActions:
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      # Alert when Sum is over 1 count in 60 seconds.
-      Period: 60
-      Statistic: Maximum
-      Threshold: 24000
-      TreatMissingData: notBreaching
-  AlarmLambdaSendNotificationToSlackThrottles:
-    Type: 'AWS::CloudWatch::Alarm'
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'Lambda *${LambdaSendNotificationToSlack}()* でスロットリングが発生しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Throttles'
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref LambdaSendNotificationToSlack
-        - Name: Resource
-          Value: !Ref LambdaSendNotificationToSlack
-      EvaluationPeriods: 1
-      MetricName: Throttles
-      Namespace: AWS/Lambda
-      OKActions:
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      # Alert when Sum is over 1 count in 60 seconds.
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
   # Chatbot
   ChatbotForDeployment:
     Condition: CreateChatbotForDeployment

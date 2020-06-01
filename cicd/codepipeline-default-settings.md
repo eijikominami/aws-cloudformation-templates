@@ -42,6 +42,7 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 | [Security Template with Config Rule](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security-config-rules/README.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting-with-ssl/README.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README.md) | Notification.json |
+| [System Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README.md) | SystemManager.json |
 
 ## Deployment
 
@@ -112,6 +113,7 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 | [Security Template with Config Rule](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security-config-rules/README_JP.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting-with-ssl/README_JP.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README_JP.md) | Notification.json |
+| [System Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README_JP.md) | SystemManager.json |
 
 ## デプロイ
 

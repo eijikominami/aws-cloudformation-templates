@@ -181,6 +181,8 @@ Resources:
                   - 'ec2:RevokeSecurityGroupIngress'
                   - 'ec2:RevokeSecurityGroupEgress'
                   - 'ec2:DescribeSecurityGroups'
+                  - 's3:PutBucketEncryption'
+                  - 's3:PutEncryptionConfiguration'
                 Resource:
                   - '*'
       RoleName: !Sub '${LogicalNamePrefix}-SSM-${AWS::Region}'
@@ -649,6 +651,38 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # PCI S3.4 S3 buckets should have server-side encryption enabled 
+  # AWS Foundational Security Best Practices S3.4 S3 buckets should have server-side encryption enabled
+  ConfigS3BucketServerSideEncryptionEnabled:
+    # Must create a configuration recorder before you can create or update a Config rule.
+    DependsOn:
+      - ConfigConfigurationRecorder
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: s3-bucket-server-side-encryption-enabled
+      Description: Amazon S3 バケットで Amazon S3 のデフォルトの暗号化が有効になっていること、または S3 バケットポリシーでサーバー側の暗号化なしの put-object リクエストを明示的に拒否することを確認します。 
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED  
+  ConfigS3BucketServerSideEncryptionEnabledRemediationConfiguration:
+    Condition: CreateRemediationResources
+    Type: 'AWS::Config::RemediationConfiguration'
+    Properties:
+      # NOTE: AutomationAssumeRole, MaximumAutomaticAttempts and RetryAttemptSeconds are Required if Automatic is true.
+      Automatic: true
+      ConfigRuleName: !Ref ConfigS3BucketServerSideEncryptionEnabled
+      MaximumAutomaticAttempts: 1
+      Parameters:
+        AutomationAssumeRole:
+          StaticValue:
+            Values:
+              - !GetAtt IAMRoleForSSM.Arn
+        BucketName:
+          ResourceValue:
+            Value: RESOURCE_ID
+      RetryAttemptSeconds: 30
+      TargetId: AWS-EnableS3BucketEncryption
+      TargetType: SSM_DOCUMENT
   # S3
   S3ForConfig:
     Type: 'AWS::S3::Bucket'

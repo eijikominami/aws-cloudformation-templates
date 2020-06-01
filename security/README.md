@@ -45,6 +45,7 @@ This template enables ``Amazon GuardDuty``. ``Amazon GuardDuty`` only sends noti
 ### AWS CloudTrail
 
 This template enables ``AWS CloudTrail`` and creates an ``S3 Bucket`` when its logs are stored.
+CloudTrail Logs stored in an S3 bucket are encrypted using ``AWS KMS CMKs``.
 
 ### Amazon Inspector
 
@@ -83,6 +84,7 @@ The following rules enable ``Automatic Remediation`` feature and attached ``SSM 
 
 + [iam-password-policy](https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html)
 + [iam-root-access-key-check](https://docs.aws.amazon.com/config/latest/developerguide/iam-root-access-key-check.html)
++ [s3-bucket-server-side-encryption-enabled](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html)
 + [vpc-flow-logs-enabled](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
 + [vpc-sg-open-only-to-authorized-ports](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
 + [vpc-default-security-group-closed](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
@@ -113,7 +115,7 @@ You can provide optional parameters as follows:
 | AutoRemediation | Enabled / Disabled | Enabled | ○ | If it is Enabled, **AutoRemediation** by SSM Automation and Lambda are enabled. |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 
-## Comply with Center for Internet Security (CIS) Benchmarks
+## Comply with the Center for Internet Security (CIS) Benchmarks
 
 This template helps you to comply with the Center for Internet Security (CIS) Benchmarks.
 
@@ -153,3 +155,34 @@ This template helps you to comply with the Center for Internet Security (CIS) Be
 | 4.1| Ensure no security groups allow ingress from 0.0.0.0/0 to port 22 | **Config** checks it and **SSM Automation** remediates the rules automatically. |
 | 4.2| Ensure no security groups allow ingress from 0.0.0.0/0 to port 3389 | **Config** checks it and **SSM Automation** remediates the rules automatically. |
 | 4.3| Ensure the default security group of every VPC restricts all traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+
+## Comply with the PCI DSS controls
+
+This template helps you to comply with the PCI DSS controls.
+
+| No. | Rules | Remediation |
+| --- | --- | --- |
+| PCI.CloudTrail.1 | CloudTrail logs should be encrypted at rest using AWS KMS CMKs.  | This template enables **CloudTrail** and related resources in all Regions. |
+| PCI.CloudTrail.2 | CloudTrail should be enabled. | This template enables **CloudTrail** and related resources in all Regions. |
+| PCI.CloudTrail.3 | CloudTrail log file validation should be enabled. | This template enables **CloudTrail** and related resources in all Regions. |
+| PCI.CloudTrail.4 | CloudTrail trails should be integrated with CloudWatch Logs. | This template enables **CloudTrail** and related resources in all Regions. |
+| PCI.Config.1 | AWS Config should be enabled. | This template enables **Config** and related resources in all Regions.  |
+| PCI.CW.1 | A log metric filter and alarm should exist for usage of the "root" user. |  |
+| PCI.EC2.2 | VPC default security group should prohibit inbound and outbound traffic. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+| PCI.IAM.1 | IAM root user access key should not exist. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+| PCI.S3.4 | S3 buckets should have server-side encryption enabled. | **Config** checks it and **SSM Automation** remediates the default security group automatically.s |
+
+## Comply with the AWS Foundational Security Best Practices standard 
+
+This template helps you to comply with the AWS Foundational Security Best Practices standard.
+
+| No. | Rules | Remediation |
+| --- | --- | --- |
+| CloudTrail.1 | CloudTrail should be enabled and configured with at least one multi-Region trail. | This template enables **CloudTrail** and related resources in all Regions. |
+| CloudTrail.2 | CloudTrail should have encryption at-rest enabled. | This template enables **CloudTrail** and related resources in all Regions. |
+| Config.1 | AWS Config should be enabled. | This template enables **Config** and related resources in all Regions. |
+| EC2.2 | The VPC default security group should not allow inbound and outbound traffic. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+| GuardDuty.1 | GuardDuty should be enabled. | This template enables **GuardDuty** and related resources in all Regions. |
+| IAM.3 | IAM users' access keys should be rotated every 90 days or less. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+| IAM.4 | IAM root user access key should not exist. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+| S3.4 | S3 buckets should have server-side encryption enabled. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |

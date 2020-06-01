@@ -24,6 +24,7 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | |
 | `FunctionResouceName` | String | | ○ | |
+| `MetricFilterPattern` | String | ?Error ?Exception | ○ | Metric filter pattern | 
 | `SNSTopicArn` | String | | ○ | |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | |
 
@@ -51,5 +52,6 @@ cloudwatch-alarm-about-apigateway は、AWS Lambda に関する Amazon CloudWatc
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | |
 | `FunctionResouceName` | String | | ○ | |
+| `MetricFilterPattern` | String | ?Error ?Exception | ○ | メトリックフィルタパターン | 
 | `SNSTopicArn` | String | | ○ | |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | |
