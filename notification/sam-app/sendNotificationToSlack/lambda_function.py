@@ -66,15 +66,22 @@ def lambda_handler(event, context):
             # TrustedAdvisor
             elif 'source' in message and 'aws.trustedadvisor' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createTrustedAdvisorMessage(message)                    
+                slack_message = createTrustedAdvisorMessage(message)      
+            # IAM Access Analyzer
+            elif 'source' in message and 'aws.access-analyzer' in message['source']:  
+                hook_url = "https://" + ALERT_HOOK_URL
+                slack_message = createIAMAccessAnalyzer(message)
+            else:
+                hook_url = None
+                slack_message = None                           
         else:
             # Amplify Console
             if 'AWS Amplify Console' in message:
                 hook_url = "https://" + DEPLOYMENT_HOOK_URL
                 slack_message = createAmplifyMessage(message)
             else:
-                hook_url = "https://" + ALERT_HOOK_URL            
-                slack_message = {'text': message}
+                hook_url = None     
+                slack_message = None
     except json.decoder.JSONDecodeError as e:
         logger.error("JSON decode error: %s at %s.", e.msg, sys._getframe().f_code.co_name)
     # Sends Slack
@@ -391,6 +398,36 @@ def createTrustedAdvisorMessage(message):
         }]
     }
 
+@xray_recorder.capture('createIAMAccessAnalyzer')
+def createIAMAccessAnalyzer(message):
+
+    actions = ''
+    title = ":heavy_exclamation_mark: IAM Access Analyzer Findings | " + message['region'] + " | Account: " + message['account']
+    title_link = "https://console.aws.amazon.com/resource-groups/access-analyzer/home?region=" + message['region']
+
+    return {
+        'attachments': [{
+            'color': '#961D13',
+            'title': "%s" % title,
+            'title_link': "%s" % title_link,
+            'text': "*IAM Access Analyzer* が %s に対する *%s* 権限を検知しました。 *意図していない権限の場合は、潜在的なセキュリティリスクが存在するため、この権限を許可するポリシーを変更または削除してください* 。ビジネスプロセスに必要なアクセスなど、アクセスが意図している場合は、結果をアーカイブできます。" % (message['detail']['resource'], actions),
+            'fields': [
+                    {
+                        'title': "Principal",
+                        'value': "%s" % str(message['detail']['principal'])
+                    },
+                    {
+                        'title': "Actions",
+                        'value': "%s" % actions
+                    },
+                    {
+                        'title': "Resource",
+                        'value': "%s" % message['detail']['resource']
+                    },
+                ]
+        }]
+    }
+
 @xray_recorder.capture('createAmplifyMessages')
 def createAmplifyMessage(message):
     if 'FAILED' in message:
@@ -438,4 +475,4 @@ def sendMessage(hook_url, message):
             return False
         except URLError as e:
             logger.error("Server connection failed: %s at %s.", e.reason, sys._getframe().f_code.co_name)
-            return False
+            return False   

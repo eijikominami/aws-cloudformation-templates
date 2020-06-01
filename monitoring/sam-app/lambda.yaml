@@ -7,6 +7,11 @@ Parameters:
     Type: String
     Default: ''
     Description: Custom Alram name
+  MetricFilterPattern:
+    Type: String
+    Default: '?Error ?Exception'
+    AllowedPattern: .+
+    Description: Metric filter pattern [required]
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
@@ -109,7 +114,7 @@ Resources:
   MetricFilterErrorLog:
     Type: 'AWS::Logs::MetricFilter'
     Properties:
-      FilterPattern: '?Error ?Exception'
+      FilterPattern: !Ref MetricFilterPattern
       LogGroupName: !Sub /aws/lambda/${FunctionResouceName}
       MetricTransformations:
         - MetricName: !Sub ${FunctionResouceName}-ErrorLog
