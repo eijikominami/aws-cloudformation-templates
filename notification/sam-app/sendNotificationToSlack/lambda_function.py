@@ -70,15 +70,18 @@ def lambda_handler(event, context):
             # IAM Access Analyzer
             elif 'source' in message and 'aws.access-analyzer' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createIAMAccessAnalyzer(message)                 
+                slack_message = createIAMAccessAnalyzer(message)
+            else:
+                hook_url = None
+                slack_message = None                           
         else:
             # Amplify Console
             if 'AWS Amplify Console' in message:
                 hook_url = "https://" + DEPLOYMENT_HOOK_URL
                 slack_message = createAmplifyMessage(message)
             else:
-                hook_url = "https://" + ALERT_HOOK_URL            
-                slack_message = {'text': message}
+                hook_url = None     
+                slack_message = None
     except json.decoder.JSONDecodeError as e:
         logger.error("JSON decode error: %s at %s.", e.msg, sys._getframe().f_code.co_name)
     # Sends Slack
