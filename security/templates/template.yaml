@@ -28,6 +28,14 @@ Parameters:
     Type: String
     Default: ''
     Description: IAM User ARN to assume AWS Support role
+  NotificationFilterAboutSecurityChecks:
+    Type: String
+    Default: DENY_ALL
+    AllowedValues:
+     - DENY_ALL
+     - MEDIUM
+     - ALLOW_ALL
+    Description: Notification filter about Security Hub Security Checks [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -77,7 +85,8 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
+      Parameters:
+        NotificationFilterAboutSecurityChecks: !Ref NotificationFilterAboutSecurityChecks
         SnsTopicARN: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -161,6 +170,18 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Detective:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/detective.yaml
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
