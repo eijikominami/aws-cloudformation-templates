@@ -5,7 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
 
-``AWSCloudFormationTemplates/security`` は、 ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` などの **セキュリティ** に関連するAWSサービスを設定します。
+``AWSCloudFormationTemplates/security`` は、 ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub``, ``Amazon Detective`` などの **セキュリティ** に関連するAWSサービスを設定します。
 
 ## TL;DR
 
@@ -39,7 +39,10 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
 また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon CloudWatch Events`` 経由でメッセージを受け取ります。
-``AWS Security Hub`` は、**MEDIUM以上の検出結果を検出時に通知を送信** します。
+
+### Amazon Detective
+
+このテンプレートは、 ``AWS Detective`` の　behavior graph を有効化します。
 
 ### Amazon GuardDuty
 
@@ -82,7 +85,6 @@ Amazon Inspector は、``Amazon CloudWatch Events``　によって **毎週月�
 
 + [cloudformation-stack-drift-detection-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html)
 + [cloudformation-stack-notification-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-notification-check.html)
-+ [guardduty-enabled-centralized](https://docs.aws.amazon.com/config/latest/developerguide/guardduty-enabled-centralized.html)
 
 以下のルールは、``自動修復機能`` が有効化されており、 ``SSM Automation Documents`` が紐づけられています。
 
@@ -92,6 +94,9 @@ Amazon Inspector は、``Amazon CloudWatch Events``　によって **毎週月�
 + [vpc-flow-logs-enabled](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
 + [vpc-sg-open-only-to-authorized-ports](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
 + [vpc-default-security-group-closed](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
+
+``AWS Security Hub`` もセキュリティチェックに関連する Config ルールを自動的に作成します。
+``AWS Config`` が非準拠のリソースを検知した場合は、 ``Amazon SNS`` に通知が送信されます。
 
 ### Amazon CloudWatch Events
 

@@ -5,7 +5,7 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates) 
 
-``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` , and related resources.
+``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` , ``Amazon Detective`` , and related resources.
 
 ## TL;DR
 
@@ -36,7 +36,11 @@ This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results
 
 ### AWS Security Hub
 
-This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon CloudWatch Events`` to receive a message when the result of a compliance check changes to Failure. ``AWS Security Hub`` only sends notifications when it detects findings of **MEDIUM or higher level**.
+This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon CloudWatch Events`` to receive a message when the result of a compliance check changes to Failure. 
+
+### Amazon Detective
+
+This template creates an ``Amazon Detective`` behavior graph.
 
 ### Amazon GuardDuty
 
@@ -78,7 +82,6 @@ This template creates an AWS Config ``delivery channel``, a ``configuration reco
 
 + [cloudformation-stack-drift-detection-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html)
 + [cloudformation-stack-notification-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-notification-check.html)
-+ [guardduty-enabled-centralized](https://docs.aws.amazon.com/config/latest/developerguide/guardduty-enabled-centralized.html)
 
 The following rules enable ``Automatic Remediation`` feature and attached ``SSM Automation Documents``.
 
@@ -88,6 +91,9 @@ The following rules enable ``Automatic Remediation`` feature and attached ``SSM 
 + [vpc-flow-logs-enabled](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
 + [vpc-sg-open-only-to-authorized-ports](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
 + [vpc-default-security-group-closed](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
+
+``AWS Security Hub`` creates some related config rules for security checks automatically.
+When ``AWS Config`` detects noncompliant resources, it sends a notification to ``Amazon SNS``.
 
 ### Amazon CloudWatch Events
 
