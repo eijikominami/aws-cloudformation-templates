@@ -2,9 +2,23 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/SecurityHub sets AWS Security Hub.
 
 Parameters:
+  NotificationFilterAboutSecurityChecks:
+    Type: String
+    Default: DENY_ALL
+    AllowedValues:
+     - DENY_ALL
+     - MEDIUM
+     - ALLOW_ALL
+    Description: Notification filter about Security Hub Security Checks [required]
   SnsTopicARN:
     Type: String
     AllowedPattern: .+
+
+Conditions:
+  CreateCloudWatchEventsForSecurityHubFindings:
+   !Not [ !Equals [ !Ref NotificationFilterAboutSecurityChecks, DENY_ALL ] ]
+  SendAllEvents:
+   !Equals [ !Ref NotificationFilterAboutSecurityChecks, ALLOW_ALL ]
 
 Resources:
   # Service-linked Role
@@ -22,6 +36,7 @@ Resources:
     Type: 'AWS::SecurityHub::Hub'
   # CloudWatch Events for SecurityHub
   CloudWatchEventsForSecurityHubFindings:
+    Condition: CreateCloudWatchEventsForSecurityHubFindings
     Type: 'AWS::Events::Rule'
     Properties: 
       Description: !Sub Rule for SecurityHub created by ${AWS::StackName}.
@@ -37,25 +52,13 @@ Resources:
               Status:
                 - FAILED
             Severity:
-              Label:
-                - CRITICAL
-                - HIGH
-                - MEDIUM
+              Label: !If 
+                - SendAllEvents
+                - !Ref AWS::NoValue
+                - - CRITICAL
+                  - HIGH
+                  - MEDIUM
       Name: SecurityHub-Findings
-      State: ENABLED
-      Targets:
-        - Arn: !Ref SnsTopicARN
-          Id: CloudWatchEventsForSecurityHub
-  CloudWatchEventsForSecurityHubInsightResults:
-    Type: 'AWS::Events::Rule'
-    Properties: 
-      Description: !Sub Rule for SecurityHub created by ${AWS::StackName}.
-      EventPattern:
-        source:
-          - aws.securityhub
-        detail-type: 
-          - Security Hub Insight Results
-      Name: SecurityHub-InsightResults
       State: ENABLED
       Targets:
         - Arn: !Ref SnsTopicARN

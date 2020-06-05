@@ -145,7 +145,6 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogGroup'
                   - 'logs:CreateLogStream'
                 Resource: '*'
               - Effect: Allow
@@ -227,7 +226,6 @@ Resources:
     Properties:
       Name: default
       S3BucketName: !Ref S3ForConfig
-      SnsTopicARN: !Ref SnsTopicARN
   # AWS Config requires both DeliveryChannel and ConfigurationRecorder.
   ConfigConfigurationRecorder:
     Type: 'AWS::Config::ConfigurationRecorder'
@@ -371,7 +369,7 @@ Resources:
         Owner: AWS
         SourceIdentifier: ACCESS_KEYS_ROTATED
   # CloudWatch Events for AWS Config
-  CloudWatchEventsForConfigIamAccessKeysRotated:
+  CloudWatchEventsForConfig:
     Type: 'AWS::Events::Rule'
     Properties: 
       Description: !Sub Rule for Config when IAM Access Keys are rotated created by ${AWS::StackName}.
@@ -386,7 +384,7 @@ Resources:
           newEvaluationResult:
             complianceType:
               - NON_COMPLIANT
-      Name: Config
+      Name: Config-ComplianceChange
       State: !If
        - CreateRemediationResources
        - ENABLED
@@ -394,6 +392,8 @@ Resources:
       Targets:
         - Arn: !GetAtt LambdaDeleteExpiredAccessKeys.Arn
           Id: lambda
+        - Arn: !Ref SnsTopicARN
+          Id: CloudWatchEventsForConfig
   LambdaDeleteExpiredAccessKeys:
     Type: 'AWS::Lambda::Function'
     Properties:
@@ -449,7 +449,7 @@ Resources:
       FunctionName: !Ref LambdaDeleteExpiredAccessKeys
       Principal: events.amazonaws.com
       # DO NOT write 'SourceAccount' option.
-      SourceArn: !GetAtt CloudWatchEventsForConfigIamAccessKeysRotated.Arn
+      SourceArn: !GetAtt CloudWatchEventsForConfig.Arn
   LambdaDeleteExpiredAccessKeysLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
