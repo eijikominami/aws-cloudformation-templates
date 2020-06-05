@@ -270,17 +270,6 @@ Resources:
       Source:
         Owner: AWS
         SourceIdentifier: CLOUDFORMATION_STACK_NOTIFICATION_CHECK
-  ConfigGuarddutyEnabledCentralized:
-    # Must create a configuration recorder before you can create or update a Config rule.
-    DependsOn:
-      - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
-    Properties:
-      ConfigRuleName: guardduty-enabled-centralized
-      Description: AWS アカウントおよびリージョンで Amazon GuardDuty が有効になっているかどうかを確認します。
-      Source:
-        Owner: AWS
-        SourceIdentifier: GUARDDUTY_ENABLED_CENTRALIZED
   # CIS 1.5 – Ensure IAM password policy requires at least one uppercase letter 
   # CIS 1.6 – Ensure IAM password policy requires at least one lowercase letter 
   # CIS 1.7 – Ensure IAM password policy requires at least one symbol 
@@ -368,8 +357,8 @@ Resources:
       Source:
         Owner: AWS
         SourceIdentifier: ACCESS_KEYS_ROTATED
-  # CloudWatch Events for AWS Config
-  CloudWatchEventsForConfig:
+  # CloudWatch Events for ConfigIamAccessKeysRotated
+  CloudWatchEventsForIamAccessKeysRotated:
     Type: 'AWS::Events::Rule'
     Properties: 
       Description: !Sub Rule for Config when IAM Access Keys are rotated created by ${AWS::StackName}.
@@ -379,21 +368,21 @@ Resources:
         detail-type: 
           - Config Rules Compliance Change
         detail:
+          configRuleName:
+            - !Ref ConfigIamAccessKeysRotated
           messageType:
             - ComplianceChangeNotification
           newEvaluationResult:
             complianceType:
               - NON_COMPLIANT
-      Name: Config-ComplianceChange
+      Name: Config-IamAccessKeysRotated
       State: !If
        - CreateRemediationResources
        - ENABLED
        - DISABLED
       Targets:
         - Arn: !GetAtt LambdaDeleteExpiredAccessKeys.Arn
-          Id: lambda
-        - Arn: !Ref SnsTopicARN
-          Id: CloudWatchEventsForConfig
+          Id: CloudWatchEventsForIamAccessKeysRotated
   LambdaDeleteExpiredAccessKeys:
     Type: 'AWS::Lambda::Function'
     Properties:
@@ -449,7 +438,7 @@ Resources:
       FunctionName: !Ref LambdaDeleteExpiredAccessKeys
       Principal: events.amazonaws.com
       # DO NOT write 'SourceAccount' option.
-      SourceArn: !GetAtt CloudWatchEventsForConfig.Arn
+      SourceArn: !GetAtt CloudWatchEventsForIamAccessKeysRotated.Arn
   LambdaDeleteExpiredAccessKeysLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
@@ -739,3 +728,28 @@ Resources:
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
+  CloudWatchEventsForConfig:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for Config created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.config
+        detail-type: 
+          - Config Rules Compliance Change
+        detail:
+          configRuleName:
+            - prefix: securityhub-
+          messageType:
+            - ComplianceChangeNotification
+          newEvaluationResult:
+            complianceType:
+              - NON_COMPLIANT
+      Name: Config
+      State: !If
+       - CreateRemediationResources
+       - ENABLED
+       - DISABLED
+      Targets:
+        - Arn: !Ref SnsTopicARN
+          Id: CloudWatchEventsForConfig
