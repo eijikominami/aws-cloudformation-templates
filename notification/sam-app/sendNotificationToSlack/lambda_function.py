@@ -401,7 +401,6 @@ def createTrustedAdvisorMessage(message):
 @xray_recorder.capture('createIAMAccessAnalyzer')
 def createIAMAccessAnalyzer(message):
 
-    actions = ''
     title = ":heavy_exclamation_mark: IAM Access Analyzer Findings | " + message['region'] + " | Account: " + message['account']
     title_link = "https://console.aws.amazon.com/resource-groups/access-analyzer/home?region=" + message['region']
 
@@ -410,7 +409,7 @@ def createIAMAccessAnalyzer(message):
             'color': '#961D13',
             'title': "%s" % title,
             'title_link': "%s" % title_link,
-            'text': "*IAM Access Analyzer* が %s に対する *%s* 権限を検知しました。 *意図していない権限の場合は、潜在的なセキュリティリスクが存在するため、この権限を許可するポリシーを変更または削除してください* 。ビジネスプロセスに必要なアクセスなど、アクセスが意図している場合は、結果をアーカイブできます。" % (message['detail']['resource'], actions),
+            'text': "*IAM Access Analyzer* が %s に対する *%s* 権限を検知しました。 *意図していない権限の場合は、潜在的なセキュリティリスクが存在するため、この権限を許可するポリシーを変更または削除してください* 。ビジネスプロセスに必要なアクセスなど、アクセスが意図している場合は、結果をアーカイブできます。" % (message['detail']['resource'], str(message['detail']['action'])),
             'fields': [
                     {
                         'title': "Principal",
@@ -418,7 +417,7 @@ def createIAMAccessAnalyzer(message):
                     },
                     {
                         'title': "Actions",
-                        'value': "%s" % actions
+                        'value': "%s" % str(message['detail']['action'])
                     },
                     {
                         'title': "Resource",
