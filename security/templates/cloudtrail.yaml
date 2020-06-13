@@ -12,12 +12,12 @@ Parameters:
   LogBacketName:
     Type: String
     AllowedPattern: .+
-    Description: LogBacket Name [required]
+    Description: The S3 log bucket Name [required]
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
     AllowedPattern: .+
-    Description: Custom prefix name [required]
+    Description: The custom prefix name [required]
   SnsTopicARN:
     Type: String
     AllowedPattern: .+

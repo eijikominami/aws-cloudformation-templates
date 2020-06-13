@@ -1,30 +1,30 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for Kinesis
+Description: CloudWatch alarm for Amazon Kinesis
 
 Parameters:
   CustomAlarmName:
     Type: String
     Default: ''
-    Description: Custom Alram name
+    Description: The custom Alram name
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
-    Description: SNS topic ARN [required]
+    Description: The SNS topic ARN [required]
   KinesisStreamName:
     Type: String
     AllowedPattern: .+
-    Description: Kinesis stream name [required]
+    Description: The Kinesis stream name [required]
   IteratorAgeMillisecondsThreshold:
     Type: Number
     Default: 30000
     MinValue: 0
-    Description: Threshold of IteratorAgeMilliseconds [required]
+    Description: The threshold of IteratorAgeMilliseconds [required]
   NumberOfPutRecordThreshold:
     Type: Number
     Default: 1000
     MinValue: 0
-    Description: Threshold of PutRecord per minute [required]
+    Description: The threshold of PutRecord per minute [required]
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]

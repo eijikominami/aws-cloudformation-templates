@@ -27,7 +27,7 @@ Parameters:
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
-    Description: IAM User ARN to assume AWS Support role
+    Description: The IAM User ARN to assume AWS Support role
   NotificationFilterAboutSecurityChecks:
     Type: String
     Default: DENY_ALL
@@ -35,7 +35,7 @@ Parameters:
      - DENY_ALL
      - MEDIUM
      - ALLOW_ALL
-    Description: Notification filter about Security Hub Security Checks [required]
+    Description: The notification filter type about Security Hub Security Checks [required]
   SNSForAlertArn:
     Type: String
     Default: '' 

@@ -6,23 +6,23 @@ Parameters:
   IAMRoleForChatbotArn:
     Type: String
     AllowedPattern: .+
-    Description: IAM Role ARN for Chatbot [required]
+    Description: The IAM Role ARN for Chatbot [required]
   LogicalNamePrefix:
     Type: String
     Default: Default
     AllowedPattern: .+
-    Description: Custom prefix name [required]
+    Description: The custom prefix name [required]
   SlackWorkspaceId:
     Type: String
     AllowedPattern: .+
-    Description: Slack Workspace Name [required]
+    Description: The Slack Workspace Name [required]
   SlackChannelId:
     Type: String
-    Description: Slack Channel Id [required]
+    Description: The Slack Channel id [required]
   SNSArn:
     Type: String
     AllowedPattern: .+
-    Description: Amazon SNS Topic ARN [required]
+    Description: The SNS Topic ARN [required]
 
 Resources:
   # Service-linked Role

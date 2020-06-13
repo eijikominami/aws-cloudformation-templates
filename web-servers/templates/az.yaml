@@ -5,11 +5,11 @@ Parameters:
   AvailabilityZone:
     Type: AWS::EC2::AvailabilityZone::Name
     AllowedPattern: .+
-    Description: Availability Zone Name [required]
+    Description: The Availability Zone name [required]
   InternetGatewayId:
     Type: String
     AllowedPattern: .+
-    Description: Internet Gateway Id [required]
+    Description: The Internet Gateway Id [required]
   NetworkLoadBalancer:
     Type: String
     Default: Disabled
@@ -21,7 +21,7 @@ Parameters:
     Type: String
     Default: WebServers
     AllowedPattern: .+
-    Description: Custom prefix name [required]
+    Description: The custom prefix name [required]
   SNSTopicARN:
     Type: String
     AllowedPattern: .+
@@ -29,15 +29,15 @@ Parameters:
     Type: String
     Default: 10.0.0.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: Public Subnet CidrBlock [required]
+    Description: The Public subnet CIDR block [required]
   SubnetExternalCidrBlock:
     Type: String
     AllowedPattern: ^[0-9./]*$
-    Description: Private Subnet CidrBlock
+    Description: The private subnet CIDR block
   VPCId:
     Type: String
     AllowedPattern: .+
-    Description: VPC Id [required]
+    Description: The VPC id [required]
   TagKey:
     Type: String
     Default: createdby

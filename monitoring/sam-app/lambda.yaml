@@ -1,29 +1,29 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for Lambda
+Description: CloudWatch alarm for AWS Lambda
 
 Parameters:
   CustomAlarmName:
     Type: String
     Default: ''
-    Description: Custom Alram name
+    Description: The custom alram name
   MetricFilterPattern:
     Type: String
     Default: '?Error ?Exception'
-    Description: Metric filter pattern
+    Description: The Metric filter pattern
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
-    Description: SNS topic ARN [required]
+    Description: The SNS topic ARN [required]
   FunctionResouceName:
     Type: String
     AllowedPattern: .+
-    Description: Resource name of the Lambda function [required]
+    Description: The resource name of the Lambda function [required]
   TimeoutMilliseconds:
     Type: Number
     Default: 24000
     MinValue: 0
-    Description: Threshold of Duration [required]
+    Description: The threshold of Duration [required]
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]

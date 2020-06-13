@@ -67,12 +67,11 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| ArtifactBacketInVirginia | String | | | S3 artifact bucket name in N.Verginia region. |
-| CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
-| **GitHubOAuthToken** | String | | | OAuth token to access GitHub |
-| GitHubOwnerNameForTemplateConfiguration | String | | | GitHub owner name for CloudFormation Template Configuration files |
-| GitHubRepoNameForTemplateConfiguration | String | | | GitHub repository name for CloudFormation Template Configuration files |
-| GitHubStage | String | master | ○ | GitHub stage name of the repository CloudFormation templates are located |
+| ArtifactBacketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
+| CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | The Docker image name for CodeBuild |
+| **GitHubOAuthToken** | String | | | The OAuth token to access GitHub |
+| GitHubOwnerNameForTemplateConfiguration | String | | | The GitHub owner name for CloudFormation Template Configuration files |
+| GitHubRepoNameForTemplateConfiguration | String | | | The GitHub repository name for CloudFormation Template Configuration files |
 | DefaultSecuritySettingsConfigRules | Enabled / Disabled | Disabled | ○ | If it is Enabled, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
 | GlobalSettings | Enabled / Disabled | Disabled | ○ | If it is Enabled, `GlobalSettings` stack is deployed. |
 | Notification | Enabled / Disabled | Disabled | ○ | If it is Enabled, `Notification` stack is deployed. |

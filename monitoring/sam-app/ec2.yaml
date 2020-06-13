@@ -1,22 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for EC2
+Description: CloudWatch alarm for Amazon EC2
 
 Parameters:
   CustomAlarmName:
     Type: String
     Default: ''
-    Description: Custom Alram name
+    Description: The custom alram name
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
-    Description: SNS topic ARN [required]
+    Description: The SNS topic ARN [required]
   CPUUtilizationThreshold:
     Type: Number
     Default: 100
     MinValue: 0
     MaxValue: 100
-    Description: Threshold of CPU Utilization [required]
+    Description: The threshold of CPU Utilization [required]
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]

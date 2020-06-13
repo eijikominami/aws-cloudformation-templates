@@ -1,34 +1,34 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for API Gateway
+Description: CloudWatch alarm for Amazon API Gateway
 
 Parameters:
   CustomAlarmName:
     Type: String
     Default: ''
-    Description: Custom Alram name
+    Description: The custom alram name
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
-    Description: SNS topic ARN [required]
+    Description: The SNS topic ARN [required]
   ApiName:
     Type: String
     AllowedPattern: .+
-    Description: API name [required]
+    Description: The API Gateway api name [required]
   ApiStageName:
     Type: String
     AllowedPattern: .+
-    Description: API stage name [required] 
+    Description: The API Gateway stage name [required] 
   ApiCount:
     Type: Number
     Default: 0
     MinValue: 0
-    Description: Threshold of ApiCount per minute [required] 
+    Description: The threshold of ApiCount per minute [required] 
   LatencyThreshold:
     Type: Number
     Default: 2000
     MinValue: 0
-    Description: Threshold of Latency [required]
+    Description: The threshold of Latency [required]
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]

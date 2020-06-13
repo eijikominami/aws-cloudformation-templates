@@ -9,7 +9,7 @@ Parameters:
      - DENY_ALL
      - MEDIUM
      - ALLOW_ALL
-    Description: Notification filter about Security Hub Security Checks [required]
+    Description: The notification filter about Security Hub Security Checks [required]
   SnsTopicARN:
     Type: String
     AllowedPattern: .+

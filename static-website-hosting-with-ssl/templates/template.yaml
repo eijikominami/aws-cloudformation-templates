@@ -1,16 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/static-web-hosting creates environment of static web hosting.
+Description: AWSCloudFormationTemplates/static-web-hosting creates an environment for static website hosting.
 
 Parameters:
   CertificateManagerARN:
     Default: ''
     Type: String
-    Description: ARN of an SSL Certifiation attached to CloudFront
+    Description: The ARN of an SSL Certifiation attached to CloudFront
   DomainName:
     Type: String
     AllowedPattern: .+
-    Description: CNAME attached to CloudFront [required]
+    Description: The CNAME attached to CloudFront [required]
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -42,15 +42,26 @@ Parameters:
   CloudFrontAdditionalName:
     Type: String
     Default: ''
-    Description: CNAME attached to CloudFront
+    Description: The CNAME attached to CloudFront
   CloudFrontSecondaryOriginId:
     Type: String
     Default: ''
-    Description: S3 bucket name for Secondary Origin
+    Description: The S3 bucket name for Secondary Origin
+  CloudFrontRestrictViewerAccess:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable Restrict Viewer Access [required]  
+  CloudFront403ErrorResponsePagePath:
+    Type: String
+    Default: ''
+    Description: The path to the 403 custom error page
   S3DestinationBucketArnOfCrossRegionReplication:
     Type: String
     Default: ''
-    Description: S3 bucket name for Cross Region Replication
+    Description: The S3 bucket name for Cross Region Replication
   LoggingEnabled:
     Type: String
     Default: Enabled
@@ -61,7 +72,7 @@ Parameters:
   LogBacketName:
     Type: String
     Default: ''
-    Description: Custom S3 bucket name for access logging
+    Description: The custom S3 bucket name for access logging
   WebACL:
     Type: String
     Default: Disabled
@@ -90,6 +101,8 @@ Conditions:
   CreateLog: !Equals [ !Ref LoggingEnabled, Enabled ]
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateWebACL: !Equals [ !Ref WebACL, Enabled ]
+  CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ]
+  Create403CustomErrorResponse: !And [ !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ], !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
 
 Resources:
@@ -272,6 +285,13 @@ Resources:
             - - !Ref DomainName
           - !Ref AWS::NoValue
         Comment: !Sub CDN for ${DomainName}
+        CustomErrorResponses: !If
+          - Create403CustomErrorResponse
+          - - ErrorCachingMinTTL: 60
+              ErrorCode: 403
+              ResponseCode: 403
+              ResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
+          - !Ref AWS::NoValue
         DefaultCacheBehavior:
           AllowedMethods:
             - GET
@@ -283,6 +303,10 @@ Resources:
           MinTTL: !Ref CloudFrontMinimumTTL
           SmoothStreaming: false
           TargetOriginId: !Ref S3ForWebHosting
+          TrustedSigners: !If 
+            - CreateRestrictViewerAccess
+            - - !Ref AWS::AccountId
+            - !Ref AWS::NoValue
           ViewerProtocolPolicy: !Ref CloudFrontViewerProtocolPolicy
         DefaultRootObject : !If
           - DefaultRootObjectExists

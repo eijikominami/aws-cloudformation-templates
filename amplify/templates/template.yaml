@@ -1,20 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/amplify sets CI/CD environments with AWS Amplify.
+Description: AWSCloudFormationTemplates/amplify builds builds a CI/CD environment with AWS Amplify Console, AWS CodeCommit, and related resources.
 
 Parameters:
   AmplifyConsoleAppId:
     Type: String
     Default: ''
-    Description: Amplify Console application id this template created
+    Description: The Amplify Console application id this template created
   DomainName:
     Type: String
     AllowedPattern: .+
-    Description: Custom domain name for your Amplify Console application [required]
+    Description: The custom domain name for your Amplify Console application [required]
   RepositoryName:
     Type: String
     AllowedPattern: .+
-    Description: Repository name on CodeCommit [required]
+    Description: The repository name on CodeCommit [required]
   SNSForDeploymentArn:
     Type: String
     Default: ''

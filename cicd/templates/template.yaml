@@ -1,34 +1,34 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description:  AWSCloudFormationTemplates/cicd creates CodePipeline for building AWSCloudFormationTemplates.
+Description:  AWSCloudFormationTemplates/cicd/codepipeline creates a CodePipeline pipeline building AWSCloudFormationTemplates.
 
 Parameters: 
   ArtifactBacketInVirginia:
     Type: String
     Default: ''  
-    Description: S3 artifact bucket name in N.Verginia region
+    Description: The S3 artifact bucket name in N.Verginia region
   CodeBuildImageName:
     Type: String
     Default: aws/codebuild/amazonlinux2-x86_64-standard:3.0
     AllowedPattern: ^aws/codebuild/.+$
-    Description: Docker image name for CodeBuild [required]
+    Description: The Docker image name for CodeBuild [required]
   GitHubOAuthToken:
     Type: String
     Default: ''
-    Description: OAuth token to access GitHub
+    Description: The OAuth token to access GitHub
   GitHubOwnerNameForTemplateConfiguration:
     Type: String
     Default: ''
-    Description: GitHub owner name for CloudFormation Template Configuration files
+    Description: The GitHub owner name for CloudFormation Template Configuration files
   GitHubRepoNameForTemplateConfiguration:
     Type: String
     Default: ''
-    Description: GitHub repository name for CloudFormation Template Configuration files
+    Description: The GitHub repository name for CloudFormation Template Configuration files
   GitHubBranchName:
     Type: String
     Default: master
     AllowedPattern: .+
-    Description: Branch name of CloudFormation template [required]
+    Description: The Branch name of GitHub [required]
   StaticWebsiteHosting:
     Type: String
     Default: Disabled
@@ -68,11 +68,11 @@ Parameters:
   SNSForAlertArn:
     Type: String
     Default: ''
-    Description: Amazon SNS Topic ARN for alert
+    Description: The Amazon SNS topic ARN for alert
   SNSForDeploymentArn:
     Type: String
     Default: '' 
-    Description: Amazon SNS Topic ARN for deployment information
+    Description: The Amazon SNS topic ARN for deployment information
   TagKey:
     Type: String
     Default: createdby

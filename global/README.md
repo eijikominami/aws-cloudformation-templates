@@ -48,5 +48,5 @@ You can provide optional parameters as follows.
 | BillingAlertThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created. |
 | CloudFrontErrorRateThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created. |
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created. |
-| CloudFrontDistributionId | String | | | Targeted CloudFront Distribution Id for monitoring |
+| CloudFrontDistributionId | String | | | The CloudFront Distribution Id for monitoring |
 | SnsTopicArn | String | | | If it's empty, notifications are send to 'arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications' | 

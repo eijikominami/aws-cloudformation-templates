@@ -49,13 +49,15 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront**. |
-| **DomainName** | String | | ○ | |
-| CloudFrontDefaultTTL | Number | 86400 | ○ | |
-| CloudFrontMinimumTTL | Number | 0 | ○ | |
-| CloudFrontMaximumTTL | Number | 31536000 | ○ | |
-| CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | |
+| **DomainName** | String | | ○ | The CNAME attached to CloudFront |
+| CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
+| CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
+| CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
+| CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | CloudFront Viewer Protocol Policy |
 | CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront**. |
 | CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
+| CloudFrontRestrictViewerAccess | Enabled / Disabled | Disabled | ○ | Enable or disable Restrict Viewer Access |
+| CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3**. |
 | LoggingEnabled | Enabled / Disabled | Enabled | ○ | If Enabled, Logging is enabled on **CloudFront** and **S3**. |
 | LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |

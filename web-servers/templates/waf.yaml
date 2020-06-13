@@ -6,7 +6,7 @@ Parameters:
     Type: String
     Default: WebServers
     AllowedPattern: .+
-    Description: Custom prefix name [required]
+    Description: The custom prefix name [required]
   TargetResourceArn:
     Type: String
     Default: ''  
