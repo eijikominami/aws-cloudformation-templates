@@ -329,7 +329,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-        MetricFilterPattern: 'ERROR'
+        MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaSendNotificationToSlack
       NotificationARNs: 
         - !If
