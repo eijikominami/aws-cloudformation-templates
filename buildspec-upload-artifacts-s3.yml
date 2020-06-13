@@ -2,6 +2,8 @@ version: 0.2
 
 env:
   variables:
+    AMPLIFY_SRC_DIR: amplify/templates
+    AMPLIFY_DIST_DIR: aws-cloudformation-templates/amplify
     CICD_SRC_DIR: cicd/templates
     CICD_DIST_DIR: aws-cloudformation-templates/cicd
     GLOBAL_SRC_DIR: global/templates
@@ -32,6 +34,7 @@ phases:
       - pip install -U aws_xray_sdk
   pre_build:
     commands:
+      - cfn-lint -t ${AMPLIFY_SRC_DIR}/template.yaml
       - cfn-lint -t ${CICD_SRC_DIR}/template.yaml
       - cfn-lint -t ${CICD_SRC_DIR}/codebuild.yaml
       - cfn-lint -t ${GLOBAL_SRC_DIR}/template.yaml
@@ -43,6 +46,7 @@ phases:
       - cfn-lint -t ${SECURITY_CONFIG_RULES_SRC_DIR}/template.yaml
       - cfn-lint -t ${HOSTING_SRC_DIR}/template.yaml
       - cfn-lint -t ${EC2_SRC_DIR}/template.yaml
+      - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive
@@ -65,6 +69,7 @@ phases:
       - aws cloudformation package --template-file ${EC2_SRC_DIR}/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${EC2_DIST_DIR} --output-template-file ${EC2_SRC_DIR}/packaged.yaml
   post_build:
     commands:
+       - aws s3 cp ${AMPLIFY_SRC_DIR}/ s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${CICD_SRC_DIR}/ s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${GLOBAL_SRC_DIR}/ s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${MONITORING_SRC_DIR}/ s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
