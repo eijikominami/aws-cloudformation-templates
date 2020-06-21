@@ -39,7 +39,7 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 ### AWS Security Hub
 
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
-また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon CloudWatch Events`` 経由でメッセージを受け取ります。
+また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon EventBridge`` 経由でメッセージを受け取ります。
 
 ### Amazon Detective
 
@@ -64,7 +64,7 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 + [Center for Internet Security (CIS) Benchmarks](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_cis.html)
 + [Security Best Practices for Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_security-best-practices.html)
 
-Amazon Inspector は、``Amazon CloudWatch Events``　によって **毎週月曜日午前9時** に実行されます。
+Amazon Inspector は、``Amazon EventBridge``　によって **毎週月曜日午前9時** に実行されます。
 
 このテンプレートは、以下のリージョンをサポートしています。
 
@@ -84,22 +84,22 @@ Amazon Inspector は、``Amazon CloudWatch Events``　によって **毎週月�
 
 このテンプレートは、Amazon Config ``デリバリーチャンネル``、 ``レコーダ``と、以下の ``マネージドルール`` を作成します。
 
-+ [cloudformation-stack-drift-detection-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html)
-+ [cloudformation-stack-notification-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-notification-check.html)
++ [CLOUDFORMATION_STACK_DRIFT_DETECTION_CHECK](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html)
++ [CLOUDFORMATION_STACK_NOTIFICATION_CHECK](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-notification-check.html)
 
 以下のルールは、``自動修復機能`` が有効化されており、 ``SSM Automation Documents`` が紐づけられています。
 
-+ [iam-password-policy](https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html)
-+ [iam-root-access-key-check](https://docs.aws.amazon.com/config/latest/developerguide/iam-root-access-key-check.html)
-+ [s3-bucket-server-side-encryption-enabled](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html)
-+ [vpc-flow-logs-enabled](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
-+ [vpc-sg-open-only-to-authorized-ports](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
-+ [vpc-default-security-group-closed](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
++ [IAM_PASSWORD_POLICY](https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html)
++ [IAM_ROOT_ACCESS_KEY_CHECK](https://docs.aws.amazon.com/config/latest/developerguide/iam-root-access-key-check.html)
++ [S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html)
++ [VPC_FLOW_LOGS_ENABLED](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
++ [VPC_SG_OPEN_ONLY_TO_AUTHORIZED_PORTS](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
++ [VPC_DEFAULT_SECURITY_GROUP_CLOSED](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
 
 ``AWS Security Hub`` もセキュリティチェックに関連する Config ルールを自動的に作成します。
 ``AWS Config`` が非準拠のリソースを検知した場合は、 ``Amazon SNS`` に通知が送信されます。
 
-### Amazon CloudWatch Events
+### Amazon EventBridge
 
 このテンプレートは、 ``AWS Health`` に関する  ``CloudWatchイベント`` を作成します。
 CloudWatchイベントは、Amazon SNS にこれらのイベントを転送します。

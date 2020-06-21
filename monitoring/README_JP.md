@@ -278,7 +278,7 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
-## CloudWatch Events
+## EventBridge
 
 このテンプレートは、以下のアラームを作成します。
 

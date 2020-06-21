@@ -34,7 +34,7 @@ Resources:
     DependsOn:
       - ServiceLinkedRoleForSecurityHub
     Type: 'AWS::SecurityHub::Hub'
-  # CloudWatch Events for SecurityHub
+  # EventBridge for SecurityHub
   CloudWatchEventsForSecurityHubFindings:
     Condition: CreateCloudWatchEventsForSecurityHubFindings
     Type: 'AWS::Events::Rule'

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for CloudWatch Events
+Description: CloudWatch alarm for EventBridge
 
 Parameters:
   CustomAlarmName:
@@ -14,7 +14,7 @@ Parameters:
   EventsRuleName:
     Type: String
     AllowedPattern: .+
-    Description: CloudWatch Events rule name [required]
+    Description: EventBridge rule name [required]
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
