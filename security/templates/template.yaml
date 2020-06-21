@@ -256,7 +256,7 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # CloudWatch Events for Health
+  # EventBridge for Health
   CloudWatchEventsForHealth:
     Type: 'AWS::Events::Rule'
     Properties: 

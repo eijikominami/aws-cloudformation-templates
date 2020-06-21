@@ -280,7 +280,7 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
-## CloudWatch Events
+## EventBridge
 
 The template creates the following alarms.
 

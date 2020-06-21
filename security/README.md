@@ -37,7 +37,7 @@ This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results
 
 ### AWS Security Hub
 
-This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon CloudWatch Events`` to receive a message when the result of a compliance check changes to Failure. 
+This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure. 
 
 ### Amazon Detective
 
@@ -61,7 +61,7 @@ This template creates an Amazon Inspector ``assessment target`` and some ``asses
 + [Center for Internet Security (CIS) Benchmarks](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_cis.html)
 + [Security Best Practices for Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_security-best-practices.html)
 
-They run **every Monday at 9am**, kicked by ``Amazon CloudWatch Events``.
+They run **every Monday at 9am**, kicked by ``Amazon EventBridge``.
 
 This template supports some specific regions.
 
@@ -81,25 +81,25 @@ This template supports some specific regions.
 
 This template creates an AWS Config ``delivery channel``, a ``configuration recorder`` and some ``managed rules``, as follows.
 
-+ [cloudformation-stack-drift-detection-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html)
-+ [cloudformation-stack-notification-check](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-notification-check.html)
++ [CLOUDFORMATION_STACK_DRIFT_DETECTION_CHECK](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html)
++ [CLOUDFORMATION_STACK_NOTIFICATION_CHECK](https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-notification-check.html)
 
 The following rules enable ``Automatic Remediation`` feature and attached ``SSM Automation Documents``.
 
-+ [iam-password-policy](https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html)
-+ [iam-root-access-key-check](https://docs.aws.amazon.com/config/latest/developerguide/iam-root-access-key-check.html)
-+ [s3-bucket-server-side-encryption-enabled](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html)
-+ [vpc-flow-logs-enabled](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
-+ [vpc-sg-open-only-to-authorized-ports](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
-+ [vpc-default-security-group-closed](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
++ [IAM_PASSWORD_POLICY](https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html)
++ [IAM_ROOT_ACCESS_KEY_CHECK](https://docs.aws.amazon.com/config/latest/developerguide/iam-root-access-key-check.html)
++ [S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html)
++ [VPC_FLOW_LOGS_ENABLED](https://docs.aws.amazon.com/config/latest/developerguide/vpc-flow-logs-enabled.html)
++ [VPC_SG_OPEN_ONLY_TO_AUTHORIZED_PORTS](https://docs.aws.amazon.com/config/latest/developerguide/vpc-sg-open-only-to-authorized-ports.html)
++ [VPC_DEFAULT_SECURITY_GROUP_CLOSED](https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html)
 
 ``AWS Security Hub`` creates some related config rules for security checks automatically.
 When ``AWS Config`` detects noncompliant resources, it sends a notification to ``Amazon SNS``.
 
-### Amazon CloudWatch Events
+### Amazon EventBridge
 
-This template creates ``Amazon CloudWatch Events`` for ``AWS Health``.
-CloudWatch Events transfer its events to ``Amazon SNS``.
+This template creates ``Amazon EventBridge`` for ``AWS Health``.
+EventBridge transfer its events to ``Amazon SNS``.
 
 ### Other Resources
 
@@ -175,7 +175,7 @@ This template helps you to comply with the PCI DSS controls.
 | PCI.CloudTrail.3 | CloudTrail log file validation should be enabled. | This template enables **CloudTrail** and related resources in all Regions. |
 | PCI.CloudTrail.4 | CloudTrail trails should be integrated with CloudWatch Logs. | This template enables **CloudTrail** and related resources in all Regions. |
 | PCI.Config.1 | AWS Config should be enabled. | This template enables **Config** and related resources in all Regions.  |
-| PCI.CW.1 | A log metric filter and alarm should exist for usage of the "root" user. |  |
+| PCI.CW.1 | A log metric filter and alarm should exist for usage of the "root" user. | This template enables **CloudTrail** and related resources in all Regions. |
 | PCI.EC2.2 | VPC default security group should prohibit inbound and outbound traffic. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
 | PCI.IAM.1 | IAM root user access key should not exist. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
 | PCI.S3.4 | S3 buckets should have server-side encryption enabled. | **Config** checks it and **SSM Automation** remediates the default security group automatically.s |
