@@ -10,8 +10,7 @@ Parameters:
   MetricFilterPattern:
     Type: String
     Default: '?Error ?Exception'
-    AllowedPattern: .+
-    Description: Metric filter pattern [required]
+    Description: Metric filter pattern
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
@@ -28,6 +27,7 @@ Parameters:
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+  CreateMetricFilter: !Not [ !Equals [ !Ref MetricFilterPattern, '' ] ]
 
 Resources:
   AlarmLambdaErrors:
@@ -112,6 +112,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   MetricFilterErrorLog:
+    Condition: CreateMetricFilter
     Type: 'AWS::Logs::MetricFilter'
     Properties:
       FilterPattern: !Ref MetricFilterPattern

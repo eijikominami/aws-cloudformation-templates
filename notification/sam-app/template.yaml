@@ -126,7 +126,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.17
+        SemanticVersion: 1.0.18
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -142,7 +142,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.0.17
+        SemanticVersion: 1.0.18
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -152,7 +152,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.0.17
+        SemanticVersion: 1.0.18
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -329,7 +329,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-        MetricFilterPattern: 'ERROR'
+        MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaSendNotificationToSlack
       NotificationARNs: 
         - !If
@@ -338,7 +338,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.0.17
+        SemanticVersion: 1.0.18
       Tags:
         createdby: !Ref TagValue
   # Chatbot

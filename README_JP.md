@@ -42,6 +42,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | [EC2ベースのWebサイトホスティング](/web-servers/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WebServers&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/template.yaml)  |
 | [Systems Manager](/web-servers/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/ssm.yaml&param_LogicalNamePrefix=SystemsManager) |
 | [Slackへの通知](/notification/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
+| [Amplifyを用いたCI/CD環境](/amplify/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Amplify&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/amplify/template.yaml) |
 | [CloudWatch アラームの設定](/monitoring/README_JP.md) | | |
 
 ## アーキテクチャ
@@ -69,6 +70,10 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 ### EC2ベースのWebサイトホスティング
 
 ![](images/architecture-web-servers.png)
+
+### Amplifyを用いたCI/CD環境
+
+![](images/architecture-amplify.png)
 
 ### Slackへの通知
 
