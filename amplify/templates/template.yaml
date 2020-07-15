@@ -30,6 +30,24 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
 Resources:
+  # IAM Role
+  IAMRoleForAmplify:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: amplify.amazonaws.com 
+            Action: 'sts:AssumeRole'
+      Description: Allows Amplify Backend Deployment to access AWS resources on your behalf.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AdministratorAccess
+      RoleName: !Sub '${AWS::StackName}-AmplifyBackend-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CodeCommit
   CodeCommit:
     Type: 'AWS::CodeCommit::Repository'
@@ -63,7 +81,7 @@ Resources:
         EnableAutoBranchCreation: true
         EnableAutoBuild: true
       Description: !Ref DomainName
-      IAMServiceRole: !Sub arn:aws:iam::${AWS::AccountId}:role/AmplifyConsoleBackendRole
+      IAMServiceRole: !GetAtt IAMRoleForAmplify.Arn
       Name: !Ref RepositoryName
       Repository: !GetAtt CodeCommit.CloneUrlHttp
       Tags:

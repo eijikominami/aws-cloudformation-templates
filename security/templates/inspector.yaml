@@ -113,7 +113,7 @@ Resources:
             Principal:
               Service: events.amazonaws.com
             Action: 'sts:AssumeRole'
-      Description: A role required for CloudWatch Events to access Inspector.
+      Description: A role required for EventBridge to access Inspector.
       Policies:
         - PolicyName: !Sub '${LogicalNamePrefix}-AWSEventsInspectorPolicy-${AWS::Region}'
           PolicyDocument:
@@ -152,7 +152,7 @@ Resources:
         - !FindInMap [RulePackages, !Ref "AWS::Region", NetworkReachability]
         # セキュリティのベストプラクティス
         - !FindInMap [RulePackages, !Ref "AWS::Region", Security]
-  # CloudWatch Events for Inspector
+  # EventBridge for Inspector
   CloudWatchEventsForInspector:
     Condition: IsSupportedRegion
     Type: 'AWS::Events::Rule'

@@ -95,7 +95,7 @@ Resources:
     DeletionPolicy: Retain
     Properties: 
       AWSServiceName: codestar-notifications.amazonaws.com
-      Description: Allows AWS CodeStar Notifications to access Amazon CloudWatch Events on your behalf
+      Description: Allows AWS CodeStar Notifications to access Amazon EventBridge on your behalf
   # IAM
   IAMRoleForCodeBuild:
     Type: 'AWS::IAM::Role'

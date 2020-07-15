@@ -22,7 +22,7 @@ Resources:
     Type: 'AWS::GuardDuty::Detector'
     Properties:
       Enable: true
-  # CloudWatch Events for GuardDuty
+  # EventBridge for GuardDuty
   CloudWatchEventsForGuardDuty:
     Type: 'AWS::Events::Rule'
     Properties: 
