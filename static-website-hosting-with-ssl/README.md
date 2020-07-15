@@ -58,6 +58,8 @@ You can provide optional parameters as follows.
 | CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
 | CloudFrontRestrictViewerAccess | Enabled / Disabled | Disabled | ○ | Enable or disable Restrict Viewer Access |
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
+| CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
+| CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3**. |
 | LoggingEnabled | Enabled / Disabled | Enabled | ○ | If Enabled, Logging is enabled on **CloudFront** and **S3**. |
 | LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |

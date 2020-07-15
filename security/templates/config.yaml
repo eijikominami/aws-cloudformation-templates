@@ -681,7 +681,7 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
-              SSEAlgorithm: aws:kms
+              SSEAlgorithm: AES256
       BucketName: !Sub defaultsecuritysettings-config-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:

@@ -58,6 +58,14 @@ Parameters:
     Type: String
     Default: ''
     Description: The path to the 403 custom error page
+  CloudFront404ErrorResponsePagePath:
+    Type: String
+    Default: ''
+    Description: The path to the 404 custom error page
+  CloudFront500ErrorResponsePagePath:
+    Type: String
+    Default: ''
+    Description: The path to the 500 custom error page
   S3DestinationBucketArnOfCrossRegionReplication:
     Type: String
     Default: ''
@@ -102,7 +110,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateWebACL: !Equals [ !Ref WebACL, Enabled ]
   CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ]
-  Create403CustomErrorResponse: !And [ !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ], !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ] ]
+  CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
 
 Resources:
@@ -196,7 +204,7 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
-              SSEAlgorithm: aws:kms
+              SSEAlgorithm: AES256
       BucketName: !Ref LogBacketName
       LifecycleConfiguration:
         Rules:
@@ -221,7 +229,7 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
-              SSEAlgorithm: aws:kms
+              SSEAlgorithm: AES256
       BucketName: !Ref DomainName
       LifecycleConfiguration:
         Rules:
@@ -285,12 +293,20 @@ Resources:
             - - !Ref DomainName
           - !Ref AWS::NoValue
         Comment: !Sub CDN for ${DomainName}
-        CustomErrorResponses: !If
-          - Create403CustomErrorResponse
+        CustomErrorResponses: !If 
+          - CreateCustomErrorResponse
           - - ErrorCachingMinTTL: 60
               ErrorCode: 403
               ResponseCode: 403
               ResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
+            - ErrorCachingMinTTL: 60
+              ErrorCode: 404
+              ResponseCode: 404
+              ResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
+            - ErrorCachingMinTTL: 60
+              ErrorCode: 500
+              ResponseCode: 500
+              ResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
           - !Ref AWS::NoValue
         DefaultCacheBehavior:
           AllowedMethods:

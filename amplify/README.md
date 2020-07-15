@@ -5,11 +5,7 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates) 
 
-<<<<<<< HEAD
 ``AWSCloudFormationTemplates/amplify`` builds a CI/CD environment with ``AWS Amplify Console``, ``AWS CodeCommit`` , and related resources.
-=======
-``AWSCloudFormationTemplates/amplify`` builds CI/CD environments with ``AWS Amplify``, ``AWS CodeCommit`` , and related resources.
->>>>>>> master
 
 ## TL;DR
 
@@ -35,12 +31,6 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-<<<<<<< HEAD
 | AmplifyConsoleAppId | String |  |  | You can provide this parameter after your first deployment. |
 | DomainName | String | | ○ | The custom domain name for your Amplify Console application |
 | RepositoryName | String | | ○ | The repository name on CodeCommit | 
-=======
-| AmplifyConsoleAppId | String |  |  | You can privide this parameter after your first deployment. |
-| DomainName | String | ○ |  | Custom domain name for your Amplify Console application |
-| RepositoryName | String | ○ |  | Repository name on CodeCommit | 
->>>>>>> master
