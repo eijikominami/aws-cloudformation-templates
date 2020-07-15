@@ -1,20 +1,28 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
+<<<<<<< HEAD
+Description: CloudWatch alarm for Amazon EventBridge
+=======
 Description: CloudWatch alarm for EventBridge
+>>>>>>> master
 
 Parameters:
   CustomAlarmName:
     Type: String
     Default: ''
-    Description: Custom Alram name
+    Description: The custom alram name
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
-    Description: SNS topic ARN [required]
+    Description: The SNS topic ARN [required]
   EventsRuleName:
     Type: String
     AllowedPattern: .+
+<<<<<<< HEAD
+    Description: The EventBridge rule name [required]
+=======
     Description: EventBridge rule name [required]
+>>>>>>> master
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]

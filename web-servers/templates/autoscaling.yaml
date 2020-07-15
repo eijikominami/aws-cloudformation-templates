@@ -16,22 +16,22 @@ Parameters:
     Type: AWS::EC2::Image::Id
     Default: ami-068a6cefc24c301d2
     AllowedPattern: ^ami-.+$
-    Description: EC2 Image Id [required]
+    Description: The EC2 Image Id [required]
   EC2InstanceType:
     Type: String
     Default: t3.micro
-    Description: EC2 Instance Type [required]
+    Description: The EC2 Instance Type [required]
   EC2IamInstanceProfileArn:
     Type: String
     AllowedPattern: .+
-    Description: Instance Profile ARN to attach the instances [required]
+    Description: The Instance Profile ARN to attach the instances [required]
   EC2KeyName:
     Type: String
     Default: ''
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Description: The Name of an existing EC2 KeyPair to enable SSH access to the instance
   EC2SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
-    Description: Security Group Id to attach the instances [required]
+    Description: The Security Group id to attach the instances [required]
   EC2VolumeSize:
     Type: Number
     Default: 8
@@ -40,31 +40,31 @@ Parameters:
   EipAllocationId1ForNLB:     
     Type: String 
     AllowedPattern: .+
-    Description: Elastic Ip Allocation Id1 for Network LoadBalancer
+    Description: The Elastic Ip Allocation Id1 for Network LoadBalancer
   EipAllocationId2ForNLB:     
     Type: String 
     AllowedPattern: .+
-    Description: Elastic Ip Allocation Id2 for Network LoadBalancer
+    Description: The Elastic Ip Allocation Id2 for Network LoadBalancer
   LogicalNamePrefix:
     Type: String
     Default: WebServers
     AllowedPattern: .+
-    Description: Custom prefix name [required]
+    Description: The custom prefix name [required]
   LoadBalancerType:
     Type: String
     Default: application
     AllowedValues:
       - application
       - network
-    Description: LoadBalancer Type [required]
+    Description: The LoadBalancer Type [required]
   SubnetId1ForELB:
     Type: String
     AllowedPattern: .+
-    Description: Subnet Id1 for Network LoadBalancer
+    Description: The subnet id 1 for Network LoadBalancer
   SubnetId2ForELB:
     Type: String
     AllowedPattern: .+
-    Description: Subnet Id2 for Network LoadBalancer
+    Description: The subnet id 2 for Network LoadBalancer
   SNSTopicARN:
     Type: String
     AllowedPattern: .+

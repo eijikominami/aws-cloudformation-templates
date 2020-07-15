@@ -54,6 +54,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | |
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
 | CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |
+| CloudFrontRestrictViewerAccess | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
+| CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | LoggingEnabled | Enabled / Disabled | Enabled | ○ | Enabledを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |

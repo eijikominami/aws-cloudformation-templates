@@ -8,11 +8,11 @@ Parameters:
     AllowedValues:
      - DNS
      - EMAIL
-    Description: Validation method that you own or control the domain [required]
+    Description: The validation method that you own or control the domain [required]
   ACMDomainName:
     Type: String
     Default: ''
-    Description: Domain name created by Certification Manager
+    Description: The domain name created by Certification Manager
   BillingAlertThreshold:
     Type: Number
     Default: 0
@@ -36,7 +36,7 @@ Parameters:
   CloudFrontDistributionId:
     Type: String
     Default: ''
-    Description: Target distribution ID monitored by CloudWatch Alarm
+    Description: The target distribution ID monitored by CloudWatch Alarm
   SnsTopicArn:
     Type: String
     Default: ''

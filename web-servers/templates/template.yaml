@@ -20,7 +20,7 @@ Parameters:
       - None
       - application
       - network  
-    Description: AutoScaling LoadBalancer Type [required]
+    Description: The autoScaling LoadBalancer Type [required]
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
@@ -30,15 +30,15 @@ Parameters:
     Type: AWS::EC2::Image::Id
     Default: ami-068a6cefc24c301d2
     AllowedPattern: ^ami-.+$
-    Description: EC2 Image Id [required]
+    Description: The EC2 Image Id [required]
   EC2InstanceType:
     Type: String
     Default: t3.micro
-    Description: EC2 Instance Type [required]
+    Description: The EC2 Instance Type [required]
   EC2KeyName:
     Type: String
     Default: ''
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Description: The name of an existing EC2 KeyPair to enable SSH access to the instance
   EC2VolumeSize:
     Type: Number
     Default: 8
@@ -60,27 +60,27 @@ Parameters:
     Type: String
     Default: 10.0.0.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: Public Subnet CidrBlock at AZ1 [required]
+    Description: The public subnet CIDR block at AZ1 [required]
   SubnetExternalCidrBlockForAz1:
     Type: String
     Default: 10.0.1.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: Private Subnet CidrBlock at AZ1
+    Description: The private subnet CIDR block at AZ1
   SubnetPublicCidrBlockForAz2:
     Type: String
     Default: 10.0.4.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: Public Subnet CidrBlock at AZ2 [required]
+    Description: The public subnet CIDR block at AZ2 [required]
   SubnetExternalCidrBlockForAz2:
     Type: String
     Default: 10.0.5.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: Private Subnet CidrBlock at AZ2
+    Description: The private subnet CIDR block at AZ2
   VPCCidrBlock:
     Type: String
     Default: 10.0.0.0/21
     AllowedPattern: ^[0-9./]*$
-    Description: VPC CidrBlock [required]
+    Description: The VPC CIDR block [required]
   WebACL:
     Type: String
     Default: Disabled

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description:  AWSCloudFormationTemplates/cicd creates CodePipeline for building AWSCloudFormationTemplates.
+Description:  AWSCloudFormationTemplates/cicd creates a CodePipeline pipeline building AWSCloudFormationTemplates.
 
 Parameters:
   BuildSpecForCommits:
@@ -29,7 +29,7 @@ Parameters:
   GitHubOAuthToken:
     Type: String
     AllowedPattern: .+
-    Description: OAuth token to access GitHub [required]
+    Description: The OAuth token to access GitHub [required]
   GitHubCloneUrl:
     Type: String
     AllowedPattern: ^https://github.com/.+$
@@ -37,15 +37,15 @@ Parameters:
   GitHubBranchName:
     Type: String
     AllowedPattern: .+
-    Description: Branch name [required]
+    Description: The branch name of GitHub [required]
   SNSForAlertArn:
     Type: String
     Default: ''
-    Description: Amazon SNS Topic ARN for alert
+    Description: The Amazon SNS topic ARN for alert
   SNSForDeploymentArn:
     Type: String
     Default: '' 
-    Description: Amazon SNS Topic ARN for deployment information
+    Description: The Amazon SNS topic ARN for deployment information
   TagKey:
     Type: String
     Default: createdby

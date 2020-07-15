@@ -5,7 +5,7 @@ Parameters:
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
-    Description: Custom prefix name [required]
+    Description: The custom prefix name [required]
   TagKey:
     Type: String
     Default: createdby
