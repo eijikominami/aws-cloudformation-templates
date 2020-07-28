@@ -458,7 +458,7 @@ Resources:
           };
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
-      Name: cloudfront
+      Name: cf
       RuntimeVersion: syn-1.0
       Schedule: 
         DurationInSeconds: '10'
