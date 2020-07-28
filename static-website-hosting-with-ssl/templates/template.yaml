@@ -193,6 +193,47 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForSynthetics:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-CloudWatchLogsSynthetics-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetBucketLocation'
+                Resource: !Sub arn:aws:s3:::${LogBacketName}/Synthetics/${DomainName}/
+              - Effect: Allow
+                Action:
+
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: !GetAtt LogGroupForLambdaSynthetics.Arn
+              - Effect: Allow
+                Action:
+                  - 's3:ListAllMyBuckets'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'cloudwatch:PutMetricData'
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    cloudwatch:namespace: CloudWatchSynthetics
+      RoleName: !Sub '${AWS::StackName}-SyntheticsRole-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # S3
   S3ForAccessLog:
     Condition: CustomLogBucketName
@@ -377,6 +418,81 @@ Resources:
     Properties:
       CloudFrontOriginAccessIdentityConfig: 
         Comment: !Sub access-identity-${DomainName}
+Synthetics:
+    Type: AWS::Synthetics::Canary
+    Properties: 
+      ArtifactS3Location: !Sub s3://${LogBacketName}/Synthetics/${DomainName}/
+      Code: 
+        ZipFile: |
+          var synthetics = require('Synthetics');
+          const log = require('SyntheticsLogger');
+          const https = require('https');
+          const http = require('http');
+
+          const apiCanaryBlueprint = async function () {
+              const postData = "";
+
+              const verifyRequest = async function (requestOption) {
+                return new Promise((resolve, reject) => {
+                  log.info("Making request with options: " + JSON.stringify(requestOption));
+                  let req
+                  if (requestOption.port === 443) {
+                    req = https.request(requestOption);
+                  } else {
+                    req = http.request(requestOption);
+                  }
+                  req.on('response', (res) => {
+                    log.info(`Status Code: ${res.statusCode}`)
+                    log.info(`Response Headers: ${JSON.stringify(res.headers)}`)
+                    if (res.statusCode !== 200) {
+                      reject("Failed: " + requestOption.path);
+                    }
+                    res.on('data', (d) => {
+                      log.info("Response: " + d);
+                    });
+                    res.on('end', () => {
+                      resolve();
+                    })
+                  });
+
+                  req.on('error', (error) => {
+                    reject(error);
+                  });
+
+                  if (postData) {
+                    req.write(postData);
+                  }
+                  req.end();
+                });
+              }
+
+              const headers = {"x-api-key":"rvZVXvEy1h1k7wOiXwPq8ioPXGhoAiuatdZxFiCd"}
+              headers['User-Agent'] = [synthetics.getCanaryUserAgentString(), headers['User-Agent']].join(' ');
+              const requestOptions = {"hostname":"test-api.count.asahi.co.jp","method":"GET","path":"/web/ranking/TEST120200406si/","port":443}
+              requestOptions['headers'] = headers;
+              await verifyRequest(requestOptions);
+          };
+
+          exports.handler = async () => {
+              return await apiCanaryBlueprint();
+          };        
+      ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
+      FailureRetentionPeriod: 31
+      Name: !Ref AWS::StackName
+      RuntimeVersion: syn-1.0
+      Schedule: 
+        DurationInSeconds: '10'
+        Expression: rate(5 minutes) 
+      StartCanaryAfterCreation: true
+      SuccessRetentionPeriod: 31
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  LogGroupForLambdaSynthetics:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/${Synthetics}
+      RetentionInDays: 60
   # CloudWatch Dashboard
   Dashboard:
     Type: 'AWS::CloudWatch::Dashboard'
