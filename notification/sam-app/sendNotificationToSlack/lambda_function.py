@@ -71,17 +71,13 @@ def lambda_handler(event, context):
             elif 'source' in message and 'aws.access-analyzer' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
                 slack_message = createIAMAccessAnalyzer(message)
-            else:
-                hook_url = None
-                slack_message = None                           
-        else:
             # Amplify Console
-            if 'AWS Amplify Console' in message:
+            elif 'source' in message and 'aws.amplify' in message['source']:  
                 hook_url = "https://" + DEPLOYMENT_HOOK_URL
                 slack_message = createAmplifyMessage(message)
             else:
-                hook_url = None     
-                slack_message = None
+                hook_url = None
+                slack_message = None                           
     except json.decoder.JSONDecodeError as e:
         logger.error("JSON decode error: %s at %s.", e.msg, sys._getframe().f_code.co_name)
     # Sends Slack
@@ -429,29 +425,31 @@ def createIAMAccessAnalyzer(message):
 
 @xray_recorder.capture('createAmplifyMessages')
 def createAmplifyMessage(message):
-    if 'FAILED' in message:
-        message = message.replace('FAILED', ' *FAILED* ')
-        text = ":x: Amplify Console のデプロイが失敗しました 。"
-        color = "#961D13"
-    elif 'SUCCEED' in message:
-        message = message.replace('SUCCEED', ' *SUCCEED* ')
-        text = ":white_check_mark: Amplify Console のデプロイが成功しました 。"
-        color = "#49C39E"
-    elif 'STARTED' in message:
-        message = message.replace('STARTED', ' *STARTED* ')
+    if message['detail']['jobStatus'] == 'STARTED':
         text = ":information_source: Amplify Console のデプロイが開始されました 。"
         color = "#888888"
-    else:
-        text = ":japanese_ogre: Amplify Console からの通知があります。"
-        color = "#EBB424"
+    elif message['detail']['jobStatus'] == 'FAILED':
+        text = ":x: Amplify Console のデプロイが失敗しました 。"
+        color = "#961D13"
+    elif message['detail']['jobStatus'] == 'SUCCEED':
+        text = ":white_check_mark: Amplify Console のデプロイが成功しました 。"
+        color = "#49C39E"
     return {
         'attachments': [{
             'color': color,
             'title': text,
             'fields': [
                     {
-                        'title': "Message",
-                        'value': "%s" % (message)
+                        'title': "AppId",
+                        'value': "%s" % (message['detail']['appId'])
+                    },
+                    {
+                        'title': "BranchName",
+                        'value': "%s" % (message['detail']['branchName'])
+                    },
+                    {
+                        'title': "JobId",
+                        'value': "%s" % (message['detail']['jobId'])
                     }
                 ]
         }]
