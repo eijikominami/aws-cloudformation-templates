@@ -218,7 +218,7 @@ Resources:
                 Action:
                   - 's3:PutObject'
                   - 's3:GetBucketLocation'
-                Resource: !Sub arn:aws:s3:::${LogBacketName}/Synthetics/${DomainName}/
+                Resource: !Sub arn:aws:s3:::${S3ForSynthetics}/*
               - Effect: Allow
                 Action:
 
@@ -425,11 +425,11 @@ Resources:
       CloudFrontOriginAccessIdentityConfig: 
         Comment: !Sub access-identity-${DomainName}
   # CloudWatch Synthetics
-  CloudWatchSynthetics:
+  Synthetics:
     Condition: CreateSynthetics
     Type: 'AWS::Synthetics::Canary'
     Properties: 
-      ArtifactS3Location: !Sub s3://${LogBacketName}/Synthetics/${SyntheticsCanaryName}/
+      ArtifactS3Location: !Sub s3://${S3ForSynthetics}
       Code: 
         Handler: pageLoadBlueprint.handler
         Script: !Sub |
@@ -463,6 +463,25 @@ Resources:
       StartCanaryAfterCreation: true
       SuccessRetentionPeriod: 31
       Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3ForSynthetics:
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub synthetics-${SyntheticsCanaryName}-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   LogGroupForLambdaSynthetics:
