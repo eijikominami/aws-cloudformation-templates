@@ -70,6 +70,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The S3 bucket name for Cross Region Replication
+  SyntheticsEnabled:
+    Type: String
+    Default: Enabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable CloudWatch Synthetics [required]    
   LoggingEnabled:
     Type: String
     Default: Enabled
@@ -108,6 +115,7 @@ Conditions:
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
   CreateLog: !Equals [ !Ref LoggingEnabled, Enabled ]
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateSynthetics: !Equals [ !Ref SyntheticsEnabled, Enabled ]
   CreateWebACL: !Equals [ !Ref WebACL, Enabled ]
   CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
@@ -194,6 +202,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForSynthetics:
+    Condition: CreateSynthetics
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
@@ -418,11 +427,14 @@ Resources:
     Properties:
       CloudFrontOriginAccessIdentityConfig: 
         Comment: !Sub access-identity-${DomainName}
+  # CloudWatch Synthetics
   Synthetics:
+    Condition: CreateSynthetics
     Type: 'AWS::Synthetics::Canary'
     Properties: 
       ArtifactS3Location: !Sub s3://${LogBacketName}/Synthetics/${DomainName}/
       Code: 
+        Handler: pageLoadBlueprint.handler
         Script: !Sub |
           var synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
@@ -457,6 +469,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   LogGroupForLambdaSynthetics:
+    Condition: CreateSynthetics
     Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/Synthetics-${AWS::StackName}
