@@ -61,6 +61,7 @@ You can provide optional parameters as follows.
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3**. |
+| SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled. |
 | LoggingEnabled | Enabled / Disabled | Enabled | ○ | If Enabled, Logging is enabled on **CloudFront** and **S3**. |
 | LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |
 | WebACL | Enabled / Disabled | Disabled | ○ | If **Disabled** is set, AWS WAF does NOT created. |

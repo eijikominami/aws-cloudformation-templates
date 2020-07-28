@@ -73,7 +73,7 @@ Parameters:
   SyntheticsCanaryName:
     Type: String
     Default: ''
-    Description: CloudWatch Synthetics Canary Name [required]    
+    Description: CloudWatch Synthetics Canary Name 
   LoggingEnabled:
     Type: String
     Default: Enabled
