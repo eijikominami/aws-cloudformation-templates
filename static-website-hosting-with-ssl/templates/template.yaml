@@ -70,7 +70,7 @@ Parameters:
     Type: String
     Default: ''
     Description: The S3 bucket name for Cross Region Replication
-  SyntheticsEnabled:
+  SyntheticsCanaryName:
     Type: String
     Default: Enabled
     AllowedValues:
@@ -115,7 +115,7 @@ Conditions:
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
   CreateLog: !Equals [ !Ref LoggingEnabled, Enabled ]
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateSynthetics: !Equals [ !Ref SyntheticsEnabled, Enabled ]
+  CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, '' ] ]
   CreateWebACL: !Equals [ !Ref WebACL, Enabled ]
   CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
@@ -432,7 +432,7 @@ Resources:
     Condition: CreateSynthetics
     Type: 'AWS::Synthetics::Canary'
     Properties: 
-      ArtifactS3Location: !Sub s3://${LogBacketName}/Synthetics/${DomainName}/
+      ArtifactS3Location: !Sub s3://${LogBacketName}/Synthetics/${SyntheticsCanaryName}/
       Code: 
         Handler: pageLoadBlueprint.handler
         Script: !Sub |
@@ -458,7 +458,7 @@ Resources:
           };
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
-      Name: cf
+      Name: !Ref SyntheticsCanaryName
       RuntimeVersion: syn-1.0
       Schedule: 
         DurationInSeconds: '10'
@@ -472,7 +472,7 @@ Resources:
     Condition: CreateSynthetics
     Type: 'AWS::Logs::LogGroup'
     Properties: 
-      LogGroupName: !Sub /aws/lambda/Synthetics-${AWS::StackName}
+      LogGroupName: !Sub /aws/lambda/Synthetics-${SyntheticsCanaryName}
       RetentionInDays: 60
   # CloudWatch Dashboard
   Dashboard:
