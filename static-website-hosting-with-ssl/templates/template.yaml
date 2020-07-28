@@ -418,12 +418,12 @@ Resources:
     Properties:
       CloudFrontOriginAccessIdentityConfig: 
         Comment: !Sub access-identity-${DomainName}
-Synthetics:
-    Type: AWS::Synthetics::Canary
+  Synthetics:
+    Type: 'AWS::Synthetics::Canary'
     Properties: 
       ArtifactS3Location: !Sub s3://${LogBacketName}/Synthetics/${DomainName}/
       Code: 
-        ZipFile: |
+        Script: |
           var synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
           const https = require('https');
@@ -489,9 +489,9 @@ Synthetics:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   LogGroupForLambdaSynthetics:
-    Type: AWS::Logs::LogGroup
+    Type: 'AWS::Logs::LogGroup'
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${Synthetics}
+      LogGroupName: !Sub /aws/lambda/Synthetics-${AWS::StackName}
       RetentionInDays: 60
   # CloudWatch Dashboard
   Dashboard:
