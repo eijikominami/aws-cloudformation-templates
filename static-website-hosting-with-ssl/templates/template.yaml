@@ -425,7 +425,7 @@ Resources:
       CloudFrontOriginAccessIdentityConfig: 
         Comment: !Sub access-identity-${DomainName}
   # CloudWatch Synthetics
-  Synthetics:
+  CloudWatchSynthetics:
     Condition: CreateSynthetics
     Type: 'AWS::Synthetics::Canary'
     Properties: 
