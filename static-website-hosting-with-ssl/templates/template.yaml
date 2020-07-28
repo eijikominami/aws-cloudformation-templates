@@ -72,11 +72,8 @@ Parameters:
     Description: The S3 bucket name for Cross Region Replication
   SyntheticsCanaryName:
     Type: String
-    Default: Enabled
-    AllowedValues:
-     - Enabled
-     - Disabled
-    Description: Enable or disable CloudWatch Synthetics [required]    
+    Default: ''
+    Description: CloudWatch Synthetics Canary Name [required]    
   LoggingEnabled:
     Type: String
     Default: Enabled
