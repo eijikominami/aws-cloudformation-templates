@@ -19,7 +19,7 @@ env:
     SECURITY_CONFIG_RULES_DIST_DIR: aws-cloudformation-templates/security-config-rules
     HOSTING_SRC_DIR: static-website-hosting-with-ssl/templates
     HOSTING_DIST_DIR: aws-cloudformation-templates/static-website-hosting-with-ssl
-    SYNTHETICS_SRC_DIR: synthetics/sam-app
+    SYNTHETICS_SRC_DIR: synthetics/templates
     SYNTHETICS_DIST_DIR: aws-cloudformation-templates/synthetics
     EC2_SRC_DIR: web-servers/templates
     EC2_DIST_DIR: aws-cloudformation-templates/web-servers
