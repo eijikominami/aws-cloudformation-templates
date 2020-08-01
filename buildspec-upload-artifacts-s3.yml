@@ -19,6 +19,8 @@ env:
     SECURITY_CONFIG_RULES_DIST_DIR: aws-cloudformation-templates/security-config-rules
     HOSTING_SRC_DIR: static-website-hosting-with-ssl/templates
     HOSTING_DIST_DIR: aws-cloudformation-templates/static-website-hosting-with-ssl
+    SYNTHETICS_SRC_DIR: synthetics/sam-app
+    SYNTHETICS_DIST_DIR: aws-cloudformation-templates/synthetics
     EC2_SRC_DIR: web-servers/templates
     EC2_DIST_DIR: aws-cloudformation-templates/web-servers
 
@@ -45,6 +47,7 @@ phases:
       - cfn-lint -t ${SECURITY_SRC_DIR}/template.yaml
       - cfn-lint -t ${SECURITY_CONFIG_RULES_SRC_DIR}/template.yaml
       - cfn-lint -t ${HOSTING_SRC_DIR}/template.yaml
+      - cfn-lint -t ${SYNTHETICS_SRC_DIR}/template.yaml
       - cfn-lint -t ${EC2_SRC_DIR}/template.yaml
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
@@ -54,6 +57,7 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive
   build:
     commands:
@@ -78,4 +82,5 @@ phases:
        - aws s3 cp ${SECURITY_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${SECURITY_CONFIG_RULES_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${HOSTING_SRC_DIR}/ s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
+       - aws s3 cp ${SYNTHETICS_SRC_DIR}/ s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${EC2_SRC_DIR}/ s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'

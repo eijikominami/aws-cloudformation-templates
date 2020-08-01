@@ -106,6 +106,7 @@ Resources:
                   throw "Failed to load page!";
               }
           };
+          
           exports.handler = async () => {
             return await pageLoadBlueprint();
           };
