@@ -70,6 +70,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The S3 bucket name for Cross Region Replication
+  SyntheticsCanaryName:
+    Type: String
+    Default: ''
+    Description: CloudWatch Synthetics Canary Name 
   LoggingEnabled:
     Type: String
     Default: Enabled
@@ -88,6 +92,9 @@ Parameters:
       - Enabled
       - Disabled
     Description: Enable or disable WebACL [required]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
   SNSForDeploymentArn:
     Type: String
     Default: ''  
@@ -107,7 +114,9 @@ Conditions:
   SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
   CreateLog: !Equals [ !Ref LoggingEnabled, Enabled ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
   CreateWebACL: !Equals [ !Ref WebACL, Enabled ]
   CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
@@ -132,6 +141,45 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml
+  Synthetics:
+    Condition: CreateSynthetics
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CanaryName: !Ref SyntheticsCanaryName
+        DomainName: !Ref DomainName
+        SNSForAlertArn: !If 
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !Ref SNSForDeploymentArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/synthetics/heartbeat.yaml
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.18
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
     Type: 'AWS::Serverless::Application'

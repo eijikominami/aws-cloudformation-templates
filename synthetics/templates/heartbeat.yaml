@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/synthetics creates an AWS CloudWatch Synthetics canary.
+
+Parameters:
+  CanaryName:
+    Type: String
+    AllowedPattern: .+
+    Description: CloudWatch Synthetics Canary Name [required]
+  DomainName:
+    Type: String
+    AllowedPattern: .+
+    Description: The watched domain name [required]
+  WatchedPagePath:
+    Type: String
+    Default: /index.html
+    AllowedPattern: .+
+    Description: The watched page path [required]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws:cloudformation:stack
+    AllowedPattern: .+
+
+Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+
+Resources:
+  # IAM
+  IAMRoleForSynthetics:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub 'CloudWatchLogsSynthetics-${CanaryName}-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetBucketLocation'
+                Resource: !Sub arn:aws:s3:::${S3ForSynthetics}/*
+              - Effect: Allow
+                Action:
+
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: !GetAtt LogGroupForLambdaSynthetics.Arn
+              - Effect: Allow
+                Action:
+                  - 's3:ListAllMyBuckets'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'cloudwatch:PutMetricData'
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    cloudwatch:namespace: CloudWatchSynthetics
+      RoleName: !Sub 'SyntheticsRole-${CanaryName}-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CloudWatch Synthetics
+  Synthetics:
+    Type: 'AWS::Synthetics::Canary'
+    Properties: 
+      ArtifactS3Location: !Sub s3://${S3ForSynthetics}
+      Code: 
+        Handler: pageLoadBlueprint.handler
+        Script: !Sub >
+          var synthetics = require('Synthetics');
+          const log = require('SyntheticsLogger');
+
+          const pageLoadBlueprint = async function () {
+
+              // INSERT URL here
+              const URL = "https://${DomainName}${WatchedPagePath}";
+
+              let page = await synthetics.getPage();
+              const response = await page.goto(URL, {waitUntil: 'domcontentloaded', timeout: 30000});
+              //Wait for page to render.
+              //Increase or decrease wait time based on endpoint being monitored.
+              await page.waitFor(15000);
+              await synthetics.takeScreenshot('loaded', 'loaded');
+              let pageTitle = await page.title();
+              log.info('Page title: ' + pageTitle);
+              if (response.status() !== 200) {
+                  throw "Failed to load page!";
+              }
+          };
+          
+          exports.handler = async () => {
+            return await pageLoadBlueprint();
+          };
+      ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
+      FailureRetentionPeriod: 31
+      Name: !Ref CanaryName
+      RuntimeVersion: syn-1.0
+      Schedule: 
+        DurationInSeconds: '10'
+        Expression: rate(5 minutes) 
+      StartCanaryAfterCreation: true
+      SuccessRetentionPeriod: 31
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3ForSynthetics:
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub synthetics-${CanaryName}-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  LogGroupForLambdaSynthetics:
+    Type: 'AWS::Logs::LogGroup'
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/Synthetics-${CanaryName}
+      RetentionInDays: 60
+  # CloudWatch Alarm
+  CloudWatchAlarmSynthetics:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub '*${DomainName}* で *アクセス失敗率が上昇* しています。'
+      AlarmName: !Sub 'Notice-${CanaryName}-Synthetics-AccessError'
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: CanaryName
+          Value: !Ref CanaryName
+      EvaluationPeriods: 1
+      MetricName: SuccessPercent
+      Namespace: CloudWatchSynthetics
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: 300
+      Statistic: Average
+      Threshold: 90
+      TreatMissingData: notBreaching
+  # SNS
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.18
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.0.18
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue

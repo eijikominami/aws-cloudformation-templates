@@ -671,7 +671,7 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
-                  ParameterOverrides: '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}}'
+                  ParameterOverrides: '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - Source-CloudFormationConfigurationArtifact::StaticWebsiteHosting.json

@@ -59,6 +59,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
+| SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | LoggingEnabled | Enabled / Disabled | Enabled | ○ | Enabledを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
 | WebACL | Enabled / Disabled | Disabled | ○ | Disabled に設定された場合、AWS WAFは作成されません。 |
