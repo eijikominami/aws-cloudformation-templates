@@ -7,15 +7,25 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: CloudWatch Synthetics Canary Name [required]
-  DomainName:
+  EndpointHostName:
     Type: String
     AllowedPattern: .+
-    Description: The watched domain name [required]
-  WatchedPagePath:
+    Description: The endpoint host name [required]
+  EndpointPath:
     Type: String
-    Default: /index.html
     AllowedPattern: .+
-    Description: The watched page path [required]
+    Default: /
+    Description: The endpoint path [required]
+  Data:
+    Type: String
+    Default: ''
+    Description: The POST data [required]
+  Method:
+    Type: String
+    AllowedValues:
+     - GET
+     - POST
+    Description: The HTTP method the canary will be testing [required]  
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -85,31 +95,59 @@ Resources:
     Properties: 
       ArtifactS3Location: !Sub s3://${S3ForSynthetics}
       Code: 
-        Handler: pageLoadBlueprint.handler
+        Handler: apiCanaryBlueprint.handler
         Script: !Sub >
           var synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
+          const https = require('https');
+          const http = require('http');
 
-          const pageLoadBlueprint = async function () {
+          const apiCanaryBlueprint = async function () {
+              const postData = "${Data}";
 
-              // INSERT URL here
-              const URL = "https://${DomainName}${WatchedPagePath}";
+              const verifyRequest = async function (requestOption) {
+                return new Promise((resolve, reject) => {
+                  log.info("Making request with options: " + JSON.stringify(requestOption));
+                  let req
+                  if (requestOption.port === 443) {
+                    req = https.request(requestOption);
+                  } else {
+                    req = http.request(requestOption);
+                  }
+                  req.on('response', (res) => {
+                    log.info(`Status Code: %s`, res.statusCode)
+                    log.info(`Response Headers: %s`, JSON.stringify(res.headers))
+                    if (res.statusCode !== 200) {
+                      reject("Failed: " + requestOption.path);
+                    }
+                    res.on('data', (d) => {
+                      log.info("Response: " + d);
+                    });
+                    res.on('end', () => {
+                      resolve();
+                    })
+                  });
 
-              let page = await synthetics.getPage();
-              const response = await page.goto(URL, {waitUntil: 'domcontentloaded', timeout: 30000});
-              //Wait for page to render.
-              //Increase or decrease wait time based on endpoint being monitored.
-              await page.waitFor(15000);
-              await synthetics.takeScreenshot('loaded', 'loaded');
-              let pageTitle = await page.title();
-              log.info('Page title: ' + pageTitle);
-              if (response.status() !== 200) {
-                  throw "Failed to load page!";
+                  req.on('error', (error) => {
+                    reject(error);
+                  });
+
+                  if (postData) {
+                    req.write(postData);
+                  }
+                  req.end();
+                });
               }
+
+              const headers = {}
+              headers['User-Agent'] = [synthetics.getCanaryUserAgentString(), headers['User-Agent']].join(' ');
+              const requestOptions = {"hostname":"${EndpointHostName}","method":"${Method}","path":"${EndpointPath}","port":443}
+              requestOptions['headers'] = headers;
+              await verifyRequest(requestOptions);
           };
-          
+
           exports.handler = async () => {
-            return await pageLoadBlueprint();
+              return await apiCanaryBlueprint();
           };
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
@@ -152,7 +190,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      AlarmDescription: !Sub '${DomainName}${WatchedPagePath} で *アクセス失敗率が上昇* しています。'
+      AlarmDescription: !Sub '${EndpointHostName}${EndpointPath} で ${Method} による *アクセス失敗率が上昇* しています。'
       AlarmName: !Sub 'Notice-${CanaryName}-Synthetics-AccessError'
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
