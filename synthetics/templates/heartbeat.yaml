@@ -85,7 +85,7 @@ Resources:
       ArtifactS3Location: !Sub s3://${S3ForSynthetics}
       Code: 
         Handler: pageLoadBlueprint.handler
-        Script: !Sub |
+        Script: !Sub >
           var synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
 
@@ -105,6 +105,9 @@ Resources:
               if (response.status() !== 200) {
                   throw "Failed to load page!";
               }
+          };
+          exports.handler = async () => {
+            return await pageLoadBlueprint();
           };
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
@@ -161,7 +164,7 @@ Resources:
           Value: !Ref CanaryName
       EvaluationPeriods: 1
       MetricName: SuccessPercent
-      Namespace: AWS/CloudWatchSynthetics
+      Namespace: CloudWatchSynthetics
       OKActions:
         - !If
           - CreateSNSForAlert

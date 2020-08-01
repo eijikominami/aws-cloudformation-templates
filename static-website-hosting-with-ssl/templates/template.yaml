@@ -163,7 +163,7 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/synthetics/template.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/synthetics/heartbeat.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: 'AWS::Serverless::Application'
