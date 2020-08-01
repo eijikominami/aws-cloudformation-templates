@@ -47,7 +47,7 @@ phases:
       - cfn-lint -t ${SECURITY_SRC_DIR}/template.yaml
       - cfn-lint -t ${SECURITY_CONFIG_RULES_SRC_DIR}/template.yaml
       - cfn-lint -t ${HOSTING_SRC_DIR}/template.yaml
-      - cfn-lint -t ${SYNTHETICS_SRC_DIR}/template.yaml
+      - cfn-lint -t ${SYNTHETICS_SRC_DIR}/heartbeat.yaml
       - cfn-lint -t ${EC2_SRC_DIR}/template.yaml
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
