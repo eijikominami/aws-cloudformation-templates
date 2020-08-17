@@ -118,9 +118,9 @@ Resources:
       AssociationName: SystemAssociationForInstallAndConfigureCloudWatchAgent
       Name: !Ref CloudWatchAgentInstallAndConfigure
       Targets: 
-        - Key: InstanceIds
+        - Key: !Sub tag:${TagKey}
           Values:
-            - '*'
+            - !Sub value:${TagValue}
   # Update Systems Manager (SSM) Agent every two weeks
   SystemAssociationForSsmAgentUpdate:
     Type: 'AWS::SSM::Association'
@@ -129,9 +129,9 @@ Resources:
       Name: AWS-UpdateSSMAgent
       ScheduleExpression: rate(14 days)
       Targets: 
-        - Key: InstanceIds
+        - Key: !Sub tag:${TagKey}
           Values:
-            - '*'
+            - !Sub value:${TagValue}
   # Collect inventory from your instances every 30 minutes
   SystemAssociationForInventoryCollection:
     Condition: CreateResource
@@ -158,9 +158,9 @@ Resources:
             - Enabled
       ScheduleExpression: rate(30 minutes)
       Targets: 
-        - Key: InstanceIds
+        - Key: !Sub tag:${TagKey}
           Values:
-            - '*'
+            - !Sub value:${TagValue}
   # Scan instances for missing patches daily
   SystemAssociationForScanningPatches:
     Type: 'AWS::SSM::Association'
@@ -172,9 +172,9 @@ Resources:
           Operation:
             - Scan
       Targets: 
-        - Key: InstanceIds
+        - Key: !Sub tag:${TagKey}
           Values:
-            - '*'
+            - !Sub value:${TagValue}
   # Update the CloudWatch agent every 30 days
   SystemAssociationForUpdateCloudWatchAgent:
     Type: 'AWS::SSM::Association'
@@ -183,9 +183,9 @@ Resources:
       Name: !Ref CloudWatchAgentUpdate
       ScheduleExpression: rate(30 days)
       Targets: 
-        - Key: InstanceIds
+        - Key: !Sub tag:${TagKey}
           Values:
-            - '*'
+            - !Sub value:${TagValue}
   # Install the Inspector agent two weeks
   SystemAssociationForAmazonInspector:
     Type: 'AWS::SSM::Association'
@@ -197,9 +197,9 @@ Resources:
           Operation:
             - Install
       Targets: 
-        - Key: InstanceIds
+        - Key: !Sub tag:${TagKey}
           Values:
-            - '*'
+            - !Sub value:${TagValue}
   # Maintenance Window
   MaintenanceWindow:
     Type: 'AWS::SSM::MaintenanceWindow'

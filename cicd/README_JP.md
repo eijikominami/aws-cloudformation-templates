@@ -74,6 +74,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | GitHubOwnerNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリの所有者名　|
 | GitHubRepoNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリ名　|
 | GitHubStage | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |
+| TemplateConfigurationBasePath | String | | | 設定プロパティのあるディレクトリのパス |
 | DefaultSecuritySettingsConfigRules | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
 | GlobalSettings | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
 | Notification | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`Notification` スタックがデプロイされます。 |

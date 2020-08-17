@@ -29,6 +29,10 @@ Parameters:
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
+  TemplateConfigurationBasePath:
+    Type: String
+    Default: ''
+    Description: The base path of template configuration files.
   StaticWebsiteHosting:
     Type: String
     Default: Disabled
@@ -528,7 +532,7 @@ Resources:
                   - !Sub '{"ArtifactBacketInVirginia": "${ArtifactBacketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
-                  - Source-CloudFormationConfigurationArtifact::CICD.json  
+                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CICD.json  
                   - !Ref AWS::NoValue   
                 OutputFileName: Output.json    
               InputArtifacts:
@@ -557,7 +561,7 @@ Resources:
                   TemplatePath: Source-CloudFormationTemplatesArtifact::global/templates/template.yaml
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Source-CloudFormationConfigurationArtifact::GlobalSettings.json
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
                     - !Ref AWS::NoValue
                   OutputFileName: Output.json
                 InputArtifacts:
@@ -587,7 +591,7 @@ Resources:
                 ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
-                  - Source-CloudFormationConfigurationArtifact::DefaultSecuritySettings.json
+                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings.json
                   - !Ref AWS::NoValue
               InputArtifacts:
                 - Name: Source-CloudFormationTemplatesArtifact
@@ -614,7 +618,7 @@ Resources:
                 TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
-                  - Source-CloudFormationConfigurationArtifact::DefaultSecuritySettings-ConfigRules.json
+                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
                   - !Ref AWS::NoValue
               InputArtifacts:
                 - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
@@ -643,7 +647,7 @@ Resources:
                   ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Source-CloudFormationConfigurationArtifact::Notification.json
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Notification.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: BuildArtifact-Notification
@@ -674,7 +678,7 @@ Resources:
                   ParameterOverrides: '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Source-CloudFormationConfigurationArtifact::StaticWebsiteHosting.json
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}StaticWebsiteHosting.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
@@ -706,7 +710,7 @@ Resources:
                   ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Source-CloudFormationConfigurationArtifact::WebServers.json
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}WebServers.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
@@ -737,7 +741,7 @@ Resources:
                   ParameterOverrides: '{"SNSTopicARN": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Source-CloudFormationConfigurationArtifact::SystemManager.json
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SystemManager.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
@@ -768,7 +772,7 @@ Resources:
                   ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Source-CloudFormationConfigurationArtifact::UploadArtifacts.json
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}UploadArtifacts.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact

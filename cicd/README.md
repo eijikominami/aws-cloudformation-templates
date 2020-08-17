@@ -72,6 +72,7 @@ You can provide optional parameters as follows.
 | **GitHubOAuthToken** | String | | | The OAuth token to access GitHub |
 | GitHubOwnerNameForTemplateConfiguration | String | | | The GitHub owner name for CloudFormation Template Configuration files |
 | GitHubRepoNameForTemplateConfiguration | String | | | The GitHub repository name for CloudFormation Template Configuration files |
+| TemplateConfigurationBasePath | String | | | The base path of template configration files. |
 | DefaultSecuritySettingsConfigRules | Enabled / Disabled | Disabled | ○ | If it is Enabled, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
 | GlobalSettings | Enabled / Disabled | Disabled | ○ | If it is Enabled, `GlobalSettings` stack is deployed. |
 | Notification | Enabled / Disabled | Disabled | ○ | If it is Enabled, `Notification` stack is deployed. |
