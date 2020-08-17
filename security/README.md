@@ -117,6 +117,7 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
+| AmazonDetective | Enabled / Disabled | Disabled | ○ | If it is Enabled, Amazon Detective is enabled. |
 | AuditOtherAccounts | Enabled / Disabled | Disabled | ○ | If it is Enabled, **Config Aggregator** is enabled. |
 | AuditOtherRegions | Enabled / Disabled | Enabled | ○ | If it is Enabled, **CloudTrail** and **Include Global Resource Types** option in Config are enabled. |
 | AutoRemediation | Enabled / Disabled | Enabled | ○ | If it is Enabled, **AutoRemediation** by SSM Automation and Lambda are enabled. |

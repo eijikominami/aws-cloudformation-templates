@@ -24,6 +24,13 @@ Parameters:
      - Enabled
      - Disabled
     Description: Enable or disable auto remediation [required]
+  AmazonDetective:
+    Type: String
+    Default: Disabled
+    AllowedValues:
+     - Enabled
+     - Disabled
+    Description: Enable or disable Amazon Detective [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -54,6 +61,7 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateDetective: !Equals [ !Ref AmazonDetective, Enabled]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
 
 Resources:
@@ -174,6 +182,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   Detective:
+    Condition: CreateDetective
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:

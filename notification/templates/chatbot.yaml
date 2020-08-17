@@ -34,6 +34,8 @@ Resources:
       AWSServiceName: management.chatbot.amazonaws.com
       Description: The Service Linked Role used by AWS Chatbot.
   Chatbot:
+    DependsOn:
+      - ServiceLinkedRoleForChatbot
     Type: 'AWS::Chatbot::SlackChannelConfiguration'
     Properties: 
       ConfigurationName: !Sub ${LogicalNamePrefix}-${AWS::StackName}-${AWS::Region}
