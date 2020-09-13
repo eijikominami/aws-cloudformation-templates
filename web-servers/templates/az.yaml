@@ -170,7 +170,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 1.1.2
+        SemanticVersion: 1.1.3
       Tags:
         createdby: !Ref TagValue
 Outputs:
