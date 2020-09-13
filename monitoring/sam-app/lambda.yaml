@@ -36,7 +36,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions: 
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でエラーが発生しています。'
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Errors'
@@ -63,7 +63,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions: 
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でクライアントエラーが発生しています。'
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でクライアントエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ClientError'
@@ -90,7 +90,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions: 
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でタイプエラーが発生しています。'
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でタイプエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-TypeError'
@@ -127,7 +127,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions: 
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* からエラーログが出力されています。'
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* からエラーログが出力されています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ErrorLog'
@@ -149,7 +149,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* の実行時間がタイムアウト値に近づいています。'
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* の実行時間がタイムアウト値に近づいています。X-Ray から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Timeout-Will-Occur'
@@ -176,7 +176,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でスロットリングが発生しています。'
+      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でスロットリングが発生しています。これは、プロビジョニングされたスループット値を超えるリクエストが発生して、Lambdaの実行が中断されたことを示しています。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Throttles'

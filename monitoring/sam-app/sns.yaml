@@ -26,7 +26,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*SNS* (${CustomAlarmName}) で *通知エラー* が発生しています。'
+      AlarmDescription: !Sub '*SNS* (${CustomAlarmName}) で *通知エラー* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/sns/latest/dg/sns-monitoring-using-cloudwatch.html|CloudWatchを使用したトピックの監視> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - Warning-SNS-NumberOfNotificationsFailed-Occured

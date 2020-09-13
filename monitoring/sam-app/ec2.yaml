@@ -28,7 +28,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: '*EC2* で *ステータスチェックエラー* が発生しています。'
+      AlarmDescription: '*EC2* で *ステータスチェックエラー* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html|インスタンスの利用可能な CloudWatch メトリクスのリスト表示> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-EC2-StatusCheckFailed'
@@ -50,7 +50,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: '*EC2* で *CPU使用率が上昇* しています。'
+      AlarmDescription: '*EC2* で *CPU使用率が上昇* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html|インスタンスの利用可能な CloudWatch メトリクスのリスト表示> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-EC2-CPU-Overloaded'

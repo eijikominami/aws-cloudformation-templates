@@ -26,7 +26,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions: 
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*${ProjectName}* で *ビルドが失敗* しました。'
+      AlarmDescription: !Sub '*${ProjectName}* で *ビルドが失敗* しました。マネージメントコンソールから詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Notice-${CustomAlarmName}-CodeBuild-${ProjectName}-FailedBuilds'
