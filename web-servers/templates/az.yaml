@@ -165,8 +165,7 @@ Resources:
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
-        SNSForAlertArn: 
-          - !Ref SNSForAlertArn
+        SNSTopicArn: !Ref SNSForAlertArn
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Location:
