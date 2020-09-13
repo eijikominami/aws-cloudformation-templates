@@ -38,7 +38,7 @@ Resources:
         - ''
         - - '*SNS* ('
           - !GetAtt SNSTopic.TopicName
-          - ') で *通知エラー* が発生しています。'
+          - ') で *通知エラー* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/sns/latest/dg/sns-monitoring-using-cloudwatch.html|CloudWatchを使用したトピックの監視> をご覧ください。'
       AlarmName: !Sub 'Warning-${TopicName}-SNS-NumberOfNotificationsFailed-Occured'
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions: 

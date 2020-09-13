@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/static-web-hosting/az creates a VPC Subnet and related resources.
 
 Parameters:
@@ -22,7 +23,10 @@ Parameters:
     Default: WebServers
     AllowedPattern: .+
     Description: The custom prefix name [required]
-  SNSTopicARN:
+  SNSForAlertArn:
+    Type: String
+    AllowedPattern: .+
+  SNSForDeploymentArn:
     Type: String
     AllowedPattern: .+
   SubnetPublicCidrBlock:
@@ -156,52 +160,19 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm
-  NatGatewayPacketsDropCount:
-    Condition: PrivateSubnetExists
-    Type: 'AWS::CloudWatch::Alarm'
+  CloudWatchAlarmNATGateway:
+    Type: 'AWS::Serverless::Application'
     Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !Ref SNSTopicARN
-      AlarmDescription: '*NatGateway* で *パケット破棄* が発生しています。'
-      AlarmName: !Sub 'Notice-${AWS::StackName}-NatGateway-PacketsDropCount'
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      DatapointsToAlarm: 1
-      Dimensions:
-        - Name: NatGatewayId
-          Value: !Ref NatGateway
-      EvaluationPeriods: 1
-      MetricName: PacketsDropCount
-      Namespace: AWS/NATGateway
-      OKActions:
-        - !Ref SNSTopicARN
-      Period: 60
-      Statistic: Maximum
-      Threshold: 1
-      TreatMissingData: notBreaching
-  NatGatewayErrorPortAllocation:
-    Condition: PrivateSubnetExists
-    Type: 'AWS::CloudWatch::Alarm'
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !Ref SNSTopicARN
-      AlarmDescription: '*NatGateway* で *送信先ポートが割り当てられませんでした* 。'
-      AlarmName: !Sub 'Notice-${AWS::StackName}-NatGateway-ErrorPortAllocation'
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      DatapointsToAlarm: 1
-      Dimensions:
-        - Name: NatGatewayId
-          Value: !Ref NatGateway
-      EvaluationPeriods: 1
-      MetricName: ErrorPortAllocation
-      Namespace: AWS/NATGateway
-      OKActions:
-        - !Ref SNSTopicARN
-      Period: 60
-      Statistic: Maximum
-      Threshold: 1
-      TreatMissingData: notBreaching
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !Ref SNSForAlertArn
+      NotificationARNs: 
+        - !Ref SNSForDeploymentArn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
+        SemanticVersion: 1.1.2
+      Tags:
+        createdby: !Ref TagValue
 Outputs:
   SubnetId:
     Description: Subnet ID

@@ -22,7 +22,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: '*NatGateway* で *パケット破棄* が発生しています。'
+      AlarmDescription: '*NatGateway* で *パケット破棄* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/vpc-nat-gateway-cloudwatch.html#ec2-cloudwatch-metrics|Amazon CloudWatch を使用した NAT ゲートウェイのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Notice-${CustomAlarmName}-NatGateway-PacketsDropCount'
@@ -44,7 +44,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: '*NatGateway* で *送信先ポートが割り当てられませんでした* 。'
+      AlarmDescription: '*NatGateway* で *送信先ポートが割り当てられませんでした* 。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/vpc-nat-gateway-cloudwatch.html#ec2-cloudwatch-metrics|Amazon CloudWatch を使用した NAT ゲートウェイのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Notice-${CustomAlarmName}-NatGateway-ErrorPortAllocation'

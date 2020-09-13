@@ -190,7 +190,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      AlarmDescription: !Sub '${EndpointHostName}${EndpointPath} で ${Method} による *アクセス失敗率が上昇* しています。'
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${EndpointHostName}${EndpointPath} に対する ${Method} の *失敗率が上昇* しています。このエラーが継続する場合は、*トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
       AlarmName: !Sub 'Notice-${CanaryName}-Synthetics-AccessError'
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
@@ -216,7 +216,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.0
+        SemanticVersion: 1.1.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -232,7 +232,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.0
+        SemanticVersion: 1.1.2
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

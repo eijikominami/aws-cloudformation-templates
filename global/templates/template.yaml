@@ -143,7 +143,7 @@ Resources:
           - DefaultSNSTopic
           - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:DefaultSecuritySettings-system-notifications
           - !Ref SnsTopicArn
-      AlarmDescription: !Sub '*概算請求金額* が *${BillingAlertThreshold}00円を超過* しています。'
+      AlarmDescription: !Sub '*概算請求金額* が *$ ${BillingAlertThreshold} を超過* しています。'
       AlarmName: !Sub 'Warning-${AWS::StackName}-EstimatedCharges-is-Over-${BillingAlertThreshold}00-Yen'
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
