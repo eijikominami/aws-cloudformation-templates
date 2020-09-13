@@ -92,10 +92,16 @@ def createCloudWatchAlarmMessage(message):
 
     # OK
     if new_state == "OK":
-        alarm_description = "エラーから *回復* しました。"
         reason = "なし"
         title_prefix = ":white_check_mark: 正常復帰イベント"
         color = "#49C39E"
+        return {
+            'attachments': [{
+                'color': color,
+                'title': "%s | %s" % (title_prefix, title_suffix),
+                'text': "%s エラーから *回復* しました。" % (alarm_name)
+            }]
+        }
     # NG
     else: 
         alarm_description = message['AlarmDescription']
@@ -109,22 +115,22 @@ def createCloudWatchAlarmMessage(message):
         else:
             title_prefix = ":japanese_ogre: 不明なイベント"
             color = "#EBB424"
-    return {
-        'attachments': [{
-            'color': color,
-            'title': "%s | %s" % (title_prefix, title_suffix),
-            'text': "%s" % (alarm_description),
-            'fields': [
-                    {
-                        'title': "Alarm Name",
-                        'value': "%s" % (alarm_name)
-                    },
-                    {
-                        'title': "Cause",
-                        'value': "%s" % (reason)
-                    }
-                ]
-        }]
+        return {
+            'attachments': [{
+                'color': color,
+                'title': "%s | %s" % (title_prefix, title_suffix),
+                'text': "%s" % (alarm_description),
+                'fields': [
+                        {
+                            'title': "Alarm Name",
+                            'value': "%s" % (alarm_name)
+                        },
+                        {
+                            'title': "Cause",
+                            'value': "%s" % (reason)
+                        }
+                    ]
+            }]
     }
 
 @xray_recorder.capture('createScheduledEventMessage')

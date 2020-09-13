@@ -89,7 +89,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*API Gateway* (${ApiName}) の GET メソッドで *Latencyの値が増加* しています。このエラーが継続する場合は、*トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
+      AlarmDescription: !Sub '*API Gateway* (${ApiName}) の GET メソッドで *Latencyの値が増加* しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Notice-${CustomAlarmName}-ApiGateway-${ApiName}-Latency'
