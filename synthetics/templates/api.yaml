@@ -152,7 +152,7 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-1.0
+      RuntimeVersion: syn-nodejs-2.0
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 
