@@ -8,6 +8,9 @@ env:
 phases:
   pre_build:
     commands:
+      # Use the latest version
+      - pip install -U awscli
+      # Semantic Version
       - export SEMANTIC_VERSION=`echo ${CODEBUILD_WEBHOOK_TRIGGER} | sed -r 's/tag\/v([0-9\.]+).*-rc(.*)/\1/'`
       - echo $SEMANTIC_VERSION
   build:
