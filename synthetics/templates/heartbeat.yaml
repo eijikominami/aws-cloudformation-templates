@@ -142,6 +142,26 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  S3BucketPolicyForSynthetics:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties: 
+      Bucket: !Ref S3ForSynthetics
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForSynthetics
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForSynthetics.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForSynthetics.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
   # CloudWatch Alarm
   CloudWatchAlarmSynthetics:
     Type: 'AWS::CloudWatch::Alarm'

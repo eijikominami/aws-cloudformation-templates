@@ -265,6 +265,26 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  S3BucketPolicyForAccessLog:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties: 
+      Bucket: !Ref S3ForAccessLog
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForAccessLog
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForAccessLog.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForAccessLog.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
   # EventBridge for Health
   CloudWatchEventsForHealth:
     Type: 'AWS::Events::Rule'

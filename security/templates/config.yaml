@@ -728,6 +728,18 @@ Resources:
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForConfig.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForConfig.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
   CloudWatchEventsForConfig:
     Type: 'AWS::Events::Rule'
     Properties: 
