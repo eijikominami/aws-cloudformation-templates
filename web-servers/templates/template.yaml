@@ -296,7 +296,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.4
+        SemanticVersion: 1.1.5
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -312,7 +312,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.4
+        SemanticVersion: 1.1.5
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -509,7 +509,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 1.1.4
+        SemanticVersion: 1.1.5
       Tags:
         createdby: !Ref TagValue
 
