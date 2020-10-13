@@ -36,19 +36,7 @@ phases:
       - pip install -U aws_xray_sdk
   pre_build:
     commands:
-      - cfn-lint -t ${AMPLIFY_SRC_DIR}/template.yaml
-      - cfn-lint -t ${CICD_SRC_DIR}/template.yaml
-      - cfn-lint -t ${CICD_SRC_DIR}/codebuild.yaml
-      - cfn-lint -t ${GLOBAL_SRC_DIR}/template.yaml
-      - cfn-lint -t ${NOTIFICATION_SAM_SRC_DIR}/template.yaml
-      - cfn-lint -t ${NOTIFICATION_SAM_SRC_DIR}/sns.yaml
-      - cfn-lint -t ${NOTIFICATION_SAM_SRC_DIR}/events.yaml
-      - cfn-lint -t ${NOTIFICATION_CFN_SRC_DIR}/chatbot.yaml
-      - cfn-lint -t ${SECURITY_SRC_DIR}/template.yaml
-      - cfn-lint -t ${SECURITY_CONFIG_RULES_SRC_DIR}/template.yaml
-      - cfn-lint -t ${HOSTING_SRC_DIR}/template.yaml
-      - cfn-lint -t ${SYNTHETICS_SRC_DIR}/heartbeat.yaml
-      - cfn-lint -t ${EC2_SRC_DIR}/template.yaml
+      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive

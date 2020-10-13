@@ -6,15 +6,20 @@ phases:
        python: 3.8
     commands:
       - pip install -U pip
-      - pip install -U aws-sam-cli
       - pip install -U cfn-lint
-      - pip install -U requests
-      - pip install -U aws_xray_sdk
+      # Use the latest version
+      - pip install -U awscli
+      # for Lambda
+      - pip install -U aws-sam-cli
+      - pip install -U boto3
+      # for Lambda Powertools
+      - pip install -U aws-lambda-powertools
   pre_build:
     commands:
-      - cfn-lint -t ${TEMPLATE_FILE_PATH}template.yaml
+      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
   build:
     commands:
+       - sam validate --template ${TEMPLATE_FILE_PATH}template.yaml
        - sam build --template ${TEMPLATE_FILE_PATH}template.yaml
        - sam package --template-file .aws-sam/build/template.yaml --s3-bucket ${PACKAGE_BUCKET} --output-template-file packaged.yaml
 artifacts:
