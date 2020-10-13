@@ -1,18 +1,51 @@
 import logging
 import json
 import boto3
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch
+# Lambda Powertools
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools import Tracer
 
 # Specify desired resource types to validate
 APPLICABLE_RESOURCES = ["AWS::ApiGateway::RestApi", "AWS::Lambda::Function"]
 
-logger = logging.getLogger()
-logger.setLevel(20)
+# Lambda Powertools
+logger = Logger()
+tracer = Tracer()
+
+@logger.inject_lambda_context(log_event=True)
+@tracer.capture_lambda_handler
+def lambda_handler(event, context):
+    invoking_event = json.loads(event["invokingEvent"])
+    configuration_item = invoking_event["configurationItem"]
+    rule_parameters = json.loads(event["ruleParameters"])
+    
+    result_token = "No token found."
+    if "resultToken" in event:
+        result_token = event["resultToken"]
+
+    evaluation = evaluate_compliance(configuration_item, rule_parameters)
+
+    config = boto3.client("config")
+    config.put_evaluations(
+        Evaluations=[
+            {
+                "ComplianceResourceType":
+                    configuration_item["resourceType"],
+                "ComplianceResourceId":
+                    configuration_item["resourceId"],
+                "ComplianceType":
+                    evaluation["compliance_type"],
+                "Annotation":
+                    evaluation["annotation"],
+                "OrderingTimestamp":
+                    configuration_item["configurationItemCaptureTime"]
+            },
+        ],
+        ResultToken=result_token
+    )
 
 # Iterate through required tags ensureing each required tag is present, 
 # and value is one of the given valid values
-@xray_recorder.capture('find_violation')
 def find_violation(current_tags, required_tags):
     tagkey = ""
     tagValue = ""
@@ -31,7 +64,6 @@ def find_violation(current_tags, required_tags):
     else:
         return "Required tags dose NOT be defined."
 
-@xray_recorder.capture('evaluate_compliance')
 def evaluate_compliance(configuration_item, rule_parameters):
     
     if configuration_item["resourceType"] not in APPLICABLE_RESOURCES:
@@ -73,37 +105,3 @@ def evaluate_compliance(configuration_item, rule_parameters):
         "compliance_type": "COMPLIANT",
         "annotation": "This resource is compliant with the rule."
     }
-
-@xray_recorder.capture('lambda_handler')
-def lambda_handler(event, context):
-    invoking_event = json.loads(event["invokingEvent"])
-    logger.info(event)
-
-    configuration_item = invoking_event["configurationItem"]
-    
-    rule_parameters = json.loads(event["ruleParameters"])
-    
-    result_token = "No token found."
-    if "resultToken" in event:
-        result_token = event["resultToken"]
-
-    evaluation = evaluate_compliance(configuration_item, rule_parameters)
-
-    config = boto3.client("config")
-    config.put_evaluations(
-        Evaluations=[
-            {
-                "ComplianceResourceType":
-                    configuration_item["resourceType"],
-                "ComplianceResourceId":
-                    configuration_item["resourceId"],
-                "ComplianceType":
-                    evaluation["compliance_type"],
-                "Annotation":
-                    evaluation["annotation"],
-                "OrderingTimestamp":
-                    configuration_item["configurationItemCaptureTime"]
-            },
-        ],
-        ResultToken=result_token
-    )

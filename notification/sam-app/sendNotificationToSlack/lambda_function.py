@@ -3,24 +3,22 @@ import json
 import logging
 import os
 import sys
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch_all
+# Lambda Powertools
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools import Tracer
 
 from base64 import b64decode
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-# X-Ray
-xray_recorder.configure()
-patch_all()
+# Lambda Powertools
+logger = Logger()
+tracer = Tracer()
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-@xray_recorder.capture('lambda_handler')
+@logger.inject_lambda_context(log_event=True)
+@tracer.capture_lambda_handler
 def lambda_handler(event, context):
 
-    logger.info("Event: " + str(event))
     ALERT_HOOK_URL = os.environ['ALERT_HOOK_URL']
     DEPLOYMENT_HOOK_URL = os.environ['DEPLOYMENT_HOOK_URL']
     if os.environ['ENCRYPT'] == 'true':
@@ -32,7 +30,10 @@ def lambda_handler(event, context):
     slack_message = None
     try:
         message = json.loads(event['Records'][0]['Sns']['Message'])
-        logger.info("Message: " + str(message) + " Type:" + type(message).__name__ + " Length:" + str(len(message)))
+        logger.structure_logs(append=True, sns_message_body=str(message))
+        logger.structure_logs(append=True, sns_message_type=type(message).__name__)
+        logger.structure_logs(append=True, sns_message_length=str(len(message)))
+        logger.info("Analyzing the received message.")
         if isinstance(message, dict):
             # CloudWatch Alarm
             if 'AlarmName' in message:
@@ -78,12 +79,11 @@ def lambda_handler(event, context):
             else:
                 hook_url = None
                 slack_message = None                           
-    except json.decoder.JSONDecodeError as e:
-        logger.error("JSON decode error: %s at %s.", e.msg, sys._getframe().f_code.co_name)
+    except json.decoder.JSONDecodeError:
+        logger.exception("Received an exception in the main handler.")
     # Sends Slack
     sendMessage(hook_url, slack_message)
 
-@xray_recorder.capture('createCloudWatchAlarmMessage')
 def createCloudWatchAlarmMessage(message):
 
     alarm_name = message['AlarmName']
@@ -138,7 +138,6 @@ def createCloudWatchAlarmMessage(message):
             }]
     }
 
-@xray_recorder.capture('createScheduledEventMessage')
 def createScheduledEventMessage(message):
 
     resources = ''
@@ -160,7 +159,6 @@ def createScheduledEventMessage(message):
         }]
     }
 
-@xray_recorder.capture('createEC2Message')
 def createEC2Message(message):
 
     color = "#e38b33"
@@ -221,7 +219,6 @@ def createEC2Message(message):
         }]
     }
 
-@xray_recorder.capture('createAutoScalingMessage')
 def createAutoScalingMessage(message):
 
     color = "#e38b33"
@@ -282,7 +279,6 @@ def createAutoScalingMessage(message):
         }]
     }
 
-@xray_recorder.capture('createKMSMessage')
 def createKMSMessage(message):
 
     color = "#dd4e4b"
@@ -321,7 +317,6 @@ def createKMSMessage(message):
         }]
     }
 
-@xray_recorder.capture('createManagementConsoleMessage')
 def createManagementConsoleMessage(message):
 
     resources = ''
@@ -353,7 +348,6 @@ def createManagementConsoleMessage(message):
         }]
     }
 
-@xray_recorder.capture('createTagMessage')
 def createTagMessage(message):
 
     resources = ''
@@ -377,7 +371,6 @@ def createTagMessage(message):
         }]
     }
 
-@xray_recorder.capture('createTrustedAdvisorMessage')
 def createTrustedAdvisorMessage(message):
 
     resources = ''
@@ -405,7 +398,6 @@ def createTrustedAdvisorMessage(message):
         }]
     }
 
-@xray_recorder.capture('createIAMAccessAnalyzer')
 def createIAMAccessAnalyzer(message):
 
     title = ":heavy_exclamation_mark: IAM Access Analyzer Findings | " + message['region'] + " | Account: " + message['account']
@@ -434,7 +426,6 @@ def createIAMAccessAnalyzer(message):
         }]
     }
 
-@xray_recorder.capture('createAmplifyMessages')
 def createAmplifyMessage(message):
     if message['detail']['jobStatus'] == 'STARTED':
         text = ":information_source: Amplify Console のデプロイが開始されました 。"
@@ -466,21 +457,21 @@ def createAmplifyMessage(message):
         }]
     }
 
-@xray_recorder.capture('sendMessage')
 def sendMessage(hook_url, message):
     if hook_url is None or message is None:
-        logger.warning("Hook url or message is empty at %s.", sys._getframe().f_code.co_name)
+        logger.warning("Hook url or message is empty.")
         return False
     else:
         req = Request(hook_url, json.dumps(message).encode('utf-8'))
         try:
-            logger.info("Message posted to %s at %s.", hook_url, sys._getframe().f_code.co_name)
+            logger.structure_logs(append=True, slack_hook_url=hook_url)
+            logger.info("Posted a message to the Slack.")
             response = urlopen(req)
             response.read()
             return True
-        except HTTPError as e:
-            logger.error("Request failed: %d %s at %s.", e.code, e.reason, sys._getframe().f_code.co_name)
+        except HTTPError:
+            logger.exception("Received an exception in %s.", sys._getframe().f_code.co_name)
             return False
-        except URLError as e:
-            logger.error("Server connection failed: %s at %s.", e.reason, sys._getframe().f_code.co_name)
+        except URLError:
+            logger.exception("Received an exception in %s.", sys._getframe().f_code.co_name)
             return False   

@@ -1,19 +1,22 @@
 import logging
 import json
 import boto3
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch
+# Lambda Powertools
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools import Tracer
 
-logger = logging.getLogger()
-logger.setLevel(20)
+# Lambda Powertools
+logger = Logger()
+tracer = Tracer()
 
-@xray_recorder.capture('lambda_handler')
+@logger.inject_lambda_context(log_event=True)
+@tracer.capture_lambda_handler
 def lambda_handler(event, context):
     if 'detail' in event:
         detail = event['detail']
         if 'configRuleName' in detail:
             if detail['configRuleName'] == 'required-tags':
-                logger.info(str(detail))
+                logger.debug(str(detail))
                 # S3
                 if detail['resourceType'] == 'AWS::S3::Bucket': 
                     s3 = boto3.resource('s3') 
