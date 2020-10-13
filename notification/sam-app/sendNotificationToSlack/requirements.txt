@@ -1,2 +1,1 @@
-requests
-aws_xray_sdk
+aws-lambda-powertools

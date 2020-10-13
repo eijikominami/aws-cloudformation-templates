@@ -39,6 +39,7 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForSSM:
     Type: 'AWS::IAM::ServiceLinkedRole'
+    UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
       AWSServiceName: ssm.amazonaws.com
