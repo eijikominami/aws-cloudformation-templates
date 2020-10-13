@@ -99,7 +99,12 @@ def createCloudWatchAlarmMessage(message):
             'attachments': [{
                 'color': color,
                 'title': "%s | %s" % (title_prefix, title_suffix),
-                'text': "%s エラーから *回復* しました。" % (alarm_name)
+                'fields': [
+                        {
+                            'title': "Alarm Name",
+                            'value': "%s" % (alarm_name)
+                        }
+                    ]
             }]
         }
     # NG

@@ -106,7 +106,7 @@ Resources:
       OKActions:
         - !Ref SNSTopicArn
       Period: 60
-      Statistic: Maximum
+      Statistic: Average
       Threshold: !Ref LatencyThreshold
       TreatMissingData: notBreaching
   AlarmApiCount:
