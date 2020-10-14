@@ -1,5 +1,0 @@
-# [EC2.3] Attached EBS volumes should be encrypted at-rest
-AWS::EC2::Instance BlockDeviceMappings.*.Ebs.Encrypted == true
-
-# [IAM.1] IAM policies should not allow full "*" administrative privileges 
-AWS::IAM::Role Policies.*.PolicyDocument.Statement.*.Action.* != *
