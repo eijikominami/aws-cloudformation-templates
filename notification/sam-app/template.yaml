@@ -5,6 +5,9 @@ Description: AWSCloudFormationTemplates/notification sends notifications to Slac
 Globals:
   Function:
     Handler: lambda_function.lambda_handler
+    Layers:
+      # NOTE: AWS Lambda Extensions for Lambda Insights
+      - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
     Runtime: python3.8
     Tracing: Active
 

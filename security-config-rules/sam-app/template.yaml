@@ -5,7 +5,11 @@ Description: AWSCloudFormationTemplates/security-config-rules sets extended Conf
 Globals:
   Function:
     Handler: lambda_function.lambda_handler
+    Layers:
+      # NOTE: AWS Lambda Extensions for Lambda Insights
+      - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
     Runtime: python3.8
+    Tracing: Active
 
 Parameters:
   AutoRemediation:
@@ -121,7 +125,6 @@ Resources:
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
-      Tracing: Active
   LambdaCheckRequiredTagsPermission:
     Type: 'AWS::Lambda::Permission'
     Properties:
@@ -166,7 +169,6 @@ Resources:
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
-      Tracing: Active
   LambdaDeleteUnapplicableResourcesPermission:
     Type: 'AWS::Lambda::Permission'
     Properties:
