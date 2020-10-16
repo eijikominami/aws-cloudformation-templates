@@ -14,9 +14,13 @@ phases:
       - pip install -U boto3
       # for Lambda Powertools
       - pip install -U aws-lambda-powertools
+      # for cloudformation-guard
+      - wget https://github.com/aws-cloudformation/cloudformation-guard/releases/download/1.0.0/cfn-guard-linux-1.0.0.tar.gz
+      - tar -xvf cfn-guard-linux-1.0.0.tar.gz
   pre_build:
     commands:
       - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
+      - find ./ -type f -name "*.yaml" | xargs -I {} ./cfn-guard-linux/cfn-guard check -r ./security-standards.ruleset -t {}
   build:
     commands:
        - sam validate --template ${TEMPLATE_FILE_PATH}template.yaml
