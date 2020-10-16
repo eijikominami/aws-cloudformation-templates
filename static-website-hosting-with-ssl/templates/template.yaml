@@ -170,7 +170,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.3
+        SemanticVersion: 1.1.5
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -186,7 +186,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.3
+        SemanticVersion: 1.1.5
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -267,6 +267,27 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  S3BucketPolicyForAccessLog:
+    Condition: CustomLogBucketName
+    Type: 'AWS::S3::BucketPolicy'
+    Properties: 
+      Bucket: !Ref S3ForAccessLog
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForAccessLog
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForAccessLog.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForAccessLog.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
   S3ForWebHosting:
     Type: 'AWS::S3::Bucket'
     # Retain this bucket when a stack is deleted.
@@ -327,6 +348,18 @@ Resources:
             Action:
               - 's3:GetObject'
             Resource: !Sub arn:aws:s3:::${S3ForWebHosting}/*
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForWebHosting.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForWebHosting.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
   # CloudFront
   CloudFront:
     Type: 'AWS::CloudFront::Distribution'

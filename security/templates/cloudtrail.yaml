@@ -192,6 +192,18 @@ Resources:
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForCloudTrail.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForCloudTrail.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
   # CloudWatch Logs
   CloudWatchLogsGroupForCloudTrail:
     Type: 'AWS::Logs::LogGroup'

@@ -34,6 +34,8 @@ phases:
       - pip install -U cfn-lint
       - pip install -U requests
       - pip install -U aws_xray_sdk
+      # Use the latest version
+      - pip install -U awscli
   pre_build:
     commands:
       - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
