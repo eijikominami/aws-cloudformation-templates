@@ -1,7 +1,9 @@
+# AWS CloudFormation Guard Rules.
+# https://github.com/aws-cloudformation/cloudformation-guard
 #
 # CIS AWS Foundations Benchmark controls
 # AWS Foundational Security Best Practices controls
-#
+
 # [CIS 2.1] Ensure CloudTrail is enabled in all Regions 
 # [CloudTrail.1] CloudTrail should be enabled and configured with at least one multi-Region trail 
 AWS::CloudTrail::Trail IsMultiRegionTrail == true << CloudTrail trails should cover all regions
