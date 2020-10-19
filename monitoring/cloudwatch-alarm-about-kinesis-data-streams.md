@@ -26,6 +26,8 @@ You can provide optional parameters as follows.
 | `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-kinesis-data-streams(ja)
 
 cloudwatch-alarm-about-apigateway は、Amazon Kinesis Data Streams に関する Amazon CloudWatch アラームを作成します。

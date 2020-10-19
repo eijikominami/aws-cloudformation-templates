@@ -22,6 +22,8 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | |
 | `SNSTopicArn` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-dynamodb(ja)
 
 cloudwatch-alarm-about-apigateway は、Amazon DynamoDB に関する Amazon CloudWatch アラームを作成します。
@@ -33,7 +35,7 @@ cloudwatch-alarm-about-apigateway は、Amazon DynamoDB に関する Amazon Clou
 | ネームスペース | メトリクス | Operation | 閾値 |
 | --- | --- | --- | --- |
 | AWS/DynamoDB | **UserErrors** | GetRecords | 1分間に1回以上 | 
-| AWS/DynamoDB | **SystemErrors** | GetRecords | 1分間に1回以上 | 
+| AWS/DynamoDB | **SystemErrors** | GetRecords | 1分間に2回以上 | 
 
 ## パラメータ
 

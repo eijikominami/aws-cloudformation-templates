@@ -22,6 +22,8 @@ You can provide optional parameters as follows.
 | `EventsRuleName` | String | | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-events(ja)
 
 cloudwatch-alarm-about-apigateway は、Amazon EventBridge に関する Amazon CloudWatch アラームを作成します。

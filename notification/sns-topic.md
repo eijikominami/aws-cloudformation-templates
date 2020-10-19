@@ -12,7 +12,9 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | TopicName | String | Default | ○ | Amazon SNS Topic Name |
 
-# sns-topic(en)
+---------------------------------------
+
+# sns-topic(ja)
 
 sns-topic は、Amazon SNS トピックとこれに関連する CloudWatch アラームを作成します。
 

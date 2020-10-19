@@ -23,6 +23,8 @@ You can provide optional parameters as follows.
 | `SNSTopicArn` | String | | ○ | |
 | `TableName` | String |  | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-dynamodb-throttole(ja)
 
 cloudwatch-alarm-about-apigateway は、Amazon DynamoDB の スロットルメトリクス に関する Amazon CloudWatch アラームを作成します。

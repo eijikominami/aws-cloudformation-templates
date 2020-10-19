@@ -28,6 +28,8 @@ You can provide optional parameters as follows.
 | `SNSTopicArn` | String | | ○ | |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-lambda(ja)
 
 cloudwatch-alarm-about-apigateway は、AWS Lambda に関する Amazon CloudWatch アラームを作成します。

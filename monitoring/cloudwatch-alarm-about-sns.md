@@ -22,6 +22,8 @@ You can provide optional parameters as follows.
 | `SNSTopicArn` | String | | ○ | |
 | `SNSTopicName` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-sns(ja)
 
 cloudwatch-alarm-about-apigateway は、Amazon SNS に関する Amazon CloudWatch アラームを作成します。
