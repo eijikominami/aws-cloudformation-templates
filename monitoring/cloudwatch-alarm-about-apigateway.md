@@ -30,6 +30,8 @@ You can provide optional parameters as follows.
 | `LatencyThreshold` | Number | 2000 | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-apigateway(ja)
 
 cloudwatch-alarm-about-apigateway は、 Amazon API Gateway に関する Amazon CloudWatch アラームを作成します。

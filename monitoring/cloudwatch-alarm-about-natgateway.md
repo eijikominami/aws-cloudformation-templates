@@ -22,6 +22,8 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | |
 | `SNSTopicArn` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-natgateway(ja)
 
 cloudwatch-alarm-about-apigateway は、NAT Gateway に関する Amazon CloudWatch アラームを作成します。

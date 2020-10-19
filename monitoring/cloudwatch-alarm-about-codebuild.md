@@ -22,6 +22,8 @@ You can provide optional parameters as follows.
 | `ProjectName` | String |  | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-codebuild(ja)
 
 cloudwatch-alarm-about-apigateway は、AWS CodeBuild に関する Amazon CloudWatch アラームを作成します。
