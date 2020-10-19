@@ -23,6 +23,8 @@ You can give optional parameters as follows.
 | `CustomAlarmName` | String | | | |
 | `SNSTopicArn` | String | | ○ | |
 
+---------------------------------------
+
 # cloudwatch-alarm-about-ec2(ja)
 
 cloudwatch-alarm-about-apigateway は、Amazon EC2 に関する Amazon CloudWatch アラームを作成します。

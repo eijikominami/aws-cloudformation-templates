@@ -63,5 +63,5 @@ Resources:
       # Alert when Sum is 1 count in 60 seconds.
       Period: 60
       Statistic: Sum
-      Threshold: 1
+      Threshold: 2
       TreatMissingData: notBreaching
