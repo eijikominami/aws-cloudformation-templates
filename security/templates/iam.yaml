@@ -42,6 +42,8 @@ Resources:
            - aws.access-analyzer
         detail-type:
            - Access Analyzer Finding
+        detail:
+          status: ACTIVE
       Name: AccessAnalyzer
       State: ENABLED
       Targets: 
