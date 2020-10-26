@@ -80,7 +80,8 @@ def lambda_handler(event, context):
                 hook_url = None
                 slack_message = None                           
     except json.decoder.JSONDecodeError:
-        logger.exception("Received an exception in the main handler.")
+        logger.info("Message is NOT a JSON format.")
+        return
     # Sends Slack
     sendMessage(hook_url, slack_message)
 
