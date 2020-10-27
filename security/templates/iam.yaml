@@ -43,7 +43,8 @@ Resources:
         detail-type:
            - Access Analyzer Finding
         detail:
-          status: ACTIVE
+          status:
+            - ACTIVE
       Name: AccessAnalyzer
       State: ENABLED
       Targets: 
