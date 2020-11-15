@@ -319,4 +319,4 @@ Outputs:
     Value: !If
       - CreateACMCertificate
       - !Ref CertificateManager
-      - ''
+      - !Ref AWS::NoValue

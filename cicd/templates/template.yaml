@@ -91,7 +91,7 @@ Conditions:
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  DeployStaticWebsiteHosting: !And [ !Equals [ !Ref StaticWebsiteHosting, Enabled], !Equals [ !Ref GlobalSettings, Enabled], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
+  DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, Enabled]
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, Enabled], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, Enabled]
   DeployWebServers: !Equals [ !Ref WebServers, Enabled]
@@ -675,7 +675,10 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
-                  ParameterOverrides: '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                  ParameterOverrides: !If
+                    - DeployGlobalSettings
+                    - '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                    - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}StaticWebsiteHosting.json
@@ -686,7 +689,10 @@ Resources:
                     - CreateCloudFormationConfigurationArtifact
                     - Name: Source-CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: GlobalSettings
+                  - !If
+                    - DeployGlobalSettings
+                    - Name: GlobalSettings
+                    - !Ref AWS::NoValue
                   - Name: DeployArtifact-CICD
                 Name: StaticWebsiteHosting
                 OutputArtifacts: 
