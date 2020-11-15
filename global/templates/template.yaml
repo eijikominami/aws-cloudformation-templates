@@ -316,4 +316,7 @@ Outputs:
   CertificationARN:
     Condition: CreateACMCertificate
     Description: Certification ARN
-    Value: !Ref CertificateManager
+    Value: !If
+      - CreateACMCertificate
+      - !Ref CertificateManager
+      - ''
