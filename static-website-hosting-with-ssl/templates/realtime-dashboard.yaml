@@ -29,9 +29,9 @@ Metadata:
           - TagValue
 
 Parameters: 
-  ElasticSearchDomainNamePrifix:
+  ElasticSearchDomainName:
     Type: String
-    Default: realtime-logs-
+    Default: cloudfront-realtime-logs
     AllowedPattern: .+
   ElasticSearchInstanceType:
     Type: String
@@ -219,20 +219,20 @@ Resources:
                   - 'es:ESHttpPost'
                   - 'es:ESHttpPut'
                 Resource:
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/*'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/*'
               - Effect: Allow
                 Action:
                   - 'es:ESHttpGet'
                 Resource:
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_all/_settings'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_cluster/stats'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/index-name*/_mapping/type-name'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_nodes'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_nodes/stats'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_nodes/*/stats'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_stats'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/index-name*/_stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_all/_settings'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_cluster/stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/index-name*/_mapping/type-name'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_nodes'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_nodes/stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_nodes/*/stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/index-name*/_stats'
               - Effect: Allow
                 Action:
                   - 'kinesis:DescribeStream'
@@ -514,7 +514,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub ${ElasticSearchDomainNamePrifix}${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub ${ElasticSearchDomainName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
@@ -581,7 +581,7 @@ Resources:
                 - "*"
             Action:
               - es:*
-            Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::AccountId}/*
+            Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/*
       AdvancedSecurityOptions: 
         Enabled: true
         InternalUserDatabaseEnabled: true
@@ -590,11 +590,11 @@ Resources:
           MasterUserPassword: !Ref ElasticSearchMasterUserPassword
       DomainEndpointOptions: 
         EnforceHTTPS: true
-      DomainName: !Sub ${ElasticSearchDomainNamePrifix}${AWS::AccountId}
+      DomainName: !Ref ElasticSearchDomainName
       EBSOptions: 
         EBSEnabled: true
         VolumeSize: 10
-        VolumeType: standard
+        VolumeType: gp2
       ElasticsearchClusterConfig: 
         DedicatedMasterCount: 3
         DedicatedMasterEnabled: true
@@ -612,6 +612,9 @@ Resources:
         Enabled: true
       SnapshotOptions: 
         AutomatedSnapshotStartHour: 0
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue 
 Outputs:
   RealtimeLogConfigArn:
     Description: Realtime Log Config ARN
