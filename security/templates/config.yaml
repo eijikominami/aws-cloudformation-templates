@@ -444,7 +444,7 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.7
+      Runtime: python3.8
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
