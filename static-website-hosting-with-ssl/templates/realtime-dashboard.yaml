@@ -3,6 +3,74 @@ Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/static-web-hosting/realtime-dashboard creates realtime dashboards for CloudFront logs.
 
 Parameters: 
+  ElasticSearchInstanceType:
+    Type: String
+    Default: r5.large.elasticsearch
+    AllowedValues:
+     - t3.small.elasticsearch
+     - t3.medium.elasticsearch
+     - t2.micro.elasticsearch
+     - t2.small.elasticsearch
+     - t2.medium.elasticsearch
+     - m5.large.elasticsearch
+     - m5.xlarge.elasticsearch
+     - m5.2xlarge.elasticsearch
+     - m5.4xlarge.elasticsearch
+     - m5.12xlarge.elasticsearch
+     - m4.large.elasticsearch
+     - m4.xlarge.elasticsearch
+     - m4.2xlarge.elasticsearch
+     - m4.4xlarge.elasticsearch
+     - m4.10xlarge.elasticsearch
+     - c5.large.elasticsearch
+     - c5.xlarge.elasticsearch
+     - c5.2xlarge.elasticsearch
+     - c5.4xlarge.elasticsearch
+     - c5.9xlarge.elasticsearch
+     - c5.18xlarge.elasticsearch
+     - c4.large.elasticsearch
+     - c4.xlarge.elasticsearch
+     - c4.2xlarge.elasticsearch
+     - c4.4xlarge.elasticsearch
+     - c4.8xlarge.elasticsearch
+     - r5.large.elasticsearch
+     - r5.xlarge.elasticsearch
+     - r5.2xlarge.elasticsearch
+     - r5.4xlarge.elasticsearch
+     - r5.12xlarge.elasticsearch
+     - r4.large.elasticsearch
+     - r4.xlarge.elasticsearch
+     - r4.2xlarge.elasticsearch
+     - r4.4xlarge.elasticsearch
+     - r4.8xlarge.elasticsearch
+     - r4.16xlarge.elasticsearch
+     - r3.large.elasticsearch
+     - r3.xlarge.elasticsearch
+     - r3.2xlarge.elasticsearch
+     - r3.4xlarge.elasticsearch
+     - r3.8xlarge.elasticsearch
+     - i3.large.elasticsearch
+     - i3.xlarge.elasticsearch
+     - i3.2xlarge.elasticsearch
+     - i3.4xlarge.elasticsearch
+     - i3.8xlarge.elasticsearch
+     - i3.16xlarge.elasticsearch
+  ElasticSearchKmsKeyId:
+    Type: String
+    AllowedPattern: .+  
+  ElasticSearchMasterUserName:
+    Type: String
+    Default: root
+    AllowedPattern: .+
+  ElasticSearchMasterUserPassword:
+    Type: String
+    Default: Password1+
+    AllowedPattern: .+
+    NoEcho: true
+  ElasticsearchVersion:
+    Type: String
+    Default: '7.8'
+    AllowedPattern: .+
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
@@ -13,7 +81,7 @@ Parameters:
     Default: 100
     MinValue: 1
     MaxValue: 100
-  ShardCount:
+  KinesisShardCount:
     Type: Number
     Default: 1
     MinValue: 1 
@@ -28,6 +96,9 @@ Parameters:
     Type: String
     Default: aws:cloudformation:stack
     AllowedPattern: .+
+
+Conditions:
+  CreateEncryptionAtRestOptions: !Not [ !Equals [ !Ref ElasticSearchKmsKeyId, '' ]]
 
 Resources:
   # IAM
@@ -75,6 +146,22 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForKinesisFirehouse:
+    DependsOn:
+      - Kinesis
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Ref 'AWS::AccountId'
+      Description: A role required for KinesisFirehouse to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
   # CloudFront
   CloudFormationRealtimeLogConfig:
     Type: 'AWS::CloudFront::RealtimeLogConfig'
@@ -137,7 +224,7 @@ Resources:
       StreamEncryption:
         EncryptionType: KMS
         KeyId: alias/aws/kinesis
-      ShardCount: !Ref ShardCount
+      ShardCount: !Ref KinesisShardCount
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -278,6 +365,54 @@ Resources:
       Timeout: 60
       TracingConfig:
         Mode: Active
+  ElasticSearchDomain:
+    Type: 'AWS::Elasticsearch::Domain'
+    Properties: 
+      AccessPolicies:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - "*"
+            Action:
+              - es:*
+            Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/cloudfront-realtime-log-${AWS::AccountId}/*
+      AdvancedSecurityOptions: 
+        Enabled: true
+        InternalUserDatabaseEnabled: true
+        MasterUserOptions:
+          MasterUserName: !Ref ElasticSearchMasterUserName
+          MasterUserPassword: !Ref ElasticSearchMasterUserPassword
+      DomainEndpointOptions: 
+        EnforceHTTPS: true
+      DomainName: !Sub cloudfront-realtime-logs-${AWS::AccountId}
+      EBSOptions: 
+        EBSEnabled: true
+        VolumeSize: 10
+        VolumeType: standard
+      ElasticsearchClusterConfig: 
+        DedicatedMasterCount: 3
+        DedicatedMasterEnabled: true
+        DedicatedMasterType: !Ref ElasticSearchInstanceType
+        InstanceCount: 3
+        InstanceType: !Ref ElasticSearchInstanceType
+        ZoneAwarenessConfig: 
+          AvailabilityZoneCount: 3
+        ZoneAwarenessEnabled: true
+      ElasticsearchVersion: !Ref ElasticsearchVersion
+      EncryptionAtRestOptions: !If
+        - CreateEncryptionAtRestOptions
+        - Enabled: true
+          KmsKeyId: !Ref ElasticSearchKmsKeyId
+        - !Ref AWS::NoValue
+      NodeToNodeEncryptionOptions: 
+        Enabled: true
+      SnapshotOptions: 
+        AutomatedSnapshotStartHour: 0
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 Outputs:
   RealtimeLogConfigArn:
     Description: Realtime Log Config ARN
