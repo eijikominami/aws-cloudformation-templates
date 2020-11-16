@@ -345,7 +345,4 @@ Outputs:
   CertificationARN:
     Condition: CreateACMCertificate
     Description: Certification ARN
-    Value: !If
-      - CreateACMCertificate
-      - !Ref CertificateManager
-      - !Ref AWS::NoValue
+    Value: !Ref CertificateManager
