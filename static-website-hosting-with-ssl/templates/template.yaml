@@ -460,6 +460,11 @@ Resources:
               - !Ref CloudFrontAdditionalName
             - - !Ref DomainName
           - !Ref AWS::NoValue
+        CacheBehaviors:
+          - !If
+            - CreateRealtimeDashboard
+            - RealtimeLogConfigArn: !GetAtt RealtimeDashboard.Outputs.SNSTopicArn
+            - !Ref AWS::NoValue
         Comment: !Sub CDN for ${DomainName}
         CustomErrorResponses: !If 
           - CreateCustomErrorResponse

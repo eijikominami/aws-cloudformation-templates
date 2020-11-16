@@ -141,3 +141,7 @@ Resources:
         SemanticVersion: 1.1.8
       Tags:
         createdby: !Ref TagValue
+Outputs:
+  RealtimeLogConfigArn:
+    Description: Realtime Log Config ARN
+    Value: !GetAtt CloudFormationRealtimeLogConfig.Arn
