@@ -28,7 +28,6 @@ Metadata:
           default: 'CloudFront Realtime Dashboard Configuration'
         Parameters: 
           - RealtimeDashboardElasticSearchInstanceType
-          - RealtimeDashboardElasticSearchKmsKeyId
           - RealtimeDashboardElasticSearchMasterUserName
           - RealtimeDashboardElasticSearchMasterUserPassword
           - RealtimeDashboardElasticsearchVersion
@@ -170,9 +169,6 @@ Parameters:
      - i3.4xlarge.elasticsearch
      - i3.8xlarge.elasticsearch
      - i3.16xlarge.elasticsearch
-  RealtimeDashboardElasticSearchKmsKeyId:
-    Type: String
-    Default: ''
   RealtimeDashboardElasticSearchMasterUserName:
     Type: String
     Default: root
@@ -289,7 +285,6 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         ElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
-        ElasticSearchKmsKeyId: !Ref RealtimeDashboardElasticSearchKmsKeyId
         ElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
         ElasticSearchMasterUserPassword: !Ref RealtimeDashboardElasticSearchMasterUserPassword
         ElasticsearchVersion: !Ref RealtimeDashboardElasticsearchVersion

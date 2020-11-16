@@ -14,7 +14,6 @@ Metadata:
           default: 'ElasticSearch Configuration'
         Parameters: 
           - ElasticSearchInstanceType
-          - ElasticSearchKmsKeyId
           - ElasticSearchMasterUserName
           - ElasticSearchMasterUserPassword
           - ElasticsearchVersion
@@ -30,6 +29,10 @@ Metadata:
           - TagValue
 
 Parameters: 
+  ElasticSearchDomainNamePrifix:
+    Type: String
+    Default: realtime-logs-
+    AllowedPattern: .+
   ElasticSearchInstanceType:
     Type: String
     Default: r5.large.elasticsearch
@@ -82,9 +85,6 @@ Parameters:
      - i3.4xlarge.elasticsearch
      - i3.8xlarge.elasticsearch
      - i3.16xlarge.elasticsearch
-  ElasticSearchKmsKeyId:
-    Type: String
-    Default: ''
   ElasticSearchMasterUserName:
     Type: String
     Default: root
@@ -123,9 +123,6 @@ Parameters:
     Type: String
     Default: aws:cloudformation:stack
     AllowedPattern: .+
-
-Conditions:
-  CreateEncryptionAtRestOptions: !Not [ !Equals [ !Ref ElasticSearchKmsKeyId, '' ]]
 
 Resources:
   # IAM
@@ -174,8 +171,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForKinesisFirehouse:
-    DependsOn:
-      - Kinesis
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
@@ -189,8 +184,79 @@ Resources:
               StringEquals:
                 'sts:ExternalId': !Ref 'AWS::AccountId'
       Description: A role required for KinesisFirehouse to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
+      Policies:
+        - PolicyName: !Sub '${LogicalNamePrefix}-FirehouseDelivery-${AWS::Region}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:AbortMultipartUpload'
+                  - 's3:GetBucketLocation'
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                  - 's3:ListBucketMultipartUploads'
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3ForKinesisFirehose}'
+                  - !Sub 'arn:aws:s3:::${S3ForKinesisFirehose}/*'
+              - Effect: Allow
+                Action:
+                  - 'kms:Decrypt'
+                  - 'kms:GenerateDataKey'
+                Resource:
+                  - !GetAtt KMSKey.Arn
+                Condition:
+                  StringEquals:
+                    'kms:ViaService': s3.region.amazonaws.com
+                  StringLike:
+                    'kms:EncryptionContext:aws:s3:arn': !Sub 'arn:aws:s3:::${S3ForKinesisFirehose}/*'
+              - Effect: Allow
+                Action:
+                  - 'es:DescribeElasticsearchDomain'
+                  - 'es:DescribeElasticsearchDomains'
+                  - 'es:DescribeElasticsearchDomainConfig'
+                  - 'es:ESHttpPost'
+                  - 'es:ESHttpPut'
+                Resource:
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/*'
+              - Effect: Allow
+                Action:
+                  - 'es:ESHttpGet'
+                Resource:
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_all/_settings'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_cluster/stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/index-name*/_mapping/type-name'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_nodes'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_nodes/stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_nodes/*/stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/_stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::Region}/index-name*/_stats'
+              - Effect: Allow
+                Action:
+                  - 'kinesis:DescribeStream'
+                  - 'kinesis:GetShardIterator'
+                  - 'kinesis:GetRecords'
+                  - 'kinesis:ListShards'
+                Resource: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${Kinesis}'
+              - Effect: Allow
+                Action:
+                  - 'logs:PutLogEvents'
+                Resource:
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CloudWatchLogsGroupForFirehose}:log-stream:${CloudWatchLogsStreamForFirehose}'
+              - Effect: Allow
+                Action:
+                  - 'lambda:InvokeFunction'
+                  - 'lambda:GetFunctionConfiguration'
+                Resource:
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Lambda}:$LATEST'
+      RoleName: !Sub '${LogicalNamePrefix}-FirehouseDelivery-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudFront
-  CloudFormationRealtimeLogConfig:
+  CloudFrontRealtimeLogConfig:
     Type: 'AWS::CloudFront::RealtimeLogConfig'
     Properties: 
       EndPoints: 
@@ -392,6 +458,117 @@ Resources:
       Timeout: 60
       TracingConfig:
         Mode: Active
+  # Kinesis Firehose
+  KinesisFirehose:
+    Type: 'AWS::KinesisFirehose::DeliveryStream'
+    Properties:
+      DeliveryStreamName: !Ref LogicalNamePrefix
+      DeliveryStreamType: KinesisStreamAsSource
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt Kinesis.Arn
+        RoleARN: !GetAtt IAMRoleForKinesisFirehouse.Arn
+      ElasticsearchDestinationConfiguration:
+        CloudWatchLoggingOptions: 
+          Enabled: true
+          LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+          LogStreamName: !Ref CloudWatchLogsStreamForFirehose
+        DomainARN: !GetAtt ElasticSearchDomain.DomainArn
+        IndexName: realtime
+        IndexRotationPeriod: NoRotation
+        ProcessingConfiguration: 
+          Enabled: true
+          Processors: 
+            - Parameters: 
+                - ParameterName: LambdaArn
+                  ParameterValue: !GetAtt Lambda.Arn
+              Type: Lambda
+        RetryOptions: 
+          DurationInSeconds: 300
+        RoleARN: !GetAtt IAMRoleForKinesisFirehouse.Arn
+        S3BackupMode: FailedDocumentsOnly
+        S3Configuration: 
+          BucketARN: !GetAtt S3ForKinesisFirehose.Arn
+          CloudWatchLoggingOptions:
+            Enabled: true
+            LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+            LogStreamName: !Ref CloudWatchLogsStreamForFirehose
+          RoleARN: !GetAtt IAMRoleForKinesisFirehouse.Arn
+        TypeName: fromFirehose  
+  CloudWatchLogsGroupForFirehose:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/kinesisfirehose/${LogicalNamePrefix}'
+      RetentionInDays: 60
+  CloudWatchLogsStreamForFirehose:
+    Type: 'AWS::Logs::LogStream'
+    Properties:
+      LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+      LogStreamName: S3Delivery
+  # S3
+  S3ForKinesisFirehose:
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub ${ElasticSearchDomainNamePrifix}${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # KMS
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties: 
+      Description: Encrypt CloudTrail Logs
+      Enabled: true
+      EnableKeyRotation: true
+      KeyPolicy: 
+        Version: 2012-10-17
+        Id: DefaultKeyPolicy
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 'kms:*'
+            Resource: '*'
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - 'kms:GenerateDataKey*'
+            Resource:
+              - '*'
+            Condition:
+              StringLike:
+                kms:EncryptionContext:aws:cloudtrail:arn:
+                  - !Sub arn:aws:cloudtrail:*:${AWS::AccountId}:trail/*
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - 'kms:DescribeKey'
+            Resource:
+              - '*'
+      KeyUsage: ENCRYPT_DECRYPT
+      PendingWindowInDays: 30
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue 
+  # ElasticSearch
   ElasticSearchDomain:
     Type: 'AWS::Elasticsearch::Domain'
     Properties: 
@@ -404,7 +581,7 @@ Resources:
                 - "*"
             Action:
               - es:*
-            Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/cloudfront-realtime-log-${AWS::AccountId}/*
+            Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainNamePrifix}${AWS::AccountId}/*
       AdvancedSecurityOptions: 
         Enabled: true
         InternalUserDatabaseEnabled: true
@@ -413,7 +590,7 @@ Resources:
           MasterUserPassword: !Ref ElasticSearchMasterUserPassword
       DomainEndpointOptions: 
         EnforceHTTPS: true
-      DomainName: !Sub cloudfront-realtime-logs-${AWS::AccountId}
+      DomainName: !Sub ${ElasticSearchDomainNamePrifix}${AWS::AccountId}
       EBSOptions: 
         EBSEnabled: true
         VolumeSize: 10
@@ -428,19 +605,14 @@ Resources:
           AvailabilityZoneCount: 3
         ZoneAwarenessEnabled: true
       ElasticsearchVersion: !Ref ElasticsearchVersion
-      EncryptionAtRestOptions: !If
-        - CreateEncryptionAtRestOptions
-        - Enabled: true
-          KmsKeyId: !Ref ElasticSearchKmsKeyId
-        - !Ref AWS::NoValue
+      EncryptionAtRestOptions:
+        Enabled: true
+        KmsKeyId: !GetAtt KMSKey.Arn
       NodeToNodeEncryptionOptions: 
         Enabled: true
       SnapshotOptions: 
         AutomatedSnapshotStartHour: 0
-      Tags: 
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
 Outputs:
   RealtimeLogConfigArn:
     Description: Realtime Log Config ARN
-    Value: !GetAtt CloudFormationRealtimeLogConfig.Arn
+    Value: !GetAtt CloudFrontRealtimeLogConfig.Arn
