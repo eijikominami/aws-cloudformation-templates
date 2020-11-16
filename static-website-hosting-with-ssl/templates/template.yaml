@@ -460,11 +460,6 @@ Resources:
               - !Ref CloudFrontAdditionalName
             - - !Ref DomainName
           - !Ref AWS::NoValue
-        CacheBehaviors:
-          - !If
-            - CreateRealtimeDashboard
-            - RealtimeLogConfigArn: !GetAtt RealtimeDashboard.Outputs.SNSTopicArn
-            - !Ref AWS::NoValue
         Comment: !Sub CDN for ${DomainName}
         CustomErrorResponses: !If 
           - CreateCustomErrorResponse
@@ -490,6 +485,10 @@ Resources:
             QueryString: false
           MaxTTL: !Ref CloudFrontMaximumTTL
           MinTTL: !Ref CloudFrontMinimumTTL
+          RealtimeLogConfigArn: !If
+            - CreateRealtimeDashboard
+            - !GetAtt RealtimeDashboard.Outputs.SNSTopicArn
+            - !Ref AWS::NoValue
           SmoothStreaming: false
           TargetOriginId: !Ref S3ForWebHosting
           TrustedSigners: !If 
