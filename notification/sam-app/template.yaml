@@ -11,6 +11,40 @@ Globals:
     Runtime: python3.8
     Tracing: Active
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'EventBridge Configuration'
+        Parameters:
+          - AutoScalingEventsRule
+          - EBSEventsRule
+          - EC2EventsRule
+          - KMSEventsRule
+          - ManagementConsoleEventsRule
+          - ScheduledEventsRule
+          - TagEventsRule
+          - TrustedAdvisorEventsRule
+      - Label: 
+          default: 'Slack Configuration'
+        Parameters: 
+          - Encrypt
+          - HookUrlForDeployment
+          - HookUrlForAlert
+          - SlackWorkspaceId
+          - SlackChannelIdForDeployment
+          - SlackChannelIdForAlert
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - TagKey
+          - TagValue
+
 Parameters: 
   Encrypt:
     Type: String
@@ -49,20 +83,6 @@ Parameters:
     Type: String
     Default: '' 
     Description: Amazon SNS Topic ARN for deployment information
-  ScheduledEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-     - ENABLED
-     - DISABLED
-    Description: Enable or disable the events rule about Scheduled Events [required]
-  EBSEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-     - ENABLED
-     - DISABLED
-    Description: Enable or disable the events rule about EBS [required]
   AutoScalingEventsRule:
     Type: String
     Default: ENABLED
@@ -70,6 +90,13 @@ Parameters:
      - ENABLED
      - DISABLED
     Description: Enable or disable the events rule about AutoScaling [required]
+  EBSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about EBS [required]
   EC2EventsRule:
     Type: String
     Default: ENABLED
@@ -91,6 +118,13 @@ Parameters:
      - ENABLED
      - DISABLED
     Description: Enable or disable the events rule about Management Console [required]
+  ScheduledEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+     - ENABLED
+     - DISABLED
+    Description: Enable or disable the events rule about Scheduled Events [required]
   TagEventsRule:
     Type: String
     Default: ENABLED

@@ -2,6 +2,25 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/amplify builds builds a CI/CD environment with AWS Amplify Console, AWS CodeCommit, and related resources.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Amplify Console Configuration'
+        Parameters: 
+          - AmplifyConsoleAppId
+          - DomainName
+          - RepositoryName
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - TagKey
+          - TagValue
+
 Parameters:
   AmplifyConsoleAppId:
     Type: String

@@ -2,6 +2,44 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description:  AWSCloudFormationTemplates/cicd/codepipeline creates a CodePipeline pipeline building AWSCloudFormationTemplates.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'CodeBuild Configuration'
+        Parameters: 
+          - CodeBuildImageName
+      - Label: 
+          default: 'GlobalSettings Stack Configuration'
+        Parameters: 
+          - ArtifactBacketInVirginia
+          - GlobalSettings
+      - Label: 
+          default: 'Source Configuration'
+        Parameters: 
+          - GitHubOAuthToken
+          - GitHubOwnerNameForTemplateConfiguration
+          - GitHubRepoNameForTemplateConfiguration
+          - GitHubBranchName
+          - TemplateConfigurationBasePath
+      - Label: 
+          default: 'Stack Configuration'
+        Parameters: 
+          - StaticWebsiteHosting
+          - Notification
+          - WebServers
+          - UploadArtifacts
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - TagKey
+          - TagValue
+
 Parameters: 
   ArtifactBacketInVirginia:
     Type: String

@@ -2,6 +2,27 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/chatbot creates AWS Chatbot.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Chatbot Configuration'
+        Parameters: 
+          - IAMRoleForChatbotArn
+      - Label: 
+          default: 'Slack Configuration'
+        Parameters: 
+          - SlackWorkspaceId
+          - SlackChannelId
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+
 Parameters:
   IAMRoleForChatbotArn:
     Type: String
