@@ -2,6 +2,26 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/synthetics creates an AWS CloudWatch Synthetics canary.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Synthetics Configuration'
+        Parameters: 
+          - CanaryName
+          - DomainName
+          - WatchedPagePath
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
 Parameters:
   CanaryName:
     Type: String

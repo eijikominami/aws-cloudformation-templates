@@ -1,6 +1,19 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/iam sets IAM.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SnsTopicARN
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
 Parameters:
   SnsTopicARN:
     Type: String

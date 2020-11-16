@@ -1,6 +1,36 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/static-web-hosting/autoscaling creates Auto Scaling Group and Application Load Balancer or Network Load Balancer.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'AutoScaling Configuration'
+        Parameters: 
+          - AutoScalingDesiredCapacity
+          - AutoScalingMaxSize
+          - EC2ImageId
+          - EC2InstanceType
+          - EC2IamInstanceProfileArn
+          - EC2KeyName
+          - EC2SecurityGroupId
+          - EipAllocationId1ForNLB
+          - EipAllocationId2ForNLB
+          - LoadBalancerType
+          - SubnetId1ForELB
+          - SubnetId2ForELB
+          - VPCId
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSTopicARN
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   AutoScalingDesiredCapacity:
     Type: Number

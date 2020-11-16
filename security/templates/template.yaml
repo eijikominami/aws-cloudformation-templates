@@ -2,6 +2,35 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/security sets basic configurations for security.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'CloudTrail and Config Configuration'
+        Parameters: 
+          - AuditOtherAccounts
+          - AuditOtherRegions
+          - AutoRemediation
+      - Label: 
+          default: 'Detective Configuration'
+        Parameters: 
+          - AmazonDetective
+      - Label: 
+          default: 'SecurityHub Configuration'
+        Parameters: 
+          - IAMUserArnToAssumeAWSSupportRole
+          - NotificationFilterAboutSecurityChecks
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
 Parameters:
   AuditOtherAccounts:
     Type: String

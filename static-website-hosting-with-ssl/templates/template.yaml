@@ -2,6 +2,53 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/static-web-hosting creates an environment for static website hosting.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'CloudFront Configuration'
+        Parameters: 
+          - CertificateManagerARN
+          - CloudFrontDefaultTTL
+          - CloudFrontMinimumTTL
+          - CloudFrontMaximumTTL
+          - CloudFrontViewerProtocolPolicy
+          - CloudFrontDefaultRootObject
+          - CloudFrontAdditionalName
+          - CloudFrontSecondaryOriginId
+          - CloudFrontRestrictViewerAccess
+          - CloudFront403ErrorResponsePagePath
+          - CloudFront404ErrorResponsePagePath
+          - CloudFront500ErrorResponsePagePath
+          - DomainName
+          - LoggingEnabled
+          - LogBacketName
+          - S3DestinationBucketArnOfCrossRegionReplication
+      - Label: 
+          default: 'CloudFront Realtime Dashboard Configuration'
+        Parameters: 
+          - RealtimeDashboardEnabled
+          - RealtimeDashboardSamplingRate
+          - RealtimeDashboardShardCount
+      - Label: 
+          default: 'Synthetics Configuration'
+        Parameters: 
+          - SyntheticsCanaryName
+      - Label: 
+          default: 'WAF Configuration'
+        Parameters: 
+          - WebACL
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
 Parameters:
   CertificateManagerARN:
     Default: ''
@@ -72,7 +119,16 @@ Parameters:
     AllowedValues:
      - Enabled
      - Disabled
-    Description: Enable or disable realtime dashboard [required]  
+    Description: Enable or disable realtime dashboard [required] 
+  RealtimeDashboardSamplingRate:
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 100 
+  RealtimeDashboardShardCount:
+    Type: Number
+    Default: 1
+    MinValue: 1
   S3DestinationBucketArnOfCrossRegionReplication:
     Type: String
     Default: ''
@@ -160,6 +216,8 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         LogicalNamePrefix: !Ref AWS::StackName
+        ShardCount: !Ref RealtimeDashboardShardCount
+        SamplingRate: !Ref RealtimeDashboardSamplingRate
         SNSForAlertArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn

@@ -8,6 +8,15 @@ Parameters:
     Default: DefaultSecuritySettings
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  SamplingRate:
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 100
+  ShardCount:
+    Type: Number
+    Default: 1
+    MinValue: 1 
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -100,7 +109,7 @@ Resources:
         - cs-header-names
         - cs-headers-count
       Name: RealtimeLogConfig
-      SamplingRate: 100
+      SamplingRate: !Ref SamplingRate
   # Kinesis Data Streams
   Kinesis:
     Type: 'AWS::Kinesis::Stream'
@@ -111,7 +120,7 @@ Resources:
       StreamEncryption:
         EncryptionType: KMS
         KeyId: alias/aws/kinesis
-      ShardCount: 1
+      ShardCount: !Ref ShardCount
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue

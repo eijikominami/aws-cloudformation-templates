@@ -1,6 +1,25 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/CloudTrail sets AWS CloudTrail.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'CloudTrail Configuration'
+        Parameters: 
+          - AuditOtherRegions
+          - LogBacketName
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SnsTopicARN
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   AuditOtherRegions:
     Type: String

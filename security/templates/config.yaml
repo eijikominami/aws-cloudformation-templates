@@ -1,6 +1,26 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/config sets AWS Config.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Config Configuration'
+        Parameters: 
+          - AuditOtherAccounts
+          - AuditOtherRegions
+          - AutoRemediation
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SnsTopicARN
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   AuditOtherAccounts:
     Type: String

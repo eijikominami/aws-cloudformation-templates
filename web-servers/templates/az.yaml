@@ -2,6 +2,30 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/static-web-hosting/az creates a VPC Subnet and related resources.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'AvailabilityZone Configuration'
+        Parameters: 
+          - AvailabilityZone
+          - InternetGatewayId
+          - NetworkLoadBalancer
+          - SubnetPublicCidrBlock
+          - SubnetExternalCidrBlock
+          - VPCId
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   AvailabilityZone:
     Type: AWS::EC2::AvailabilityZone::Name
