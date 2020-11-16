@@ -2,6 +2,33 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/static-web-hosting/realtime-dashboard creates realtime dashboards for CloudFront logs.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'CloudFront Realtime Dashboard Configuration'
+        Parameters: 
+          - SamplingRate
+          - KinesisShardCount
+      - Label: 
+          default: 'ElasticSearch Configuration'
+        Parameters: 
+          - ElasticSearchInstanceType
+          - ElasticSearchKmsKeyId
+          - ElasticSearchMasterUserName
+          - ElasticSearchMasterUserPassword
+          - ElasticsearchVersion
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters: 
   ElasticSearchInstanceType:
     Type: String
@@ -57,7 +84,7 @@ Parameters:
      - i3.16xlarge.elasticsearch
   ElasticSearchKmsKeyId:
     Type: String
-    AllowedPattern: .+  
+    Default: ''
   ElasticSearchMasterUserName:
     Type: String
     Default: root

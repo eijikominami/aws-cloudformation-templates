@@ -172,7 +172,7 @@ Parameters:
      - i3.16xlarge.elasticsearch
   RealtimeDashboardElasticSearchKmsKeyId:
     Type: String
-    AllowedPattern: .+  
+    Default: ''
   RealtimeDashboardElasticSearchMasterUserName:
     Type: String
     Default: root
