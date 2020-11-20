@@ -16,8 +16,8 @@ Parameters:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable auto remendentions [required]
   RequiredTagKey:
     Type: String
@@ -26,7 +26,7 @@ Parameters:
     Description: Required tag key [required]
   RequiredTagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
     Description: Required tag key [required]
     

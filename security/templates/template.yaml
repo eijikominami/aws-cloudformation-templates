@@ -2,34 +2,63 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/security sets basic configurations for security.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'CloudTrail and Config Configuration'
+        Parameters: 
+          - AuditOtherAccounts
+          - AuditOtherRegions
+          - AutoRemediation
+      - Label: 
+          default: 'Detective Configuration'
+        Parameters: 
+          - AmazonDetective
+      - Label: 
+          default: 'SecurityHub Configuration'
+        Parameters: 
+          - IAMUserArnToAssumeAWSSupportRole
+          - NotificationFilterAboutSecurityChecks
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
 Parameters:
   AuditOtherAccounts:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable cross account audit [required]
   AuditOtherRegions:
     Type: String
     Default: Enabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable cross region audit [required]
   AutoRemediation:
     Type: String
     Default: Enabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable auto remediation [required]
   AmazonDetective:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable Amazon Detective [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
@@ -39,9 +68,9 @@ Parameters:
     Type: String
     Default: DENY_ALL
     AllowedValues:
-     - DENY_ALL
-     - MEDIUM
-     - ALLOW_ALL
+      - DENY_ALL
+      - MEDIUM
+      - ALLOW_ALL
     Description: The notification filter type about Security Hub Security Checks [required]
   SNSForAlertArn:
     Type: String
@@ -55,7 +84,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Conditions:
@@ -200,7 +229,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -216,7 +245,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

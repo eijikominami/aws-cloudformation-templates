@@ -2,67 +2,90 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudSAMTemplates/notification/eventbridge creates Amazon EventBridge to support events from AWS Services.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'EventBridge Configuration'
+        Parameters:
+          - AutoScalingEventsRule
+          - EBSEventsRule
+          - EC2EventsRule
+          - KMSEventsRule
+          - ManagementConsoleEventsRule
+          - ScheduledEventsRule
+          - TagEventsRule
+          - TrustedAdvisorEventsRule
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+
 Parameters:
   LogicalNamePrefix:
     Type: String
     Default: Notification-
     AllowedPattern: .+
     Description: Custom prefix name [required]
-  ScheduledEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-     - ENABLED
-     - DISABLED
-    Description: Enable or disable the events rule about Scheduled Events [required]
-  EBSEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-     - ENABLED
-     - DISABLED
-    Description: Enable or disable the events rule about EBS [required]
   AutoScalingEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about AutoScaling [required]
+  EBSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about EBS [required]
   EC2EventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about EC2 [required]
   KMSEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about KMS [required]
   ManagementConsoleEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Management Console [required]
+  ScheduledEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about Scheduled Events [required]
   TagEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Tag [required]
   TrustedAdvisorEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Trusted Advisor [required]
   SNSForAlertArn:
     Type: String

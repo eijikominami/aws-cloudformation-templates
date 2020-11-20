@@ -2,6 +2,51 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/web-servers creates a Network Load Balancer and EC2 instances for Web Servers.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'AutoScaling Configuration'
+        Parameters: 
+          - AutoScalingDesiredCapacity
+          - AutoScalingMaxSize
+          - AutoScalingLoadBalancerType
+          - EC2ImageId
+          - EC2InstanceType
+          - EC2KeyName
+          - EC2VolumeSize
+      - Label: 
+          default: 'AvailabilityZone Configuration'
+        Parameters: 
+          - SubnetPublicCidrBlockForAz1
+          - SubnetExternalCidrBlockForAz1
+          - SubnetPublicCidrBlockForAz2
+          - SubnetExternalCidrBlockForAz2
+          - VPCCidrBlock
+      - Label: 
+          default: 'Data Lifecycle Manager Configuration'
+        Parameters: 
+          - EC2DailySnapshotScheduledAt
+      - Label: 
+          default: 'SystemsManager Configuration'
+        Parameters: 
+          - IgnoreResourceConflicts
+          - SSMPatchingAt
+      - Label: 
+          default: 'WAF Configuration'
+        Parameters: 
+          - WebACL
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
 Parameters:
   AutoScalingDesiredCapacity:
     Type: Number
@@ -100,7 +145,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Conditions:
@@ -296,7 +341,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -312,7 +357,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -509,7 +554,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Tags:
         createdby: !Ref TagValue
 

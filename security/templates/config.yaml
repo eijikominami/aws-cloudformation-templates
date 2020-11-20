@@ -1,27 +1,47 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/config sets AWS Config.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Config Configuration'
+        Parameters: 
+          - AuditOtherAccounts
+          - AuditOtherRegions
+          - AutoRemediation
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SnsTopicARN
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   AuditOtherAccounts:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable cross account audit [required]
   AuditOtherRegions:
     Type: String
     Default: Enabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable cross region audit [required]
   AutoRemediation:
     Type: String
     Default: Enabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable auto remediation [required]
   LogicalNamePrefix:
     Type: String
@@ -36,7 +56,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
  
 Conditions:
@@ -424,7 +444,7 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.7
+      Runtime: python3.8
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
