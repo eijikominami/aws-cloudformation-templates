@@ -895,6 +895,33 @@ Resources:
         EventsRuleName: !Ref CodePipelineEvents
       Tags:
         createdby: !Ref TagValue
+  # CodeStar
+  NotificationRule:
+    Condition: CreateCodePipeline
+    DependsOn:
+      - ServiceLinkedRoleForCodeStar
+    Type: 'AWS::CodeStarNotifications::NotificationRule'
+    Properties: 
+      DetailType: FULL
+      EventTypeIds:
+        # Action
+        - codepipeline-pipeline-action-execution-failed
+        # Stage
+        - codepipeline-pipeline-stage-execution-started
+        # Pipeline
+        - codepipeline-pipeline-pipeline-execution-started
+        - codepipeline-pipeline-pipeline-execution-succeeded
+        - codepipeline-pipeline-pipeline-execution-failed
+      Name: !Sub CICD-started-succeeded-${AWS::Region}
+      Resource: !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}'
+      Targets: 
+        - TargetAddress: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+          TargetType: SNS
+      Tags:
+        createdby: !Ref TagValue
   # S3
   S3ForArtifact:
     Type: 'AWS::S3::Bucket'
