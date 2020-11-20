@@ -16,7 +16,7 @@ If you just want to deploy the stack follow these steps.
 + [Security Template](../security/README.md)
 + [Global Settings Template](../global/README.md)
 
-2. click the button below.
+2. Click the button below.
 
 [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=StaticWebsiteHosting&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/static-website-hosting-with-ssl/template.yaml) 
 

@@ -566,12 +566,12 @@ Resources:
     Type: 'AWS::Logs::LogStream'
     Properties:
       LogGroupName: !Ref CloudWatchLogsGroupForFirehose
-      LogStreamName: S3Delivery
+      LogStreamName: S3
   CloudWatchLogsStreamForFirehoseElasticSearch:
     Type: 'AWS::Logs::LogStream'
     Properties:
       LogGroupName: !Ref CloudWatchLogsGroupForFirehose
-      LogStreamName: ElasticSearchDelivery
+      LogStreamName: ElasticSearch
   # S3
   S3ForKinesisFirehose:
     Type: 'AWS::S3::Bucket'
