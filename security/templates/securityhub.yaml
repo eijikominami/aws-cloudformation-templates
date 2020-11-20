@@ -15,9 +15,9 @@ Parameters:
     Type: String
     Default: DENY_ALL
     AllowedValues:
-     - DENY_ALL
-     - MEDIUM
-     - ALLOW_ALL
+      - DENY_ALL
+      - MEDIUM
+      - ALLOW_ALL
     Description: The notification filter about Security Hub Security Checks [required]
   SnsTopicARN:
     Type: String

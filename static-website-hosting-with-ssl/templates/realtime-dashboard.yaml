@@ -21,6 +21,7 @@ Metadata:
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -33,71 +34,76 @@ Parameters:
     Type: String
     Default: cloudfront-realtime-logs
     AllowedPattern: .+
+    Description: The domain name of ElasticSearch Service [required]
   ElasticSearchInstanceType:
     Type: String
     Default: r5.large.elasticsearch
     AllowedValues:
-     - t3.small.elasticsearch
-     - t3.medium.elasticsearch
-     - t2.micro.elasticsearch
-     - t2.small.elasticsearch
-     - t2.medium.elasticsearch
-     - m5.large.elasticsearch
-     - m5.xlarge.elasticsearch
-     - m5.2xlarge.elasticsearch
-     - m5.4xlarge.elasticsearch
-     - m5.12xlarge.elasticsearch
-     - m4.large.elasticsearch
-     - m4.xlarge.elasticsearch
-     - m4.2xlarge.elasticsearch
-     - m4.4xlarge.elasticsearch
-     - m4.10xlarge.elasticsearch
-     - c5.large.elasticsearch
-     - c5.xlarge.elasticsearch
-     - c5.2xlarge.elasticsearch
-     - c5.4xlarge.elasticsearch
-     - c5.9xlarge.elasticsearch
-     - c5.18xlarge.elasticsearch
-     - c4.large.elasticsearch
-     - c4.xlarge.elasticsearch
-     - c4.2xlarge.elasticsearch
-     - c4.4xlarge.elasticsearch
-     - c4.8xlarge.elasticsearch
-     - r5.large.elasticsearch
-     - r5.xlarge.elasticsearch
-     - r5.2xlarge.elasticsearch
-     - r5.4xlarge.elasticsearch
-     - r5.12xlarge.elasticsearch
-     - r4.large.elasticsearch
-     - r4.xlarge.elasticsearch
-     - r4.2xlarge.elasticsearch
-     - r4.4xlarge.elasticsearch
-     - r4.8xlarge.elasticsearch
-     - r4.16xlarge.elasticsearch
-     - r3.large.elasticsearch
-     - r3.xlarge.elasticsearch
-     - r3.2xlarge.elasticsearch
-     - r3.4xlarge.elasticsearch
-     - r3.8xlarge.elasticsearch
-     - i3.large.elasticsearch
-     - i3.xlarge.elasticsearch
-     - i3.2xlarge.elasticsearch
-     - i3.4xlarge.elasticsearch
-     - i3.8xlarge.elasticsearch
-     - i3.16xlarge.elasticsearch
+      - t3.small.elasticsearch
+      - t3.medium.elasticsearch
+      - t2.micro.elasticsearch
+      - t2.small.elasticsearch
+      - t2.medium.elasticsearch
+      - m5.large.elasticsearch
+      - m5.xlarge.elasticsearch
+      - m5.2xlarge.elasticsearch
+      - m5.4xlarge.elasticsearch
+      - m5.12xlarge.elasticsearch
+      - m4.large.elasticsearch
+      - m4.xlarge.elasticsearch
+      - m4.2xlarge.elasticsearch
+      - m4.4xlarge.elasticsearch
+      - m4.10xlarge.elasticsearch
+      - c5.large.elasticsearch
+      - c5.xlarge.elasticsearch
+      - c5.2xlarge.elasticsearch
+      - c5.4xlarge.elasticsearch
+      - c5.9xlarge.elasticsearch
+      - c5.18xlarge.elasticsearch
+      - c4.large.elasticsearch
+      - c4.xlarge.elasticsearch
+      - c4.2xlarge.elasticsearch
+      - c4.4xlarge.elasticsearch
+      - c4.8xlarge.elasticsearch
+      - r5.large.elasticsearch
+      - r5.xlarge.elasticsearch
+      - r5.2xlarge.elasticsearch
+      - r5.4xlarge.elasticsearch
+      - r5.12xlarge.elasticsearch
+      - r4.large.elasticsearch
+      - r4.xlarge.elasticsearch
+      - r4.2xlarge.elasticsearch
+      - r4.4xlarge.elasticsearch
+      - r4.8xlarge.elasticsearch
+      - r4.16xlarge.elasticsearch
+      - r3.large.elasticsearch
+      - r3.xlarge.elasticsearch
+      - r3.2xlarge.elasticsearch
+      - r3.4xlarge.elasticsearch
+      - r3.8xlarge.elasticsearch
+      - i3.large.elasticsearch
+      - i3.xlarge.elasticsearch
+      - i3.2xlarge.elasticsearch
+      - i3.4xlarge.elasticsearch
+      - i3.8xlarge.elasticsearch
+      - i3.16xlarge.elasticsearch
+    Description: The instance type of ElasticSearch Service [required]
   ElasticSearchMasterUserName:
     Type: String
     Default: root
     AllowedPattern: .+
+    Description: The user name of ElasticSearch Service [required]
   ElasticSearchMasterUserPassword:
     Type: String
     Default: Password1+
     AllowedPattern: .+
     NoEcho: true
+    Description: The password of ElasticSearch Service [required]
   ElasticsearchVersion:
     Type: String
     Default: '7.8'
     AllowedPattern: .+
+    Description: The version of ElasticSearch Service [required]
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
@@ -108,11 +114,21 @@ Parameters:
     Default: 100
     MinValue: 1
     MaxValue: 100
+    Description: The sampling rate of logs CloudFront sends [required]
   KinesisShardCount:
     Type: Number
     Default: 1
     MinValue: 1 
+    Description: The shard count of Kinesis [required]
+  KinesisNumberOfPutRecordThreshold:
+    Type: Number
+    Default: 12000000
+    MinValue: 0  
+    Description: The threshold of put record API calls [required]
   SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
     Type: String
     Default: '' 
   TagKey:
@@ -124,7 +140,39 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+
 Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.1.8
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.1.8
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
   # IAM
   IAMRoleForCloudFrontRealtimeLog:
     Type: 'AWS::IAM::Role'
@@ -244,7 +292,8 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource:
-                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CloudWatchLogsGroupForFirehose}:log-stream:${CloudWatchLogsStreamForFirehose}'
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CloudWatchLogsGroupForFirehose}:log-stream:${CloudWatchLogsStreamForFirehoseElasticSearch}'
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CloudWatchLogsGroupForFirehose}:log-stream:${CloudWatchLogsStreamForFirehoseS3}'
               - Effect: Allow
                 Action:
                   - 'lambda:InvokeFunction'
@@ -330,7 +379,7 @@ Resources:
         KinesisStreamName: !Ref LogicalNamePrefix
         IteratorAgeMillisecondsThreshold: 30000
         # Number of Input Records (200000rps * 60sec)
-        NumberOfPutRecordThreshold: 12000000
+        NumberOfPutRecordThreshold: !Ref KinesisNumberOfPutRecordThreshold
       NotificationARNs: 
         - !Ref SNSForAlertArn
       Location:
@@ -458,6 +507,20 @@ Resources:
       Timeout: 60
       TracingConfig:
         Mode: Active
+  EnqueteVotesAlarmLambda:
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Parameters:
+        CustomAlarmName: !Ref LogicalNamePrefix
+        SNSTopicArn: !Ref SNSForAlertArn
+        FunctionResouceName: !Ref Lambda
+      NotificationARNs: 
+        - !Ref SNSForDeploymentArn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
+        SemanticVersion: 1.1.8
+      Tags:
+        createdby: !Ref TagValue
   # Kinesis Firehose
   KinesisFirehose:
     Type: 'AWS::KinesisFirehose::DeliveryStream'
@@ -471,7 +534,7 @@ Resources:
         CloudWatchLoggingOptions: 
           Enabled: true
           LogGroupName: !Ref CloudWatchLogsGroupForFirehose
-          LogStreamName: !Ref CloudWatchLogsStreamForFirehose
+          LogStreamName: !Ref CloudWatchLogsStreamForFirehoseS3
         DomainARN: !GetAtt ElasticSearchDomain.DomainArn
         IndexName: realtime
         IndexRotationPeriod: NoRotation
@@ -491,19 +554,24 @@ Resources:
           CloudWatchLoggingOptions:
             Enabled: true
             LogGroupName: !Ref CloudWatchLogsGroupForFirehose
-            LogStreamName: !Ref CloudWatchLogsStreamForFirehose
+            LogStreamName: !Ref CloudWatchLogsStreamForFirehoseElasticSearch
           RoleARN: !GetAtt IAMRoleForKinesisFirehouse.Arn
-        TypeName: fromFirehose  
+        TypeName: ''  
   CloudWatchLogsGroupForFirehose:
     Type: 'AWS::Logs::LogGroup'
     Properties:
       LogGroupName: !Sub '/aws/kinesisfirehose/${LogicalNamePrefix}'
       RetentionInDays: 60
-  CloudWatchLogsStreamForFirehose:
+  CloudWatchLogsStreamForFirehoseS3:
     Type: 'AWS::Logs::LogStream'
     Properties:
       LogGroupName: !Ref CloudWatchLogsGroupForFirehose
       LogStreamName: S3Delivery
+  CloudWatchLogsStreamForFirehoseElasticSearch:
+    Type: 'AWS::Logs::LogStream'
+    Properties:
+      LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+      LogStreamName: ElasticSearchDelivery
   # S3
   S3ForKinesisFirehose:
     Type: 'AWS::S3::Bucket'

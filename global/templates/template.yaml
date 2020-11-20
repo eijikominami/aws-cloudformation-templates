@@ -35,8 +35,8 @@ Parameters:
     Type: String
     Default: DNS
     AllowedValues:
-     - DNS
-     - EMAIL
+      - DNS
+      - EMAIL
     Description: The validation method that you own or control the domain [required]
   ACMDomainName:
     Type: String

@@ -75,37 +75,37 @@ Parameters:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable deployment of StaticWebsiteHosting template [required]
   GlobalSettings:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable deployment of GlobalSettings template [required]
   Notification:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable deployment of Notification template [required]
   WebServers:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - SystemManager-Only
-     - Disabled
+      - Enabled
+      - SystemManager-Only
+      - Disabled
     Description: Enable or disable deployment of WebServers template [required]
   UploadArtifacts:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable deployment of UploadArtifacts template [required]
   SNSForAlertArn:
     Type: String

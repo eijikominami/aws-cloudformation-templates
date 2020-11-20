@@ -35,57 +35,57 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about AutoScaling [required]
   EBSEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about EBS [required]
   EC2EventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about EC2 [required]
   KMSEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about KMS [required]
   ManagementConsoleEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Management Console [required]
   ScheduledEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Scheduled Events [required]
   TagEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Tag [required]
   TrustedAdvisorEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Trusted Advisor [required]
   SNSForAlertArn:
     Type: String

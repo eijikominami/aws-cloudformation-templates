@@ -25,8 +25,8 @@ Parameters:
     Type: String
     Default: Enabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable cross region audit [required]
   LogBacketName:
     Type: String

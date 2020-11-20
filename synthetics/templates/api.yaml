@@ -45,8 +45,8 @@ Parameters:
   Method:
     Type: String
     AllowedValues:
-     - GET
-     - POST
+      - GET
+      - POST
     Description: The HTTP method the canary will be testing [required]  
   SNSForAlertArn:
     Type: String

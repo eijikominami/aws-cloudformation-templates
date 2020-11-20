@@ -26,22 +26,22 @@ Parameters:
     Type: String
     Default: Disabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable cross account audit [required]
   AuditOtherRegions:
     Type: String
     Default: Enabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable cross region audit [required]
   AutoRemediation:
     Type: String
     Default: Enabled
     AllowedValues:
-     - Enabled
-     - Disabled
+      - Enabled
+      - Disabled
     Description: Enable or disable auto remediation [required]
   LogicalNamePrefix:
     Type: String
