@@ -152,7 +152,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -168,7 +168,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -384,7 +384,7 @@ Resources:
         - !Ref SNSForAlertArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Tags:
         createdby: !Ref TagValue
   # Lambda
@@ -518,7 +518,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Tags:
         createdby: !Ref TagValue
   # Kinesis Firehose
