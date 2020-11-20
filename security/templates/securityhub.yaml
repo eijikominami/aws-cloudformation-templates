@@ -1,14 +1,23 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/SecurityHub sets AWS Security Hub.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters:
+          - NotificationFilterAboutSecurityChecks
+          - SnsTopicARN
+
 Parameters:
   NotificationFilterAboutSecurityChecks:
     Type: String
     Default: DENY_ALL
     AllowedValues:
-     - DENY_ALL
-     - MEDIUM
-     - ALLOW_ALL
+      - DENY_ALL
+      - MEDIUM
+      - ALLOW_ALL
     Description: The notification filter about Security Hub Security Checks [required]
   SnsTopicARN:
     Type: String

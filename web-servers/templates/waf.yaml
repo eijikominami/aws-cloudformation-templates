@@ -1,6 +1,20 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/static-web-hosting/waf creates an AWS WAF.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'WAF Configuration'
+        Parameters: 
+          - TargetResourceArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   LogicalNamePrefix:
     Type: String
@@ -16,7 +30,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Conditions:

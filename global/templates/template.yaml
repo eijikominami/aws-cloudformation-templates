@@ -1,13 +1,42 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/global creates global settings on N.Virginia Region.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Certificate Manager Configuration'
+        Parameters: 
+          - ACMValidationMethod
+          - ACMDomainName
+      - Label: 
+          default: 'Billing Configuration'
+        Parameters: 
+          - BillingAlertThreshold
+      - Label: 
+          default: 'CloudFront Alarm Configuration'
+        Parameters: 
+          - CloudFrontErrorRateThreshold
+          - CloudFrontErrorRequestPerMinuteThreshold
+          - CloudFrontBytesDownloadedPerMinuteThreshold
+          - CloudFrontDistributionId
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SnsTopicArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - TagKey
+          - TagValue
+
 Parameters:
   ACMValidationMethod:
     Type: String
     Default: DNS
     AllowedValues:
-     - DNS
-     - EMAIL
+      - DNS
+      - EMAIL
     Description: The validation method that you own or control the domain [required]
   ACMDomainName:
     Type: String
@@ -46,7 +75,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Conditions:

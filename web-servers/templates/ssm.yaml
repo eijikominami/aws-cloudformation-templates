@@ -2,6 +2,25 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/web-servers/ssm executes Systems Manager Quick Setup and creates a System Manager Maintenance Window and related resources.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Systems Manager Configuration'
+        Parameters: 
+          - IgnoreResourceConflicts
+          - PatchingAt
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSTopicARN
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   IgnoreResourceConflicts:
     Type: String
@@ -28,7 +47,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Conditions:

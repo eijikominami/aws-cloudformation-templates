@@ -59,4 +59,4 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | AutoRemediation | Enabled / Disabled | Disabled | ○ | If it is Enabled, **AutoRemediation** by SSM Automation and Lambda are enabled. |
 | RequiredTagKey | String | createdby | ○ | AWS Config removes AWSnresouces without this tag. |
-| RequiredTagValue | String | aws:cloudformation:stack | ○ | AWS Config removes AWSnresouces without this tag. |
+| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Config removes AWSnresouces without this tag. |

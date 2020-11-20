@@ -11,13 +11,47 @@ Globals:
     Runtime: python3.8
     Tracing: Active
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'EventBridge Configuration'
+        Parameters:
+          - AutoScalingEventsRule
+          - EBSEventsRule
+          - EC2EventsRule
+          - KMSEventsRule
+          - ManagementConsoleEventsRule
+          - ScheduledEventsRule
+          - TagEventsRule
+          - TrustedAdvisorEventsRule
+      - Label: 
+          default: 'Slack Configuration'
+        Parameters: 
+          - Encrypt
+          - HookUrlForDeployment
+          - HookUrlForAlert
+          - SlackWorkspaceId
+          - SlackChannelIdForDeployment
+          - SlackChannelIdForAlert
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - TagKey
+          - TagValue
+
 Parameters: 
   Encrypt:
     Type: String
     Default: false
     AllowedValues:
-     - true
-     - false
+      - true
+      - false
     Description: Enable or disable encryption [required]
   HookUrlForDeployment:
     Type: String
@@ -49,61 +83,61 @@ Parameters:
     Type: String
     Default: '' 
     Description: Amazon SNS Topic ARN for deployment information
-  ScheduledEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-     - ENABLED
-     - DISABLED
-    Description: Enable or disable the events rule about Scheduled Events [required]
-  EBSEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-     - ENABLED
-     - DISABLED
-    Description: Enable or disable the events rule about EBS [required]
   AutoScalingEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about AutoScaling [required]
+  EBSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about EBS [required]
   EC2EventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about EC2 [required]
   KMSEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about KMS [required]
   ManagementConsoleEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Management Console [required]
+  ScheduledEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about Scheduled Events [required]
   TagEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Tag [required]
   TrustedAdvisorEventsRule:
     Type: String
     Default: ENABLED
     AllowedValues:
-     - ENABLED
-     - DISABLED
+      - ENABLED
+      - DISABLED
     Description: Enable or disable the events rule about Trusted Advisor [required]
   TagKey:
     Type: String
@@ -111,7 +145,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Conditions:
@@ -129,7 +163,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -145,7 +179,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -155,7 +189,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -341,7 +375,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.1.8
+        SemanticVersion: 1.1.9
       Tags:
         createdby: !Ref TagValue
   # Chatbot

@@ -1,6 +1,22 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/web-servers/dlm creates a DataLifecycleManager.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Data Lifecycle Manager Configuration'
+        Parameters: 
+          - DailySnapshotScheduledAt
+          - SnapshotInterval
+          - SnapshotRetainRule
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   DailySnapshotScheduledAt:
     Type: String
@@ -35,7 +51,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Resources:
