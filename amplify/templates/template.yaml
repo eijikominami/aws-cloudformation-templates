@@ -42,7 +42,7 @@ Parameters:
     Default: createdby
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
 
 Conditions:
   CreateCodeCommitTrigger: !Not [ !Equals [ !Ref AmplifyConsoleAppId, ''] ]

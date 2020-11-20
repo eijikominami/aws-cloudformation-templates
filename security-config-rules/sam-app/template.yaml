@@ -26,7 +26,7 @@ Parameters:
     Description: Required tag key [required]
   RequiredTagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
     Description: Required tag key [required]
     

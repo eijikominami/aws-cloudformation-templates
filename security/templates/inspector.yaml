@@ -22,7 +22,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws:cloudformation:stack
+    Default: aws-cloudformation-templates
     AllowedPattern: .+
 
 Mappings:
