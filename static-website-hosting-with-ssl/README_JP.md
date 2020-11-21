@@ -24,6 +24,7 @@
 | --- | --- |
 | Synthetics | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) |
 | Realtime Dashboard | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=RealtimeDashboard&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/static-website-hosting-with-ssl/realtime-dashboard.yaml) |
+| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml) |
 
 ## アーキテクチャ
 
@@ -33,13 +34,54 @@
 
 ### Amazon S3
 
+#### オリジン
+
 このテンプレートは、WebディストリビューションのオリジンとしてS3バケットを作成します。
 ``オリジンアクセスアイデンティティ``（``OAI``）を用いたCloudFrontからのアクセスは許可されますが、匿名ユーザからの直接アクセスは拒否されます。
+
+#### ログの保存
+
+S3やCloudFrontで生成されたログは、このテンプレートで作成されたS3バケットに保存されます。
 
 ### Amazon CloudFront
 
 このテンプレートは、CloudFrontを作成します。
 CloudFrontは、``Custom Domain Name with ACM``、 ``Aliases``、 ``Origin Access Identity``、 ``Secondary Origin``、``Logging``に対応します。
+
+### AWS WAF
+
+このテンプレートは、Amazon CloudFront に ``AWS WAF`` を適用することができます。
+以下の [**AWS Managed Rules rule**](https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/aws-managed-rule-groups-list.html) が有効化されます。
+
++ AWSManagedRulesCommonRuleSet
++ AWSManagedRulesAdminProtectionRuleSet
++ AWSManagedRulesKnownBadInputsRuleSet
++ AWSManagedRulesAmazonIpReputationList
+
+### Synthetics Stack
+
+このテンプレートは、外形監視に関するネストされたスタックを生成します。
+このスタックの詳細は、 [こちら](../synthetics/README_JP.md) をご覧ください。
+
+### Real-time Dashboard Stack
+
+このテンプレートは、CloudFrontのリアルタイムログのダッシュボードに関するネストされたスタックを生成します。
+これには、以下のリソースが含まれます。
+
+#### Amazon Kinesis Data Streams
+
+Amazon CloudFrontで生成されたリアルタイムログは、 ``Amazon Kinesis Data Streams`` と統合され、 ``Amazon Kinesis Data Firehose`` を用いて一般的なHTTPエンドポイントに対してこれらのログを配信します。
+
+#### Amazon Kinesis Firehose とこれに関連したリソース
+
+``Amazon Kinesis Data Firehose`` は、ログを ``Amazon S3`` や ``Amazon Elasticsearch Service`` に配信します。
+Kinesis Firehose は、 ``AWS Lambda`` を用いて、ログの処理やログのフォーマットの変換を行います。
+Elasticsearch にログを送信できない場合、Kinesis Firehose は ``Amazon S3`` バケットにログを送信します。
+
+#### Amazon Elasticsearch Service
+
+``Amazon Elasticsearch Service`` を用いて、リアルタイムダッシュボードやアラートの作成、異常の調査、運用イベントに迅速に対応できます。
+追跡できる一般的なデータポイントには、さまざまな地域から発信されたユーザのリクエストの数や、待ち時間が長くなったユニークユーザの数が含まれます。
 
 ## デプロイ
 
@@ -65,11 +107,32 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
+| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
+| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
+| RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
+| RealtimeDashboardEnabled | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、 **Real-time Dashboard** が有効化されます。|
+| RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
+| RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
+| RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | LoggingEnabled | Enabled / Disabled | Enabled | ○ | Enabledを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
 | WebACL | Enabled / Disabled | Disabled | ○ | Disabled に設定された場合、AWS WAFは作成されません。 |
+
+``Synthetics Stack`` を単独でデプロイする場合は、以下のパラメータを指定することができます。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | Elasticsearch Service のドメイン名 |
+| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
+| ElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
+| ElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
+| ElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
+| SamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
+| KinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
+| KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 
 ### 手動設定
 
