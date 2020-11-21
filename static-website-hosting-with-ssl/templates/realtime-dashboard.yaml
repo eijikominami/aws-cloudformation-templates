@@ -116,7 +116,7 @@ Parameters:
     Default: 100
     MinValue: 1
     MaxValue: 100
-    Description: The sampling rate of logs CloudFront sends [required]
+    Description: The sampling rate of logs sent by CloudFront [required]
   KinesisShardCount:
     Type: Number
     Default: 1
@@ -126,7 +126,7 @@ Parameters:
     Type: Number
     Default: 12000000
     MinValue: 0  
-    Description: The threshold of put record API calls [required]
+    Description: The threshold of PutRecord API calls [required]
   SNSForAlertArn:
     Type: String
     Default: '' 

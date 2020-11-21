@@ -33,7 +33,8 @@ Metadata:
           - RealtimeDashboardElasticsearchVersion
           - RealtimeDashboardEnabled
           - RealtimeDashboardSamplingRate
-          - RealtimeDashboardShardCount
+          - RealtimeDashboardKinesisShardCount
+          - RealtimeKinesisNumberOfPutRecordThreshold
       - Label: 
           default: 'Synthetics Configuration'
         Parameters: 
@@ -169,35 +170,46 @@ Parameters:
       - i3.4xlarge.elasticsearch
       - i3.8xlarge.elasticsearch
       - i3.16xlarge.elasticsearch
+    Description: The instance type of ElasticSearch Service [required]
   RealtimeDashboardElasticSearchMasterUserName:
     Type: String
     Default: root
     AllowedPattern: .+
+    Description: The user name of ElasticSearch Service [required]
   RealtimeDashboardElasticSearchMasterUserPassword:
     Type: String
     Default: Password1+
     AllowedPattern: .+
     NoEcho: true
+    Description: The password of ElasticSearch Service [required]
   RealtimeDashboardElasticsearchVersion:
     Type: String
     Default: '7.8'
     AllowedPattern: .+
+    Description: The version of ElasticSearch Service [required]
   RealtimeDashboardEnabled:
     Type: String
     Default: Disabled
     AllowedValues:
       - Enabled
       - Disabled
-    Description: Enable or disable realtime dashboard [required] 
+    Description: Enable or disable real-time dashboard [required] 
   RealtimeDashboardSamplingRate:
     Type: Number
     Default: 100
     MinValue: 1
     MaxValue: 100 
-  RealtimeDashboardShardCount:
+    Description: The sampling rate of logs sent by CloudFront [required]
+  RealtimeDashboardKinesisShardCount:
     Type: Number
     Default: 1
     MinValue: 1
+    Description: The shard count of Kinesis [required]
+  RealtimeKinesisNumberOfPutRecordThreshold:
+    Type: Number
+    Default: 12000000
+    MinValue: 0  
+    Description: The threshold of PutRecord API calls [required]
   S3DestinationBucketArnOfCrossRegionReplication:
     Type: String
     Default: ''
@@ -288,7 +300,8 @@ Resources:
         ElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
         ElasticSearchMasterUserPassword: !Ref RealtimeDashboardElasticSearchMasterUserPassword
         ElasticsearchVersion: !Ref RealtimeDashboardElasticsearchVersion
-        KinesisShardCount: !Ref RealtimeDashboardShardCount
+        KinesisShardCount: !Ref RealtimeDashboardKinesisShardCount
+        KinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
         LogicalNamePrefix: !Ref AWS::StackName
         SamplingRate: !Ref RealtimeDashboardSamplingRate
         SNSForAlertArn: !If

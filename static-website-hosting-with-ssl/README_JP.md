@@ -75,10 +75,10 @@ Amazon CloudFrontで生成されたリアルタイムログは、 ``Amazon Kines
 #### Amazon Kinesis Firehose とこれに関連したリソース
 
 ``Amazon Kinesis Data Firehose`` は、ログを ``Amazon S3`` や ``Amazon Elasticsearch Service`` に配信します。
-Kinesis Firehose は、 ``AWS Lambda`` を用いて、ログを処理したりログのフォーマットを変換したりします。
+Kinesis Firehose は、 ``AWS Lambda`` を用いて、ログの処理やログのフォーマットの変換を行います。
 Elasticsearch にログを送信できない場合、Kinesis Firehose は ``Amazon S3`` バケットにログを送信します。
 
-#### Amazon ElasticSearch Service
+#### Amazon Elasticsearch Service
 
 ``Amazon Elasticsearch Service`` を用いて、リアルタイムダッシュボードやアラートの作成、異常の調査、運用イベントに迅速に対応できます。
 追跡できる一般的なデータポイントには、さまざまな地域から発信されたユーザのリクエストの数や、待ち時間が長くなったユニークユーザの数が含まれます。
@@ -107,11 +107,32 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
+| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
+| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
+| RealtimeDashboardElasticsearchVersion | String | Password1+ | ○ | Elasticsearch Service のバージョン |
+| RealtimeDashboardEnabled | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、 **Real-time Dashboard** が有効化されます。|
+| RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
+| RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
+| RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | LoggingEnabled | Enabled / Disabled | Enabled | ○ | Enabledを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
 | WebACL | Enabled / Disabled | Disabled | ○ | Disabled に設定された場合、AWS WAFは作成されません。 |
+
+``Synthetics Stack`` を単独でデプロイする場合は、以下のパラメータを指定することができます。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | Elasticsearch Service のドメイン名 |
+| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
+| ElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
+| ElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
+| ElasticsearchVersion | String | Password1+ | ○ | Elasticsearch Service のバージョン |
+| SamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
+| KinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
+| KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 
 ### 手動設定
 
