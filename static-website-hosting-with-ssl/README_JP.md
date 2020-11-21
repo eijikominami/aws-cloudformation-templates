@@ -51,7 +51,7 @@ CloudFrontは、``Custom Domain Name with ACM``、 ``Aliases``、 ``Origin Acces
 ### AWS WAF
 
 このテンプレートは、Amazon CloudFront に ``AWS WAF`` を適用することができます。
-以下の [**AWS Managed Rules rule**](https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/aws-managed-rule-groups-list.html#aws-managed-rule-groups-baseline) が有効化されます。
+以下の [**AWS Managed Rules rule**](https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/aws-managed-rule-groups-list.html) が有効化されます。
 
 + AWSManagedRulesCommonRuleSet
 + AWSManagedRulesAdminProtectionRuleSet
@@ -62,6 +62,26 @@ CloudFrontは、``Custom Domain Name with ACM``、 ``Aliases``、 ``Origin Acces
 
 このテンプレートは、外形監視に関するネストされたスタックを生成します。
 このスタックの詳細は、 [こちら](../synthetics/README_JP.md) をご覧ください。
+
+### Real-time Dashboard Stack
+
+このテンプレートは、CloudFrontのリアルタイムログのダッシュボードに関するネストされたスタックを生成します。
+これには、以下のリソースが含まれます。
+
+#### Amazon Kinesis Data Streams
+
+Amazon CloudFrontで生成されたリアルタイムログは、 ``Amazon Kinesis Data Streams`` と統合され、 ``Amazon Kinesis Data Firehose`` を用いて一般的なHTTPエンドポイントに対してこれらのログを配信します。
+
+#### Amazon Kinesis Firehose とこれに関連したリソース
+
+``Amazon Kinesis Data Firehose`` は、ログを ``Amazon S3`` や ``Amazon Elasticsearch Service`` に配信します。
+Kinesis Firehose は、 ``AWS Lambda`` を用いて、ログを処理したりログのフォーマットを変換したりします。
+Elasticsearch にログを送信できない場合、Kinesis Firehose は ``Amazon S3`` バケットにログを送信します。
+
+#### Amazon ElasticSearch Service
+
+``Amazon Elasticsearch Service`` を用いて、リアルタイムダッシュボードやアラートの作成、異常の調査、運用イベントに迅速に対応できます。
+追跡できる一般的なデータポイントには、さまざまな地域から発信されたユーザのリクエストの数や、待ち時間が長くなったユニークユーザの数が含まれます。
 
 ## デプロイ
 
