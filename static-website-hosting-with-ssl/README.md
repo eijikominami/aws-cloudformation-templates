@@ -112,7 +112,7 @@ You can provide optional parameters as follows.
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
-| RealtimeDashboardElasticsearchVersion | String | Password1+ | ○ | The version of Elasticsearch Service |
+| RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
 | RealtimeDashboardEnabled | Enabled / Disabled | Disabled | ○ | If Enabled, Real-time Dashboard is enabled. |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
@@ -131,7 +131,7 @@ If you deploy ``Synthetics Stack`` individually, you can provide optional parame
 | ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
 | ElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
-| ElasticsearchVersion | String | Password1+ | ○ | The version of Elasticsearch Service |
+| ElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
 | SamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | KinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |

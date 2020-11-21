@@ -110,7 +110,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
-| RealtimeDashboardElasticsearchVersion | String | Password1+ | ○ | Elasticsearch Service のバージョン |
+| RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
 | RealtimeDashboardEnabled | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
@@ -129,7 +129,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
 | ElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
-| ElasticsearchVersion | String | Password1+ | ○ | Elasticsearch Service のバージョン |
+| ElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
 | SamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | KinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
 | KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
