@@ -10,9 +10,11 @@ Metadata:
         Parameters: 
           - SamplingRate
           - KinesisShardCount
+          - KinesisNumberOfPutRecordThreshold
       - Label: 
           default: 'ElasticSearch Configuration'
         Parameters: 
+          - ElasticSearchDomainName
           - ElasticSearchInstanceType
           - ElasticSearchMasterUserName
           - ElasticSearchMasterUserPassword
@@ -507,20 +509,6 @@ Resources:
       Timeout: 60
       TracingConfig:
         Mode: Active
-  EnqueteVotesAlarmLambda:
-    Type: 'AWS::Serverless::Application'
-    Properties:
-      Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
-        SNSTopicArn: !Ref SNSForAlertArn
-        FunctionResouceName: !Ref Lambda
-      NotificationARNs: 
-        - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.1.9
-      Tags:
-        createdby: !Ref TagValue
   # Kinesis Firehose
   KinesisFirehose:
     Type: 'AWS::KinesisFirehose::DeliveryStream'

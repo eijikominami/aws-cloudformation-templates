@@ -24,6 +24,7 @@
 | --- | --- |
 | Synthetics | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) |
 | Realtime Dashboard | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=RealtimeDashboard&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/static-website-hosting-with-ssl/realtime-dashboard.yaml) |
+| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml) |
 
 ## アーキテクチャ
 
@@ -33,13 +34,34 @@
 
 ### Amazon S3
 
+#### オリジン
+
 このテンプレートは、WebディストリビューションのオリジンとしてS3バケットを作成します。
 ``オリジンアクセスアイデンティティ``（``OAI``）を用いたCloudFrontからのアクセスは許可されますが、匿名ユーザからの直接アクセスは拒否されます。
+
+#### ログの保存
+
+S3やCloudFrontで生成されたログは、このテンプレートで作成されたS3バケットに保存されます。
 
 ### Amazon CloudFront
 
 このテンプレートは、CloudFrontを作成します。
 CloudFrontは、``Custom Domain Name with ACM``、 ``Aliases``、 ``Origin Access Identity``、 ``Secondary Origin``、``Logging``に対応します。
+
+### AWS WAF
+
+このテンプレートは、Amazon CloudFront に ``AWS WAF`` を適用することができます。
+以下の [**AWS Managed Rules rule**](https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/aws-managed-rule-groups-list.html#aws-managed-rule-groups-baseline) が有効化されます。
+
++ AWSManagedRulesCommonRuleSet
++ AWSManagedRulesAdminProtectionRuleSet
++ AWSManagedRulesKnownBadInputsRuleSet
++ AWSManagedRulesAmazonIpReputationList
+
+### Synthetics Stack
+
+このテンプレートは、外形監視に関するネストされたスタックを生成します。
+このスタックの詳細は、 [こちら](../synthetics/README_JP.md) をご覧ください。
 
 ## デプロイ
 

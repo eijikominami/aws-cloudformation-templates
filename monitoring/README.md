@@ -503,7 +503,7 @@ Properties:
 The template creates the following alarms.
 
 | Namespace | MetricName | TopicName | Threshold |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | AWS/SNS | **NumberOfNotificationsFailed** | `SNSTopicName` | At least once a minute |
 
 You can provide optional parameters as follows.

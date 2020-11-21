@@ -501,7 +501,7 @@ Properties:
 このテンプレートは、以下のアラームを作成します。
 
 | ネームスペース | メトリクス | TopicName | 閾値 |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | AWS/SNS | **NumberOfNotificationsFailed** | `SNSTopicName` | 1分間に1回以上 |
 
 以下のパラメータを指定できます。
