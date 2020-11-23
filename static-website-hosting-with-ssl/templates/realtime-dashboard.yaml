@@ -154,7 +154,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -170,7 +170,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -306,6 +306,31 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # IAM Role
+  IAMRoleForEvents:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for EventBridge to access Lambda.
+      Policies:
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSEventslambdaPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lambda:invoke'
+                Resource: '*'
+      RoleName: !Sub '${LogicalNamePrefix}-InspectorEvents-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudFront
   CloudFrontRealtimeLogConfig:
     Type: 'AWS::CloudFront::RealtimeLogConfig'
@@ -386,7 +411,7 @@ Resources:
         - !Ref SNSForAlertArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       Tags:
         createdby: !Ref TagValue
   # Lambda
@@ -670,7 +695,85 @@ Resources:
         AutomatedSnapshotStartHour: 0
       Tags: 
         - Key: !Ref TagKey
-          Value: !Ref TagValue 
+          Value: !Ref TagValue
+  # EventBridge for Safeguard
+  CloudWatchEventsForSafeguard:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: Check 
+      Name: Safeguard-For-Realtime-Dashboard
+      # Every Hour
+      ScheduleExpression: cron(0 */1 ? * * *)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt LambdaShutdownElasticSearch.Arn
+          Id: CloudWatchEventsForSafeguard
+  # Lambda
+  LambdaShutdownElasticSearch:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        ZipFile: !Sub |
+          import boto3
+          import logging
+          import datetime
+          import time
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          cloudformation = boto3.client('cloudformation')
+
+          def lambda_handler(event, context):
+            response = client.describe_stacks(
+                StackName='${AWS::StackName}'
+            )
+            last_updated_time = response['Stacks'][0]['LastUpdatedTime'].timestamp()
+            now = time.time()
+
+            if now < last_updated_time + 3600*1:
+              cloudformation.update_stack(
+                StackName='string',
+                UsePreviousTemplate=True|False,
+                Parameters=[
+                    {
+                        'ParameterKey': 'string',
+                        'ParameterValue': 'string',
+                        'UsePreviousValue': True|False,
+                        'ResolvedValue': 'string'
+                    },
+                ],
+                Capabilities=[
+                    'CAPABILITY_IAM'|'CAPABILITY_NAMED_IAM'|'CAPABILITY_AUTO_EXPAND',
+                ]
+              )
+            logger.info(str(datetime))
+
+      Description: Elasticsearchを削除します
+      FunctionName: shutdownElasticSearch
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Runtime: python3.8
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Timeout: 3
+      TracingConfig:
+        Mode: Active
+  LambdaShutdownElasticSearchPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaShutdownElasticSearch
+      Principal: events.amazonaws.com
+      # DO NOT write 'SourceAccount' option.
+      SourceArn: !GetAtt CloudWatchEventsForSafeguard.Arn
+  LambdaShutdownElasticSearchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
+
 Outputs:
   RealtimeLogConfigArn:
     Description: Realtime Log Config ARN
