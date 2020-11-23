@@ -144,7 +144,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -160,7 +160,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -597,6 +597,7 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::global/templates/template.yaml
+                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
@@ -608,6 +609,7 @@ Resources:
                     - CreateCloudFormationConfigurationArtifact
                     - Name: Source-CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
                 Name: GlobalSettings
                 OutputArtifacts: 
                   - Name: GlobalSettings
@@ -840,7 +842,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -860,7 +862,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -880,7 +882,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 1.1.10
+        SemanticVersion: 1.1.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -987,6 +989,22 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
+  # Resource Group
+  ResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties: 
+      Description: !Sub Group by ${TagKey} ${TagValue}
+      Name: !Sub ${TagKey}-${TagValue}
+      ResourceQuery: 
+        Query: 
+          TagFilters: 
+            - Key: !Ref TagKey
+              Values: 
+                - !Ref TagValue
+        Type: TAG_FILTERS_1_0
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 
 Outputs:
   SNSForAlertArn:
