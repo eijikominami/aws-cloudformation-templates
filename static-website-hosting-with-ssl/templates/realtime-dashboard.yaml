@@ -764,18 +764,16 @@ Resources:
             response = cloudformation.describe_stacks(
                 StackName='${LogicalNamePrefix}'
             )
-            creation_time = response['Stacks'][0]['CreationTime'].timestamp()
+            last_updated_time = response['Stacks'][0]['LastUpdatedTime'].timestamp()
             parameters = response['Stacks'][0]['Parameters']
 
             for parameter in parameters:
               if parameter['ParameterKey'] == 'RealtimeDashboardEnabled':
                 parameter['ParameterValue'] = 'Disabled'
-
-            print(response)
             
             now = time.time()
 
-            if now < creation_time + 3600*${ElasticSearchLifetime}:
+            if now > last_updated_time + 3600*${ElasticSearchLifetime}:
               cloudformation.update_stack(
                 StackName=response['Stacks'][0]['StackName'],
                 UsePreviousTemplate=True,
