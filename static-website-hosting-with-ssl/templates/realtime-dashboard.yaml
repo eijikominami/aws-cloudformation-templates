@@ -711,9 +711,9 @@ Resources:
     Condition: CreateShutdownElasticSearchWorker
     Type: 'AWS::Events::Rule'
     Properties: 
-      Description: Shutdown retired elasticsearch cluster.
+      Description: Shutdown retired Elasticsearch Service cluster.
       Name: ShutdownElasticSearchWorker
-      # Every Hour
+      # Every 5 minutes
       ScheduleExpression: cron(*/5 * ? * * *)
       State: ENABLED
       Targets:
