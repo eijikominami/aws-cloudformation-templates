@@ -155,7 +155,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateSafeguard: !Not [ !Equals [ !Ref ElasticSearchLifetime, 0] ]
+  CreateShutdownElasticSearchWorker: !Not [ !Equals [ !Ref ElasticSearchLifetime, 0] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -730,22 +730,23 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # EventBridge for Safeguard
-  CloudWatchEventsForSafeguard:
-    Condition: CreateSafeguard
+  # EventBridge for ShutdownElasticSearchWorker
+  CloudWatchEventsForShutdownElasticSearchWorker:
+    Condition: CreateShutdownElasticSearchWorker
     Type: 'AWS::Events::Rule'
     Properties: 
-      Description: Check 
-      Name: Safeguard-For-Realtime-Dashboard
+      Description: Shutdown retired elasticsearch cluster.
+      Name: ShutdownElasticSearchWorker
       # Every Hour
       ScheduleExpression: cron(0 */1 ? * * *)
       State: ENABLED
       Targets:
         - Arn: !GetAtt LambdaShutdownElasticSearch.Arn
-          Id: CloudWatchEventsForSafeguard
+          Id: ShutdownElasticSearchWorker
+          RoleArn: !GetAtt IAMRoleForEvents.Arn
   # Lambda
   LambdaShutdownElasticSearch:
-    Condition: CreateSafeguard
+    Condition: CreateShutdownElasticSearchWorker
     Type: 'AWS::Lambda::Function'
     Properties:
       Code:
@@ -795,16 +796,16 @@ Resources:
       TracingConfig:
         Mode: Active
   LambdaShutdownElasticSearchPermission:
-    Condition: CreateSafeguard
+    Condition: CreateShutdownElasticSearchWorker
     Type: 'AWS::Lambda::Permission'
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref LambdaShutdownElasticSearch
       Principal: events.amazonaws.com
       # DO NOT write 'SourceAccount' option.
-      SourceArn: !GetAtt CloudWatchEventsForSafeguard.Arn
+      SourceArn: !GetAtt CloudWatchEventsForShutdownElasticSearchWorker.Arn
   LambdaShutdownElasticSearchLogGroup:
-    Condition: CreateSafeguard
+    Condition: CreateShutdownElasticSearchWorker
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
