@@ -786,9 +786,12 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
 
 Outputs:
-  ElasticSearchDomainEndpoint:
-    Description: Elasticsearch Domain Endpoint
-    Value: !GetAtt ElasticSearchDomain.DomainEndpoint
+  KibanaURL:
+    Description: Kibana URL
+    Value: !Join
+      - ''
+      - - !GetAtt ElasticSearchDomain.DomainEndpoint
+        - /_plugin/kibana/
   RealtimeLogConfigArn:
     Description: Realtime Log Config ARN
     Value: !GetAtt CloudFrontRealtimeLogConfig.Arn
