@@ -171,6 +171,11 @@ Parameters:
       - i3.8xlarge.elasticsearch
       - i3.16xlarge.elasticsearch
     Description: The instance type of ElasticSearch Service [required]
+  RealtimeDashboardElasticSearchLifetime:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: The lifetime (hour) of ElasticSearch Service [required]
   RealtimeDashboardElasticSearchMasterUserName:
     Type: String
     Default: root
@@ -297,6 +302,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         ElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
+        ElasticSearchLifetime: !Ref RealtimeDashboardElasticSearchLifetime
         ElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
         ElasticSearchMasterUserPassword: !Ref RealtimeDashboardElasticSearchMasterUserPassword
         ElasticsearchVersion: !Ref RealtimeDashboardElasticsearchVersion

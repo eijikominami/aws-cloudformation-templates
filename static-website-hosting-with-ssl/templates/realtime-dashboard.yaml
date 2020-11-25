@@ -90,6 +90,11 @@ Parameters:
       - i3.8xlarge.elasticsearch
       - i3.16xlarge.elasticsearch
     Description: The instance type of ElasticSearch Service [required]
+  ElasticSearchLifetime:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: The lifetime (hour) of ElasticSearch Service [required]
   ElasticSearchMasterUserName:
     Type: String
     Default: root
@@ -108,7 +113,7 @@ Parameters:
     Description: The version of ElasticSearch Service [required]
   LogicalNamePrefix:
     Type: String
-    Default: DefaultSecuritySettings
+    Default: StaticWebsiteHosting
     AllowedPattern: .+
     Description: The custom prefix name [required]
   SamplingRate:
@@ -143,6 +148,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateSafeguard: !Not [ !Equals [ !Ref ElasticSearchLifetime, 0] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -216,6 +222,28 @@ Resources:
       Description: A role required for Lambda to execute.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudFormationPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'cloudformation:DescribeStacks'
+                  - 'cloudformation:UpdateStack'
+                Resource: '*'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudFormationCalledViaPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - '*'
+                Resource: '*'
+                Condition:
+                  ForAnyValue:StringEquals:
+                    aws:CalledVia:
+                      - cloudformation.amazonaws.com
       RoleName: !Sub '${LogicalNamePrefix}-Lambda-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
@@ -306,7 +334,6 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # IAM Role
   IAMRoleForEvents:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -319,7 +346,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for EventBridge to access Lambda.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSEventslambdaPolicy-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSEventsLambdaPolicy-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -698,6 +725,7 @@ Resources:
           Value: !Ref TagValue
   # EventBridge for Safeguard
   CloudWatchEventsForSafeguard:
+    Condition: CreateSafeguard
     Type: 'AWS::Events::Rule'
     Properties: 
       Description: Check 
@@ -710,6 +738,7 @@ Resources:
           Id: CloudWatchEventsForSafeguard
   # Lambda
   LambdaShutdownElasticSearch:
+    Condition: CreateSafeguard
     Type: 'AWS::Lambda::Function'
     Properties:
       Code:
@@ -725,27 +754,26 @@ Resources:
           cloudformation = boto3.client('cloudformation')
 
           def lambda_handler(event, context):
-            response = client.describe_stacks(
-                StackName='${AWS::StackName}'
+            response = cloudformation.describe_stacks(
+                StackName='${LogicalNamePrefix}'
             )
-            last_updated_time = response['Stacks'][0]['LastUpdatedTime'].timestamp()
+            creation_time = response['Stacks'][0]['CreationTime'].timestamp()
+            parameters = response['Stacks'][0]['Parameters']
+
+            for parameter in parameters:
+              if parameter['ParameterKey'] == 'RealtimeDashboardEnabled':
+                parameter['ParameterValue'] = 'Disabled'
+
+            print(response)
+            
             now = time.time()
 
-            if now < last_updated_time + 3600*1:
+            if now < creation_time + 3600*${ElasticSearchLifetime}:
               cloudformation.update_stack(
-                StackName='string',
-                UsePreviousTemplate=True|False,
-                Parameters=[
-                    {
-                        'ParameterKey': 'string',
-                        'ParameterValue': 'string',
-                        'UsePreviousValue': True|False,
-                        'ResolvedValue': 'string'
-                    },
-                ],
-                Capabilities=[
-                    'CAPABILITY_IAM'|'CAPABILITY_NAMED_IAM'|'CAPABILITY_AUTO_EXPAND',
-                ]
+                StackName=response['Stacks'][0]['StackName'],
+                UsePreviousTemplate=True,
+                Parameters=parameters,
+                Capabilities=['CAPABILITY_IAM','CAPABILITY_NAMED_IAM','CAPABILITY_AUTO_EXPAND']
               )
             logger.info(str(datetime))
 
@@ -762,6 +790,7 @@ Resources:
       TracingConfig:
         Mode: Active
   LambdaShutdownElasticSearchPermission:
+    Condition: CreateSafeguard
     Type: 'AWS::Lambda::Permission'
     Properties:
       Action: lambda:InvokeFunction
@@ -770,6 +799,7 @@ Resources:
       # DO NOT write 'SourceAccount' option.
       SourceArn: !GetAtt CloudWatchEventsForSafeguard.Arn
   LambdaShutdownElasticSearchLogGroup:
+    Condition: CreateSafeguard
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
