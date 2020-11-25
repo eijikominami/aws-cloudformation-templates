@@ -14,8 +14,10 @@ Metadata:
       - Label: 
           default: 'ElasticSearch Configuration'
         Parameters: 
+          - ElasticSearchVolumeSize
           - ElasticSearchDomainName
           - ElasticSearchInstanceType
+          - ElasticSearchLifetime
           - ElasticSearchMasterUserName
           - ElasticSearchMasterUserPassword
           - ElasticsearchVersion
@@ -32,6 +34,11 @@ Metadata:
           - TagValue
 
 Parameters: 
+  ElasticSearchVolumeSize:
+    Type: Number
+    Default: 10
+    MinValue: 10
+    Description: The volume size (GB) of ElasticSearch Service [required]
   ElasticSearchDomainName:
     Type: String
     Default: cloudfront-realtime-logs
@@ -701,7 +708,7 @@ Resources:
       DomainName: !Ref ElasticSearchDomainName
       EBSOptions: 
         EBSEnabled: true
-        VolumeSize: 10
+        VolumeSize: !Ref ElasticSearchVolumeSize
         VolumeType: gp2
       ElasticsearchClusterConfig: 
         DedicatedMasterCount: 3

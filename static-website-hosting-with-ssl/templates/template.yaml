@@ -27,9 +27,11 @@ Metadata:
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
         Parameters: 
+          - RealtimeDashboardElasticSearchVolumeSize
           - RealtimeDashboardElasticSearchInstanceType
           - RealtimeDashboardElasticSearchMasterUserName
           - RealtimeDashboardElasticSearchMasterUserPassword
+          - RealtimeDashboardElasticSearchLifetime
           - RealtimeDashboardElasticsearchVersion
           - RealtimeDashboardEnabled
           - RealtimeDashboardSamplingRate
@@ -118,6 +120,11 @@ Parameters:
     Type: String
     Default: ''
     Description: The path to the 500 custom error page
+  RealtimeDashboardElasticSearchVolumeSize:
+    Type: Number
+    Default: 10
+    MinValue: 10
+    Description: The volume size (GB) of ElasticSearch Service [required]
   RealtimeDashboardElasticSearchInstanceType:
     Type: String
     Default: r5.large.elasticsearch
@@ -301,6 +308,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        ElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
         ElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
         ElasticSearchLifetime: !Ref RealtimeDashboardElasticSearchLifetime
         ElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
