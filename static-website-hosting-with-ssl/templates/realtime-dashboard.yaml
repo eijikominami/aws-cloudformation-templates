@@ -341,30 +341,6 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  IAMRoleForEvents:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: events.amazonaws.com
-            Action: 'sts:AssumeRole'
-      Description: A role required for EventBridge to access Lambda.
-      Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSEventsLambdaPolicy-${AWS::Region}'
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'lambda:invoke'
-                Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-InspectorEvents-${AWS::Region}'
-      Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   # CloudFront
   CloudFrontRealtimeLogConfig:
     Type: 'AWS::CloudFront::RealtimeLogConfig'
@@ -738,12 +714,11 @@ Resources:
       Description: Shutdown retired elasticsearch cluster.
       Name: ShutdownElasticSearchWorker
       # Every Hour
-      ScheduleExpression: cron(0 */1 ? * * *)
+      ScheduleExpression: cron(*/5 * ? * * *)
       State: ENABLED
       Targets:
         - Arn: !GetAtt LambdaShutdownElasticSearch.Arn
           Id: ShutdownElasticSearchWorker
-          RoleArn: !GetAtt IAMRoleForEvents.Arn
   # Lambda
   LambdaShutdownElasticSearch:
     Condition: CreateShutdownElasticSearchWorker
@@ -811,6 +786,9 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
 
 Outputs:
+  ElasticSearchDomainEndpoint:
+    Description: Elasticsearch Domain Endpoint
+    Value: !GetAtt ElasticSearchDomain.DomainEndpoint
   RealtimeLogConfigArn:
     Description: Realtime Log Config ARN
     Value: !GetAtt CloudFrontRealtimeLogConfig.Arn

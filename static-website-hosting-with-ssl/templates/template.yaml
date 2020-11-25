@@ -667,3 +667,7 @@ Outputs:
   CloudFrontURL:
     Description: CloudFront URL
     Value: !GetAtt CloudFront.DomainName
+  RealtimeDashboardEndpoint:
+    Condition: CreateRealtimeDashboard
+    Description: Elasticsearch Domain Endpoint
+    Value: !GetAtt RealtimeDashboard.Outputs.ElasticSearchDomainEndpoint
