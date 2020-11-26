@@ -163,7 +163,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.11
+        SemanticVersion: 1.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -179,7 +179,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.11
+        SemanticVersion: 1.1.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -189,7 +189,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.1.11
+        SemanticVersion: 1.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -376,7 +376,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.1.11
+        SemanticVersion: 1.1.12
       Tags:
         createdby: !Ref TagValue
   # Chatbot
