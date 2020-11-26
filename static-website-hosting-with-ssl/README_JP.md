@@ -107,7 +107,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
+| RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | Elasticsearch Service のボリュームサイズ（GB） |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
+| RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | Elasticsearch Service の生存時間 |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
 | RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
@@ -125,7 +127,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| ElasticSearchVolumeSize | Number | 10 | ○ | Elasticsearch Service のボリュームサイズ（GB） |
 | ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | Elasticsearch Service のドメイン名 |
+| ElasticSearchLifetime | Number | 1 | ○ | Elasticsearch Service の生存時間 |
 | ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
 | ElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
