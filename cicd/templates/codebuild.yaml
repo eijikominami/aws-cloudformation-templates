@@ -147,7 +147,7 @@ Resources:
               # Required for `sam build`
               - Action:
                   - iam:ListPolicies
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               # Required for `AWS::Serverless::Application`
               - Action:
@@ -158,13 +158,13 @@ Resources:
                   - serverlessrepo:CreateCloudFormationChangeSet
                   - serverlessrepo:ListApplicationVersions
                   - serverlessrepo:ListApplicationDependencies
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               # Required for creating the new application version in AWS Serverless Application Repository
               - Action:
                   - serverlessrepo:CreateApplicationVersion
                   - serverlessrepo:UpdateApplication
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               # Required for uploading artifacts to S3 buckets
               - Action:
@@ -182,7 +182,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - s3:PutObject

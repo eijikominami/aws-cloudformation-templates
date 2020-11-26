@@ -68,7 +68,7 @@ Resources:
     Type: 'AWS::SSM::Document'
     Properties: 
       Content:
-        schemaVersion: "2.2"
+        schemaVersion: '2.2'
         description: A composite document for installing and configuring CloudWatchAgent.
         mainSteps:
           - name: installCWAgent
@@ -97,7 +97,7 @@ Resources:
     Type: 'AWS::SSM::Document'
     Properties: 
       Content:
-        schemaVersion: "2.2"
+        schemaVersion: '2.2'
         description: A composite document for updating CloudWatchAgent.
         mainSteps:
           - name: first

@@ -239,6 +239,7 @@ Resources:
                 - !Ref AWS::NoValue
               - Effect: Allow
                 Action:
+                  - 'logs:CreateLogGroup'
                   - 'logs:CreateLogStream'
                 Resource: '*'
               - Effect: Allow

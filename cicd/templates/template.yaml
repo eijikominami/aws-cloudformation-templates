@@ -193,14 +193,14 @@ Resources:
               # Required for `sam build`
               - Action:
                   - iam:ListPolicies
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               # Default Policy
               - Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - s3:PutObject
@@ -220,7 +220,7 @@ Resources:
                   - serverlessrepo:CreateCloudFormationChangeSet
                   - serverlessrepo:ListApplicationVersions
                   - serverlessrepo:ListApplicationDependencies
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - codebuild:CreateReportGroup
@@ -278,7 +278,7 @@ Resources:
             Statement:
               - Action:
                   - iam:PassRole
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
                 Condition:
                   StringEqualsIfExists:
@@ -293,7 +293,7 @@ Resources:
                   - codecommit:GetCommit
                   - codecommit:GetUploadArchiveStatus
                   - codecommit:UploadArchive
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - codedeploy:CreateDeployment
@@ -302,11 +302,11 @@ Resources:
                   - codedeploy:GetDeployment
                   - codedeploy:GetDeploymentConfig
                   - codedeploy:RegisterApplicationRevision
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - codestar-connections:UseConnection
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - elasticbeanstalk:*
@@ -320,12 +320,12 @@ Resources:
                   - rds:*
                   - sqs:*
                   - ecs:*
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - lambda:InvokeFunction
                   - lambda:ListFunctions
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - opsworks:CreateDeployment
@@ -336,7 +336,7 @@ Resources:
                   - opsworks:DescribeStacks
                   - opsworks:UpdateApp
                   - opsworks:UpdateStack
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - cloudformation:CreateStack
@@ -349,7 +349,7 @@ Resources:
                   - cloudformation:ExecuteChangeSet
                   - cloudformation:SetStackPolicy
                   - cloudformation:ValidateTemplate
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - serverlessrepo:SearchApplications
@@ -359,12 +359,12 @@ Resources:
                   - serverlessrepo:CreateCloudFormationChangeSet
                   - serverlessrepo:ListApplicationVersions
                   - serverlessrepo:ListApplicationDependencies
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - codebuild:BatchGetBuilds
                   - codebuild:StartBuild
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - devicefarm:ListProjects
@@ -373,7 +373,7 @@ Resources:
                   - devicefarm:GetUpload
                   - devicefarm:CreateUpload
                   - devicefarm:ScheduleRun
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - servicecatalog:ListProvisioningArtifacts
@@ -381,15 +381,15 @@ Resources:
                   - servicecatalog:DescribeProvisioningArtifact
                   - servicecatalog:DeleteProvisioningArtifact
                   - servicecatalog:UpdateProduct
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - cloudformation:ValidateTemplate
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - ecr:DescribeImages
-                Resource: "*"
+                Resource: '*'
                 Effect: Allow
       RoleName: !Sub 'CICD-CodePipeline-${AWS::Region}'
       Tags:

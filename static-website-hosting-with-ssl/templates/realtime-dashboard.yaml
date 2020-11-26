@@ -669,7 +669,7 @@ Resources:
           - Effect: Allow
             Principal:
               AWS:
-                - "*"
+                - '*'
             Action:
               - es:*
             Resource: !Sub arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/*
