@@ -248,8 +248,7 @@ Resources:
       AlarmDescription: '*CloudTrail* が *不正なAPIコールを検知* しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの *権限設定に問題が無いかを確認してください* 。'
       AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-Unauthorized-API-Calls'
       ComparisonOperator: GreaterThanOrEqualToThreshold
-      DatapointsToAlarm: 6
-      EvaluationPeriods: 60
+      EvaluationPeriods: 1
       MetricName: UnauthorizedAPICalls
       Namespace: LogMetrics
       Period: 60

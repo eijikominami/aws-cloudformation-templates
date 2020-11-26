@@ -109,7 +109,9 @@ You can provide optional parameters as follows.
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
+| RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
+| RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
 | RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
@@ -127,8 +129,10 @@ If you deploy ``Synthetics Stack`` individually, you can provide optional parame
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| ElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | The domain name of ElasticSearch Service |
 | ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
+| ElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
 | ElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
 | ElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
