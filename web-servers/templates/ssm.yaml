@@ -292,7 +292,7 @@ Resources:
         detail:
           status: 
             - Failed
-      Name: SystemManager
+      Name: SystemsManager
       State: ENABLED
       Targets:
         - Arn: !Ref SNSTopicARN
@@ -310,7 +310,7 @@ Resources:
         detail:
           resource-id:
             - prefix: i-
-      Name: SystemManagerConfigurationCompliance
+      Name: SystemsManagerConfigurationCompliance
       State: ENABLED
       Targets:
         - Arn: !Ref SNSTopicARN
@@ -331,7 +331,7 @@ Resources:
             - FAILED 
             - SKIPPED_OVERLAPPING 
             - TIMED_OUT
-      Name: SystemManagerMaintenanceWindow
+      Name: SystemsManagerMaintenanceWindow
       State: ENABLED
       Targets:
         - Arn: !Ref SNSTopicARN
@@ -345,7 +345,7 @@ Resources:
           - aws.ssm
         detail-type: 
           - Parameter Store Change
-      Name: SystemManagerParameterStore
+      Name: SystemsManagerParameterStore
       State: ENABLED
       Targets:
         - Arn: !Ref SNSTopicARN
