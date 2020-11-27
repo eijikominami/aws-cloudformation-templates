@@ -42,6 +42,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | AutoScalingDesiredCapacity | Number | 1 | ○ | | 
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | 'None'を指定した場合、ELBは作成されません。 |
+| CertificateManagerARN | String | | | ARNを指定した場合、**Elastic Load Balancer** に **SSL証明書** が紐付けられます。 |
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | スナップショット作成時刻 (UTC) |
 | EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 

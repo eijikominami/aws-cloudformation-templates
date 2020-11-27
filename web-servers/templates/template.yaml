@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/web-servers creates a Network Load Balancer and EC2 instances for Web Servers.
+Description: AWSCloudFormationTemplates/web-servers creates an Elastic Load Balancer and EC2 instances for Web Servers.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -11,6 +11,7 @@ Metadata:
           - AutoScalingDesiredCapacity
           - AutoScalingMaxSize
           - AutoScalingLoadBalancerType
+          - CertificateManagerARN
           - EC2ImageId
           - EC2InstanceType
           - EC2KeyName
@@ -66,6 +67,10 @@ Parameters:
       - application
       - network  
     Description: The autoScaling LoadBalancer Type [required]
+  CertificateManagerARN:
+    Default: ''
+    Type: String
+    Description: The ARN of an SSL Certifiation attached to Elastic Load Balancer
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
@@ -73,7 +78,7 @@ Parameters:
     Description: Daily Snapshot time (HH:MM) [required]
   EC2ImageId:
     Type: AWS::EC2::Image::Id
-    Default: ami-068a6cefc24c301d2
+    Default: ami-00f045aed21a55240
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [required]
   EC2InstanceType:
@@ -249,6 +254,7 @@ Resources:
       Parameters:
         AutoScalingDesiredCapacity: !Ref AutoScalingDesiredCapacity
         AutoScalingMaxSize: !Ref AutoScalingMaxSize
+        CertificateManagerARN: !Ref CertificateManagerARN
         EC2ImageId: !Ref EC2ImageId
         EC2InstanceType: !Ref EC2InstanceType
         EC2IamInstanceProfileArn: !GetAtt IamInstanceProfileForIAMRoleForEC2.Arn
@@ -295,7 +301,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
-  SystemManager:
+  SystemsManager:
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:

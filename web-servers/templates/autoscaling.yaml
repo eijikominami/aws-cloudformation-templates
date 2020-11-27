@@ -14,12 +14,16 @@ Metadata:
           - EC2IamInstanceProfileArn
           - EC2KeyName
           - EC2SecurityGroupId
+          - VPCId
+      - Label: 
+          default: 'Elastic Load Balancer Configuration'
+        Parameters: 
+          - CertificateManagerARN
           - EipAllocationId1ForNLB
           - EipAllocationId2ForNLB
           - LoadBalancerType
           - SubnetId1ForELB
           - SubnetId2ForELB
-          - VPCId
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -42,6 +46,10 @@ Parameters:
     Default: 1
     MinValue: 0
     Description: AutoScaling Max Size [required]
+  CertificateManagerARN:
+    Default: ''
+    Type: String
+    Description: The ARN of an SSL Certifiation attached to Elastic Load Balancer
   EC2ImageId:
     Type: AWS::EC2::Image::Id
     Default: ami-068a6cefc24c301d2
@@ -69,11 +77,11 @@ Parameters:
     Description: EC2 Volume Size [required]
   EipAllocationId1ForNLB:     
     Type: String 
-    AllowedPattern: .+
+    Default: ''
     Description: The Elastic Ip Allocation Id1 for Network LoadBalancer
   EipAllocationId2ForNLB:     
     Type: String 
-    AllowedPattern: .+
+    Default: ''
     Description: The Elastic Ip Allocation Id2 for Network LoadBalancer
   LogicalNamePrefix:
     Type: String
@@ -112,10 +120,9 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  KeyExists:
-    !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
-  CreateNetworkLoadBalancer:
-    !Equals [ !Ref LoadBalancerType, network ]
+  KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
+  CreateNetworkLoadBalancer: !Equals [ !Ref LoadBalancerType, network ]
+  CreateElasticBalancerListenerCertificate: !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ]
 
 Resources:
   # Service-linked Role
@@ -134,6 +141,13 @@ Resources:
       AWSServiceName: elasticloadbalancing.amazonaws.com 
       Description: Allows ELB to call AWS services on your behalf.
   # ELB
+  LoadBalancerListenerCertificate:
+    Condition: CreateElasticBalancerListenerCertificate
+    Type: AWS::ElasticLoadBalancingV2::ListenerCertificate
+    Properties: 
+      Certificates: 
+        - CertificateArn: !Ref CertificateManagerARN
+      ListenerArn: !Ref LoadBalancer
   LoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:

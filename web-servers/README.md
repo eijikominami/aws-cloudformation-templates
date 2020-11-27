@@ -42,6 +42,7 @@ You can provide optional parameters as follows.
 | AutoScalingDesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created. | 
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | If you set 'None', an ELB is NOT created. |
+| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **Elastic Load Balancer**. |
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
 | EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
