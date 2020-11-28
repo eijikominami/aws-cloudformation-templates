@@ -54,7 +54,7 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 | [Security Template with Config Rule](../security-config-rules/README_JP.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](../static-website-hosting-with-ssl/README_JP.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](../web-servers/README_JP.md) | WebServers.json |
-| [System Manager Template](../web-servers/README_JP.md) | SystemManager.json |
+| [Systems Manager Template](../web-servers/README_JP.md) | SystemsManager.json |
 
 ## デプロイ
 
