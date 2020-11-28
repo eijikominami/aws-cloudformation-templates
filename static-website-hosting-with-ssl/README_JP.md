@@ -103,7 +103,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | |
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
 | CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |
-| CloudFrontRestrictViewerAccess | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
+| CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
@@ -113,15 +113,15 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
 | RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
-| RealtimeDashboardEnabled | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、 **Real-time Dashboard** が有効化されます。|
+| RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
-| LoggingEnabled | Enabled / Disabled | Enabled | ○ | Enabledを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
-| WebACL | Enabled / Disabled | Disabled | ○ | Disabled に設定された場合、AWS WAFは作成されません。 |
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
 
 ``Synthetics Stack`` を単独でデプロイする場合は、以下のパラメータを指定することができます。
 

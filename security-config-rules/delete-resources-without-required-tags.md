@@ -43,7 +43,7 @@ You can give optional parameters as follows.
 
 | Name | Parameter | Details | 
 | --- | --- | --- | 
-| AutoRemediation | Enabled/Disabled | If it is Enabled, **AutoRemediation** by SSM Automation and Lambda are enabled. |
+| AutoRemediation | ENABLED / DISABLED | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled. |
 | RequiredTagKey | string | AWS Config removes AWS resouces without this tag. |
 | RequiredTagValue | string | AWS Config removes AWS resouces without this tag. |
 
@@ -92,6 +92,6 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AutoRemediation | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、Lambda を用いた **自動修復機能** が有効化されます。 |
+| AutoRemediation | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Lambda を用いた **自動修復機能** が有効化されます。 |
 | RequiredTagKey | String | createdby | ○ | AWS Configは、このタグの無いAWSリソースを削除します。 |
 | RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Configは、このタグの無いAWSリソースを削除します。 |

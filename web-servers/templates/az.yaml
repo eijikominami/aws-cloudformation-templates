@@ -37,10 +37,10 @@ Parameters:
     Description: The Internet Gateway Id [required]
   NetworkLoadBalancer:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable Network LoadBalaner [required]
   LogicalNamePrefix:
     Type: String
@@ -79,7 +79,7 @@ Conditions:
   PrivateSubnetExists:
     !Not [ !Equals [ !Ref SubnetExternalCidrBlock, '' ] ]
   NetworkLoadBalancerExists:
-    !Equals [ !Ref NetworkLoadBalancer, Enabled ]
+    !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
 
 Resources:
   # Subnet

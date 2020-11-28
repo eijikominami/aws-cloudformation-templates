@@ -118,19 +118,19 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| Encrypt | String | Disabled | ○ | Enabledを指定した場合、AWS KMS カスタムキーで SlackのHook URL を暗号化します。 |
+| Encrypt | String | DISABLED | ○ | ENABLEDを指定した場合、AWS KMS カスタムキーで SlackのHook URL を暗号化します。 |
 | **HookUrlForDeployment** | String | | | Slack デプロイチャンネルのHook URL | 
 | **HookUrlForAlert** | String | | | Slack アラートチャンネルのHook URL |
 | **SlackWorkspaceId** | String | | | Slackのワークスペース名 | 
 | **SlackChannelIdForDeployment** | String | | | Slack デプロイチャンネルのID |
 | **SlackChannelIdForAlert** | String | | | Slack アラートチャンネルのID | 
-| AutoScalingEventsRule | ENABLED / DISABLED | ENABLED | ○ | Enabledを指定した場合、AutoScaling に関するイベントルールを作成します。  |
-| EBSEventsRule | ENABLED / DISABLED | ENABLED | ○ | Enabledを指定した場合、EBS に関するイベントルールを作成します。 |
-| EC2EventsRule | ENABLED / DISABLED | ENABLED | ○ | Enabledを指定した場合、EC2 に関するイベントルールを作成します。 |
-| KMSEventsRule | ENABLED / DISABLED | ENABLED | ○ | Enabledを指定した場合、KMS に関するイベントルールを作成します。 |
-| ManagementConsoleEventsRule | ENABLED / DISABLED | ENABLED | ○ | Enabledを指定した場合、Management Console に関するイベントルールを作成します。 |
-| ScheduledEventsRule | ENABLED / DISABLED | ENABLED | ○ | Enabledを指定した場合、ScheduledEvents に関するイベントルールを作成します。 |
-| TagEventsRule | ENABLED / DISABLED | ENABLED | ○ |Enabledを指定した場合、Tag Events に関するイベントルールを作成します。 |
-| TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | Enabledを指定した場合、Trusted Advisor に関するイベントルールを作成します。 |
+| AutoScalingEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AutoScaling に関するイベントルールを作成します。  |
+| EBSEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、EBS に関するイベントルールを作成します。 |
+| EC2EventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、EC2 に関するイベントルールを作成します。 |
+| KMSEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、KMS に関するイベントルールを作成します。 |
+| ManagementConsoleEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Management Console に関するイベントルールを作成します。 |
+| ScheduledEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、ScheduledEvents に関するイベントルールを作成します。 |
+| TagEventsRule | ENABLED / DISABLED | ENABLED | ○ |ENABLEDを指定した場合、Tag Events に関するイベントルールを作成します。 |
+| TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Trusted Advisor に関するイベントルールを作成します。 |
 | SNSForAlertArn | String | | | アラート用 Amazon SNS トピックの ARN | 
 | SNSForDeploymentArn | String | | | デプロイ用 Amazon SNS トピックの ARN |

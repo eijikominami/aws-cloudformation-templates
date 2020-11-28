@@ -57,6 +57,6 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AutoRemediation | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、Lambda を用いた **自動修復機能** が有効化されます。 |
+| AutoRemediation | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Lambda を用いた **自動修復機能** が有効化されます。 |
 | RequiredTagKey | String | createdby | ○ | AWS Configは、このタグの無いAWSリソースを削除します。 |
 | RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Configは、このタグの無いAWSリソースを削除します。 |

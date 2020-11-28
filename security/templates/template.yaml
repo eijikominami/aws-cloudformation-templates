@@ -34,31 +34,31 @@ Metadata:
 Parameters:
   AuditOtherAccounts:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable cross account audit [required]
   AuditOtherRegions:
     Type: String
-    Default: Enabled
+    Default: ENABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable cross region audit [required]
   AutoRemediation:
     Type: String
-    Default: Enabled
+    Default: ENABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable auto remediation [required]
   AmazonDetective:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable Amazon Detective [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
@@ -90,7 +90,7 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateDetective: !Equals [ !Ref AmazonDetective, Enabled]
+  CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
 
 Resources:

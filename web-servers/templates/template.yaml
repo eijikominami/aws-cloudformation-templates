@@ -96,10 +96,10 @@ Parameters:
     Description: EC2 Volume Size [required]
   IgnoreResourceConflicts:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
   SSMPatchingAt:
     Type: Number
     Default: 3
@@ -133,10 +133,10 @@ Parameters:
     Description: The VPC CIDR block [required]
   WebACL:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable WebACL [required]
   SNSForAlertArn:
     Type: String
@@ -156,13 +156,13 @@ Parameters:
 Conditions:
   AutoScalingEnabled: !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ] 
   AutoScalingDisabled: !Equals [ !Ref AutoScalingLoadBalancerType, None ]
-  NetworkLoadBalancerEnabled: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   PrivateSubnet1Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz1, '' ] ]
   PrivateSubnet2Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz2, '' ] ]
-  WebAclEnabled: !And [!Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, Enabled ] ]
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
+  CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateWAF: !And [!Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
 
 Resources:
   # Nested Stack
@@ -183,7 +183,7 @@ Resources:
           - Fn::GetAZs: !Ref 'AWS::Region'
         InternetGatewayId: !Ref InternetGateway
         NetworkLoadBalancer: !If 
-         - NetworkLoadBalancerEnabled
+         - CreateNetworkLoadBalancer
          - Enabled
          - Disabled
         LogicalNamePrefix: !Ref AWS::StackName
@@ -221,7 +221,7 @@ Resources:
           - Fn::GetAZs: !Ref 'AWS::Region'
         InternetGatewayId: !Ref InternetGateway
         NetworkLoadBalancer: !If 
-         - NetworkLoadBalancerEnabled
+         - CreateNetworkLoadBalancer
          - Enabled
          - Disabled
         LogicalNamePrefix: !Ref AWS::StackName
@@ -262,11 +262,11 @@ Resources:
         EC2SecurityGroupId: !Ref SecurityGroupWeb
         EC2VolumeSize: !Ref EC2VolumeSize
         EipAllocationId1ForNLB: !If 
-          - NetworkLoadBalancerEnabled
+          - CreateNetworkLoadBalancer
           - !GetAtt Az1.Outputs.NetworkLoadBalancerIPAllocationId
           - ''
         EipAllocationId2ForNLB: !If 
-          - NetworkLoadBalancerEnabled
+          - CreateNetworkLoadBalancer
           - !GetAtt Az2.Outputs.NetworkLoadBalancerIPAllocationId
           - ''
         LoadBalancerType: !Ref AutoScalingLoadBalancerType
@@ -324,7 +324,7 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ssm.yaml
   WAF:
-    Condition: WebAclEnabled
+    Condition: CreateWAF
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -577,7 +577,7 @@ Outputs:
     Description: NatGateway IP address
     Value: !GetAtt Az1.Outputs.NatGatewayIP
   NetworkLoadBalancerIP1:
-    Condition: NetworkLoadBalancerEnabled
+    Condition: CreateNetworkLoadBalancer
     Description: NetworkLoadBalancer IP
     Value: !GetAtt Az1.Outputs.NetworkLoadBalancerIP
   NatGatewayIP2:
@@ -585,7 +585,7 @@ Outputs:
     Description: NatGateway IP address
     Value: !GetAtt Az2.Outputs.NatGatewayIP
   NetworkLoadBalancerIP2:
-    Condition: NetworkLoadBalancerEnabled
+    Condition: CreateNetworkLoadBalancer
     Description: NetworkLoadBalancer IP address
     Value: !GetAtt Az2.Outputs.NetworkLoadBalancerIP
   SNSForAlertArn:

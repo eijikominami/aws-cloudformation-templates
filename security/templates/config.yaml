@@ -24,24 +24,24 @@ Metadata:
 Parameters:
   AuditOtherAccounts:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable cross account audit [required]
   AuditOtherRegions:
     Type: String
-    Default: Enabled
+    Default: ENABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable cross region audit [required]
   AutoRemediation:
     Type: String
-    Default: Enabled
+    Default: ENABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable auto remediation [required]
   LogicalNamePrefix:
     Type: String
@@ -61,11 +61,11 @@ Parameters:
  
 Conditions:
   CreateConfigurationAggregator:
-    !Equals [ !Ref AuditOtherAccounts, Enabled ]
+    !Equals [ !Ref AuditOtherAccounts, ENABLED ]
   CreateCentralizedResources:
-    !Equals [ !Ref AuditOtherRegions, Enabled ]
+    !Equals [ !Ref AuditOtherRegions, ENABLED ]
   CreateRemediationResources:
-    !Equals [ !Ref AutoRemediation, Enabled ]
+    !Equals [ !Ref AutoRemediation, ENABLED ]
 
 Resources:
   # Service-linked Role

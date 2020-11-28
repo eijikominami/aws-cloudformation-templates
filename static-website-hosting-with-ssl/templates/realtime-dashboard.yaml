@@ -747,8 +747,8 @@ Resources:
             parameters = response['Stacks'][0]['Parameters']
 
             for parameter in parameters:
-              if parameter['ParameterKey'] == 'RealtimeDashboardEnabled':
-                parameter['ParameterValue'] = 'Disabled'
+              if parameter['ParameterKey'] == 'RealtimeDashboardState':
+                parameter['ParameterValue'] = 'DISABLED'
             
             now = time.time()
 

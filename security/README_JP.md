@@ -120,10 +120,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AmazonDetective | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、Amazon Detective が有効化されます。|
-| AuditOtherAccounts | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、**Config Aggregator** が有効化されます。 |
-| AuditOtherRegions | Enabled / Disabled | Enabled | ○ | Enabledを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
-| AutoRemediation | Enabled / Disabled | Enabled | ○ | Enabledを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
+| AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Amazon Detective が有効化されます。|
+| AuditOtherAccounts | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**Config Aggregator** が有効化されます。 |
+| AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
+| AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | セキュリティチェックに関する通知フィルタ | 
 

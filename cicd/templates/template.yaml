@@ -73,39 +73,39 @@ Parameters:
     Description: The base path of template configuration files.
   StaticWebsiteHosting:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable deployment of StaticWebsiteHosting template [required]
   GlobalSettings:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable deployment of GlobalSettings template [required]
   Notification:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable deployment of Notification template [required]
   WebServers:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - SystemsManager-Only
-      - Disabled
+      - ENABLED
+      - SYSTEMS_MANAGER_ONLY
+      - DISABLED
     Description: Enable or disable deployment of WebServers template [required]
   UploadArtifacts:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable deployment of UploadArtifacts template [required]
   SNSForAlertArn:
     Type: String
@@ -129,12 +129,12 @@ Conditions:
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, Enabled]
-  DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, Enabled], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
-  DeployNotification: !Equals [ !Ref Notification, Enabled]
-  DeployWebServers: !Equals [ !Ref WebServers, Enabled]
+  DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
+  DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
+  DeployNotification: !Equals [ !Ref Notification, ENABLED]
+  DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
   DeploySystemsManager: !Equals [ !Ref WebServers, SystemsManager-Only]
-  DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, Enabled]
+  DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
 
 Resources:
   # Nested Stack
