@@ -187,7 +187,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for SSM to access IAM.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSSystemManagerIAMRole-${AWS::Region}'
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSSystemsManagerIAMRole-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:

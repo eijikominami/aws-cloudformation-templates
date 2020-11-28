@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/web-servers/ssm executes Systems Manager Quick Setup and creates a System Manager Maintenance Window and related resources.
+Description: AWSCloudFormationTemplates/web-servers/ssm executes Systems Manager Quick Setup and creates a Systems Manager Maintenance Window and related resources.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -278,7 +278,7 @@ Resources:
   EventBridgeForSSM:
     Type: 'AWS::Events::Rule'
     Properties: 
-      Description: !Sub Rule for System Manager created by ${AWS::StackName}.
+      Description: !Sub Rule for Systems Manager created by ${AWS::StackName}.
       EventPattern:
         source:
           - aws.ssm
@@ -300,7 +300,7 @@ Resources:
   EventBridgeForSSMConfigurationCompliance:
     Type: 'AWS::Events::Rule'
     Properties: 
-      Description: !Sub Rule for System Manager Configuration Compliance created by ${AWS::StackName}.
+      Description: !Sub Rule for Systems Manager Configuration Compliance created by ${AWS::StackName}.
       EventPattern:
         source:
           - aws.ssm
@@ -318,7 +318,7 @@ Resources:
   EventBridgeForSSMMaintenanceWindow:
     Type: 'AWS::Events::Rule'
     Properties: 
-      Description: !Sub Rule for System Manager Maintenance Window created by ${AWS::StackName}.
+      Description: !Sub Rule for Systems Manager Maintenance Window created by ${AWS::StackName}.
       EventPattern:
         source:
           - aws.ssm
@@ -339,7 +339,7 @@ Resources:
   EventBridgeForSSMParameterStore:
     Type: 'AWS::Events::Rule'
     Properties: 
-      Description: !Sub Rule for System Manager Parameter Store created by ${AWS::StackName}.
+      Description: !Sub Rule for Systems Manager Parameter Store created by ${AWS::StackName}.
       EventPattern:
         source:
           - aws.ssm

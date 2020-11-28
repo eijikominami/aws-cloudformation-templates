@@ -97,7 +97,7 @@ Parameters:
     Default: Disabled
     AllowedValues:
       - Enabled
-      - SystemManager-Only
+      - SystemsManager-Only
       - Disabled
     Description: Enable or disable deployment of WebServers template [required]
   UploadArtifacts:
@@ -133,7 +133,7 @@ Conditions:
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, Enabled], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, Enabled]
   DeployWebServers: !Equals [ !Ref WebServers, Enabled]
-  DeploySystemManager: !Equals [ !Ref WebServers, SystemManager-Only]
+  DeploySystemsManager: !Equals [ !Ref WebServers, SystemsManager-Only]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, Enabled]
 
 Resources:
@@ -770,9 +770,9 @@ Resources:
                   - Name: DeployArtifact-WebServers
                 RunOrder: 3
               - !Ref AWS::NoValue
-            # Deploy SystemManager
+            # Deploy SystemsManager
             - !If
-              - DeploySystemManager
+              - DeploySystemsManager
               - ActionTypeId: 
                   Category: Deploy
                   Owner: AWS
@@ -780,14 +780,14 @@ Resources:
                   Version: '1'
                 Configuration:
                   ActionMode: CREATE_UPDATE
-                  StackName: SystemManager
+                  StackName: SystemsManager
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/ssm.yaml
                   ParameterOverrides: '{"SNSTopicARN": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SystemManager.json
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SystemsManager.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
@@ -796,9 +796,9 @@ Resources:
                     - Name: Source-CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
                   - Name: DeployArtifact-CICD
-                Name: SystemManager
+                Name: SystemsManager
                 OutputArtifacts: 
-                  - Name: DeployArtifact-SystemManager
+                  - Name: DeployArtifact-SystemsManager
                 RunOrder: 3
               - !Ref AWS::NoValue
             # Deploy UploadArtifacts
