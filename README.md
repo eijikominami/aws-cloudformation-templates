@@ -52,7 +52,7 @@ The following section describes the individual components of the architecture.
 
 ![](images/architecture.png)
 
-### The Security Template
+### Security Template
 
 ![](images/architecture-default-security-settings.png)
 
@@ -60,23 +60,23 @@ The following section describes the individual components of the architecture.
 
 ![](images/architecture-delete-resources-without-required-tags.png)
 
-### The Static Website Hosting Template
+### Static Website Hosting Template
 
 ![](images/architecture-static-website-hosting.png)
 
-### The Global Settings Template
+### Global Settings Template
 
 ![](images/architecture-global.png)
 
-### The EC2-based Web Servers Template
+### EC2-based Web Servers Template
 
 ![](images/architecture-web-servers.png)
 
-### The Synthetics Monitoring Template
+### Synthetics Monitoring Template
 
 ![](images/architecture-synthetics.png)
 
-### The Amplify Console Template
+### Amplify Console Template
 
 ![](images/architecture-amplify.png)
 
