@@ -184,8 +184,8 @@ Resources:
         InternetGatewayId: !Ref InternetGateway
         NetworkLoadBalancer: !If 
          - CreateNetworkLoadBalancer
-         - Enabled
-         - Disabled
+         - ENABLED
+         - DISABLED
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
         SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz1
@@ -222,8 +222,8 @@ Resources:
         InternetGatewayId: !Ref InternetGateway
         NetworkLoadBalancer: !If 
          - CreateNetworkLoadBalancer
-         - Enabled
-         - Disabled
+         - ENABLED
+         - DISABLED
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
         SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz2
@@ -347,7 +347,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.0
+        SemanticVersion: 1.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -363,7 +363,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.0
+        SemanticVersion: 1.2.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -560,7 +560,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.0
+        SemanticVersion: 1.2.0
       Tags:
         createdby: !Ref TagValue
 
