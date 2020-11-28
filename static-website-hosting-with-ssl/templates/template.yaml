@@ -105,6 +105,8 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable Restrict Viewer Access [required]  
@@ -203,6 +205,8 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable real-time dashboard [required] 
@@ -234,6 +238,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable logging [required]
@@ -245,6 +251,8 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable WebACL [required]

@@ -25,6 +25,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]

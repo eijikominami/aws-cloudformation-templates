@@ -87,6 +87,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about AutoScaling [required]
@@ -94,6 +96,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about EBS [required]
@@ -101,6 +105,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about EC2 [required]
@@ -108,6 +114,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about KMS [required]
@@ -115,6 +123,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Management Console [required]
@@ -122,6 +132,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Scheduled Events [required]
@@ -129,6 +141,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Tag [required]
@@ -136,6 +150,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Trusted Advisor [required]

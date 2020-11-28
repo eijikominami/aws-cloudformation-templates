@@ -36,6 +36,8 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable cross account audit [required]
@@ -43,6 +45,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]
@@ -50,6 +54,8 @@ Parameters:
     Type: String
     Default: ENABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable auto remediation [required]
@@ -57,6 +63,8 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
+      - Enabled
+      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon Detective [required]
