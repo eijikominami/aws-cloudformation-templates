@@ -26,8 +26,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED  
   PatchingAt:

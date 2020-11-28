@@ -98,8 +98,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED
   SSMPatchingAt:
@@ -137,8 +135,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable WebACL [required]

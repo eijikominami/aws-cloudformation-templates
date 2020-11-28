@@ -16,8 +16,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable auto remendentions [required]

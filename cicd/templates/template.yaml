@@ -75,8 +75,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of StaticWebsiteHosting template [required]
@@ -84,8 +82,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of GlobalSettings template [required]
@@ -93,8 +89,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of Notification template [required]
@@ -102,8 +96,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - SYSTEMS_MANAGER_ONLY
       - DISABLED
@@ -112,8 +104,6 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of UploadArtifacts template [required]
