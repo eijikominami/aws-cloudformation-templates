@@ -79,4 +79,4 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | GlobalSettings | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
 | Notification | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`Notification` スタックがデプロイされます。 |
 | StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
-| WebServers | Enabled / SystemManager-Only / Disabled | Disabled | ○ | Enabledを指定した場合、`WebServers` スタックがデプロイされます。 |
+| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | Enabledを指定した場合、`WebServers` スタックがデプロイされます。 |

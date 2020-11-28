@@ -42,7 +42,7 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 | [Security Template with Config Rule](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security-config-rules/README.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting-with-ssl/README.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README.md) | Notification.json |
-| [System Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README.md) | SystemManager.json |
+| [Systems Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README.md) | SystemsManager.json |
 
 ## Deployment
 
@@ -66,7 +66,7 @@ You can provide optional parameters as follows.
 | GlobalSettings | Enabled / Disabled | Disabled | ○ | If it is Enabled, `GlobalSettings` stack is deployed. |
 | Notification | Enabled / Disabled | Disabled | ○ | If it is Enabled, `Notification` stack is deployed. |
 | StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | If it is Enabled, `StaticWebsiteHosting` stack is deployed. |
-| WebServers | Enabled / SystemManager-Only / Disabled | Disabled | ○ | If it is Enabled, `WebServers` stack is deployed. |
+| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | If it is Enabled, `WebServers` stack is deployed. |
 
 ---------------------------------------
 
@@ -113,7 +113,7 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 | [Security Template with Config Rule](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security-config-rules/README_JP.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting-with-ssl/README_JP.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README_JP.md) | Notification.json |
-| [System Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README_JP.md) | SystemsManager.json |
+| [Systems Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README_JP.md) | SystemsManager.json |
 
 ## デプロイ
 
@@ -137,4 +137,4 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | GlobalSettings | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
 | Notification | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`Notification` スタックがデプロイされます。 |
 | StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
-| WebServers | Enabled / SystemManager-Only / Disabled | Disabled | ○ | Enabledを指定した場合、`WebServers` スタックがデプロイされます。 |
+| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | Enabledを指定した場合、`WebServers` スタックがデプロイされます。 |

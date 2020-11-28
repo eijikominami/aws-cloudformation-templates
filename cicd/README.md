@@ -53,7 +53,7 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 | [Security Template with Config Rule](../security-config-rules/README.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](../static-website-hosting-with-ssl/README.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](../web-servers/README.md) | WebServers.json |
-| [System Manager Template](../web-servers/README_JP.md) | SystemsManager.json |
+| [Systems Manager Template](../web-servers/README_JP.md) | SystemsManager.json |
 
 ## Deployment
 
@@ -77,4 +77,4 @@ You can provide optional parameters as follows.
 | GlobalSettings | Enabled / Disabled | Disabled | ○ | If it is Enabled, `GlobalSettings` stack is deployed. |
 | Notification | Enabled / Disabled | Disabled | ○ | If it is Enabled, `Notification` stack is deployed. |
 | StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | If it is Enabled, `StaticWebsiteHosting` stack is deployed. |
-| WebServers | Enabled / SystemManager-Only / Disabled | Disabled | ○ | If it is Enabled, `WebServers` stack is deployed. |
+| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | If it is Enabled, `WebServers` stack is deployed. |
