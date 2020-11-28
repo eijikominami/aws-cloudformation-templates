@@ -75,8 +75,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | GitHubRepoNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリ名　|
 | GitHubStage | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |
 | TemplateConfigurationBasePath | String | | | 設定プロパティのあるディレクトリのパス |
-| DefaultSecuritySettingsConfigRules | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
-| GlobalSettings | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
-| Notification | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`Notification` スタックがデプロイされます。 |
-| StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
-| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | Enabledを指定した場合、`WebServers` スタックがデプロイされます。 |
+| DefaultSecuritySettingsConfigRules | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
+| GlobalSettings | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
+| Notification | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |
+| StaticWebsiteHosting | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
+| WebServers | ENABLED / SystemsManager-Only / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |

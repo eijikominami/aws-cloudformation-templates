@@ -14,10 +14,10 @@ Globals:
 Parameters:
   AutoRemediation:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable auto remendentions [required]
   RequiredTagKey:
     Type: String
@@ -32,7 +32,7 @@ Parameters:
     
 Conditions:
   CreateRemediationResources:
-    !Equals [ !Ref AutoRemediation, Enabled ]
+    !Equals [ !Ref AutoRemediation, ENABLED ]
 
 Resources:
   IAMRoleForLambda:

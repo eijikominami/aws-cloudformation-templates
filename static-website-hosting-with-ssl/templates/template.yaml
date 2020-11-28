@@ -21,7 +21,7 @@ Metadata:
           - CloudFront404ErrorResponsePagePath
           - CloudFront500ErrorResponsePagePath
           - DomainName
-          - LoggingEnabled
+          - Logging
           - LogBacketName
           - S3DestinationBucketArnOfCrossRegionReplication
       - Label: 
@@ -33,7 +33,7 @@ Metadata:
           - RealtimeDashboardElasticSearchMasterUserPassword
           - RealtimeDashboardElasticSearchLifetime
           - RealtimeDashboardElasticsearchVersion
-          - RealtimeDashboardEnabled
+          - RealtimeDashboardState
           - RealtimeDashboardSamplingRate
           - RealtimeDashboardKinesisShardCount
           - RealtimeKinesisNumberOfPutRecordThreshold
@@ -103,10 +103,10 @@ Parameters:
     Description: The S3 bucket name for Secondary Origin
   CloudFrontRestrictViewerAccess:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable Restrict Viewer Access [required]  
   CloudFront403ErrorResponsePagePath:
     Type: String
@@ -199,12 +199,12 @@ Parameters:
     Default: '7.8'
     AllowedPattern: .+
     Description: The version of ElasticSearch Service [required]
-  RealtimeDashboardEnabled:
+  RealtimeDashboardState:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable real-time dashboard [required] 
   RealtimeDashboardSamplingRate:
     Type: Number
@@ -230,12 +230,12 @@ Parameters:
     Type: String
     Default: ''
     Description: CloudWatch Synthetics Canary Name 
-  LoggingEnabled:
+  Logging:
     Type: String
-    Default: Enabled
+    Default: ENABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable logging [required]
   LogBacketName:
     Type: String
@@ -243,10 +243,10 @@ Parameters:
     Description: The custom S3 bucket name for access logging
   WebACL:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable WebACL [required]
   SNSForAlertArn:
     Type: String
@@ -269,13 +269,13 @@ Conditions:
   DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ]]
   SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
-  CreateLog: !Equals [ !Ref LoggingEnabled, Enabled ]
-  CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardEnabled, Enabled ]
+  CreateLog: !Equals [ !Ref Logging, ENABLED ]
+  CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardState, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
-  CreateWebACL: !Equals [ !Ref WebACL, Enabled ]
-  CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, Enabled ]
+  CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
+  CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, ENABLED ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
 
@@ -364,7 +364,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.17
+        SemanticVersion: 2.0.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -380,7 +380,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.17
+        SemanticVersion: 2.0.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

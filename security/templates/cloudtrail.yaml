@@ -23,10 +23,10 @@ Metadata:
 Parameters:
   AuditOtherRegions:
     Type: String
-    Default: Enabled
+    Default: ENABLED
     AllowedValues:
-      - Enabled
-      - Disabled
+      - ENABLED
+      - DISABLED
     Description: Enable or disable cross region audit [required]
   LogBacketName:
     Type: String
@@ -51,7 +51,7 @@ Parameters:
  
 Conditions:
   CreateCentralizedResources:
-    !Equals [ !Ref AuditOtherRegions, Enabled ]
+    !Equals [ !Ref AuditOtherRegions, ENABLED ]
 
 Resources:
   # IAM Role

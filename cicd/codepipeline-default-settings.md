@@ -62,11 +62,11 @@ You can provide optional parameters as follows.
 | GitHubOwnerNameForTemplateConfiguration | String | | | GitHub owner name for CloudFormation Template Configuration files |
 | GitHubRepoNameForTemplateConfiguration | String | | | GitHub repository name for CloudFormation Template Configuration files |
 | GitHubStage | String | master | ○ | GitHub stage name of the repository CloudFormation templates are located |
-| DefaultSecuritySettingsConfigRules | Enabled / Disabled | Disabled | ○ | If it is Enabled, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
-| GlobalSettings | Enabled / Disabled | Disabled | ○ | If it is Enabled, `GlobalSettings` stack is deployed. |
-| Notification | Enabled / Disabled | Disabled | ○ | If it is Enabled, `Notification` stack is deployed. |
-| StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | If it is Enabled, `StaticWebsiteHosting` stack is deployed. |
-| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | If it is Enabled, `WebServers` stack is deployed. |
+| DefaultSecuritySettingsConfigRules | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
+| GlobalSettings | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed. |
+| Notification | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed. |
+| StaticWebsiteHosting | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed. |
+| WebServers | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed. |
 
 ---------------------------------------
 
@@ -133,8 +133,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | GitHubOwnerNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリの所有者名　|
 | GitHubRepoNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリ名　|
 | GitHubStage | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |
-| DefaultSecuritySettingsConfigRules | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
-| GlobalSettings | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
-| Notification | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`Notification` スタックがデプロイされます。 |
-| StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | Enabledを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
-| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | Enabledを指定した場合、`WebServers` スタックがデプロイされます。 |
+| DefaultSecuritySettingsConfigRules | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
+| GlobalSettings | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
+| Notification | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |
+| StaticWebsiteHosting | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
+| WebServers | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |

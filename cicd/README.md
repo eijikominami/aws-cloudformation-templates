@@ -73,8 +73,8 @@ You can provide optional parameters as follows.
 | GitHubOwnerNameForTemplateConfiguration | String | | | The GitHub owner name for CloudFormation Template Configuration files |
 | GitHubRepoNameForTemplateConfiguration | String | | | The GitHub repository name for CloudFormation Template Configuration files |
 | TemplateConfigurationBasePath | String | | | The base path of template configration files. |
-| DefaultSecuritySettingsConfigRules | Enabled / Disabled | Disabled | ○ | If it is Enabled, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
-| GlobalSettings | Enabled / Disabled | Disabled | ○ | If it is Enabled, `GlobalSettings` stack is deployed. |
-| Notification | Enabled / Disabled | Disabled | ○ | If it is Enabled, `Notification` stack is deployed. |
-| StaticWebsiteHosting | Enabled / Disabled | Disabled | ○ | If it is Enabled, `StaticWebsiteHosting` stack is deployed. |
-| WebServers | Enabled / SystemsManager-Only / Disabled | Disabled | ○ | If it is Enabled, `WebServers` stack is deployed. |
+| DefaultSecuritySettingsConfigRules | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
+| GlobalSettings | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed. |
+| Notification | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed. |
+| StaticWebsiteHosting | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed. |
+| WebServers | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed. |

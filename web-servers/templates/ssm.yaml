@@ -24,10 +24,10 @@ Metadata:
 Parameters:
   IgnoreResourceConflicts:
     Type: String
-    Default: Disabled
+    Default: DISABLED
     AllowedValues:
-      - Enabled
-      - Disabled  
+      - ENABLED
+      - DISABLED  
   PatchingAt:
     Type: Number
     Default: 3
@@ -52,7 +52,7 @@ Parameters:
 
 Conditions:
   CreateResource:
-    !Equals [ !Ref IgnoreResourceConflicts, Disabled ]
+    !Equals [ !Ref IgnoreResourceConflicts, DISABLED ]
 
 Resources:
   # Service-linked Role

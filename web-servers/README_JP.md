@@ -49,15 +49,15 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2PatchingAt | Number | 3 | ○ | パッチ処理を開始する時刻 |
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
 | EC2VolumeSize | Number | 8 | ○ | |
-| IgnoreResourceConflicts | Enabled / Diasbled | Disabled | ○ | Enabled に設定された場合、当該のリソースは生成されません。 |
+| IgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
 | SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 の パブリックサブネット |
 | SubnetExternalCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | AZ1 の プライベートサブネット |
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | AZ2 の パブリックサブネット |
 | SubnetExternalCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | AZ2 の プライベートサブネット |
-| WebACL | Enabled / Diasbled | Disabled | ○ | Disabled に設定された場合、AWS WAFは作成されません。 |
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
 | VPCCidrBlock | String | 10.0.0.0/21 | ○ | |
 
 ## トラブルシューティング
 
-`AWS-GatherSoftwareInventory` を含むSSM State Manager の関連付けが既に存在する場合、このテンプレートは失敗します。`IgnoreResourceConflicts` オプションを Enabled に設定してこのテンプレートを実行してください。
+`AWS-GatherSoftwareInventory` を含むSSM State Manager の関連付けが既に存在する場合、このテンプレートは失敗します。`IgnoreResourceConflicts` オプションを ENABLED に設定してこのテンプレートを実行してください。

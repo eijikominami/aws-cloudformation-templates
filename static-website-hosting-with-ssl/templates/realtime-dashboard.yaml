@@ -167,7 +167,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.17
+        SemanticVersion: 2.0.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -183,7 +183,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.1.17
+        SemanticVersion: 2.0.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -424,7 +424,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 1.1.17
+        SemanticVersion: 2.0.0
       Tags:
         createdby: !Ref TagValue
   # Lambda
@@ -747,8 +747,8 @@ Resources:
             parameters = response['Stacks'][0]['Parameters']
 
             for parameter in parameters:
-              if parameter['ParameterKey'] == 'RealtimeDashboardEnabled':
-                parameter['ParameterValue'] = 'Disabled'
+              if parameter['ParameterKey'] == 'RealtimeDashboardState':
+                parameter['ParameterValue'] = 'DISABLED'
             
             now = time.time()
 

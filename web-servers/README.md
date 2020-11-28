@@ -49,13 +49,13 @@ You can provide optional parameters as follows.
 | EC2PatchingAt | Number | 3 | ○ | Starting time of patching process. |
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set. |
 | EC2VolumeSize | Number | 8 | ○ | |
-| IgnoreResourceConflicts | Enabled / Diasbled | Disabled | ○ | If **Enabled** is set, the resources does NOT created. |
+| IgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created. |
 | SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | Public subnet of AZ1 |
 | SubnetExternalCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | Private subnet of AZ1 |
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | Public subnet of AZ2 |
 | SubnetExternalCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | Private subnet of AZ2 |
-| WebACL | Enabled / Diasbled | Disabled | ○ | If **Disabled** is set, AWS WAF does NOT created. |
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created. |
 | VPCCidrBlock | String | 10.0.0.0/21 | ○ | |
 
 ## Trouble Shooting

@@ -105,7 +105,7 @@ You can provide optional parameters as follows.
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | CloudFront Viewer Protocol Policy |
 | CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront**. |
 | CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
-| CloudFrontRestrictViewerAccess | Enabled / Disabled | Disabled | ○ | Enable or disable Restrict Viewer Access |
+| CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Restrict Viewer Access |
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
@@ -115,15 +115,15 @@ You can provide optional parameters as follows.
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
 | RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
-| RealtimeDashboardEnabled | Enabled / Disabled | Disabled | ○ | If Enabled, Real-time Dashboard is enabled. |
+| RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled. |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3**. |
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled. |
-| LoggingEnabled | Enabled / Disabled | Enabled | ○ | If Enabled, Logging is enabled on **CloudFront** and **S3**. |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3**. |
 | LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |
-| WebACL | Enabled / Disabled | Disabled | ○ | If **Disabled** is set, AWS WAF does NOT created. |
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | If it is **DISABLED**, AWS WAF does NOT created. |
 
 If you deploy ``Synthetics Stack`` individually, you can provide optional parameters as follows.
 

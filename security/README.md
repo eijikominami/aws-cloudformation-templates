@@ -117,10 +117,10 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AmazonDetective | Enabled / Disabled | Disabled | ○ | If it is Enabled, Amazon Detective is enabled. |
-| AuditOtherAccounts | Enabled / Disabled | Disabled | ○ | If it is Enabled, **Config Aggregator** is enabled. |
-| AuditOtherRegions | Enabled / Disabled | Enabled | ○ | If it is Enabled, **CloudTrail** and **Include Global Resource Types** option in Config are enabled. |
-| AutoRemediation | Enabled / Disabled | Enabled | ○ | If it is Enabled, **AutoRemediation** by SSM Automation and Lambda are enabled. |
+| AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Amazon Detective is enabled. |
+| AuditOtherAccounts | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, **Config Aggregator** is enabled. |
+| AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled. |
+| AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled. |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | Notification filter about Security Hub Security Checks | 
 
