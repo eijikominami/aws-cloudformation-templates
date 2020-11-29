@@ -415,7 +415,7 @@ Resources:
       SourceArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
   LambdaTransferSNSTopicLogGroup:
     Condition: CreateSNSForAlertTransfer
-    Type: AWS::Logs::LogGroup
+    Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaTransferSNSTopic}
   # SNS

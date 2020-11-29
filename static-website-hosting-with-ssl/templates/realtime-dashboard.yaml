@@ -784,7 +784,7 @@ Resources:
       SourceArn: !GetAtt CloudWatchEventsForShutdownElasticSearchWorker.Arn
   LambdaShutdownElasticSearchLogGroup:
     Condition: CreateShutdownElasticSearchWorker
-    Type: AWS::Logs::LogGroup
+    Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
 
