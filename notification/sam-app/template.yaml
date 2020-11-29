@@ -413,7 +413,7 @@ Resources:
               - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
               - !Ref SNSForDeploymentArn
           Type: SNS
-      FunctionName: !Sub AnalyzeUnauthorizedApiCalls-createdby-${AWS::StackName}
+      FunctionName: !Sub analyzeUnauthorizedApiCalls-createdby-${AWS::StackName}
       KmsKeyArn: !If
         - CreateKMSKey
         - !GetAtt KMSKey.Arn
@@ -441,7 +441,7 @@ Resources:
     Properties: 
       DestinationArn: !GetAtt LambdaAnalyzeUnauthorizedApiCalls.Arn
       FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
-      LogGroupName: String
+      LogGroupName: !Ref CloudTrailLogGroup
   # CloudWatch Alarm for Lambda
   AlarmLambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction

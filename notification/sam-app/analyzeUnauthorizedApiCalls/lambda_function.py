@@ -7,7 +7,8 @@ import sys
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools import Tracer
 
-from base64 import b64decode
+import base64
+import gzip
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
@@ -23,41 +24,74 @@ def lambda_handler(event, context):
     DEPLOYMENT_HOOK_URL = os.environ['DEPLOYMENT_HOOK_URL']
     if os.environ['ENCRYPT'] == 'true':
         # The base-64 encoded, encrypted key (CiphertextBlob) stored in the HOOK_URL and DEPLOYMENT_HOOK_URL environment variable
-        ALERT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=b64decode(ALERT_HOOK_URL))['Plaintext'].decode('utf-8')
-        DEPLOYMENT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=b64decode(DEPLOYMENT_HOOK_URL))['Plaintext'].decode('utf-8')
+        ALERT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(ALERT_HOOK_URL))['Plaintext'].decode('utf-8')
+        DEPLOYMENT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(DEPLOYMENT_HOOK_URL))['Plaintext'].decode('utf-8')
     # Variable declaration
     hook_url = None
     slack_message = None
     try:
-        message = json.loads(event['Records'][0]['Sns']['Message'])
-        logger.structure_logs(append=True, sns_message_body=str(message))
-        logger.structure_logs(append=True, sns_message_type=type(message).__name__)
-        logger.structure_logs(append=True, sns_message_length=str(len(message)))
-        logger.info("Analyzing the received message.")                          
+        # Extracting the record data in bytes and base64 decoding it
+        compressed_payload = base64.b64decode(event['awslogs']['data'])
+        # Converting the bytes payload to string
+        uncompressed_payload = gzip.decompress(compressed_payload)
+        message = json.loads(uncompressed_payload)
+        logger.structure_logs(append=True, log_message_body=message)
+        logger.structure_logs(append=True, log_message_type=type(message).__name__)
+        logger.structure_logs(append=True, log_message_length=str(len(message)))
+        logger.info("Analyzing the received message.") 
+
+        for logEvent in message['logEvents']:
+            hook_url = "https://" + ALERT_HOOK_URL
+            slack_message = createUnauthorizedApiCallsAlarmMessage(message['owner'], json.loads(logEvent['message']))                      
     except json.decoder.JSONDecodeError:
         logger.info("Message is NOT a JSON format.")
         return
     # Sends Slack
     sendMessage(hook_url, slack_message)
 
-def createUnauthorizedApiCallsAlarmMessage(message):
+def createUnauthorizedApiCallsAlarmMessage(account_id, message):
 
     resources = ''
-    title = ":x: 警告イベント | CloudWatch Alarm | " + message['Region'] + " | Account: " + message['AWSAccountId']
-    title_link = "https://console.aws.amazon.com/cloudwatch/home?region=" + message['region'] + "#logsV2:log-groups"
+    user = 'Unknown'
+    permissions = 'Unknown'
+    title = ":x: 警告イベント | CloudWatch Alarm | " + message['awsRegion'] + " | Account: " + account_id
+    title_link = "https://console.aws.amazon.com/cloudwatch/home?region=" + message['awsRegion'] + "#logsV2:log-groups"
     
-    for resource in message['resources']:
-        resources = resources + ' ' + resource
+    if 'resources' in message:
+        for resource in message['resources']:
+            resources = resources + ' ' + resource['ARN']
+    if 'principalId' in message['userIdentity']:
+        user = message['userIdentity']['principalId']
+    elif 'invokedBy' in message['userIdentity']:
+        user = message['userIdentity']['invokedBy']
+    if 'sessionContext' in message['userIdentity']:
+        permissions = message['userIdentity']['sessionContext']['sessionIssuer']['arn']
     return {
         'attachments': [{
-            'color': '#dc4f7e',
+            'color': '#df514d',
             'title': "%s" % title,
             'title_link': "%s" % title_link,
             'text': "CloudTrail が 不正なAPIコールを検知 しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの 権限設定に問題が無いかを確認してください 。",
             'fields': [
                     {
-                        'title': "Resources",
+                        'title': "Target Service",
+                        'value': "%s" % message['eventSource']
+                    },
+                    {
+                        'title': "Target Resources",
                         'value': "%s" % resources
+                    },
+                    {
+                        'title': "API Name",
+                        'value': "%s" % message['eventName']
+                    },
+                    {
+                        'title': "User Id",
+                        'value': "%s" % user
+                    },
+                    {
+                        'title': "User Permissions",
+                        'value': "%s" % permissions
                     }
                 ]
         }]
