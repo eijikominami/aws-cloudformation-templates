@@ -460,7 +460,7 @@ Resources:
       # DO NOT write 'SourceAccount' option.
       SourceArn: !GetAtt CloudWatchEventsForIamAccessKeysRotated.Arn
   LambdaDeleteExpiredAccessKeysLogGroup:
-    Type: AWS::Logs::LogGroup
+    Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteExpiredAccessKeys}
       RetentionInDays: 60
