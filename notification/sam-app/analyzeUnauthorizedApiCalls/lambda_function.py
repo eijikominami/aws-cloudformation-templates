@@ -71,7 +71,7 @@ def createUnauthorizedApiCallsAlarmMessage(account_id, message):
             'color': '#df514d',
             'title': "%s" % title,
             'title_link': "%s" % title_link,
-            'text': "CloudTrail が 不正なAPIコールを検知 しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの 権限設定に問題が無いかを確認してください 。",
+            'text': "*CloudTrail* が *不正なAPIコールを検知* しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの *権限設定に問題が無いかを確認してください* 。",
             'fields': [
                     {
                         'title': "Target Service",
