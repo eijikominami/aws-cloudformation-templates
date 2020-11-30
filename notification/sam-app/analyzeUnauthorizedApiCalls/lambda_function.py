@@ -52,19 +52,33 @@ def lambda_handler(event, context):
 def createUnauthorizedApiCallsAlarmMessage(account_id, message):
 
     resources = ''
+    error = 'Unknown'
     user = 'Unknown'
     permissions = 'Unknown'
     title = ":x: 警告イベント | CloudWatch Alarm | " + message['awsRegion'] + " | Account: " + account_id
     title_link = "https://console.aws.amazon.com/cloudwatch/home?region=" + message['awsRegion'] + "#logsV2:log-groups"
     
+    # Target Resources
     if 'resources' in message:
         for resource in message['resources']:
-            resources = resources + ' ' + resource['ARN']
-    if 'principalId' in message['userIdentity']:
-        user = message['userIdentity']['principalId']
+            if 'ARN' in resource:
+                resources = resources + ' ' + resource['ARN']
+            elif 'ARNPrefix' in resource:
+                resources = resources + ' ' + resource['ARNPrefix']
+    else:
+        resources = 'Unknown'
+    # User Id
+    if 'arn' in message['userIdentity']:
+        user = message['userIdentity']['arn']
     elif 'invokedBy' in message['userIdentity']:
         user = message['userIdentity']['invokedBy']
-    if 'sessionContext' in message['userIdentity']:
+    elif 'accountId' in message['userIdentity']:
+        user = message['userIdentity']['accountId']
+    # Error Message
+    if 'errorMessage' in message:
+        error = message['errorMessage']
+    # User Permissions
+    if 'sessionContext' in message['userIdentity'] and 'sessionIssuer' in message['userIdentity']['sessionContext'] and 'arn' in message['userIdentity']['sessionContext']['sessionIssuer']:
         permissions = message['userIdentity']['sessionContext']['sessionIssuer']['arn']
     return {
         'attachments': [{
@@ -84,6 +98,10 @@ def createUnauthorizedApiCallsAlarmMessage(account_id, message):
                     {
                         'title': "API Name",
                         'value': "%s" % message['eventName']
+                    },
+                    {
+                        'title': "Error Message",
+                        'value': "%s" % error
                     },
                     {
                         'title': "User Id",

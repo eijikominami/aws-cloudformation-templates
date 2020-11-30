@@ -399,20 +399,11 @@ Resources:
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
           SLACK_CHANNEL_NAME: !Ref SlackChannelIdForAlert
       Events:
-        SNSForAlert:
+        CloudWatchLogs:
           Properties:
-            Topic: !If
-              - CreateSNSForAlert
-              - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-              - !Ref SNSForAlertArn
-          Type: SNS
-        SNSForDeployment:
-          Properties:
-            Topic: !If
-              - CreateSNSForDeployment
-              - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-              - !Ref SNSForDeploymentArn
-          Type: SNS
+            FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
+            LogGroupName: !Ref CloudTrailLogGroup
+          Type: CloudWatchLogs
       FunctionName: !Sub analyzeUnauthorizedApiCalls-createdby-${AWS::StackName}
       KmsKeyArn: !If
         - CreateKMSKey
@@ -435,13 +426,6 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaAnalyzeUnauthorizedApiCalls}
       RetentionInDays: 60
-  SubscriptionFilterForAnalyzeUnauthorizedApiCalls:
-    Condition: CreateAnalyzeUnauthorizedApiCallsFunction
-    Type: 'AWS::Logs::SubscriptionFilter'
-    Properties: 
-      DestinationArn: !GetAtt LambdaAnalyzeUnauthorizedApiCalls.Arn
-      FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
-      LogGroupName: !Ref CloudTrailLogGroup
   # CloudWatch Alarm for Lambda
   AlarmLambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
