@@ -133,7 +133,7 @@ Resources:
       FunctionName: !Ref LambdaCheckRequiredTags
       Principal: config.amazonaws.com
   LambdaCheckRequiredTagsLogGroup:
-    Type: AWS::Logs::LogGroup
+    Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaCheckRequiredTags}
       RetentionInDays: 60
@@ -178,7 +178,7 @@ Resources:
       Principal: events.amazonaws.com
       SourceArn: !GetAtt CloudWatchEventsForConfigRequiredTags.Arn
   LambdaDeleteUnapplicableResourcesLogGroup:
-    Type: AWS::Logs::LogGroup
+    Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteUnapplicableResources}
       RetentionInDays: 60

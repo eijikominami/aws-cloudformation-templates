@@ -7,7 +7,7 @@ import sys
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools import Tracer
 
-from base64 import b64decode
+import base64
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
@@ -23,14 +23,14 @@ def lambda_handler(event, context):
     DEPLOYMENT_HOOK_URL = os.environ['DEPLOYMENT_HOOK_URL']
     if os.environ['ENCRYPT'] == 'true':
         # The base-64 encoded, encrypted key (CiphertextBlob) stored in the HOOK_URL and DEPLOYMENT_HOOK_URL environment variable
-        ALERT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=b64decode(ALERT_HOOK_URL))['Plaintext'].decode('utf-8')
-        DEPLOYMENT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=b64decode(DEPLOYMENT_HOOK_URL))['Plaintext'].decode('utf-8')
+        ALERT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(ALERT_HOOK_URL))['Plaintext'].decode('utf-8')
+        DEPLOYMENT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(DEPLOYMENT_HOOK_URL))['Plaintext'].decode('utf-8')
     # Variable declaration
     hook_url = None
     slack_message = None
     try:
         message = json.loads(event['Records'][0]['Sns']['Message'])
-        logger.structure_logs(append=True, sns_message_body=str(message))
+        logger.structure_logs(append=True, sns_message_body=message)
         logger.structure_logs(append=True, sns_message_type=type(message).__name__)
         logger.structure_logs(append=True, sns_message_length=str(len(message)))
         logger.info("Analyzing the received message.")
