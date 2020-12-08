@@ -29,7 +29,6 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
           - TagKey
           - TagValue
 
@@ -118,17 +117,17 @@ Parameters:
     Default: '7.8'
     AllowedPattern: .+
     Description: The version of ElasticSearch Service [required]
-  LogicalNamePrefix:
-    Type: String
-    Default: StaticWebsiteHosting
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   SamplingRate:
     Type: Number
     Default: 100
     MinValue: 1
     MaxValue: 100
     Description: The sampling rate of logs sent by CloudFront [required]
+  KinesisFirehoseStreamNameSuffix:
+    Type: String
+    Default: default
+    AllowedPattern: .+
+    Description: The suffix of the Kinesis Firehose stream.
   KinesisShardCount:
     Type: Number
     Default: 1
@@ -167,7 +166,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -183,7 +182,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -197,10 +196,10 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: s3.amazonaws.com
+              Service: cloudfront.amazonaws.com
             Action: 'sts:AssumeRole'
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-S3Replication-${AWS::Region}'
+        - PolicyName: !Sub '${AWS::StackName}-KinesisPutPolicy-${AWS::Region}'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -212,7 +211,12 @@ Resources:
                   - 'kinesis:PutRecords'
                 Resource:
                   - !GetAtt Kinesis.Arn
-      RoleName: !Sub '${LogicalNamePrefix}-CloudFrontRealtimeLog-${AWS::Region}'
+              - Effect: Allow
+                Action:
+                  - 'kms:GenerateDataKey'
+                Resource:
+                  - !GetAtt KMSKey.Arn
+      RoleName: !Sub '${AWS::StackName}-CloudFrontRealtimeLog-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -230,7 +234,7 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudFormationPolicy-${AWS::Region}'
+        - PolicyName: !Sub '${AWS::StackName}-AWSLambdaCloudFormationPolicy-${AWS::Region}'
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -239,23 +243,11 @@ Resources:
                   - 'cloudformation:DescribeStacks'
                   - 'cloudformation:UpdateStack'
                 Resource: '*'
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudFormationCalledViaPolicy-${AWS::Region}'
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - '*'
-                Resource: '*'
-                Condition:
-                  ForAnyValue:StringEquals:
-                    aws:CalledVia:
-                      - cloudformation.amazonaws.com
-      RoleName: !Sub '${LogicalNamePrefix}-Lambda-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-Lambda-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  IAMRoleForKinesisFirehouse:
+  IAMRoleForKinesisFirehose:
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
@@ -265,12 +257,9 @@ Resources:
             Principal:
               Service: firehose.amazonaws.com
             Action: 'sts:AssumeRole'
-            Condition:
-              StringEquals:
-                'sts:ExternalId': !Ref 'AWS::AccountId'
-      Description: A role required for KinesisFirehouse to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
+      Description: A role required for KinesisFirehose to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-FirehouseDelivery-${AWS::Region}'
+        - PolicyName: !Sub '${AWS::StackName}-FirehoseDelivery-${AWS::Region}'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -312,19 +301,19 @@ Resources:
                 Resource:
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_all/_settings'
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_cluster/stats'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/index-name*/_mapping/type-name'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/realtime*/_mapping/*'
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_nodes'
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_nodes/stats'
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_nodes/*/stats'
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_stats'
-                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/index-name*/_stats'
+                  - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/realtime*/_stats'
               - Effect: Allow
                 Action:
                   - 'kinesis:DescribeStream'
                   - 'kinesis:GetShardIterator'
                   - 'kinesis:GetRecords'
                   - 'kinesis:ListShards'
-                Resource: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${Kinesis}'
+                Resource: !GetAtt Kinesis.Arn
               - Effect: Allow
                 Action:
                   - 'logs:PutLogEvents'
@@ -336,8 +325,17 @@ Resources:
                   - 'lambda:InvokeFunction'
                   - 'lambda:GetFunctionConfiguration'
                 Resource:
-                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Lambda}:$LATEST'
-      RoleName: !Sub '${LogicalNamePrefix}-FirehouseDelivery-${AWS::Region}'
+                  - !GetAtt Lambda.Arn
+              - Effect: Allow
+                Action:
+                  - 'kms:Decrypt'
+                Resource:
+                  - !GetAtt KMSKey.Arn
+                Condition:
+                  StringEquals:
+                    'kms:ViaService': kinesis.ap-northeast-1.amazonaws.com
+                  StringLike:
+                    'kms:EncryptionContext:aws:kinesis:arn': !GetAtt Kinesis.Arn
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -397,7 +395,7 @@ Resources:
   Kinesis:
     Type: 'AWS::Kinesis::Stream'
     Properties:
-      Name: !Ref LogicalNamePrefix
+      Name: !Ref AWS::StackName
       RetentionPeriodHours: 24
       # Server-Side Encryption
       StreamEncryption:
@@ -411,9 +409,9 @@ Resources:
     Type: 'AWS::Serverless::Application'
     Properties:
       Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
+        CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !Ref SNSForAlertArn
-        KinesisStreamName: !Ref LogicalNamePrefix
+        KinesisStreamName: !Ref AWS::StackName
         IteratorAgeMillisecondsThreshold: 30000
         # Number of Input Records (200000rps * 60sec)
         NumberOfPutRecordThreshold: !Ref KinesisNumberOfPutRecordThreshold
@@ -424,7 +422,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       Tags:
         createdby: !Ref TagValue
   # Lambda
@@ -433,6 +431,7 @@ Resources:
     Properties:
       Code:
         ZipFile: |
+          import logging
           import base64
           import json
 
@@ -535,10 +534,10 @@ Resources:
               logger.info("Successfully processed {} records.".format(len(event["records"])))
 
               return {"records": output}
-      Description: CloudFrontログを変換します。
+      Description: CloudFrontログを変換します
       FunctionName: realtimeLogsTransformer
       Handler: index.lambda_handler
-      MemorySize: 128
+      MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.8
       Tags:
@@ -547,15 +546,20 @@ Resources:
       Timeout: 60
       TracingConfig:
         Mode: Active
+  LambdaLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/${Lambda}
+      RetentionInDays: 60
   # Kinesis Firehose
   KinesisFirehose:
     Type: 'AWS::KinesisFirehose::DeliveryStream'
     Properties:
-      DeliveryStreamName: !Ref LogicalNamePrefix
+      DeliveryStreamName: !Sub ${AWS::StackName}-${KinesisFirehoseStreamNameSuffix}
       DeliveryStreamType: KinesisStreamAsSource
       KinesisStreamSourceConfiguration:
         KinesisStreamARN: !GetAtt Kinesis.Arn
-        RoleARN: !GetAtt IAMRoleForKinesisFirehouse.Arn
+        RoleARN: !GetAtt IAMRoleForKinesisFirehose.Arn
       ElasticsearchDestinationConfiguration:
         CloudWatchLoggingOptions: 
           Enabled: true
@@ -573,7 +577,7 @@ Resources:
               Type: Lambda
         RetryOptions: 
           DurationInSeconds: 300
-        RoleARN: !GetAtt IAMRoleForKinesisFirehouse.Arn
+        RoleARN: !GetAtt IAMRoleForKinesisFirehose.Arn
         S3BackupMode: FailedDocumentsOnly
         S3Configuration: 
           BucketARN: !GetAtt S3ForKinesisFirehose.Arn
@@ -581,12 +585,14 @@ Resources:
             Enabled: true
             LogGroupName: !Ref CloudWatchLogsGroupForFirehose
             LogStreamName: !Ref CloudWatchLogsStreamForFirehoseElasticSearch
-          RoleARN: !GetAtt IAMRoleForKinesisFirehouse.Arn
-        TypeName: ''  
+          RoleARN: !GetAtt IAMRoleForKinesisFirehose.Arn
+        # Types are deprecated in Elasticsearch version 7.8.
+        # TypeName must be empty. 
+        TypeName: ''
   CloudWatchLogsGroupForFirehose:
     Type: 'AWS::Logs::LogGroup'
     Properties:
-      LogGroupName: !Sub '/aws/kinesisfirehose/${LogicalNamePrefix}'
+      LogGroupName: !Sub '/aws/kinesisfirehose/${AWS::StackName}'
       RetentionInDays: 60
   CloudWatchLogsStreamForFirehoseS3:
     Type: 'AWS::Logs::LogStream'
@@ -741,7 +747,7 @@ Resources:
 
           def lambda_handler(event, context):
             response = cloudformation.describe_stacks(
-                StackName='${LogicalNamePrefix}'
+                StackName='${AWS::StackName}'
             )
             last_updated_time = response['Stacks'][0]['LastUpdatedTime'].timestamp()
             parameters = response['Stacks'][0]['Parameters']
@@ -787,6 +793,7 @@ Resources:
     Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
+      RetentionInDays: 60
 
 Outputs:
   KibanaURL:

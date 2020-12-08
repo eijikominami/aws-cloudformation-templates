@@ -43,9 +43,10 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| ACMValidationMethod | DNS / EMAIL | DNS | ○ |  |
+| ACMValidationMethod | DNS / EMAIL | DNS | ○ | The method you want to use to validate that you own or control the domain associated with a public certificate.  |
 | **ACMDomainName** | String | | | If it's NOT empty, **SSL certification** is created. |
 | BillingAlertThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created. |
+| BudgetName | String | Total | ○ | The budget name. When ``BillingAlertThreshold`` is changed, **this value also must be changed** . |
 | CloudFrontErrorRateThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created. |
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created. |
 | CloudFrontDistributionId | String | | | The CloudFront Distribution Id for monitoring |

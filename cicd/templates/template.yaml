@@ -76,6 +76,7 @@ Parameters:
     Default: DISABLED
     AllowedValues:
       - ENABLED
+      - REALTIME_DASHBOARD_ONLY
       - DISABLED
     Description: Enable or disable deployment of StaticWebsiteHosting template [required]
   GlobalSettings:
@@ -130,6 +131,7 @@ Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
+  DeployCreateRealtimeDashboard: !Equals [ !Ref StaticWebsiteHosting, REALTIME_DASHBOARD_ONLY]
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
@@ -144,7 +146,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -160,7 +162,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -598,7 +600,7 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::global/templates/template.yaml
-                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}}}'
+                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
@@ -740,6 +742,37 @@ Resources:
                   - Name: DeployArtifact-StaticWebsiteHosting
                 RunOrder: 3
               - !Ref AWS::NoValue
+            # Deploy CreateRealtimeDashboard
+            - !If
+              - DeployCreateRealtimeDashboard
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: RealtimeDashboard
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/realtime-dashboard.yaml
+                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}RealtimeDashboard.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: RealtimeDashboard
+                OutputArtifacts: 
+                  - Name: DeployArtifact-RealtimeDashboard
+                RunOrder: 3
+              - !Ref AWS::NoValue
             # Deploy WebServers
             - !If
               - DeployWebServers
@@ -843,7 +876,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -863,7 +896,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -883,7 +916,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 1.2.3
+        SemanticVersion: 1.2.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

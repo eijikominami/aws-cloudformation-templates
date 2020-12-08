@@ -44,9 +44,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name GlobalSetti
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| ACMValidationMethod | DNS / EMAIL | DNS | ○ | |
-| **ACMDomainName** | String | | |ドメイン名を指定した場合、**SSL証明書**が作成されます。 |
+| ACMValidationMethod | DNS / EMAIL | DNS | ○ | ドメインを所有または管理していることを検証するために使用する方法 |
+| **ACMDomainName** | String | | | ドメイン名を指定した場合、**SSL証明書**が作成されます。 |
 | BillingAlertThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
+| BudgetName | String | Total | ○ | 予算名。 ``BillingAlertThreshold`` を変更する場合は、この値も変更してください。 |
 | CloudFrontErrorRateThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontErrorRequestPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |

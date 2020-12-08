@@ -118,15 +118,15 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| CloudTrailLogGroup | | | If it is not empty, Slack sends details about 'Unauthorized API Calls' logs. |
+| CloudTrailLogGroup | | | | If it is not empty, Slack sends details about ``Unauthorized API Calls`` logs. |
 | Encrypt | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Slack hook urls are encrypted by an AWS KMS Custom key |
 | **HookUrlForDeployment** | String | | | Slack Hook Url for deployment information | 
 | **HookUrlForAlert** | String | | | Slack Hook Url for alert |
 | **SlackWorkspaceId** | String | | | Slack Workspace Name | 
 | **SlackChannelIdForDeployment** | String | | | Slack Channel Id for deployment information |
 | **SlackChannelIdForAlert** | String | | | Slack Channel Id for alert |
-| AutoScalingEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about AutoScaling is enabled. |
-| EBSEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about EBS is enabled. |
+| AutoScalingEventsRule | ENABLED / ERROR_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about AutoScaling is enabled. |
+| EBSEventsRule | ENABLED / ERROR_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about EBS is enabled. |
 | EC2EventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about EC2 is enabled. |
 | KMSEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about KMS is enabled. |
 | ManagementConsoleEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Management Console is enabled. |
