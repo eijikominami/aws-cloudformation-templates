@@ -70,13 +70,13 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | --- | --- | --- | --- | --- |
 | ArtifactBacketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
-| **GitHubOAuthToken** | String | | | GitHubからコードを取得する際に用いるOAuthトークン |
-| GitHubOwnerNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリの所有者名　|
-| GitHubRepoNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリ名　|
+| **GitHubOAuthToken** | String | | | GitHubからコードを取得する際に用いる **OAuthトークン** |
+| **GitHubOwnerNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリの所有者名**　|
+| **GitHubRepoNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリ名**　|
 | GitHubStage | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |
 | TemplateConfigurationBasePath | String | | | 設定プロパティのあるディレクトリのパス |
-| DefaultSecuritySettingsConfigRules | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
-| GlobalSettings | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
-| Notification | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |
-| StaticWebsiteHosting | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
-| WebServers | ENABLED / SystemsManager-Only / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |
+| **DefaultSecuritySettingsConfigRules** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
+| **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
+| **Notification** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |
+| **StaticWebsiteHosting** | ENABLED / REALTIME_DASHBOARD_ONLY / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
+| **WebServers** | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |

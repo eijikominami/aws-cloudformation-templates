@@ -125,7 +125,7 @@ You can provide optional parameters as follows.
 | LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If it is **DISABLED**, AWS WAF does NOT created. |
 
-If you deploy ``Synthetics Stack`` individually, you can provide optional parameters as follows.
+If you deploy ``Real-time Dashboard Stack`` individually, you can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
@@ -137,13 +137,18 @@ If you deploy ``Synthetics Stack`` individually, you can provide optional parame
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
 | ElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
 | SamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
+| KinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
 | KinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
 
 ### Manual Deployment
+
+#### Origin failover
 
 You can add ``secondary origin server`` in ``CloudFront`` by this CloudFormation Template, but it does **NOT suppport** creating ``Origin Group``.
 Therefore create ``Origin Group`` and edit ``Default Cache Behavior Settings`` manually after comleting CloudFormation deployment.
 
 1. Create ``Origin Group`` with ``Origins`` and ``Failover criteria`` .
 2. Change ``Origin or Origin Group`` at ``Default Cache Behavior Settings`` to ``Origin Group`` you created.
+
+#### Real-time Dashboard Stack

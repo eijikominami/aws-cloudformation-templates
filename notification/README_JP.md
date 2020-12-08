@@ -118,15 +118,15 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| CloudTrailLogGroup | | | ロググループを指定した場合、'Unauthorized API Calls' イベントの詳細がSlackによって送信されます。 |
+| CloudTrailLogGroup | | | | ロググループを指定した場合、``Unauthorized API Calls`` イベントの詳細がSlackによって送信されます。 |
 | Encrypt | String | DISABLED | ○ | ENABLEDを指定した場合、AWS KMS カスタムキーで SlackのHook URL を暗号化します。 |
 | **HookUrlForDeployment** | String | | | Slack デプロイチャンネルのHook URL | 
 | **HookUrlForAlert** | String | | | Slack アラートチャンネルのHook URL |
 | **SlackWorkspaceId** | String | | | Slackのワークスペース名 | 
 | **SlackChannelIdForDeployment** | String | | | Slack デプロイチャンネルのID |
 | **SlackChannelIdForAlert** | String | | | Slack アラートチャンネルのID | 
-| AutoScalingEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AutoScaling に関するイベントルールを作成します。  |
-| EBSEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、EBS に関するイベントルールを作成します。 |
+| AutoScalingEventsRule | ENABLED / ERROR_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AutoScaling に関するイベントルールを作成します。  |
+| EBSEventsRule | ENABLED / ERROR_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、EBS に関するイベントルールを作成します。 |
 | EC2EventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、EC2 に関するイベントルールを作成します。 |
 | KMSEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、KMS に関するイベントルールを作成します。 |
 | ManagementConsoleEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Management Console に関するイベントルールを作成します。 |

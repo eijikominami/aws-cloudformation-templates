@@ -36,6 +36,7 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
+      - ERROR_ONLY
       - DISABLED
     Description: Enable or disable the events rule about AutoScaling [required]
   EBSEventsRule:
@@ -43,6 +44,7 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
+      - ERROR_ONLY
       - DISABLED
     Description: Enable or disable the events rule about EBS [required]
   EC2EventsRule:
@@ -92,6 +94,10 @@ Parameters:
     Default: ''
     Description: Amazon SNS Topic ARN for alert
 
+Conditions:
+  SubscribeAutoScalingErrorEventOnly: !Equals [ !Ref AutoScalingEventsRule, ERROR_ONLY]
+  SubscribeEBSErrorEventOnly: !Equals [ !Ref EBSEventsRule, ERROR_ONLY]
+
 Resources:
   EventBridgeForScheduledEvents:
     Type: 'AWS::Events::Rule'
@@ -119,8 +125,16 @@ Resources:
           - EBS Snapshot Notification
           - EBS Multi-Volume Snapshots Completion Status
           - EBS Fast Snapshot Restore State-change Notification
+        detail: !If 
+          - SubscribeEBSErrorEventOnly
+          - result:
+              - failed
+          - !Ref AWS::NoValue
       Name: !Sub ${LogicalNamePrefix}-EBS
-      State: !Ref EBSEventsRule
+      State: !If
+        - SubscribeEBSErrorEventOnly
+        - ENABLED
+        - !Ref EBSEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
@@ -138,8 +152,16 @@ Resources:
           - EC2 Instance-terminate Lifecycle Action
           - EC2 Instance Terminate Successful
           - EC2 Instance Terminate Unsuccessful
+        detail: !If 
+          - SubscribeAutoScalingErrorEventOnly
+          - StatusCode:
+              - Failed
+          - !Ref AWS::NoValue
       Name: !Sub ${LogicalNamePrefix}-AutoScaling
-      State: !Ref AutoScalingEventsRule
+      State: !If
+        - SubscribeAutoScalingErrorEventOnly
+        - ENABLED
+        - !Ref AutoScalingEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert

@@ -123,7 +123,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
 
-``Synthetics Stack`` を単独でデプロイする場合は、以下のパラメータを指定することができます。
+``Real-time Dashboard Stack`` を単独でデプロイする場合は、以下のパラメータを指定することができます。
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
@@ -135,13 +135,18 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
 | ElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
 | SamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
+| KinesisFirehoseStreamNameSuffix | String | default | ○ | Kinesis Firehose ストリーム名の接尾辞 |
 | KinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
 | KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 
 ### 手動設定
+
+#### Origin failover
 
 本テンプレートを実行することで、 ``CloudFront`` に ``secondary origin server`` を設定することはできますが、 現時点ではCloudFormationで ``Origin Group`` がサポートされていません。
 したがって、 CloudFormationのデプロイ完了後に、``Origin Group`` の作成と ``Default Cache Behavior Settings`` の**手動設定**が必要です。
 
 1. ``Origins`` と ``Failover criteria`` を含んだ ``Origin Group`` を作成します。
 2. ``Default Cache Behavior Settings`` の ``Origin or Origin Group`` に 1. で作成した ``Origin Group`` を指定します。
+
+#### Real-time Dashboard Stack
