@@ -424,21 +424,6 @@ Resources:
     Type: 'AWS::Logs::LogGroup'
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaTransferSNSTopic}
-  # CloudWatch Alarm for Lambda
-  AlarmLambda:
-    Condition: CreateSNSForAlertTransfer
-    Type: 'AWS::Serverless::Application'
-    Properties:
-      Parameters:
-        CustomAlarmName: !Ref AWS::StackName
-        SNSTopicArn: !Ref SNSForAlertArn
-        MetricFilterPattern: ''
-        FunctionResouceName: !Ref LambdaTransferSNSTopic
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.10
-      Tags:
-        createdby: !Ref TagValue
   # SNS
   SNSSubscription:
     Condition: CreateSNSForAlertTransfer
