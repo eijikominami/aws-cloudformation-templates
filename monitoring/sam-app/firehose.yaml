@@ -3,11 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for Amazon Kinesis Data Firehose
 
 Parameters:
-  OldestRecordAge:
-    Type: Number
-    Default: 600
-    MinValue: 0
-    Description: The threshold of the age of the oldest record [required]
   CustomAlarmName:
     Type: String
     Default: ''
@@ -16,6 +11,11 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The Firehose stream name [required]
+  OldestRecordAge:
+    Type: Number
+    Default: 120
+    MinValue: 0
+    Description: The threshold of the age of the oldest record [required]
   SNSTopicArn:
     Type: String
     AllowedPattern: .+

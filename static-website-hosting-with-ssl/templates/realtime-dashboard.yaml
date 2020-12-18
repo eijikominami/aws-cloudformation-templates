@@ -581,6 +581,9 @@ Resources:
         KinesisStreamARN: !GetAtt Kinesis.Arn
         RoleARN: !GetAtt IAMRoleForKinesisFirehose.Arn
       ElasticsearchDestinationConfiguration:
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 1
         CloudWatchLoggingOptions: 
           Enabled: true
           LogGroupName: !Ref CloudWatchLogsGroupForFirehose
