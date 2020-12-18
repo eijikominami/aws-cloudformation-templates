@@ -1,0 +1,152 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Amazon Kinesis Data Firehose
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  FirehoseStreamName:
+    Type: String
+    AllowedPattern: .+
+    Description: The Firehose stream name [required]
+  OldestRecordAge:
+    Type: Number
+    Default: 120
+    MinValue: 0
+    Description: The threshold of the age of the oldest record [required]
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmFirehoseDeliveryToElasticsearchDataFreshness:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *Elasticsearchへの配信遅延が発生* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Data-Freshness'
+        - !Sub 'Notice-Kinesis-${FirehoseStreamName}-Delivery-To-Elasticsearch-Data-Freshness'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DeliveryStreamName
+          Value: !Ref FirehoseStreamName
+      EvaluationPeriods: 1
+      MetricName: DeliveryToElasticsearch.DataFreshness
+      Namespace: AWS/Firehose
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: !Ref OldestRecordAge
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmFirehoseThrottledGetShardIterator:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetShardIteratorが発生* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Shard-Iterator'
+        - !Sub 'Notice-Kinesis-${FirehoseStreamName}-Throttled-Get-Shard-Iterator'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DeliveryStreamName
+          Value: !Ref FirehoseStreamName
+      EvaluationPeriods: 1
+      MetricName: ThrottledGetShardIterator
+      Namespace: AWS/Firehose
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmFirehoseThrottledGetRecords:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetRecordsが発生* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Records'
+        - !Sub 'Notice-Kinesis-${FirehoseStreamName}-Throttled-Get-Records'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DeliveryStreamName
+          Value: !Ref FirehoseStreamName
+      EvaluationPeriods: 1
+      MetricName: ThrottledGetRecords
+      Namespace: AWS/Firehose
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmFirehoseDeliveryToElasticsearchFailed:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *Elasticsearchへのデータ配信が失敗* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Failed'
+        - !Sub 'Notice-Kinesis-${FirehoseStreamName}-Delivery-To-Elasticsearch-Failed'
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DeliveryStreamName
+          Value: !Ref FirehoseStreamName
+      EvaluationPeriods: 1
+      MetricName: DeliveryToElasticsearch.Success
+      Namespace: AWS/Firehose
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Minimum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmFirehoseDeliveryToS3Failed:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *S3へのデータ配信が失敗* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-S3-Failed'
+        - !Sub 'Notice-Kinesis-${FirehoseStreamName}-Delivery-To-S3-Failed'
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DeliveryStreamName
+          Value: !Ref FirehoseStreamName
+      EvaluationPeriods: 1
+      MetricName: DeliveryToS3.Success
+      Namespace: AWS/Firehose
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Minimum
+      Threshold: 1
+      TreatMissingData: notBreaching
