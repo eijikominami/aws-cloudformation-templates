@@ -13,7 +13,7 @@ The template creates the following alarms.
 | AWS/Firehose | **DeliveryToElasticsearch.DataFreshness** | `FirehoseStreamName` | `OldestRecordAge` |
 | AWS/Firehose | **ThrottledGetShardIterator** | `FirehoseStreamName` | At least once a minute | 
 | AWS/Firehose | **ThrottledGetRecords** | `FirehoseStreamName` | At least once a minute | 
-| AWS/Firehose | **DeliveryToElasticsearch.Success** | `FirehoseStreamName` | 0 | 
+| AWS/Firehose | **DeliveryToElasticsearch.Success** | `FirehoseStreamName` | <1 | 
 
 ## Parameters
 
@@ -36,12 +36,12 @@ cloudwatch-alarm-about-kinesis-data-firehose は、 Amazon Kinesis Data Firehose
 
 このテンプレートは、以下のアラームを作成します。
 
-| ネームスペース | メトリクス | ApiName | Stage | 閾値 |
-| --- | --- | --- | --- | --- |
+| ネームスペース | メトリクス | DeliveryStreamName | 閾値 |
+| --- | --- | --- | --- |
 | AWS/Firehose | **DeliveryToElasticsearch.DataFreshness** | `FirehoseStreamName` | `OldestRecordAge` |
 | AWS/Firehose | **ThrottledGetShardIterator** | `FirehoseStreamName` | 1分間に1回以上 | 
 | AWS/Firehose | **ThrottledGetRecords** | `FirehoseStreamName` | 1分間に1回以上 | 
-| AWS/Firehose | **DeliveryToElasticsearch.Success** | `FirehoseStreamName` | 1分間に0回 | 
+| AWS/Firehose | **DeliveryToElasticsearch.Success** | `FirehoseStreamName` | <1 | 
 
 ## パラメータ
 

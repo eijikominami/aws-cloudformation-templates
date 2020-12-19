@@ -246,7 +246,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *不正なAPIコールを検知* しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの *権限設定に問題が無いかを確認してください* 。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-Unauthorized-API-Calls'
+      AlarmName: !Sub 'Notice-${LogicalNamePrefix}-CloudTrail-Unauthorized-API-Calls'
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: UnauthorizedAPICalls

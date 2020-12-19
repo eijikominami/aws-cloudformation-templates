@@ -55,7 +55,7 @@ def createUnauthorizedApiCallsAlarmMessage(account_id, message):
     error = 'Unknown'
     user = 'Unknown'
     permissions = 'Unknown'
-    title = ":x: 警告イベント | CloudWatch Alarm | " + message['awsRegion'] + " | Account: " + account_id
+    title = ":x: 注意イベント | CloudWatch Alarm | " + message['awsRegion'] + " | Account: " + account_id
     title_link = "https://console.aws.amazon.com/cloudwatch/home?region=" + message['awsRegion'] + "#logsV2:log-groups"
     
     # Target Resources
@@ -82,7 +82,7 @@ def createUnauthorizedApiCallsAlarmMessage(account_id, message):
         permissions = message['userIdentity']['sessionContext']['sessionIssuer']['arn']
     return {
         'attachments': [{
-            'color': '#df514d',
+            'color': '#EBB424',
             'title': "%s" % title,
             'title_link': "%s" % title_link,
             'text': "*CloudTrail* が *不正なAPIコールを検知* しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの *権限設定に問題が無いかを確認してください* 。",
