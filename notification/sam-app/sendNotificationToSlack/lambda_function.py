@@ -116,7 +116,7 @@ def createCloudWatchAlarmMessage(message):
             title_prefix = ":x: 警告イベント"
             color = "#961D13"
         elif alarm_name.startswith('Notice'):
-            title_prefix = ":x: 注意イベント"
+            title_prefix = ":heavy_exclamation_mark: 注意イベント"
             color = "#EBB424"
         else:
             title_prefix = ":japanese_ogre: 不明なイベント"

@@ -55,7 +55,7 @@ def createUnauthorizedApiCallsAlarmMessage(account_id, message):
     error = 'Unknown'
     user = 'Unknown'
     permissions = 'Unknown'
-    title = ":x: 注意イベント | CloudWatch Alarm | " + message['awsRegion'] + " | Account: " + account_id
+    title = ":heavy_exclamation_mark: 注意イベント | CloudWatch Alarm | " + message['awsRegion'] + " | Account: " + account_id
     title_link = "https://console.aws.amazon.com/cloudwatch/home?region=" + message['awsRegion'] + "#logsV2:log-groups"
     
     # Target Resources
