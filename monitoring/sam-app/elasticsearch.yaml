@@ -35,7 +35,7 @@ Resources:
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Cluster-Status'
         - !Sub 'Warning-Elasticsearch-${DomainName}-Cluster-Status'
-      ComparisonOperator: LessThanThreshold
+      ComparisonOperator: LessThanOrEqualToThreshold
       DatapointsToAlarm: 1
       Dimensions:
         - Name: DomainName
@@ -49,7 +49,7 @@ Resources:
         - !Ref SNSTopicArn
       Period: 60
       Statistic: Minimum
-      Threshold: 1
+      Threshold: 0
       TreatMissingData: notBreaching
   AlarmElasticsearchClusterIndexWritesBlocked:
     Type: 'AWS::CloudWatch::Alarm'
@@ -87,9 +87,9 @@ Resources:
       AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードで異常が発生* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Cluster-Index-Writes-Blocked'
-        - !Sub 'Warning-Elasticsearch-${DomainName}-Cluster-Index-Writes-Blocked'
-      ComparisonOperator: LessThanThreshold
+        - !Sub 'Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Master-Reachable-From-Node'
+        - !Sub 'Warning-Elasticsearch-${DomainName}-Master-Reachable-From-Node'
+      ComparisonOperator: LessThanOrEqualToThreshold
       DatapointsToAlarm: 1
       Dimensions:
         - Name: DomainName
@@ -103,7 +103,7 @@ Resources:
         - !Ref SNSTopicArn
       Period: 60
       Statistic: Minimum
-      Threshold: 1
+      Threshold: 0
       TreatMissingData: notBreaching
   AlarmElasticsearchAutomatedSnapshotFailure:
     Type: 'AWS::CloudWatch::Alarm'
@@ -143,7 +143,7 @@ Resources:
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Kibana-Healthy-Nodes'
         - !Sub 'Warning-Elasticsearch-${DomainName}-Kibana-Healthy-Nodes'
-      ComparisonOperator: LessThanThreshold
+      ComparisonOperator: LessThanOrEqualToThreshold
       DatapointsToAlarm: 1
       Dimensions:
         - Name: DomainName
@@ -157,7 +157,7 @@ Resources:
         - !Ref SNSTopicArn
       Period: 60
       Statistic: Minimum
-      Threshold: 1
+      Threshold: 0
       TreatMissingData: notBreaching
   AlarmElasticsearchFreeStorageSpace:
     Type: 'AWS::CloudWatch::Alarm'
