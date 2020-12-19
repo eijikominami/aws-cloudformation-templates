@@ -109,6 +109,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | Elasticsearch Service のボリュームサイズ（GB） |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のマスタータイプ |
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | Elasticsearch Service の生存時間 |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
@@ -131,6 +132,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | Elasticsearch Service のドメイン名 |
 | ElasticSearchLifetime | Number | 1 | ○ | Elasticsearch Service の生存時間 |
 | ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
+| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のマスタータイプ |
 | ElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
 | ElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
@@ -149,4 +151,55 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 1. ``Origins`` と ``Failover criteria`` を含んだ ``Origin Group`` を作成します。
 2. ``Default Cache Behavior Settings`` の ``Origin or Origin Group`` に 1. で作成した ``Origin Group`` を指定します。
 
-#### Real-time Dashboard Stack
+#### Kibana
+
+Kibana を使ってリアルタイムダッシュボードを作成するためには、以下の手順を行ってください。
+
+1. **Security** の **Roles** を選択します。
+2. ``+`` アイコンをクリックして新しいロールを追加します。
+3. 作成したロールに ``firehose`` という名前をつけます。
+
+![](../images/kibana_setting_1.png)
+
+4. **Cluster Permissions** タブの **Cluster-wide permissions** で ``cluster_composite_ops`` ``cluster_monitor`` グループを追加します。
+
+![](../images/kibana_setting_2.png)
+
+5. **Index Permissions** タブの **Add index permissions** から **Index Patterns** を選んで ``realtime*`` を入力します。**Permissions: Action Groups** で ``crud`` ``create_index`` ``manage`` アクショングループを追加します。
+
+![](../images/kibana_setting_3.png)
+
+6. **Save Role Definition** をクリックします。
+7. **Security** の **Role Mappings** を選択します。
+
+![](../images/kibana_setting_4.png)
+
+8. **Add Backend Role** をクリックします。
+9. 先ほど作成した ``firehose``を選択します。
+10. Backend roles に Kinesis Data Firehose が Amazon ES および S3 に書き込むために使用する IAM ロールの ARN を入力します。
+
+![](../images/kibana_setting_5.png)
+
+11. **Submit** をクリックします。
+12. **Dev Tools** を選択します。
+13. ``timestamp`` フィールドを ``date`` タイプと認識させるために、以下のコマンドを入力して実行します。
+
+```json
+PUT _template/custom_template
+{
+    "template": "realtime*",
+    "mappings": {
+        "propeties": {
+            "timestamp": {
+                "type": "date",
+                "format": "epoch_second"
+            }
+        }
+    }
+}
+```
+
+![](../images/kibana_setting_6.png)
+
+14. [visualizes と dashboard の設定ファイル](export.ndjson) をインポートします。
+

@@ -219,7 +219,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードのJavaヒープ使用率が上昇* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードのJVMメモリ負荷率が上昇* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Master-JVM-Memory-Pressure'
@@ -233,6 +233,87 @@ Resources:
           Value: !Ref AWS::AccountId
       EvaluationPeriods: 15
       MetricName: MasterJVMMemoryPressure
+      Namespace: AWS/ES
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 80
+      TreatMissingData: notBreaching
+  AlarmElasticsearchCPUUtilization:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのCPU使用率が上昇* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Data-CPU-Utilization'
+        - !Sub 'Notice-Elasticsearch-${DomainName}-Data-CPU-Utilization'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 3
+      Dimensions:
+        - Name: DomainName
+          Value: !Ref DomainName
+        - Name: ClientId
+          Value: !Ref AWS::AccountId
+      EvaluationPeriods: 15
+      MetricName: CPUUtilization
+      Namespace: AWS/ES
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 50
+      TreatMissingData: notBreaching
+  AlarmElasticsearchJVMMemoryPressure:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのJVMメモリ負荷率が上昇* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Data-JVM-Memory-Pressure'
+        - !Sub 'Notice-Elasticsearch-${DomainName}-Data-JVM-Memory-Pressure'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DomainName
+          Value: !Ref DomainName
+        - Name: ClientId
+          Value: !Ref AWS::AccountId
+      EvaluationPeriods: 15
+      MetricName: JVMMemoryPressure
+      Namespace: AWS/ES
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 80
+      TreatMissingData: notBreaching
+  AlarmElasticsearchSysMemoryUtilization:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのメモリ使用率が上昇* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Data-Sys-Memory-Utilization'
+        - !Sub 'Notice-Elasticsearch-${DomainName}-Data-JVM-Sys-Memory-Utilization'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DomainName
+          Value: !Ref DomainName
+        - Name: ClientId
+          Value: !Ref AWS::AccountId
+      EvaluationPeriods: 15
+      MetricName: SysMemoryUtilization
       Namespace: AWS/ES
       OKActions:
         - !Ref SNSTopicArn

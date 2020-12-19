@@ -17,7 +17,10 @@ The template creates the following alarms.
 | AWS/ES | **KibanaHealthyNodes** | `DomainName` | `AWS::AccountId` | 0 | 
 | AWS/ES | **FreeStorageSpace** | `DomainName` | `AWS::AccountId` | `FreeStorageSpaceThreshold` | 
 | AWS/ES | **MasterCPUUtilization** | `DomainName` | `AWS::AccountId` | >50 | 
-| AWS/ES | **MasterJVMMemoryPressure** | `DomainName` | `AWS::AccountId` | >80 | 
+| AWS/ES | **MasterJVMMemoryPressure** | `DomainName` | `AWS::AccountId` | >80 |
+| AWS/ES | **CPUUtilization** | `DomainName` | `AWS::AccountId` | >50 | 
+| AWS/ES | **JVMMemoryPressure** | `DomainName` | `AWS::AccountId` | >80 | 
+| AWS/ES | **SysMemoryUtilization** | `DomainName` | `AWS::AccountId` | >80 | 
 
 ## Parameters
 
@@ -50,6 +53,9 @@ cloudwatch-alarm-about-elasticsearch は、 Amazon Elasticsearch Service に関�
 | AWS/ES | **FreeStorageSpace** | `DomainName` | `AWS::AccountId` | `FreeStorageSpaceThreshold` | 
 | AWS/ES | **MasterCPUUtilization** | `DomainName` | `AWS::AccountId` | >50 | 
 | AWS/ES | **MasterJVMMemoryPressure** | `DomainName` | `AWS::AccountId` | >80 | 
+| AWS/ES | **CPUUtilization** | `DomainName` | `AWS::AccountId` | >50 | 
+| AWS/ES | **JVMMemoryPressure** | `DomainName` | `AWS::AccountId` | >80 | 
+| AWS/ES | **SysMemoryUtilization** | `DomainName` | `AWS::AccountId` | >80 | 
 
 ## パラメータ
 
