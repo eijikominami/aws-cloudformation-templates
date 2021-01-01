@@ -476,7 +476,7 @@ Resources:
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.15
+        SemanticVersion: 1.2.16
       Tags:
         createdby: !Ref TagValue
   # CIS 2.9 – Ensure VPC flow logging is enabled in all VPCs 
