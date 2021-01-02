@@ -317,7 +317,6 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-          SLACK_CHANNEL_NAME: !Ref SlackChannelIdForAlert
       Events:
         SNSForAlert:
           Properties:
@@ -398,7 +397,6 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-          SLACK_CHANNEL_NAME: !Ref SlackChannelIdForAlert
       Events:
         CloudWatchLogs:
           Properties:
