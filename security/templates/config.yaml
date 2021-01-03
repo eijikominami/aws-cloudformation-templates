@@ -476,7 +476,7 @@ Resources:
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.14
+        SemanticVersion: 1.2.16
       Tags:
         createdby: !Ref TagValue
   # CIS 2.9 – Ensure VPC flow logging is enabled in all VPCs 
@@ -525,13 +525,13 @@ Resources:
           - name: CreateLogGroup
             action: aws:executeAwsApi
             inputs:
-              Service: cloudwatch
+              Service: logs
               Api: CreateLogGroup
               logGroupName: "/aws/vpc/{{ ResourceId }}"
           - name: PutRetentionPolicy
             action: aws:executeAwsApi
             inputs:
-              Service: cloudwatch
+              Service: logs
               Api: PutRetentionPolicy
               logGroupName: "/aws/vpc/{{ ResourceId }}"
               retentionInDays: 60
@@ -543,7 +543,8 @@ Resources:
               DeliverLogsPermissionArn: "{{ DeliverLogsPermissionArn }}"
               LogDestinationType: cloud-watch-logs
               LogGroupName: "/aws/vpc/{{ ResourceId }}"
-              ResourceId.N: "{{ ResourceId }}"
+              ResourceId.N:
+                - "{{ ResourceId }}"
               ResourceType: VPC
               TrafficType: ALL
         parameters:

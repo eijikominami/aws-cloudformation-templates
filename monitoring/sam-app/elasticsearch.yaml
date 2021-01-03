@@ -75,7 +75,7 @@ Resources:
       OKActions:
         - !Ref SNSTopicArn
       Period: 60
-      Statistic: Maximum
+      Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmElasticsearchMasterReachableFromNode:
