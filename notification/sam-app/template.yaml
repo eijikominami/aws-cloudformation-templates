@@ -171,7 +171,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.14
+        SemanticVersion: 1.2.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -187,7 +187,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.14
+        SemanticVersion: 1.2.16
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -197,7 +197,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.2.14
+        SemanticVersion: 1.2.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -317,7 +317,6 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-          SLACK_CHANNEL_NAME: !Ref SlackChannelIdForAlert
       Events:
         SNSForAlert:
           Properties:
@@ -383,7 +382,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.14
+        SemanticVersion: 1.2.16
       Tags:
         createdby: !Ref TagValue
   # Lambda
@@ -398,7 +397,6 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-          SLACK_CHANNEL_NAME: !Ref SlackChannelIdForAlert
       Events:
         CloudWatchLogs:
           Properties:
@@ -447,7 +445,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.14
+        SemanticVersion: 1.2.16
       Tags:
         createdby: !Ref TagValue
   # Chatbot
