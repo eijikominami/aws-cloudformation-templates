@@ -380,6 +380,7 @@ Resources:
         ElasticsearchVersion: !Ref RealtimeDashboardElasticsearchVersion
         KinesisShardCount: !Ref RealtimeDashboardKinesisShardCount
         KinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
+        LogicalNamePrefix: !Ref AWS::StackName
         SamplingRate: !Ref RealtimeDashboardSamplingRate
         SNSForAlertArn: !If
           - CreateSNSForDeployment
@@ -722,7 +723,7 @@ Resources:
   # Route53
   Route53RecordSet:
     Condition: CreateRoute53
-    Type: AWS::Route53::RecordSet
+    Type: 'AWS::Route53::RecordSet'
     Properties: 
       AliasTarget: 
         DNSName: !GetAtt CloudFront.DomainName
