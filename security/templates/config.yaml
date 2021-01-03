@@ -525,13 +525,13 @@ Resources:
           - name: CreateLogGroup
             action: aws:executeAwsApi
             inputs:
-              Service: cloudwatch
+              Service: logs
               Api: CreateLogGroup
               logGroupName: "/aws/vpc/{{ ResourceId }}"
           - name: PutRetentionPolicy
             action: aws:executeAwsApi
             inputs:
-              Service: cloudwatch
+              Service: logs
               Api: PutRetentionPolicy
               logGroupName: "/aws/vpc/{{ ResourceId }}"
               retentionInDays: 60
@@ -543,7 +543,8 @@ Resources:
               DeliverLogsPermissionArn: "{{ DeliverLogsPermissionArn }}"
               LogDestinationType: cloud-watch-logs
               LogGroupName: "/aws/vpc/{{ ResourceId }}"
-              ResourceId.N: "{{ ResourceId }}"
+              ResourceId.N:
+                - "{{ ResourceId }}"
               ResourceType: VPC
               TrafficType: ALL
         parameters:

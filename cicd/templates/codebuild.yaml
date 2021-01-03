@@ -303,7 +303,7 @@ Resources:
       Artifacts:
         Type: NO_ARTIFACTS
       BadgeEnabled: true
-      Description: Building process for git tags. 
+      Description: Upload SAM artifacts and README files to AWS Serverless Application Repository. 
       Environment: 
         ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
