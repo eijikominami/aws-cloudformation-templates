@@ -340,7 +340,7 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: 'AWS::Serverless::Application'
