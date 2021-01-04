@@ -79,7 +79,7 @@ Parameters:
   DomainName:
     Type: String
     Default: ''
-    Description: The CNAME attached to Elastic Load Balancer [required]
+    Description: The CNAME attached to Elastic Load Balancer
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
@@ -480,6 +480,7 @@ Resources:
     Properties: 
       AllocationId: !GetAtt EIPForEC2Instance.AllocationId
       InstanceId: !Ref EC2
+  # Route53
   Route53RecordSet:
     Condition: CreateRoute53
     Type: 'AWS::Route53::RecordSet'

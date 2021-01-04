@@ -120,6 +120,7 @@ You can provide optional parameters as follows.
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
+| Route53HostedZoneId | String | | | Route53 hosted zone id |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3**. |
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled. |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3**. |
@@ -191,7 +192,7 @@ PUT _template/custom_template
 {
     "template": "realtime*",
     "mappings": {
-        "propeties": {
+        "properties": {
             "timestamp": {
                 "type": "date",
                 "format": "epoch_second"

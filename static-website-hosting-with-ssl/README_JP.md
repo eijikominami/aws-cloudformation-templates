@@ -118,6 +118,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
+| Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
@@ -189,7 +190,7 @@ PUT _template/custom_template
 {
     "template": "realtime*",
     "mappings": {
-        "propeties": {
+        "properties": {
             "timestamp": {
                 "type": "date",
                 "format": "epoch_second"

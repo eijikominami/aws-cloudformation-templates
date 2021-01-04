@@ -77,7 +77,7 @@ Parameters:
   DomainName:
     Type: String
     Default: ''
-    Description: The name of the domain [required]
+    Description: The name of the domain
   SNSForAlertArn:
     Type: String
     Default: '' 

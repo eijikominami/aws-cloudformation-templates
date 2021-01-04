@@ -58,7 +58,7 @@ Parameters:
   DomainName:
     Type: String
     Default: ''
-    Description: The CNAME attached to Elastic Load Balancer [required]
+    Description: The CNAME attached to Elastic Load Balancer
   EC2ImageId:
     Type: AWS::EC2::Image::Id
     Default: ami-068a6cefc24c301d2
