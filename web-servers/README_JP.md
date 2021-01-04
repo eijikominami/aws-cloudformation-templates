@@ -19,7 +19,7 @@
 | --- | --- |
 | Data Lifecycle Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DataLifecycleManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/dlm.yaml&param_LogicalNamePrefix=DataLifecycleManager) |
 | Systems Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/ssm.yaml&param_LogicalNamePrefix=SystemsManager) |
-| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml) |
+| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml) |
 
 ## アーキテクチャ
 
@@ -43,6 +43,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | 'None'を指定した場合、ELBは作成されません。 |
 | CertificateManagerARN | String | | | ARNを指定した場合、**Elastic Load Balancer** に **SSL証明書** が紐付けられます。 |
+| DomainName | String | | | Elastic Load Balancer と紐づける CNAME 名 | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | スナップショット作成時刻 (UTC) |
 | EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
@@ -50,6 +51,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
 | EC2VolumeSize | Number | 8 | ○ | |
 | IgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
+| Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 の パブリックサブネット |
 | SubnetExternalCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | AZ1 の プライベートサブネット |

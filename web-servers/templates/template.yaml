@@ -34,6 +34,11 @@ Metadata:
           - IgnoreResourceConflicts
           - SSMPatchingAt
       - Label: 
+          default: 'Route53 Configuration'
+        Parameters: 
+          - DomainName
+          - Route53HostedZoneId
+      - Label: 
           default: 'WAF Configuration'
         Parameters: 
           - WebACL
@@ -71,6 +76,10 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to Elastic Load Balancer
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The CNAME attached to Elastic Load Balancer
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
@@ -100,6 +109,10 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
+  Route53HostedZoneId:
+    Type: String
+    Default: ''
+    Description: Route53 hosted zone id
   SSMPatchingAt:
     Type: Number
     Default: 3
@@ -160,6 +173,7 @@ Conditions:
   PrivateSubnet2Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz2, '' ] ]
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
+  CreateRoute53: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateWAF: !And [!Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
@@ -255,6 +269,7 @@ Resources:
         AutoScalingDesiredCapacity: !Ref AutoScalingDesiredCapacity
         AutoScalingMaxSize: !Ref AutoScalingMaxSize
         CertificateManagerARN: !Ref CertificateManagerARN
+        DomainName: !Ref DomainName
         EC2ImageId: !Ref EC2ImageId
         EC2InstanceType: !Ref EC2InstanceType
         EC2IamInstanceProfileArn: !GetAtt IamInstanceProfileForIAMRoleForEC2.Arn
@@ -271,6 +286,7 @@ Resources:
           - ''
         LoadBalancerType: !Ref AutoScalingLoadBalancerType
         LogicalNamePrefix: !Ref AWS::StackName
+        Route53HostedZoneId: !Ref Route53HostedZoneId
         SubnetId1ForELB: !GetAtt Az1.Outputs.SubnetId
         SubnetId2ForELB: !GetAtt Az2.Outputs.SubnetId
         SNSTopicARN: !If
@@ -340,7 +356,7 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: 'AWS::Serverless::Application'
@@ -464,6 +480,18 @@ Resources:
     Properties: 
       AllocationId: !GetAtt EIPForEC2Instance.AllocationId
       InstanceId: !Ref EC2
+  # Route53
+  Route53RecordSet:
+    Condition: CreateRoute53
+    Type: 'AWS::Route53::RecordSet'
+    Properties:
+      Comment: !Ref DomainName
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !Ref DomainName
+      ResourceRecords: 
+        - !Ref EIPForEC2Instance
+      TTL: 600
+      Type: A
   # EC2
   EC2:
     Condition: AutoScalingDisabled

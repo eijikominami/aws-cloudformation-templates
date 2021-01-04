@@ -25,6 +25,11 @@ Metadata:
           - SubnetId1ForELB
           - SubnetId2ForELB
       - Label: 
+          default: 'Route53 Configuration'
+        Parameters: 
+          - DomainName
+          - Route53HostedZoneId
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSTopicARN
@@ -50,6 +55,10 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to Elastic Load Balancer
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The CNAME attached to Elastic Load Balancer
   EC2ImageId:
     Type: AWS::EC2::Image::Id
     Default: ami-068a6cefc24c301d2
@@ -95,6 +104,10 @@ Parameters:
       - application
       - network
     Description: The LoadBalancer Type [required]
+  Route53HostedZoneId:
+    Type: String
+    Default: ''
+    Description: Route53 hosted zone id
   SubnetId1ForELB:
     Type: String
     AllowedPattern: .+
@@ -123,6 +136,7 @@ Conditions:
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref LoadBalancerType, network ]
   CreateElasticBalancerListenerCertificate: !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ]
+  CreateRoute53: !And [ !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
 
 Resources:
   # Service-linked Role
@@ -273,6 +287,18 @@ Resources:
       VPCZoneIdentifier: 
         - !Ref SubnetId1ForELB
         - !Ref SubnetId2ForELB
+  # Route53
+  Route53RecordSet:
+    Condition: CreateRoute53
+    Type: 'AWS::Route53::RecordSet'
+    Properties: 
+      AliasTarget: 
+        DNSName: !GetAtt LoadBalancer.DNSName
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
+      Comment: !Ref DomainName
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !Ref DomainName
+      Type: A
         
 Outputs:
   LoadBalancerArn:
