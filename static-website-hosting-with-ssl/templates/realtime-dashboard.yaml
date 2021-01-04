@@ -825,18 +825,9 @@ Resources:
         Enabled: true
       SnapshotOptions: 
         AutomatedSnapshotStartHour: 0
-      LogPublishingOptions:
-        ES_APPLICATION_LOGS:
-          CloudWatchLogsLogGroupArn: !GetAtt ElasticSearchDomainLogGroup.Arn
-          Enabled: true
       Tags: 
         - Key: !Ref TagKey
-          Value: !Ref TagValue
-  ElasticSearchDomainLogGroup:
-    Type: 'AWS::Logs::LogGroup'
-    Properties: 
-      LogGroupName: !Sub /aws/aes/domains/${ElasticSearchDomainName}/application-logs
-      RetentionInDays: 60
+          Value: !Ref TagValue 
   CloudWatchAlarmElasticsearch:
     Type: 'AWS::Serverless::Application'
     Properties:
