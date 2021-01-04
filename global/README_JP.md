@@ -52,3 +52,4 @@ aws cloudformation deploy --template-file template.yaml --stack-name GlobalSetti
 | CloudFrontErrorRequestPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontDistributionId | String | | | 監視対象のCloudFrontのディストリビューションID |
+| DomainName | String | | | Route53に登録するドメイン名 | 

@@ -10,6 +10,8 @@ env:
     GLOBAL_DIST_DIR: aws-cloudformation-templates/global
     MONITORING_SRC_DIR: monitoring/sam-app
     MONITORING_DIST_DIR: aws-cloudformation-templates/monitoring
+    NETWORK_SRC_DIR: network/templates
+    NETWORK_DIST_DIR: aws-cloudformation-templates/network
     NOTIFICATION_SAM_SRC_DIR: notification/sam-app
     NOTIFICATION_CFN_SRC_DIR: notification/templates
     NOTIFICATION_DIST_DIR: aws-cloudformation-templates/notification
@@ -43,6 +45,7 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${NETWORK_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive
@@ -67,6 +70,7 @@ phases:
        - aws s3 cp ${CICD_SRC_DIR}/ s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${GLOBAL_SRC_DIR}/ s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${MONITORING_SRC_DIR}/ s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
+       - aws s3 cp ${NETWORK_SRC_DIR}/ s3://${BUCKET_NAME}/${NETWORK_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${NOTIFICATION_SAM_SRC_DIR}/ s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${NOTIFICATION_CFN_SRC_DIR}/ s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${SECURITY_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'

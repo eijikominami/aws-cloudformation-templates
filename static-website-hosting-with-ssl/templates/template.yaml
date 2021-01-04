@@ -43,6 +43,10 @@ Metadata:
         Parameters: 
           - SyntheticsCanaryName
       - Label: 
+          default: 'Route53 Configuration'
+        Parameters: 
+          - Route53HostedZoneId
+      - Label: 
           default: 'WAF Configuration'
         Parameters: 
           - WebACL
@@ -276,6 +280,10 @@ Parameters:
     Default: 12000000
     MinValue: 0  
     Description: The threshold of PutRecord API calls [required]
+  Route53HostedZoneId:
+    Type: String
+    Default: ''
+    Description: Route53 hosted zone id
   S3DestinationBucketArnOfCrossRegionReplication:
     Type: String
     Default: ''
@@ -330,6 +338,7 @@ Conditions:
   CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
   CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
   CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, ENABLED ]
+  CreateRoute53: !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
 
@@ -711,6 +720,18 @@ Resources:
     Properties:
       CloudFrontOriginAccessIdentityConfig: 
         Comment: !Sub access-identity-${DomainName}
+  # Route53
+  Route53RecordSet:
+    Condition: CreateRoute53
+    Type: 'AWS::Route53::RecordSet'
+    Properties: 
+      AliasTarget: 
+        DNSName: !GetAtt CloudFront.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+      Comment: !Ref DomainName
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !Ref DomainName
+      Type: A
   # CloudWatch Dashboard
   Dashboard:
     Type: 'AWS::CloudWatch::Dashboard'

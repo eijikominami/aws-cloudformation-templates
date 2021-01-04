@@ -10,6 +10,7 @@ Metadata:
         Parameters: 
           - ACMValidationMethod
           - ACMDomainName
+          - DomainName
       - Label: 
           default: 'Billing Configuration'
         Parameters: 
@@ -73,6 +74,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The target distribution ID monitored by CloudWatch Alarm
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The name of the domain
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -92,6 +97,7 @@ Conditions:
   CreateCloudWatchAlarmCloudFrontErrorRate: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRateThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateCloudWatchAlarmCloudFrontRequests: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRequestPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateCloudWatchAlarmCloudFrontBytesDownloaded: !And [ !Not [ !Equals [ !Ref CloudFrontBytesDownloadedPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
+  CreateRoute53: !Not [ !Equals [ !Ref DomainName, '' ] ]
 
 Resources:
   # Nested Stack
@@ -234,6 +240,17 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # Route53
+  HostedZone:
+    Condition: CreateRoute53
+    Type: AWS::Route53::HostedZone
+    Properties: 
+      HostedZoneConfig: 
+        Comment: !Ref DomainName
+      HostedZoneTags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Name: !Ref DomainName
   # CloudWatch
   CloudWatchAlarmBilling:
     Condition: CreateCloudWatchAlarmBilling
@@ -453,3 +470,9 @@ Outputs:
     Condition: CreateACMCertificate
     Description: Certification ARN
     Value: !Ref CertificateManager
+  HostedZoneId:
+    Description: Hosted Zone Id
+    Value: !If
+      - CreateRoute53
+      - !Ref HostedZone
+      - ''
