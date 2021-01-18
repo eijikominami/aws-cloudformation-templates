@@ -360,7 +360,7 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/waf.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml
   RealtimeDashboard:
     Condition: CreateRealtimeDashboard
     Type: AWS::CloudFormation::Stack
@@ -383,9 +383,9 @@ Resources:
         LogicalNamePrefix: !Ref AWS::StackName
         SamplingRate: !Ref RealtimeDashboardSamplingRate
         SNSForAlertArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
         SNSForDeploymentArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn

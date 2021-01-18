@@ -279,6 +279,12 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
+              # Required for WAF
+              - Action:
+                  - waf:GetWebACL
+                Resource: '*'
+                Effect: Allow              
+              # Default Policy
               - Action:
                   - iam:PassRole
                 Resource: '*'
