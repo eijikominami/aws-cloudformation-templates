@@ -71,7 +71,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | --- | --- | --- | --- | --- |
 | ArtifactBacketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
-| **GitHubOAuthToken** | String | | | GitHubからコードを取得する際に用いる **OAuthトークン** |
+| GitHubOAuthToken | String | | | GitHubからコードを取得する際に用いる **OAuthトークン** |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリの所有者名**　|
 | **GitHubRepoNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリ名**　|
 | GitHubStage | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |

@@ -406,6 +406,7 @@ Resources:
                     'kms:ViaService': kinesis.ap-northeast-1.amazonaws.com
                   StringLike:
                     'kms:EncryptionContext:aws:kinesis:arn': !GetAtt Kinesis.Arn
+      RoleName: !Sub '${LogicalNamePrefix}-Firehose-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue

@@ -70,7 +70,7 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | ArtifactBacketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | The Docker image name for CodeBuild |
-| **GitHubOAuthToken** | String | | | The **OAuth token** to access GitHub |
+| GitHubOAuthToken | String | | | The **OAuth token** to access GitHub. |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | The **GitHub owner name** for CloudFormation Template Configuration files |
 | **GitHubRepoNameForTemplateConfiguration** | String | | | The **GitHub repository name** for CloudFormation Template Configuration files |
 | TemplateConfigurationBasePath | String | | | The base path of template configration files. |

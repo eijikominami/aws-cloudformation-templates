@@ -16,7 +16,7 @@ Metadata:
           - GlobalSettings
       - Label: 
           default: 'Source Configuration'
-        Parameters: 
+        Parameters:
           - GitHubOAuthToken
           - GitHubOwnerNameForTemplateConfiguration
           - GitHubRepoNameForTemplateConfiguration
@@ -53,7 +53,7 @@ Parameters:
   GitHubOAuthToken:
     Type: String
     Default: ''
-    Description: The OAuth token to access GitHub
+    Description: The OAuth token to access GitHub [deprecated]
   GitHubOwnerNameForTemplateConfiguration:
     Type: String
     Default: ''
@@ -126,7 +126,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateCodePipeline: !Not [ !Equals [ !Ref GitHubOAuthToken, ''] ]
+  CreateCodeStarConnection: !Equals [ !Ref GitHubOAuthToken, '']
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -238,7 +238,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCloudWatchEvents:
-    Condition: CreateCodePipeline
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
@@ -421,6 +420,16 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # CodeStar Connection
+  CodeStarConnection:
+    Condition: CreateCodeStarConnection
+    Type: AWS::CodeStarConnections::Connection
+    Properties: 
+      ConnectionName: GitHub
+      ProviderType: GitHub
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CodeBuild
   CodeBuildForSAM:
     Type: 'AWS::CodeBuild::Project'
@@ -470,7 +479,6 @@ Resources:
       TimeoutInMinutes: 60
   # CodePipeline
   CodePipeline:
-    Condition: CreateCodePipeline
     Type: 'AWS::CodePipeline::Pipeline'
     Properties: 
       ArtifactStores:
@@ -490,35 +498,53 @@ Resources:
       RoleArn: !GetAtt IAMRoleForCodePipeline.Arn
       Stages: 
         # Source
-        - Actions: 
-            - ActionTypeId: 
-                Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
-                Version: '1'
-              Configuration:
-                Owner: eijikominami
-                Repo: aws-cloudformation-templates
-                Branch: !Ref GitHubBranchName
-                OAuthToken: !Ref GitHubOAuthToken
-                PollForSourceChanges: true
+        - Actions:
+            - ActionTypeId: !If
+                - CreateCodeStarConnection
+                - Category: Source
+                  Owner: AWS
+                  Provider: CodeStarSourceConnection
+                  Version: '1'                 
+                - Category: Source
+                  Owner: ThirdParty
+                  Provider: GitHub
+                  Version: '1'
+              Configuration: !If 
+                - CreateCodeStarConnection
+                - ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
+                  FullRepositoryId: eijikominami/aws-cloudformation-templates
+                  BranchName: !Ref GitHubBranchName
+                - Owner: eijikominami
+                  Repo: aws-cloudformation-templates
+                  Branch: !Ref GitHubBranchName
+                  OAuthToken: !Ref GitHubOAuthToken
+                  PollForSourceChanges: true
               Name: AWSCloudFormationTemplates
               OutputArtifacts: 
                 - Name: Source-CloudFormationTemplatesArtifact
               RunOrder: 1
             - !If
               - CreateCloudFormationConfigurationArtifact
-              - ActionTypeId: 
-                  Category: Source
-                  Owner: ThirdParty
-                  Provider: GitHub
-                  Version: '1'
-                Configuration:
-                  Owner: !Ref GitHubOwnerNameForTemplateConfiguration
-                  Repo: !Ref GitHubRepoNameForTemplateConfiguration
-                  Branch: master
-                  OAuthToken: !Ref GitHubOAuthToken
-                  PollForSourceChanges: true
+              - ActionTypeId: !If
+                  - CreateCodeStarConnection
+                  - Category: Source
+                    Owner: AWS
+                    Provider: CodeStarSourceConnection
+                    Version: '1'
+                  - Category: Source
+                    Owner: ThirdParty
+                    Provider: GitHub
+                    Version: '1'
+                Configuration: !If 
+                  - CreateCodeStarConnection
+                  - ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
+                    FullRepositoryId: !Sub ${GitHubOwnerNameForTemplateConfiguration}/${GitHubRepoNameForTemplateConfiguration}
+                    BranchName: master
+                  - Owner: !Ref GitHubOwnerNameForTemplateConfiguration
+                    Repo: !Ref GitHubRepoNameForTemplateConfiguration
+                    Branch: master
+                    OAuthToken: !Ref GitHubOAuthToken
+                    PollForSourceChanges: true
                 Name: AWSCloudFormationConfiguration
                 OutputArtifacts: 
                   - Name: Source-CloudFormationConfigurationArtifact
@@ -946,7 +972,6 @@ Resources:
         createdby: !Ref TagValue
   # CodeStar
   NotificationRule:
-    Condition: CreateCodePipeline
     DependsOn:
       - ServiceLinkedRoleForCodeStar
     Type: 'AWS::CodeStarNotifications::NotificationRule'
