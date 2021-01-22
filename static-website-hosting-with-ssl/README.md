@@ -159,6 +159,9 @@ Therefore create ``Origin Group`` and edit ``Default Cache Behavior Settings`` m
 Follow the steps below to create a real-time dashboard using Kibana.
 
 1. Under **Security**, choose **Roles**.
+
+![](../images/kibana_setting_0.png)
+
 2. Click the ``+`` icon to add new role.
 3. Name your role; for example, ``firehose``.
 

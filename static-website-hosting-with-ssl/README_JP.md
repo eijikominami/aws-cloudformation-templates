@@ -157,6 +157,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 Kibana を使ってリアルタイムダッシュボードを作成するためには、以下の手順を行ってください。
 
 1. **Security** の **Roles** を選択します。
+
+![](../images/kibana_setting_0.png)
+
 2. ``+`` アイコンをクリックして新しいロールを追加します。
 3. 作成したロールに ``firehose`` という名前をつけます。
 

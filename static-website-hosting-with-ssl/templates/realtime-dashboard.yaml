@@ -226,7 +226,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.16
+        SemanticVersion: 1.2.17
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -242,7 +242,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.16
+        SemanticVersion: 1.2.17
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
       Tags:
@@ -406,6 +406,7 @@ Resources:
                     'kms:ViaService': kinesis.ap-northeast-1.amazonaws.com
                   StringLike:
                     'kms:EncryptionContext:aws:kinesis:arn': !GetAtt Kinesis.Arn
+      RoleName: !Sub '${LogicalNamePrefix}-Firehose-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -495,7 +496,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 1.2.16
+        SemanticVersion: 1.2.17
       Tags:
         createdby: !Ref TagValue
   # Lambda
@@ -638,7 +639,7 @@ Resources:
         FunctionResouceName: !Ref Lambda
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.16
+        SemanticVersion: 1.2.17
       Tags:
         createdby: !Ref TagValue
   # Kinesis Firehose
@@ -714,7 +715,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 1.2.16
+        SemanticVersion: 1.2.17
       Tags:
         createdby: !Ref TagValue
   # S3
@@ -846,7 +847,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elasticsearch
-        SemanticVersion: 1.2.16
+        SemanticVersion: 1.2.17
       Tags:
         createdby: !Ref TagValue
   # EventBridge for ShutdownElasticSearchWorker
@@ -943,7 +944,7 @@ Resources:
         FunctionResouceName: !Ref LambdaShutdownElasticSearch
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.16
+        SemanticVersion: 1.2.17
       Tags:
         createdby: !Ref TagValue
   # CloudWatch Dashboard
