@@ -257,6 +257,11 @@ Parameters:
     Default: '7.8'
     AllowedPattern: .+
     Description: The version of ElasticSearch Service [required]
+  RealtimeDashboardKinesisFirehoseStreamNameSuffix:
+    Type: String
+    Default: default
+    AllowedPattern: .+
+    Description: The suffix of the Kinesis Firehose stream.
   RealtimeDashboardState:
     Type: String
     Default: DISABLED
@@ -378,6 +383,7 @@ Resources:
         ElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
         ElasticSearchMasterUserPassword: !Ref RealtimeDashboardElasticSearchMasterUserPassword
         ElasticsearchVersion: !Ref RealtimeDashboardElasticsearchVersion
+        KinesisFirehoseStreamNameSuffix: !Ref RealtimeDashboardKinesisFirehoseStreamNameSuffix
         KinesisShardCount: !Ref RealtimeDashboardKinesisShardCount
         KinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
         LogicalNamePrefix: !Ref AWS::StackName
