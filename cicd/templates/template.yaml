@@ -752,7 +752,7 @@ Resources:
                   TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
                   ParameterOverrides: !If
                     - DeployGlobalSettings
-                    - '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
+                    - '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
                     - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact

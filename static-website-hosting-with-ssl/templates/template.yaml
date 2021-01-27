@@ -49,7 +49,7 @@ Metadata:
       - Label: 
           default: 'WAF Configuration'
         Parameters: 
-          - WebACL
+          - WebACLArn
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -308,13 +308,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The custom S3 bucket name for access logging
-  WebACL:
+  WebACLArn:
     Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable WebACL [required]
+    Default: '' 
+    Description: Web ACL ARN
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -341,7 +338,7 @@ Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
-  CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
+  CreateWebACL: !Not [ !Equals [ !Ref WebACLArn, '' ] ]
   CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, ENABLED ]
   CreateRoute53: !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
@@ -349,23 +346,6 @@ Conditions:
 
 Resources:
   # Nested Stack
-  WAF:
-    Condition: CreateWebACL
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        LogicalNamePrefix: !Ref AWS::StackName
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml
   RealtimeDashboard:
     Condition: CreateRealtimeDashboard
     Type: AWS::CloudFormation::Stack
@@ -719,7 +699,7 @@ Resources:
           - !Ref AWS::NoValue
         WebACLId: !If
           - CreateWebACL
-          - !GetAtt WAF.Outputs.WebACLId
+          - !Ref WebACLArn
           - !Ref AWS::NoValue
   CloudFrontOriginAccessIdentity:
     Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
