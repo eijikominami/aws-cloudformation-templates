@@ -119,6 +119,7 @@ Resources:
     Properties:
       Parameters:
         LogicalNamePrefix: !Ref AWS::StackName
+        Scope: CLOUDFRONT
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:

@@ -123,7 +123,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
-| WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
+| WebACLArn | String | | | WebACL の　ARN |
 
 ``Real-time Dashboard Stack`` を単独でデプロイする場合は、以下のパラメータを指定することができます。
 

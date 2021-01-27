@@ -53,3 +53,4 @@ aws cloudformation deploy --template-file template.yaml --stack-name GlobalSetti
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontDistributionId | String | | | 監視対象のCloudFrontのディストリビューションID |
 | DomainName | String | | | Route53に登録するドメイン名 | 
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
