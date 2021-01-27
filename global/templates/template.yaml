@@ -28,6 +28,10 @@ Metadata:
         Parameters: 
           - SNSForAlertArn
       - Label: 
+          default: 'Web ACL Configuration'
+        Parameters: 
+          - WebACL
+      - Label: 
           default: 'Tag Configuration'
         Parameters: 
           - TagKey
@@ -81,6 +85,13 @@ Parameters:
   SNSForAlertArn:
     Type: String
     Default: '' 
+  WebACL:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable WebACL [required]
   TagKey:
     Type: String
     Default: createdby
@@ -98,15 +109,29 @@ Conditions:
   CreateCloudWatchAlarmCloudFrontRequests: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRequestPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateCloudWatchAlarmCloudFrontBytesDownloaded: !And [ !Not [ !Equals [ !Ref CloudFrontBytesDownloadedPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateRoute53: !Not [ !Equals [ !Ref DomainName, '' ] ]
+  CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
 
 Resources:
   # Nested Stack
+  WAF:
+    Condition: CreateWebACL
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        LogicalNamePrefix: !Ref AWS::StackName
+        Scope: CLOUDFRONT
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml
   SNSForAlert:
     Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.17
+        SemanticVersion: 1.2.18
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -461,7 +486,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.17
+        SemanticVersion: 1.2.18
       Tags:
         createdby: !Ref TagValue
     
@@ -475,4 +500,10 @@ Outputs:
     Value: !If
       - CreateRoute53
       - !Ref HostedZone
+      - ''
+  WebACLArn:
+    Description: WebACL Arn
+    Value: !If
+      - CreateWebACL
+      - !GetAtt WAF.Outputs.WebACLArn
       - ''

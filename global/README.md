@@ -51,3 +51,4 @@ You can provide optional parameters as follows.
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created. |
 | CloudFrontDistributionId | String | | | The CloudFront Distribution Id for monitoring |
 | DomainName | String | | | The name of the domain | 
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | If it is **DISABLED**, AWS WAF does NOT created. |

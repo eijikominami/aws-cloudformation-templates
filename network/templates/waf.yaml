@@ -7,6 +7,7 @@ Metadata:
       - Label: 
           default: 'WAF Configuration'
         Parameters: 
+          - Scope
           - TargetResourceArn
       - Label: 
           default: 'Tag Configuration'
@@ -21,6 +22,13 @@ Parameters:
     Default: WebServers
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  Scope:
+    Type: String
+    Default: REGIONAL
+    AllowedValues:
+      - REGIONAL
+      - CLOUDFRONT
+    Description: Enable or disable cross region audit [required]  
   TargetResourceArn:
     Type: String
     Default: ''  
@@ -38,7 +46,7 @@ Conditions:
 
 Resources:
   WebACL:
-    Type: AWS::WAFv2::WebACL
+    Type: 'AWS::WAFv2::WebACL'
     Properties: 
       DefaultAction: 
         Allow: {}
@@ -93,7 +101,7 @@ Resources:
             CloudWatchMetricsEnabled: true
             MetricName: AWSManagedRulesAmazonIpReputationList
             SampledRequestsEnabled: false
-      Scope: REGIONAL
+      Scope: !Ref Scope
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -103,7 +111,7 @@ Resources:
         SampledRequestsEnabled: false
   WebACLAssociation:
     Condition: CreateWebACLAssociation
-    Type: AWS::WAFv2::WebACLAssociation
+    Type: 'AWS::WAFv2::WebACLAssociation'
     Properties: 
       ResourceArn: !Ref TargetResourceArn
       WebACLArn: !GetAtt WebACL.Arn
@@ -112,3 +120,6 @@ Outputs:
   WebACLId:
     Description: WebACL Id
     Value: !GetAtt WebACL.Id  
+  WebACLArn:
+    Description: WebACL Arn
+    Value: !GetAtt WebACL.Arn  

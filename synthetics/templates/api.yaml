@@ -174,7 +174,7 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-2.0
+      RuntimeVersion: syn-nodejs-2.2
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 
@@ -258,7 +258,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.17
+        SemanticVersion: 1.2.18
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -274,7 +274,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.17
+        SemanticVersion: 1.2.18
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

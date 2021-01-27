@@ -125,7 +125,7 @@ You can provide optional parameters as follows.
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled. |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3**. |
 | LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |
-| WebACL | ENABLED / DISABLED | DISABLED | ○ | If it is **DISABLED**, AWS WAF does NOT created. |
+| WebACLArn | String | | | The ARN of Web ACL |
 
 If you deploy ``Real-time Dashboard Stack`` individually, you can provide optional parameters as follows.
 
