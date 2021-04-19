@@ -595,7 +595,6 @@ Resources:
             Resource:
               - !Sub arn:aws:s3:::${S3ForWebHosting}/*
               - !Sub arn:aws:s3:::${S3ForWebHosting}
-            Resource: !Sub arn:aws:s3:::${S3ForWebHosting}/*
           - Effect: Deny
             Principal: '*'
             Action: 's3:*'
