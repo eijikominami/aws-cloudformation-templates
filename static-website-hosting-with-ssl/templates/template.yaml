@@ -591,6 +591,10 @@ Resources:
               AWS: !Sub arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}
             Action:
               - 's3:GetObject'
+              - 's3:ListBucket'
+            Resource:
+              - !Sub arn:aws:s3:::${S3ForWebHosting}/*
+              - !Sub arn:aws:s3:::${S3ForWebHosting}
             Resource: !Sub arn:aws:s3:::${S3ForWebHosting}/*
           - Effect: Deny
             Principal: '*'
