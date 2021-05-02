@@ -329,10 +329,14 @@ Resources:
         IgnoreResourceConflicts: !Ref IgnoreResourceConflicts
         PatchingAt: !Ref SSMPatchingAt
         LogicalNamePrefix: !Ref AWS::StackName
-        SNSTopicARN: !If
+        SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:

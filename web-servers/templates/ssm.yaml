@@ -13,7 +13,8 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
-          - SNSTopicARN
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -38,9 +39,14 @@ Parameters:
     Type: String
     Default: WebServers
     Description: The custom prefix name [required]
-  SNSTopicARN:
+  SNSForAlertArn:
     Type: String
-    AllowedPattern: .+
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
   TagKey:
     Type: String
     Default: createdby
@@ -51,10 +57,39 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateResource:
-    !Equals [ !Ref IgnoreResourceConflicts, DISABLED ]
+  CreateResource: !Equals [ !Ref IgnoreResourceConflicts, DISABLED ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
 Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.2.19
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.2.19
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForSSM:
     Type: 'AWS::IAM::ServiceLinkedRole'
@@ -267,7 +302,10 @@ Resources:
       TaskInvocationParameters:
         MaintenanceWindowRunCommandParameters:
           NotificationConfig:
-              NotificationArn: !Ref SNSTopicARN
+              NotificationArn: !If
+                - CreateSNSForAlert
+                - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+                - !Ref SNSForAlertArn
           Parameters: 
             Operation:
               - Install
@@ -295,7 +333,10 @@ Resources:
       Name: SystemsManager
       State: ENABLED
       Targets:
-        - Arn: !Ref SNSTopicARN
+        - Arn: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForSSMConfigurationCompliance:
     Type: 'AWS::Events::Rule'
@@ -313,7 +354,10 @@ Resources:
       Name: SystemsManagerConfigurationCompliance
       State: ENABLED
       Targets:
-        - Arn: !Ref SNSTopicARN
+        - Arn: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForSSMMaintenanceWindow:
     Type: 'AWS::Events::Rule'
@@ -334,7 +378,10 @@ Resources:
       Name: SystemsManagerMaintenanceWindow
       State: ENABLED
       Targets:
-        - Arn: !Ref SNSTopicARN
+        - Arn: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForSSMParameterStore:
     Type: 'AWS::Events::Rule'
@@ -348,5 +395,8 @@ Resources:
       Name: SystemsManagerParameterStore
       State: ENABLED
       Targets:
-        - Arn: !Ref SNSTopicARN
+        - Arn: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
           Id: SNSForAlert
