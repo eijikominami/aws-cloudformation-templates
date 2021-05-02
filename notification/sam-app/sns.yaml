@@ -25,8 +25,8 @@ Resources:
           - Effect: Allow
             # All AWS Services
             Principal:
-              AWS: '*'
-            Resource: '*'
+              AWS: !Ref AWS::AccountId
+            Resource: !Ref SNSTopic
             Action: 'SNS:Publish'
   CloudWatchAlarmSNSNumberOfNotificationsFailed:
     Type: 'AWS::CloudWatch::Alarm'
