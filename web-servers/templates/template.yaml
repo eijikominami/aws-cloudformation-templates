@@ -11,7 +11,6 @@ Metadata:
           - AutoScalingDesiredCapacity
           - AutoScalingMaxSize
           - AutoScalingLoadBalancerType
-          - CertificateManagerARN
           - EC2ImageId
           - EC2InstanceType
           - EC2KeyName
@@ -34,8 +33,10 @@ Metadata:
           - IgnoreResourceConflicts
           - SSMPatchingAt
       - Label: 
-          default: 'Route53 Configuration'
+          default: 'Domain Configuration'
         Parameters: 
+          - ACMValidationMethod
+          - ACMDomainName
           - DomainName
           - Route53HostedZoneId
       - Label: 
@@ -54,6 +55,17 @@ Metadata:
           - TagValue
 
 Parameters:
+  ACMValidationMethod:
+    Type: String
+    Default: DNS
+    AllowedValues:
+      - DNS
+      - EMAIL
+    Description: The validation method that you own or control the domain [required]
+  ACMDomainName:
+    Type: String
+    Default: ''
+    Description: The domain name created by Certification Manager
   AutoScalingDesiredCapacity:
     Type: Number
     Default: 1
@@ -72,10 +84,6 @@ Parameters:
       - application
       - network  
     Description: The autoScaling LoadBalancer Type [required]
-  CertificateManagerARN:
-    Default: ''
-    Type: String
-    Description: The ARN of an SSL Certifiation attached to Elastic Load Balancer
   DomainName:
     Type: String
     Default: ''
@@ -266,9 +274,10 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        ACMValidationMethod: !Ref ACMValidationMethod
+        ACMDomainName: !Ref ACMDomainName
         AutoScalingDesiredCapacity: !Ref AutoScalingDesiredCapacity
         AutoScalingMaxSize: !Ref AutoScalingMaxSize
-        CertificateManagerARN: !Ref CertificateManagerARN
         DomainName: !Ref DomainName
         EC2ImageId: !Ref EC2ImageId
         EC2InstanceType: !Ref EC2InstanceType

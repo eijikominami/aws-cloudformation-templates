@@ -262,6 +262,11 @@ Resources:
     Properties: 
       DomainName: !Ref ACMDomainName
       ValidationMethod: !Ref ACMValidationMethod
+      DomainValidationOptions: !If
+        - CreateRoute53
+        - - DomainName: !Ref ACMDomainName
+            HostedZoneId: !Ref HostedZone
+        - !Ref AWS::NoValue
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue

@@ -18,15 +18,16 @@ Metadata:
       - Label: 
           default: 'Elastic Load Balancer Configuration'
         Parameters: 
-          - CertificateManagerARN
           - EipAllocationId1ForNLB
           - EipAllocationId2ForNLB
           - LoadBalancerType
           - SubnetId1ForELB
           - SubnetId2ForELB
       - Label: 
-          default: 'Route53 Configuration'
-        Parameters: 
+          default: 'Domain Configuration'
+        Parameters:
+          - ACMValidationMethod
+          - ACMDomainName
           - DomainName
           - Route53HostedZoneId
       - Label: 
@@ -41,6 +42,17 @@ Metadata:
           - TagValue
 
 Parameters:
+  ACMValidationMethod:
+    Type: String
+    Default: DNS
+    AllowedValues:
+      - DNS
+      - EMAIL
+    Description: The validation method that you own or control the domain [required]
+  ACMDomainName:
+    Type: String
+    Default: ''
+    Description: The domain name created by Certification Manager
   AutoScalingDesiredCapacity:
     Type: Number
     Default: 1
@@ -51,10 +63,6 @@ Parameters:
     Default: 1
     MinValue: 0
     Description: AutoScaling Max Size [required]
-  CertificateManagerARN:
-    Default: ''
-    Type: String
-    Description: The ARN of an SSL Certifiation attached to Elastic Load Balancer
   DomainName:
     Type: String
     Default: ''
@@ -135,7 +143,6 @@ Parameters:
 Conditions:
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref LoadBalancerType, network ]
-  CreateElasticBalancerListenerCertificate: !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ]
   CreateRoute53: !And [ !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
 
 Resources:
@@ -155,18 +162,15 @@ Resources:
       AWSServiceName: elasticloadbalancing.amazonaws.com 
       Description: Allows ELB to call AWS services on your behalf.
   # ELB
-  LoadBalancerListenerCertificate:
-    Condition: CreateElasticBalancerListenerCertificate
-    Type: AWS::ElasticLoadBalancingV2::ListenerCertificate
-    Properties: 
-      Certificates: 
-        - CertificateArn: !Ref CertificateManagerARN
-      ListenerArn: !Ref LoadBalancer
   LoadBalancer:
+    DependsOn:
+      - ServiceLinkedRoleForElasticLoadBalancing
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
       Name: !Sub elb-${LogicalNamePrefix}
       Scheme: internet-facing
+      SecurityGroups:
+       - !Ref EC2SecurityGroupId
       # For Network Load Balaner
       SubnetMappings: !If
         - CreateNetworkLoadBalancer
@@ -219,11 +223,25 @@ Resources:
         - CreateNetworkLoadBalancer
         - TCP
         - HTTP
+  LoadBalancerListenerHttps:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref CertificateManager
+      DefaultActions:
+        - TargetGroupArn: !Ref LoadBalancerTargetGroupHttp
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: !If
+        - CreateNetworkLoadBalancer
+        - TLS
+        - HTTPS
   # Auto Scaling Group
   AutoScalingLaunchConfiguration:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
     Properties: 
-      AssociatePublicIpAddress: false
+      AssociatePublicIpAddress: true
       BlockDeviceMappings: 
         - DeviceName: /dev/xvda
           Ebs: 
@@ -243,6 +261,8 @@ Resources:
       SecurityGroups: 
         - !Ref EC2SecurityGroupId
   AutoScalingGroup:
+    DependsOn:
+      - ServiceLinkedRoleForAutoScaling
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     Properties: 
       AutoScalingGroupName: !Sub autoscalinggroup-${LogicalNamePrefix}
@@ -287,6 +307,20 @@ Resources:
       VPCZoneIdentifier: 
         - !Ref SubnetId1ForELB
         - !Ref SubnetId2ForELB
+  # CertificateManager
+  CertificateManager:
+    Type: 'AWS::CertificateManager::Certificate'
+    Properties: 
+      DomainName: !Ref ACMDomainName
+      ValidationMethod: !Ref ACMValidationMethod
+      DomainValidationOptions: !If
+        - CreateRoute53
+        - - DomainName: !Ref ACMDomainName
+            HostedZoneId: !Ref Route53HostedZoneId
+        - !Ref AWS::NoValue
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # Route53
   Route53RecordSet:
     Condition: CreateRoute53
@@ -298,7 +332,10 @@ Resources:
       Comment: !Ref DomainName
       HostedZoneId: !Ref Route53HostedZoneId
       Name: !Ref DomainName
-      Type: A
+      Type: !If
+        - CreateNetworkLoadBalancer
+        - A
+        - CNAME
         
 Outputs:
   LoadBalancerArn:

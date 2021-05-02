@@ -98,6 +98,33 @@ Resources:
     Properties: 
       AWSServiceName: ssm.amazonaws.com
       Description: Provides access to AWS Resources managed or used by Amazon SSM.
+  # IAM Role
+  IAMRoleForEC2:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for Managed Instances.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      RoleName: !Sub '${AWS::StackName}-AWSEC2Role-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # InstanceProfile
+  IamInstanceProfileForIAMRoleForEC2:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName: !Ref IAMRoleForEC2
+      Roles: 
+        - !Ref IAMRoleForEC2
   # Document
   CloudWatchAgentInstallAndConfigure:
     Type: 'AWS::SSM::Document'

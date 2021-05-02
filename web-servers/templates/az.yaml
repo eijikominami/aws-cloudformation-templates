@@ -185,6 +185,7 @@ Resources:
           Value: !Ref TagValue
   # CloudWatch Alarm
   CloudWatchAlarmNATGateway:
+    Condition: PrivateSubnetExists
     Type: 'AWS::Serverless::Application'
     Properties:
       Parameters:
