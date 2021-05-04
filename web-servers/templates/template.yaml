@@ -55,12 +55,14 @@ Metadata:
         Parameters: 
           - ACMValidationMethod
           - ACMDomainName
+          - CertificateManagerARN
           - DomainName
           - Route53HostedZoneId
       - Label: 
           default: 'WAF Configuration'
         Parameters: 
           - WebACL
+          - WebACLArnForCloudFront
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -87,7 +89,7 @@ Parameters:
   CertificateManagerARN:
     Default: ''
     Type: String
-    Description: The ARN of an SSL Certifiation attached to CloudFront [conditional]
+    Description: The ARN of an SSL Certifiation attached to CloudFront
   AutoScalingDesiredCapacity:
     Type: Number
     Default: 1
@@ -212,10 +214,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The custom S3 bucket name for access logging
-  WebACLArn:
-    Type: String
-    Default: '' 
-    Description: Web ACL ARN
   Route53HostedZoneId:
     Type: String
     Default: ''
@@ -258,6 +256,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable WebACL [required]
+  WebACLArnForCloudFront:
+    Type: String
+    Default: '' 
+    Description: Web ACL ARN for CloudFront
   SNSForAlertArn:
     Type: String
     Default: ''   
@@ -284,7 +286,8 @@ Conditions:
   CreateRoute53: !And [ !Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateWAF: !And [!Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
+  CreateWAFForCloudFront: !And [!Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref WebACL, ENABLED ] ]
+  CreateWAFForALB: !And [!Equals [ !Ref CloudFrontState, DISABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
 
 Resources:
@@ -381,8 +384,8 @@ Resources:
         AutoScalingMaxSize: !Ref AutoScalingMaxSize
         DomainName: !If
           - CreateCloudFront
+          - !Sub origin-${DomainName}
           - !Ref DomainName
-          - ''
         EC2ImageId: !Ref EC2ImageId
         EC2InstanceType: !Ref EC2InstanceType
         EC2IamInstanceProfileArn: !GetAtt IamInstanceProfileForIAMRoleForEC2.Arn
@@ -457,7 +460,7 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ssm.yaml
   WAF:
-    Condition: CreateWAF
+    Condition: CreateWAFForALB
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -469,7 +472,7 @@ Resources:
         LogicalNamePrefix: !Ref AWS::StackName
         TargetResourceArn: !GetAtt AutoScaling.Outputs.LoadBalancerArn
         TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
+        TagValue: !Ref TagValue
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -499,7 +502,7 @@ Resources:
         CloudFront500ErrorResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
         CloudFrontOriginDomainName: !If
           - AutoScalingEnabled
-          - !GetAtt AutoScaling.Outputs.LoadBalancerDNSName
+          - !Sub origin-${DomainName}
           - !Ref EIPForEC2Instance
         CloudFrontOriginType: NOT_S3
         Route53HostedZoneId: !Ref Route53HostedZoneId
@@ -508,7 +511,10 @@ Resources:
           - CustomLogBucketName
           - !Ref S3ForAccessLog
           - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}.s3.amazonaws.com
-        WebACLArn: !Ref WebACLArn
+        WebACLArn: !If
+          - CreateWAFForCloudFront
+          - !Ref WebACLArnForCloudFront
+          - ''
         SNSForAlertArn: !Ref SNSForAlertArn
         SNSForDeploymentArn: !Ref SNSForDeploymentArn
         TagKey: !Ref TagKey
@@ -523,7 +529,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -539,7 +545,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -748,10 +754,11 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       Tags:
         createdby: !Ref TagValue
   S3ForAccessLog:
+    Condition: CustomLogBucketName
     Type: 'AWS::S3::Bucket'
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -776,6 +783,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
+    Condition: CustomLogBucketName
     Type: 'AWS::S3::BucketPolicy'
     Properties: 
       Bucket: !Ref S3ForAccessLog
@@ -797,6 +805,14 @@ Resources:
                 aws:SecureTransport: false
 
 Outputs:
+  CloudFrontURL:
+    Condition: CreateCloudFront
+    Description: CloudFront URL
+    Value: !GetAtt CloudFront.Outputs.CloudFrontURL
+  LoadBalancerDNSName:
+    Condition: AutoScalingEnabled
+    Description: LoadBalancer DNS Name
+    Value: !GetAtt AutoScaling.Outputs.LoadBalancerDNSName
   VPCCidrBlock:
     Description: VPC CIDR Block
     Value: !GetAtt VPC.CidrBlock   

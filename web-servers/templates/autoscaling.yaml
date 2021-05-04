@@ -14,6 +14,7 @@ Metadata:
           - EC2IamInstanceProfileArn
           - EC2KeyName
           - EC2SecurityGroupId
+          - EC2VolumeSize
           - VPCId
       - Label: 
           default: 'Elastic Load Balancer Configuration'
@@ -237,6 +238,8 @@ Resources:
         - CreateNetworkLoadBalancer
         - TLS
         - HTTPS
+      # Default
+      SslPolicy: ELBSecurityPolicy-2016-08
   # Auto Scaling Group
   AutoScalingLaunchConfiguration:
     Type: 'AWS::AutoScaling::LaunchConfiguration'

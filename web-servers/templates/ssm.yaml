@@ -69,7 +69,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -85,7 +85,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -114,7 +114,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      RoleName: !Sub '${AWS::StackName}-AWSEC2Role-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-EC2SSMRole-${AWS::Region}'
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue

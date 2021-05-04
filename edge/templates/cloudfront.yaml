@@ -36,6 +36,7 @@ Metadata:
           - RealtimeDashboardElasticSearchMasterUserPassword
           - RealtimeDashboardElasticSearchLifetime
           - RealtimeDashboardElasticsearchVersion
+          - RealtimeDashboardKinesisFirehoseStreamNameSuffix
           - RealtimeDashboardState
           - RealtimeDashboardSamplingRate
           - RealtimeDashboardKinesisShardCount
@@ -390,7 +391,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -406,7 +407,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -444,11 +445,7 @@ Resources:
           AllowedMethods:
             - GET
             - HEAD
-          DefaultTTL: !Ref CloudFrontDefaultTTL
-          ForwardedValues:
-            QueryString: false
-          MaxTTL: !Ref CloudFrontMaximumTTL
-          MinTTL: !Ref CloudFrontMinimumTTL
+          CachePolicyId: !Ref CloudFrontCachePolicy
           RealtimeLogConfigArn: !If
             - CreateRealtimeDashboard
             - !GetAtt RealtimeDashboard.Outputs.RealtimeLogConfigArn
@@ -499,16 +496,44 @@ Resources:
                     - !Ref CloudFrontOriginAccessIdentity
           - - DomainName: !Ref CloudFrontOriginDomainName
               Id: !Ref CloudFrontOriginDomainName
+              CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+                # Default
+                OriginSSLProtocols:
+                  - TLSv1
+                  - TLSv1.1
+                  - TLSv1.2
         ViewerCertificate: !If
           - BundleSSLCertification
           - AcmCertificateArn: !Ref CertificateManagerARN
-            MinimumProtocolVersion: TLSv1.1_2016
+            # Default
+            MinimumProtocolVersion: TLSv1
             SslSupportMethod: sni-only
           - !Ref AWS::NoValue
         WebACLId: !If
           - CreateWebACL
           - !Ref WebACLArn
           - !Ref AWS::NoValue
+  CloudFrontCachePolicy:
+    Type: 'AWS::CloudFront::CachePolicy'
+    Properties: 
+      CachePolicyConfig: 
+        Comment: Default cache policy
+        DefaultTTL: !Ref CloudFrontDefaultTTL
+        MaxTTL: !Ref CloudFrontMaximumTTL
+        MinTTL: !Ref CloudFrontMinimumTTL
+        Name: !Sub DefaultCachePolicy-${AWS::StackName}
+        ParametersInCacheKeyAndForwardedToOrigin: 
+          CookiesConfig: 
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: false
+          EnableAcceptEncodingGzip: false
+          HeadersConfig: 
+            HeaderBehavior: whitelist
+            Headers: 
+              - Authorization
+          QueryStringsConfig: 
+            QueryStringBehavior: none
   # Route53
   Route53RecordSet:
     Condition: CreateRoute53
@@ -529,6 +554,9 @@ Resources:
       DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "# CloudFront\n${DomainName} のパフォーマンスを確認できます。"}},{"type": "metric","x": 0,"y": 2,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "4xxErrorRate", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Average", "period": 60, "color": "#ff7f0e" } ],[ ".", "TotalErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#9467bd" } ],[ ".", "5xxErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#d62728" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "ErrorRate","period": 300}},{"type": "metric","x": 0,"y": 8,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "BytesUploaded", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Sum", "period": 60 } ],[ ".", "BytesDownloaded", ".", ".", ".", ".", { "stat": "Sum", "period": 60, "color": "#2ca02c" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "Bytes","period": 300}},{"type": "metric","x": 0,"y": 14,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "Requests", "Region", "Global", "DistributionId", "${CloudFront}", { "period": 60, "stat": "Sum" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","period": 300}}]}'
 
 Outputs:
+  CloudFrontURL:
+    Description: CloudFront URL
+    Value: !GetAtt CloudFront.DomainName
   KibanaURL:
     Condition: CreateRealtimeDashboard
     Description: Kibana URL
