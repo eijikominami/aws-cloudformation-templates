@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/network/waf creates an AWS WAF.
+Description: AWSCloudFormationTemplates/edge/waf creates an AWS WAF.
 
 Metadata: 
   AWS::CloudFormation::Interface:

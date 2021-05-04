@@ -50,7 +50,6 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 | CICD Template | CICD.json |
 | [Global Settings Template](../global/README_JP.md) | GlobalSettings.json |
 | [Notification Template](../notification/README_JP.md) | Notification.json |
-| [Route53 Template](../network/README_JP.md) | Route53.json |
 | [Security Template](../security/README_JP.md) | DefaultSecuritySettings.json |
 | [Security Template with Config Rule](../security-config-rules/README_JP.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](../static-website-hosting-with-ssl/README_JP.md) | StaticWebsiteHosting.json |

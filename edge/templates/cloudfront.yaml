@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/static-web-hosting creates an environment for static website hosting.
+Description: AWSCloudFormationTemplates/edge/waf creates an Amazon CloudFront.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -15,6 +15,9 @@ Metadata:
           - CloudFrontViewerProtocolPolicy
           - CloudFrontDefaultRootObject
           - CloudFrontAdditionalName
+          - CloudFrontOriginAccessIdentity
+          - CloudFrontOriginDomainName
+          - CloudFrontOriginType
           - CloudFrontSecondaryOriginId
           - CloudFrontRestrictViewerAccess
           - CloudFront403ErrorResponsePagePath
@@ -23,7 +26,6 @@ Metadata:
           - DomainName
           - Logging
           - LogBacketName
-          - S3DestinationBucketArnOfCrossRegionReplication
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
         Parameters: 
@@ -38,10 +40,6 @@ Metadata:
           - RealtimeDashboardSamplingRate
           - RealtimeDashboardKinesisShardCount
           - RealtimeKinesisNumberOfPutRecordThreshold
-      - Label: 
-          default: 'Synthetics Configuration'
-        Parameters: 
-          - SyntheticsCanaryName
       - Label: 
           default: 'Route53 Configuration'
         Parameters: 
@@ -102,6 +100,21 @@ Parameters:
     Type: String
     Default: ''
     Description: The CNAME attached to CloudFront
+  CloudFrontOriginAccessIdentity:
+    Type: String
+    Default: ''
+    Description: The origin access identity [conditional]
+  CloudFrontOriginDomainName:
+    Type: String
+    AllowedPattern: .+
+    Description: The origin domain [required]
+  CloudFrontOriginType:
+    Type: String
+    Default: S3
+    AllowedValues:
+      - S3
+      - NOT_S3
+    Description: The Origin Type [required]
   CloudFrontSecondaryOriginId:
     Type: String
     Default: ''
@@ -289,14 +302,6 @@ Parameters:
     Type: String
     Default: ''
     Description: Route53 hosted zone id
-  S3DestinationBucketArnOfCrossRegionReplication:
-    Type: String
-    Default: ''
-    Description: The S3 bucket name for Cross Region Replication
-  SyntheticsCanaryName:
-    Type: String
-    Default: ''
-    Description: CloudWatch Synthetics Canary Name 
   Logging:
     Type: String
     Default: ENABLED
@@ -306,7 +311,7 @@ Parameters:
     Description: Enable or disable logging [required]
   LogBacketName:
     Type: String
-    Default: ''
+    AllowedPattern: .+
     Description: The custom S3 bucket name for access logging
   WebACLArn:
     Type: String
@@ -328,17 +333,23 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
+  AdditionalNameExists: !Not [ !Equals [ !Ref CloudFrontAdditionalName, '' ]]
+  BundleSSLCertification: !Not [ !Equals [ !Ref CertificateManagerARN, '' ]]
+  DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ]]
+  SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
+  S3Origin: !Equals [ !Ref CloudFrontOriginType, S3 ]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
   CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardState, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
-  CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
+  CreateWebACL: !Not [ !Equals [ !Ref WebACLArn, '' ] ]
+  CreateRestrictViewerAccess: !Equals [ !Ref CloudFrontRestrictViewerAccess, ENABLED ]
+  CreateRoute53: !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ]
+  CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
 
 Resources:
-  # Nested Stack
-  CloudFront:
+  RealtimeDashboard:
+    Condition: CreateRealtimeDashboard
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -347,62 +358,19 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        CertificateManagerARN: !Ref CertificateManagerARN
-        DomainName: !Ref DomainName
-        CloudFrontDefaultTTL: !Ref CloudFrontDefaultTTL
-        CloudFrontMinimumTTL: !Ref CloudFrontMinimumTTL
-        CloudFrontMaximumTTL: !Ref CloudFrontMaximumTTL
-        CloudFrontViewerProtocolPolicy: !Ref CloudFrontViewerProtocolPolicy
-        CloudFrontDefaultRootObject: !Ref CloudFrontDefaultRootObject
-        CloudFrontAdditionalName: !Ref CloudFrontAdditionalName
-        CloudFrontOriginAccessIdentity: !Ref CloudFrontOriginAccessIdentity
-        CloudFrontSecondaryOriginId: !Ref CloudFrontSecondaryOriginId
-        CloudFrontRestrictViewerAccess: !Ref CloudFrontRestrictViewerAccess
-        CloudFront403ErrorResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
-        CloudFront404ErrorResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
-        CloudFront500ErrorResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
-        OriginDomainName: !GetAtt S3ForWebHosting.DomainName
-        OriginType: S3
-        RealtimeDashboardElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
-        RealtimeDashboardElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
-        RealtimeDashboardElasticSearchMasterType: !Ref RealtimeDashboardElasticSearchMasterType
-        RealtimeDashboardElasticSearchLifetime: !Ref RealtimeDashboardElasticSearchLifetime
-        RealtimeDashboardElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
-        RealtimeDashboardElasticSearchMasterUserPassword: !Ref RealtimeDashboardElasticSearchMasterUserPassword
-        RealtimeDashboardElasticsearchVersion: !Ref RealtimeDashboardElasticsearchVersion
-        RealtimeDashboardKinesisFirehoseStreamNameSuffix: !Ref RealtimeDashboardKinesisFirehoseStreamNameSuffix
-        RealtimeDashboardState: !Ref RealtimeDashboardState
-        RealtimeDashboardSamplingRate: !Ref RealtimeDashboardSamplingRate
-        RealtimeDashboardKinesisShardCount: !Ref RealtimeDashboardKinesisShardCount
-        RealtimeKinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
-        Route53HostedZoneId: !Ref Route53HostedZoneId
-        Logging: !Ref Logging
-        LogBacketName: !If
-          - CustomLogBucketName
-          - !Ref S3ForAccessLog
-          - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}.s3.amazonaws.com
-        WebACLArn: !Ref WebACLArn
-        SNSForAlertArn: !Ref SNSForAlertArn
-        SNSForDeploymentArn: !Ref SNSForDeploymentArn
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml    
-  Synthetics:
-    Condition: CreateSynthetics
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        CanaryName: !Ref SyntheticsCanaryName
-        DomainName: !Ref DomainName
-        SNSForAlertArn: !If 
+        ElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
+        ElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
+        ElasticSearchMasterType: !Ref RealtimeDashboardElasticSearchMasterType
+        ElasticSearchLifetime: !Ref RealtimeDashboardElasticSearchLifetime
+        ElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
+        ElasticSearchMasterUserPassword: !Ref RealtimeDashboardElasticSearchMasterUserPassword
+        ElasticsearchVersion: !Ref RealtimeDashboardElasticsearchVersion
+        KinesisFirehoseStreamNameSuffix: !Ref RealtimeDashboardKinesisFirehoseStreamNameSuffix
+        KinesisShardCount: !Ref RealtimeDashboardKinesisShardCount
+        KinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
+        LogicalNamePrefix: !Ref AWS::StackName
+        SamplingRate: !Ref RealtimeDashboardSamplingRate
+        SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
@@ -415,7 +383,7 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/synthetics/heartbeat.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/realtime-dashboard.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: 'AWS::Serverless::Application'
@@ -443,188 +411,125 @@ Resources:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
         createdby: !Ref TagValue
-  # IAM
-  IAMRoleForCrossRegionReplication:
-    Condition: CrossRegionReplication
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: s3.amazonaws.com
-            Action: 'sts:AssumeRole'
-      Policies:
-        - PolicyName: !Sub '${AWS::StackName}-S3Replication-${AWS::Region}'
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 's3:GetReplicationConfiguration'
-                  - 's3:ListBucket'
-                Resource: !Join
-                  - ''
-                  - - 'arn:aws:s3:::'
-                    - !Ref DomainName
-              - Effect: Allow
-                Action:
-                  - 's3:GetObjectVersion'
-                  - 's3:GetObjectVersionAcl'
-                  - 's3:GetObjectVersionTagging'
-                  - 's3:GetObjectRetention'
-                  - 's3:GetObjectLegalHold'
-                Resource: !Join
-                  - ''
-                  - - 'arn:aws:s3:::'
-                    - !Ref DomainName
-                    - /*
-              - Effect: Allow
-                Action:
-                  - 's3:ReplicateObject'
-                  - 's3:ReplicateDelete'
-                  - 's3:ReplicateTags'
-                Resource: !Join
-                  - ''
-                  - - !Ref S3DestinationBucketArnOfCrossRegionReplication
-                    - /*
-      RoleName: !Sub '${AWS::StackName}-S3ReplicationRole-${AWS::Region}'
-      Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   # CloudFront
-  CloudFrontOriginAccessIdentity:
-    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+  CloudFront:
+    Type: 'AWS::CloudFront::Distribution'
     Properties:
-      CloudFrontOriginAccessIdentityConfig: 
-        Comment: !Sub access-identity-${DomainName}
-  # S3
-  S3ForWebHosting:
-    Type: 'AWS::S3::Bucket'
-    # Retain this bucket when a stack is deleted.
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      AccessControl: Private
-      BucketEncryption:
-        ServerSideEncryptionConfiguration: 
-          - ServerSideEncryptionByDefault: 
-              SSEAlgorithm: AES256
-      BucketName: !Ref DomainName
-      LifecycleConfiguration:
-        Rules:
-          - Id: NonCurrentVersionExpiration
-            NoncurrentVersionExpirationInDays: 90
-            Status: Enabled
-      LoggingConfiguration: !If
-        - CreateLog
-        - DestinationBucketName: !If
-          - CustomLogBucketName
-          - !Ref S3ForAccessLog
-          - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}
-          LogFilePrefix: !Sub S3-${DomainName}/
-        - !Ref AWS::NoValue
-      PublicAccessBlockConfiguration: 
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      ReplicationConfiguration: !If
-       - CrossRegionReplication
-       - Role: !GetAtt IAMRoleForCrossRegionReplication.Arn
-         Rules:
-           - Destination: 
-               Bucket: !Ref S3DestinationBucketArnOfCrossRegionReplication
-             Id: !Ref S3DestinationBucketArnOfCrossRegionReplication
-             # All Objects
-             Prefix: ''
-             Status: Enabled
-       - !Ref AWS::NoValue
-      Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      VersioningConfiguration:
-        Status: Enabled
-  S3BucketPolicy:
-    Type: 'AWS::S3::BucketPolicy'
+      DistributionConfig:
+        Aliases: !If
+          - BundleSSLCertification
+          - !If 
+            - AdditionalNameExists
+            - - !Ref DomainName
+              - !Ref CloudFrontAdditionalName
+            - - !Ref DomainName
+          - !Ref AWS::NoValue
+        Comment: !Sub CDN for ${DomainName}
+        CustomErrorResponses: !If 
+          - CreateCustomErrorResponse
+          - - ErrorCachingMinTTL: 60
+              ErrorCode: 403
+              ResponseCode: 403
+              ResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
+            - ErrorCachingMinTTL: 60
+              ErrorCode: 404
+              ResponseCode: 404
+              ResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
+            - ErrorCachingMinTTL: 60
+              ErrorCode: 500
+              ResponseCode: 500
+              ResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
+          - !Ref AWS::NoValue
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          DefaultTTL: !Ref CloudFrontDefaultTTL
+          ForwardedValues:
+            QueryString: false
+          MaxTTL: !Ref CloudFrontMaximumTTL
+          MinTTL: !Ref CloudFrontMinimumTTL
+          RealtimeLogConfigArn: !If
+            - CreateRealtimeDashboard
+            - !GetAtt RealtimeDashboard.Outputs.RealtimeLogConfigArn
+            - !Ref AWS::NoValue
+          SmoothStreaming: false
+          TargetOriginId: !Ref CloudFrontOriginDomainName
+          TrustedSigners: !If 
+            - CreateRestrictViewerAccess
+            - - !Ref AWS::AccountId
+            - !Ref AWS::NoValue
+          ViewerProtocolPolicy: !Ref CloudFrontViewerProtocolPolicy
+        DefaultRootObject : !If
+          - DefaultRootObjectExists
+          - !Ref CloudFrontDefaultRootObject
+          - !Ref AWS::NoValue
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: false
+        Logging: !If
+          - CreateLog
+          - Bucket: !Ref LogBacketName
+            Prefix: !Sub CloudFront-${DomainName}/
+          - !Ref AWS::NoValue
+        Origins: !If
+          - S3Origin
+          - !If
+            - SingleOrigin
+            - - DomainName: !Ref CloudFrontOriginDomainName
+                Id: !Ref CloudFrontOriginDomainName
+                S3OriginConfig:
+                  OriginAccessIdentity: !Join
+                   - ''
+                   - - origin-access-identity/cloudfront/
+                     - !Ref CloudFrontOriginAccessIdentity
+            - - DomainName: !Ref CloudFrontOriginDomainName
+                Id: !Ref CloudFrontOriginDomainName
+                S3OriginConfig:
+                  OriginAccessIdentity: !Join
+                  - ''
+                  - - origin-access-identity/cloudfront/
+                    - !Ref CloudFrontOriginAccessIdentity
+              - DomainName: !Sub ${CloudFrontSecondaryOriginId}.s3.amazonaws.com
+                Id: !Ref CloudFrontSecondaryOriginId
+                S3OriginConfig:
+                  OriginAccessIdentity: !Join
+                  - ''
+                  - - origin-access-identity/cloudfront/
+                    - !Ref CloudFrontOriginAccessIdentity
+          - - DomainName: !Ref CloudFrontOriginDomainName
+              Id: !Ref CloudFrontOriginDomainName
+        ViewerCertificate: !If
+          - BundleSSLCertification
+          - AcmCertificateArn: !Ref CertificateManagerARN
+            MinimumProtocolVersion: TLSv1.1_2016
+            SslSupportMethod: sni-only
+          - !Ref AWS::NoValue
+        WebACLId: !If
+          - CreateWebACL
+          - !Ref WebACLArn
+          - !Ref AWS::NoValue
+  # Route53
+  Route53RecordSet:
+    Condition: CreateRoute53
+    Type: 'AWS::Route53::RecordSet'
     Properties: 
-      Bucket: !Ref S3ForWebHosting
-      PolicyDocument:
-        Version: 2012-10-17
-        Id: !Ref S3ForWebHosting
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}
-            Action:
-              - 's3:GetObject'
-              - 's3:ListBucket'
-            Resource:
-              - !Sub arn:aws:s3:::${S3ForWebHosting}/*
-              - !Sub arn:aws:s3:::${S3ForWebHosting}
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForWebHosting.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForWebHosting.Arn
-                  - /*
-            Condition:
-              Bool: 
-                aws:SecureTransport: false
-  S3ForAccessLog:
-    Type: 'AWS::S3::Bucket'
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
+      AliasTarget: 
+        DNSName: !GetAtt CloudFront.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+      Comment: !Ref DomainName
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+  # CloudWatch Dashboard
+  Dashboard:
+    Type: 'AWS::CloudWatch::Dashboard'
     Properties:
-      AccessControl: LogDeliveryWrite
-      BucketEncryption:
-        ServerSideEncryptionConfiguration: 
-          - ServerSideEncryptionByDefault: 
-              SSEAlgorithm: AES256
-      BucketName: !Ref LogBacketName
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpirationInDays
-            ExpirationInDays: 60
-            Status: Enabled
-      PublicAccessBlockConfiguration: 
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  S3BucketPolicyForAccessLog:
-    Type: 'AWS::S3::BucketPolicy'
-    Properties: 
-      Bucket: !Ref S3ForAccessLog
-      PolicyDocument:
-        Version: 2012-10-17
-        Id: !Ref S3ForAccessLog
-        Statement:
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForAccessLog.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForAccessLog.Arn
-                  - /*
-            Condition:
-              Bool: 
-                aws:SecureTransport: false
+      DashboardName: !Sub ${AWS::StackName}-${CloudFront}
+      DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "# CloudFront\n${DomainName} のパフォーマンスを確認できます。"}},{"type": "metric","x": 0,"y": 2,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "4xxErrorRate", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Average", "period": 60, "color": "#ff7f0e" } ],[ ".", "TotalErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#9467bd" } ],[ ".", "5xxErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#d62728" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "ErrorRate","period": 300}},{"type": "metric","x": 0,"y": 8,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "BytesUploaded", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Sum", "period": 60 } ],[ ".", "BytesDownloaded", ".", ".", ".", ".", { "stat": "Sum", "period": 60, "color": "#2ca02c" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "Bytes","period": 300}},{"type": "metric","x": 0,"y": 14,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "Requests", "Region", "Global", "DistributionId", "${CloudFront}", { "period": 60, "stat": "Sum" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","period": 300}}]}'
 
 Outputs:
-  CloudFrontURL:
-    Description: CloudFront URL
-    Value: !GetAtt CloudFront.DomainName
   KibanaURL:
     Condition: CreateRealtimeDashboard
     Description: Kibana URL
-    Value: !GetAtt CloudFront.Outputs.KibanaURL
+    Value: !GetAtt RealtimeDashboard.Outputs.KibanaURL
