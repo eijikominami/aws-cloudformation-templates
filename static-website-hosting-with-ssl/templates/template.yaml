@@ -356,13 +356,13 @@ Resources:
         CloudFrontDefaultRootObject: !Ref CloudFrontDefaultRootObject
         CloudFrontAdditionalName: !Ref CloudFrontAdditionalName
         CloudFrontOriginAccessIdentity: !Ref CloudFrontOriginAccessIdentity
+        CloudFrontOriginDomainName: !GetAtt S3ForWebHosting.DomainName
+        CloudFrontOriginType: S3
         CloudFrontSecondaryOriginId: !Ref CloudFrontSecondaryOriginId
         CloudFrontRestrictViewerAccess: !Ref CloudFrontRestrictViewerAccess
         CloudFront403ErrorResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
         CloudFront404ErrorResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
         CloudFront500ErrorResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
-        OriginDomainName: !GetAtt S3ForWebHosting.DomainName
-        OriginType: S3
         RealtimeDashboardElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
         RealtimeDashboardElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
         RealtimeDashboardElasticSearchMasterType: !Ref RealtimeDashboardElasticSearchMasterType

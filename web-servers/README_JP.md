@@ -42,8 +42,22 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | AutoScalingDesiredCapacity | Number | 1 | ○ | | 
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | 'None'を指定した場合、ELBは作成されません。 |
-| CertificateManagerARN | String | | | ARNを指定した場合、**Elastic Load Balancer** に **SSL証明書** が紐付けられます。 |
-| DomainName | String | | | Elastic Load Balancer と紐づける CNAME 名 | 
+| ACMValidationMethod | String | DNS | 条件付き | ドメインの検証方法 |
+| ACMDomainName | String | | | 証明書のドメイン名 |
+| CertificateManagerARN | String | | 条件付き | ARNを指定した場合、**CloudFront** もしくは **Elastic Load Balancer** に **SSL証明書** が紐付けられます。 |
+| **DomainName** | String | | ○ | |
+| CloudFrontDefaultTTL | Number | 86400 | ○ | |
+| CloudFrontMinimumTTL | Number | 0 | ○ | |
+| CloudFrontMaximumTTL |  Number | 31536000 | ○ | |
+| CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | |
+| CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
+| CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |
+| CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
+| CloudFrontState | DISABLED | ○ | CloudFront を有効にするかどうか |
+| CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
+| CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
+| CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
+| DomainName | String | | | ドメイン名 | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | スナップショット作成時刻 (UTC) |
 | EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 

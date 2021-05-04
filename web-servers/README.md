@@ -42,8 +42,21 @@ You can provide optional parameters as follows.
 | AutoScalingDesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created. | 
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | If you set 'None', an ELB is NOT created. |
-| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **Elastic Load Balancer**. |
-| DomainName | String | | | The CNAME attached to Elastic Load Balancer | 
+| ACMValidationMethod | String | DNS | Conditional | The validation method that you own or control the domain |
+| ACMDomainName | String | | | The domain name created by Certification Manager |
+| CertificateManagerARN | String | | Conditional | If it's NOT empty, **SSL Certification** is associated with **CloudFront** or **Elastic Load Balancer**. |
+| CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
+| CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
+| CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
+| CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | CloudFront Viewer Protocol Policy |
+| CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront**. |
+| CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
+| CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Restrict Viewer Access |
+| CloudFrontState | DISABLED | ○ | Enable or disable CloudFront |
+| CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
+| CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
+| CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
+| DomainName | String | | | Domain name | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
 | EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
