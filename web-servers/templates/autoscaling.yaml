@@ -339,3 +339,6 @@ Outputs:
   LoadBalancerArn:
     Description: LoadBalancer ARN
     Value: !Ref LoadBalancer
+  LoadBalancerDNSName:
+    Description: LoadBalancer DNS Name
+    Value: !GetAtt LoadBalancer.DNSName 

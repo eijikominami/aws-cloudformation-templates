@@ -16,6 +16,24 @@ Metadata:
           - EC2KeyName
           - EC2VolumeSize
       - Label: 
+          default: 'CloudFront Configuration'
+        Parameters: 
+          - CloudFrontDefaultTTL
+          - CloudFrontMinimumTTL
+          - CloudFrontMaximumTTL
+          - CloudFrontViewerProtocolPolicy
+          - CloudFrontDefaultRootObject
+          - CloudFrontAdditionalName
+          - CloudFrontSecondaryOriginId
+          - CloudFrontRestrictViewerAccess
+          - CloudFrontState
+          - CloudFront403ErrorResponsePagePath
+          - CloudFront404ErrorResponsePagePath
+          - CloudFront500ErrorResponsePagePath
+          - DomainName
+          - Logging
+          - LogBacketName
+      - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
           - SubnetPublicCidrBlockForAz1
@@ -61,11 +79,15 @@ Parameters:
     AllowedValues:
       - DNS
       - EMAIL
-    Description: The validation method that you own or control the domain [required]
+    Description: The validation method that you own or control the domain [conditional]
   ACMDomainName:
     Type: String
     Default: ''
     Description: The domain name created by Certification Manager
+  CertificateManagerARN:
+    Default: ''
+    Type: String
+    Description: The ARN of an SSL Certifiation attached to CloudFront [conditional]
   AutoScalingDesiredCapacity:
     Type: Number
     Default: 1
@@ -84,6 +106,68 @@ Parameters:
       - application
       - network  
     Description: The autoScaling LoadBalancer Type [required]
+  CloudFrontDefaultTTL:
+    Default: 86400
+    MinValue: 0
+    Type: Number
+    Description: CloudFront Default TTL [required]
+  CloudFrontMinimumTTL:
+    Default: 0
+    MinValue: 0
+    Type: Number
+    Description: CloudFront Minimum TTL [required]
+  CloudFrontMaximumTTL:
+    Default: 31536000
+    MinValue: 0
+    Type: Number
+    Description: CloudFront Maximum TTL [required]
+  CloudFrontViewerProtocolPolicy:
+    Type: String
+    Default: redirect-to-https
+    AllowedValues:
+      - allow-all
+      - redirect-to-https
+      - https-only
+    Description: CloudFront Viewer Protocol Policy [required]
+  CloudFrontDefaultRootObject:
+    Type: String
+    Default: index.html
+    AllowedPattern: .+
+    Description: CloudFront Viewer Protocol Policy [required]
+  CloudFrontAdditionalName:
+    Type: String
+    Default: ''
+    Description: The CNAME attached to CloudFront
+  CloudFrontSecondaryOriginId:
+    Type: String
+    Default: ''
+    Description: The S3 bucket name for Secondary Origin
+  CloudFrontRestrictViewerAccess:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable Restrict Viewer Access [required]  
+  CloudFrontState:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudFront [required] 
+  CloudFront403ErrorResponsePagePath:
+    Type: String
+    Default: ''
+    Description: The path to the 403 custom error page
+  CloudFront404ErrorResponsePagePath:
+    Type: String
+    Default: ''
+    Description: The path to the 404 custom error page
+  CloudFront500ErrorResponsePagePath:
+    Type: String
+    Default: ''
+    Description: The path to the 500 custom error page
   DomainName:
     Type: String
     Default: ''
@@ -117,6 +201,21 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
+  Logging:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable logging [required]
+  LogBacketName:
+    Type: String
+    Default: ''
+    Description: The custom S3 bucket name for access logging
+  WebACLArn:
+    Type: String
+    Default: '' 
+    Description: Web ACL ARN
   Route53HostedZoneId:
     Type: String
     Default: ''
@@ -181,10 +280,12 @@ Conditions:
   PrivateSubnet2Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz2, '' ] ]
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
-  CreateRoute53: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
+  CreateCloudFront: !Equals [ !Ref CloudFrontState, ENABLED ]
+  CreateRoute53: !And [ !Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateWAF: !And [!Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
+  CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
 
 Resources:
   # Nested Stack
@@ -278,7 +379,10 @@ Resources:
         ACMDomainName: !Ref ACMDomainName
         AutoScalingDesiredCapacity: !Ref AutoScalingDesiredCapacity
         AutoScalingMaxSize: !Ref AutoScalingMaxSize
-        DomainName: !Ref DomainName
+        DomainName: !If
+          - CreateCloudFront
+          - !Ref DomainName
+          - ''
         EC2ImageId: !Ref EC2ImageId
         EC2InstanceType: !Ref EC2InstanceType
         EC2IamInstanceProfileArn: !GetAtt IamInstanceProfileForIAMRoleForEC2.Arn
@@ -369,7 +473,50 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
+  CloudFront:
+    Condition: CreateCloudFront
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CertificateManagerARN: !Ref CertificateManagerARN
+        DomainName: !Ref DomainName
+        CloudFrontDefaultTTL: !Ref CloudFrontDefaultTTL
+        CloudFrontMinimumTTL: !Ref CloudFrontMinimumTTL
+        CloudFrontMaximumTTL: !Ref CloudFrontMaximumTTL
+        CloudFrontViewerProtocolPolicy: !Ref CloudFrontViewerProtocolPolicy
+        CloudFrontDefaultRootObject: !Ref CloudFrontDefaultRootObject
+        CloudFrontAdditionalName: !Ref CloudFrontAdditionalName
+        CloudFrontSecondaryOriginId: !Ref CloudFrontSecondaryOriginId
+        CloudFrontRestrictViewerAccess: !Ref CloudFrontRestrictViewerAccess
+        CloudFront403ErrorResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
+        CloudFront404ErrorResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
+        CloudFront500ErrorResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
+        CloudFrontOriginDomainName: !If
+          - AutoScalingEnabled
+          - !GetAtt AutoScaling.Outputs.LoadBalancerDNSName
+          - !Ref EIPForEC2Instance
+        CloudFrontOriginType: NOT_S3
+        Route53HostedZoneId: !Ref Route53HostedZoneId
+        Logging: !Ref Logging
+        LogBacketName: !If
+          - CustomLogBucketName
+          - !Ref S3ForAccessLog
+          - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}.s3.amazonaws.com
+        WebACLArn: !Ref WebACLArn
+        SNSForAlertArn: !Ref SNSForAlertArn
+        SNSForDeploymentArn: !Ref SNSForDeploymentArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: 'AWS::Serverless::Application'
@@ -604,6 +751,50 @@ Resources:
         SemanticVersion: 1.2.29
       Tags:
         createdby: !Ref TagValue
+  S3ForAccessLog:
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: AES256
+      BucketName: !Ref LogBacketName
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForAccessLog:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties: 
+      Bucket: !Ref S3ForAccessLog
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForAccessLog
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForAccessLog.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForAccessLog.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
 
 Outputs:
   VPCCidrBlock:

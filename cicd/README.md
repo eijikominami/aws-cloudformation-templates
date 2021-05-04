@@ -49,7 +49,6 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 | CICD Template | CICD.json |
 | [Global Settings Template](../global/README.md) | GlobalSettings.json |
 | [Notification Template](../notification/README.md) | Notification.json |
-| [Route53 Template](../network/README_JP.md) | Route53.json |
 | [Security Template](../security/README.md) | DefaultSecuritySettings.json |
 | [Security Template with Config Rule](../security-config-rules/README.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](../static-website-hosting-with-ssl/README.md) | StaticWebsiteHosting.json |
