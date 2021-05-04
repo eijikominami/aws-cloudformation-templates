@@ -332,10 +332,8 @@ Resources:
       Comment: !Ref DomainName
       HostedZoneId: !Ref Route53HostedZoneId
       Name: !Ref DomainName
-      Type: !If
-        - CreateNetworkLoadBalancer
-        - A
-        - CNAME
+      # Alias record
+      Type: A
         
 Outputs:
   LoadBalancerArn:

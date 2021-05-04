@@ -59,7 +59,11 @@ def lambda_handler(event, context):
             # Sign-in
             elif 'source' in message and 'aws.signin' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createManagementConsoleMessage(message)     
+                slack_message = createManagementConsoleMessage(message)    
+            # MGN
+            elif 'source' in message and 'aws.mgn' in message['source']:  
+                hook_url = "https://" + ALERT_HOOK_URL
+                slack_message = createMGNMessage(message)   
             # Tag
             elif 'source' in message and 'aws.tag' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
@@ -320,7 +324,6 @@ def createKMSMessage(message):
 
 def createManagementConsoleMessage(message):
 
-    resources = ''
     title = ":id: AWS Management Console Sign-in Events | " + message['region'] + " | Account: " + message['account']
     title_link = "https://console.aws.amazon.com/cloudtrail/home?region=" + message['region'] + "#/dashboard"
     if message['detail']['userIdentity']['type'] == 'IAMUser':
@@ -332,8 +335,6 @@ def createManagementConsoleMessage(message):
     else:
         user = '不明なユーザ'
     
-    for resource in message['resources']:
-        resources = resources + ' ' + resource
     return {
         'attachments': [{
             'color': '#dc4f7e',
@@ -344,6 +345,72 @@ def createManagementConsoleMessage(message):
                     {
                         'title': "Message",
                         'value': "%s が %s からログインしました。" % (user, message['detail']['sourceIPAddress'])
+                    }
+                ]
+        }]
+    }
+
+def createMGNMessage(message):
+
+    resources = ''
+    color = "#4b8e7c"
+    title = " AWS MGN Events | " + message['region'] + " | Account: " + message['account']
+    title_link = "https://console.aws.amazon.com/mgn/home?region=" + message['region'] + "#/sourceServers"
+    # MGN Source Server Launch Result
+    if message['detail-type'] == 'MGN Source Server Launch Result':
+        if message['detail']['state'] == 'TEST_LAUNCH_SUCCEEDED':
+            icon = ':computer:'
+            text = '*テストインスタンスが起動* しました。'
+        elif message['detail']['state'] == 'TEST_LAUNCH_FAILED':
+            icon = ':x:'
+            text = '*テストインスタンスの起動に失敗* しました。'
+            color = "#961D13"
+        elif message['detail']['state'] == 'CUTOVER_LAUNCH_SUCCEEDED':
+            icon = ':computer:'
+            text = '*カットオーバインスタンスが起動* しました。'
+        elif message['detail']['state'] == 'CUTOVER_LAUNCH_FAILED':
+            icon = ':x:'
+            text = '*カットオーバインスタンスの起動に失敗* しました。'
+            color = "#961D13"
+        else:
+            icon = ':japanese_ogre:'
+            text = '不明なイベントが発生しました。'
+            color = "#961D13"
+    # MGN Source server lifecycle state change
+    elif message['detail-type'] == 'MGN Source server lifecycle state change':
+        if message['detail']['state'] == 'TEST_LAUNCH_SUCCEEDED':
+            icon = ':repeat:'
+            text = '*レプリケーションが完了* しました。'
+        else:
+            icon = ':japanese_ogre:'
+            text = '不明なイベントが発生しました。'
+            color = "#961D13"
+    # MGN Source server data replication stalled change
+    elif message['detail-type'] == 'MGN Source server data replication stalled change':
+        if message['detail']['state'] == 'STALLED':
+            icon = ':x:'
+            text = '*レプリケーションが停止* しました。'
+            color = "#961D13"
+        elif message['detail']['state'] == 'NOT_STALLED':
+            icon = ':repeat:'
+            text = '*レプリケーションが再開* しました。'
+        else:
+            icon = ':japanese_ogre:'
+            text = '不明なイベントが発生しました。'
+            color = "#961D13"
+
+    for resource in message['resources']:
+        resources = resources + ' ' + resource
+    return {
+        'attachments': [{
+            'color': '#dc4f7e',
+            'title': "%s %s" % (icon, title),
+            'title_link': "%s" % title_link,
+            'text': "%s" % text,
+            'fields': [
+                    {
+                        'title': "Resources",
+                        'value': "%s" % resources
                     }
                 ]
         }]
