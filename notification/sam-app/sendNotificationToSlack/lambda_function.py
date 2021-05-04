@@ -354,49 +354,49 @@ def createMGNMessage(message):
 
     resources = ''
     color = "#4b8e7c"
-    title = ":id: AWS MGN Events | " + message['region'] + " | Account: " + message['account']
+    title = " AWS MGN Events | " + message['region'] + " | Account: " + message['account']
     title_link = "https://console.aws.amazon.com/mgn/home?region=" + message['region'] + "#/sourceServers"
     # MGN Source Server Launch Result
     if message['detail-type'] == 'MGN Source Server Launch Result':
         if message['detail']['state'] == 'TEST_LAUNCH_SUCCEEDED':
-            icon = ':arrow_up_down:'
-            text = '*テストインスタンスが起動* しました'
+            icon = ':computer:'
+            text = '*テストインスタンスが起動* しました。'
         elif message['detail']['state'] == 'TEST_LAUNCH_FAILED':
             icon = ':x:'
-            text = '*テストインスタンスの起動に失敗* しました'
+            text = '*テストインスタンスの起動に失敗* しました。'
             color = "#961D13"
         elif message['detail']['state'] == 'CUTOVER_LAUNCH_SUCCEEDED':
-            icon = ':arrow_up_down:'
-            text = '*カットオーバインスタンスが起動* しました'
+            icon = ':computer:'
+            text = '*カットオーバインスタンスが起動* しました。'
         elif message['detail']['state'] == 'CUTOVER_LAUNCH_FAILED':
             icon = ':x:'
-            text = '*カットオーバインスタンスの起動に失敗* しました'
+            text = '*カットオーバインスタンスの起動に失敗* しました。'
             color = "#961D13"
         else:
             icon = ':japanese_ogre:'
-            text = '不明なイベントが発生しました'
+            text = '不明なイベントが発生しました。'
             color = "#961D13"
     # MGN Source server lifecycle state change
     elif message['detail-type'] == 'MGN Source server lifecycle state change':
         if message['detail']['state'] == 'TEST_LAUNCH_SUCCEEDED':
-            icon = ':arrow_up_down:'
-            text = '*レプリケーションが完了* しました'
+            icon = ':repeat:'
+            text = '*レプリケーションが完了* しました。'
         else:
             icon = ':japanese_ogre:'
-            text = '不明なイベントが発生しました'
+            text = '不明なイベントが発生しました。'
             color = "#961D13"
     # MGN Source server data replication stalled change
     elif message['detail-type'] == 'MGN Source server data replication stalled change':
         if message['detail']['state'] == 'STALLED':
             icon = ':x:'
-            text = '*レプリケーションが停止* しました'
+            text = '*レプリケーションが停止* しました。'
             color = "#961D13"
         elif message['detail']['state'] == 'NOT_STALLED':
-            icon = ':arrow_up_down:'
-            text = '*レプリケーションが再開* しました'
+            icon = ':repeat:'
+            text = '*レプリケーションが再開* しました。'
         else:
             icon = ':japanese_ogre:'
-            text = '不明なイベントが発生しました'
+            text = '不明なイベントが発生しました。'
             color = "#961D13"
 
     for resource in message['resources']:

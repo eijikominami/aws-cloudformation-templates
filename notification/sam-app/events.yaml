@@ -75,7 +75,7 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
-    Description: Enable or disable the events rule about Management Console [required]
+    Description: Enable or disable the events rule about MGN [required]
   ScheduledEventsRule:
     Type: String
     Default: ENABLED
