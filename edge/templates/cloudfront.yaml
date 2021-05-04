@@ -529,6 +529,9 @@ Resources:
       DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "# CloudFront\n${DomainName} のパフォーマンスを確認できます。"}},{"type": "metric","x": 0,"y": 2,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "4xxErrorRate", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Average", "period": 60, "color": "#ff7f0e" } ],[ ".", "TotalErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#9467bd" } ],[ ".", "5xxErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#d62728" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "ErrorRate","period": 300}},{"type": "metric","x": 0,"y": 8,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "BytesUploaded", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Sum", "period": 60 } ],[ ".", "BytesDownloaded", ".", ".", ".", ".", { "stat": "Sum", "period": 60, "color": "#2ca02c" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "Bytes","period": 300}},{"type": "metric","x": 0,"y": 14,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "Requests", "Region", "Global", "DistributionId", "${CloudFront}", { "period": 60, "stat": "Sum" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","period": 300}}]}'
 
 Outputs:
+  CloudFrontURL:
+    Description: CloudFront URL
+    Value: !GetAtt CloudFront.DomainName
   KibanaURL:
     Condition: CreateRealtimeDashboard
     Description: Kibana URL

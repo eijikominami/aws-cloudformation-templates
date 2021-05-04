@@ -752,6 +752,7 @@ Resources:
       Tags:
         createdby: !Ref TagValue
   S3ForAccessLog:
+    Condition: CustomLogBucketName
     Type: 'AWS::S3::Bucket'
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -776,6 +777,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
+    Condition: CustomLogBucketName
     Type: 'AWS::S3::BucketPolicy'
     Properties: 
       Bucket: !Ref S3ForAccessLog
