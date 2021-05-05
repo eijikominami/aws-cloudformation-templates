@@ -125,13 +125,13 @@ Resources:
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
   SNSForAlert:
     Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -491,7 +491,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       Tags:
         createdby: !Ref TagValue
     

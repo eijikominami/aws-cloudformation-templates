@@ -19,7 +19,7 @@ If you want to deploy each service individually, click the buttons below.
 | --- | --- |
 | Data Lifecycle Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DataLifecycleManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/dlm.yaml&param_LogicalNamePrefix=DataLifecycleManager) |
 | Systems Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/ssm.yaml&param_LogicalNamePrefix=SystemsManager) |
-| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/waf.yaml) |
+| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
 
 ## Architecture
 
@@ -42,8 +42,21 @@ You can provide optional parameters as follows.
 | AutoScalingDesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created. | 
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | If you set 'None', an ELB is NOT created. |
-| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **Elastic Load Balancer**. |
-| DomainName | String | | | The CNAME attached to Elastic Load Balancer | 
+| ACMValidationMethod | String | DNS | Conditional | The validation method that you own or control the domain |
+| ACMDomainName | String | | | The domain name created by Certification Manager |
+| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** or **Elastic Load Balancer**. |
+| CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
+| CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
+| CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
+| CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | CloudFront Viewer Protocol Policy |
+| CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront**. |
+| CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
+| CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Restrict Viewer Access |
+| CloudFrontState | DISABLED | ○ | Enable or disable CloudFront |
+| CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
+| CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
+| CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
+| DomainName | String | | | Domain name | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
 | EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
@@ -58,6 +71,7 @@ You can provide optional parameters as follows.
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | Public subnet of AZ2 |
 | SubnetExternalCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | Private subnet of AZ2 |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created. |
+| WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
 | VPCCidrBlock | String | 10.0.0.0/21 | ○ | |
 
 ## Trouble Shooting

@@ -146,7 +146,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -162,7 +162,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -787,7 +787,7 @@ Resources:
                   StackName: RealtimeDashboard
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/realtime-dashboard.yaml
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::edge/templates/realtime-dashboard.yaml
                   ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
@@ -821,8 +821,8 @@ Resources:
                   TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/template.yaml
                   ParameterOverrides: !If
                     - DeployGlobalSettings
-                    - '{ "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
-                    - '{ "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                    - '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                    - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}WebServers.json
@@ -915,7 +915,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -935,7 +935,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -955,7 +955,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 1.2.29
+        SemanticVersion: 1.3.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

@@ -359,44 +359,34 @@ def createMGNMessage(message):
     # MGN Source Server Launch Result
     if message['detail-type'] == 'MGN Source Server Launch Result':
         if message['detail']['state'] == 'TEST_LAUNCH_SUCCEEDED':
-            icon = ':computer:'
-            text = '*テストインスタンスが起動* しました。'
+            text = ':computer: *テストインスタンスが起動* しました。'
         elif message['detail']['state'] == 'TEST_LAUNCH_FAILED':
-            icon = ':x:'
-            text = '*テストインスタンスの起動に失敗* しました。'
+            text = ':x: *テストインスタンスの起動に失敗* しました。'
             color = "#961D13"
         elif message['detail']['state'] == 'CUTOVER_LAUNCH_SUCCEEDED':
-            icon = ':computer:'
-            text = '*カットオーバインスタンスが起動* しました。'
+            text = ':computer: *カットオーバインスタンスが起動* しました。'
         elif message['detail']['state'] == 'CUTOVER_LAUNCH_FAILED':
-            icon = ':x:'
-            text = '*カットオーバインスタンスの起動に失敗* しました。'
+            text = ':x: *カットオーバインスタンスの起動に失敗* しました。'
             color = "#961D13"
         else:
-            icon = ':japanese_ogre:'
-            text = '不明なイベントが発生しました。'
+            text = ':japanese_ogre: 不明なイベントが発生しました。'
             color = "#961D13"
     # MGN Source server lifecycle state change
     elif message['detail-type'] == 'MGN Source server lifecycle state change':
         if message['detail']['state'] == 'TEST_LAUNCH_SUCCEEDED':
-            icon = ':repeat:'
-            text = '*レプリケーションが完了* しました。'
+            text = ':repeat: *レプリケーションが完了* しました。'
         else:
-            icon = ':japanese_ogre:'
-            text = '不明なイベントが発生しました。'
+            text = ':japanese_ogre: 不明なイベントが発生しました。'
             color = "#961D13"
     # MGN Source server data replication stalled change
     elif message['detail-type'] == 'MGN Source server data replication stalled change':
         if message['detail']['state'] == 'STALLED':
-            icon = ':x:'
-            text = '*レプリケーションが停止* しました。'
+            text = ':x: *レプリケーションが停止* しました。'
             color = "#961D13"
         elif message['detail']['state'] == 'NOT_STALLED':
-            icon = ':repeat:'
-            text = '*レプリケーションが再開* しました。'
+            text = ':repeat: *レプリケーションが再開* しました。'
         else:
-            icon = ':japanese_ogre:'
-            text = '不明なイベントが発生しました。'
+            text = ':japanese_ogre: 不明なイベントが発生しました。'
             color = "#961D13"
 
     for resource in message['resources']:
@@ -404,7 +394,7 @@ def createMGNMessage(message):
     return {
         'attachments': [{
             'color': '#dc4f7e',
-            'title': "%s %s" % (icon, title),
+            'title': "%s" % title,
             'title_link': "%s" % title_link,
             'text': "%s" % text,
             'fields': [
