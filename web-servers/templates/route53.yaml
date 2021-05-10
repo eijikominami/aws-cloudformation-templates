@@ -3,19 +3,19 @@ Description: AWSCloudFormationTemplates/web-servers/route53 creates a Route53 Re
 
 Parameters:
   SecurityGroupId:
-    Type: String
+    Type: AWS::EC2::SecurityGroup::Id
     AllowedPattern: .+
     Description: The ID of one or more security groups that control access to this VPC.   
   SubnetId1:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
     Description: The ID of the subnet that DNS queries originate from.
   SubnetId2:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     Default: ''
     Description: The ID of the subnet that DNS queries originate from.
   SubnetId3:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     Default: ''
     Description: The ID of the subnet that DNS queries originate from.
   Environment:

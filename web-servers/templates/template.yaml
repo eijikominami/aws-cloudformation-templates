@@ -37,10 +37,15 @@ Metadata:
           default: 'AvailabilityZone Configuration'
         Parameters: 
           - SubnetPublicCidrBlockForAz1
-          - SubnetExternalCidrBlockForAz1
+          - SubnetTransitCidrBlockAz1
           - SubnetPublicCidrBlockForAz2
-          - SubnetExternalCidrBlockForAz2
-          - VPCCidrBlock
+          - SubnetTransitCidrBlockAz2
+          - VPCCidrBlock     
+      - Label:
+          default: 'Transit Gateway Configuration'
+        Parameters:
+          - TransitGatewayId
+          - TransitGatewayDestinationCidrBlock    
       - Label: 
           default: 'Data Lifecycle Manager Configuration'
         Parameters: 
@@ -216,7 +221,7 @@ Parameters:
     Default: ''
     Description: The custom S3 bucket name for access logging
   Route53HostedZoneId:
-    Type: String
+    Type: AWS::Route53::HostedZone::Id
     Default: ''
     Description: Route53 hosted zone id
   SSMPatchingAt:
@@ -230,21 +235,29 @@ Parameters:
     Default: 10.0.0.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
-  SubnetExternalCidrBlockForAz1:
+  SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.0.1.0/24
+    Default: 10.0.3.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ1
+    Description: The transit subnet CIDR block
   SubnetPublicCidrBlockForAz2:
     Type: String
     Default: 10.0.4.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
-  SubnetExternalCidrBlockForAz2:
+  SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.0.5.0/24
+    Default: 10.0.7.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ2
+    Description: The transit subnet CIDR block
+  TransitGatewayId:
+    Type: String
+    Default: ''
+    Description: The ID of a transit gateway
+  TransitGatewayDestinationCidrBlock:
+    Type: String
+    Default: ''
+    Description: The IPv4 CIDR block forward to TransitGateway
   VPCCidrBlock:
     Type: String
     Default: 10.0.0.0/21
@@ -286,8 +299,6 @@ Parameters:
 Conditions:
   AutoScalingEnabled: !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ] 
   AutoScalingDisabled: !Equals [ !Ref AutoScalingLoadBalancerType, None ]
-  PrivateSubnet1Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz1, '' ] ]
-  PrivateSubnet2Exists: !Not [ !Equals [ !Ref SubnetExternalCidrBlockForAz2, '' ] ]
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreateCloudFront: !Equals [ !Ref CloudFrontState, ENABLED ]
@@ -323,7 +334,7 @@ Resources:
          - DISABLED
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
-        SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz1
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -331,7 +342,9 @@ Resources:
         SNSForDeploymentArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn        
+          - !Ref SNSForDeploymentArn   
+        TransitGatewayId: !Ref TransitGatewayId
+        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
         VPCId: !Ref VPC
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -367,7 +380,7 @@ Resources:
          - DISABLED
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
-        SubnetExternalCidrBlock: !Ref SubnetExternalCidrBlockForAz2
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -376,6 +389,8 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn 
+        TransitGatewayId: !Ref TransitGatewayId
+        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
         VPCId: !Ref VPC
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -424,8 +439,8 @@ Resources:
         LoadBalancerType: !Ref AutoScalingLoadBalancerType
         LogicalNamePrefix: !Ref AWS::StackName
         Route53HostedZoneId: !Ref Route53HostedZoneId
-        SubnetId1ForELB: !GetAtt Az1.Outputs.SubnetId
-        SubnetId2ForELB: !GetAtt Az2.Outputs.SubnetId
+        SubnetId1ForELB: !GetAtt Az1.Outputs.PublicSubnetId
+        SubnetId2ForELB: !GetAtt Az2.Outputs.PublicSubnetId
         SNSTopicARN: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -584,8 +599,8 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         SecurityGroupId: !Ref SecurityGroupWeb
-        SubnetId1: !GetAtt Az1.Outputs.SubnetId
-        SubnetId2: !GetAtt Az2.Outputs.SubnetId
+        SubnetId1: !GetAtt Az1.Outputs.PublicSubnetId
+        SubnetId2: !GetAtt Az2.Outputs.PublicSubnetId
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagKey
@@ -763,7 +778,7 @@ Resources:
       Monitoring: true
       SecurityGroupIds: 
         - !Ref SecurityGroupWeb
-      SubnetId: !GetAtt Az1.Outputs.SubnetId
+      SubnetId: !GetAtt Az1.Outputs.PublicSubnetId
       Tags: 
         - Key: Name
           Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
@@ -905,7 +920,6 @@ Outputs:
     Description: EC2 IP address
     Value: !Ref EIPForEC2Instance
   NatGatewayIP1:
-    Condition: PrivateSubnet1Exists
     Description: NatGateway IP address
     Value: !GetAtt Az1.Outputs.NatGatewayIP
   NetworkLoadBalancerIP1:
@@ -913,13 +927,24 @@ Outputs:
     Description: NetworkLoadBalancer IP
     Value: !GetAtt Az1.Outputs.NetworkLoadBalancerIP
   NatGatewayIP2:
-    Condition: PrivateSubnet2Exists
     Description: NatGateway IP address
     Value: !GetAtt Az2.Outputs.NatGatewayIP
   NetworkLoadBalancerIP2:
     Condition: CreateNetworkLoadBalancer
     Description: NetworkLoadBalancer IP address
     Value: !GetAtt Az2.Outputs.NetworkLoadBalancerIP
+  PublicSubnetId1:
+    Description: Public Subnet Id
+    Value: !GetAtt Az1.Outputs.PublicSubnetId
+  PublicSubnetId2:
+    Description: Public Subnet Id
+    Value: !GetAtt Az2.Outputs.PublicSubnetId
+  TransitSubnetId1:
+    Description: Public Subnet Id
+    Value: !GetAtt Az1.Outputs.TransitSubnetId
+  TransitSubnetId2:
+    Description: Public Subnet Id
+    Value: !GetAtt Az2.Outputs.TransitSubnetId
   SNSForAlertArn:
     Description: SNS ARN for Alert
     Value: !If

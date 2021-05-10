@@ -67,9 +67,9 @@ You can provide optional parameters as follows.
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
 | SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | Public subnet of AZ1 |
-| SubnetExternalCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | Private subnet of AZ1 |
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | Public subnet of AZ2 |
-| SubnetExternalCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | Private subnet of AZ2 |
+| TransitGatewayId | String | | | The ID of a transit gateway |
+| TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created. |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
 | VPCCidrBlock | String | 10.0.0.0/21 | ○ | |

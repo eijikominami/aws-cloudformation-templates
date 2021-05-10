@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/network/transitgateway creates an Transit Gateway.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Network Configuration'
+        Parameters:
+          - SubnetIds
+          - VpcId
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
+Parameters:
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: The IDs of one or more subnets. [required]  
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    AllowedPattern: .+
+    Description: The ID of the VPC. [required]     
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  LogicalNamePrefix:
+    Type: String
+    Default: TransitGateway
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  TransitGateway:
+    Type: AWS::EC2::TransitGateway
+    Properties: 
+      AmazonSideAsn: 64512
+      AutoAcceptSharedAttachments: disable
+      DefaultRouteTableAssociation: enable
+      DefaultRouteTablePropagation: enable
+      Description: !Sub Transit Gateway created by ${AWS::StackName}
+      DnsSupport: enable
+      MulticastSupport: enable
+      Tags:
+        - Key: Name
+          Value: !Sub tgw-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpnEcmpSupport: enable
+  TransitGatewayAttachment:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties: 
+      SubnetIds: !Ref SubnetIds
+      Tags:
+        - Key: Name
+          Value: !Sub tgw-attach-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGateway
+      VpcId: !Ref VpcId
+  TransitGatewayRouteTable:
+    Type: AWS::EC2::TransitGatewayRouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: !Sub tgw-rtb-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGateway
+  TransitGatewayRouteTableAssociation:
+    Type: AWS::EC2::TransitGatewayRouteTableAssociation
+    Properties: 
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+  TransitGatewayRouteTablePropagation:
+    Type: AWS::EC2::TransitGatewayRouteTablePropagation
+    Properties: 
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+
+Outputs:
+  TransitGatewayId:
+    Description: Transit Gateway Id
+    Value: !Ref TransitGateway
+  TransitGatewayAttachmentId:
+    Description: Transit Gateway Attachment Id
+    Value: !Ref TransitGatewayAttachment  
+  TransitGatewayRouteTableId:
+    Description: Transit Gateway Route Table Id
+    Value: !Ref TransitGatewayRouteTable

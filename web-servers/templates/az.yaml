@@ -12,8 +12,13 @@ Metadata:
           - InternetGatewayId
           - NetworkLoadBalancer
           - SubnetPublicCidrBlock
-          - SubnetExternalCidrBlock
-          - VPCId
+          - SubnetTransitCidrBlock
+          - VPCId   
+      - Label:
+          default: 'Transit Gateway Configuration'
+        Parameters:
+          - TransitGatewayId
+          - TransitGatewayDestinationCidrBlock  
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -58,12 +63,20 @@ Parameters:
     Default: 10.0.0.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The Public subnet CIDR block [required]
-  SubnetExternalCidrBlock:
+  SubnetTransitCidrBlock:
     Type: String
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block
-  VPCId:
+    Description: The transit subnet CIDR block
+  TransitGatewayId:
     Type: String
+    Default: ''
+    Description: The ID of a transit gateway
+  TransitGatewayDestinationCidrBlock:
+    Type: String
+    Default: ''
+    Description: The IPv4 CIDR block forward to TransitGateway
+  VPCId:
+    Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
     Description: The VPC id [required]
   Environment:
@@ -83,25 +96,11 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  PrivateSubnetExists:
-    !Not [ !Equals [ !Ref SubnetExternalCidrBlock, '' ] ]
-  NetworkLoadBalancerExists:
-    !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
+  NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
+  TransitGatewayExists: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
 
 Resources:
   # Subnet
-  SubnetExternal:
-    Condition: PrivateSubnetExists
-    Type: 'AWS::EC2::Subnet'
-    Properties:
-      AvailabilityZone: !Ref AvailabilityZone
-      CidrBlock: !Ref SubnetExternalCidrBlock
-      Tags:
-        - Key: Name
-          Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-ext
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      VpcId: !Ref VPCId
   SubnetPublic:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -113,24 +112,18 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
-  # Route Table
-  RouteTableExternal:
-    Condition: PrivateSubnetExists
-    Type: 'AWS::EC2::RouteTable'
-    Properties: 
-      VpcId: !Ref VPCId
+  SubnetTransit:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      CidrBlock: !Ref SubnetTransitCidrBlock
       Tags:
         - Key: Name
-          Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-ext
+          Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-transit
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  RouteExternalToNATGateway:
-    Condition: PrivateSubnetExists
-    Type: 'AWS::EC2::Route'
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway
-      RouteTableId: !Ref RouteTableExternal
+      VpcId: !Ref VPCId
+  # Route Table
   RouteTablePublic:
     Type: 'AWS::EC2::RouteTable'
     Properties: 
@@ -140,26 +133,55 @@ Resources:
           Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-pub
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RouteTableTransit:
+    Type: 'AWS::EC2::RouteTable'
+    Properties: 
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-transit
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  RoutePublicToTransitGateway:
+    Condition: TransitGatewayExists
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !Ref RouteTablePublic
   RoutePublicToInternetGateway:
     Type: 'AWS::EC2::Route'
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGatewayId
       RouteTableId: !Ref RouteTablePublic
-  RouteTableExternalAssociation:
-    Condition: PrivateSubnetExists
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Properties: 
-      RouteTableId: !Ref RouteTableExternal
-      SubnetId: !Ref SubnetExternal
+  RouteTransitToTransitGateway:
+    Condition: TransitGatewayExists
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !Ref RouteTableTransit
+  RouteTransitToNATGateway:
+    Condition: TransitGatewayExists
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+      RouteTableId: !Ref RouteTableTransit
   RouteTablePublicAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties: 
       RouteTableId: !Ref RouteTablePublic
       SubnetId: !Ref SubnetPublic
+  RouteTableTransitAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RouteTableTransit
+      SubnetId: !Ref SubnetTransit
   # Elastic IP
   EIPForNatGateway:
-    Condition: PrivateSubnetExists
+    Condition: TransitGatewayExists
     Type: 'AWS::EC2::EIP'
     Properties:
       Domain: !Ref VPCId
@@ -180,7 +202,7 @@ Resources:
           Value: !Ref TagValue
   # NatGateway
   NatGateway:
-    Condition: PrivateSubnetExists
+    Condition: TransitGatewayExists
     Type: 'AWS::EC2::NatGateway'
     Properties: 
       AllocationId: !GetAtt EIPForNatGateway.AllocationId
@@ -192,7 +214,7 @@ Resources:
           Value: !Ref TagValue
   # CloudWatch Alarm
   CloudWatchAlarmNATGateway:
-    Condition: PrivateSubnetExists
+    Condition: TransitGatewayExists
     Type: 'AWS::Serverless::Application'
     Properties:
       Parameters:
@@ -206,19 +228,30 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+
 Outputs:
-  SubnetId:
+  PublicSubnetId:
     Description: Subnet ID
     Value: !Ref SubnetPublic
+  TransitSubnetId:
+    Description: Subnet ID
+    Value: !Ref SubnetTransit
   NetworkLoadBalancerIPAllocationId:
-    Condition: NetworkLoadBalancerExists
     Description: Internet GW IP address
-    Value: !GetAtt EIPForNLB.AllocationId
+    Value: !If
+      - NetworkLoadBalancerExists
+      - !GetAtt EIPForNLB.AllocationId
+      - ''
   NetworkLoadBalancerIP:
-    Condition: NetworkLoadBalancerExists
     Description: Internet GW IP address
-    Value: !Ref EIPForNLB
+    Value: !If
+       - NetworkLoadBalancerExists
+       - !Ref EIPForNLB
+       - ''
   NatGatewayIP:
-    Condition: PrivateSubnetExists
+    Condition: TransitGatewayExists
     Description: NAT GW IP address
-    Value: !Ref EIPForNatGateway
+    Value: !If
+      - TransitGatewayExists
+      - !Ref EIPForNatGateway
+      - ''
