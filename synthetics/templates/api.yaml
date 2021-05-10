@@ -21,6 +21,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment 
           - TagKey
           - TagValue
 
@@ -53,7 +54,14 @@ Parameters:
     Default: '' 
   SNSForDeploymentArn:
     Type: String
-    Default: '' 
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -109,6 +117,8 @@ Resources:
                     cloudwatch:namespace: CloudWatchSynthetics
       RoleName: !Sub 'SyntheticsRole-${CanaryName}-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Synthetics
@@ -200,6 +210,8 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForSynthetics:
@@ -267,6 +279,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -278,4 +291,5 @@ Resources:
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue

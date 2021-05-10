@@ -16,6 +16,13 @@ Parameters:
     Type: String
     Default: DefaultSecuritySettings
     Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -135,6 +142,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub '${LogicalNamePrefix}-InspectorEvents-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Inspector

@@ -31,7 +31,14 @@ Parameters:
     Description: Enable or disable cross region audit [required]  
   TargetResourceArn:
     Type: String
-    Default: ''  
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -102,7 +109,9 @@ Resources:
             MetricName: AWSManagedRulesAmazonIpReputationList
             SampledRequestsEnabled: false
       Scope: !Ref Scope
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VisibilityConfig: 

@@ -29,6 +29,13 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
     Description: Required tag key [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
     
 Conditions:
   CreateRemediationResources:
@@ -125,6 +132,9 @@ Resources:
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref RequiredTagValue
   LambdaCheckRequiredTagsPermission:
     Type: 'AWS::Lambda::Permission'
     Properties:
@@ -169,6 +179,9 @@ Resources:
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref RequiredTagValue
   LambdaDeleteUnapplicableResourcesPermission:
     Type: 'AWS::Lambda::Permission'
     Properties:

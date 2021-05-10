@@ -40,6 +40,13 @@ Parameters:
   SnsTopicARN:
     Type: String
     AllowedPattern: .+
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -50,8 +57,7 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
-  CreateCentralizedResources:
-    !Equals [ !Ref AuditOtherRegions, ENABLED ]
+  CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
 
 Resources:
   # IAM Role
@@ -80,6 +86,8 @@ Resources:
                   - !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
       RoleName: !Sub '${LogicalNamePrefix}-CloudTrail-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudTrail
@@ -109,6 +117,8 @@ Resources:
       S3BucketName: !Ref S3ForCloudTrail
       TrailName: !Sub ${LogicalNamePrefix}
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # KMS
@@ -178,6 +188,8 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Set a S3 bucket policy in order to avoid 'InsufficientS3BucketPolicyException'.

@@ -71,6 +71,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment 
           - TagKey
           - TagValue
 
@@ -265,7 +266,14 @@ Parameters:
     Default: ''   
   SNSForDeploymentArn:
     Type: String
-    Default: ''  
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -289,6 +297,7 @@ Conditions:
   CreateWAFForCloudFront: !And [!Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref WebACL, ENABLED ] ]
   CreateWAFForALB: !And [!Equals [ !Ref CloudFrontState, DISABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
@@ -324,12 +333,18 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn        
         VPCId: !Ref VPC
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -362,12 +377,18 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn 
         VPCId: !Ref VPC
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -410,12 +431,18 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         VPCId: !Ref VPC
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/autoscaling.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
   DataLifecycleManager:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -427,12 +454,18 @@ Resources:
       Parameters:
         DailySnapshotScheduledAt: !Ref EC2DailySnapshotScheduledAt
         LogicalNamePrefix: !Ref AWS::StackName
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/dlm.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
   SystemsManager:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -452,13 +485,19 @@ Resources:
         SNSForDeploymentArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn 
+          - !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ssm.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/ssm.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ssm.yaml
   WAF:
     Condition: CreateWAFForALB
     Type: AWS::CloudFormation::Stack
@@ -471,12 +510,18 @@ Resources:
       Parameters:
         LogicalNamePrefix: !Ref AWS::StackName
         TargetResourceArn: !GetAtt AutoScaling.Outputs.LoadBalancerArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
   CloudFront:
     Condition: CreateCloudFront
     Type: AWS::CloudFormation::Stack
@@ -517,12 +562,18 @@ Resources:
           - ''
         SNSForAlertArn: !Ref SNSForAlertArn
         SNSForDeploymentArn: !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/cloudfront.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
   Route53Resolver:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -532,15 +583,21 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        SecurityGroupIds: !Ref SecurityGroupWeb
+        SecurityGroupId: !Ref SecurityGroupWeb
         SubnetId1: !GetAtt Az1.Outputs.SubnetId
         SubnetId2: !GetAtt Az2.Outputs.SubnetId
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagKey
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/route53.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/route53.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/route53.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: 'AWS::Serverless::Application'
@@ -556,6 +613,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -567,6 +625,7 @@ Resources:
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
   IAMRoleForEC2:
@@ -586,6 +645,8 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
       RoleName: !Sub '${AWS::StackName}-AWSEC2Role-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForVPCFlowLog:
@@ -614,6 +675,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub '${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # InstanceProfile
@@ -774,6 +837,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
         SemanticVersion: 1.3.2
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   S3ForAccessLog:
     Condition: CustomLogBucketName
@@ -798,6 +862,8 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:

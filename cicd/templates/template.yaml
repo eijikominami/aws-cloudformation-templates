@@ -137,6 +137,7 @@ Conditions:
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
   DeploySystemsManager: !Equals [ !Ref WebServers, SystemsManager-Only]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
+  Development: !Equals [ !Ref GitHubBranchName, develop]
 
 Resources:
   # Nested Stack
@@ -155,6 +156,10 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !If
+          - Development
+          - development
+          - production
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -166,6 +171,10 @@ Resources:
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !If
+          - Development
+          - development
+          - production
         createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForCodeStar:
@@ -235,6 +244,11 @@ Resources:
                 Effect: Allow
       RoleName: !Sub 'CICD-CodeBuild-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCloudWatchEvents:
@@ -260,6 +274,11 @@ Resources:
                 Effect: Allow
       RoleName: !Sub 'CICD-CloudWatchEvents-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCodePipeline:
@@ -401,6 +420,11 @@ Resources:
                 Effect: Allow
       RoleName: !Sub 'CICD-CodePipeline-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCloudFormation:
@@ -418,6 +442,11 @@ Resources:
           - arn:aws:iam::aws:policy/AdministratorAccess
       RoleName: !Sub 'CICD-CloudFormation-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CodeStar Connection
@@ -602,7 +631,10 @@ Resources:
                 ParameterOverrides: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Ref AWS::NoValue
-                  - !Sub '{"ArtifactBacketInVirginia": "${ArtifactBacketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                  - !If 
+                    - Development
+                    - !Sub '{"ArtifactBacketInVirginia": "${ArtifactBacketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"ArtifactBacketInVirginia": "${ArtifactBacketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CICD.json  
@@ -632,7 +664,10 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::global/templates/template.yaml
-                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}"}'
+                  ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
@@ -663,7 +698,10 @@ Resources:
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                 RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                 TemplatePath: Source-CloudFormationTemplatesArtifact::security/templates/template.yaml
-                ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}}'
+                ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings.json
@@ -691,6 +729,10 @@ Resources:
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                 RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                 TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
+                ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"Environment": "development","RequiredTagKey": "${TagKey}","RequiredTagValue": "${TagValue}"}'
+                    - !Sub '{"RequiredTagKey": "${TagKey}","RequiredTagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
@@ -719,7 +761,10 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: BuildArtifact-Notification::packaged.yaml
-                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings"}'
+                  ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Notification.json
@@ -752,8 +797,14 @@ Resources:
                   TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
                   ParameterOverrides: !If
                     - DeployGlobalSettings
-                    - '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
-                    - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
+                    - !If 
+                      - Development
+                      - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                      - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !If 
+                      - Development
+                      - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                      - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}StaticWebsiteHosting.json
@@ -788,7 +839,10 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::edge/templates/realtime-dashboard.yaml
-                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}"}'
+                  ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}RealtimeDashboard.json
@@ -821,8 +875,14 @@ Resources:
                   TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/template.yaml
                   ParameterOverrides: !If
                     - DeployGlobalSettings
-                    - '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
-                    - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                    - !If 
+                      - Development
+                      - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                      - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !If 
+                      - Development
+                      - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                      - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}WebServers.json
@@ -857,7 +917,10 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/ssm.yaml
-                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                  ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SystemsManager.json
@@ -888,7 +951,10 @@ Resources:
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::cicd/templates/codebuild.yaml
-                  ParameterOverrides: '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}}'
+                  ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}UploadArtifacts.json
@@ -907,6 +973,11 @@ Resources:
               - !Ref AWS::NoValue
           Name: Deploy
       Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm
@@ -929,6 +1000,10 @@ Resources:
           - !Ref SNSForDeploymentArn
         ProjectName: !Ref CodeBuildForSAM
       Tags:
+        environment: !If
+          - Development
+          - development
+          - production
         createdby: !Ref TagValue
   AlarmCodeBuildForNestedStack:
     Type: 'AWS::Serverless::Application'
@@ -949,6 +1024,10 @@ Resources:
           - !Ref SNSForDeploymentArn
         ProjectName: !Ref CodeBuildForNestedStack
       Tags:
+        environment: !If
+          - Development
+          - development
+          - production
         createdby: !Ref TagValue
   AlarmEventsForCodePipeline:
     Type: 'AWS::Serverless::Application'
@@ -969,6 +1048,10 @@ Resources:
           - !Ref SNSForDeploymentArn
         EventsRuleName: !Ref CodePipelineEvents
       Tags:
+        environment: !If
+          - Development
+          - development
+          - production
         createdby: !Ref TagValue
   # CodeStar
   NotificationRule:
@@ -995,6 +1078,10 @@ Resources:
             - !Ref SNSForDeploymentArn
           TargetType: SNS
       Tags:
+        environment: !If
+          - Development
+          - development
+          - production
         createdby: !Ref TagValue
   # S3
   S3ForArtifact:
@@ -1011,6 +1098,11 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
       Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForArtifact:

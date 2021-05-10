@@ -132,6 +132,13 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: VPC Id [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -322,6 +329,8 @@ Resources:
             HostedZoneId: !Ref Route53HostedZoneId
         - !Ref AWS::NoValue
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Route53

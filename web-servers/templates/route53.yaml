@@ -2,8 +2,8 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/web-servers/route53 creates a Route53 Resolver.
 
 Parameters:
-  SecurityGroupIds:
-    Type: CommaDelimitedList
+  SecurityGroupId:
+    Type: String
     AllowedPattern: .+
     Description: The ID of one or more security groups that control access to this VPC.   
   SubnetId1:
@@ -18,6 +18,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The ID of the subnet that DNS queries originate from.
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -47,7 +54,10 @@ Resources:
           - SubnetId: !Ref SubnetId3
           - !Ref AWS::NoValue
       Name: !Sub rslvr-in-${AWS::StackName}-${AWS::Region}
-      SecurityGroupIds: !Split [ ',', !Ref SecurityGroupIds ]
-      Tags: 
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue

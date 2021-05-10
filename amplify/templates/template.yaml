@@ -17,7 +17,8 @@ Metadata:
           - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
-        Parameters: 
+        Parameters:
+          - Environment 
           - TagKey
           - TagValue
 
@@ -37,6 +38,13 @@ Parameters:
   SNSForDeploymentArn:
     Type: String
     Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -65,6 +73,8 @@ Resources:
           - arn:aws:iam::aws:policy/AdministratorAccess
       RoleName: !Sub '${AWS::StackName}-AmplifyBackend-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CodeCommit
@@ -74,6 +84,8 @@ Resources:
       RepositoryDescription: !Ref DomainName
       RepositoryName: !Ref RepositoryName
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Triggers:
@@ -104,6 +116,8 @@ Resources:
       Name: !Ref RepositoryName
       Repository: !GetAtt CodeCommit.CloneUrlHttp
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AmplifyBranchDev:      
@@ -117,6 +131,8 @@ Resources:
         - Name: USER_BRANCH
           Value: dev
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AmplifyBranchProd:      
@@ -130,6 +146,8 @@ Resources:
         - Name: USER_BRANCH
           Value: prod
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AmplifyDomainDev:
@@ -183,6 +201,7 @@ Resources:
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
 
 Outputs:

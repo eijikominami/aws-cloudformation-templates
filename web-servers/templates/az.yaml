@@ -66,6 +66,13 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The VPC id [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -197,6 +204,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
         SemanticVersion: 1.3.2
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
 Outputs:
   SubnetId:

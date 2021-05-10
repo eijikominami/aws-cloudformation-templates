@@ -28,6 +28,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment 
           - TagKey
           - TagValue
 
@@ -77,7 +78,14 @@ Parameters:
     Default: '' 
   SNSForDeploymentArn:
     Type: String
-    Default: '' 
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -92,6 +100,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
@@ -108,10 +117,16 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/iam.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/iam.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/iam.yaml
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SecurityHub:
@@ -128,8 +143,13 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securityhub.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securityhub.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securityhub.yaml
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   Inspector:
@@ -142,10 +162,16 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         LogicalNamePrefix: !Ref AWS::StackName
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/inspector.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/inspector.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/inspector.yaml
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   GuardDuty:
@@ -161,8 +187,13 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/guardduty.yaml 
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/guardduty.yaml 
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/guardduty.yaml
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudTrail:
@@ -181,10 +212,16 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/cloudtrail.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/cloudtrail.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/cloudtrail.yaml
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   Config:
@@ -204,10 +241,16 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         LogicalNamePrefix: !Ref AWS::StackName
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/config.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   Detective:
@@ -219,8 +262,13 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/detective.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/detective.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/detective.yaml
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SNSForAlert:
@@ -238,6 +286,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -249,6 +298,7 @@ Resources:
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM Role
   IAMRoleForAWSSupport:
@@ -267,6 +317,8 @@ Resources:
         - arn:aws:iam::aws:policy/AWSSupportAccess
       RoleName: !Sub '${AWS::StackName}-AWSSupport-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # S3
@@ -292,6 +344,8 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:

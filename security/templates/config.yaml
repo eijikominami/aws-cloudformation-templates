@@ -51,6 +51,13 @@ Parameters:
   SnsTopicARN:
     Type: String
     AllowedPattern: .+
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -115,6 +122,8 @@ Resources:
                   - '*'
       RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForConfigRules-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForConfigurationAggregator:
@@ -133,6 +142,8 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSConfigRoleForOrganizations
       RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForAggregator-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForLambda:
@@ -174,6 +185,8 @@ Resources:
                 Resource: '*' 
       RoleName: !Sub '${LogicalNamePrefix}-LambdaIAM-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForSSM:
@@ -207,6 +220,8 @@ Resources:
                   - '*'
       RoleName: !Sub '${LogicalNamePrefix}-SSM-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForVPCFlowLog:
@@ -235,6 +250,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub '${LogicalNamePrefix}-AWSVPCFlowLogRole-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Config
@@ -361,6 +378,8 @@ Resources:
             description: Automation Assume Role Arn
       DocumentType: Automation
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CIS 1.3 – Ensure credentials unused for 90 days or greater are disabled
@@ -447,6 +466,8 @@ Resources:
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.8
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Timeout: 3
@@ -478,6 +499,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
         SemanticVersion: 1.3.2
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # CIS 2.9 – Ensure VPC flow logging is enabled in all VPCs 
   ConfigVpcFlowLogsEnabled:
@@ -559,6 +581,8 @@ Resources:
             description: Resource ID
       DocumentType: Automation
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CIS 4.1 – Ensure no security groups allow ingress from 0.0.0.0/0 to port 22
@@ -674,6 +698,8 @@ Resources:
             description: Group Id
       DocumentType: Automation
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # PCI S3.4 S3 buckets should have server-side encryption enabled 
@@ -730,6 +756,8 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Set a S3 bucket policy in order to avoid 'InsufficientS3BucketPolicyException'.
