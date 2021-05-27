@@ -135,7 +135,7 @@ Conditions:
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
-  DeploySystemsManager: !Equals [ !Ref WebServers, SystemsManager-Only]
+  DeploySystemsManager: !Equals [ !Ref WebServers, SYSTEMS_MANAGER_ONLY]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]
 
