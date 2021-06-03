@@ -243,6 +243,7 @@ Resources:
       Description: A role required for Lambda to access X-Ray, KMS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: !Sub '${AWS::StackName}-AWSLambdaBasicExecutionRole-${AWS::Region}'
           PolicyDocument:

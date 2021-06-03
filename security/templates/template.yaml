@@ -236,10 +236,14 @@ Resources:
         AuditOtherAccounts: !Ref AuditOtherAccounts
         AuditOtherRegions: !Ref AuditOtherRegions
         AutoRemediation: !Ref AutoRemediation
-        SnsTopicARN: !If
+        SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
         LogicalNamePrefix: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -266,6 +270,28 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/detective.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/detective.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Macie:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        LogicalNamePrefix: !Ref AWS::StackName
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/macie.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/macie.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

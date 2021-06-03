@@ -16,6 +16,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment
           - LogicalNamePrefix
           - TagKey
           - TagValue
