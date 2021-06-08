@@ -550,6 +550,8 @@ Resources:
           - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}
           LogFilePrefix: !Sub S3-${DomainName}/
         - !Ref AWS::NoValue
+      MetricsConfigurations: 
+        - Id: ALL
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true

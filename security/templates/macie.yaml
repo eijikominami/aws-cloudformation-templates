@@ -126,8 +126,3 @@ Resources:
     Properties:
         FindingPublishingFrequency: ONE_HOUR
         Status: ENABLED
-  MacieSessionLogGroup:
-    Type: 'AWS::Logs::LogGroup'
-    Properties: 
-      LogGroupName: /aws/macie/classificationjobs
-      RetentionInDays: 60
