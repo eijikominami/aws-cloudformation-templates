@@ -44,7 +44,14 @@ Parameters:
     Type: Number
     Default: 7
     MinValue: 1
-    Description: The number of snapshots to retain for each volume [required]  
+    Description: The number of snapshots to retain for each volume [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -87,6 +94,8 @@ Resources:
                 Resource: 'arn:aws:ec2:*::snapshot/*'
       RoleName: !Sub '${LogicalNamePrefix}-DataLifecycleManager-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # DLM

@@ -51,7 +51,9 @@ Properties:
     ApiMethodName : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/apigateway.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/apigateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -60,7 +62,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -107,7 +109,9 @@ Properties:
     SNSTopicArn : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/codebuild.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/codebuild.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -116,7 +120,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -159,7 +163,9 @@ Properties:
     SNSTopicArn : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -168,7 +174,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -209,7 +215,9 @@ Properties:
     SNSTopicArn : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/dynamodb.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -218,7 +226,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -260,7 +268,9 @@ Properties:
     SNSTopicArn : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/ec2.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -269,7 +279,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -311,7 +321,9 @@ Properties:
     SNSTopicArn : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/events.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/events.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -320,7 +332,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -368,7 +380,9 @@ Properties:
     SNSTopicArn : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/kinesis.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -377,7 +391,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -428,7 +442,9 @@ Properties:
     TimeoutMilliseconds: Integer
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/lambda.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/lambda.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -437,7 +453,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -479,7 +495,9 @@ Properties:
     SNSTopicArn : String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/natgateway.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/natgateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -488,7 +506,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -529,7 +547,9 @@ Properties:
     SNSTopicName: String
   Tags: 
     - Tag
-  TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/sns.yaml
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/sns.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -538,7 +558,7 @@ Type: 'AWS::Serverless::Application'
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 1.3.2
+    SemanticVersion: 1.3.7
   NotificationARNs: 
     - String
   Parameters: 

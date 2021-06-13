@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/network/vpn creates a VPN connection.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Network Configuration'
+        Parameters: 
+          - CustomerGatewayOutsideIpAddress
+          - StaticRoutesOnly
+          - TransitGatewayId
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
+Parameters:
+  CustomerGatewayOutsideIpAddress:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Description: The Internet-routable IP address for the customer gateway's outside interface [required]
+  StaticRoutesOnly:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+    Description: Indicates whether the VPN connection uses static routes only [required] 
+  TransitGatewayId:
+    Type: String
+    Default: .+
+    Description: The ID of the transit gateway associated with the VPN connection [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  LogicalNamePrefix:
+    Type: String
+    Default: TransitGateway
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  CustomerGateway:
+    Type: AWS::EC2::CustomerGateway
+    Properties: 
+      BgpAsn: 65000
+      IpAddress: !Ref CustomerGatewayOutsideIpAddress
+      Tags: 
+        - Key: Name
+          Value: !Sub cgw-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: ipsec.1
+  VPNConnection:
+    Type: AWS::EC2::VPNConnection
+    Properties: 
+      CustomerGatewayId: !Ref CustomerGateway
+      StaticRoutesOnly: !Ref StaticRoutesOnly
+      Tags: 
+        - Key: Name
+          Value: !Sub vpn-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGatewayId
+      Type: ipsec.1

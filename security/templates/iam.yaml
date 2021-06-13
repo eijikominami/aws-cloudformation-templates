@@ -11,6 +11,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment 
           - TagKey
           - TagValue
 
@@ -18,6 +19,13 @@ Parameters:
   SnsTopicARN:
     Type: String
     AllowedPattern: .+
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -42,9 +50,11 @@ Resources:
       - ServiceLinkedRoleForAccessAnalyzer
     Type: AWS::AccessAnalyzer::Analyzer
     Properties: 
-      Tags: 
-      - Key: !Ref TagKey
-        Value: !Ref TagValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
       Type: ACCOUNT
   EventBridgeForAccessAnalyzer:    
     Type: AWS::Events::Rule

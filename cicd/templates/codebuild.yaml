@@ -77,6 +77,13 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for deployment information
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -98,7 +105,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -107,6 +114,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -114,10 +122,11 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForCodeStar:
@@ -207,6 +216,8 @@ Resources:
                 Effect: Allow
       RoleName: !Sub 'UploadArtifacts-CodeBuild-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CodeBuild
@@ -352,7 +363,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -366,13 +377,14 @@ Resources:
           - !Ref SNSForDeploymentArn
         ProjectName: !Ref CodeBuildForMasterBranch
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   AlarmCodeBuildForTargetBranch:
     Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -386,13 +398,14 @@ Resources:
           - !Ref SNSForDeploymentArn
         ProjectName: !Ref CodeBuildForTargetBranch
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   AlarmCodeBuildForTags:
     Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -406,6 +419,7 @@ Resources:
           - !Ref SNSForDeploymentArn
         ProjectName: !Ref CodeBuildForTags
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # CodeStar
   NotificationRuleForMasterBranch:
@@ -432,6 +446,7 @@ Resources:
             - !Ref SNSForDeploymentArn
           TargetType: SNS
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   NotificationRuleForTargetBranch:
     DependsOn:
@@ -457,6 +472,7 @@ Resources:
             - !Ref SNSForDeploymentArn
           TargetType: SNS
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   NotificationRuleForTags:
     DependsOn:
@@ -482,4 +498,5 @@ Resources:
             - !Ref SNSForDeploymentArn
           TargetType: SNS
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
