@@ -59,10 +59,13 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive
   build:
     commands:
+      - sam validate --template ${CICD_SRC_DIR}/template.yaml
       - sam build --template ${CICD_SRC_DIR}/template.yaml --build-dir ${CICD_SRC_DIR}/.aws-sam/build
       - sam package --template-file ${CICD_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${CICD_DIST_DIR} --output-template-file ${CICD_SRC_DIR}/packaged.yaml
+      - sam validate --template ${NOTIFICATION_SAM_SRC_DIR}/template.yaml
       - sam build --template ${NOTIFICATION_SAM_SRC_DIR}/template.yaml --build-dir ${NOTIFICATION_SAM_SRC_DIR}/.aws-sam/build
       - sam package --template-file ${NOTIFICATION_SAM_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${NOTIFICATION_DIST_DIR} --output-template-file ${NOTIFICATION_SAM_SRC_DIR}/packaged.yaml
+      - sam validate --template ${SECURITY_CONFIG_RULES_SRC_DIR}/template.yaml
       - sam build --template ${SECURITY_CONFIG_RULES_SRC_DIR}/template.yaml --build-dir ${SECURITY_CONFIG_RULES_SRC_DIR}/.aws-sam/build
       - sam package --template-file ${SECURITY_CONFIG_RULES_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${SECURITY_CONFIG_RULES_DIST_DIR} --output-template-file ${SECURITY_CONFIG_RULES_SRC_DIR}/packaged.yaml
       - aws cloudformation package --template-file ${EC2_SRC_DIR}/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${EC2_DIST_DIR} --output-template-file ${EC2_SRC_DIR}/packaged.yaml
