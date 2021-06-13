@@ -1,0 +1,367 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWSCloudFormationSamples/elemental/medialive sets Elemental MediaLive.
+
+Parameters:
+  AudioBitrate:
+    Type: Number
+    Default: 96000
+    Description: Average audio bitrate in bits/second [required]
+  ChannelClass:
+    Type: String
+    AllowedValues:
+      - STANDARD
+      - SINGLE_PIPELINE  
+    Default: STANDARD
+    Description: Select the class of channel you intend to attach this input to [required] 
+  AutoInputFailover:
+    Type: String
+    AllowedValues:
+      - ENABLED
+      - DISABLED  
+    Default: ENABLED
+    Description: Enable or disable automatic input failover [required]
+  FramerateDenominator:
+    Type: Number
+    Default: 1001
+    Description: Framerate denominator [required]
+  FramerateNumerator:
+    Type: Number
+    Default: 30000
+    Description: Framerate numerator [required]  
+  GopNumBFrames:
+    Type: Number
+    Default: 3
+    Description: Number of B-frames between reference frames [required]
+  GopSize:
+    Type: Number
+    Default: 60
+    Description: GOP size (keyframe interval) in units of either frames or seconds per gopSizeUnits [required]
+  H264Profile:
+    Type: String
+    AllowedValues:
+      - BASELINE
+      - HIGH
+      - HIGH_10BIT
+      - HIGH_422
+      - HIGH_422_10BIT
+      - MAIN
+    Default: HIGH
+    Description: H.264 Profile [required]
+  H264Level:
+    Type: String
+    AllowedValues:
+      - H264_LEVEL_1
+      - H264_LEVEL_1_1
+      - H264_LEVEL_1_2
+      - H264_LEVEL_1_3
+      - H264_LEVEL_2
+      - H264_LEVEL_2_1
+      - H264_LEVEL_2_2
+      - H264_LEVEL_3
+      - H264_LEVEL_3_1
+      - H264_LEVEL_3_2
+      - H264_LEVEL_4
+      - H264_LEVEL_4_1
+      - H264_LEVEL_4_2
+      - H264_LEVEL_5
+      - H264_LEVEL_5_1
+      - H264_LEVEL_5_2
+      - H264_LEVEL_AUTO
+    Default: H264_LEVEL_4_1
+    Description: H.264 Level [required]
+  Height:
+    Type: Number
+    Default: 540
+    Description: Output video height, in pixels [required]
+  MediaPackageChannelId:
+    Type: String
+    AllowedPattern: .+
+    Default: 'MediaPackage'
+    Description: MediaPackage channel id [required]
+  LogicalNamePrefix:
+    Type: String
+    Default: MediaLive
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  StreamKey:
+    Type: String
+    Default: stream
+    Description: A unique name for the location the RTMP stream is being pushed to [required]
+  VideoBitrate:
+    Type: Number
+    Default: 2200000
+    Description: Average video bitrate in bits/second [required]
+  Width:
+    Type: Number
+    Default: 960
+    Description: Output video width, in pixels [required]
+  WhitelistRules:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Default: 0.0.0.0/0
+    Description: A list of one or more IPv4 CIDR addresses to allow [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples 
+    AllowedPattern: .+
+
+Conditions:
+  CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
+  CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
+
+Resources:
+  # IAM Role
+  IAMRoleForMediaLive:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: medialive.amazonaws.com 
+            Action: 'sts:AssumeRole'
+      Description: A role required for MediaLive to access S3.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+      Policies:
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaLivePolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:ListBucket'
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                  - 's3:DeleteObject'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'mediastore:ListContainers'
+                  - 'mediastore:PutObject'
+                  - 'mediastore:GetObject'
+                  - 'mediastore:DeleteObject'
+                  - 'mediastore:DescribeObject'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'logs:DescribeLogStreams'
+                  - 'logs:DescribeLogGroups'
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow
+                Action:
+                  - 'mediaconnect:ManagedDescribeFlow'
+                  - 'mediaconnect:ManagedAddOutput'
+                  - 'mediaconnect:ManagedRemoveOutput'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'ec2:describeSubnets'
+                  - 'ec2:describeNetworkInterfaces'
+                  - 'ec2:createNetworkInterface'
+                  - 'ec2:createNetworkInterfacePermission'
+                  - 'ec2:deleteNetworkInterface'
+                  - 'ec2:deleteNetworkInterfacePermission'
+                  - 'ec2:describeSecurityGroups'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'mediapackage:DescribeChannel'
+                Resource: '*'
+      RoleName: !Sub '${LogicalNamePrefix}-MediaLive-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # MediaLive
+  MediaLiveChannel:
+    Type: AWS::MediaLive::Channel
+    Properties: 
+      ChannelClass: !Ref ChannelClass
+      Destinations: 
+        - Id: MediaPackageDestinationId
+          MediaPackageSettings: 
+            - ChannelId: !Ref MediaPackageChannelId
+      EncoderSettings:
+        AudioDescriptions: 
+          - AudioTypeControl: FOLLOW_INPUT
+            CodecSettings: 
+              AacSettings: 
+                Bitrate: !Ref AudioBitrate
+                CodingMode: CODING_MODE_2_0
+                InputType: NORMAL
+                Profile: LC
+                RateControlMode: CBR
+                RawFormat: NONE
+                SampleRate: 48000
+                Spec: MPEG4
+            LanguageCodeControl: FOLLOW_INPUT
+            Name: !Sub audio_2_aac${AudioBitrate}
+        OutputGroups: 
+          - Name: MediaPackage Group
+            OutputGroupSettings: 
+              MediaPackageGroupSettings: 
+                Destination:
+                  DestinationRefId: MediaPackageDestinationId
+            Outputs: 
+              - AudioDescriptionNames: 
+                  - !Sub audio_2_aac${AudioBitrate}
+                OutputName: !Sub _${Width}x${Height}_${VideoBitrate}
+                OutputSettings: 
+                  MediaPackageOutputSettings: {}
+                VideoDescriptionName: !Sub video_${Width}_${Height}
+        TimecodeConfig: 
+          Source: SYSTEMCLOCK
+        VideoDescriptions: 
+          - CodecSettings: 
+              H264Settings: 
+                AdaptiveQuantization: HIGH
+                AfdSignaling: NONE
+                Bitrate: !Ref VideoBitrate
+                ColorMetadata: INSERT
+                EntropyEncoding: CABAC
+                FlickerAq: ENABLED
+                FramerateControl: SPECIFIED
+                FramerateDenominator: !Ref FramerateDenominator
+                FramerateNumerator: !Ref FramerateNumerator
+                GopBReference: ENABLED
+                GopClosedCadence: 1
+                GopNumBFrames: !Ref GopNumBFrames
+                GopSize: !Ref GopSize
+                GopSizeUnits: FRAMES
+                Level: !Ref H264Level
+                LookAheadRateControl: HIGH
+                NumRefFrames: 1
+                ParControl: SPECIFIED
+                Profile: !Ref H264Profile
+                RateControlMode: CBR
+                ScanType: PROGRESSIVE
+                SceneChangeDetect: ENABLED
+                SpatialAq: ENABLED
+                SubgopLength: FIXED
+                Syntax: DEFAULT
+                TemporalAq: ENABLED
+                TimecodeInsertion: DISABLED
+            Height: !Ref Height
+            Name: !Sub video_${Width}_${Height}
+            Sharpness: 50
+            Width: !Ref Width
+      InputAttachments: 
+        - AutomaticInputFailoverSettings: !If
+          - CreateTwoInput
+          - ErrorClearTimeMsec: 60000
+            FailoverConditions: 
+              - FailoverConditionSettings:
+                  AudioSilenceSettings: 
+                    AudioSilenceThresholdMsec: 15000
+              - FailoverConditionSettings:
+                  InputLossSettings: 
+                    InputLossThresholdMsec: 15000
+              - FailoverConditionSettings:
+                  VideoBlackSettings: 
+                    BlackDetectThreshold: 0.1
+                    VideoBlackThresholdMsec: 15000
+            InputPreference: EQUAL_INPUT_PREFERENCE
+            SecondaryInputId: !Ref MediaLiveInput1
+          - !Ref AWS::NoValue
+          InputAttachmentName: !Sub ${LogicalNamePrefix}-0
+          InputId: !Ref MediaLiveInput0
+          InputSettings: 
+            DeblockFilter: DISABLED
+            DenoiseFilter: DISABLED
+            FilterStrength: 1
+            InputFilter: AUTO
+            Smpte2038DataPreference: IGNORE
+            SourceEndBehavior: CONTINUE
+        - !If
+          - CreateTwoInput
+          - InputAttachmentName: !Sub ${LogicalNamePrefix}-1
+            InputId: !Ref MediaLiveInput1
+            InputSettings: 
+              DeblockFilter: DISABLED
+              DenoiseFilter: DISABLED
+              FilterStrength: 1
+              InputFilter: AUTO
+              Smpte2038DataPreference: IGNORE
+              SourceEndBehavior: CONTINUE
+          - !Ref AWS::NoValue
+      InputSpecification: 
+        Codec: AVC
+        MaximumBitrate: MAX_20_MBPS
+        Resolution: HD
+      LogLevel: ERROR
+      Name: !Ref LogicalNamePrefix
+      RoleArn: !GetAtt IAMRoleForMediaLive.Arn
+      Tags: 
+        createdby: !Ref TagValue
+  MediaLiveInput0:
+    Type: AWS::MediaLive::Input
+    Properties:
+      Destinations:
+        - StreamName: !Sub ${LogicalNamePrefix}-0/${StreamKey}-a
+        - !If
+          - CreateTwoPipelines
+          - StreamName: !Sub ${LogicalNamePrefix}-0/${StreamKey}-b
+          - !Ref AWS::NoValue
+      InputSecurityGroups: 
+        - !Ref MediaLiveInputSecurityGroup
+      Name: !Ref LogicalNamePrefix
+      Tags:
+        createdby: !Ref TagValue
+      Type: RTMP_PUSH
+  MediaLiveInput1:
+    Type: AWS::MediaLive::Input
+    Condition: CreateTwoInput
+    Properties: 
+      Destinations:
+        - StreamName: !Sub ${LogicalNamePrefix}-1/${StreamKey}-a
+        - !If
+          - CreateTwoPipelines
+          - StreamName: !Sub ${LogicalNamePrefix}-1/${StreamKey}-b
+          - !Ref AWS::NoValue
+      InputSecurityGroups: 
+        - !Ref MediaLiveInputSecurityGroup
+      Name: !Ref LogicalNamePrefix
+      Tags:
+        createdby: !Ref TagValue
+      Type: RTMP_PUSH
+  MediaLiveInputSecurityGroup:
+    Type: AWS::MediaLive::InputSecurityGroup
+    Properties: 
+      Tags:
+        createdby: !Ref TagValue
+      WhitelistRules: 
+        - Cidr: !Ref WhitelistRules
+
+Outputs:
+  ChannelId:
+    Description: Channel Id
+    Value: !Ref MediaLiveChannel
+  RtmpPrimary1:
+    Description: The RTMP primary address 1
+    Value: !Select [0, !GetAtt MediaLiveInput0.Destinations]
+  RtmpPrimary2:
+    Description: The RTMP primary address 2
+    Value: !If
+      - CreateTwoPipelines
+      - !Select [1, !GetAtt MediaLiveInput0.Destinations]
+      - ''
+  RtmpSecondary1:
+    Description: The RTMP secondary address 1
+    Value: !If
+      - CreateTwoInput
+      - !Select [0, !GetAtt MediaLiveInput1.Destinations]
+      - ''
+  RtmpSecondary2:
+    Description: The RTMP secondary address 2
+    Value: !If
+      - CreateTwoInput
+      - !Select [1, !GetAtt MediaLiveInput1.Destinations]
+      - ''
