@@ -203,7 +203,14 @@ Parameters:
     Default: '' 
   SNSForDeploymentArn:
     Type: String
-    Default: '' 
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -226,7 +233,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -235,6 +242,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${LogicalNamePrefix}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -242,10 +250,11 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
   IAMRoleForCloudFrontRealtimeLog:
@@ -278,6 +287,8 @@ Resources:
                   - !GetAtt KMSKey.Arn
       RoleName: !Sub '${LogicalNamePrefix}-CloudFrontRealtimeLog-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForLambda:
@@ -315,6 +326,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub '${LogicalNamePrefix}-Lambda-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForKinesisFirehose:
@@ -408,6 +421,8 @@ Resources:
                     'kms:EncryptionContext:aws:kinesis:arn': !GetAtt Kinesis.Arn
       RoleName: !Sub '${LogicalNamePrefix}-Firehose-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudFront
@@ -474,6 +489,8 @@ Resources:
         KeyId: alias/aws/kinesis
       ShardCount: !Ref KinesisShardCount
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchAlarmKinesis:
@@ -496,8 +513,9 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # Lambda
   Lambda:
@@ -615,6 +633,8 @@ Resources:
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.8
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Timeout: 60
@@ -639,8 +659,9 @@ Resources:
         FunctionResouceName: !Ref Lambda
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # Kinesis Firehose
   KinesisFirehose:
@@ -715,8 +736,9 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # S3
   S3ForKinesisFirehose:
@@ -740,6 +762,8 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # KMS
@@ -847,8 +871,9 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elasticsearch
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # EventBridge for ShutdownElasticSearchWorker
   CloudWatchEventsForShutdownElasticSearchWorker:
@@ -909,6 +934,8 @@ Resources:
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.8
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Timeout: 3
@@ -944,8 +971,9 @@ Resources:
         FunctionResouceName: !Ref LambdaShutdownElasticSearch
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # CloudWatch Dashboard
   Dashboard:

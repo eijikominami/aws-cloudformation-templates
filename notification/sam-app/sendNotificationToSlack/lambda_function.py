@@ -388,6 +388,9 @@ def createMGNMessage(message):
         else:
             text = ':japanese_ogre: 不明なイベントが発生しました。'
             color = "#961D13"
+    else:
+        text = ':japanese_ogre: 不明なイベントが発生しました。'
+        color = "#961D13"
 
     for resource in message['resources']:
         resources = resources + ' ' + resource

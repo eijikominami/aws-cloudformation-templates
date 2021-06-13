@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/web-servers/route53 creates a Route53 Resolver.
+
+Parameters:
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    AllowedPattern: .+
+    Description: The ID of one or more security groups that control access to this VPC.   
+  SubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    AllowedPattern: .+
+    Description: The ID of the subnet that DNS queries originate from.
+  SubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Default: ''
+    Description: The ID of the subnet that DNS queries originate from.
+  SubnetId3:
+    Type: AWS::EC2::Subnet::Id
+    Default: ''
+    Description: The ID of the subnet that DNS queries originate from.
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  SubnetId2Exists: !Not [ !Equals [ !Ref SubnetId2, '' ] ]
+  SubnetId3Exists: !Not [ !Equals [ !Ref SubnetId3, '' ] ]
+
+Resources:
+  Route53Resolver:
+    Type: AWS::Route53Resolver::ResolverEndpoint
+    Properties: 
+      Direction: INBOUND
+      IpAddresses: 
+        - SubnetId: !Ref SubnetId1
+        - !If
+          - SubnetId2Exists
+          - SubnetId: !Ref SubnetId2
+          - !Ref AWS::NoValue
+        - !If
+          - SubnetId3Exists
+          - SubnetId: !Ref SubnetId3
+          - !Ref AWS::NoValue
+      Name: !Sub rslvr-in-${AWS::StackName}-${AWS::Region}
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

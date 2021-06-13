@@ -92,6 +92,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable WebACL [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -110,6 +117,7 @@ Conditions:
   CreateCloudWatchAlarmCloudFrontBytesDownloaded: !And [ !Not [ !Equals [ !Ref CloudFrontBytesDownloadedPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateRoute53: !Not [ !Equals [ !Ref DomainName, '' ] ]
   CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
@@ -120,21 +128,28 @@ Resources:
       Parameters:
         LogicalNamePrefix: !Ref AWS::StackName
         Scope: CLOUDFRONT
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
   SNSForAlert:
     Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
   IAMRoleForBudget:
@@ -161,6 +176,8 @@ Resources:
                   - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       RoleName: !Sub '${AWS::StackName}-Budget-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue 
   IAMRoleForLambda:
@@ -201,6 +218,8 @@ Resources:
                 Resource: '*' 
       RoleName: !Sub '${AWS::StackName}-LambdaIAM-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Budget 
@@ -268,6 +287,8 @@ Resources:
             HostedZoneId: !Ref HostedZone
         - !Ref AWS::NoValue
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Route53
@@ -452,6 +473,8 @@ Resources:
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.8
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Timeout: 3
@@ -491,8 +514,9 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
     
 Outputs:

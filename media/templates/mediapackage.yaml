@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWSCloudFormationSamples/elemental/mediapackage sets Elemental MediaPackage.
+
+Parameters:
+  LogicalNamePrefix:
+    Type: String
+    Default: MediaPackage
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  StartoverWindowSeconds:
+    Type: Number
+    Default: 0
+    Description: Maximum duration seconds of content to retain for startover playback. [required]
+    MinValue: 0
+  SegmentDurationSeconds:
+    Type: String
+    Default: 3
+    Description: Duration (in seconds) of each fragment. [required]
+  VodSourceBucket:
+    Type: String
+    Default: ''
+    Description: The S3 bucket Name VOD contents exist.
+  VodDestinationBucket:
+    Type: String
+    Default: ''
+    Description: The S3 bucket Name LIVE-to-VOD contents are stored.
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples 
+    AllowedPattern: .+
+
+Conditions:
+  CreateVODWorkflow:
+    !Not [ !Equals [ !Ref VodSourceBucket, '' ] ]
+  CreateLiveToVODWorkflow:
+    !Not [ !Equals [ !Ref VodDestinationBucket, '' ] ]
+
+Resources:
+  # IAM Role
+  IAMRoleForMediaPackage:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: mediapackage.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for MediaPackage to access S3.
+      Policies:
+        # Allow MediaPackage to access S3 for VOD workflows.
+        - !If
+          - CreateVODWorkflow
+          - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaPackageS3ReadPolicy-${AWS::Region}'
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 's3:GetObject'
+                    - 's3:GetBucketLocation'
+                    - 's3:GetBucketRequestPayment'
+                    - 's3:ListBucket'
+                  Resource:
+                    - !Sub 'arn:aws:s3:::${VodSourceBucket}/*'
+                    - !Sub 'arn:aws:s3:::${VodSourceBucket}'
+          - !Ref AWS::NoValue
+        # Allow MediaPackage to access S3 for Live-to-VOD workflows.
+        - !If
+          - CreateLiveToVODWorkflow
+          - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaPackageS3WritePolicy-${AWS::Region}'
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 's3:PutObject'
+                    - 's3:ListBucket'
+                    - 's3:GetBucketLocation'
+                  Resource:
+                    - !Sub 'arn:aws:s3:::${VodDestinationBucket}/*'
+                    - !Sub 'arn:aws:s3:::${VodDestinationBucket}'
+          - !Ref AWS::NoValue
+        # Allow MediaPackage to access SecretManager.
+        - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaPackageSecretManagerPolicy-${AWS::Region}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'secretsmanager:GetSecretValue'
+                  - 'secretsmanager:DescribeSecret'
+                  - 'secretsmanager:ListSecrets'
+                  - 'secretsmanager:ListSecretVersionIds'
+                Resource:
+                  - '*'
+              - Effect: Allow
+                Action:
+                  - 'iam:GetRole'
+                  - 'iam:PassRole'
+                Resource:
+                  - '*'
+      RoleName: !Sub '${LogicalNamePrefix}-MediaPackage-${AWS::Region}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # MediaPackage
+  MediaPackageChannel:
+    Type: AWS::MediaPackage::Channel
+    Properties: 
+      Description: !Sub Media Package Channel for ${LogicalNamePrefix}
+      Id: !Ref LogicalNamePrefix
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaPackageOriginEndpoint:
+    Type: AWS::MediaPackage::OriginEndpoint
+    Properties: 
+      ChannelId: !Ref MediaPackageChannel
+      Description: !Sub Media Package OriginEndpoint for ${LogicalNamePrefix}
+      HlsPackage:
+        AdMarkers: NONE
+        IncludeIframeOnlyStream: false
+        SegmentDurationSeconds: !Ref SegmentDurationSeconds
+      Id: !Ref LogicalNamePrefix
+      ManifestName: !Ref LogicalNamePrefix
+      Origination: !If 
+        - CreateLiveToVODWorkflow
+        - DENY
+        - ALLOW
+      StartoverWindowSeconds: !Ref StartoverWindowSeconds
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeDelaySeconds: 0
+
+Outputs:
+  ChannelId:
+    Description: Channel Id
+    Value: !Ref MediaPackageChannel
+  EndpointUrl:
+    Description: Endpoint Url
+    Value: !GetAtt MediaPackageOriginEndpoint.Url

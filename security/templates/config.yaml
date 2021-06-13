@@ -14,7 +14,8 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
-          - SnsTopicARN
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -48,9 +49,21 @@ Parameters:
     Type: String
     Default: DefaultSecuritySettings
     Description: The custom prefix name [required]
-  SnsTopicARN:
+  SNSForAlertArn:
     Type: String
-    AllowedPattern: .+
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -115,6 +128,8 @@ Resources:
                   - '*'
       RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForConfigRules-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForConfigurationAggregator:
@@ -133,6 +148,8 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSConfigRoleForOrganizations
       RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForAggregator-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForLambda:
@@ -174,6 +191,8 @@ Resources:
                 Resource: '*' 
       RoleName: !Sub '${LogicalNamePrefix}-LambdaIAM-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForSSM:
@@ -205,8 +224,15 @@ Resources:
                   - 's3:PutEncryptionConfiguration'
                 Resource:
                   - '*'
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt IAMRoleForVPCFlowLog.Arn
       RoleName: !Sub '${LogicalNamePrefix}-SSM-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForVPCFlowLog:
@@ -235,6 +261,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub '${LogicalNamePrefix}-AWSVPCFlowLogRole-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Config
@@ -361,6 +389,8 @@ Resources:
             description: Automation Assume Role Arn
       DocumentType: Automation
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CIS 1.3 – Ensure credentials unused for 90 days or greater are disabled
@@ -447,6 +477,8 @@ Resources:
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.8
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Timeout: 3
@@ -471,13 +503,16 @@ Resources:
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
-        SNSTopicArn: !Ref SnsTopicARN
+        SNSTopicArn: !Ref SNSForDeploymentArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
+      NotificationARNs:
+        - !Ref SNSForDeploymentArn
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # CIS 2.9 – Ensure VPC flow logging is enabled in all VPCs 
   ConfigVpcFlowLogsEnabled:
@@ -543,7 +578,7 @@ Resources:
               DeliverLogsPermissionArn: "{{ DeliverLogsPermissionArn }}"
               LogDestinationType: cloud-watch-logs
               LogGroupName: "/aws/vpc/{{ ResourceId }}"
-              ResourceId.N:
+              ResourceIds:
                 - "{{ ResourceId }}"
               ResourceType: VPC
               TrafficType: ALL
@@ -559,6 +594,8 @@ Resources:
             description: Resource ID
       DocumentType: Automation
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CIS 4.1 – Ensure no security groups allow ingress from 0.0.0.0/0 to port 22
@@ -674,6 +711,8 @@ Resources:
             description: Group Id
       DocumentType: Automation
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # PCI S3.4 S3 buckets should have server-side encryption enabled 
@@ -730,6 +769,8 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Set a S3 bucket policy in order to avoid 'InsufficientS3BucketPolicyException'.
@@ -799,5 +840,5 @@ Resources:
        - ENABLED
        - DISABLED
       Targets:
-        - Arn: !Ref SnsTopicARN
+        - Arn: !Ref SNSForAlertArn
           Id: CloudWatchEventsForConfig

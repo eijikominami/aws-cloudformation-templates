@@ -146,6 +146,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Trusted Advisor [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -171,7 +178,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -180,6 +187,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -187,17 +195,18 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   EventsRule:
     Type: 'AWS::Serverless::Application'
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -218,6 +227,7 @@ Resources:
         TagEventsRule: !Ref TagEventsRule
         TrustedAdvisorEventsRule: !Ref TrustedAdvisorEventsRule
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
   IAMRoleForLambda:
@@ -233,6 +243,7 @@ Resources:
       Description: A role required for Lambda to access X-Ray, KMS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: !Sub '${AWS::StackName}-AWSLambdaBasicExecutionRole-${AWS::Region}'
           PolicyDocument:
@@ -255,6 +266,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub '${AWS::StackName}-ExecuteLambda-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForChatbot:
@@ -281,6 +294,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub '${AWS::StackName}-Chatbot-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # KMS
@@ -340,6 +355,9 @@ Resources:
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   LogGroupForLambdaSendNotificationToSlack:
     Type: 'AWS::Logs::LogGroup'
     Properties: 
@@ -382,8 +400,9 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # Lambda
   LambdaAnalyzeUnauthorizedApiCalls:
@@ -411,6 +430,9 @@ Resources:
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   LambdaAnalyzeUnauthorizedApiCallsPermission:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
     Type: 'AWS::Lambda::Permission'
@@ -445,8 +467,9 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # Chatbot
   ChatbotForDeployment:
@@ -469,6 +492,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   ChatbotForAlert:
     Condition: CreateChatbot
@@ -490,6 +514,7 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # CloudWatch Dashboard
   Dashboard:

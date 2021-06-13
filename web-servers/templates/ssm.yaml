@@ -47,6 +47,13 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for deployment information
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -69,7 +76,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -78,6 +85,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -85,10 +93,11 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.2
+        SemanticVersion: 1.3.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForSSM:
@@ -116,6 +125,8 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
       RoleName: !Sub '${LogicalNamePrefix}-EC2SSMRole-${AWS::Region}'
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # InstanceProfile
@@ -153,6 +164,8 @@ Resources:
                 optionalRestart: yes
       DocumentType: Command
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchAgentUpdate:
@@ -190,6 +203,8 @@ Resources:
                 name: AmazonCloudWatchAgent
       DocumentType: Command
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # State Manager
