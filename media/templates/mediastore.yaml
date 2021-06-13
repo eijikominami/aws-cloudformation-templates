@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWSCloudFormationSamples/media/mediastore sets Elemental MediaStore.
+
+Parameters:
+  ExpirationDate:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 36500
+    Description: The date objects to expire [required]
+  LogicalNamePrefix:
+    Type: String
+    Default: MediaStore
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  MaxAgeSeconds:
+    Type: Number
+    Default: 30000
+    Description: The time in seconds that browser caches the preflight response [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples 
+    AllowedPattern: .+
+
+Resources:
+  MediaStore:
+    Type: AWS::MediaStore::Container
+    Properties: 
+      AccessLoggingEnabled: true
+      ContainerName: !Ref LogicalNamePrefix
+      CorsPolicy: 
+        - AllowedHeaders: 
+            - '*'
+          AllowedMethods: 
+            - GET
+            - HEAD
+          AllowedOrigins: 
+            - '*'
+          MaxAgeSeconds: !Ref MaxAgeSeconds
+      LifecyclePolicy:
+        !Sub
+          - '{
+                "rules": [
+                    {
+                        "definition": {
+                            "path": [
+                                {"wildcard": "*"}
+                            ],
+                            "days_since_create": [
+                                {"numeric": [ ">", ${ExpirationDate} ]}
+                            ]
+                        },
+                        "action": "EXPIRE"
+                    }
+                ]
+            }'
+          - ExpirationDate: !Ref ExpirationDate
+      MetricPolicy: 
+        ContainerLevelMetrics: ENABLED
+      Policy: !Sub
+        - '{
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "MediaStoreFullAccess",
+                "Action": [ "mediastore:*" ],
+                "Principal":{
+                    "AWS" : "arn:aws:iam::${AWS::AccountId}:root"},
+                "Effect": "Allow",
+                "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${ContainerName}/*",
+                "Condition": {
+                  "Bool": { "aws:SecureTransport": "true" }
+                }
+              }
+            ]
+          }'
+        - ContainerName: !Ref LogicalNamePrefix 
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  Endpoint:
+    Description: Endpoint
+    Value: !GetAtt MediaStore.Endpoint
