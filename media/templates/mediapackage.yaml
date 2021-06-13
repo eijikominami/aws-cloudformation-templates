@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: AWSCloudFormationSamples/elemental/mediapackage sets Elemental MediaPackage.
+Description: AWSCloudFormationSamples/media/mediapackage sets Elemental MediaPackage.
 
 Parameters:
   LogicalNamePrefix:
