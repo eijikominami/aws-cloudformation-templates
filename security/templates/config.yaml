@@ -508,7 +508,7 @@ Resources:
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.3
+        SemanticVersion: 1.3.4
       NotificationARNs:
         - !Ref SNSForDeploymentArn
       Tags:
