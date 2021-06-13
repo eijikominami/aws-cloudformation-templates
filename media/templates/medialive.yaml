@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: AWSCloudFormationSamples/elemental/medialive sets Elemental MediaLive.
+Description: AWSCloudFormationSamples/media/medialive sets Elemental MediaLive.
 
 Parameters:
   AudioBitrate:
