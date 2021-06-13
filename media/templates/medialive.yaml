@@ -75,9 +75,12 @@ Parameters:
     Description: Output video height, in pixels [required]
   MediaPackageChannelId:
     Type: String
-    AllowedPattern: .+
-    Default: 'MediaPackage'
-    Description: MediaPackage channel id [required]
+    AllowedPattern: ''
+    Description: The MediaPackage channel id [conditional]
+  MediaStoreEndpoint:
+    Type: String
+    AllowedPattern: ''
+    Description: The endpoint of MediaStore [conditional]    
   LogicalNamePrefix:
     Type: String
     Default: MediaLive
@@ -110,6 +113,8 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateDestinationForMediaPackage: !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ]
+  CreateDestinationForMediaStore: !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
 
@@ -186,9 +191,19 @@ Resources:
     Properties: 
       ChannelClass: !Ref ChannelClass
       Destinations: 
-        - Id: MediaPackageDestinationId
-          MediaPackageSettings: 
-            - ChannelId: !Ref MediaPackageChannelId
+        - !If
+          - CreateDestinationForMediaPackage
+          - Id: !Sub ${LogicalNamePrefix}-for-MediaPackage
+            MediaPackageSettings: 
+              - ChannelId: !Ref MediaPackageChannelId
+          - !Ref AWS::NoValue   
+        - !If
+          - CreateDestinationForMediaStore
+          - Id: !Sub ${LogicalNamePrefix}-for-MediaStore
+            Settings:
+              - StreamName: ''
+                Url: !Sub mediastoressl://${MediaStoreEndpoint}/${LogicalNamePrefix}/${StreamKey}
+          - !Ref AWS::NoValue
       EncoderSettings:
         AudioDescriptions: 
           - AudioTypeControl: FOLLOW_INPUT

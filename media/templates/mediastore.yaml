@@ -82,3 +82,8 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
+
+Outputs:
+  Endpoint:
+    Description: Endpoint
+    Value: !GetAtt MediaStore.Endpoint
