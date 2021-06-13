@@ -114,7 +114,6 @@ Parameters:
 
 Conditions:
   CreateDestinationForMediaPackage: !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ]
-  CreateDestinationForMediaStore: !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
 
@@ -196,14 +195,15 @@ Resources:
           - Id: !Sub ${LogicalNamePrefix}-for-MediaPackage
             MediaPackageSettings: 
               - ChannelId: !Ref MediaPackageChannelId
-          - !Ref AWS::NoValue   
-        - !If
-          - CreateDestinationForMediaStore
           - Id: !Sub ${LogicalNamePrefix}-for-MediaStore
-            Settings:
-              - StreamName: ''
-                Url: !Sub mediastoressl://${MediaStoreEndpoint}/${LogicalNamePrefix}/${StreamKey}
-          - !Ref AWS::NoValue
+            Settings: !If
+              - CreateTwoPipelines
+              - - StreamName: ''
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-a/main
+                - StreamName: ''
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-b/main
+              - - StreamName: ''
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live/main
       EncoderSettings:
         AudioDescriptions: 
           - AudioTypeControl: FOLLOW_INPUT
@@ -220,18 +220,84 @@ Resources:
             LanguageCodeControl: FOLLOW_INPUT
             Name: !Sub audio_2_aac${AudioBitrate}
         OutputGroups: 
-          - Name: MediaPackage Group
-            OutputGroupSettings: 
-              MediaPackageGroupSettings: 
-                Destination:
-                  DestinationRefId: MediaPackageDestinationId
-            Outputs: 
-              - AudioDescriptionNames: 
-                  - !Sub audio_2_aac${AudioBitrate}
-                OutputName: !Sub _${Width}x${Height}_${VideoBitrate}
-                OutputSettings: 
-                  MediaPackageOutputSettings: {}
-                VideoDescriptionName: !Sub video_${Width}_${Height}
+          - !If
+            - CreateDestinationForMediaPackage
+            - Name: MediaPackage Group
+              OutputGroupSettings: 
+                MediaPackageGroupSettings: 
+                  Destination:
+                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-MediaPackage
+              Outputs: 
+                - AudioDescriptionNames: 
+                    - !Sub audio_2_aac${AudioBitrate}
+                  OutputName: !Sub _${Width}x${Height}_${VideoBitrate}
+                  OutputSettings: 
+                    MediaPackageOutputSettings: {}
+                  VideoDescriptionName: !Sub video_${Width}_${Height}
+            - Name: MediaStore Group
+              OutputGroupSettings: 
+                HlsGroupSettings: 
+                  CaptionLanguageSetting: OMIT
+                  CodecSpecification: RFC_4281
+                  Destination: 
+                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-MediaStore
+                  DirectoryStructure: SINGLE_DIRECTORY
+                  DiscontinuityTags: INSERT
+                  HlsCdnSettings: 
+                    HlsMediaStoreSettings: 
+                      ConnectionRetryInterval: 1
+                      FilecacheDuration: 300
+                      MediaStoreStorageClass: TEMPORAL
+                      NumRetries: 10
+                      RestartDelay: 15
+                  HlsId3SegmentTagging: DISABLED
+                  IFrameOnlyPlaylists: DISABLED
+                  IncompleteSegmentBehavior: AUTO
+                  IndexNSegments: 10
+                  InputLossAction: EMIT_OUTPUT
+                  IvInManifest: INCLUDE
+                  IvSource: FOLLOWS_SEGMENT_NUMBER
+                  KeepSegments: 21
+                  ManifestCompression: NONE
+                  ManifestDurationFormat: INTEGER
+                  Mode: LIVE
+                  OutputSelection: MANIFESTS_AND_SEGMENTS
+                  ProgramDateTime: EXCLUDE
+                  ProgramDateTimePeriod: 600
+                  RedundantManifest: DISABLED
+                  SegmentationMode: USE_SEGMENT_DURATION
+                  SegmentLength: 6
+                  SegmentsPerSubdirectory: 10000
+                  StreamInfResolution: INCLUDE
+                  TimedMetadataId3Frame: PRIV
+                  TimedMetadataId3Period: 10
+                  TsFileMode: SEGMENTED_FILES
+              Outputs:
+                - AudioDescriptionNames: 
+                    - !Sub audio_2_aac${AudioBitrate}
+                  OutputName: !Sub _${Width}x${Height}_${VideoBitrate}
+                  OutputSettings: 
+                    HlsOutputSettings:
+                      H265PackagingType: HVC1
+                      HlsSettings: 
+                        StandardHlsSettings: 
+                          AudioRenditionSets: program_audio
+                          M3u8Settings: 
+                            AudioFramesPerPes: 4
+                            AudioPids: 492-498
+                            EcmPid: '8182'
+                            NielsenId3Behavior: NO_PASSTHROUGH
+                            PcrControl: PCR_EVERY_PES_PACKET
+                            PmtPid: '480'
+                            ProgramNum: 1
+                            Scte35Behavior: NO_PASSTHROUGH
+                            Scte35Pid: '500'
+                            TimedMetadataBehavior: NO_PASSTHROUGH
+                            TimedMetadataPid: '502'
+                            TransportStreamId: 500
+                            VideoPid: '481'
+                      NameModifier: !Sub _${Width}_${Height}
+                  VideoDescriptionName: !Sub video_${Width}_${Height}
         TimecodeConfig: 
           Source: SYSTEMCLOCK
         VideoDescriptions: 
