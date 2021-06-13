@@ -75,11 +75,11 @@ Parameters:
     Description: Output video height, in pixels [required]
   MediaPackageChannelId:
     Type: String
-    AllowedPattern: ''
+    Default: ''
     Description: The MediaPackage channel id [conditional]
   MediaStoreEndpoint:
     Type: String
-    AllowedPattern: ''
+    Default: ''
     Description: The endpoint of MediaStore [conditional]    
   LogicalNamePrefix:
     Type: String
