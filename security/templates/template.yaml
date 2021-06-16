@@ -38,7 +38,7 @@ Metadata:
 Parameters:
   AWSAuditManager:
     Type: String
-    Default: DISABLED
+    Default: ENABLED
     AllowedValues:
       - ENABLED
       - DISABLED
