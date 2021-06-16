@@ -19,7 +19,7 @@ phases:
       - tar -xvf cfn-guard-linux-1.0.0.tar.gz
   pre_build:
     commands:
-      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
+      #- find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
       - find ./ -type f -name "*.yaml" | xargs -I {} ./cfn-guard-linux/cfn-guard check -r ./security-standards.ruleset -t {}
   build:
     commands:

@@ -5,7 +5,7 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates) 
 
-``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` , ``Amazon Detective`` , ``Amazon Macie`` , and related resources.
+``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` , ``Amazon Detective`` , ``Amazon Macie`` , ``AWS Audit Manager`` , and related resources.
 
 ## TL;DR
 
@@ -25,6 +25,7 @@ If you want to deploy each service individually, click the button below.
 | AWS CloudTrail | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalNamePrefix=CloudTrail) |
 | AWS Config | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalNamePrefix=Config) |
 | Amazon Macie | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalNamePrefix=Macie) |
+| AWS Audit Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AuditManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/auditmanager.yaml&param_LogicalNamePrefix=AuditManager) |
 
 ## Architecture
 
@@ -101,6 +102,10 @@ When ``AWS Config`` detects noncompliant resources, it sends a notification to `
 
 This templates configures ``Amazon Macie``. 
 
+### AWS Audit Manager
+
+This templates creates assesments such as ``AWS Well Architected Framework`` , ``AWS Foundational Security Best Practices`` and ``AWS Operational Best Practices``.
+
 ### Amazon EventBridge
 
 This template creates ``Amazon EventBridge`` for ``AWS Health``.
@@ -123,7 +128,6 @@ You can provide optional parameters as follows:
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
 | AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Amazon Detective is enabled. |
-| AuditOtherAccounts | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, **Config Aggregator** is enabled. |
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled. |
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled. |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
