@@ -35,7 +35,14 @@ Parameters:
     AllowedPattern: .+
 
 Resources:
-  IAMRoleForAuditManager:
+  ServiceLinkedRoleForAuditManager:
+    Type: 'AWS::IAM::ServiceLinkedRole'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: auditmanager.amazonaws.com
+      Description: ''
+  IAMRoleForAuditOwner:
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
@@ -47,14 +54,16 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for Audit Manager to access related services.
       ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/aws-service-role/AWSAuditManagerServiceRolePolicy
-      RoleName: !Sub '${LogicalNamePrefix}-AuditManager-${AWS::Region}'
+          - arn:aws:iam::aws:policy/AWSAuditManagerAdministratorAccess
+      RoleName: !Sub '${LogicalNamePrefix}-AuditManagerAuditOwner-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AWSFoundationalSecurityBestPractices:
+    DependsOn:
+      - ServiceLinkedRoleForAuditManager
     Type: AWS::AuditManager::Assessment
     Properties: 
       AssessmentReportsDestination: 
@@ -64,7 +73,7 @@ Resources:
       FrameworkId: 7fdddac2-e71c-3b25-8588-4e6df98b38d5
       Name: AWSFoundationalSecurityBestPractices
       Roles: 
-        - RoleArn: !GetAtt IAMRoleForAuditManager.Arn
+        - RoleArn: !GetAtt IAMRoleForAuditOwner.Arn
           RoleType: PROCESS_OWNER
       Scope: 
         AwsServices: 
@@ -76,6 +85,8 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AWSWellArchitectedFramework:
+    DependsOn:
+      - ServiceLinkedRoleForAuditManager
     Type: AWS::AuditManager::Assessment
     Properties: 
       AssessmentReportsDestination: 
@@ -85,7 +96,7 @@ Resources:
       FrameworkId: 21060514-60c0-3fbb-ad3b-0b4af6dcca7c
       Name: AWSWellArchitectedFramework
       Roles: 
-        - RoleArn: !GetAtt IAMRoleForAuditManager.Arn
+        - RoleArn: !GetAtt IAMRoleForAuditOwner.Arn
           RoleType: PROCESS_OWNER
       Scope: 
         AwsServices: 
@@ -97,6 +108,8 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AWSOperationalBestPractices:
+    DependsOn:
+      - ServiceLinkedRoleForAuditManager
     Type: AWS::AuditManager::Assessment
     Properties: 
       AssessmentReportsDestination: 
@@ -106,7 +119,7 @@ Resources:
       FrameworkId: 067999dd-6933-3707-96c8-e4bce8f1a60b
       Name: AWSOperationalBestPractices
       Roles: 
-        - RoleArn: !GetAtt IAMRoleForAuditManager.Arn
+        - RoleArn: !GetAtt IAMRoleForAuditOwner.Arn
           RoleType: PROCESS_OWNER
       Scope:
         AwsServices: 
