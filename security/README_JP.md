@@ -5,7 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
 
-``AWSCloudFormationTemplates/security`` は、 ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub``, ``Amazon Detective`` , ``Amazon Macie`` などの **セキュリティ** に関連するAWSサービスを設定します。
+``AWSCloudFormationTemplates/security`` は、 ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub``, ``Amazon Detective`` , ``Amazon Macie`` , ``AWS Audit Manager`` などの **セキュリティ** に関連するAWSサービスを設定します。
 
 ## TL;DR
 
@@ -25,6 +25,7 @@
 | AWS CloudTrail | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalNamePrefix=CloudTrail) |
 | AWS Config | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalNamePrefix=Config) |
 | Amazon Macie | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalNamePrefix=Macie) |
+| AWS Audit Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AuditManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/auditmanager.yaml&param_LogicalNamePrefix=AuditManager) |
 
 ## アーキテクチャ
 
@@ -104,6 +105,10 @@ Amazon Inspector は、``Amazon EventBridge``　によって **毎週月曜日�
 
 このテンプレートは、 ``AWS Macie`` を構成します。 
 
+### AWS Audit Manager
+
+このテンプレートは、``AWS Well Architected Framework`` , ``AWS Foundational Security Best Practices`` , ``AWS Operational Best Practices`` アセスメントを作成します。
+
 ### Amazon EventBridge
 
 このテンプレートは、 ``AWS Health`` に関する  ``CloudWatchイベント`` を作成します。
@@ -126,7 +131,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Amazon Detective が有効化されます。|
-| AuditOtherAccounts | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**Config Aggregator** が有効化されます。 |
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |

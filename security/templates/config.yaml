@@ -8,7 +8,6 @@ Metadata:
       - Label: 
           default: 'Config Configuration'
         Parameters: 
-          - AuditOtherAccounts
           - AuditOtherRegions
           - AutoRemediation
       - Label: 
@@ -24,13 +23,6 @@ Metadata:
           - TagValue
 
 Parameters:
-  AuditOtherAccounts:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable cross account audit [required]
   AuditOtherRegions:
     Type: String
     Default: ENABLED
@@ -74,8 +66,6 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
-  CreateConfigurationAggregator:
-    !Equals [ !Ref AuditOtherAccounts, ENABLED ]
   CreateCentralizedResources:
     !Equals [ !Ref AuditOtherRegions, ENABLED ]
   CreateRemediationResources:
@@ -127,26 +117,6 @@ Resources:
                 Resource:
                   - '*'
       RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForConfigRules-${AWS::Region}'
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  IAMRoleForConfigurationAggregator:
-    Condition: CreateConfigurationAggregator
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: config.amazonaws.com
-            Action: 'sts:AssumeRole'
-      Description: A role required for Config to access Organizations.
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSConfigRoleForOrganizations
-      RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForAggregator-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -287,14 +257,6 @@ Resources:
           - true
           - false
       RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig
-  ConfigurationAggregator:
-    Condition: CreateConfigurationAggregator
-    Type: AWS::Config::ConfigurationAggregator
-    Properties: 
-      ConfigurationAggregatorName: default
-      OrganizationAggregationSource: 
-        AllAwsRegions: true
-        RoleArn: !GetAtt IAMRoleForConfigurationAggregator.Arn
   ConfigCloudformationStackDriftDetectionCheck:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
@@ -508,7 +470,7 @@ Resources:
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.7
+        SemanticVersion: 1.3.10
       NotificationARNs:
         - !Ref SNSForDeploymentArn
       Tags:
