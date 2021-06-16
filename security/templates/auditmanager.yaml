@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/auditmanager sets AWS Audit Manager.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
+Parameters:
+  LogicalNamePrefix:
+    Type: String
+    Default: DefaultSecuritySettings
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  IAMRoleForAuditManager:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:  auditmanager.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for Audit Manager to access related services.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/aws-service-role/AWSAuditManagerServiceRolePolicy
+      RoleName: !Sub '${LogicalNamePrefix}-AuditManager-${AWS::Region}'
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AWSFoundationalSecurityBestPractices:
+    Type: AWS::AuditManager::Assessment
+    Properties: 
+      AssessmentReportsDestination: 
+        Destination: !Sub s3://${S3}
+        DestinationType: S3
+      Description: The AWS Foundational Security Best Practices standard is a set of controls that detect when your deployed accounts and resources deviate from security best practices.
+      FrameworkId: 7fdddac2-e71c-3b25-8588-4e6df98b38d5
+      Name: AWSFoundationalSecurityBestPractices
+      Roles: 
+        - RoleArn: !GetAtt IAMRoleForAuditManager.Arn
+          RoleType: PROCESS_OWNER
+      Scope: 
+        AwsServices: 
+          - ServiceName: AWS Security Hub
+      Status: ACTIVE
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AWSWellArchitectedFramework:
+    Type: AWS::AuditManager::Assessment
+    Properties: 
+      AssessmentReportsDestination: 
+        Destination: !Sub s3://${S3}
+        DestinationType: S3
+      Description: The AWS Well-Architected Framework describes the key concepts, design principles, and architectural best practices for designing and running workloads in the cloud. Of the 5 pillars security and reliability are addressed here.
+      FrameworkId: 21060514-60c0-3fbb-ad3b-0b4af6dcca7c
+      Name: AWSWellArchitectedFramework
+      Roles: 
+        - RoleArn: !GetAtt IAMRoleForAuditManager.Arn
+          RoleType: PROCESS_OWNER
+      Scope: 
+        AwsServices: 
+          - ServiceName: AWS Config
+      Status: ACTIVE
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AWSOperationalBestPractices:
+    Type: AWS::AuditManager::Assessment
+    Properties: 
+      AssessmentReportsDestination: 
+        Destination: !Sub s3://${S3}
+        DestinationType: S3
+      Description: The AWS Operational Best Practices standard offers a subset of controls from AWS Foundational Security Best Practices standard. These controls serve as a baseline checks to detect when your deployed accounts and resources deviate from security best practices.
+      FrameworkId: 067999dd-6933-3707-96c8-e4bce8f1a60b
+      Name: AWSOperationalBestPractices
+      Roles: 
+        - RoleArn: !GetAtt IAMRoleForAuditManager.Arn
+          RoleType: PROCESS_OWNER
+      Scope:
+        AwsServices: 
+          - ServiceName: AWS Security Hub
+      Status: ACTIVE
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3:
+    Type: 'AWS::S3::Bucket'
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: AES256
+      BucketName: !Sub defaultsecuritysettings-auditmanager-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties: 
+      Bucket: !Ref S3
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false

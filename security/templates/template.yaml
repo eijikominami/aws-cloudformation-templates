@@ -4,11 +4,14 @@ Description: AWSCloudFormationTemplates/security sets basic configurations for s
 
 Metadata: 
   AWS::CloudFormation::Interface:
-    ParameterGroups: 
+    ParameterGroups:
+      - Label: 
+          default: 'Audit Manager Configuration'
+        Parameters: 
+          - AWSAuditManager 
       - Label: 
           default: 'CloudTrail and Config Configuration'
         Parameters: 
-          - AuditOtherAccounts
           - AuditOtherRegions
           - AutoRemediation
       - Label: 
@@ -33,13 +36,13 @@ Metadata:
           - TagValue
 
 Parameters:
-  AuditOtherAccounts:
+  AWSAuditManager:
     Type: String
     Default: DISABLED
     AllowedValues:
       - ENABLED
       - DISABLED
-    Description: Enable or disable cross account audit [required]
+    Description: Enable or disable AWS Audit Manager [required]
   AuditOtherRegions:
     Type: String
     Default: ENABLED
@@ -98,6 +101,7 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateAuditManager: !Equals [ !Ref AWSAuditManager, ENABLED]
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   Development: !Equals [ !Ref Environment, development]
@@ -232,8 +236,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
-        AuditOtherAccounts: !Ref AuditOtherAccounts
+      Parameters:
         AuditOtherRegions: !Ref AuditOtherRegions
         AutoRemediation: !Ref AutoRemediation
         SNSForAlertArn: !If
@@ -292,6 +295,29 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/macie.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/macie.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AuditManager:
+    Condition: CreateAuditManager
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        LogicalNamePrefix: !Ref AWS::StackName
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/auditmanager.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/auditmanager.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
