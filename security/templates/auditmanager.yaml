@@ -139,7 +139,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
               SSEAlgorithm: AES256
-      BucketName: !Sub defaultsecuritysettings-auditmanager-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub defaultsecuritysettings-audit-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
