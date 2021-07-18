@@ -10,7 +10,7 @@ Parameters:
     Type: String
     AllowedValues:
       - STANDARD
-      - SINGLE_PIPELINE  
+      - SINGLE_PIPELINE
     Default: STANDARD
     Description: Select the class of channel you intend to attach this input to [required] 
   AutoInputFailover:
@@ -86,6 +86,22 @@ Parameters:
     Default: MediaLive
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  RtmpUrl1:
+    Type: String
+    Default: ''
+    Description: The rtmp url a stream sends to.
+  RtmpStreamName1:
+    Type: String
+    Default: ''
+    Description: The rtmp stream name a stream sends to.
+  RtmpUrl2:
+    Type: String
+    Default: ''
+    Description: The rtmp url a stream sends to.
+  RtmpStreamName2:
+    Type: String
+    Default: ''
+    Description: The rtmp stream name a stream sends to.
   StreamKey:
     Type: String
     Default: stream
@@ -94,6 +110,10 @@ Parameters:
     Type: Number
     Default: 2200000
     Description: Average video bitrate in bits/second [required]
+  VodSourceBucket:
+    Type: String
+    Default: ''
+    Description: The S3 bucket Name VOD contents exist.
   Width:
     Type: Number
     Default: 960
@@ -114,8 +134,14 @@ Parameters:
 
 Conditions:
   CreateDestinationForMediaPackage: !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ]
+  CreateDestinationForRTMP: !And [ !Not [ !Equals [ !Ref RtmpUrl1, ''] ], !Not [ !Equals [ !Ref RtmpStreamName1, ''] ], !Not [ !Equals [ !Ref RtmpUrl2, ''] ], !Not [ !Equals [ !Ref RtmpStreamName2, ''] ] ]
+  CreateDestinationForMediaStore: !And [ !Equals [ !Ref MediaPackageChannelId, ''], !Equals [ !Ref RtmpUrl1, ''], !Equals [ !Ref RtmpStreamName1, ''], !Equals [ !Ref RtmpUrl2, ''], !Equals [ !Ref RtmpStreamName2, '']  ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
+  CreateTwoPipelinesAndTwoInput: !And [ !Equals [ !Ref ChannelClass, STANDARD], !Equals [ !Ref AutoInputFailover, ENABLED] ]
+  CreateLIVEWorkflow: !Equals [ !Ref VodSourceBucket, '' ]
+  CreateVODWorkflow: !Not [ !Equals [ !Ref VodSourceBucket, '' ] ]
+  CreateLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref VodSourceBucket, '' ], !Equals [ !Ref AutoInputFailover, ENABLED] ]
 
 Resources:
   # IAM Role
@@ -195,6 +221,18 @@ Resources:
           - Id: !Sub ${LogicalNamePrefix}-for-MediaPackage
             MediaPackageSettings: 
               - ChannelId: !Ref MediaPackageChannelId
+          - !Ref AWS::NoValue
+        - !If
+          - CreateDestinationForRTMP
+          - Id: !Sub ${LogicalNamePrefix}-for-RTMP
+            Settings:
+              - StreamName: !Ref RtmpStreamName1
+                Url: !Ref RtmpUrl1
+              - StreamName: !Ref RtmpStreamName2
+                Url: !Ref RtmpUrl2
+          - !Ref AWS::NoValue
+        - !If
+          - CreateDestinationForMediaStore
           - Id: !Sub ${LogicalNamePrefix}-for-MediaStore
             Settings: !If
               - CreateTwoPipelines
@@ -204,6 +242,7 @@ Resources:
                   Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-b/main
               - - StreamName: ''
                   Url: !Sub mediastoressl://${MediaStoreEndpoint}/live/main
+          - !Ref AWS::NoValue
       EncoderSettings:
         AudioDescriptions: 
           - AudioTypeControl: FOLLOW_INPUT
@@ -230,10 +269,37 @@ Resources:
               Outputs: 
                 - AudioDescriptionNames: 
                     - !Sub audio_2_aac${AudioBitrate}
-                  OutputName: !Sub _${Width}x${Height}_${VideoBitrate}
+                  OutputName: !Sub mediapackage_${Width}x${Height}_${VideoBitrate}
                   OutputSettings: 
                     MediaPackageOutputSettings: {}
                   VideoDescriptionName: !Sub video_${Width}_${Height}
+            - !Ref AWS::NoValue
+          - !If
+            - CreateDestinationForRTMP
+            - Name: RTMP Group
+              OutputGroupSettings:
+                RtmpGroupSettings:
+                  AuthenticationScheme: COMMON
+                  CacheFullBehavior: DISCONNECT_IMMEDIATELY
+                  CacheLength: 30
+                  CaptionData: ALL
+                  InputLossAction: EMIT_OUTPUT
+                  RestartDelay: 15
+              Outputs: 
+                - AudioDescriptionNames: 
+                    - !Sub audio_2_aac${AudioBitrate}
+                  OutputName: !Sub rtmp_${Width}x${Height}_${VideoBitrate}
+                  OutputSettings:
+                    RtmpOutputSettings:
+                      CertificateMode: VERIFY_AUTHENTICITY
+                      ConnectionRetryInterval: 2
+                      Destination: 
+                        DestinationRefId: !Sub ${LogicalNamePrefix}-for-RTMP
+                      NumRetries: 10
+                  VideoDescriptionName: !Sub video_${Width}_${Height}
+            - !Ref AWS::NoValue
+          - !If 
+            - CreateDestinationForMediaStore
             - Name: MediaStore Group
               OutputGroupSettings: 
                 HlsGroupSettings: 
@@ -275,7 +341,7 @@ Resources:
               Outputs:
                 - AudioDescriptionNames: 
                     - !Sub audio_2_aac${AudioBitrate}
-                  OutputName: !Sub _${Width}x${Height}_${VideoBitrate}
+                  OutputName: !Sub mediastore_${Width}x${Height}_${VideoBitrate}
                   OutputSettings: 
                     HlsOutputSettings:
                       H265PackagingType: HVC1
@@ -298,6 +364,7 @@ Resources:
                             VideoPid: '481'
                       NameModifier: !Sub _${Width}_${Height}
                   VideoDescriptionName: !Sub video_${Width}_${Height}
+            - !Ref AWS::NoValue        
         TimecodeConfig: 
           Source: SYSTEMCLOCK
         VideoDescriptions: 
@@ -350,10 +417,16 @@ Resources:
                     BlackDetectThreshold: 0.1
                     VideoBlackThresholdMsec: 15000
             InputPreference: EQUAL_INPUT_PREFERENCE
-            SecondaryInputId: !Ref MediaLiveInput1
+            SecondaryInputId: !If 
+              - CreateLIVEWorkflow
+              - !Ref MediaLiveInputRempPush1
+              - !Ref MediaLiveInputMP4
           - !Ref AWS::NoValue
           InputAttachmentName: !Sub ${LogicalNamePrefix}-0
-          InputId: !Ref MediaLiveInput0
+          InputId: !If
+              - CreateLIVEWorkflow
+              - !Ref MediaLiveInputRempPush0
+              - !Ref MediaLiveInputMP4
           InputSettings: 
             DeblockFilter: DISABLED
             DenoiseFilter: DISABLED
@@ -364,7 +437,10 @@ Resources:
         - !If
           - CreateTwoInput
           - InputAttachmentName: !Sub ${LogicalNamePrefix}-1
-            InputId: !Ref MediaLiveInput1
+            InputId: !If
+              - CreateLIVEWorkflow
+              - !Ref MediaLiveInputRempPush1
+              - !Ref MediaLiveInputMP4
             InputSettings: 
               DeblockFilter: DISABLED
               DenoiseFilter: DISABLED
@@ -382,7 +458,8 @@ Resources:
       RoleArn: !GetAtt IAMRoleForMediaLive.Arn
       Tags: 
         createdby: !Ref TagValue
-  MediaLiveInput0:
+  MediaLiveInputRempPush0:
+    Condition: CreateLIVEWorkflow
     Type: AWS::MediaLive::Input
     Properties:
       Destinations:
@@ -393,13 +470,13 @@ Resources:
           - !Ref AWS::NoValue
       InputSecurityGroups: 
         - !Ref MediaLiveInputSecurityGroup
-      Name: !Ref LogicalNamePrefix
+      Name: !Sub ${LogicalNamePrefix}-RtmpPush0
       Tags:
         createdby: !Ref TagValue
       Type: RTMP_PUSH
-  MediaLiveInput1:
+  MediaLiveInputRempPush1:
+    Condition: CreateLIVEWorkflowAndTwoInput
     Type: AWS::MediaLive::Input
-    Condition: CreateTwoInput
     Properties: 
       Destinations:
         - StreamName: !Sub ${LogicalNamePrefix}-1/${StreamKey}-a
@@ -409,10 +486,23 @@ Resources:
           - !Ref AWS::NoValue
       InputSecurityGroups: 
         - !Ref MediaLiveInputSecurityGroup
-      Name: !Ref LogicalNamePrefix
+      Name: !Sub ${LogicalNamePrefix}-RtmpPush1
       Tags:
         createdby: !Ref TagValue
       Type: RTMP_PUSH
+  MediaLiveInputMP4:
+    Condition: CreateVODWorkflow
+    Type: AWS::MediaLive::Input
+    Properties: 
+      Name: !Sub ${LogicalNamePrefix}-Mp4
+      Sources: !If
+        - CreateTwoPipelines
+        - - Url: !Ref VodSourceBucket
+          - Url: !Ref VodSourceBucket
+        - - Url: !Ref VodSourceBucket
+      Tags:
+        createdby: !Ref TagValue
+      Type: MP4_FILE
   MediaLiveInputSecurityGroup:
     Type: AWS::MediaLive::InputSecurityGroup
     Properties: 
@@ -426,23 +516,27 @@ Outputs:
     Description: Channel Id
     Value: !Ref MediaLiveChannel
   RtmpPrimary1:
+    Condition: CreateLIVEWorkflow
     Description: The RTMP primary address 1
-    Value: !Select [0, !GetAtt MediaLiveInput0.Destinations]
+    Value: !Select [0, !GetAtt MediaLiveInputRempPush0.Destinations]
   RtmpPrimary2:
+    Condition: CreateLIVEWorkflow
     Description: The RTMP primary address 2
     Value: !If
       - CreateTwoPipelines
-      - !Select [1, !GetAtt MediaLiveInput0.Destinations]
+      - !Select [1, !GetAtt MediaLiveInputRempPush0.Destinations]
       - ''
   RtmpSecondary1:
+    Condition: CreateLIVEWorkflow
     Description: The RTMP secondary address 1
     Value: !If
       - CreateTwoInput
-      - !Select [0, !GetAtt MediaLiveInput1.Destinations]
+      - !Select [0, !GetAtt MediaLiveInputRempPush1.Destinations]
       - ''
   RtmpSecondary2:
+    Condition: CreateLIVEWorkflow
     Description: The RTMP secondary address 2
     Value: !If
-      - CreateTwoInput
-      - !Select [1, !GetAtt MediaLiveInput1.Destinations]
+      - CreateTwoPipelinesAndTwoInput
+      - !Select [1, !GetAtt MediaLiveInputRempPush1.Destinations]
       - ''

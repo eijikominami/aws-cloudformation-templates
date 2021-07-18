@@ -61,81 +61,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  AWSFoundationalSecurityBestPractices:
-    DependsOn:
-      - ServiceLinkedRoleForAuditManager
-    Type: AWS::AuditManager::Assessment
-    Properties: 
-      AssessmentReportsDestination: 
-        Destination: !Sub s3://${S3}
-        DestinationType: S3
-      Description: The AWS Foundational Security Best Practices standard is a set of controls that detect when your deployed accounts and resources deviate from security best practices.
-      FrameworkId: 7fdddac2-e71c-3b25-8588-4e6df98b38d5
-      Name: AWSFoundationalSecurityBestPractices
-      Roles: 
-        - RoleArn: !GetAtt IAMRoleForAuditOwner.Arn
-          RoleType: PROCESS_OWNER
-      Scope: 
-        AwsAccounts:
-          - Id: !Ref AWS::AccountId
-        AwsServices: 
-          - ServiceName: securityhub
-      Status: ACTIVE
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  AWSWellArchitectedFramework:
-    DependsOn:
-      - ServiceLinkedRoleForAuditManager
-    Type: AWS::AuditManager::Assessment
-    Properties: 
-      AssessmentReportsDestination: 
-        Destination: !Sub s3://${S3}
-        DestinationType: S3
-      Description: The AWS Well-Architected Framework describes the key concepts, design principles, and architectural best practices for designing and running workloads in the cloud. Of the 5 pillars security and reliability are addressed here.
-      FrameworkId: 21060514-60c0-3fbb-ad3b-0b4af6dcca7c
-      Name: AWSWellArchitectedFramework
-      Roles: 
-        - RoleArn: !GetAtt IAMRoleForAuditOwner.Arn
-          RoleType: PROCESS_OWNER
-      Scope: 
-        AwsAccounts:
-          - Id: !Ref AWS::AccountId
-        AwsServices: 
-          - ServiceName: config
-      Status: ACTIVE
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  AWSOperationalBestPractices:
-    DependsOn:
-      - ServiceLinkedRoleForAuditManager
-    Type: AWS::AuditManager::Assessment
-    Properties: 
-      AssessmentReportsDestination: 
-        Destination: !Sub s3://${S3}
-        DestinationType: S3
-      Description: The AWS Operational Best Practices standard offers a subset of controls from AWS Foundational Security Best Practices standard. These controls serve as a baseline checks to detect when your deployed accounts and resources deviate from security best practices.
-      FrameworkId: 067999dd-6933-3707-96c8-e4bce8f1a60b
-      Name: AWSOperationalBestPractices
-      Roles: 
-        - RoleArn: !GetAtt IAMRoleForAuditOwner.Arn
-          RoleType: PROCESS_OWNER
-      Scope:
-        AwsAccounts:
-          - Id: !Ref AWS::AccountId
-        AwsServices: 
-          - ServiceName: securityhub
-      Status: ACTIVE
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   S3:
     Type: 'AWS::S3::Bucket'
     UpdateReplacePolicy: Retain
@@ -145,7 +70,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
               SSEAlgorithm: AES256
-      BucketName: !Sub defaultsecuritysettings-audit-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub defaultsecuritysettings-auditmgr-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
