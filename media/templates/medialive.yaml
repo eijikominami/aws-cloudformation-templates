@@ -156,8 +156,6 @@ Resources:
               Service: medialive.amazonaws.com 
             Action: 'sts:AssumeRole'
       Description: A role required for MediaLive to access S3.
-      ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
       Policies:
         - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaLivePolicy-${AWS::Region}'
           PolicyDocument:
