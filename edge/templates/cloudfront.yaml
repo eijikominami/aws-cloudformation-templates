@@ -313,7 +313,7 @@ Parameters:
     Description: Enable or disable logging [required]
   LogBacketName:
     Type: String
-    AllowedPattern: .+
+    Default: ''
     Description: The custom S3 bucket name for access logging
   WebACLArn:
     Type: String
