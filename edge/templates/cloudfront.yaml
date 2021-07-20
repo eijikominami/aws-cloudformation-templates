@@ -68,7 +68,7 @@ Parameters:
     Description: The ARN of an SSL Certifiation attached to CloudFront
   DomainName:
     Type: String
-    AllowedPattern: ''
+    Default: ''
     Description: The CNAME attached to CloudFront [conditional]
   CloudFrontDefaultTTL:
     Default: 86400
