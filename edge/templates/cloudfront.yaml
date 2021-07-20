@@ -68,8 +68,8 @@ Parameters:
     Description: The ARN of an SSL Certifiation attached to CloudFront
   DomainName:
     Type: String
-    AllowedPattern: .+
-    Description: The CNAME attached to CloudFront [required]
+    AllowedPattern: ''
+    Description: The CNAME attached to CloudFront [conditional]
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -314,7 +314,7 @@ Parameters:
   LogBacketName:
     Type: String
     Default: ''
-    Description: The custom S3 bucket name for access logging
+    Description: The custom S3 bucket name for access logging [conditional]
   WebACLArn:
     Type: String
     Default: '' 
