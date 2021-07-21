@@ -26,6 +26,7 @@ Metadata:
           - DomainName
           - Logging
           - LogBacketName
+          - UserAgent
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
         Parameters: 
@@ -304,6 +305,10 @@ Parameters:
     Type: String
     Default: ''
     Description: Route53 hosted zone id
+  UserAgent:
+    Type: String
+    Default: ''
+    Description: The secret key that 'User-Agent' header contains  
   Logging:
     Type: String
     Default: ENABLED
@@ -342,9 +347,10 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  AdditionalNameExists: !Not [ !Equals [ !Ref CloudFrontAdditionalName, '' ]]
-  BundleSSLCertification: !Not [ !Equals [ !Ref CertificateManagerARN, '' ]]
-  DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ]]
+  AdditionalNameExists: !Not [ !Equals [ !Ref CloudFrontAdditionalName, '' ] ]
+  BundleSSLCertification: !And [ !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ], !Not [ !Equals [ !Ref DomainName, '' ] ] ]
+  DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ] ]
+  DomainNameExists: !Not [ !Equals [ !Ref DomainName, '' ] ]
   SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
   S3Origin: !Equals [ !Ref CloudFrontOriginType, S3 ]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
@@ -356,6 +362,7 @@ Conditions:
   CreateRoute53: !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
   Development: !Equals [ !Ref Environment, development]
+  UserAgentExists: !Not [ !Equals [ !Ref UserAgent, ''] ]
 
 Resources:
   RealtimeDashboard:
@@ -442,7 +449,10 @@ Resources:
               - !Ref CloudFrontAdditionalName
             - - !Ref DomainName
           - !Ref AWS::NoValue
-        Comment: !Sub CDN for ${DomainName}
+        Comment: !If
+          - DomainNameExists
+          - !Sub CDN for ${DomainName}
+          - !Ref CloudFrontOriginDomainName
         CustomErrorResponses: !If 
           - CreateCustomErrorResponse
           - - ErrorCachingMinTTL: 60
@@ -484,7 +494,10 @@ Resources:
         Logging: !If
           - CreateLog
           - Bucket: !Ref LogBacketName
-            Prefix: !Sub CloudFront-${DomainName}/
+            Prefix: !If
+              - DomainNameExists
+              - !Sub CloudFront-${DomainName}/
+              - !Sub CloudFront-${CloudFrontOriginDomainName}/
           - !Ref AWS::NoValue
         Origins: !If
           - S3Origin
@@ -520,6 +533,11 @@ Resources:
                   - TLSv1
                   - TLSv1.1
                   - TLSv1.2
+              OriginCustomHeaders: !If
+                - UserAgentExists
+                - - HeaderName: User-Agent
+                    HeaderValue: !Ref UserAgent
+                - !Ref AWS::NoValue
         ViewerCertificate: !If
           - BundleSSLCertification
           - AcmCertificateArn: !Ref CertificateManagerARN

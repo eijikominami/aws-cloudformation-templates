@@ -6,13 +6,6 @@ Parameters:
     Type: Number
     Default: 96000
     Description: Average audio bitrate in bits/second [required]
-  ChannelClass:
-    Type: String
-    AllowedValues:
-      - STANDARD
-      - SINGLE_PIPELINE
-    Default: STANDARD
-    Description: Select the class of channel you intend to attach this input to [required] 
   AutoInputFailover:
     Type: String
     AllowedValues:
@@ -20,6 +13,13 @@ Parameters:
       - DISABLED  
     Default: ENABLED
     Description: Enable or disable automatic input failover [required]
+  ChannelClass:
+    Type: String
+    AllowedValues:
+      - STANDARD
+      - SINGLE_PIPELINE
+    Default: STANDARD
+    Description: Select the class of channel you intend to attach this input to [required] 
   FramerateDenominator:
     Type: Number
     Default: 1001
@@ -80,7 +80,14 @@ Parameters:
   MediaStoreEndpoint:
     Type: String
     Default: ''
-    Description: The endpoint of MediaStore [conditional]    
+    Description: The endpoint of MediaStore [conditional]
+  LiveSource:
+    Type: String     
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Default: ENABLED
+    Description: Enable or disable a live source [required]    
   LogicalNamePrefix:
     Type: String
     Default: MediaLive
@@ -105,7 +112,7 @@ Parameters:
   StreamKey:
     Type: String
     Default: stream
-    Description: A unique name for the location the RTMP stream is being pushed to [required]
+    Description: A unique name for the location the RTMP stream is being pushed to [conditional]
   VideoBitrate:
     Type: Number
     Default: 2200000
@@ -135,13 +142,13 @@ Parameters:
 Conditions:
   CreateDestinationForMediaPackage: !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ]
   CreateDestinationForRTMP: !And [ !Not [ !Equals [ !Ref RtmpUrl1, ''] ], !Not [ !Equals [ !Ref RtmpStreamName1, ''] ], !Not [ !Equals [ !Ref RtmpUrl2, ''] ], !Not [ !Equals [ !Ref RtmpStreamName2, ''] ] ]
-  CreateDestinationForMediaStore: !And [ !Equals [ !Ref MediaPackageChannelId, ''], !Equals [ !Ref RtmpUrl1, ''], !Equals [ !Ref RtmpStreamName1, ''], !Equals [ !Ref RtmpUrl2, ''], !Equals [ !Ref RtmpStreamName2, '']  ]
+  CreateDestinationForMediaStore: !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
   CreateTwoPipelinesAndTwoInput: !And [ !Equals [ !Ref ChannelClass, STANDARD], !Equals [ !Ref AutoInputFailover, ENABLED] ]
-  CreateLIVEWorkflow: !Equals [ !Ref VodSourceBucket, '' ]
+  CreateLIVEWorkflow: !Equals [ !Ref LiveSource, ENABLED ]
   CreateVODWorkflow: !Not [ !Equals [ !Ref VodSourceBucket, '' ] ]
-  CreateLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref VodSourceBucket, '' ], !Equals [ !Ref AutoInputFailover, ENABLED] ]
+  CreateLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref LiveSource, ENABLED ], !Equals [ !Ref AutoInputFailover, ENABLED] ]
 
 Resources:
   # IAM Role
@@ -399,46 +406,55 @@ Resources:
             Name: !Sub video_${Width}_${Height}
             Sharpness: 50
             Width: !Ref Width
-      InputAttachments: 
-        - AutomaticInputFailoverSettings: !If
-          - CreateTwoInput
-          - ErrorClearTimeMsec: 60000
-            FailoverConditions: 
-              - FailoverConditionSettings:
-                  AudioSilenceSettings: 
-                    AudioSilenceThresholdMsec: 15000
-              - FailoverConditionSettings:
-                  InputLossSettings: 
-                    InputLossThresholdMsec: 15000
-              - FailoverConditionSettings:
-                  VideoBlackSettings: 
-                    BlackDetectThreshold: 0.1
-                    VideoBlackThresholdMsec: 15000
-            InputPreference: EQUAL_INPUT_PREFERENCE
-            SecondaryInputId: !If 
-              - CreateLIVEWorkflow
-              - !Ref MediaLiveInputRempPush1
-              - !Ref MediaLiveInputMP4
+      InputAttachments:
+        - !If 
+          - CreateLIVEWorkflow
+          - AutomaticInputFailoverSettings: !If
+              - CreateTwoInput
+              - ErrorClearTimeMsec: 60000
+                FailoverConditions: 
+                  - FailoverConditionSettings:
+                      AudioSilenceSettings: 
+                        AudioSilenceThresholdMsec: 15000
+                  - FailoverConditionSettings:
+                      InputLossSettings: 
+                        InputLossThresholdMsec: 15000
+                  - FailoverConditionSettings:
+                      VideoBlackSettings: 
+                        BlackDetectThreshold: 0.1
+                        VideoBlackThresholdMsec: 15000
+                InputPreference: EQUAL_INPUT_PREFERENCE
+                SecondaryInputId: !Ref MediaLiveInputRempPush1
+              - !Ref AWS::NoValue
+            InputAttachmentName: !Sub ${LogicalNamePrefix}-Rtmp0
+            InputId: !Ref MediaLiveInputRempPush0
+            InputSettings: 
+              DeblockFilter: DISABLED
+              DenoiseFilter: DISABLED
+              FilterStrength: 1
+              InputFilter: AUTO
+              Smpte2038DataPreference: IGNORE
+              SourceEndBehavior: CONTINUE
           - !Ref AWS::NoValue
-          InputAttachmentName: !Sub ${LogicalNamePrefix}-0
-          InputId: !If
-              - CreateLIVEWorkflow
-              - !Ref MediaLiveInputRempPush0
-              - !Ref MediaLiveInputMP4
-          InputSettings: 
-            DeblockFilter: DISABLED
-            DenoiseFilter: DISABLED
-            FilterStrength: 1
-            InputFilter: AUTO
-            Smpte2038DataPreference: IGNORE
-            SourceEndBehavior: CONTINUE
-        - !If
-          - CreateTwoInput
-          - InputAttachmentName: !Sub ${LogicalNamePrefix}-1
-            InputId: !If
-              - CreateLIVEWorkflow
-              - !Ref MediaLiveInputRempPush1
-              - !Ref MediaLiveInputMP4
+        - !If 
+          - CreateLIVEWorkflow
+          - !If
+              - CreateTwoInput
+              - InputAttachmentName: !Sub ${LogicalNamePrefix}-Rtmp1
+                InputId: !Ref MediaLiveInputRempPush1
+                InputSettings: 
+                  DeblockFilter: DISABLED
+                  DenoiseFilter: DISABLED
+                  FilterStrength: 1
+                  InputFilter: AUTO
+                  Smpte2038DataPreference: IGNORE
+                  SourceEndBehavior: CONTINUE
+              - !Ref AWS::NoValue
+          - !Ref AWS::NoValue
+        - !If 
+          - CreateVODWorkflow
+          - InputAttachmentName: !Sub ${LogicalNamePrefix}-Vod
+            InputId: !Ref MediaLiveInputVod
             InputSettings: 
               DeblockFilter: DISABLED
               DenoiseFilter: DISABLED
@@ -488,11 +504,11 @@ Resources:
       Tags:
         createdby: !Ref TagValue
       Type: RTMP_PUSH
-  MediaLiveInputMP4:
+  MediaLiveInputVod:
     Condition: CreateVODWorkflow
     Type: AWS::MediaLive::Input
     Properties: 
-      Name: !Sub ${LogicalNamePrefix}-Mp4
+      Name: !Sub ${LogicalNamePrefix}-Vod0
       Sources: !If
         - CreateTwoPipelines
         - - Url: !Ref VodSourceBucket
@@ -500,7 +516,7 @@ Resources:
         - - Url: !Ref VodSourceBucket
       Tags:
         createdby: !Ref TagValue
-      Type: MP4_FILE
+      Type: MP4_FILE   
   MediaLiveInputSecurityGroup:
     Type: AWS::MediaLive::InputSecurityGroup
     Properties: 

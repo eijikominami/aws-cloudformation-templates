@@ -46,6 +46,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | [Systems Managerの設定](/web-servers/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/ssm.yaml&param_LogicalNamePrefix=SystemsManager) |
 | [Slackへの通知](/notification/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
 | [Amplifyを用いたCI/CD環境を構築](/amplify/README.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Amplify&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/amplify/template.yaml) |
+| [Media Services の設定](/media/README.md) | | |
 | [CloudWatch アラームの設定](/monitoring/README_JP.md) | | |
 
 ## アーキテクチャ
