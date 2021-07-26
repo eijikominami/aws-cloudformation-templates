@@ -93,6 +93,14 @@ Parameters:
     Default: MediaLive
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  OutputType:
+    Type: String
+    AllowedValues:
+      - MEDIA_PACKAGE
+      - MEDIA_STORE
+      - RTMP
+    Default: RTMP
+    Description: Output type [required]
   RtmpUrl1:
     Type: String
     Default: ''
@@ -140,9 +148,9 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateDestinationForMediaPackage: !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ]
-  CreateDestinationForRTMP: !And [ !Not [ !Equals [ !Ref RtmpUrl1, ''] ], !Not [ !Equals [ !Ref RtmpStreamName1, ''] ], !Not [ !Equals [ !Ref RtmpUrl2, ''] ], !Not [ !Equals [ !Ref RtmpStreamName2, ''] ] ]
-  CreateDestinationForMediaStore: !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ]
+  CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
+  CreateDestinationForRTMP: !Equals [ !Ref OutputType, RTMP] 
+  CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
   CreateTwoPipelinesAndTwoInput: !And [ !Equals [ !Ref ChannelClass, STANDARD], !Equals [ !Ref AutoInputFailover, ENABLED] ]
@@ -230,11 +238,14 @@ Resources:
         - !If
           - CreateDestinationForRTMP
           - Id: !Sub ${LogicalNamePrefix}-for-RTMP
-            Settings:
-              - StreamName: !Ref RtmpStreamName1
-                Url: !Ref RtmpUrl1
-              - StreamName: !Ref RtmpStreamName2
-                Url: !Ref RtmpUrl2
+            Settings: !If
+              - CreateTwoPipelines
+              - - StreamName: !Ref RtmpStreamName1
+                  Url: !Ref RtmpUrl1
+                - StreamName: !Ref RtmpStreamName2
+                  Url: !Ref RtmpUrl2
+              - - StreamName: !Ref RtmpStreamName1
+                  Url: !Ref RtmpUrl1
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForMediaStore
