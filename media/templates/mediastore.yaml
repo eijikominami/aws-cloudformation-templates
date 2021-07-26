@@ -17,6 +17,10 @@ Parameters:
     Type: Number
     Default: 30000
     Description: The time in seconds that browser caches the preflight response [required]
+  UserAgent:
+    Type: String
+    Default: ''
+    Description: The secret key that 'User-Agent' header contains  
   TagKey:
     Type: String
     Default: createdby
@@ -25,6 +29,9 @@ Parameters:
     Type: String
     Default: aws-cloudformation-samples 
     AllowedPattern: .+
+
+Conditions:
+  UserAgentExists: !Not [ !Equals [ !Ref UserAgent, ''] ]
 
 Resources:
   MediaStore:
@@ -61,24 +68,47 @@ Resources:
           - ExpirationDate: !Ref ExpirationDate
       MetricPolicy: 
         ContainerLevelMetrics: ENABLED
-      Policy: !Sub
-        - '{
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Sid": "MediaStoreFullAccess",
-                "Action": [ "mediastore:*" ],
-                "Principal":{
-                    "AWS" : "arn:aws:iam::${AWS::AccountId}:root"},
-                "Effect": "Allow",
-                "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${ContainerName}/*",
-                "Condition": {
-                  "Bool": { "aws:SecureTransport": "true" }
+      Policy: !Join
+        - '' 
+        - - !Sub '{
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "MediaStoreFullAccess",
+                  "Action": [ "mediastore:*" ],
+                  "Principal":{
+                      "AWS" : "arn:aws:iam::${AWS::AccountId}:root"},
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",
+                  "Condition": {
+                    "Bool": { "aws:SecureTransport": "true" }
+                  }
+                },
+                {
+                  "Sid": "PublicReadOverHttps",
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": [
+                    "mediastore:GetObject",
+                    "mediastore:DescribeObject"
+                  ],
+                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",'
+          - !If
+            - UserAgentExists
+            - !Sub ' 
+                  "Condition": {
+                    "StringEquals": {
+                      "aws:UserAgent": "${UserAgent}"
+                    },'
+            - ''
+          - '
+                  "Bool": {
+                      "aws:SecureTransport": "true"
+                    }
+                  }
                 }
-              }
-            ]
-          }'
-        - ContainerName: !Ref LogicalNamePrefix 
+              ]
+            }'
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue

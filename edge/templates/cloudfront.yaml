@@ -26,6 +26,7 @@ Metadata:
           - DomainName
           - Logging
           - LogBacketName
+          - UserAgent
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
         Parameters: 
@@ -68,8 +69,8 @@ Parameters:
     Description: The ARN of an SSL Certifiation attached to CloudFront
   DomainName:
     Type: String
-    AllowedPattern: .+
-    Description: The CNAME attached to CloudFront [required]
+    Default: ''
+    Description: The CNAME attached to CloudFront [conditional]
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -304,6 +305,10 @@ Parameters:
     Type: String
     Default: ''
     Description: Route53 hosted zone id
+  UserAgent:
+    Type: String
+    Default: ''
+    Description: The secret key that 'User-Agent' header contains  
   Logging:
     Type: String
     Default: ENABLED
@@ -313,8 +318,8 @@ Parameters:
     Description: Enable or disable logging [required]
   LogBacketName:
     Type: String
-    AllowedPattern: .+
-    Description: The custom S3 bucket name for access logging
+    Default: ''
+    Description: The custom S3 bucket name for access logging [conditional]
   WebACLArn:
     Type: String
     Default: '' 
@@ -342,9 +347,10 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  AdditionalNameExists: !Not [ !Equals [ !Ref CloudFrontAdditionalName, '' ]]
-  BundleSSLCertification: !Not [ !Equals [ !Ref CertificateManagerARN, '' ]]
-  DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ]]
+  AdditionalNameExists: !Not [ !Equals [ !Ref CloudFrontAdditionalName, '' ] ]
+  BundleSSLCertification: !And [ !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ], !Not [ !Equals [ !Ref DomainName, '' ] ] ]
+  DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ] ]
+  DomainNameExists: !Not [ !Equals [ !Ref DomainName, '' ] ]
   SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
   S3Origin: !Equals [ !Ref CloudFrontOriginType, S3 ]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
@@ -356,6 +362,7 @@ Conditions:
   CreateRoute53: !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ]
   CreateCustomErrorResponse: !And [ !Not [ !Equals [ !Ref CloudFront403ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront404ErrorResponsePagePath, '' ] ], !Not [ !Equals [ !Ref CloudFront500ErrorResponsePagePath, '' ] ] ]
   Development: !Equals [ !Ref Environment, development]
+  UserAgentExists: !Not [ !Equals [ !Ref UserAgent, ''] ]
 
 Resources:
   RealtimeDashboard:
@@ -406,7 +413,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.11
+        SemanticVersion: 1.3.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -423,7 +430,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.11
+        SemanticVersion: 1.3.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -442,7 +449,10 @@ Resources:
               - !Ref CloudFrontAdditionalName
             - - !Ref DomainName
           - !Ref AWS::NoValue
-        Comment: !Sub CDN for ${DomainName}
+        Comment: !If
+          - DomainNameExists
+          - !Sub CDN for ${DomainName}
+          - !Ref CloudFrontOriginDomainName
         CustomErrorResponses: !If 
           - CreateCustomErrorResponse
           - - ErrorCachingMinTTL: 60
@@ -484,7 +494,10 @@ Resources:
         Logging: !If
           - CreateLog
           - Bucket: !Ref LogBacketName
-            Prefix: !Sub CloudFront-${DomainName}/
+            Prefix: !If
+              - DomainNameExists
+              - !Sub CloudFront-${DomainName}/
+              - !Sub CloudFront-${CloudFrontOriginDomainName}/
           - !Ref AWS::NoValue
         Origins: !If
           - S3Origin
@@ -520,6 +533,11 @@ Resources:
                   - TLSv1
                   - TLSv1.1
                   - TLSv1.2
+              OriginCustomHeaders: !If
+                - UserAgentExists
+                - - HeaderName: User-Agent
+                    HeaderValue: !Ref UserAgent
+                - !Ref AWS::NoValue
         ViewerCertificate: !If
           - BundleSSLCertification
           - AcmCertificateArn: !Ref CertificateManagerARN
