@@ -372,7 +372,7 @@ def createMediaLiveMessage(message):
                     },
                     {
                         'title': "Pipeline",
-                        'value': "%s" % message['detail']['pipeline_running_count']
+                        'value': "%s" % str(message['detail']['pipelines_running_count'])
                     },
                     {
                         'title': "State",

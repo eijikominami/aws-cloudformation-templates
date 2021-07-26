@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: AWSCloudFormationSamples/media/mediapackage sets Elemental MediaPackage.
 
 Parameters:
+  ArchiveBucket:
+    Type: String
+    Default: ''
+    Description: The S3 bucket Name LIVE-to-VOD contents are stored.
   LogicalNamePrefix:
     Type: String
     Default: MediaPackage
@@ -16,14 +20,18 @@ Parameters:
     Type: String
     Default: 3
     Description: Duration (in seconds) of each fragment. [required]
+  OutputType:
+    Type: String
+    AllowedValues:
+      - APPLE_HLS
+      - ISO_DASH
+      - ALL  
+    Default: APPLE_HLS
+    Description: OutputType [required] 
   VodSourceBucket:
     Type: String
     Default: ''
     Description: The S3 bucket Name VOD contents exist.
-  VodDestinationBucket:
-    Type: String
-    Default: ''
-    Description: The S3 bucket Name LIVE-to-VOD contents are stored.
   TagKey:
     Type: String
     Default: createdby
@@ -34,10 +42,12 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateVODWorkflow:
-    !Not [ !Equals [ !Ref VodSourceBucket, '' ] ]
-  CreateLiveToVODWorkflow:
-    !Not [ !Equals [ !Ref VodDestinationBucket, '' ] ]
+  CreateVODWorkflow: !Not [ !Equals [ !Ref VodSourceBucket, '' ] ]
+  CreateLiveToVODWorkflow: !Not [ !Equals [ !Ref ArchiveBucket, '' ] ]
+  CreateHlsEndPoint: !Or [ !Equals [ !Ref OutputType, APPLE_HLS ], !Equals [ !Ref OutputType, ALL ] ]
+  CreateDashEndPoint: !Or [ !Equals [ !Ref OutputType, ISO_DASH ], !Equals [ !Ref OutputType, ALL ] ]
+  CreateHlsVODWorkflow: !And [ !Not [ !Equals [ !Ref VodSourceBucket, '' ] ], !Or [ !Equals [ !Ref OutputType, APPLE_HLS ], !Equals [ !Ref OutputType, ALL ] ] ]
+  CreateDashVODWorkflow: !And [ !Not [ !Equals [ !Ref VodSourceBucket, '' ] ], !Or [ !Equals [ !Ref OutputType, ISO_DASH ], !Equals [ !Ref OutputType, ALL ] ] ]
 
 Resources:
   # IAM Role
@@ -83,8 +93,8 @@ Resources:
                     - 's3:ListBucket'
                     - 's3:GetBucketLocation'
                   Resource:
-                    - !Sub 'arn:aws:s3:::${VodDestinationBucket}/*'
-                    - !Sub 'arn:aws:s3:::${VodDestinationBucket}'
+                    - !Sub 'arn:aws:s3:::${ArchiveBucket}/*'
+                    - !Sub 'arn:aws:s3:::${ArchiveBucket}'
           - !Ref AWS::NoValue
         # Allow MediaPackage to access SecretManager.
         - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaPackageSecretManagerPolicy-${AWS::Region}'
@@ -118,7 +128,8 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  MediaPackageOriginEndpoint:
+  MediaPackageHlsOriginEndpoint:
+    Condition: CreateHlsEndPoint
     Type: AWS::MediaPackage::OriginEndpoint
     Properties: 
       ChannelId: !Ref MediaPackageChannel
@@ -127,7 +138,33 @@ Resources:
         AdMarkers: NONE
         IncludeIframeOnlyStream: false
         SegmentDurationSeconds: !Ref SegmentDurationSeconds
-      Id: !Ref LogicalNamePrefix
+      Id: !Sub ${LogicalNamePrefix}-Hls
+      ManifestName: index
+      Origination: !If 
+        - CreateLiveToVODWorkflow
+        - DENY
+        - ALLOW
+      StartoverWindowSeconds: !Ref StartoverWindowSeconds
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeDelaySeconds: 0
+  MediaPackageDashOriginEndpoint:
+    Condition: CreateDashEndPoint
+    Type: AWS::MediaPackage::OriginEndpoint
+    Properties: 
+      ChannelId: !Ref MediaPackageChannel
+      DashPackage:
+        ManifestLayout: FULL
+        ManifestWindowSeconds: 60
+        MinBufferTimeSeconds: 10
+        MinUpdatePeriodSeconds: 2
+        Profile: NONE
+        SegmentDurationSeconds: 2
+        SegmentTemplateFormat: NUMBER_WITH_TIMELINE
+        SuggestedPresentationDelaySeconds: 20     
+      Description: !Sub Media Package OriginEndpoint for ${LogicalNamePrefix}
+      Id: !Sub ${LogicalNamePrefix}-Dash
       ManifestName: !Ref LogicalNamePrefix
       Origination: !If 
         - CreateLiveToVODWorkflow
@@ -138,11 +175,83 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeDelaySeconds: 0
+  MediaPackageHlsAsset:
+    Condition: CreateHlsVODWorkflow    
+    Type: AWS::MediaPackage::Asset
+    Properties: 
+      Id: !Sub ${LogicalNamePrefix}-Hls
+      PackagingGroupId: !Ref MediaPackagePackagingGroup
+      SourceArn: !Sub 'arn:aws:s3:::${VodSourceBucket}'
+      SourceRoleArn: !GetAtt IAMRoleForMediaPackage.Arn
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaPackageDashAsset:  
+    Condition: CreateDashVODWorkflow  
+    Type: AWS::MediaPackage::Asset
+    Properties: 
+      Id: !Sub ${LogicalNamePrefix}-Dash
+      PackagingGroupId: !Ref MediaPackagePackagingGroup
+      SourceArn: !Sub 'arn:aws:s3:::${VodSourceBucket}'
+      SourceRoleArn: !GetAtt IAMRoleForMediaPackage.Arn
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaPackagePackagingGroup:
+    Condition: CreateVODWorkflow
+    Type: AWS::MediaPackage::PackagingGroup
+    Properties: 
+      Id: !Ref LogicalNamePrefix
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaPackageHlsPackagingConfiguration:
+    Condition: CreateHlsVODWorkflow
+    Type: AWS::MediaPackage::PackagingConfiguration
+    Properties:
+      HlsPackage:
+        HlsManifests: 
+          - IncludeIframeOnlyStream: false
+            ManifestName: index
+            RepeatExtXKey: false
+        SegmentDurationSeconds: !Ref SegmentDurationSeconds
+        UseAudioRenditionGroup: false
+      Id: !Sub ${LogicalNamePrefix}-Hls
+      PackagingGroupId: !Ref MediaPackagePackagingGroup
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaPackageDashPackagingConfiguration:
+    Condition: CreateDashVODWorkflow
+    Type: AWS::MediaPackage::PackagingConfiguration
+    Properties:
+      DashPackage:
+        DashManifests: 
+          - ManifestLayout: FULL
+            ManifestName: index
+            MinBufferTimeSeconds: 30
+            Profile: NONE
+        SegmentDurationSeconds: !Ref SegmentDurationSeconds
+        SegmentTemplateFormat: NUMBER_WITH_TIMELINE
+      Id: !Sub ${LogicalNamePrefix}-Dash
+      PackagingGroupId: !Ref MediaPackagePackagingGroup
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 
 Outputs:
   ChannelId:
     Description: Channel Id
     Value: !Ref MediaPackageChannel
-  EndpointUrl:
+  HlsEndpointUrl:
     Description: Endpoint Url
-    Value: !GetAtt MediaPackageOriginEndpoint.Url
+    Value: !If
+      - CreateHlsEndPoint
+      - !GetAtt MediaPackageHlsOriginEndpoint.Url
+      - ''
+  DashEndpointUrl:
+    Description: Endpoint Url
+    Value: !If
+      - CreateDashEndPoint
+      - !GetAtt MediaPackageDashOriginEndpoint.Url
+      - ''

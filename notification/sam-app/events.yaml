@@ -234,7 +234,7 @@ Resources:
           - aws.medialive
         detail-type: 
           - MediaLive Channel State Change
-      Name: !Sub ${LogicalNamePrefix}-ManagementConsole
+      Name: !Sub ${LogicalNamePrefix}-MediaLive
       State: !Ref MediaLiveEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn

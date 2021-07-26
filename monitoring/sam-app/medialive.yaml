@@ -90,7 +90,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) でアラートが発生しています。'
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) で *アラートが発生* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Active-Alerts'
@@ -116,7 +116,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の現用入力が非アクティブです。'
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の *現用入力が非アクティブ* です。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Primary-Input-Inactive'
