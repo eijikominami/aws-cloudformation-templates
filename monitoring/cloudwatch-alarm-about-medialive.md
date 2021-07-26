@@ -9,7 +9,7 @@ cloudwatch-alarm-about-medialive creates Amazon CloudWatch Alarm about AWS Eleme
 The template creates the following alarms.
 
 | Namespace | MetricName | OutputGroupName | ChannelId | Pipeline | Threshold |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- | --- |
 | AWS/MediaLive | **Output4xxErrors** | `OutputGroupName` | `ChannelId` | `Pipeline` | At least once a minute | 
 | AWS/MediaLive | **Output5xxErrors** | `OutputGroupName` | `ChannelId` | `Pipeline` | At least once a minute |
 | AWS/MediaLive | **ActiveAlerts** | | `ChannelId` | `Pipeline` | At least once a minute | 
@@ -37,8 +37,8 @@ cloudwatch-alarm-about-medialive は、 AWS Elemental MediaLive に関する Ama
 
 このテンプレートは、以下のアラームを作成します。
 
-| ネームスペース | メトリクス | ApiName | Stage | 閾値 |
-| --- | --- | --- | --- | --- |
+| ネームスペース | メトリクス | OutputGroupName | ChannelId | Pipeline | 閾値 |
+| --- | --- | --- | --- | --- | --- |
 | AWS/MediaLive | **Output4xxErrors** | `OutputGroupName` | `ChannelId` | `Pipeline` | 1分間に1回以上 | 
 | AWS/MediaLive | **Output5xxErrors** | `OutputGroupName` | `ChannelId` | `Pipeline` | 1分間に1回以上 |
 | AWS/MediaLive | **ActiveAlerts** | | `ChannelId` | `Pipeline` | 1分間に1回以上 | 
