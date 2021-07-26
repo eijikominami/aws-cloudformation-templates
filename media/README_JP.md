@@ -46,6 +46,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | MediaPackageChannelId | String | | | MediaPackage のチャネルID |
 | MediaStoreEndpoint | String | | | MediaStore のエンドポイントURL |
 | LiveSource | ENABLED or DISABLED | ENABLED | ○ | ライブソースを使用するかどうか |
+| OutputType | String | RTMP | ○ | 出力先のタイプ |
 | RtmpUrl1 | String | | | 出力先のRTMP URL1 |
 | RtmpStreamName1 | String | | | 出力先のRTMPストリーム名1 |
 | RtmpUrl2 | String | | | 出力先のRTMP URL2 |

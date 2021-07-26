@@ -70,6 +70,7 @@ This template creates ``EventBridge Events Rule`` for [supported AWS Services](h
 | Amazon EC2 Auto Scaling Events | aws.autoscaling | EC2 Instance Terminate Successful  |
 | Amazon EC2 Auto Scaling Events | aws.autoscaling | EC2 Instance Terminate Unsuccessful |
 | Amazon EC2 State Change Events | aws.ec2 | EC2 Instance State-change Notification |
+| AWS Elemental MediaLive Events | aws.medialive | MediaLive Channel State Change Events |
 | AWS KMS Events | aws.kms | KMS CMK Rotations |
 | AWS KMS Events | aws.kms | KMS Imported Key Material Expiration |
 | AWS KMS Events | aws.kms | KMS CMK Deletion |

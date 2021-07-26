@@ -13,6 +13,7 @@ Metadata:
           - EC2EventsRule
           - KMSEventsRule
           - ManagementConsoleEventsRule
+          - MediaLiveEventsRule
           - MGNEventsRule
           - ScheduledEventsRule
           - TagEventsRule
@@ -69,6 +70,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Management Console [required]
+  MediaLiveEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about MediaLive [required]
   MGNEventsRule:
     Type: String
     Default: ENABLED
@@ -214,6 +222,20 @@ Resources:
           - AWS Console Sign In via CloudTrail
       Name: !Sub ${LogicalNamePrefix}-ManagementConsole
       State: !Ref ManagementConsoleEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForMediaLive:
+    Type: 'AWS::Events::Rule'
+    Properties: 
+      Description: !Sub Rule for MediaLive created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.medialive
+        detail-type: 
+          - MediaLive Channel State Change
+      Name: !Sub ${LogicalNamePrefix}-ManagementConsole
+      State: !Ref MediaLiveEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
