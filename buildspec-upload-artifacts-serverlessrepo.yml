@@ -54,9 +54,9 @@ phases:
       - aws s3 cp monitoring/cloudwatch-alarm-about-lambda.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-lambda --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-lambda.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-natgateway.md s3://${BUCKET_NAME}/readme/
-      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-medialive --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-medialive.md --region us-east-1
-      - aws s3 cp monitoring/cloudwatch-alarm-about-medialive.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-natgateway --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-natgateway.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-medialive.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-medialive --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-medialive.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-sns.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-sns --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-sns.md --region us-east-1
       - aws s3 cp notification/eventbridge-rules.md s3://${BUCKET_NAME}/readme/
