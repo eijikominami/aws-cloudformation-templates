@@ -262,6 +262,7 @@ Resources:
             - Type: BASE_REF
               Pattern: ^refs/heads/master$
               ExcludeMatchedPattern: false
+      Visibility: PUBLIC_READ
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -302,6 +303,7 @@ Resources:
             - Type: HEAD_REF
               Pattern: !Sub ^refs/heads/${GitHubBranchName}$
               ExcludeMatchedPattern: false
+      Visibility: PUBLIC_READ
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -341,6 +343,7 @@ Resources:
             - Type: HEAD_REF
               Pattern: ^refs/tags/.*-rc.*$
               ExcludeMatchedPattern: false
+      Visibility: PUBLIC_READ
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
