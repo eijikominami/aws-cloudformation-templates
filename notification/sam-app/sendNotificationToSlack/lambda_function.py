@@ -60,6 +60,10 @@ def lambda_handler(event, context):
             elif 'source' in message and 'aws.signin' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
                 slack_message = createManagementConsoleMessage(message)    
+            # MediaLive
+            elif 'source' in message and 'aws.medialive' in message['source']:  
+                hook_url = "https://" + ALERT_HOOK_URL
+                slack_message = createMediaLiveMessage(message) 
             # MGN
             elif 'source' in message and 'aws.mgn' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
@@ -75,7 +79,7 @@ def lambda_handler(event, context):
             # IAM Access Analyzer
             elif 'source' in message and 'aws.access-analyzer' in message['source']:  
                 hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createIAMAccessAnalyzer(message)
+                slack_message = createIAMAccessAnalyzerMessage(message)
             # Amplify Console
             elif 'source' in message and 'aws.amplify' in message['source']:  
                 hook_url = "https://" + DEPLOYMENT_HOOK_URL
@@ -350,6 +354,38 @@ def createManagementConsoleMessage(message):
         }]
     }
 
+def createMediaLiveMessage(message):
+
+    title = ":video_camera: AWS Elemental MediaLive | " + message['region'] + " | Account: " + message['account']
+    title_link = "https://console.aws.amazon.com/rmedialive/home?region=" + message['region']
+
+    return {
+        'attachments': [{
+            'color': '#EA9836',
+            'title': "%s" % title,
+            'title_link': "%s" % title_link,
+            'text': "MediaLive でイベントが発生しました。",
+            'fields': [
+                    {
+                        'title': "Resource",
+                        'value': "%s" % str(message['detail']['channel_arn'])
+                    },
+                    {
+                        'title': "Pipeline",
+                        'value': "%s" % str(message['detail']['pipelines_running_count'])
+                    },
+                    {
+                        'title': "State",
+                        'value': "%s" % str(message['detail']['state'])
+                    },
+                    {
+                        'title': "Message",
+                        'value': "%s" % str(message['detail']['message'])
+                    }
+                ]
+        }]
+    }
+
 def createMGNMessage(message):
 
     resources = ''
@@ -459,7 +495,7 @@ def createTrustedAdvisorMessage(message):
         }]
     }
 
-def createIAMAccessAnalyzer(message):
+def createIAMAccessAnalyzerMessage(message):
 
     title = ":heavy_exclamation_mark: IAM Access Analyzer Findings | " + message['region'] + " | Account: " + message['account']
     title_link = "https://console.aws.amazon.com/resource-groups/access-analyzer/home?region=" + message['region']

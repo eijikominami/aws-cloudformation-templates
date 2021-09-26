@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for AWS Elemental MediaLive
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom alram name
+  ChannelId:
+    Type: String
+    Default: ''
+    Description: The channel Id   
+  OutputGroupName:
+    Type: String
+    Default: ''
+    Description: The output group name  
+  PipelineId:
+    Type: Number
+    Default: 0
+    Description: The pipeline id 
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmOutput4xxErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *4XX エラー* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-4XX-Error-Occured'
+        - !Sub 'Warning-MediaLive-${ChannelId}-4XX-Error-Occured'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: OutputGroupName
+          Value: !Ref OutputGroupName
+        - Name: ChannelId
+          Value: !Ref ChannelId
+        - Name: Pipeline
+          Value: !Ref PipelineId
+      EvaluationPeriods: 1
+      MetricName: Output4xxErrors
+      Namespace: AWS/MediaLive
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmOutput5xxErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *5XX エラー* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-5XX-Error-Occured'
+        - !Sub 'Warning-MediaLive-${ChannelId}-5XX-Error-Occured'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: OutputGroupName
+          Value: !Ref OutputGroupName
+        - Name: ChannelId
+          Value: !Ref ChannelId
+        - Name: Pipeline
+          Value: !Ref PipelineId
+      EvaluationPeriods: 1
+      MetricName: Output5xxErrors
+      Namespace: AWS/MediaLive
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  ActiveAlerts:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) で *アラートが発生* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Active-Alerts'
+        - !Sub 'Warning-MediaLive-${ChannelId}-Active-Alerts'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ChannelId
+          Value: !Ref ChannelId
+        - Name: Pipeline
+          Value: !Ref PipelineId
+      EvaluationPeriods: 1
+      MetricName: ActiveAlerts
+      Namespace: AWS/MediaLive
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  PrimaryInputActive:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の *現用入力が非アクティブ* です。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Primary-Input-Inactive'
+        - !Sub 'Warning-MediaLive-${ChannelId}-Primary-Input-Inactive'
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: ChannelId
+          Value: !Ref ChannelId
+        - Name: Pipeline
+          Value: !Ref PipelineId
+      EvaluationPeriods: 1
+      MetricName: PrimaryInputActive
+      Namespace: AWS/MediaLive
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Minimum
+      Threshold: 1
+      TreatMissingData: notBreaching

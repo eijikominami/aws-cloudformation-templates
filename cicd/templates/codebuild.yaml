@@ -105,7 +105,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.12
+        SemanticVersion: 1.3.19
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -122,7 +122,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.12
+        SemanticVersion: 1.3.19
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -231,7 +231,7 @@ Resources:
       BadgeEnabled: true
       Description: Upload artifacts from master branch to the specified S3 bucket. 
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
@@ -262,6 +262,7 @@ Resources:
             - Type: BASE_REF
               Pattern: ^refs/heads/master$
               ExcludeMatchedPattern: false
+      Visibility: PUBLIC_READ
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -276,7 +277,7 @@ Resources:
       BadgeEnabled: true
       Description: !Sub Upload artifacts from ${GitHubBranchName} branch to the specified S3 bucket. 
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
@@ -302,6 +303,7 @@ Resources:
             - Type: HEAD_REF
               Pattern: !Sub ^refs/heads/${GitHubBranchName}$
               ExcludeMatchedPattern: false
+      Visibility: PUBLIC_READ
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -316,7 +318,7 @@ Resources:
       BadgeEnabled: true
       Description: Upload SAM artifacts and README files to AWS Serverless Application Repository. 
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
@@ -341,6 +343,7 @@ Resources:
             - Type: HEAD_REF
               Pattern: ^refs/tags/.*-rc.*$
               ExcludeMatchedPattern: false
+      Visibility: PUBLIC_READ
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -363,7 +366,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.12
+        SemanticVersion: 1.3.19
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -384,7 +387,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.12
+        SemanticVersion: 1.3.19
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -405,7 +408,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.12
+        SemanticVersion: 1.3.19
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

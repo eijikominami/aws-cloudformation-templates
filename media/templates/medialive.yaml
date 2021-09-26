@@ -1,7 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationSamples/media/medialive sets Elemental MediaLive.
 
 Parameters:
+  ArchiveBucket:
+    Type: String
+    Default: ''
+    Description: The S3 bucket Name LIVE-to-VOD contents are stored.
   AudioBitrate:
     Type: Number
     Default: 96000
@@ -93,22 +98,30 @@ Parameters:
     Default: MediaLive
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  OutputType:
+    Type: String
+    AllowedValues:
+      - MEDIA_PACKAGE
+      - MEDIA_STORE
+      - RTMP
+    Default: RTMP
+    Description: Output type [required]
   RtmpUrl1:
     Type: String
     Default: ''
-    Description: The rtmp url a stream sends to.
-  RtmpStreamName1:
+    Description: The rtmp url a stream sends to
+  RtmpStreamKey1:
     Type: String
     Default: ''
-    Description: The rtmp stream name a stream sends to.
+    Description: The rtmp stream name a stream sends to
   RtmpUrl2:
     Type: String
     Default: ''
-    Description: The rtmp url a stream sends to.
-  RtmpStreamName2:
+    Description: The rtmp url a stream sends to
+  RtmpStreamKey2:
     Type: String
     Default: ''
-    Description: The rtmp stream name a stream sends to.
+    Description: The rtmp stream name a stream sends to
   StreamKey:
     Type: String
     Default: stream
@@ -120,7 +133,7 @@ Parameters:
   VodSourceBucket:
     Type: String
     Default: ''
-    Description: The S3 bucket Name VOD contents exist.
+    Description: The S3 bucket Name VOD contents exist
   Width:
     Type: Number
     Default: 960
@@ -129,7 +142,20 @@ Parameters:
     Type: String
     AllowedPattern: ^[0-9./]*$
     Default: 0.0.0.0/0
-    Description: A list of one or more IPv4 CIDR addresses to allow [required]
+    Description: A list of one or more IPv4 CIDR addresses to allow (e.g. 0.0.0.0/0) [required]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -140,17 +166,50 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateDestinationForMediaPackage: !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ]
-  CreateDestinationForRTMP: !And [ !Not [ !Equals [ !Ref RtmpUrl1, ''] ], !Not [ !Equals [ !Ref RtmpStreamName1, ''] ], !Not [ !Equals [ !Ref RtmpUrl2, ''] ], !Not [ !Equals [ !Ref RtmpStreamName2, ''] ] ]
-  CreateDestinationForMediaStore: !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ]
+  CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
+  CreateDestinationForRTMP: !Equals [ !Ref OutputType, RTMP] 
+  CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
+  CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
   CreateTwoPipelinesAndTwoInput: !And [ !Equals [ !Ref ChannelClass, STANDARD], !Equals [ !Ref AutoInputFailover, ENABLED] ]
   CreateLIVEWorkflow: !Equals [ !Ref LiveSource, ENABLED ]
   CreateVODWorkflow: !Not [ !Equals [ !Ref VodSourceBucket, '' ] ]
   CreateLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref LiveSource, ENABLED ], !Equals [ !Ref AutoInputFailover, ENABLED] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
 Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.3.19
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.3.19
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # IAM Role
   IAMRoleForMediaLive:
     Type: 'AWS::IAM::Role'
@@ -230,11 +289,14 @@ Resources:
         - !If
           - CreateDestinationForRTMP
           - Id: !Sub ${LogicalNamePrefix}-for-RTMP
-            Settings:
-              - StreamName: !Ref RtmpStreamName1
-                Url: !Ref RtmpUrl1
-              - StreamName: !Ref RtmpStreamName2
-                Url: !Ref RtmpUrl2
+            Settings: !If
+              - CreateTwoPipelines
+              - - StreamName: !Ref RtmpStreamKey1
+                  Url: !Ref RtmpUrl1
+                - StreamName: !Ref RtmpStreamKey2
+                  Url: !Ref RtmpUrl2
+              - - StreamName: !Ref RtmpStreamKey1
+                  Url: !Ref RtmpUrl1
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForMediaStore
@@ -247,6 +309,18 @@ Resources:
                   Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-b/main
               - - StreamName: ''
                   Url: !Sub mediastoressl://${MediaStoreEndpoint}/live/main
+          - !Ref AWS::NoValue
+        - !If
+          - CreateDestinationForArchive
+          - Id: !Sub ${LogicalNamePrefix}-for-Archive
+            Settings: !If
+              - CreateTwoPipelines
+              - - StreamName: ''
+                  Url: !Sub s3ssl://${ArchiveBucket}
+                - StreamName: ''
+                  Url: !Sub s3ssl://${ArchiveBucket}
+              - - StreamName: ''
+                  Url: !Sub s3ssl://${ArchiveBucket}
           - !Ref AWS::NoValue
       EncoderSettings:
         AudioDescriptions: 
@@ -266,7 +340,7 @@ Resources:
         OutputGroups: 
           - !If
             - CreateDestinationForMediaPackage
-            - Name: MediaPackage Group
+            - Name: MediaPackage
               OutputGroupSettings: 
                 MediaPackageGroupSettings: 
                   Destination:
@@ -281,7 +355,7 @@ Resources:
             - !Ref AWS::NoValue
           - !If
             - CreateDestinationForRTMP
-            - Name: RTMP Group
+            - Name: RTMP
               OutputGroupSettings:
                 RtmpGroupSettings:
                   AuthenticationScheme: COMMON
@@ -305,7 +379,7 @@ Resources:
             - !Ref AWS::NoValue
           - !If 
             - CreateDestinationForMediaStore
-            - Name: MediaStore Group
+            - Name: MediaStore
               OutputGroupSettings: 
                 HlsGroupSettings: 
                   CaptionLanguageSetting: OMIT
@@ -369,7 +443,64 @@ Resources:
                             VideoPid: '481'
                       NameModifier: !Sub _${Width}_${Height}
                   VideoDescriptionName: !Sub video_${Width}_${Height}
-            - !Ref AWS::NoValue        
+            - !Ref AWS::NoValue     
+          - !If
+            - CreateDestinationForArchive
+            - Name: Archive
+              OutputGroupSettings: 
+                ArchiveGroupSettings: 
+                  Destination: 
+                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-Archive
+                  RolloverInterval: 30
+              Outputs: 
+                - AudioDescriptionNames: 
+                    - !Sub audio_2_aac${AudioBitrate}
+                  OutputName: !Sub archive_${Width}x${Height}_${VideoBitrate}
+                  OutputSettings:
+                    ArchiveOutputSettings:
+                      ContainerSettings: 
+                        M2tsSettings: 
+                          AbsentInputAudioBehavior: ENCODE_SILENCE
+                          Arib: DISABLED
+                          AribCaptionsPid: '507'
+                          AribCaptionsPidControl: AUTO
+                          AudioBufferModel: ATSC
+                          AudioFramesPerPes: 2
+                          AudioPids: 482-498
+                          AudioStreamType: DVB
+                          Bitrate: 0
+                          BufferModel: MULTIPLEX
+                          CcDescriptor: DISABLED
+                          DvbSubPids: 460-479
+                          DvbTeletextPid: '499'
+                          Ebif: NONE
+                          EbpAudioInterval: VIDEO_INTERVAL
+                          EbpPlacement: VIDEO_AND_AUDIO_PIDS
+                          EsRateInPes: EXCLUDE
+                          EtvPlatformPid: '504'
+                          EtvSignalPid: '505'
+                          Klv: NONE
+                          KlvDataPids: '501'
+                          NielsenId3Behavior: NO_PASSTHROUGH
+                          PatInterval: 100
+                          PcrControl: PCR_EVERY_PES_PACKET
+                          PcrPeriod: 40 
+                          PmtInterval: 100
+                          PmtPid: '480'
+                          ProgramNum: 1
+                          RateMode: CBR
+                          Scte27Pids: 450-459
+                          Scte35Control: NONE
+                          Scte35Pid: '500'
+                          SegmentationMarkers: NONE
+                          SegmentationStyle: MAINTAIN_CADENCE
+                          TimedMetadataBehavior: NO_PASSTHROUGH
+                          TimedMetadataPid: '502'
+                          VideoPid: '481'
+                      Extension: ''
+                      NameModifier: !Sub _${Width}_${Height}
+                  VideoDescriptionName: !Sub video_${Width}_${Height}           
+            - !Ref AWS::NoValue
         TimecodeConfig: 
           Source: SYSTEMCLOCK
         VideoDescriptions: 
@@ -511,9 +642,9 @@ Resources:
       Name: !Sub ${LogicalNamePrefix}-Vod0
       Sources: !If
         - CreateTwoPipelines
-        - - Url: !Ref VodSourceBucket
-          - Url: !Ref VodSourceBucket
-        - - Url: !Ref VodSourceBucket
+        - - Url: !Sub s3ssl://${VodSourceBucket}
+          - Url: !Sub s3ssl://${VodSourceBucket}
+        - - Url: !Sub s3ssl://${VodSourceBucket}
       Tags:
         createdby: !Ref TagValue
       Type: MP4_FILE   
@@ -524,6 +655,53 @@ Resources:
         createdby: !Ref TagValue
       WhitelistRules: 
         - Cidr: !Ref WhitelistRules
+  CloudWatchAlarmMediaLive0:
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        ChannelId: !Ref MediaLiveChannel
+        OutputGroupName: MediaPackage
+        PipelineId: 0
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
+        SemanticVersion: 1.3.19
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  CloudWatchAlarmMediaLive1:
+    Condition: CreateTwoPipelines
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        ChannelId: !Ref MediaLiveChannel
+        OutputGroupName: MediaPackage
+        PipelineId: 1
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
+        SemanticVersion: 1.3.19
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
 
 Outputs:
   ChannelId:

@@ -46,6 +46,7 @@ You can provide optional parameters as follows.
 | MediaPackageChannelId | String | | | The MediaPackage channel id |
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
 | LiveSource | ENABLED or DISABLED | ENABLED | ○ | Enable or disable a live source |
+| OutputType | String | RTMP | ○ | OutputType |
 | RtmpUrl1 | String | | | The rtmp url a stream sends to. |
 | RtmpStreamName1 | String | | | The rtmp stream name a stream sends to. |
 | RtmpUrl2 | String | | | The rtmp url a stream sends to. |
