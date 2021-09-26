@@ -15,6 +15,10 @@ Metadata:
           - AuditOtherRegions
           - AutoRemediation
       - Label: 
+          default: 'Config Configuration'
+        Parameters: 
+          - AWSConfig
+      - Label: 
           default: 'Detective Configuration'
         Parameters: 
           - AmazonDetective
@@ -43,6 +47,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable AWS Audit Manager [required]
+  AWSConfig:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable AWS Config [required]
   AuditOtherRegions:
     Type: String
     Default: ENABLED
@@ -102,6 +113,7 @@ Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateAuditManager: !Equals [ !Ref AWSAuditManager, ENABLED]
+  CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   Development: !Equals [ !Ref Environment, development]
@@ -230,6 +242,7 @@ Resources:
           Value: !Ref TagValue
   Config:
     Type: AWS::CloudFormation::Stack
+    Condition: CreateConfig
     Properties:
       NotificationARNs:
         - !If

@@ -130,6 +130,8 @@ You can provide optional parameters as follows:
 | AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Amazon Detective is enabled. |
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled. |
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled. |
+| AWSAuditManager | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Audit Manager is enabled. |
+| AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS AWS Configis enabled. |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | Notification filter about Security Hub Security Checks | 
 
