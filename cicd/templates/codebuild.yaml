@@ -231,7 +231,7 @@ Resources:
       BadgeEnabled: true
       Description: Upload artifacts from master branch to the specified S3 bucket. 
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
@@ -277,7 +277,7 @@ Resources:
       BadgeEnabled: true
       Description: !Sub Upload artifacts from ${GitHubBranchName} branch to the specified S3 bucket. 
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
@@ -318,7 +318,7 @@ Resources:
       BadgeEnabled: true
       Description: Upload SAM artifacts and README files to AWS Serverless Application Repository. 
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
           - Name: BUCKET_NAME
             Type: PLAINTEXT

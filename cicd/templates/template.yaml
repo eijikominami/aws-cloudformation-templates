@@ -467,7 +467,7 @@ Resources:
         Type: CODEPIPELINE
       Description: !Sub Builds SAM teplate of ${AWS::StackName}
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         Image: !Ref CodeBuildImageName
         Type: LINUX_CONTAINER
       LogsConfig: 
@@ -490,7 +490,7 @@ Resources:
         Type: CODEPIPELINE
       Description: !Sub Builds CloudFormation nested teplate of ${AWS::StackName}
       Environment: 
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         Image: !Ref CodeBuildImageName
         Type: LINUX_CONTAINER
       LogsConfig: 
