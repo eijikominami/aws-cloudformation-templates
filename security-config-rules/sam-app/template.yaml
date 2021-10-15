@@ -8,7 +8,7 @@ Globals:
     Layers:
       # NOTE: AWS Lambda Extensions for Lambda Insights
       - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
-    Runtime: python3.8
+    Runtime: python3.9
     Tracing: Active
 
 Parameters:
