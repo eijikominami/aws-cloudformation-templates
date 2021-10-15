@@ -61,6 +61,31 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  AuditManager:
+    Type: AWS::AuditManager::Assessment
+    Properties: 
+      AssessmentReportsDestination: 
+        Destination: !Ref S3
+        DestinationType: S3
+      AwsAccount: 
+        Id: !Ref AWS::AccountId
+      Description: !Sub AWS Well Architected Framework created by ${LogicalNamePrefix}
+      FrameworkId: 21060514-60c0-3fbb-ad3b-0b4af6dcca7c
+      Name: AWS-Well-Architected-Framework
+      Roles: 
+        - RoleArn: !GetAtt IAMRoleForAuditOwner.Arn
+          RoleType: PROCESS_OWNER
+      Scope: 
+        AwsAccounts: 
+          - Id: !Ref AWS::AccountId
+        AwsServices: 
+          - ServiceName: AWS Config
+      Status: ACTIVE
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   S3:
     Type: 'AWS::S3::Bucket'
     UpdateReplacePolicy: Retain
