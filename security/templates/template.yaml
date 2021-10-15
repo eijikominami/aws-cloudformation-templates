@@ -6,10 +6,6 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 
-          default: 'Audit Manager Configuration'
-        Parameters: 
-          - AWSAuditManager 
-      - Label: 
           default: 'CloudTrail and Config Configuration'
         Parameters: 
           - AuditOtherRegions
@@ -40,13 +36,6 @@ Metadata:
           - TagValue
 
 Parameters:
-  AWSAuditManager:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable AWS Audit Manager [required]
   AWSConfig:
     Type: String
     Default: ENABLED
@@ -112,7 +101,6 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateAuditManager: !Equals [ !Ref AWSAuditManager, ENABLED]
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
@@ -314,7 +302,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AuditManager:
-    Condition: CreateAuditManager
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:

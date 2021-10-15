@@ -39,6 +39,7 @@ Metadata:
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
+          - SNSForCICDArn
           - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
@@ -84,6 +85,10 @@ Parameters:
     Type: String
     Default: ''
     Description: Amazon SNS Topic ARN for alert
+  SNSForCICDArn:
+    Type: String
+    Default: ''
+    Description: Amazon SNS Topic ARN for CICD information
   SNSForDeploymentArn:
     Type: String
     Default: '' 
@@ -169,6 +174,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateChatbotForDeployment: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForDeploymentArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForDeployment, ''] ] ]
   CreateChatbot: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForAlertArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForAlert, ''] ] ]
+  SNSForCICDExists: !Not [ !Equals [ !Ref SNSForCICDArn, ''] ]
 
 Resources:
   # Nested Stack
@@ -332,21 +338,40 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-      Events:
-        SNSForAlert:
-          Properties:
-            Topic: !If
-              - CreateSNSForAlert
-              - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-              - !Ref SNSForAlertArn
-          Type: SNS
-        SNSForDeployment:
-          Properties:
-            Topic: !If
-              - CreateSNSForDeployment
-              - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-              - !Ref SNSForDeploymentArn
-          Type: SNS
+      Events: !If
+        - SNSForCICDExists
+        - SNSForAlert:
+            Properties:
+              Topic: !If
+                - CreateSNSForAlert
+                - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+                - !Ref SNSForAlertArn
+            Type: SNS
+          SNSForCICD:
+            Properties:
+              Topic: !Ref SNSForCICDArn
+            Type: SNS
+          SNSForDeployment:
+            Properties:
+              Topic: !If
+                - CreateSNSForDeployment
+                - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+                - !Ref SNSForDeploymentArn
+            Type: SNS
+        - SNSForAlert:
+            Properties:
+              Topic: !If
+                - CreateSNSForAlert
+                - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+                - !Ref SNSForAlertArn
+            Type: SNS
+          SNSForDeployment:
+            Properties:
+              Topic: !If
+                - CreateSNSForDeployment
+                - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+                - !Ref SNSForDeploymentArn
+            Type: SNS
       FunctionName: !Sub sendNotificationToSlack-createdby-${AWS::StackName}
       KmsKeyArn: !If
         - CreateKMSKey
@@ -363,6 +388,22 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
       RetentionInDays: 60
+  SNSSubscriptionForAlert:
+    Type: AWS::SNS::Subscription
+    Properties: 
+      Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
+      Protocol: lambda
+      TopicArn: !If
+        - CreateSNSForAlert
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        - !Ref SNSForAlertArn
+  SNSSubscriptionForCICD:
+    Condition: SNSForCICDExists
+    Type: AWS::SNS::Subscription
+    Properties: 
+      Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
+      Protocol: lambda
+      TopicArn: !Ref SNSForCICDArn
   SNSSubscriptionForDeployment:
     Type: AWS::SNS::Subscription
     Properties: 
@@ -372,15 +413,6 @@ Resources:
         - CreateSNSForDeployment
         - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
         - !Ref SNSForDeploymentArn
-  SNSSubscription:
-    Type: AWS::SNS::Subscription
-    Properties: 
-      Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
-      Protocol: lambda
-      TopicArn: !If
-        - CreateSNSForAlert
-        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-        - !Ref SNSForAlertArn
   # CloudWatch Alarm for Lambda
   AlarmLambdaSendNotificationToSlack:
     Type: 'AWS::Serverless::Application'
