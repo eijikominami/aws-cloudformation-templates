@@ -61,11 +61,11 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  AuditManager:
+  AuditManagerAWSWellArchitectedFramework:
     Type: AWS::AuditManager::Assessment
     Properties: 
       AssessmentReportsDestination: 
-        Destination: !Ref S3
+        Destination: !Sub s3://${S3}
         DestinationType: S3
       AwsAccount: 
         Id: !Ref AWS::AccountId
