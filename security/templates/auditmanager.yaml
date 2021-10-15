@@ -79,7 +79,7 @@ Resources:
         AwsAccounts: 
           - Id: !Ref AWS::AccountId
         AwsServices: 
-          - ServiceName: AWS Config
+          - ServiceName: config
       Status: ACTIVE
       Tags: 
         - Key: environment
