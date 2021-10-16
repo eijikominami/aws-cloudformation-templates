@@ -237,20 +237,19 @@ Outputs:
     Description: Subnet ID
     Value: !Ref SubnetTransit
   NetworkLoadBalancerIPAllocationId:
-    Description: Internet GW IP address
+    Description: Network Load Balancer IP Allocation Id
     Value: !If
       - NetworkLoadBalancerExists
       - !GetAtt EIPForNLB.AllocationId
       - ''
   NetworkLoadBalancerIP:
-    Description: Internet GW IP address
+    Description: Network Load Balancer IP address
     Value: !If
        - NetworkLoadBalancerExists
        - !Ref EIPForNLB
        - ''
   NatGatewayIP:
-    Condition: TransitGatewayExists
-    Description: NAT GW IP address
+    Description: NAT Gateway IP address
     Value: !If
       - TransitGatewayExists
       - !Ref EIPForNatGateway

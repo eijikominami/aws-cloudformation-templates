@@ -7,15 +7,15 @@ Parameters:
     AllowedPattern: .+
     Description: The ID of one or more security groups that control access to this VPC.   
   SubnetId1:
-    Type: AWS::EC2::Subnet::Id
+    Type: String
     AllowedPattern: .+
     Description: The ID of the subnet that DNS queries originate from.
   SubnetId2:
-    Type: AWS::EC2::Subnet::Id
+    Type: String
     Default: ''
     Description: The ID of the subnet that DNS queries originate from.
   SubnetId3:
-    Type: AWS::EC2::Subnet::Id
+    Type: String
     Default: ''
     Description: The ID of the subnet that DNS queries originate from.
   Environment:
