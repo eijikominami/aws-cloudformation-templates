@@ -135,4 +135,5 @@ You can provide optional parameters as follows.
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Tag Events is enabled. |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Trusted Advisor is enabled. |
 | SNSForAlertArn | String | | | Amazon SNS Topic ARN for alert | 
+| SNSForAlertArn | String | | | Amazon SNS Topic ARN for CI/CD information | 
 | SNSForDeploymentArn | String | | | Amazon SNS Topic ARN for deployment information |

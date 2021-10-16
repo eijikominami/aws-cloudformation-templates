@@ -784,8 +784,8 @@ Resources:
                   TemplatePath: BuildArtifact-Notification::packaged.yaml
                   ParameterOverrides: !If 
                     - Development
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Notification.json
@@ -1199,7 +1199,7 @@ Outputs:
       - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       - !Ref SNSForAlertArn
   SNSForCICDArn:
-    Description: SNS ARN for Deployment
+    Description: SNS ARN for CICD
     Value: !If
       - CreateSNSForCICD
       - !GetAtt SNSForCICD.Outputs.SNSTopicArn
