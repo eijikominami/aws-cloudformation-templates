@@ -174,7 +174,7 @@ Conditions:
   CreateSNSForCICD: !Equals [ !Ref SNSForCICDArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateChatbotForAlert: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForAlertArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForAlert, ''] ] ]
-  CreateChatbotForDeployment: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForCICDArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForDeployment, ''] ] ]
+  CreateChatbotForCICD: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForCICDArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForDeployment, ''] ] ]
 
 Resources:
   # Nested Stack
@@ -509,7 +509,7 @@ Resources:
         createdby: !Ref TagValue
   # Chatbot
   ChatbotForCICD:
-    Condition: CreateChatbotForDeployment
+    Condition: CreateChatbotForCICD
     Type: 'AWS::Serverless::Application'
     Properties:
       Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
@@ -563,10 +563,10 @@ Outputs:
   LambdaSendNotificationToSlackARN:
     Description: Lambda ARN of sendNotificationToSlack()
     Value: !GetAtt LambdaSendNotificationToSlack.Arn
-  ChatbotForDeployment:
-    Condition: CreateChatbotForDeployment
-    Description: Chatbot ARN for Deployment
-    Value: !GetAtt ChatbotForDeployment.Outputs.ChatbotArn
+  ChatbotForChatbotForCICD:
+    Condition: CreateChatbotForCICD
+    Description: Chatbot ARN for CI/CD
+    Value: !GetAtt ChatbotForCICD.Outputs.ChatbotArn
   ChatbotForAlert:
     Condition: CreateChatbotForAlert
     Description: Chatbot ARN
