@@ -508,28 +508,6 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # Chatbot
-  ChatbotForCICD:
-    Condition: CreateChatbotForCICD
-    Type: 'AWS::Serverless::Application'
-    Properties:
-      Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
-      NotificationARNs:
-        - !If
-          - CreateSNSForCICD
-          - !GetAtt SNSForCICD.Outputs.SNSTopicArn
-          - !Ref SNSForCICDArn
-      Parameters:
-        IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
-        LogicalNamePrefix: CICD
-        SlackWorkspaceId: !Ref SlackWorkspaceId
-        SlackChannelId: !Ref SlackChannelIdForDeployment
-        SNSArn: !If
-          - CreateSNSForCICD
-          - !GetAtt SNSForCICD.Outputs.SNSTopicArn
-          - !Ref SNSForCICDArn
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
   ChatbotForAlert:
     Condition: CreateChatbotForAlert
     Type: 'AWS::Serverless::Application'
@@ -566,7 +544,7 @@ Outputs:
   ChatbotForChatbotForCICD:
     Condition: CreateChatbotForCICD
     Description: Chatbot ARN for CI/CD
-    Value: !GetAtt ChatbotForCICD.Outputs.ChatbotArn
+    Value: 'CICD'
   ChatbotForAlert:
     Condition: CreateChatbotForAlert
     Description: Chatbot ARN
