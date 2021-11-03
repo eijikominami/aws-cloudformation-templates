@@ -43,7 +43,7 @@ Conditions:
 
 Resources:
   IAMRoleForLambda:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -100,7 +100,7 @@ Resources:
         - Key: !Ref RequiredTagKey
           Value: !Ref RequiredTagValue
   ConfigRequiredTags:
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: required-tags
       Description: 指定したタグがリソースにあるかどうかを確認します。
@@ -111,7 +111,7 @@ Resources:
         Owner: AWS
         SourceIdentifier: REQUIRED_TAGS
   ConfigRequiredTagsExpanded:
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: required-tags-expanded
       Description: 指定したタグがリソースにあるかどうかを確認します。
@@ -125,7 +125,7 @@ Resources:
             MessageType: ConfigurationItemChangeNotification
         SourceIdentifier: !GetAtt LambdaCheckRequiredTags.Arn
   LambdaCheckRequiredTags:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: checkRequiredTags/
       Description: 指定したタグがリソースにあるかどうかを確認します。
@@ -137,18 +137,18 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref RequiredTagValue
   LambdaCheckRequiredTagsPermission:
-    Type: 'AWS::Lambda::Permission'
+    Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref LambdaCheckRequiredTags
       Principal: config.amazonaws.com
   LambdaCheckRequiredTagsLogGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaCheckRequiredTags}
       RetentionInDays: 60
   CloudWatchEventsForConfigRequiredTags:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Config Required Tags created by ${AWS::StackName}.
       EventPattern:
@@ -172,7 +172,7 @@ Resources:
         - Arn: !GetAtt LambdaDeleteUnapplicableResources.Arn
           Id: lambda
   LambdaDeleteUnapplicableResources:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: deleteUnapplicableResources/
       Description: 指定したタグがないリソースを削除します。
@@ -184,14 +184,14 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref RequiredTagValue
   LambdaDeleteUnapplicableResourcesPermission:
-    Type: 'AWS::Lambda::Permission'
+    Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref LambdaDeleteUnapplicableResources
       Principal: events.amazonaws.com
       SourceArn: !GetAtt CloudWatchEventsForConfigRequiredTags.Arn
   LambdaDeleteUnapplicableResourcesLogGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteUnapplicableResources}
       RetentionInDays: 60

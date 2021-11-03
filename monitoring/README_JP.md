@@ -56,7 +56,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
@@ -114,7 +114,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
@@ -168,7 +168,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
@@ -220,7 +220,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
@@ -273,7 +273,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
@@ -326,7 +326,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
@@ -385,7 +385,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
@@ -447,7 +447,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
@@ -500,7 +500,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
@@ -552,7 +552,7 @@ Properties:
 ```
 
 ```yaml
-Type: 'AWS::Serverless::Application'
+Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns

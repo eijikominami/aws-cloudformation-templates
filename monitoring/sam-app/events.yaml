@@ -21,7 +21,7 @@ Conditions:
 
 Resources:
   AlarmEventsCodeCommitFailedInvocations:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions: 

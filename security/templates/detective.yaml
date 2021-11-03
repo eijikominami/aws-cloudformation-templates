@@ -3,4 +3,4 @@ Description: AWSCloudFormationTemplates/security/Detective sets Amazon Detective
 
 Resources:
   Detective:
-    Type: 'AWS::Detective::Graph'
+    Type: AWS::Detective::Graph

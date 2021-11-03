@@ -17,7 +17,7 @@ Conditions:
 
 Resources:
   NatGatewayPacketsDropCount:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -39,7 +39,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   NatGatewayErrorPortAllocation:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

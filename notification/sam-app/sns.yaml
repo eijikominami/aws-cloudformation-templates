@@ -10,12 +10,12 @@ Parameters:
 
 Resources:
   SNSTopic:
-    Type: 'AWS::SNS::Topic'
+    Type: AWS::SNS::Topic
     Properties:
       DisplayName: !Ref TopicName
       TopicName: !Ref TopicName
   SNSTopicPolicy:
-    Type: 'AWS::SNS::TopicPolicy'
+    Type: AWS::SNS::TopicPolicy
     Properties:
       Topics: 
         - !Ref SNSTopic
@@ -44,7 +44,7 @@ Resources:
             Resource: !Ref SNSTopic
             Action: 'SNS:Publish'
   CloudWatchAlarmSNSNumberOfNotificationsFailed:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

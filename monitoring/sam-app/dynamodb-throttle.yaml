@@ -21,7 +21,7 @@ Conditions:
 
 Resources:
   AlarmDynamoDBWriteThrottleEvents:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -46,7 +46,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmDynamoDBReadThrottleEvents:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

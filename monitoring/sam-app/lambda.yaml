@@ -31,7 +31,7 @@ Conditions:
 
 Resources:
   AlarmLambdaErrors:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions: 
@@ -58,7 +58,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmLambdaClientError:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions: 
@@ -85,7 +85,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmLambdaTypeError:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions: 
@@ -113,7 +113,7 @@ Resources:
       TreatMissingData: notBreaching
   MetricFilterErrorLog:
     Condition: CreateMetricFilter
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: !Ref MetricFilterPattern
       LogGroupName: !Sub /aws/lambda/${FunctionResouceName}
@@ -122,7 +122,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   AlarmLambdaMetricFilterError:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions: 
@@ -144,7 +144,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmLambdaTimeoutWillOccur:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -171,7 +171,7 @@ Resources:
       Threshold: !Ref TimeoutMilliseconds
       TreatMissingData: notBreaching
   AlarmLambdaThrottles:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

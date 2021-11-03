@@ -149,7 +149,7 @@ Resources:
   # Nested Stack
   SNSForAlert:
     Condition: CreateSNSForAlert
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
@@ -169,7 +169,7 @@ Resources:
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
@@ -184,7 +184,7 @@ Resources:
         createdby: !Ref TagValue
   SNSForCICD:
     Condition: CreateSNSForCICD
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
@@ -199,7 +199,7 @@ Resources:
         createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForCodeStar:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
@@ -207,7 +207,7 @@ Resources:
       Description: Allows AWS CodeStar Notifications to access Amazon CloudWatch Events on your behalf
   # IAM
   IAMRoleForCodeBuild:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -273,7 +273,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCloudWatchEvents:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -303,7 +303,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCodePipeline:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -449,7 +449,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCloudFormation:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -482,7 +482,7 @@ Resources:
           Value: !Ref TagValue
   # CodeBuild
   CodeBuildForSAM:
-    Type: 'AWS::CodeBuild::Project'
+    Type: AWS::CodeBuild::Project
     Properties: 
       Artifacts:
         Type: CODEPIPELINE
@@ -505,7 +505,7 @@ Resources:
           Value: !Ref TagValue
       TimeoutInMinutes: 60
   CodeBuildForNestedStack:
-    Type: 'AWS::CodeBuild::Project'
+    Type: AWS::CodeBuild::Project
     Properties: 
       Artifacts:
         Type: CODEPIPELINE
@@ -529,7 +529,7 @@ Resources:
       TimeoutInMinutes: 60
   # CodePipeline
   CodePipeline:
-    Type: 'AWS::CodePipeline::Pipeline'
+    Type: AWS::CodePipeline::Pipeline
     Properties: 
       ArtifactStores:
         - ArtifactStore: 
@@ -1003,7 +1003,7 @@ Resources:
           Value: !Ref TagValue
   # CloudWatch Alarm
   AlarmCodeBuildForSAM:
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
@@ -1027,7 +1027,7 @@ Resources:
           - production
         createdby: !Ref TagValue
   AlarmCodeBuildForNestedStack:
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
@@ -1051,7 +1051,7 @@ Resources:
           - production
         createdby: !Ref TagValue
   AlarmEventsForCodePipeline:
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
@@ -1078,7 +1078,7 @@ Resources:
   NotificationRule:
     DependsOn:
       - ServiceLinkedRoleForCodeStar
-    Type: 'AWS::CodeStarNotifications::NotificationRule'
+    Type: AWS::CodeStarNotifications::NotificationRule
     Properties: 
       DetailType: FULL
       EventTypeIds:
@@ -1106,7 +1106,7 @@ Resources:
         createdby: !Ref TagValue
   # S3
   S3ForArtifact:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
@@ -1127,7 +1127,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForArtifact:
-    Type: 'AWS::S3::BucketPolicy'
+    Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForArtifact
       PolicyDocument:
@@ -1148,7 +1148,7 @@ Resources:
                 aws:SecureTransport: false
   # EventBridge
   CodePipelineEvents:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties:
       Description: !Sub Rule for CodePipeline created by ${AWS::StackName}.
       EventPattern:
@@ -1170,7 +1170,7 @@ Resources:
           Id: CloudWatchEventsForCodePipeline
   # CloudWatch Logs
   CodeBuildLogGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60

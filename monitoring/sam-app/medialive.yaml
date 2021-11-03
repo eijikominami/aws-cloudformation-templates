@@ -29,7 +29,7 @@ Conditions:
 
 Resources:
   AlarmOutput4xxErrors:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -57,7 +57,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmOutput5xxErrors:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -85,7 +85,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   ActiveAlerts:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -111,7 +111,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   PrimaryInputActive:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

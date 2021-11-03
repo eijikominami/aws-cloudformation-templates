@@ -74,14 +74,14 @@ Conditions:
 Resources:
   # Service-linked Role
   ServiceLinkedRoleForConfig:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
       AWSServiceName: config.amazonaws.com
       Description: A service-linked role required for AWS Config to access your resources.
   ServiceLinkedRoleForConfigRemediation:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
@@ -89,7 +89,7 @@ Resources:
       Description: A service-linked role required for AWS Config Remediation to access your resources.
   # IAM Role
   IAMRoleForConfigRules:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -123,7 +123,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForLambda:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -166,7 +166,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForSSM:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -206,7 +206,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForVPCFlowLog:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -241,13 +241,13 @@ Resources:
   # > aws configservice delete-delivery-channel --delivery-channel-name default
   # > aws configservice delete-configuration-recorder --configuration-recorder-name default
   ConfigDeliveryChannel:
-    Type: 'AWS::Config::DeliveryChannel'
+    Type: AWS::Config::DeliveryChannel
     Properties:
       Name: default
       S3BucketName: !Ref S3ForConfig
   # AWS Config requires both DeliveryChannel and ConfigurationRecorder.
   ConfigConfigurationRecorder:
-    Type: 'AWS::Config::ConfigurationRecorder'
+    Type: AWS::Config::ConfigurationRecorder
     Properties:
       Name: default
       RecordingGroup:
@@ -261,7 +261,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: cloudformation-stack-drift-detection-check
       Description: AWS CloudFormation スタックの実際の設定が、意図した設定と異なっていたり、ずれたりしていないか確認します。スタックの1つ以上のリソースが意図した設定と異なっている場合、スタックはドリフトしたと見なされます。
@@ -274,7 +274,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: cloudformation-stack-notification-check
       Description: CloudFormation スタックが SNS トピックにイベント通知を送信しているかどうか確認します。
@@ -291,7 +291,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: iam-password-policy
       Description: IAM ユーザーのアカウントパスワードポリシーが、指定した要件を満たしているかどうかを確認します。
@@ -307,7 +307,7 @@ Resources:
         SourceIdentifier: IAM_PASSWORD_POLICY
   ConfigIamPasswordPolicyRemediationConfiguration:
     Condition: CreateRemediationResources
-    Type: 'AWS::Config::RemediationConfiguration'
+    Type: AWS::Config::RemediationConfiguration
     Properties:
       # NOTE: AutomationAssumeRole, MaximumAutomaticAttempts and RetryAttemptSeconds are Required if Automatic is true.
       Automatic: true
@@ -322,7 +322,7 @@ Resources:
       TargetId: !Ref SSMAutomationUpdateAccountPasswordPolicy
       TargetType: SSM_DOCUMENT
   SSMAutomationUpdateAccountPasswordPolicy:
-    Type: 'AWS::SSM::Document'
+    Type: AWS::SSM::Document
     Properties: 
       Content:
         schemaVersion: "0.3"
@@ -361,7 +361,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: access-keys-rotated
       Description: アクティブなアクセスキーが、maxAccessKeyAge で指定された日数内にローテーションされるかどうかを確認します。
@@ -372,7 +372,7 @@ Resources:
         SourceIdentifier: ACCESS_KEYS_ROTATED
   # EventBridge for ConfigIamAccessKeysRotated
   CloudWatchEventsForIamAccessKeysRotated:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Config when IAM Access Keys are rotated created by ${AWS::StackName}.
       EventPattern:
@@ -397,7 +397,7 @@ Resources:
         - Arn: !GetAtt LambdaDeleteExpiredAccessKeys.Arn
           Id: CloudWatchEventsForIamAccessKeysRotated
   LambdaDeleteExpiredAccessKeys:
-    Type: 'AWS::Lambda::Function'
+    Type: AWS::Lambda::Function
     Properties:
       Architectures:
         - arm64
@@ -449,7 +449,7 @@ Resources:
       TracingConfig:
         Mode: Active
   LambdaDeleteExpiredAccessKeysPermission:
-    Type: 'AWS::Lambda::Permission'
+    Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref LambdaDeleteExpiredAccessKeys
@@ -457,13 +457,13 @@ Resources:
       # DO NOT write 'SourceAccount' option.
       SourceArn: !GetAtt CloudWatchEventsForIamAccessKeysRotated.Arn
   LambdaDeleteExpiredAccessKeysLogGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteExpiredAccessKeys}
       RetentionInDays: 60
   # CloudWatch Alarm for Lambda
   AlarmLambda:
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
@@ -483,7 +483,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: vpc-flow-logs-enabled
       Description: Amazon Virtual Private Cloud フローログが見つかり、Amazon VPC に対して有効になっているかどうかを確認します。
@@ -492,7 +492,7 @@ Resources:
         SourceIdentifier: VPC_FLOW_LOGS_ENABLED 
   ConfigVpcFlowLogsEnabledRemediationConfiguration:
     Condition: CreateRemediationResources
-    Type: 'AWS::Config::RemediationConfiguration'
+    Type: AWS::Config::RemediationConfiguration
     Properties:
       # NOTE: AutomationAssumeRole, MaximumAutomaticAttempts and RetryAttemptSeconds are Required if Automatic is true.
       Automatic: true
@@ -514,7 +514,7 @@ Resources:
       TargetId: !Ref SSMAutomationCreateFlowLogs
       TargetType: SSM_DOCUMENT
   SSMAutomationCreateFlowLogs:
-    Type: 'AWS::SSM::Document'
+    Type: AWS::SSM::Document
     Properties: 
       Content:
         schemaVersion: "0.3"
@@ -568,7 +568,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: vpc-sg-open-only-to-authorized-ports
       Description: いずれかの 0.0.0.0/0 Amazon Virtual Private Cloud (Amazon VPC) を持つセキュリティグループで、特定のインバウンド TCP または UDP トラフィックのみが許可されるかどうかを確認します。
@@ -580,7 +580,7 @@ Resources:
         SourceIdentifier: VPC_SG_OPEN_ONLY_TO_AUTHORIZED_PORTS 
   ConfigVpcSgOpenOnlyToAuthorizedPortsRemediationConfiguration:
     Condition: CreateRemediationResources
-    Type: 'AWS::Config::RemediationConfiguration'
+    Type: AWS::Config::RemediationConfiguration
     Properties:
       # NOTE: AutomationAssumeRole, MaximumAutomaticAttempts and RetryAttemptSeconds are Required if Automatic is true.
       Automatic: true
@@ -602,7 +602,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: vpc-default-security-group-closed
       Description: いずれの Amazon Virtual Private Cloud (VPC) のデフォルトのセキュリティグループでもインバウンドとアウトバウンドのいずれのトラフィックも許可しないことを確認します。
@@ -611,7 +611,7 @@ Resources:
         SourceIdentifier: VPC_DEFAULT_SECURITY_GROUP_CLOSED 
   ConfigVpcDefaultSecurityGroupClosedRemediationConfiguration:
     Condition: CreateRemediationResources
-    Type: 'AWS::Config::RemediationConfiguration'
+    Type: AWS::Config::RemediationConfiguration
     Properties:
       # NOTE: AutomationAssumeRole, MaximumAutomaticAttempts and RetryAttemptSeconds are Required if Automatic is true.
       Automatic: true
@@ -629,7 +629,7 @@ Resources:
       TargetId: !Ref SSMAutomationRevokeDefaultSecurityGroup
       TargetType: SSM_DOCUMENT
   SSMAutomationRevokeDefaultSecurityGroup:
-    Type: 'AWS::SSM::Document'
+    Type: AWS::SSM::Document
     Properties: 
       Content:
         schemaVersion: "0.3"
@@ -685,7 +685,7 @@ Resources:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
       - ConfigConfigurationRecorder
-    Type: 'AWS::Config::ConfigRule'
+    Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: s3-bucket-server-side-encryption-enabled
       Description: Amazon S3 バケットで Amazon S3 のデフォルトの暗号化が有効になっていること、または S3 バケットポリシーでサーバー側の暗号化なしの put-object リクエストを明示的に拒否することを確認します。 
@@ -694,7 +694,7 @@ Resources:
         SourceIdentifier: S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED  
   ConfigS3BucketServerSideEncryptionEnabledRemediationConfiguration:
     Condition: CreateRemediationResources
-    Type: 'AWS::Config::RemediationConfiguration'
+    Type: AWS::Config::RemediationConfiguration
     Properties:
       # NOTE: AutomationAssumeRole, MaximumAutomaticAttempts and RetryAttemptSeconds are Required if Automatic is true.
       Automatic: true
@@ -713,7 +713,7 @@ Resources:
       TargetType: SSM_DOCUMENT
   # S3
   S3ForConfig:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
@@ -739,7 +739,7 @@ Resources:
           Value: !Ref TagValue
   # Set a S3 bucket policy in order to avoid 'InsufficientS3BucketPolicyException'.
   S3BucketPolicyForConfig:
-    Type: 'AWS::S3::BucketPolicy'
+    Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForConfig
       PolicyDocument:
@@ -782,7 +782,7 @@ Resources:
               Bool: 
                 aws:SecureTransport: false
   CloudWatchEventsForConfig:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Config created by ${AWS::StackName}.
       EventPattern:

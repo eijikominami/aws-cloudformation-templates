@@ -409,7 +409,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/realtime-dashboard.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
@@ -426,7 +426,7 @@ Resources:
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
@@ -438,7 +438,7 @@ Resources:
         createdby: !Ref TagValue
   # CloudFront
   CloudFront:
-    Type: 'AWS::CloudFront::Distribution'
+    Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
         Aliases: !If
@@ -550,7 +550,7 @@ Resources:
           - !Ref WebACLArn
           - !Ref AWS::NoValue
   CloudFrontCachePolicy:
-    Type: 'AWS::CloudFront::CachePolicy'
+    Type: AWS::CloudFront::CachePolicy
     Properties: 
       CachePolicyConfig: 
         Comment: Default cache policy
@@ -572,7 +572,7 @@ Resources:
   # Route53
   Route53RecordSet:
     Condition: CreateRoute53
-    Type: 'AWS::Route53::RecordSet'
+    Type: AWS::Route53::RecordSet
     Properties: 
       AliasTarget: 
         DNSName: !GetAtt CloudFront.DomainName
@@ -583,7 +583,7 @@ Resources:
       Type: A
   # CloudWatch Dashboard
   Dashboard:
-    Type: 'AWS::CloudWatch::Dashboard'
+    Type: AWS::CloudWatch::Dashboard
     Properties:
       DashboardName: !Sub ${AWS::StackName}-${CloudFront}
       DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "# CloudFront\n${DomainName} のパフォーマンスを確認できます。"}},{"type": "metric","x": 0,"y": 2,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "4xxErrorRate", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Average", "period": 60, "color": "#ff7f0e" } ],[ ".", "TotalErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#9467bd" } ],[ ".", "5xxErrorRate", ".", ".", ".", ".", { "stat": "Average", "period": 60, "color": "#d62728" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "ErrorRate","period": 300}},{"type": "metric","x": 0,"y": 8,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "BytesUploaded", "Region", "Global", "DistributionId", "${CloudFront}", { "stat": "Sum", "period": 60 } ],[ ".", "BytesDownloaded", ".", ".", ".", ".", { "stat": "Sum", "period": 60, "color": "#2ca02c" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","title": "Bytes","period": 300}},{"type": "metric","x": 0,"y": 14,"width": 24,"height": 6,"properties": {"metrics": [[ "AWS/CloudFront", "Requests", "Region", "Global", "DistributionId", "${CloudFront}", { "period": 60, "stat": "Sum" } ]],"view": "timeSeries","stacked": false,"region": "us-east-1","period": 300}}]}'

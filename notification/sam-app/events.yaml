@@ -116,7 +116,7 @@ Conditions:
 
 Resources:
   EventBridgeForScheduledEvents:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Scheduled Events created by ${AWS::StackName}.
       EventPattern:
@@ -130,7 +130,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForEBS:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for EBS created by ${AWS::StackName}.
       EventPattern:
@@ -155,7 +155,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForAutoScaling:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for AutoScaling created by ${AWS::StackName}.
       EventPattern:
@@ -182,7 +182,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForEC2:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for EC2 created by ${AWS::StackName}.
       EventPattern:
@@ -196,7 +196,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForKMS:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for KMS created by ${AWS::StackName}.
       EventPattern:
@@ -212,7 +212,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForManagementConsole:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Management Console created by ${AWS::StackName}.
       EventPattern:
@@ -226,7 +226,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForMediaLive:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for MediaLive created by ${AWS::StackName}.
       EventPattern:
@@ -240,7 +240,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForMGN:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for MGN created by ${AWS::StackName}.
       EventPattern:
@@ -256,7 +256,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForTag:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Tag created by ${AWS::StackName}.
       EventPattern:
@@ -270,7 +270,7 @@ Resources:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForTrustedAdvisor:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Trusted Advisor created by ${AWS::StackName}.
       EventPattern:

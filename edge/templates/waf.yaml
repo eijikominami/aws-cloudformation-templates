@@ -53,7 +53,7 @@ Conditions:
 
 Resources:
   WebACL:
-    Type: 'AWS::WAFv2::WebACL'
+    Type: AWS::WAFv2::WebACL
     Properties: 
       DefaultAction: 
         Allow: {}
@@ -120,7 +120,7 @@ Resources:
         SampledRequestsEnabled: false
   WebACLAssociation:
     Condition: CreateWebACLAssociation
-    Type: 'AWS::WAFv2::WebACLAssociation'
+    Type: AWS::WAFv2::WebACLAssociation
     Properties: 
       ResourceArn: !Ref TargetResourceArn
       WebACLArn: !GetAtt WebACL.Arn
