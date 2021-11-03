@@ -765,7 +765,7 @@ Resources:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: !Ref EC2VolumeSize
-            VolumeType: gp2
+            VolumeType: gp3
       EbsOptimized: true
       ImageId: !Ref EC2ImageId
       IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForEC2
