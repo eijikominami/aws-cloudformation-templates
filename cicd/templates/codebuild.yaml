@@ -220,6 +220,33 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForCodeBuildBudgePublicRead:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for CodeBuild to access CloudWatch Logs.
+      Policies:
+        - PolicyName: !Sub 'UploadArtifacts-CodeBuildS3CloudWatchLogs-${AWS::Region}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - logs:GetLogEvents
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/UploadArtifacts:*
+                Effect: Allow
+      RoleName: !Sub 'UploadArtifacts-CodeBuildBudgePublicRead-${AWS::Region}'
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CodeBuild
   CodeBuildForMasterBranch:
     DependsOn:
@@ -243,6 +270,7 @@ Resources:
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-master
+      ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
         BuildSpec: !Ref BuildSpecForCommits
@@ -289,6 +317,7 @@ Resources:
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-${GitHubBranchName}
+      ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
         BuildSpec: !Ref BuildSpecForCommits
@@ -330,6 +359,7 @@ Resources:
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-Tags
+      ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
         BuildSpec: !Ref BuildSpecForTags

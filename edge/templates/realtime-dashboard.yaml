@@ -521,6 +521,8 @@ Resources:
   Lambda:
     Type: 'AWS::Lambda::Function'
     Properties:
+      Architectures:
+        - arm64
       Code:
         ZipFile: |
           import logging
@@ -893,6 +895,8 @@ Resources:
     Condition: CreateShutdownElasticSearchWorker
     Type: 'AWS::Lambda::Function'
     Properties:
+      Architectures:
+        - arm64
       Code:
         ZipFile: !Sub |
           import boto3

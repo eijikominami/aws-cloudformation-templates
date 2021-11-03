@@ -450,6 +450,8 @@ Resources:
     Condition: CreateSNSForAlertTransfer
     Type: 'AWS::Lambda::Function'
     Properties:
+      Architectures:
+        - arm64
       Code:
         ZipFile: !Sub |
           import boto3
