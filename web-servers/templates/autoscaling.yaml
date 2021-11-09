@@ -253,11 +253,11 @@ Resources:
     Properties: 
       AssociatePublicIpAddress: true
       BlockDeviceMappings: 
-        - DeviceName: /dev/xvda
+        - DeviceName: /dev/sda1
           Ebs: 
             DeleteOnTermination: true
             VolumeSize: !Ref EC2VolumeSize
-            VolumeType: gp2
+            VolumeType: gp3
       EbsOptimized: true
       IamInstanceProfile: !Ref EC2IamInstanceProfileArn
       ImageId: !Ref EC2ImageId

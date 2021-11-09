@@ -762,12 +762,12 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       BlockDeviceMappings: 
-        - DeviceName: /dev/xvda
+        - DeviceName: /dev/sda1
           Ebs: 
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: !Ref EC2VolumeSize
-            VolumeType: gp2
+            VolumeType: gp3
       EbsOptimized: true
       ImageId: !Ref EC2ImageId
       IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForEC2
