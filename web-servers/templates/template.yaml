@@ -305,6 +305,7 @@ Conditions:
   CreateRoute53: !And [ !Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateWAFForCloudFront: !And [!Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref WebACL, ENABLED ] ]
   CreateWAFForALB: !And [!Equals [ !Ref CloudFrontState, DISABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
@@ -590,6 +591,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/cloudfront.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
   Route53Resolver:
+    Condition: CreateTransitGateway
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
