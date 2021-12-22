@@ -48,7 +48,7 @@ Parameters:
 Resources:
   # Service-linked Role
   ServiceLinkedRoleForChatbot:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
@@ -57,7 +57,7 @@ Resources:
   Chatbot:
     DependsOn:
       - ServiceLinkedRoleForChatbot
-    Type: 'AWS::Chatbot::SlackChannelConfiguration'
+    Type: AWS::Chatbot::SlackChannelConfiguration
     Properties: 
       ConfigurationName: !Sub ${LogicalNamePrefix}-${AWS::StackName}-${AWS::Region}
       IamRoleArn: !Ref IAMRoleForChatbotArn

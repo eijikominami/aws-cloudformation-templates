@@ -36,14 +36,14 @@ Parameters:
 
 Resources:
   ServiceLinkedRoleForAuditManager:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
       AWSServiceName: auditmanager.amazonaws.com
       Description: A service-linked role required for AWS Audit Manager to access your resources.
   IAMRoleForAuditOwner:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -167,7 +167,7 @@ Resources:
   #       - Key: !Ref TagKey
   #         Value: !Ref TagValue
   S3:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
@@ -192,7 +192,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicy:
-    Type: 'AWS::S3::BucketPolicy'
+    Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3
       PolicyDocument:

@@ -59,7 +59,7 @@ Conditions:
 Resources:
   # IAM Role
   IAMRoleForAmplify:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -79,7 +79,7 @@ Resources:
           Value: !Ref TagValue
   # CodeCommit
   CodeCommit:
-    Type: 'AWS::CodeCommit::Repository'
+    Type: AWS::CodeCommit::Repository
     Properties: 
       RepositoryDescription: !Ref DomainName
       RepositoryName: !Ref RepositoryName
@@ -106,7 +106,7 @@ Resources:
            - !Ref AWS::NoValue
   # Amplify Console
   AmplifyConsole:
-    Type: 'AWS::Amplify::App'
+    Type: AWS::Amplify::App
     Properties:
       AutoBranchCreationConfig:
         EnableAutoBranchCreation: true
@@ -121,7 +121,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AmplifyBranchDev:      
-    Type: 'AWS::Amplify::Branch'
+    Type: AWS::Amplify::Branch
     Properties: 
       AppId: !GetAtt AmplifyConsole.AppId
       BranchName: develop
@@ -136,7 +136,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AmplifyBranchProd:      
-    Type: 'AWS::Amplify::Branch'
+    Type: AWS::Amplify::Branch
     Properties: 
       AppId: !GetAtt AmplifyConsole.AppId
       BranchName: master
@@ -159,7 +159,7 @@ Resources:
         - BranchName: !GetAtt AmplifyBranchDev.BranchName
           Prefix: ''
   AmplifyDomainProd:
-    Type: 'AWS::Amplify::Domain'
+    Type: AWS::Amplify::Domain
     Properties: 
       AppId: !GetAtt AmplifyConsole.AppId
       DomainName: !Sub ${DomainName}
@@ -167,7 +167,7 @@ Resources:
         - BranchName: !GetAtt AmplifyBranchProd.BranchName
           Prefix: ''
   EventBridgeForAmplify:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for Amplify created by ${AWS::StackName}.
       EventPattern:
@@ -193,11 +193,11 @@ Resources:
   # SNS
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

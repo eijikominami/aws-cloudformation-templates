@@ -26,7 +26,7 @@ Conditions:
 
 Resources:
   AlarmFirehoseDeliveryToElasticsearchDataFreshness:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -51,7 +51,7 @@ Resources:
       Threshold: !Ref OldestRecordAge
       TreatMissingData: notBreaching
   AlarmFirehoseThrottledGetShardIterator:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -76,7 +76,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmFirehoseThrottledGetRecords:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -101,7 +101,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmFirehoseDeliveryToElasticsearchFailed:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -126,7 +126,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmFirehoseDeliveryToS3Failed:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

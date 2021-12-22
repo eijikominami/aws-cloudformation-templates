@@ -325,11 +325,11 @@ Resources:
           Value: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -342,11 +342,11 @@ Resources:
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -355,7 +355,7 @@ Resources:
   # IAM Role
   IAMRoleForAWSSupport:
     Condition: CreateIAMRoleForAWSSupport
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -375,7 +375,7 @@ Resources:
           Value: !Ref TagValue
   # S3
   S3ForAccessLog:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
@@ -401,7 +401,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
-    Type: 'AWS::S3::BucketPolicy'
+    Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForAccessLog
       PolicyDocument:
@@ -422,7 +422,7 @@ Resources:
                 aws:SecureTransport: false
   # EventBridge for Health
   CloudWatchEventsForHealth:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for AWS Health created by ${AWS::StackName}.
       EventPattern:

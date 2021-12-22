@@ -64,7 +64,7 @@ Parameters:
 Resources:
   # IAM
   IAMRoleForDLM:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17

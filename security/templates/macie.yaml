@@ -12,6 +12,14 @@ Metadata:
           - TagValue
 
 Parameters:
+  FindingPublishingFrequency:
+    Type: String
+    Default: SIX_HOURS
+    AllowedValues:
+      - FIFTEEN_MINUTES
+      - ONE_HOUR
+      - SIX_HOURS
+    Description: The frequency with which Amazon Macie publishes updates to policy findings for an account [required]
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
@@ -35,7 +43,7 @@ Parameters:
 
 Resources:
   IAMRoleForMacie:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -124,10 +132,10 @@ Resources:
   MacieSession:
     Type: AWS::Macie::Session
     Properties:
-        FindingPublishingFrequency: ONE_HOUR
+        FindingPublishingFrequency: !Ref FindingPublishingFrequency
         Status: ENABLED
   MacieLogGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: /aws/macie/classificationjobs
       RetentionInDays: 60

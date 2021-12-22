@@ -63,7 +63,7 @@ Conditions:
 Resources:
   # IAM Role
   IAMRoleForCloudTrail:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -96,7 +96,7 @@ Resources:
     DependsOn:
       - S3BucketPolicyForCloudTrail
     Condition: CreateCentralizedResources
-    Type: 'AWS::CloudTrail::Trail'
+    Type: AWS::CloudTrail::Trail
     Properties:
       CloudWatchLogsLogGroupArn: !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
       CloudWatchLogsRoleArn: !GetAtt IAMRoleForCloudTrail.Arn
@@ -165,7 +165,7 @@ Resources:
           Value: !Ref TagValue
   # S3
   S3ForCloudTrail:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     # Retain this bucket when a stack is deleted.
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -195,7 +195,7 @@ Resources:
           Value: !Ref TagValue
   # Set a S3 bucket policy in order to avoid 'InsufficientS3BucketPolicyException'.
   S3BucketPolicyForCloudTrail:
-    Type: 'AWS::S3::BucketPolicy'
+    Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForCloudTrail
       PolicyDocument:
@@ -238,13 +238,13 @@ Resources:
                 aws:SecureTransport: false
   # CloudWatch Logs
   CloudWatchLogsGroupForCloudTrail:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/cloudtrail/${LogicalNamePrefix}'
       RetentionInDays: 365
   # CIS 3.1 a log metric filter and alarm exist for unauthorized API calls 
   CloudWatchLogsMetricFilterCloudTrailUnauthorizedAPICalls:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -253,7 +253,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailUnauthorizedAPICalls:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -270,7 +270,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.2 a log metric filter and alarm exist for AWS Management Console sign-in without MFA
   CloudWatchLogsMetricFilterCloudTrailLoginWithoutMFA:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName="ConsoleLogin") && ($.additionalEventData.MFAUsed !="Yes")}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -279,7 +279,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailLoginWithoutMFA:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -296,7 +296,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.3 a log metric filter and alarm exist for usage of "root" account 
   CloudWatchLogsMetricFilterCloudTrailForRootAcount:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{$.userIdentity.type="Root" && $.userIdentity.invokedBy NOT EXISTS && $.eventType !="AwsServiceEvent"}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -305,7 +305,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailForRootAcount:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -322,7 +322,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.4 a log metric filter and alarm exist for IAM policy changes 
   CloudWatchLogsMetricFilterCloudTrailIamPolicyChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName=DeleteGroupPolicy) || ($.eventName=DeleteRolePolicy) || ($.eventName=DeleteUserPolicy) || ($.eventName=PutGroupPolicy) || ($.eventName=PutRolePolicy) || ($.eventName=PutUserPolicy) || ($.eventName=CreatePolicy) || ($.eventName=DeletePolicy) || ($.eventName=CreatePolicyVersion) || ($.eventName=DeletePolicyVersion) || ($.eventName=AttachRolePolicy) || ($.eventName=DetachRolePolicy) || ($.eventName=AttachUserPolicy) || ($.eventName=DetachUserPolicy) || ($.eventName=AttachGroupPolicy) || ($.eventName=DetachGroupPolicy)}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -331,7 +331,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailIamPolicyChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -348,7 +348,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.5 a log metric filter and alarm exist for CloudTrail configuration changes 
   CloudWatchLogsMetricFilterCloudTrailCloudTrailConfigurationChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName=CreateTrail) || ($.eventName=UpdateTrail) || ($.eventName=DeleteTrail) || ($.eventName=StartLogging) || ($.eventName=StopLogging)}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -357,7 +357,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailCloudTrailConfigurationChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -374,7 +374,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.6 a log metric filter and alarm exist for AWS Management Console authentication failures
   CloudWatchLogsMetricFilterCloudTrailAuthenticationFailuresDetected:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName=ConsoleLogin) && ($.errorMessage="Failed authentication")}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -383,7 +383,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailAuthenticationFailuresDetected:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -400,7 +400,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.7 a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs 
   CloudWatchLogsMetricFilterCloudTrailCustomerCreatedCMKsChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventSource=kms.amazonaws.com) && (($.eventName=DisableKey) || ($.eventName=ScheduleKeyDeletion))}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -409,7 +409,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailCustomerCreatedCMKsChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -426,7 +426,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.8 a log metric filter and alarm exist for S3 bucket policy changes 
   CloudWatchLogsMetricFilterCloudTrailS3BucketPolicyChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventSource=s3.amazonaws.com) && (($.eventName=PutBucketAcl) || ($.eventName=PutBucketPolicy) || ($.eventName=PutBucketCors) || ($.eventName=PutBucketLifecycle) || ($.eventName=PutBucketReplication) || ($.eventName=DeleteBucketPolicy) || ($.eventName=DeleteBucketCors) || ($.eventName=DeleteBucketLifecycle) || ($.eventName=DeleteBucketReplication))}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -435,7 +435,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailS3BucketPolicyChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -452,7 +452,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.9 a log metric filter and alarm exist for AWS Config configuration changes 
   CloudWatchLogsMetricFilterCloudTrailConfigConfigurationChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventSource=config.amazonaws.com) && (($.eventName=StopConfigurationRecorder) || ($.eventName=DeleteDeliveryChannel) || ($.eventName=PutDeliveryChannel) || ($.eventName=PutConfigurationRecorder))}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -461,7 +461,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailConfigConfigurationChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -478,7 +478,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.10 a log metric filter and alarm exist for changes to Security Group 
   CloudWatchLogsMetricFilterCloudTrailSecurityGroupChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=AuthorizeSecurityGroupIngress) || ($.eventName=AuthorizeSecurityGroupEgress) || ($.eventName=RevokeSecurityGroupIngress) || ($.eventName=RevokeSecurityGroupEgress) || ($.eventName=CreateSecurityGroup) || ($.eventName=DeleteSecurityGroup)}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -487,7 +487,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailSecurityGroupChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -504,7 +504,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.11 a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
   CloudWatchLogsMetricFilterCloudTrailNACLChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateNetworkAcl) || ($.eventName=CreateNetworkAclEntry) || ($.eventName=DeleteNetworkAcl) || ($.eventName=DeleteNetworkAclEntry) || ($.eventName=ReplaceNetworkAclEntry) || ($.eventName=ReplaceNetworkAclAssociation)}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -513,7 +513,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailNACLChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -530,7 +530,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.12 a log metric filter and alarm exist for changes to network gateways
   CloudWatchLogsMetricFilterCloudTrailNetworkGatewayChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateCustomerGateway) || ($.eventName=DeleteCustomerGateway) || ($.eventName=AttachInternetGateway) || ($.eventName=CreateInternetGateway) || ($.eventName=DeleteInternetGateway) || ($.eventName=DetachInternetGateway)}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -539,7 +539,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailNetworkGatewayChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -556,7 +556,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.13 a log metric filter and alarm exist for route table changes
   CloudWatchLogsMetricFilterCloudTrailRouteTableChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateRoute) || ($.eventName=CreateRouteTable) || ($.eventName=ReplaceRoute) || ($.eventName=ReplaceRouteTableAssociation) || ($.eventName=DeleteRouteTable) || ($.eventName=DeleteRoute) || ($.eventName=DisassociateRouteTable)}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -565,7 +565,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailRouteTableChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -582,7 +582,7 @@ Resources:
       TreatMissingData: notBreaching
   # CIS 3.14 a log metric filter and alarm exist for VPC changes 
   CloudWatchLogsMetricFilterCloudTrailVpcChanges:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateVpc) || ($.eventName=DeleteVpc) || ($.eventName=ModifyVpcAttribute) || ($.eventName=AcceptVpcPeeringConnection) || ($.eventName=CreateVpcPeeringConnection) || ($.eventName=DeleteVpcPeeringConnection) || ($.eventName=RejectVpcPeeringConnection) || ($.eventName=AttachClassicLinkVpc) || ($.eventName=DetachClassicLinkVpc) || ($.eventName=DisableVpcClassicLink) || ($.eventName=EnableVpcClassicLink)}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
@@ -591,7 +591,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailVpcChanges:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

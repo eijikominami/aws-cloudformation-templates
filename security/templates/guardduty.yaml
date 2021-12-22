@@ -17,7 +17,7 @@ Parameters:
 Resources:
   # Service-linked Role
   ServiceLinkedRoleForGuardDuty:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
@@ -27,12 +27,12 @@ Resources:
   GuardDutyDetector:
     DependsOn:
       - ServiceLinkedRoleForGuardDuty
-    Type: 'AWS::GuardDuty::Detector'
+    Type: AWS::GuardDuty::Detector
     Properties:
       Enable: true
   # EventBridge for GuardDuty
   CloudWatchEventsForGuardDuty:
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for GuardDuty created by ${AWS::StackName}.
       # MEDIUM or higher

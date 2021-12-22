@@ -305,6 +305,7 @@ Conditions:
   CreateRoute53: !And [ !Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateWAFForCloudFront: !And [!Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref WebACL, ENABLED ] ]
   CreateWAFForALB: !And [!Equals [ !Ref CloudFrontState, DISABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
   CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
@@ -590,6 +591,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/cloudfront.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
   Route53Resolver:
+    Condition: CreateTransitGateway
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -615,11 +617,11 @@ Resources:
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/route53.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -632,11 +634,11 @@ Resources:
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -644,7 +646,7 @@ Resources:
         createdby: !Ref TagValue
   # IAM
   IAMRoleForEC2:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -665,7 +667,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForVPCFlowLog:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -703,7 +705,7 @@ Resources:
         - !Ref IAMRoleForEC2
   # VPC
   VPC:
-    Type: 'AWS::EC2::VPC'
+    Type: AWS::EC2::VPC
     Properties: 
       CidrBlock: !Ref VPCCidrBlock
       Tags:
@@ -713,7 +715,7 @@ Resources:
           Value: !Ref TagValue
   # Internet GW
   InternetGateway:
-    Type: 'AWS::EC2::InternetGateway'
+    Type: AWS::EC2::InternetGateway
     Properties: 
       Tags:
         - Key: Name
@@ -721,14 +723,14 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   InternetGatewayAttachment:
-    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Type: AWS::EC2::VPCGatewayAttachment
     Properties: 
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
   # Elastic IP
   EIPForEC2Instance:
     Condition: AutoScalingDisabled
-    Type: 'AWS::EC2::EIP'
+    Type: AWS::EC2::EIP
     Properties:
       Domain: !Ref VPC
       Tags:
@@ -745,7 +747,7 @@ Resources:
   # Route53
   Route53RecordSet:
     Condition: CreateRoute53
-    Type: 'AWS::Route53::RecordSet'
+    Type: AWS::Route53::RecordSet
     Properties:
       Comment: !Ref DomainName
       HostedZoneId: !Ref Route53HostedZoneId
@@ -760,12 +762,12 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       BlockDeviceMappings: 
-        - DeviceName: /dev/xvda
+        - DeviceName: /dev/sda1
           Ebs: 
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: !Ref EC2VolumeSize
-            VolumeType: gp2
+            VolumeType: gp3
       EbsOptimized: true
       ImageId: !Ref EC2ImageId
       IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForEC2
@@ -786,7 +788,7 @@ Resources:
           Value: !Ref TagValue
   # Security Group
   SecurityGroupWeb:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: AWS::EC2::SecurityGroup
     Properties: 
       # 'sg-' prefix is NOT permitted.
       GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
@@ -820,7 +822,7 @@ Resources:
       VpcId: !Ref VPC
   # VPC FlowLog
   VPCFlowLog:
-    Type: 'AWS::EC2::FlowLog'
+    Type: AWS::EC2::FlowLog
     Properties: 
       DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
       LogDestinationType: cloud-watch-logs
@@ -829,12 +831,12 @@ Resources:
       ResourceType: VPC
       TrafficType: ALL
   CloudWatchLogsGroupForVPCFlowLog:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
       RetentionInDays: 60
   CloudWatchAlarmEC2:
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
@@ -850,13 +852,13 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   S3ForAccessLog:
     Condition: CustomLogBucketName
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
@@ -883,7 +885,7 @@ Resources:
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
     Condition: CustomLogBucketName
-    Type: 'AWS::S3::BucketPolicy'
+    Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForAccessLog
       PolicyDocument:

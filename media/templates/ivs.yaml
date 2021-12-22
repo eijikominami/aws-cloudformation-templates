@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationSamples/media/medialive sets Interactive Video Service.
+
+Parameters:
+  Authorized:
+    Type: String
+    AllowedValues:
+      - true
+      - false
+    Default: false
+    Description: Whether the channel is authorized [required] 
+  LatencyMode:
+    Type: String
+    AllowedValues:
+      - NORMAL
+      - LOW
+    Default: LOW
+    Description: Channel latency mode [required] 
+  LogicalNamePrefix:
+    Type: String
+    Default: IVS
+    AllowedPattern: ^[a-zA-Z0-9-_]*$
+    Description: The custom prefix name [required]
+  Type:
+    Type: String
+    AllowedValues:
+      - STANDARD
+      - BASIC
+    Default: STANDARD
+    Description: The channel type [required]     
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples 
+    AllowedPattern: .+
+
+Resources:
+  Channel:
+    Type: AWS::IVS::Channel
+    Properties: 
+      Authorized: !Ref Authorized
+      LatencyMode: !Ref LatencyMode
+      Name: !Ref LogicalNamePrefix
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: !Ref Type
+  StreamKey:
+    Type: AWS::IVS::StreamKey
+    Properties: 
+      ChannelArn: !GetAtt Channel.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  IngestEndpoint:
+    Description: Channel ingest endpoint
+    Value: !GetAtt Channel.IngestEndpoint
+  PlaybackUrl:
+    Description: Channel playback URL
+    Value: !GetAtt Channel.PlaybackUrl
+  StreamKey:
+    Description: The stream-key value
+    Value: !GetAtt StreamKey.Value

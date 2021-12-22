@@ -112,7 +112,7 @@ Conditions:
 Resources:
   # Service-linked Role
   ServiceLinkedRoleForInspector:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
@@ -121,7 +121,7 @@ Resources:
   # IAM Role
   IAMRoleForInspectorEvents:
     Condition: IsSupportedRegion
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -151,14 +151,14 @@ Resources:
     DependsOn:
       - ServiceLinkedRoleForInspector
     Condition: IsSupportedRegion
-    Type: 'AWS::Inspector::AssessmentTarget'
+    Type: AWS::Inspector::AssessmentTarget
     Properties:
       AssessmentTargetName: !Sub ${LogicalNamePrefix}-Assessment-Target-All-Instances-All-Rules
   InspectorAssessmentTemplate:
     DependsOn:
       - ServiceLinkedRoleForInspector
     Condition: IsSupportedRegion
-    Type: 'AWS::Inspector::AssessmentTemplate'
+    Type: AWS::Inspector::AssessmentTemplate
     Properties:
       AssessmentTargetArn: !GetAtt InspectorAssessmentTarget.Arn
       DurationInSeconds: 3600
@@ -176,7 +176,7 @@ Resources:
   # EventBridge for Inspector
   CloudWatchEventsForInspector:
     Condition: IsSupportedRegion
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Join
         - ''

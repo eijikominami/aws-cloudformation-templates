@@ -180,11 +180,11 @@ Resources:
   # Nested Stack
   SNSForAlert:
     Condition: CreateSNSForAlert
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -197,11 +197,11 @@ Resources:
         createdby: !Ref TagValue
   SNSForCICD:
     Condition: CreateSNSForCICD
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -214,22 +214,22 @@ Resources:
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   EventsRule:
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -254,7 +254,7 @@ Resources:
         createdby: !Ref TagValue
   # IAM
   IAMRoleForLambda:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -294,7 +294,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForChatbot:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -346,7 +346,7 @@ Resources:
           Value: !Ref TagValue
   # Lambda
   LambdaSendNotificationToSlack:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: sendNotificationToSlack/
       Description: SNSの内容をSlackに送信します
@@ -389,7 +389,7 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   LogGroupForLambdaSendNotificationToSlack:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
       RetentionInDays: 60
@@ -419,7 +419,7 @@ Resources:
         - !Ref SNSForDeploymentArn
   # CloudWatch Alarm for Lambda
   AlarmLambdaSendNotificationToSlack:
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
@@ -436,14 +436,14 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # Lambda
   LambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: analyzeUnauthorizedApiCalls/
       Description: Unauthorized API Calls イベントの詳細をSlackに送信します
@@ -471,7 +471,7 @@ Resources:
         createdby: !Ref TagValue
   LambdaAnalyzeUnauthorizedApiCallsPermission:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
-    Type: 'AWS::Lambda::Permission'
+    Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref LambdaAnalyzeUnauthorizedApiCalls
@@ -479,14 +479,14 @@ Resources:
       SourceArn: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CloudTrailLogGroup}:*
   LogGroupForLambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaAnalyzeUnauthorizedApiCalls}
       RetentionInDays: 60
   # CloudWatch Alarm for Lambda
   AlarmLambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
@@ -503,14 +503,14 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.19
+        SemanticVersion: 1.3.21
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # Chatbot
   ChatbotForAlert:
     Condition: CreateChatbotForAlert
-    Type: 'AWS::Serverless::Application'
+    Type: AWS::Serverless::Application
     Properties:
       Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
       NotificationARNs:
@@ -532,7 +532,7 @@ Resources:
         createdby: !Ref TagValue
   # CloudWatch Dashboard
   Dashboard:
-    Type: 'AWS::CloudWatch::Dashboard'
+    Type: AWS::CloudWatch::Dashboard
     Properties:
       DashboardName: !Sub ${AWS::StackName}-${AWS::Region}
       DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "\n# Lambda ${LambdaSendNotificationToSlack}()\n\nCloudWatch アラームの内容をSlackに送信します\n"}},{"type": "metric","x": 12,"y": 2,"width": 12,"height": 9,"properties": {"metrics": [[ "AWS/Lambda", "Errors", "FunctionName", "${LambdaSendNotificationToSlack}", "Resource", "${LambdaSendNotificationToSlack}", { "color": "#d62728" } ],[ ".", "Throttles", ".", ".", ".", "." ],[ ".", "ConcurrentExecutions", ".", ".", ".", "." ],[ ".", "Invocations", ".", ".", ".", ".", { "color": "#1f77b4" } ]],"view": "timeSeries","stacked": false,"region": "${AWS::Region}","stat": "Sum","period": 60,"title": "Count"}},{"type": "metric","x": 0,"y": 5,"width": 6,"height": 3,"properties": {"title": "ClientError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-ClientError"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 0,"y": 8,"width": 6,"height": 3,"properties": {"title": "TypeError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-TypeError"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 6,"y": 5,"width": 6,"height": 3,"properties": {"title": "Throttles","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Throttles"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 0,"y": 2,"width": 12,"height": 3,"properties": {"title": "Duration","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Timeout-Will-Occur"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 6,"y": 8,"width": 6,"height": 3,"properties": {"title": "Errors","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Errors"]},"view": "timeSeries","stacked": false}},{"type": "log","x": 0,"y": 11,"width": 12,"height": 3,"properties": {"query": "SOURCE ''/aws/lambda/${LambdaSendNotificationToSlack}'' | fields @message, @timestamp | filter @message like /(?i)ERROR/ | sort @timestamp desc | limit 20","region": "${AWS::Region}","stacked": false,"view": "table","title": "Error"}},{"type": "log","x": 12,"y": 11,"width": 12,"height": 3,"properties": {"query": "SOURCE ''/aws/lambda/${LambdaSendNotificationToSlack}'' | fields records, @timestamp | filter records>0 | sort @timestamp desc | limit 60","region": "${AWS::Region}","stacked": false,"title": "Records","view": "table"}}]}'

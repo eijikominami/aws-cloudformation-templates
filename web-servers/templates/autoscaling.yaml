@@ -173,7 +173,7 @@ Resources:
   LoadBalancer:
     DependsOn:
       - ServiceLinkedRoleForElasticLoadBalancing
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: !Sub elb-${LogicalNamePrefix}
       Scheme: internet-facing
@@ -200,7 +200,7 @@ Resources:
           Value: !Ref TagValue
       Type: !Ref LoadBalancerType
   LoadBalancerTargetGroupHttp:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
       HealthCheckTimeoutSeconds: 10
@@ -220,7 +220,7 @@ Resources:
       UnhealthyThresholdCount: 3
       VpcId: !Ref VPCId
   LoadBalancerListenerHttp:
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       DefaultActions:
         - TargetGroupArn: !Ref LoadBalancerTargetGroupHttp
@@ -232,7 +232,7 @@ Resources:
         - TCP
         - HTTP
   LoadBalancerListenerHttps:
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       Certificates:
         - CertificateArn: !Ref CertificateManager
@@ -249,15 +249,15 @@ Resources:
       SslPolicy: ELBSecurityPolicy-2016-08
   # Auto Scaling Group
   AutoScalingLaunchConfiguration:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Type: AWS::AutoScaling::LaunchConfiguration
     Properties: 
       AssociatePublicIpAddress: true
       BlockDeviceMappings: 
-        - DeviceName: /dev/xvda
+        - DeviceName: /dev/sda1
           Ebs: 
             DeleteOnTermination: true
             VolumeSize: !Ref EC2VolumeSize
-            VolumeType: gp2
+            VolumeType: gp3
       EbsOptimized: true
       IamInstanceProfile: !Ref EC2IamInstanceProfileArn
       ImageId: !Ref EC2ImageId
@@ -273,7 +273,7 @@ Resources:
   AutoScalingGroup:
     DependsOn:
       - ServiceLinkedRoleForAutoScaling
-    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Type: AWS::AutoScaling::AutoScalingGroup
     Properties: 
       AutoScalingGroupName: !Sub autoscalinggroup-${LogicalNamePrefix}
       Cooldown: '300'
@@ -319,7 +319,7 @@ Resources:
         - !Ref SubnetId2ForELB
   # CertificateManager
   CertificateManager:
-    Type: 'AWS::CertificateManager::Certificate'
+    Type: AWS::CertificateManager::Certificate
     Properties: 
       DomainName: !Ref ACMDomainName
       ValidationMethod: !Ref ACMValidationMethod
@@ -336,7 +336,7 @@ Resources:
   # Route53
   Route53RecordSet:
     Condition: CreateRoute53
-    Type: 'AWS::Route53::RecordSet'
+    Type: AWS::Route53::RecordSet
     Properties: 
       AliasTarget: 
         DNSName: !GetAtt LoadBalancer.DNSName

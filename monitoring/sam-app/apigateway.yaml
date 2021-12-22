@@ -35,7 +35,7 @@ Conditions:
 
 Resources:
   AlarmApi4XXError:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmDescription: !Sub '*API Gateway* (${ApiName}) の GET メソッドで *4XX エラー* が発生しました。'
@@ -57,7 +57,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmApi5XXError:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -84,7 +84,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmApiLatency:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -110,7 +110,7 @@ Resources:
       Threshold: !Ref LatencyThreshold
       TreatMissingData: notBreaching
   AlarmApiCount:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

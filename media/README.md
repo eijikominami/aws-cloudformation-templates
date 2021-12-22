@@ -13,6 +13,7 @@ If you just want to deploy the stack, click the button below.
 
 | Services | Launchers |
 | --- | --- |
+| IVS | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
 | MediaLive | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
 | MediaPackage | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
 | MediaStore | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
@@ -22,6 +23,7 @@ If you just want to deploy the stack, click the button below.
 Execute the command to deploy.
 
 ```bash
+aws cloudformation deploy --template-file ivs.yaml --stack-name IVS
 aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive
 aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage
 aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore
@@ -29,9 +31,17 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 
 You can provide optional parameters as follows.
 
+### IVS
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| Authorized | String | false | ○ | Whether the channel is authorized |
+| LatencyMode | String | LOW | ○ | Channel latency mode |
+| Type | String | STANDARD | ○ | The channel type |
+
 ### MediaLive
 
-| 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
+| Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | AudioBitrate | Number | | ○ | Average audio bitrate in bits/second |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Enable or disable automatic input failover |
@@ -59,7 +69,7 @@ You can provide optional parameters as follows.
 
 ### MediaPackage
 
-| 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
+| Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | StartoverWindowSeconds | Number | 0 | ○ | Maximum duration seconds of content to retain for startover playback |
 | SegmentDurationSeconds　| Number | 3 | ○ | Duration (in seconds) of each fragment |
@@ -68,7 +78,7 @@ You can provide optional parameters as follows.
 
 ### MediaStore
 
-| 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
+| Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | ExpirationDate | Number | 1 | ○ |  The date objects to expire |
 | MaxAgeSeconds　| Number | 30000 | ○ | The time in seconds that browser caches the preflight response |

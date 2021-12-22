@@ -17,7 +17,7 @@ Conditions:
 
 Resources:
   AlarmDynamoDBUserErrors:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -41,7 +41,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   AlarmDynamoDBSystemErrors:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

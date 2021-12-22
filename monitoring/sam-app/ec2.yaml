@@ -23,7 +23,7 @@ Conditions:
 
 Resources:
   EC2StatusCheckFailed:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -45,7 +45,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
   EC2CPUUtilization:
-    Type: 'AWS::CloudWatch::Alarm'
+    Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:

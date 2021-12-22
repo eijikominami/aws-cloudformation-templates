@@ -32,7 +32,7 @@ Conditions:
 Resources:
   # Service-linked Role
   ServiceLinkedRoleForSecurityHub:
-    Type: 'AWS::IAM::ServiceLinkedRole'
+    Type: AWS::IAM::ServiceLinkedRole
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties: 
@@ -42,11 +42,11 @@ Resources:
   SecurityHub:
     DependsOn:
       - ServiceLinkedRoleForSecurityHub
-    Type: 'AWS::SecurityHub::Hub'
+    Type: AWS::SecurityHub::Hub
   # EventBridge for SecurityHub
   CloudWatchEventsForSecurityHubFindings:
     Condition: CreateCloudWatchEventsForSecurityHubFindings
-    Type: 'AWS::Events::Rule'
+    Type: AWS::Events::Rule
     Properties: 
       Description: !Sub Rule for SecurityHub created by ${AWS::StackName}.
       EventPattern:
