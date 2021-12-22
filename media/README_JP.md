@@ -13,6 +13,7 @@
 
 | 作成されるAWSサービス | 個別のCloudFormationテンプレート |
 | --- | --- |
+| IVS | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
 | MediaLive | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
 | MediaPackage | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
 | MediaStore | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
@@ -22,12 +23,21 @@
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
+aws cloudformation deploy --template-file ivs.yaml --stack-name IVS
 aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive
 aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage
 aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
+
+### IVS
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| Authorized | String | false | ○ | 再生承認の有効化 |
+| LatencyMode | String | LOW | ○ | 動画レイテンシー |
+| Type | String | STANDARD | ○ | チャンネルタイプ |
 
 ### MediaLive
 
