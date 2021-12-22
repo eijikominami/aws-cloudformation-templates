@@ -111,6 +111,7 @@ Parameters:
 Conditions:
   CreateACMCertificate: !Not [ !Equals [ !Ref ACMDomainName, '' ] ]
   CreateSNSForAlertTransfer: !Not [ !Equals [ !Ref SNSForAlertArn, ''] ]
+  CreateBudget: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
   CreateCloudWatchAlarmBilling: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
   CreateCloudWatchAlarmCloudFrontErrorRate: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRateThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateCloudWatchAlarmCloudFrontRequests: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRequestPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
@@ -224,6 +225,7 @@ Resources:
           Value: !Ref TagValue
   # Budget 
   Budget:
+    Condition: CreateBudget
     Type: AWS::Budgets::Budget
     Properties: 
       Budget: 
