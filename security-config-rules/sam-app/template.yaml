@@ -11,6 +11,27 @@ Globals:
     Runtime: python3.9
     Tracing: Active
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Lambda Configuration'
+        Parameters:
+          - AutoRemediation
+          - RequiredTagKey
+          - RequiredTagValue
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters:
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
 Parameters:
   AutoRemediation:
     Type: String
@@ -29,6 +50,14 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
     Description: Required tag key [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: Amazon SNS Topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: Amazon SNS Topic ARN for deployment information
   Environment:
     Type: String
     Default: production
@@ -36,12 +65,77 @@ Parameters:
       - production
       - test
       - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
     
 Conditions:
-  CreateRemediationResources:
-    !Equals [ !Ref AutoRemediation, ENABLED ]
+  CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
+  # Nested Stack
+  CodeGuruCodeProfiler:
+    Condition: Development
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AgentPermission: !GetAtt IAMRoleForLambda.Arn
+        ProfilingGroupName: !Ref AWS::StackName
+        SNSForAlertArn: !If 
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.3.22
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 1.3.22
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # IAM
   IAMRoleForLambda:
     Type: AWS::IAM::Role
     Properties:
@@ -58,6 +152,15 @@ Resources:
           - arn:aws:iam::aws:policy/service-role/AWSConfigRulesExecutionRole
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
+        - PolicyName: CodeGuru
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'codeguru-profiler:ConfigureAgent'
+                  - 'codeguru-profiler:PostAgentProfile'
+                Resource: '*'
         - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17
@@ -95,7 +198,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-      RoleName: !Sub '${AWS::StackName}-LambdaForSecurityConfigRules-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-Lambda-${AWS::Region}'
       Tags:
         - Key: !Ref RequiredTagKey
           Value: !Ref RequiredTagValue
@@ -129,7 +232,17 @@ Resources:
     Properties:
       CodeUri: checkRequiredTags/
       Description: 指定したタグがリソースにあるかどうかを確認します。
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: checkRequiredTags
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
@@ -176,7 +289,17 @@ Resources:
     Properties:
       CodeUri: deleteUnapplicableResources/
       Description: 指定したタグがないリソースを削除します。
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: deleteUnapplicableResources
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30

@@ -175,9 +175,34 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateChatbotForAlert: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForAlertArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForAlert, ''] ] ]
   CreateChatbotForCICD: !And [ !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ], !Not [ !Equals [ !Ref SNSForCICDArn, ''] ], !Not [ !Equals [ !Ref SlackChannelIdForDeployment, ''] ] ]
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
+  CodeGuruCodeProfiler:
+    Condition: Development
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AgentPermission: !GetAtt IAMRoleForLambda.Arn
+        ProfilingGroupName: !Ref AWS::StackName
+        SNSForAlertArn: !If 
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -268,6 +293,15 @@ Resources:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
+        - PolicyName: CodeGuru
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'codeguru-profiler:ConfigureAgent'
+                  - 'codeguru-profiler:PostAgentProfile'
+                Resource: '*'
         - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17
@@ -355,6 +389,12 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       Events:
         SNSForAlert:
           Properties:
@@ -382,6 +422,8 @@ Resources:
         - CreateKMSKey
         - !GetAtt KMSKey.Arn
         - !Ref AWS::NoValue
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
@@ -452,6 +494,12 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       Events:
         CloudWatchLogs:
           Properties:
@@ -463,6 +511,8 @@ Resources:
         - CreateKMSKey
         - !GetAtt KMSKey.Arn
         - !Ref AWS::NoValue
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30

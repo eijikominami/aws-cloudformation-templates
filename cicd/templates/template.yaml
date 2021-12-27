@@ -752,13 +752,14 @@ Resources:
                 TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
                 ParameterOverrides: !If 
                     - Development
-                    - !Sub '{"Environment": "development","RequiredTagKey": "${TagKey}","RequiredTagValue": "${TagValue}"}'
-                    - !Sub '{"RequiredTagKey": "${TagKey}","RequiredTagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development", "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}","TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
                   - !Ref AWS::NoValue
               InputArtifacts:
+                - Name: DeployArtifact-CICD
                 - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
                 - !If
                   - CreateCloudFormationConfigurationArtifact

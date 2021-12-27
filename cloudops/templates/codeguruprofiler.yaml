@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationSamples/cloudops/codeguruprofiler creates a CodeGuru Profiler group.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'CodeGuru Configuration'
+        Parameters:
+          - AgentPermission
+          - ProfilingGroupName
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters:
+          - SNSForAlertArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
+Parameters:
+  AgentPermission:
+    Type: String
+    AllowedPattern: .+
+    Description: The agent permissions attached to this profiling group.
+  ProfilingGroupName:
+    Type: String
+    Default: Default
+    AllowedPattern: .+
+    Description: The name of the profiling group.        
+  SNSForAlertArn:
+    Type: String
+    AllowedPattern: .+
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  CodeGuruProfiler:
+    Type: AWS::CodeGuruProfiler::ProfilingGroup
+    Properties:
+      AnomalyDetectionNotificationConfiguration: 
+        - channelUri: !Ref SNSForAlertArn
+      ComputePlatform: AWSLambda
+      AgentPermissions:
+        Principals:
+          - !Ref AgentPermission
+      ProfilingGroupName: !Ref ProfilingGroupName
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  ProfilingGroupName:
+    Description: The name of the profiling group. 
+    Value: !Ref CodeGuruProfiler
+  ProfilerArn:
+    Description: The full ARN for that profiling group.
+    Value: !GetAtt CodeGuruProfiler.Arn
