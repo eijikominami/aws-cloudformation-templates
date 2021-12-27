@@ -66,7 +66,7 @@ Resources:
         # Allow MediaPackage to access S3 for VOD workflows.
         - !If
           - CreateVODWorkflow
-          - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaPackageS3ReadPolicy-${AWS::Region}'
+          - PolicyName: S3Read
             PolicyDocument:
               Version: 2012-10-17
               Statement:
@@ -83,7 +83,7 @@ Resources:
         # Allow MediaPackage to access S3 for Live-to-VOD workflows.
         - !If
           - CreateLiveToVODWorkflow
-          - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaPackageS3WritePolicy-${AWS::Region}'
+          - PolicyName: S3Write
             PolicyDocument:
               Version: 2012-10-17
               Statement:
@@ -97,7 +97,7 @@ Resources:
                     - !Sub 'arn:aws:s3:::${ArchiveBucket}'
           - !Ref AWS::NoValue
         # Allow MediaPackage to access SecretManager.
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaPackageSecretManagerPolicy-${AWS::Region}'
+        - PolicyName: SecretsManager
           PolicyDocument:
             Version: 2012-10-17
             Statement:

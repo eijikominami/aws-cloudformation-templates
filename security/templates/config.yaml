@@ -106,7 +106,7 @@ Resources:
         - arn:aws:iam::aws:policy/ReadOnlyAccess
       # Allow CloudFormation 'cloudformation:DetectStackDrift' and 'cloudformation:DetectStackResourceDrift' permission.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-ConfigCloudformationCheckPolicy-${AWS::Region}'
+        - PolicyName: Cloudformation
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -116,7 +116,7 @@ Resources:
                   - 'cloudformation:DetectStackResourceDrift'
                 Resource:
                   - '*'
-      RoleName: !Sub '${LogicalNamePrefix}-IAMRoleForConfigRules-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-ConfigRules-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -132,11 +132,11 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: 'sts:AssumeRole'
-      Description: A role required for Lambda to access IAM.
+      Description: A role required for Lambda to access IAM and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaIAMAccessKeyPolicy-${AWS::Region}'
+        - PolicyName: IAM
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -147,7 +147,7 @@ Resources:
                   - 'iam:DeleteAccessKey'
                 Resource:
                   - '*'
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -159,7 +159,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-      RoleName: !Sub '${LogicalNamePrefix}-LambdaIAM-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-LambdaForConfig-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -177,7 +177,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for SSM to access IAM.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSSystemsManagerIAMRole-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -217,7 +217,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for VPC flow logs to access CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSVPCFlowLogCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -229,7 +229,7 @@ Resources:
                   - 'logs:DescribeLogGroups'
                   - 'logs:DescribeLogStreams'
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-AWSVPCFlowLogRole-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-VPCFlowLog-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -434,7 +434,7 @@ Resources:
                                               UserName=user['UserName'],
                                               AccessKeyId=access_key['AccessKeyId']
                                           )
-      Description: 有効期限が過ぎたアクセスキーを削除します
+      Description: 有効期限が過ぎたアクセスキーを削除します。
       FunctionName: deleteExpiredAccessKeys
       Handler: index.lambda_handler
       MemorySize: 128

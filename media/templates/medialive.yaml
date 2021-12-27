@@ -223,7 +223,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for MediaLive to access S3.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSMediaLivePolicy-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:

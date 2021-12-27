@@ -54,7 +54,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for CloudTrail to access CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AmazonMacie-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:

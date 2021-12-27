@@ -132,7 +132,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for EventBridge to access Inspector.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSEventsInspectorPolicy-${AWS::Region}'
+        - PolicyName: Inspector
           PolicyDocument:
             Version: 2012-10-17
             Statement:

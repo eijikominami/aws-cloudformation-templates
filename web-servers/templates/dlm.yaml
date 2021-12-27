@@ -75,7 +75,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for DLM.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-DataLifecycleManagerEC2Access-${AWS::Region}'
+        - PolicyName: EC2Access
           PolicyDocument:
             Version: 2012-10-17
             Statement:

@@ -268,7 +268,7 @@ Resources:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-AWSLambdaBasicExecutionRole-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -287,7 +287,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*'
-      RoleName: !Sub '${AWS::StackName}-ExecuteLambda-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-LambdaForNotification-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -305,7 +305,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for Chatbot to access CloudWatch.
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-ChatbotCloudWatch-${AWS::Region}'
+        - PolicyName: CloudWatch
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -349,7 +349,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: sendNotificationToSlack/
-      Description: SNSの内容をSlackに送信します
+      Description: SNSの内容をSlackに送信します。
       Environment:
         Variables:
           ENCRYPT: !Ref Encrypt
@@ -446,7 +446,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: analyzeUnauthorizedApiCalls/
-      Description: Unauthorized API Calls イベントの詳細をSlackに送信します
+      Description: Unauthorized API Calls イベントの詳細をSlackに送信します。
       Environment:
         Variables:
           ENCRYPT: !Ref Encrypt
@@ -535,7 +535,7 @@ Resources:
     Type: AWS::CloudWatch::Dashboard
     Properties:
       DashboardName: !Sub ${AWS::StackName}-${AWS::Region}
-      DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "\n# Lambda ${LambdaSendNotificationToSlack}()\n\nCloudWatch アラームの内容をSlackに送信します\n"}},{"type": "metric","x": 12,"y": 2,"width": 12,"height": 9,"properties": {"metrics": [[ "AWS/Lambda", "Errors", "FunctionName", "${LambdaSendNotificationToSlack}", "Resource", "${LambdaSendNotificationToSlack}", { "color": "#d62728" } ],[ ".", "Throttles", ".", ".", ".", "." ],[ ".", "ConcurrentExecutions", ".", ".", ".", "." ],[ ".", "Invocations", ".", ".", ".", ".", { "color": "#1f77b4" } ]],"view": "timeSeries","stacked": false,"region": "${AWS::Region}","stat": "Sum","period": 60,"title": "Count"}},{"type": "metric","x": 0,"y": 5,"width": 6,"height": 3,"properties": {"title": "ClientError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-ClientError"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 0,"y": 8,"width": 6,"height": 3,"properties": {"title": "TypeError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-TypeError"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 6,"y": 5,"width": 6,"height": 3,"properties": {"title": "Throttles","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Throttles"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 0,"y": 2,"width": 12,"height": 3,"properties": {"title": "Duration","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Timeout-Will-Occur"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 6,"y": 8,"width": 6,"height": 3,"properties": {"title": "Errors","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Errors"]},"view": "timeSeries","stacked": false}},{"type": "log","x": 0,"y": 11,"width": 12,"height": 3,"properties": {"query": "SOURCE ''/aws/lambda/${LambdaSendNotificationToSlack}'' | fields @message, @timestamp | filter @message like /(?i)ERROR/ | sort @timestamp desc | limit 20","region": "${AWS::Region}","stacked": false,"view": "table","title": "Error"}},{"type": "log","x": 12,"y": 11,"width": 12,"height": 3,"properties": {"query": "SOURCE ''/aws/lambda/${LambdaSendNotificationToSlack}'' | fields records, @timestamp | filter records>0 | sort @timestamp desc | limit 60","region": "${AWS::Region}","stacked": false,"title": "Records","view": "table"}}]}'
+      DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "\n# Lambda ${LambdaSendNotificationToSlack}()\n\nCloudWatch アラームの内容をSlackに送信します。\n"}},{"type": "metric","x": 12,"y": 2,"width": 12,"height": 9,"properties": {"metrics": [[ "AWS/Lambda", "Errors", "FunctionName", "${LambdaSendNotificationToSlack}", "Resource", "${LambdaSendNotificationToSlack}", { "color": "#d62728" } ],[ ".", "Throttles", ".", ".", ".", "." ],[ ".", "ConcurrentExecutions", ".", ".", ".", "." ],[ ".", "Invocations", ".", ".", ".", ".", { "color": "#1f77b4" } ]],"view": "timeSeries","stacked": false,"region": "${AWS::Region}","stat": "Sum","period": 60,"title": "Count"}},{"type": "metric","x": 0,"y": 5,"width": 6,"height": 3,"properties": {"title": "ClientError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-ClientError"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 0,"y": 8,"width": 6,"height": 3,"properties": {"title": "TypeError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-TypeError"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 6,"y": 5,"width": 6,"height": 3,"properties": {"title": "Throttles","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Throttles"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 0,"y": 2,"width": 12,"height": 3,"properties": {"title": "Duration","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Timeout-Will-Occur"]},"view": "timeSeries","stacked": false}},{"type": "metric","x": 6,"y": 8,"width": 6,"height": 3,"properties": {"title": "Errors","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${AWS::StackName}-Lambda-${LambdaSendNotificationToSlack}-Errors"]},"view": "timeSeries","stacked": false}},{"type": "log","x": 0,"y": 11,"width": 12,"height": 3,"properties": {"query": "SOURCE ''/aws/lambda/${LambdaSendNotificationToSlack}'' | fields @message, @timestamp | filter @message like /(?i)ERROR/ | sort @timestamp desc | limit 20","region": "${AWS::Region}","stacked": false,"view": "table","title": "Error"}},{"type": "log","x": 12,"y": 11,"width": 12,"height": 3,"properties": {"query": "SOURCE ''/aws/lambda/${LambdaSendNotificationToSlack}'' | fields records, @timestamp | filter records>0 | sort @timestamp desc | limit 60","region": "${AWS::Region}","stacked": false,"title": "Records","view": "table"}}]}'
 
 Outputs:
   LambdaSendNotificationToSlackARN:

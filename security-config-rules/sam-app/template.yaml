@@ -58,7 +58,7 @@ Resources:
           - arn:aws:iam::aws:policy/service-role/AWSConfigRulesExecutionRole
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
-        - PolicyName: !Sub 'RequiredTags-AWSLambdaPolicy-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -83,7 +83,7 @@ Resources:
                   - 'lambda:DeleteFunction'
                 Resource:
                   - '*'
-        - PolicyName: !Sub 'RequiredTags-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -95,7 +95,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-      RoleName: !Sub 'RequiredTags-ConfigRules-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-LambdaForSecurityConfigRules-${AWS::Region}'
       Tags:
         - Key: !Ref RequiredTagKey
           Value: !Ref RequiredTagValue

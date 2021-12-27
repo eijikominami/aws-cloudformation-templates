@@ -268,7 +268,7 @@ Resources:
               Service: cloudfront.amazonaws.com
             Action: 'sts:AssumeRole'
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-KinesisPutPolicy-${AWS::Region}'
+        - PolicyName: KinesisStreams
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -301,9 +301,9 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: 'sts:AssumeRole'
-      Description: A role required for Lambda to execute.
+      Description: A role required for Lambda to access CloudFormation and CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -315,7 +315,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudFormationPolicy-${AWS::Region}'
+        - PolicyName: CloudFormation
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -324,7 +324,7 @@ Resources:
                   - 'cloudformation:DescribeStacks'
                   - 'cloudformation:UpdateStack'
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-Lambda-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-LambdaForRealtimeDashboard-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -342,7 +342,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for KinesisFirehose to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-FirehoseDelivery-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -628,7 +628,7 @@ Resources:
               logger.info("Successfully processed {} records.".format(len(event["records"])))
 
               return {"records": output}
-      Description: CloudFrontログを変換します
+      Description: CloudFrontログを変換します。
       FunctionName: realtimeLogsTransformer
       Handler: index.lambda_handler
       MemorySize: 512
@@ -931,7 +931,7 @@ Resources:
               )
             logger.info(str(datetime))
 
-      Description: Elasticsearchを削除します
+      Description: Elasticsearchを削除します。
       FunctionName: shutdownElasticSearch
       Handler: index.lambda_handler
       MemorySize: 128

@@ -166,7 +166,7 @@ Resources:
       Description: A role required for CloudTrail to access CloudWatch Logs.
       # Allow Budget 'SNS:Publish'.
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-BudgetSNSPublish-${AWS::Region}'
+        - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -192,11 +192,11 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: 'sts:AssumeRole'
-      Description: A role required for Lambda to access IAM.
+      Description: A role required for Lambda to access SNS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-AWSLambdaSNSPolicy-${AWS::Region}'
+        - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -205,7 +205,7 @@ Resources:
                   - 'sns:publish'
                 Resource:
                   - !Ref SNSForAlertArn
-        - PolicyName: !Sub '${AWS::StackName}-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -217,7 +217,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-      RoleName: !Sub '${AWS::StackName}-LambdaIAM-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-LambdaForGlobal-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -470,7 +470,7 @@ Resources:
                 'Subject': record['Sns']['Subject']
               }
               sns.publish(**request)
-      Description: SNSトピックを転送します
+      Description: SNSトピックを転送します。
       FunctionName: transferSNSTopic
       Handler: index.lambda_handler
       MemorySize: 128

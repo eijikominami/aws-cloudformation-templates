@@ -336,6 +336,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CertificateExists: !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ]
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
   CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardState, ENABLED ]
@@ -357,7 +358,10 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         CertificateManagerARN: !Ref CertificateManagerARN
-        DomainName: !Ref DomainName
+        DomainName: !If
+          - CertificateExists
+          - !Ref DomainName
+          - ''
         CloudFrontDefaultTTL: !Ref CloudFrontDefaultTTL
         CloudFrontMinimumTTL: !Ref CloudFrontMinimumTTL
         CloudFrontMaximumTTL: !Ref CloudFrontMaximumTTL
@@ -479,7 +483,7 @@ Resources:
               Service: s3.amazonaws.com
             Action: 'sts:AssumeRole'
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-S3Replication-${AWS::Region}'
+        - PolicyName: S3Replication
           PolicyDocument:
             Version: 2012-10-17
             Statement:
