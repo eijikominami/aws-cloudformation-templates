@@ -25,6 +25,7 @@ Metadata:
       - Label: 
           default: 'Stack Configuration'
         Parameters: 
+          - CloudOps
           - StaticWebsiteHosting
           - Notification
           - WebServers
@@ -80,6 +81,13 @@ Parameters:
       - REALTIME_DASHBOARD_ONLY
       - DISABLED
     Description: Enable or disable deployment of StaticWebsiteHosting template [required]
+  CloudOps:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of CloudOps template [required]
   GlobalSettings:
     Type: String
     Default: DISABLED
@@ -137,6 +145,7 @@ Conditions:
   CreateSNSForCICD: !Equals [ !Ref SNSForCICDArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
+  DeployCloudOps: !Equals [ !Ref CloudOps, ENABLED]
   DeployCreateRealtimeDashboard: !Equals [ !Ref StaticWebsiteHosting, REALTIME_DASHBOARD_ONLY]
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
@@ -738,37 +747,6 @@ Resources:
               OutputArtifacts: 
                 - Name: DeployArtifact-DefaultSecuritySettings
               RunOrder: 2
-            # Deploy DefaultSecuritySettings-ConfigRules
-            - ActionTypeId: 
-                Category: Deploy
-                Owner: AWS
-                Provider: CloudFormation
-                Version: '1'
-              Configuration:
-                ActionMode: CREATE_UPDATE
-                StackName: DefaultSecuritySettings-ConfigRules
-                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
-                ParameterOverrides: !If 
-                    - Development
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development", "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}","TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
-                TemplateConfiguration: !If
-                  - CreateCloudFormationConfigurationArtifact
-                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
-                  - !Ref AWS::NoValue
-              InputArtifacts:
-                - Name: DeployArtifact-CICD
-                - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
-                - !If
-                  - CreateCloudFormationConfigurationArtifact
-                  - Name: Source-CloudFormationConfigurationArtifact
-                  - !Ref AWS::NoValue
-              Name: DefaultSecuritySettings-ConfigRules
-              OutputArtifacts: 
-                - Name: DeployArtifact-DefaultSecuritySettings-ConfigRules
-              RunOrder: 3
             # Deploy Notification
             - !If
               - DeployNotification
@@ -801,8 +779,99 @@ Resources:
                 Name: Notification
                 OutputArtifacts:
                   - Name: DeployArtifact-Notification
-                RunOrder: 3
+                RunOrder: 2
               - !Ref AWS::NoValue
+            # Deploy CreateRealtimeDashboard
+            - !If
+              - DeployCreateRealtimeDashboard
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: RealtimeDashboard
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::edge/templates/realtime-dashboard.yaml
+                  ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}RealtimeDashboard.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: RealtimeDashboard
+                OutputArtifacts: 
+                  - Name: DeployArtifact-RealtimeDashboard
+                RunOrder: 2
+              - !Ref AWS::NoValue
+            # Deploy CloudOps
+            - !If
+              - DeployCloudOps
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: CloudOps
+                  Capabilities: CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
+                  ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: DeployArtifact-CICD
+                Name: CloudOps
+                OutputArtifacts: 
+                  - Name: DeployArtifact-CloudOps
+                RunOrder: 2
+              - !Ref AWS::NoValue
+            # Deploy DefaultSecuritySettings-ConfigRules
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: DefaultSecuritySettings-ConfigRules
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
+                ParameterOverrides: !If 
+                    - Development
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development", "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}","TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                TemplateConfiguration: !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
+                  - !Ref AWS::NoValue
+              InputArtifacts:
+                - Name: DeployArtifact-CICD
+                - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
+                - !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Name: Source-CloudFormationConfigurationArtifact
+                  - !Ref AWS::NoValue
+              Name: DefaultSecuritySettings-ConfigRules
+              OutputArtifacts: 
+                - Name: DeployArtifact-DefaultSecuritySettings-ConfigRules
+              RunOrder: 3
             # Deploy StaticWebsiteHosting
             - !If
               - DeployStaticWebsiteHosting
@@ -845,40 +914,6 @@ Resources:
                 Name: StaticWebsiteHosting
                 OutputArtifacts: 
                   - Name: DeployArtifact-StaticWebsiteHosting
-                RunOrder: 3
-              - !Ref AWS::NoValue
-            # Deploy CreateRealtimeDashboard
-            - !If
-              - DeployCreateRealtimeDashboard
-              - ActionTypeId: 
-                  Category: Deploy
-                  Owner: AWS
-                  Provider: CloudFormation
-                  Version: '1'
-                Configuration:
-                  ActionMode: CREATE_UPDATE
-                  StackName: RealtimeDashboard
-                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::edge/templates/realtime-dashboard.yaml
-                  ParameterOverrides: !If 
-                    - Development
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "KinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
-                  TemplateConfiguration: !If
-                    - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}RealtimeDashboard.json
-                    - !Ref AWS::NoValue
-                InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
-                  - !If
-                    - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
-                    - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
-                Name: RealtimeDashboard
-                OutputArtifacts: 
-                  - Name: DeployArtifact-RealtimeDashboard
                 RunOrder: 3
               - !Ref AWS::NoValue
             # Deploy WebServers

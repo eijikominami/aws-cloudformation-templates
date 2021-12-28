@@ -43,6 +43,14 @@ Parameters:
     AllowedPattern: .+
 
 Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForCodeGuruProfiler:
+    Type: AWS::IAM::ServiceLinkedRole
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: codeguru-profiler.amazonaws.com
+      Description: The Service Linked Role is used by Amazon CodeGuru Profiler.
   CodeGuruProfiler:
     Type: AWS::CodeGuruProfiler::ProfilingGroup
     Properties:
