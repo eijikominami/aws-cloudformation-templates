@@ -11,12 +11,12 @@ English / [**日本語**](README_JP.md)
 
 If you just want to deploy the stack, click the button below.
 
-| Services | Launchers |
-| --- | --- |
-| IVS | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
-| MediaLive | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
-| MediaPackage | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
-| MediaStore | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
+| Services | AWS Region Code | Launchers |
+| --- | --- | --- |
+| IVS | us-east-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
+| MediaLive | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
+| MediaPackage | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
+| MediaStore | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
 
 ## Deployment
 
@@ -35,15 +35,15 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| Authorized | String | false | ○ | Whether the channel is authorized |
-| LatencyMode | String | LOW | ○ | Channel latency mode |
-| Type | String | STANDARD | ○ | The channel type |
+| Authorized | true or false | false | ○ | Whether the channel is authorized |
+| LatencyMode | NORMAL or LOW | LOW | ○ | Channel latency mode |
+| Type | STANDARD or BASIC | STANDARD | ○ | The channel type |
 
 ### MediaLive
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| AudioBitrate | Number | | ○ | Average audio bitrate in bits/second |
+| AudioBitrate | Number | 96000 | ○ | Average audio bitrate in bits/second |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Enable or disable automatic input failover |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | Select the class of channel you intend to attach this input to |
 | FramerateDenominator | Number | 1001 | ○ | Framerate denominator |
@@ -72,7 +72,7 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | StartoverWindowSeconds | Number | 0 | ○ | Maximum duration seconds of content to retain for startover playback |
-| SegmentDurationSeconds　| Number | 3 | ○ | Duration (in seconds) of each fragment |
+| SegmentDurationSeconds | Number | 3 | ○ | Duration (in seconds) of each fragment |
 | VodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
 | VodDestinationBucket | String | | | The S3 bucket Name LIVE-to-VOD contents are stored |
 
@@ -81,5 +81,5 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | ExpirationDate | Number | 1 | ○ |  The date objects to expire |
-| MaxAgeSeconds　| Number | 30000 | ○ | The time in seconds that browser caches the preflight response |
+| MaxAgeSeconds | Number | 30000 | ○ | The time in seconds that browser caches the preflight response |
 | UserAgent | String | | ○ | The secret key that 'User-Agent' header contains |

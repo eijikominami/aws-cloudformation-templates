@@ -9,14 +9,14 @@
 
 ## TL;DR
 
-以下のボタンをクリックすることで、**CloudFormationをデプロイ**することが可能です。
+以下のボタンをクリックすることで、**CloudFormationをデプロイ** することが可能です。
 
-| 作成されるAWSサービス | 個別のCloudFormationテンプレート |
-| --- | --- |
-| IVS | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
-| MediaLive | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
-| MediaPackage | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
-| MediaStore | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
+| 作成されるAWSサービス | リージョン | 個別のCloudFormationテンプレート |
+| --- | --- | --- |
+| IVS | バージニア北部 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
+| MediaLive | 東京 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
+| MediaPackage | 東京 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
+| MediaStore | 東京 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
 
 ## デプロイ
 
@@ -35,15 +35,15 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| Authorized | String | false | ○ | 再生承認の有効化 |
-| LatencyMode | String | LOW | ○ | 動画レイテンシー |
-| Type | String | STANDARD | ○ | チャンネルタイプ |
+| Authorized | true or false | false | ○ | 再生承認の有効化 |
+| LatencyMode | NORMAL or LOW | LOW | ○ | 動画レイテンシー |
+| Type | STANDARD or BASIC | STANDARD | ○ | チャンネルタイプ |
 
 ### MediaLive
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| AudioBitrate | Number | | ○ | 音声ビットレート（bps） |
+| AudioBitrate | Number | 96000 | ○ | 音声ビットレート（bps） |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
 | FramerateDenominator | Number | 1001 | ○ | Framerate denominator |
@@ -72,7 +72,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
 | StartoverWindowSeconds | Number | 0 | ○ | 時間シフト（秒） |
-| SegmentDurationSeconds　| Number | 3 | ○ | フラグメント長（秒） |
+| SegmentDurationSeconds | Number | 3 | ○ | フラグメント長（秒） |
 | VodSourceBucket | String | | | VODのソースバケット名 |
 | VodDestinationBucket | String | | | LIVE-to-VODコンテンツの格納先バケット名 |
 
@@ -81,5 +81,5 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
 | ExpirationDate | Number | 1 | ○ | 有効期限（日） |
-| MaxAgeSeconds　| Number | 30000 | ○ | ブラウザキャッシュのプリフライト時間 |
+| MaxAgeSeconds | Number | 30000 | ○ | ブラウザキャッシュのプリフライト時間 |
 | UserAgent | String | | ○ | ユーザエージェント |

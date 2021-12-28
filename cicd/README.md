@@ -77,5 +77,5 @@ You can provide optional parameters as follows.
 | **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed. |
 | **Notification** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed. |
 | **Route53** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Route53` stack is deployed. |
-| **StaticWebsiteHosting** | ENABLED / REALTIME_DASHBOARD_ONLY / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed. |
+| **StaticWebsiteHosting** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed. |
 | **WebServers** | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed. |

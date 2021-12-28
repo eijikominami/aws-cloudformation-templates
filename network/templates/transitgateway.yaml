@@ -21,11 +21,11 @@ Metadata:
 Parameters:
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: The IDs of one or more subnets. [required]  
+    Description: The IDs of one or more subnets [required]  
   VpcId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
-    Description: The ID of the VPC. [required]     
+    Description: The ID of the VPC [required]     
   Environment:
     Type: String
     Default: production

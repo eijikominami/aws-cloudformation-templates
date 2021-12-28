@@ -24,15 +24,16 @@ Parameters:
   AgentPermission:
     Type: String
     AllowedPattern: .+
-    Description: The agent permissions attached to this profiling group.
+    Description: The agent permissions attached to this profiling group [required]
   ProfilingGroupName:
     Type: String
     Default: Default
     AllowedPattern: .+
-    Description: The name of the profiling group.        
+    Description: The name of the profiling group [required]   
   SNSForAlertArn:
     Type: String
     AllowedPattern: .+
+    Description: The ARN of an Amazon SNS topic [required] 
   TagKey:
     Type: String
     Default: createdby

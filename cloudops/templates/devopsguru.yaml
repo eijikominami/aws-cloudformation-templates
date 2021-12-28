@@ -16,7 +16,7 @@ Parameters:
     MinLength: 36
     MaxLength: 1024
     AllowedPattern: ^arn:aws[a-z0-9-]*:sns:[a-z0-9-]+:\d{12}:[^:]+$
-    Description: The ARN of an Amazon Simple Notification Service topic.
+    Description: The ARN of an Amazon Simple Notification Service topic [required]
 
 Resources:
   # Service-linked Role
