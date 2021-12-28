@@ -33,7 +33,8 @@ Metadata:
           - WebACL
       - Label: 
           default: 'Tag Configuration'
-        Parameters: 
+        Parameters:
+          - Environment
           - TagKey
           - TagValue
 
@@ -534,6 +535,9 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaTransferSNSTopic}
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # SNS
   SNSSubscription:
     Condition: CreateSNSForAlertTransfer

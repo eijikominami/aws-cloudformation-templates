@@ -1,6 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: AWSCloudFormationSamples/media/mediastore sets Elemental MediaStore.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'MediaStore Configuration'
+        Parameters: 
+          - ExpirationDate
+          - MaxAgeSeconds
+          - UserAgent
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   ExpirationDate:
     Type: Number
@@ -8,11 +24,6 @@ Parameters:
     MinValue: 1
     MaxValue: 36500
     Description: The date objects to expire [required]
-  LogicalNamePrefix:
-    Type: String
-    Default: MediaStore
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   MaxAgeSeconds:
     Type: Number
     Default: 30000
@@ -20,7 +31,12 @@ Parameters:
   UserAgent:
     Type: String
     Default: ''
-    Description: The secret key that 'User-Agent' header contains  
+    Description: The secret key that 'User-Agent' header contains
+  LogicalNamePrefix:
+    Type: String
+    Default: MediaStore
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   TagKey:
     Type: String
     Default: createdby

@@ -13,8 +13,8 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - Environment
           - LogicalNamePrefix
+          - Environment
           - TagKey
           - TagValue
 
@@ -240,6 +240,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdauditManagerRegister}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AuditManagerAWSWellArchitectedFramework:
     DependsOn:
       - AuditManagerRegister

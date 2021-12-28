@@ -19,6 +19,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - LogicalNamePrefix
+          - Environment
           - TagKey
           - TagValue
 
@@ -535,6 +536,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteExpiredAccessKeys}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudWatch Alarm for Lambda
   AlarmLambda:
     Type: AWS::Serverless::Application

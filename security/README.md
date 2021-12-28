@@ -120,7 +120,7 @@ This template creates some other resources, such as ``Service-linked Role``, ``I
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecuritySettings  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecuritySettings --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows:

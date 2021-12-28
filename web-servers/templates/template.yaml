@@ -835,6 +835,9 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmEC2:
     Type: AWS::Serverless::Application
     Properties:

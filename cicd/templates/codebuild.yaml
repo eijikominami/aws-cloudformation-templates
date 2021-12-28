@@ -47,11 +47,11 @@ Parameters:
   DestinationBucketNameForMasterBranch:
     Type: String
     AllowedPattern: .+
-    Description: The name of the bucket where Amazon S3 should store production artifacts. [required]  
+    Description: The name of the bucket where Amazon S3 should store production artifacts [required]  
   DestinationBucketNameForTargetBranch:
     Type: String
     AllowedPattern: .+
-    Description: The name of the bucket where Amazon S3 should store development artifacts. [required]  
+    Description: The name of the bucket where Amazon S3 should store development artifacts [required]  
   Image:
     Type: String
     Default: aws/codebuild/amazonlinux2-x86_64-standard:3.0
@@ -390,6 +390,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudWatch Alarm
   AlarmCodeBuildForMasterBranch:
     Type: AWS::Serverless::Application

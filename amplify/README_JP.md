@@ -9,7 +9,7 @@
 
 ## TL;DR
 
-以下のボタンをクリックすることで、この **CloudFormationをデプロイ**することが可能です。
+以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
 
 [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Amplify&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/amplify/template.yaml) 
 
@@ -32,5 +32,5 @@ aws cloudformation deploy --template-file template.yaml --stack-name Amplify --c
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AmplifyConsoleAppId | String |  |  | この値は2回目以降のデプロイ時に指定できます。 |
-| DomainName | String | | ○ | Amplify Console で使用するカスタムドメイン名 |
-| RepositoryName | String | | ○ | CodeCommit で使用するリポジトリ名 | 
+| **DomainName** | String | | ○ | Amplify Console で使用するカスタムドメイン名 |
+| **RepositoryName** | String | | ○ | CodeCommit で使用するリポジトリ名 | 

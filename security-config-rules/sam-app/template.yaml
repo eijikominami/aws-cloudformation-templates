@@ -260,6 +260,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaCheckRequiredTags}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchEventsForConfigRequiredTags:
     Type: AWS::Events::Rule
     Properties: 
@@ -318,3 +321,6 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteUnapplicableResources}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

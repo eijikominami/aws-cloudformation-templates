@@ -32,7 +32,7 @@
 
 + [Security Template](../security/README_JP.md)
 
-2. 以下のリンクをクリックすることで、**CloudFormationをデプロイ**することが可能です。
+2. 以下のリンクをクリックすることで、**CloudFormationをデプロイ** することが可能です。
 
 + [delete-resources-without-required-tags - AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~delete-resources-without-required-tags)
 + [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DefaultSecuritySettings-ConfigRules&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security-config-rules/packaged.yaml)

@@ -14,7 +14,7 @@
 + [Security Template](../security/README_JP.md)
 + [Global Settings Template](../global/README_JP.md)
 
-2. 以下のボタンをクリックすることで、**CloudFormationをデプロイ**することが可能です。
+2. 以下のボタンをクリックすることで、**CloudFormationをデプロイ** することが可能です。
 
 [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=StaticWebsiteHosting&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/static-website-hosting-with-ssl/template.yaml) 
 
@@ -96,10 +96,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** に **SSL証明書** が紐付けられます。 |
-| **DomainName** | String | | ○ | |
-| CloudFrontDefaultTTL | Number | 86400 | ○ | |
-| CloudFrontMinimumTTL | Number | 0 | ○ | |
-| CloudFrontMaximumTTL |  Number | 31536000 | ○ | |
+| **DomainName** | String | | ○ | ドメイン名 |
+| CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
+| CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
+| CloudFrontMaximumTTL |  Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | |
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
 | CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |
@@ -123,24 +123,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
-| WebACLArn | String | | | WebACL の　ARN |
-
-``Real-time Dashboard Stack`` を単独でデプロイする場合は、以下のパラメータを指定することができます。
-
-| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
-| --- | --- | --- | --- | --- |
-| ElasticSearchVolumeSize | Number | 10 | ○ | Elasticsearch Service のボリュームサイズ（GB） |
-| ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | Elasticsearch Service のドメイン名 |
-| ElasticSearchLifetime | Number | 1 | ○ | Elasticsearch Service の生存時間 |
-| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
-| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のマスタータイプ |
-| ElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
-| ElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
-| ElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
-| SamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
-| KinesisFirehoseStreamNameSuffix | String | default | ○ | Kinesis Firehose ストリーム名の接尾辞 |
-| KinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
-| KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
+| WebACLArn | String | | | WebACL のARN |
 
 ### 手動設定
 
@@ -206,4 +189,3 @@ PUT _template/custom_template
 ![](../images/kibana_setting_6.png)
 
 14. [visualizes と dashboard の設定ファイル](export.ndjson) をインポートします。
-

@@ -44,6 +44,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
+          - Environment
           - TagKey
           - TagValue
 
@@ -435,6 +436,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   SNSSubscriptionForAlert:
     Type: AWS::SNS::Subscription
     Properties: 
@@ -533,6 +537,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaAnalyzeUnauthorizedApiCalls}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudWatch Alarm for Lambda
   AlarmLambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction

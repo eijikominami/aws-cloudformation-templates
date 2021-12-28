@@ -2,6 +2,49 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationSamples/media/medialive sets Elemental MediaLive.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'MediaLive Configuration'
+        Parameters: 
+          - ArchiveBucket
+          - AudioBitrate
+          - AutoInputFailover
+          - ChannelClass
+          - FramerateDenominator
+          - FramerateNumerator
+          - GopNumBFrames
+          - GopSize
+          - H264Profile
+          - H264Level
+          - Height
+          - MediaPackageChannelId
+          - MediaStoreEndpoint
+          - LiveSource
+          - OutputType
+          - RtmpUrl1
+          - RtmpStreamKey1
+          - RtmpUrl2
+          - RtmpStreamKey2
+          - StreamKey
+          - VideoBitrate
+          - VodSourceBucket
+          - Width
+          - WhitelistRules
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+          - Environment
+          - AutoInputFailover
+          - TagValue
+
 Parameters:
   ArchiveBucket:
     Type: String
@@ -93,11 +136,6 @@ Parameters:
       - DISABLED
     Default: ENABLED
     Description: Enable or disable a live source [required]    
-  LogicalNamePrefix:
-    Type: String
-    Default: MediaLive
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   OutputType:
     Type: String
     AllowedValues:
@@ -149,6 +187,11 @@ Parameters:
   SNSForDeploymentArn:
     Type: String
     Default: ''
+  LogicalNamePrefix:
+    Type: String
+    Default: MediaLive
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

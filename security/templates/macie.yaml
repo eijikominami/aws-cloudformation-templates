@@ -5,9 +5,14 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'Macie Configuration'
+        Parameters:
+          - FindingPublishingFrequency
+      - Label: 
           default: 'Tag Configuration'
         Parameters:
           - LogicalNamePrefix
+          - Environment
           - TagKey
           - TagValue
 
@@ -139,3 +144,6 @@ Resources:
     Properties: 
       LogGroupName: /aws/macie/classificationjobs
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

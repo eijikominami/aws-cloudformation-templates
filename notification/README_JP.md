@@ -15,8 +15,8 @@
 │   └── chatbot.yaml                <-- CloudFormation テンプレート
 └── sam-app
     ├── sendNotificationToSlack     <-- Lambda用ディレクトリ
-    │   ├── lambda_function.py      <-- メイン関数
-    │   └── requirements.txt        <-- ライブラリの依存関係ファイル
+    │   ├── lambda_function.py      <-- メイン関数
+    │   └── requirements.txt        <-- ライブラリの依存関係ファイル
     ├── events.yaml                 <-- SAM Template
     ├── sns.yaml                    <-- SAMテンプレート
     └── template.yaml               <-- SAMテンプレート

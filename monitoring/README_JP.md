@@ -566,9 +566,3 @@ Properties:
   Tags: Map
   TimeoutInMinutes: Integer
 ```
-
-## アーキテクチャ
-
-このテンプレートが作成するAWSリソースのアーキテクチャ図は、以下の通りです。
-
-![](../images/architecture.png)

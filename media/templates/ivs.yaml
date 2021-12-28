@@ -2,6 +2,23 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationSamples/media/medialive sets Interactive Video Service.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'IVS Configuration'
+        Parameters: 
+          - Authorized
+          - LatencyMode
+          - Type
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+          - Environment
+          - TagKey
+          - TagValue
+
 Parameters:
   Authorized:
     Type: String
@@ -17,18 +34,18 @@ Parameters:
       - LOW
     Default: LOW
     Description: Channel latency mode [required] 
-  LogicalNamePrefix:
-    Type: String
-    Default: IVS
-    AllowedPattern: ^[a-zA-Z0-9-_]*$
-    Description: The custom prefix name [required]
   Type:
     Type: String
     AllowedValues:
       - STANDARD
       - BASIC
     Default: STANDARD
-    Description: The channel type [required]     
+    Description: The channel type [required] 
+  LogicalNamePrefix:
+    Type: String
+    Default: IVS
+    AllowedPattern: ^[a-zA-Z0-9-_]*$
+    Description: The custom prefix name [required]    
   Environment:
     Type: String
     Default: production

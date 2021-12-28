@@ -242,6 +242,9 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/cloudtrail/${LogicalNamePrefix}'
       RetentionInDays: 365
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.1 a log metric filter and alarm exist for unauthorized API calls 
   CloudWatchLogsMetricFilterCloudTrailUnauthorizedAPICalls:
     Type: AWS::Logs::MetricFilter

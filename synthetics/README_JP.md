@@ -9,7 +9,7 @@
 
 ## TL;DR
 
-以下のボタンをクリックすることで、この **CloudFormationをデプロイ**することが可能です。
+以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
 
 [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) 
 
@@ -48,6 +48,6 @@ aws cloudformation deploy --template-file heartbeat.yaml --stack-name Synthetics
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| CanaryName | String | | ○ | カナリア名 |
-| DomainName | String | | ○ | スクリプトが監視するドメイン名 |
+| **CanaryName** | String | | ○ | カナリア名 |
+| **DomainName** | String | | ○ | スクリプトが監視するドメイン名 |
 | WatchedPagePath | String | /index.html | ○ | スクリプトが監視するページのパス |

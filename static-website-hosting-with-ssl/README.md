@@ -127,23 +127,6 @@ You can provide optional parameters as follows.
 | LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |
 | WebACLArn | String | | | The ARN of Web ACL |
 
-If you deploy ``Real-time Dashboard Stack`` individually, you can provide optional parameters as follows.
-
-| Name | Type | Default | Required | Details | 
-| --- | --- | --- | --- | --- |
-| ElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
-| ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | The domain name of ElasticSearch Service |
-| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
-| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of Elasticsearch Service |
-| ElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
-| ElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
-| ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
-| ElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
-| SamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
-| KinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
-| KinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
-| KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
-
 ### Manual Deployment
 
 #### Origin failover

@@ -1,25 +1,38 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: AWSCloudFormationSamples/media/mediapackage sets Elemental MediaPackage.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'MediaPackage Configuration'
+        Parameters: 
+          - ArchiveBucket
+          - StartoverWindowSeconds
+          - SegmentDurationSeconds
+          - OutputType
+          - VodSourceBucket
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
 Parameters:
   ArchiveBucket:
     Type: String
     Default: ''
     Description: The S3 bucket Name LIVE-to-VOD contents are stored.
-  LogicalNamePrefix:
-    Type: String
-    Default: MediaPackage
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   StartoverWindowSeconds:
     Type: Number
     Default: 0
-    Description: Maximum duration seconds of content to retain for startover playback. [required]
+    Description: Maximum duration seconds of content to retain for startover playback [required]
     MinValue: 0
   SegmentDurationSeconds:
     Type: String
     Default: 3
-    Description: Duration (in seconds) of each fragment. [required]
+    Description: Duration (in seconds) of each fragment [required]
   OutputType:
     Type: String
     AllowedValues:
@@ -32,6 +45,11 @@ Parameters:
     Type: String
     Default: ''
     Description: The S3 bucket Name VOD contents exist.
+  LogicalNamePrefix:
+    Type: String
+    Default: MediaPackage
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   TagKey:
     Type: String
     Default: createdby

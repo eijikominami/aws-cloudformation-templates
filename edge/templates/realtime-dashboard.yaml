@@ -9,6 +9,7 @@ Metadata:
           default: 'CloudFront Realtime Dashboard Configuration'
         Parameters: 
           - SamplingRate
+          - KinesisFirehoseStreamNameSuffix
           - KinesisShardCount
           - KinesisNumberOfPutRecordThreshold
       - Label: 
@@ -31,6 +32,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - LogicalNamePrefix
+          - Environment
           - TagKey
           - TagValue
 
@@ -688,6 +690,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${Lambda}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudWatch Alarm for Lambda
   AlarmLambda:
     Type: AWS::Serverless::Application
@@ -752,6 +757,9 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/kinesisfirehose/${LogicalNamePrefix}'
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchLogsStreamForFirehoseS3:
     Type: AWS::Logs::LogStream
     Properties:
@@ -1011,6 +1019,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudWatch Alarm for Lambda
   AlarmLambdaShutdownElasticSearch:
     Condition: CreateShutdownElasticSearchWorker

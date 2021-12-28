@@ -568,9 +568,3 @@ Properties:
   Tags: Map
   TimeoutInMinutes: Integer
 ```
-
-## Architecture
-
-The following sections describe the individual components of the architecture.
-
-![](../images/architecture.png)
