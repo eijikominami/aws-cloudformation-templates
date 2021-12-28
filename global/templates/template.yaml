@@ -118,6 +118,7 @@ Conditions:
   CreateCloudWatchAlarmCloudFrontBytesDownloaded: !And [ !Not [ !Equals [ !Ref CloudFrontBytesDownloadedPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateRoute53: !Not [ !Equals [ !Ref DomainName, '' ] ]
   CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
+  CreateCodeGuruCodeProfiler: !And [ !Not [ !Equals [ !Ref SNSForAlertArn, ''] ], !Equals [ !Ref Environment, development] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -141,6 +142,22 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
+  CodeGuruCodeProfiler:
+    Condition: CreateCodeGuruCodeProfiler
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        AgentPermission: !GetAtt IAMRoleForLambda.Arn
+        ProfilingGroupName: !Ref AWS::StackName
+        SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   SNSForAlert:
     Type: AWS::Serverless::Application
     Properties:
@@ -166,7 +183,7 @@ Resources:
       Description: A role required for CloudTrail to access CloudWatch Logs.
       # Allow Budget 'SNS:Publish'.
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-BudgetSNSPublish-${AWS::Region}'
+        - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -192,11 +209,20 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: 'sts:AssumeRole'
-      Description: A role required for Lambda to access IAM.
+      Description: A role required for Lambda to access SNS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-AWSLambdaSNSPolicy-${AWS::Region}'
+        - PolicyName: CodeGuru
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'codeguru-profiler:ConfigureAgent'
+                  - 'codeguru-profiler:PostAgentProfile'
+                Resource: '*'
+        - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -205,7 +231,7 @@ Resources:
                   - 'sns:publish'
                 Resource:
                   - !Ref SNSForAlertArn
-        - PolicyName: !Sub '${AWS::StackName}-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -217,7 +243,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-      RoleName: !Sub '${AWS::StackName}-LambdaIAM-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-LambdaForGlobal-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -470,9 +496,19 @@ Resources:
                 'Subject': record['Sns']['Subject']
               }
               sns.publish(**request)
-      Description: SNSトピックを転送します
+      Description: SNSトピックを転送します。
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: transferSNSTopic
       Handler: index.lambda_handler
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.9

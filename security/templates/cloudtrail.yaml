@@ -75,7 +75,7 @@ Resources:
       Description: A role required for CloudTrail to access CloudWatch Logs.
       # Allow CloudTrail 'logs:PutLogEvents' and 'logs:CreateLogStream' permission.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSCloudTrailCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:

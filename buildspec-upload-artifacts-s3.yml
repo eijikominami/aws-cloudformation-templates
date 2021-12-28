@@ -6,6 +6,8 @@ env:
     AMPLIFY_DIST_DIR: aws-cloudformation-templates/amplify
     CICD_SRC_DIR: cicd/templates
     CICD_DIST_DIR: aws-cloudformation-templates/cicd
+    CLOUDOPS_SRC_DIR: cloudops/templates
+    CLOUDOPS_DIST_DIR: aws-cloudformation-templates/cloudops
     GLOBAL_SRC_DIR: global/templates
     GLOBAL_DIST_DIR: aws-cloudformation-templates/global
     MONITORING_SRC_DIR: monitoring/sam-app
@@ -47,6 +49,7 @@ phases:
       # - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${CLOUDOPS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${EDGE_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive
@@ -73,6 +76,7 @@ phases:
     commands:
        - aws s3 cp ${AMPLIFY_SRC_DIR}/ s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${CICD_SRC_DIR}/ s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
+       - aws s3 cp ${CLOUDOPS_SRC_DIR}/ s3://${BUCKET_NAME}/${CLOUDOPS_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${EDGE_SRC_DIR}/ s3://${BUCKET_NAME}/${EDGE_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${GLOBAL_SRC_DIR}/ s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'
        - aws s3 cp ${MONITORING_SRC_DIR}/ s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive --exclude '*' --include '*.yaml'

@@ -123,7 +123,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      RoleName: !Sub '${LogicalNamePrefix}-EC2SSMRole-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-EC2SSM-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment

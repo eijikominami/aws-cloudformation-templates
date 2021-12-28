@@ -149,7 +149,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub 'UploadArtifacts-CodeBuildS3CloudWatchLogs-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -214,7 +214,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
                 Effect: Allow
-      RoleName: !Sub 'UploadArtifacts-CodeBuild-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-CodeBuild-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -232,7 +232,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for CodeBuild to access CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub 'UploadArtifacts-CodeBuildS3CloudWatchLogs-${AWS::Region}'
+        - PolicyName: S3CloudWatchLogs
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -241,7 +241,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/UploadArtifacts:*
                 Effect: Allow
-      RoleName: !Sub 'UploadArtifacts-CodeBuildBudgePublicRead-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-CodeBuildBudgePublicRead-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment

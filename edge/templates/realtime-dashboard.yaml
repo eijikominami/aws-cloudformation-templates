@@ -224,9 +224,31 @@ Conditions:
   CreateShutdownElasticSearchWorker: !Not [ !Equals [ !Ref ElasticSearchLifetime, 0] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
+  CodeGuruCodeProfiler:
+    Condition: Development
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AgentPermission: !GetAtt IAMRoleForLambda.Arn
+        ProfilingGroupName: !Ref AWS::StackName
+        SNSForAlertArn: !Ref SNSForAlertArn
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -268,7 +290,7 @@ Resources:
               Service: cloudfront.amazonaws.com
             Action: 'sts:AssumeRole'
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-KinesisPutPolicy-${AWS::Region}'
+        - PolicyName: KinesisStreams
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -301,9 +323,18 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: 'sts:AssumeRole'
-      Description: A role required for Lambda to execute.
+      Description: A role required for Lambda to access CloudFormation and CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudWatchLogsPolicy-${AWS::Region}'
+        - PolicyName: CodeGuru
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'codeguru-profiler:ConfigureAgent'
+                  - 'codeguru-profiler:PostAgentProfile'
+                Resource: '*'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -315,7 +346,7 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-        - PolicyName: !Sub '${LogicalNamePrefix}-AWSLambdaCloudFormationPolicy-${AWS::Region}'
+        - PolicyName: CloudFormation
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -324,7 +355,7 @@ Resources:
                   - 'cloudformation:DescribeStacks'
                   - 'cloudformation:UpdateStack'
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-Lambda-${AWS::Region}'
+      RoleName: !Sub '${LogicalNamePrefix}-LambdaForRealtimeDashboard-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -342,7 +373,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for KinesisFirehose to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
       Policies:
-        - PolicyName: !Sub '${LogicalNamePrefix}-FirehoseDelivery-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -628,8 +659,18 @@ Resources:
               logger.info("Successfully processed {} records.".format(len(event["records"])))
 
               return {"records": output}
-      Description: CloudFrontログを変換します
+      Description: CloudFrontログを変換します。
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: realtimeLogsTransformer
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       Handler: index.lambda_handler
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -931,9 +972,19 @@ Resources:
               )
             logger.info(str(datetime))
 
-      Description: Elasticsearchを削除します
+      Description: Elasticsearchを削除します。
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: shutdownElasticSearch
       Handler: index.lambda_handler
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.9

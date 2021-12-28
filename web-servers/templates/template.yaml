@@ -678,7 +678,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for VPC FlowLog.
       Policies:
-        - PolicyName: !Sub '${AWS::StackName}-AWSVPCFlowLogCloudWatchAccess-${AWS::Region}'
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:

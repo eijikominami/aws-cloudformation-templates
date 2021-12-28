@@ -218,7 +218,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub 'CICD-CodeBuildS3CloudWatchLogs-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -263,7 +263,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
                 Effect: Allow
-      RoleName: !Sub 'CICD-CodeBuild-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-CodeBuild-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If
@@ -284,7 +284,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for EventBridge to access CodePipeline.
       Policies:
-        - PolicyName: !Sub 'CICD-CloudWatchEventsCodePipeline-${AWS::Region}'
+        - PolicyName: CodePipeline
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -293,7 +293,7 @@ Resources:
                 Resource:
                   - !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}'
                 Effect: Allow
-      RoleName: !Sub 'CICD-CloudWatchEvents-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-EventBridge-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If
@@ -314,7 +314,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Description: A role required for CodePipeline to access related resources.
       Policies:
-        - PolicyName: !Sub 'CICD-CodePipeline-${AWS::Region}'
+        - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -439,7 +439,7 @@ Resources:
                   - ecr:DescribeImages
                 Resource: '*'
                 Effect: Allow
-      RoleName: !Sub 'CICD-CodePipeline-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-CodePipeline-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If
@@ -461,7 +461,7 @@ Resources:
       Description: A role required for CloudFormation to access related resources.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
-      RoleName: !Sub 'CICD-CloudFormation-${AWS::Region}'
+      RoleName: !Sub '${AWS::StackName}-CloudFormation-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If
@@ -752,13 +752,14 @@ Resources:
                 TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
                 ParameterOverrides: !If 
                     - Development
-                    - !Sub '{"Environment": "development","RequiredTagKey": "${TagKey}","RequiredTagValue": "${TagValue}"}'
-                    - !Sub '{"RequiredTagKey": "${TagKey}","RequiredTagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development", "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}","TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
                   - !Ref AWS::NoValue
               InputArtifacts:
+                - Name: DeployArtifact-CICD
                 - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
                 - !If
                   - CreateCloudFormationConfigurationArtifact
