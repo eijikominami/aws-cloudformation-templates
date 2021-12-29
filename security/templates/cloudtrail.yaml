@@ -101,6 +101,9 @@ Resources:
       CloudWatchLogsLogGroupArn: !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
       CloudWatchLogsRoleArn: !GetAtt IAMRoleForCloudTrail.Arn
       EnableLogFileValidation: true
+      InsightSelectors: 
+        - InsightType: ApiCallRateInsight
+        - InsightType: ApiErrorRateInsight
       EventSelectors:
         - DataResources: 
             # All S3 buckets

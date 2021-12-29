@@ -78,7 +78,6 @@ Conditions:
   CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
