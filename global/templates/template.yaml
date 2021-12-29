@@ -16,6 +16,7 @@ Metadata:
         Parameters: 
           - BillingAlertThreshold
           - BudgetName
+          - NotificationThreshold
       - Label: 
           default: 'CloudFront Alarm Configuration'
         Parameters: 
@@ -83,6 +84,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The name of the domain
+  NotificationThreshold:
+    Type: Number
+    Default: 10
+    Description: The dollar value that triggers a notification if the threshold is exceeded [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -159,6 +164,21 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
+  CostExplorer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        NotificationThreshold: !Ref NotificationThreshold
+        SNSForAlertArn: !Ref SNSForAlertArn
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/global/costexplorer.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/global/costexplorer.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   SNSForAlert:
     Type: AWS::Serverless::Application
     Properties:
