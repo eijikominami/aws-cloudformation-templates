@@ -48,6 +48,6 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| CanaryName | String | | ○ | The name for this canary. |
-| DomainName | String | | ○ | The domain name that hearbeat scripts watches. |
+| **CanaryName** | String | | ○ | The name for this canary. |
+| **DomainName** | String | | ○ | The domain name that hearbeat scripts watches. |
 | WatchedPagePath | String | /index.html | ○ | The page path that hearbeat scripts watches. |

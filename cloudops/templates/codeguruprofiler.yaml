@@ -24,15 +24,16 @@ Parameters:
   AgentPermission:
     Type: String
     AllowedPattern: .+
-    Description: The agent permissions attached to this profiling group.
+    Description: The agent permissions attached to this profiling group [required]
   ProfilingGroupName:
     Type: String
     Default: Default
     AllowedPattern: .+
-    Description: The name of the profiling group.        
+    Description: The name of the profiling group [required]   
   SNSForAlertArn:
     Type: String
     AllowedPattern: .+
+    Description: The ARN of an Amazon SNS topic [required] 
   TagKey:
     Type: String
     Default: createdby
@@ -43,6 +44,14 @@ Parameters:
     AllowedPattern: .+
 
 Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForCodeGuruProfiler:
+    Type: AWS::IAM::ServiceLinkedRole
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: codeguru-profiler.amazonaws.com
+      Description: The Service Linked Role is used by Amazon CodeGuru Profiler.
   CodeGuruProfiler:
     Type: AWS::CodeGuruProfiler::ProfilingGroup
     Properties:

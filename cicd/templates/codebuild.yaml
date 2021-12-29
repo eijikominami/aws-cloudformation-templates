@@ -47,11 +47,11 @@ Parameters:
   DestinationBucketNameForMasterBranch:
     Type: String
     AllowedPattern: .+
-    Description: The name of the bucket where Amazon S3 should store production artifacts. [required]  
+    Description: The name of the bucket where Amazon S3 should store production artifacts [required]  
   DestinationBucketNameForTargetBranch:
     Type: String
     AllowedPattern: .+
-    Description: The name of the bucket where Amazon S3 should store development artifacts. [required]  
+    Description: The name of the bucket where Amazon S3 should store development artifacts [required]  
   Image:
     Type: String
     Default: aws/codebuild/amazonlinux2-x86_64-standard:3.0
@@ -105,7 +105,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.22
+        SemanticVersion: 2.0.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -122,7 +122,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.22
+        SemanticVersion: 2.0.1
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -390,13 +390,16 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudWatch Alarm
   AlarmCodeBuildForMasterBranch:
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.22
+        SemanticVersion: 2.0.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -417,7 +420,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.22
+        SemanticVersion: 2.0.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -438,7 +441,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 1.3.22
+        SemanticVersion: 2.0.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

@@ -13,25 +13,27 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - LogicalNamePrefix
+          - Environment
           - TagKey
           - TagValue
 
 Parameters:
-  LogicalNamePrefix:
-    Type: String
-    Default: WebServers
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   Scope:
     Type: String
     Default: REGIONAL
     AllowedValues:
       - REGIONAL
       - CLOUDFRONT
-    Description: Enable or disable cross region audit [required]  
+    Description: Specifies whether this is for an Amazon CloudFront distribution or for a regional application [required]  
   TargetResourceArn:
     Type: String
     Default: ''
+    Description: The ARN of the resource to associate with the web ACL [required] 
+  LogicalNamePrefix:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

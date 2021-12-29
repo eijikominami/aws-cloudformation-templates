@@ -33,7 +33,8 @@ Metadata:
           - WebACL
       - Label: 
           default: 'Tag Configuration'
-        Parameters: 
+        Parameters:
+          - Environment
           - TagKey
           - TagValue
 
@@ -163,7 +164,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 1.3.22
+        SemanticVersion: 2.0.1
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -534,6 +535,9 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaTransferSNSTopic}
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # SNS
   SNSSubscription:
     Condition: CreateSNSForAlertTransfer
@@ -554,7 +558,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 1.3.22
+        SemanticVersion: 2.0.1
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

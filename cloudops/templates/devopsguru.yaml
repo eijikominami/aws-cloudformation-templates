@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationSamples/cloudops/devopsguru sets DevOpsGuru.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'DevOps Guru Configuration'
+        Parameters:
+          - SNSForAlertArn
+
+Parameters:
+  SNSForAlertArn:
+    Type: String
+    MinLength: 36
+    MaxLength: 1024
+    AllowedPattern: ^arn:aws[a-z0-9-]*:sns:[a-z0-9-]+:\d{12}:[^:]+$
+    Description: The ARN of an Amazon Simple Notification Service topic [required]
+
+Resources:
+  # Service-linked Role
+  ServiceLinkedRoleForDevOpsGuru:
+    Type: AWS::IAM::ServiceLinkedRole
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: devops-guru.amazonaws.com
+      Description: AWS service role used to execute actions on your behalf.
+  NotificationChannel:
+    Type: AWS::DevOpsGuru::NotificationChannel
+    Properties: 
+      Config: 
+        Sns: 
+          TopicArn: !Ref SNSForAlertArn

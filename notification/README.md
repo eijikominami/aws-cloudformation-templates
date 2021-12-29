@@ -15,8 +15,8 @@ English / [**日本語**](README_JP.md)
 │   └── chatbot.yaml                <-- CloudFormation Template
 └── sam-app
     ├── sendNotificationToSlack     <-- Source code for a lambda function
-    │   ├── lambda_function.py      <-- Lambda function code
-    │   └── requirements.txt        <-- List of items to be installed using pip install
+    │   ├── lambda_function.py      <-- Lambda function code
+    │   └── requirements.txt        <-- List of items to be installed using pip install
     ├── events.yaml                 <-- SAM Template
     ├── sns.yaml                    <-- SAM Template
     └── template.yaml               <-- SAM Template
