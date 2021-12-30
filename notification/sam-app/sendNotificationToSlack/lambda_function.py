@@ -90,6 +90,7 @@ def lambda_handler(event, context):
     except json.decoder.JSONDecodeError:
         logger.info("Message is NOT a JSON format.")
         return
+    transferMessage(event)
     # Sends Slack
     sendMessage(hook_url, slack_message)
 
@@ -553,6 +554,38 @@ def createAmplifyMessage(message):
                 ]
         }]
     }
+
+def transferMessage(event):
+
+    sns = boto3.client('sns')
+    for record in event['Records']:
+        
+        decoded_message = json.loads(record['Sns']['Message'])
+        if isinstance(decoded_message, dict):
+            # CloudWatch Alarm
+            if 'AlarmName' in decoded_message:
+                new_state = decoded_message['NewStateValue']
+                # OK
+                if new_state == "OK":
+                    decoded_message['NewStateReason'] = '*エラーから回復* しました。'
+                # NG
+                else:
+                    decoded_message['NewStateReason'] = decoded_message['AlarmDescription']
+        
+        if record['Sns']['Subject'] is None:
+            request = {
+                'TopicArn': os.environ['SNS_TOPIC_ARN'],
+                'Message': json.dumps(decoded_message)
+            }
+        else:
+            request = {
+                'TopicArn': os.environ['SNS_TOPIC_ARN'],
+                'Message': json.dumps(decoded_message),
+                'Subject': record['Sns']['Subject']
+            }
+        logger.structure_logs(append=True, sns_message_body=decoded_message)
+        logger.info("Transfered a message to a SNS topic.")          
+        sns.publish(**request)
 
 def sendMessage(hook_url, message):
     if hook_url is None or message is None:

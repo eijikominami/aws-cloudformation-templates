@@ -511,11 +511,17 @@ Resources:
             sns = boto3.client('sns',region_name=sns_topic_arn.split(':')[3])
             
             for record in event['Records']:
-              request = {
-                'TopicArn': '${SNSForAlertArn}',
-                'Message': record['Sns']['Message'],
-                'Subject': record['Sns']['Subject']
-              }
+              if record['Sns']['Subject'] is None:
+                  request = {
+                    'TopicArn': '${SNSForAlertArn}',
+                    'Message': record['Sns']['Message']
+                  }
+              else:
+                  request = {
+                      'TopicArn': '${SNSForAlertArn}',
+                      'Message': record['Sns']['Message'],
+                      'Subject': record['Sns']['Subject']
+                  }  
               sns.publish(**request)
       Description: SNSトピックを転送します。
       Environment:

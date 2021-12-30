@@ -42,5 +42,5 @@ Resources:
         - Address: !Ref SNSForAlertArn
           Status: CONFIRMED
           Type: SNS
-      SubscriptionName: String
+      SubscriptionName: !Ref AWS::StackName
       Threshold: !Ref NotificationThreshold
