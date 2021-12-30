@@ -587,6 +587,28 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  ChatbotForCICD:
+    Condition: CreateChatbotForCICD
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
+        LogicalNamePrefix: CICD
+        SlackWorkspaceId: !Ref SlackWorkspaceId
+        SlackChannelId: !Ref SlackChannelIdForDeployment
+        SNSArn: !If
+          - CreateSNSForCICD
+          - !GetAtt SNSForCICD.Outputs.SNSTopicArn
+          - !Ref SNSForCICDArn
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # CloudWatch Dashboard
   Dashboard:
     Type: AWS::CloudWatch::Dashboard

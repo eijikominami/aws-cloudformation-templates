@@ -1084,11 +1084,7 @@ Resources:
       EventTypeIds:
         # Action
         - codepipeline-pipeline-action-execution-failed
-        # Stage
-        - codepipeline-pipeline-stage-execution-started
         # Pipeline
-        - codepipeline-pipeline-pipeline-execution-started
-        - codepipeline-pipeline-pipeline-execution-succeeded
         - codepipeline-pipeline-pipeline-execution-failed
       Name: !Sub CICD-started-succeeded-${AWS::Region}
       Resource: !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}'

@@ -30,7 +30,6 @@ Resources:
     Properties: 
       MonitorDimension: SERVICE
       MonitorName: !Ref AWS::StackName
-      MonitorSpecification: String
       MonitorType: DIMENSIONAL
   AnomalySubscription:
     Condition: CreateAnomalyMonitor
