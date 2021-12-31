@@ -340,6 +340,21 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # CloudWatch Alarm for ACM
+  CloudWatchAlarmACM:
+    Condition: CreateACMCertificate
+    Type: AWS::Serverless::Application
+    Properties:
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        CertificateArn: !Ref CertificateManager
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
+        SemanticVersion: 2.0.1
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # Route53
   HostedZone:
     Condition: CreateRoute53
