@@ -192,7 +192,10 @@ Resources:
       Parameters:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
-        SNSForAlertArn: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -316,7 +319,6 @@ Resources:
                   - 'codeguru-profiler:ConfigureAgent'
                   - 'codeguru-profiler:PostAgentProfile'
                 Resource: '*'
-      Policies:
         - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
@@ -412,7 +414,10 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-          SNS_TOPIC_ARN: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
+          SNS_TOPIC_ARN: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
           AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
@@ -603,10 +608,7 @@ Resources:
         LogicalNamePrefix: Alert
         SlackWorkspaceId: !Ref SlackWorkspaceId
         SlackChannelId: !Ref SlackChannelIdForAlert
-        SNSArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
+        SNSArn: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
