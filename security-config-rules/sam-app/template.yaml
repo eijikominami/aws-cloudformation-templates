@@ -125,7 +125,6 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/service-role/AWSConfigRulesExecutionRole
-          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: CodeGuru
           PolicyDocument:
@@ -136,6 +135,15 @@ Resources:
                   - 'codeguru-profiler:ConfigureAgent'
                   - 'codeguru-profiler:PostAgentProfile'
                 Resource: '*'
+        - PolicyName: CloudWatchLambdaInsightsExecutionRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
         - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17

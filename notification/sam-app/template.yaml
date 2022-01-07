@@ -308,7 +308,6 @@ Resources:
       Description: A role required for Lambda to access X-Ray, KMS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: CodeGuru
           PolicyDocument:
@@ -319,6 +318,15 @@ Resources:
                   - 'codeguru-profiler:ConfigureAgent'
                   - 'codeguru-profiler:PostAgentProfile'
                 Resource: '*'
+        - PolicyName: CloudWatchLambdaInsightsExecutionRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
         - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
@@ -414,11 +422,7 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-          SNS_TOPIC_ARN: !If
-            - CreateSNSForAlert
-            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-            - !Ref SNSForAlertArn
-          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          SNS_TOPIC_ARN: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
