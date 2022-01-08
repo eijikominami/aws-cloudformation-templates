@@ -422,7 +422,6 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
-          SNS_TOPIC_ARN: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
@@ -471,7 +470,7 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  SNSSubscriptionForAlert:
+  SNSSubscriptionForAlertToSlack:
     Type: AWS::SNS::Subscription
     Properties: 
       Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
@@ -480,13 +479,13 @@ Resources:
         - CreateSNSForAlert
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
         - !Ref SNSForAlertArn
-  SNSSubscriptionForCICD:
+  SNSSubscriptionForCICDToSlack:
     Type: AWS::SNS::Subscription
     Properties: 
       Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
       Protocol: lambda
       TopicArn: !Ref SNSForCICDArn
-  SNSSubscriptionForDeployment:
+  SNSSubscriptionForDeploymentToSlack:
     Type: AWS::SNS::Subscription
     Properties: 
       Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
@@ -507,6 +506,77 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaSendNotificationToSlack
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
+        SemanticVersion: 2.0.4
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # Lambda
+  LambdaTransferNotificationToSNS:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: transferNotificationToSNS/
+      Description: SNSの内容を別のSNSに転送します。
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
+      Events:
+        SNSForAlert:
+          Properties:
+            Topic: !If
+              - CreateSNSForAlert
+              - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+              - !Ref SNSForAlertArn
+          Type: SNS
+      FunctionName: !Sub transferNotificationToSNS-createdby-${AWS::StackName}
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+      MemorySize: 512
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Timeout: 30
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  LogGroupForLambdaTransferNotificationToSNS:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub /aws/lambda/${LambdaTransferNotificationToSNS}
+      RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SNSSubscriptionForAlertToSNS:
+    Type: AWS::SNS::Subscription
+    Properties: 
+      Endpoint: !GetAtt LambdaTransferNotificationToSNS.Arn
+      Protocol: lambda
+      TopicArn: !If
+        - CreateSNSForAlert
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        - !Ref SNSForAlertArn
+  # CloudWatch Alarm for Lambda
+  AlarmLambdaTransferNotificationToSNS:
+    Type: AWS::Serverless::Application
+    Properties:
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        MetricFilterPattern: ''
+        FunctionResouceName: !Ref LambdaTransferNotificationToSNS
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

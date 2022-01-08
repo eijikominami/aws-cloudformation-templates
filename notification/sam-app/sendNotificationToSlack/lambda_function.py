@@ -25,8 +25,6 @@ def lambda_handler(event, context):
         # The base-64 encoded, encrypted key (CiphertextBlob) stored in the HOOK_URL and DEPLOYMENT_HOOK_URL environment variable
         ALERT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(ALERT_HOOK_URL))['Plaintext'].decode('utf-8')
         DEPLOYMENT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(DEPLOYMENT_HOOK_URL))['Plaintext'].decode('utf-8')
-    # Transfers sns message.
-    transferMessage(event)
     # Sends Slack
     sendMessage(event, ALERT_HOOK_URL, DEPLOYMENT_HOOK_URL)
 
@@ -490,38 +488,6 @@ def createAmplifyMessage(message):
                 ]
         }]
     }
-
-def transferMessage(event):
-
-    sns = boto3.client('sns')
-    for record in event['Records']:
-        
-        decoded_message = json.loads(record['Sns']['Message'])
-        if isinstance(decoded_message, dict):
-            # CloudWatch Alarm
-            if 'AlarmName' in decoded_message:
-                new_state = decoded_message['NewStateValue']
-                # OK
-                if new_state == "OK":
-                    decoded_message['NewStateReason'] = '*エラーから回復* しました。'
-                # NG
-                else:
-                    decoded_message['NewStateReason'] = decoded_message['AlarmDescription']
-        
-        if record['Sns']['Subject'] is None:
-            request = {
-                'TopicArn': os.environ['SNS_TOPIC_ARN'],
-                'Message': json.dumps(decoded_message)
-            }
-        else:
-            request = {
-                'TopicArn': os.environ['SNS_TOPIC_ARN'],
-                'Message': json.dumps(decoded_message),
-                'Subject': record['Sns']['Subject']
-            }
-        logger.structure_logs(append=True, sns_message_body=decoded_message)
-        logger.info("Transfered a message to a SNS topic.")          
-        sns.publish(**request)
 
 def sendMessage(event, alert_hook_url, deployment_hook_url):
     
