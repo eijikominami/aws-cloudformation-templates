@@ -25,73 +25,8 @@ def lambda_handler(event, context):
         # The base-64 encoded, encrypted key (CiphertextBlob) stored in the HOOK_URL and DEPLOYMENT_HOOK_URL environment variable
         ALERT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(ALERT_HOOK_URL))['Plaintext'].decode('utf-8')
         DEPLOYMENT_HOOK_URL = boto3.client('kms').decrypt(CiphertextBlob=base64.b64decode(DEPLOYMENT_HOOK_URL))['Plaintext'].decode('utf-8')
-    # Variable declaration
-    hook_url = None
-    slack_message = None
-    try:
-        message = json.loads(event['Records'][0]['Sns']['Message'])
-        logger.structure_logs(append=True, sns_message_body=message)
-        logger.structure_logs(append=True, sns_message_type=type(message).__name__)
-        logger.structure_logs(append=True, sns_message_length=str(len(message)))
-        logger.info("Analyzing the received message.")
-        if isinstance(message, dict):
-            # CloudWatch Alarm
-            if 'AlarmName' in message:
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createCloudWatchAlarmMessage(message)
-            # Scheduled Event
-            elif 'source' in message and 'aws.events' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createScheduledEventMessage(message)    
-            # EC2
-            # EBS  
-            elif 'source' in message and 'aws.ec2' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createEC2Message(message)  
-            # AutoScaling   
-            elif 'source' in message and 'aws.autoscaling' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createAutoScalingMessage(message)   
-            # KMS
-            elif 'source' in message and 'aws.kms' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createKMSMessage(message) 
-            # Sign-in
-            elif 'source' in message and 'aws.signin' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createManagementConsoleMessage(message)    
-            # MediaLive
-            elif 'source' in message and 'aws.medialive' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createMediaLiveMessage(message) 
-            # MGN
-            elif 'source' in message and 'aws.mgn' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createMGNMessage(message)   
-            # Tag
-            elif 'source' in message and 'aws.tag' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createTagMessage(message)          
-            # TrustedAdvisor
-            elif 'source' in message and 'aws.trustedadvisor' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createTrustedAdvisorMessage(message)      
-            # IAM Access Analyzer
-            elif 'source' in message and 'aws.access-analyzer' in message['source']:  
-                hook_url = "https://" + ALERT_HOOK_URL
-                slack_message = createIAMAccessAnalyzerMessage(message)
-            # Amplify Console
-            elif 'source' in message and 'aws.amplify' in message['source']:  
-                hook_url = "https://" + DEPLOYMENT_HOOK_URL
-                slack_message = createAmplifyMessage(message)
-            else:
-                hook_url = None
-                slack_message = None                           
-    except json.decoder.JSONDecodeError:
-        logger.info("Message is NOT a JSON format.")
-        return
     # Sends Slack
-    sendMessage(hook_url, slack_message)
+    sendMessage(event, ALERT_HOOK_URL, DEPLOYMENT_HOOK_URL)
 
 def createCloudWatchAlarmMessage(message):
 
@@ -554,21 +489,75 @@ def createAmplifyMessage(message):
         }]
     }
 
-def sendMessage(hook_url, message):
-    if hook_url is None or message is None:
-        logger.warning("Hook url or message is empty.")
-        return False
-    else:
-        req = Request(hook_url, json.dumps(message).encode('utf-8'))
+def sendMessage(event, alert_hook_url, deployment_hook_url):
+    
+    for record in event['Records']:
+        
+        hook_url = alert_hook_url
+        slack_message = None
+        
         try:
-            logger.structure_logs(append=True, slack_hook_url=hook_url)
-            logger.info("Posted a message to the Slack.")
-            response = urlopen(req)
-            response.read()
-            return True
-        except HTTPError:
-            logger.exception("Received an exception in %s.", sys._getframe().f_code.co_name)
-            return False
-        except URLError:
-            logger.exception("Received an exception in %s.", sys._getframe().f_code.co_name)
-            return False   
+            message = json.loads(record['Sns']['Message'])
+            logger.structure_logs(append=True, sns_message_body=message)
+            logger.structure_logs(append=True, sns_message_type=type(message).__name__)
+            logger.structure_logs(append=True, sns_message_length=str(len(message)))
+            logger.info("Analyzing the received message.")
+            # Creates body
+            if isinstance(message, dict):
+                # CloudWatch Alarm
+                if 'AlarmName' in message:
+                    slack_message = createCloudWatchAlarmMessage(message)
+                # Scheduled Event
+                elif 'source' in message and 'aws.events' in message['source']:  
+                    slack_message = createScheduledEventMessage(message)    
+                # EC2
+                # EBS  
+                elif 'source' in message and 'aws.ec2' in message['source']:  
+                    slack_message = createEC2Message(message)  
+                # AutoScaling   
+                elif 'source' in message and 'aws.autoscaling' in message['source']:  
+                    slack_message = createAutoScalingMessage(message)   
+                # KMS
+                elif 'source' in message and 'aws.kms' in message['source']:  
+                    slack_message = createKMSMessage(message) 
+                # Sign-in
+                elif 'source' in message and 'aws.signin' in message['source']:  
+                    slack_message = createManagementConsoleMessage(message)    
+                # MediaLive
+                elif 'source' in message and 'aws.medialive' in message['source']:  
+                    slack_message = createMediaLiveMessage(message) 
+                # MGN
+                elif 'source' in message and 'aws.mgn' in message['source']:  
+                    slack_message = createMGNMessage(message)   
+                # Tag
+                elif 'source' in message and 'aws.tag' in message['source']:  
+                    slack_message = createTagMessage(message)          
+                # TrustedAdvisor
+                elif 'source' in message and 'aws.trustedadvisor' in message['source']:  
+                    slack_message = createTrustedAdvisorMessage(message)      
+                # IAM Access Analyzer
+                elif 'source' in message and 'aws.access-analyzer' in message['source']:  
+                    slack_message = createIAMAccessAnalyzerMessage(message)
+                # Amplify Console
+                elif 'source' in message and 'aws.amplify' in message['source']:  
+                    hook_url = deployment_hook_url
+                    slack_message = createAmplifyMessage(message)
+                else:
+                    hook_url = None
+                    slack_message = None
+            # Sends message
+            if not hook_url or slack_message is None:
+                logger.info("Hook url or message is empty.")
+            else:
+                req = Request("https://" + hook_url, json.dumps(slack_message).encode('utf-8'))
+                try:
+                    logger.structure_logs(append=True, slack_hook_url=hook_url)
+                    logger.info("Posted a message to the Slack.")
+                    response = urlopen(req)
+                    response.read()
+                except HTTPError:
+                    logger.exception("Received an exception in %s.", sys._getframe().f_code.co_name)
+                except URLError:
+                    logger.exception("Received an exception in %s.", sys._getframe().f_code.co_name)                                    
+        except json.decoder.JSONDecodeError:
+            logger.info("Message is NOT a JSON format.")

@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationSamples/cloudops/costexplorer configures Cost Explorer.
+
+Parameters:
+  Frequency:
+    Type: String
+    Default: IMMEDIATE
+    AllowedValues:
+      - DAILY
+      - IMMEDIATE
+      - WEEKLY
+    Description: The frequency that anomaly reports are sent over email [required]
+  NotificationThreshold:
+    Type: Number
+    Default: 10
+    Description: The dollar value that triggers a notification if the threshold is exceeded [required]
+  SNSForAlertArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The ARN of an Amazon SNS topic [required] 
+
+Conditions:
+  CreateAnomalyMonitor: !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
+
+Resources:
+  AnomalyMonitor:
+    Condition: CreateAnomalyMonitor
+    Type: AWS::CE::AnomalyMonitor
+    Properties: 
+      MonitorDimension: SERVICE
+      MonitorName: !Ref AWS::StackName
+      MonitorType: DIMENSIONAL
+  AnomalySubscription:
+    Condition: CreateAnomalyMonitor
+    Type: AWS::CE::AnomalySubscription
+    Properties: 
+      Frequency: !Ref Frequency
+      MonitorArnList: 
+        - !GetAtt AnomalyMonitor.MonitorArn
+      Subscribers: 
+        - Address: !Ref SNSForAlertArn
+          Status: CONFIRMED
+          Type: SNS
+      SubscriptionName: !Ref AWS::StackName
+      Threshold: !Ref NotificationThreshold

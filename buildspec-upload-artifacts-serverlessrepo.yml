@@ -15,6 +15,7 @@ phases:
       - echo $SEMANTIC_VERSION
   build:
     commands:
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-acm --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/acm.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-apigateway --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/apigateway.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-codebuild --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/codebuild.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb-throttle --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml --region us-east-1
@@ -28,11 +29,14 @@ phases:
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-medialive --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/medialive.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-natgateway --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/natgateway.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-sns --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/sns.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ssm-command --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/ssm-command.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/sns-topic --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/notification/sns.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/eventbridge-rules --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/notification/events.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/delete-resources-without-required-tags --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/security-config-rules/packaged.yaml --region us-east-1
   post_build:
     commands:
+      - aws s3 cp monitoring/cloudwatch-alarm-about-acm.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-acm --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-acm.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-apigateway.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-apigateway --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-apigateway.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-codebuild.md s3://${BUCKET_NAME}/readme/
@@ -59,6 +63,8 @@ phases:
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-medialive --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-medialive.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-sns.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-sns --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-sns.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-ssm-command.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ssm-command --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-ssm-command.md --region us-east-1
       - aws s3 cp notification/eventbridge-rules.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/eventbridge-rules --readme-url s3://${BUCKET_NAME}/readme/eventbridge-rules.md --region us-east-1
       - aws s3 cp notification/sns-topic.md s3://${BUCKET_NAME}/readme/

@@ -16,6 +16,7 @@ Metadata:
         Parameters: 
           - BillingAlertThreshold
           - BudgetName
+          - NotificationThreshold
       - Label: 
           default: 'CloudFront Alarm Configuration'
         Parameters: 
@@ -83,6 +84,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The name of the domain
+  NotificationThreshold:
+    Type: Number
+    Default: 10
+    Description: The dollar value that triggers a notification if the threshold is exceeded [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -159,12 +164,27 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
+  CostExplorer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        NotificationThreshold: !Ref NotificationThreshold
+        SNSForAlertArn: !Ref SNSForAlertArn
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/global/costexplorer.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/global/costexplorer.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   SNSForAlert:
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -320,6 +340,21 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # CloudWatch Alarm for ACM
+  CloudWatchAlarmACM:
+    Condition: CreateACMCertificate
+    Type: AWS::Serverless::Application
+    Properties:
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        CertificateArn: !Ref CertificateManager
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
+        SemanticVersion: 2.0.5
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # Route53
   HostedZone:
     Condition: CreateRoute53
@@ -491,11 +526,17 @@ Resources:
             sns = boto3.client('sns',region_name=sns_topic_arn.split(':')[3])
             
             for record in event['Records']:
-              request = {
-                'TopicArn': '${SNSForAlertArn}',
-                'Message': record['Sns']['Message'],
-                'Subject': record['Sns']['Subject']
-              }
+              if record['Sns']['Subject'] is None:
+                  request = {
+                    'TopicArn': '${SNSForAlertArn}',
+                    'Message': record['Sns']['Message']
+                  }
+              else:
+                  request = {
+                      'TopicArn': '${SNSForAlertArn}',
+                      'Message': record['Sns']['Message'],
+                      'Subject': record['Sns']['Subject']
+                  }  
               sns.publish(**request)
       Description: SNSトピックを転送します。
       Environment:
@@ -558,7 +599,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for AWS Certificate Manager
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  CertificateArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The Certificate ARN [required]    
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  CertificateManagerDaysToExpiry30Days:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り30日以下です。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Notice-${CustomAlarmName}-CertificateManager-DaysToExpiry-30'
+        - !Sub Notice-CertificateManager-DaysToExpiry-30
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Dimensions:
+        - Name: CertificateArn
+          Value: !Ref CertificateArn
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: DaysToExpiry
+      Namespace: AWS/CertificateManager
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 30
+      TreatMissingData: notBreaching
+  CertificateManagerDaysToExpiry7Days:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り7日以下です。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-7'
+        - !Sub Warning-CertificateManager-DaysToExpiry-7
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Dimensions:
+        - Name: CertificateArn
+          Value: !Ref CertificateArn
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: DaysToExpiry
+      Namespace: AWS/CertificateManager
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 7
+      TreatMissingData: notBreaching
+  CertificateManagerDaysToExpiry1Day:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り1日以下です。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub 'Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-1'
+        - !Sub Warning-CertificateManager-DaysToExpiry-1
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Dimensions:
+        - Name: CertificateArn
+          Value: !Ref CertificateArn
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: DaysToExpiry
+      Namespace: AWS/CertificateManager
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching

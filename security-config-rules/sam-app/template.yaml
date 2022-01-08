@@ -78,7 +78,6 @@ Conditions:
   CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
@@ -88,7 +87,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -105,7 +104,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -126,7 +125,6 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/service-role/AWSConfigRulesExecutionRole
-          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: CodeGuru
           PolicyDocument:
@@ -137,6 +135,15 @@ Resources:
                   - 'codeguru-profiler:ConfigureAgent'
                   - 'codeguru-profiler:PostAgentProfile'
                 Resource: '*'
+        - PolicyName: CloudWatchLambdaInsightsExecutionRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
         - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17

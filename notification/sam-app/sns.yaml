@@ -33,7 +33,7 @@ Resources:
               StringEquals:
                 aws:SourceOwner: !Ref AWS::AccountId
             Resource: !Ref SNSTopic
-            Action: 'SNS:Publish'
+            Action: 'sns:Publish'
           - Sid: From-AWS-Services
             Effect: Allow
             Principal:
@@ -42,7 +42,7 @@ Resources:
                 - events.amazonaws.com
                 - codestar-notifications.amazonaws.com
             Resource: !Ref SNSTopic
-            Action: 'SNS:Publish'
+            Action: 'sns:Publish'
   CloudWatchAlarmSNSNumberOfNotificationsFailed:
     Type: AWS::CloudWatch::Alarm
     Properties:

@@ -26,6 +26,7 @@ Metadata:
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
+          - SNSForCICDArn
           - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
@@ -73,6 +74,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The Amazon SNS topic ARN for alert
+  SNSForCICDArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for CI/CD information
   SNSForDeploymentArn:
     Type: String
     Default: '' 
@@ -95,6 +100,7 @@ Parameters:
 
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForCICD: !Equals [ !Ref SNSForCICDArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
 Resources:
@@ -105,7 +111,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -116,13 +122,30 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  SNSForCICD:
+    Condition: CreateSNSForCICD
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.5
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub CICD-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -399,7 +422,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -420,7 +443,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -441,7 +464,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.1
+        SemanticVersion: 2.0.5
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -467,19 +490,15 @@ Resources:
       EventTypeIds:
         # Build state
         - codebuild-project-build-state-failed
-        - codebuild-project-build-state-succeeded
-        - codebuild-project-build-state-in-progress
-        - codebuild-project-build-state-stopped
         # Build state
         - codebuild-project-build-phase-failure
-        - codebuild-project-build-phase-success
       Name: !Sub UploadArtifacts-started-succeeded-${AWS::Region}-master
       Resource: !GetAtt CodeBuildForMasterBranch.Arn
       Targets: 
         - TargetAddress: !If
-            - CreateSNSForDeployment
-            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-            - !Ref SNSForDeploymentArn
+            - CreateSNSForCICD
+            - !GetAtt SNSForCICD.Outputs.SNSTopicArn
+            - !Ref SNSForCICDArn
           TargetType: SNS
       Tags:
         environment: !Ref Environment
@@ -493,19 +512,15 @@ Resources:
       EventTypeIds:
         # Build state
         - codebuild-project-build-state-failed
-        - codebuild-project-build-state-succeeded
-        - codebuild-project-build-state-in-progress
-        - codebuild-project-build-state-stopped
         # Build state
         - codebuild-project-build-phase-failure
-        - codebuild-project-build-phase-success
       Name: !Sub UploadArtifacts-started-succeeded-${AWS::Region}-${GitHubBranchName}
       Resource: !GetAtt CodeBuildForTargetBranch.Arn
       Targets: 
         - TargetAddress: !If
-            - CreateSNSForDeployment
-            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-            - !Ref SNSForDeploymentArn
+            - CreateSNSForCICD
+            - !GetAtt SNSForCICD.Outputs.SNSTopicArn
+            - !Ref SNSForCICDArn
           TargetType: SNS
       Tags:
         environment: !Ref Environment
@@ -519,19 +534,15 @@ Resources:
       EventTypeIds:
         # Build state
         - codebuild-project-build-state-failed
-        - codebuild-project-build-state-succeeded
-        - codebuild-project-build-state-in-progress
-        - codebuild-project-build-state-stopped
         # Build state
         - codebuild-project-build-phase-failure
-        - codebuild-project-build-phase-success
       Name: !Sub UploadArtifacts-started-succeeded-${AWS::Region}-Tags
       Resource: !GetAtt CodeBuildForTags.Arn
       Targets: 
         - TargetAddress: !If
-            - CreateSNSForDeployment
-            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-            - !Ref SNSForDeploymentArn
+            - CreateSNSForCICD
+            - !GetAtt SNSForCICD.Outputs.SNSTopicArn
+            - !Ref SNSForCICDArn
           TargetType: SNS
       Tags:
         environment: !Ref Environment
