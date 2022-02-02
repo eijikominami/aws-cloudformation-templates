@@ -44,6 +44,7 @@ Metadata:
           - LogicalNamePrefix
           - Environment
           - AutoInputFailover
+          - TagKey
           - TagValue
 
 Parameters:
@@ -217,6 +218,7 @@ Parameters:
 Conditions:
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
+  CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
   CreateDestinationForRTMP: !Equals [ !Ref OutputType, RTMP] 
   CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
@@ -338,7 +340,7 @@ Resources:
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForMediaStore
-          - Id: !Sub ${LogicalNamePrefix}-for-MediaStore
+          - Id: !Sub ${LogicalNamePrefix}-for-HLS
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
@@ -362,15 +364,15 @@ Resources:
           - !Ref AWS::NoValue
         - !If 
           - CreateDestinationForS3
-          - Id: !Sub ${LogicalNamePrefix}-for-S3
+          - Id: !Sub ${LogicalNamePrefix}-for-HLS
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-a/
+                  Url: !Sub s3ssl://${HlsBucket}/live-a
                 - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-a/
+                  Url: !Sub s3ssl://${HlsBucket}/live-a
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-b/
+                  Url: !Sub s3ssl://${HlsBucket}/live-b
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForArchive
@@ -440,23 +442,26 @@ Resources:
                   VideoDescriptionName: !Sub video_${Width}_${Height}
             - !Ref AWS::NoValue
           - !If 
-            - CreateDestinationForMediaStore
-            - Name: MediaStore
+            - CreateDestinationForMediaStoreOrS3
+            - Name: HLS
               OutputGroupSettings: 
                 HlsGroupSettings: 
                   CaptionLanguageSetting: OMIT
                   CodecSpecification: RFC_4281
                   Destination: 
-                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-MediaStore
+                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-HLS
                   DirectoryStructure: SINGLE_DIRECTORY
                   DiscontinuityTags: INSERT
-                  HlsCdnSettings: 
-                    HlsMediaStoreSettings: 
-                      ConnectionRetryInterval: 1
-                      FilecacheDuration: 300
-                      MediaStoreStorageClass: TEMPORAL
-                      NumRetries: 10
-                      RestartDelay: 15
+                  HlsCdnSettings: !If 
+                    - CreateDestinationForMediaStore
+                    - HlsMediaStoreSettings: 
+                        ConnectionRetryInterval: 1
+                        FilecacheDuration: 300
+                        MediaStoreStorageClass: TEMPORAL
+                        NumRetries: 10
+                        RestartDelay: 15
+                    - HlsS3Settings:
+                        CannedAcl: BUCKET_OWNER_FULL_CONTROL
                   HlsId3SegmentTagging: DISABLED
                   IFrameOnlyPlaylists: DISABLED
                   IncompleteSegmentBehavior: AUTO
@@ -482,7 +487,7 @@ Resources:
               Outputs:
                 - AudioDescriptionNames: 
                     - !Sub audio_2_aac${AudioBitrate}
-                  OutputName: !Sub mediastore_${Width}x${Height}_${VideoBitrate}
+                  OutputName: !Sub hls_${Width}x${Height}_${VideoBitrate}
                   OutputSettings: 
                     HlsOutputSettings:
                       H265PackagingType: HVC1
