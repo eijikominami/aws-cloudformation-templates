@@ -53,6 +53,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | H264Profile | String | HIGH | ○ | H.264プロファイル |
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264レベル |
 | Height | Number | 540 | ○ | ビデオの高さ（px）|
+| HlsBucket | String | | | HLSファイルの送信バケット名 |
 | MediaPackageChannelId | String | | | MediaPackage のチャネルID |
 | MediaStoreEndpoint | String | | | MediaStore のエンドポイントURL |
 | LiveSource | ENABLED or DISABLED | ENABLED | ○ | ライブソースを使用するかどうか |

@@ -102,6 +102,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFrontMaximumTTL |  Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | |
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
+| HlsBucket | String | | | HLSファイルの送信バケット名 |
 | CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |

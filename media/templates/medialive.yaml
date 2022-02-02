@@ -19,6 +19,7 @@ Metadata:
           - H264Profile
           - H264Level
           - Height
+          - HlsBucket
           - MediaPackageChannelId
           - MediaStoreEndpoint
           - LiveSource
@@ -121,6 +122,10 @@ Parameters:
     Type: Number
     Default: 540
     Description: Output video height, in pixels [required]
+  HlsBucket:
+    Type: String
+    Default: ''
+    Description: The S3 bucket Name HLS files are sent [conditional]
   MediaPackageChannelId:
     Type: String
     Default: ''
@@ -142,6 +147,7 @@ Parameters:
       - MEDIA_PACKAGE
       - MEDIA_STORE
       - RTMP
+      - S3
     Default: RTMP
     Description: Output type [required]
   RtmpUrl1:
@@ -210,8 +216,9 @@ Parameters:
 
 Conditions:
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
-  CreateDestinationForRTMP: !Equals [ !Ref OutputType, RTMP] 
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
+  CreateDestinationForRTMP: !Equals [ !Ref OutputType, RTMP] 
+  CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
@@ -230,7 +237,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.5
+        SemanticVersion: 2.0.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -247,7 +254,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.5
+        SemanticVersion: 2.0.6
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -330,6 +337,18 @@ Resources:
               - ChannelId: !Ref MediaPackageChannelId
           - !Ref AWS::NoValue
         - !If
+          - CreateDestinationForMediaStore
+          - Id: !Sub ${LogicalNamePrefix}-for-MediaStore
+            Settings: !If
+              - CreateTwoPipelines
+              - - StreamName: ''
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-a/main
+                - StreamName: ''
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-b/main
+              - - StreamName: ''
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live/main
+          - !Ref AWS::NoValue
+        - !If
           - CreateDestinationForRTMP
           - Id: !Sub ${LogicalNamePrefix}-for-RTMP
             Settings: !If
@@ -341,17 +360,17 @@ Resources:
               - - StreamName: !Ref RtmpStreamKey1
                   Url: !Ref RtmpUrl1
           - !Ref AWS::NoValue
-        - !If
-          - CreateDestinationForMediaStore
-          - Id: !Sub ${LogicalNamePrefix}-for-MediaStore
+        - !If 
+          - CreateDestinationForS3
+          - Id: !Sub ${LogicalNamePrefix}-for-S3
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
-                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-a/main
+                  Url: !Sub s3ssl://${HlsBucket}/live-a/
                 - StreamName: ''
-                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-b/main
+                  Url: !Sub s3ssl://${HlsBucket}/live-a/
               - - StreamName: ''
-                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live/main
+                  Url: !Sub s3ssl://${HlsBucket}/live-b/
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForArchive
@@ -717,7 +736,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.5
+        SemanticVersion: 2.0.6
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -741,7 +760,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.5
+        SemanticVersion: 2.0.6
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

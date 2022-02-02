@@ -15,6 +15,7 @@ Metadata:
           - CloudFrontViewerProtocolPolicy
           - CloudFrontDefaultRootObject
           - CloudFrontAdditionalName
+          - CloudFrontOriginShield
           - CloudFrontSecondaryOriginId
           - CloudFrontRestrictViewerAccess
           - CloudFront403ErrorResponsePagePath
@@ -104,6 +105,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The CNAME attached to CloudFront
+  CloudFrontOriginShield:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+    Description: A flag that specifies whether Origin Shield is enabled [required]
   CloudFrontSecondaryOriginId:
     Type: String
     Default: ''
@@ -371,6 +379,7 @@ Resources:
         CloudFrontAdditionalName: !Ref CloudFrontAdditionalName
         CloudFrontOriginAccessIdentity: !Ref CloudFrontOriginAccessIdentity
         CloudFrontOriginDomainName: !GetAtt S3ForWebHosting.DomainName
+        CloudFrontOriginShield: !Ref CloudFrontOriginShield
         CloudFrontOriginType: S3
         CloudFrontSecondaryOriginId: !Ref CloudFrontSecondaryOriginId
         CloudFrontRestrictViewerAccess: !Ref CloudFrontRestrictViewerAccess
@@ -448,7 +457,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.5
+        SemanticVersion: 2.0.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -465,7 +474,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.5
+        SemanticVersion: 2.0.6
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

@@ -43,6 +43,7 @@ This template creates ``CloudFront`` distribution.
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontOriginAccessIdentity | String | | conditional | The origin access identity |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
+| CloudFrontOriginShield | true or false | false | ○ | A flag that specifies whether Origin Shield is enabled |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Restrict Viewer Access |
 | CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
