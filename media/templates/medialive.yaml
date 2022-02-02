@@ -368,11 +368,11 @@ Resources:
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-a/
+                  Url: !Sub s3ssl://${HlsBucket}/live-a
                 - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-a/
+                  Url: !Sub s3ssl://${HlsBucket}/live-a
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-b/
+                  Url: !Sub s3ssl://${HlsBucket}/live-b
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForArchive
