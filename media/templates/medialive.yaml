@@ -461,7 +461,7 @@ Resources:
                         NumRetries: 10
                         RestartDelay: 15
                     - HlsS3Settings:
-                        CannedAcl: none
+                        CannedAcl: BUCKET_OWNER_FULL_CONTROL
                   HlsId3SegmentTagging: DISABLED
                   IFrameOnlyPlaylists: DISABLED
                   IncompleteSegmentBehavior: AUTO
