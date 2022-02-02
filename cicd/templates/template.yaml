@@ -270,7 +270,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
                 Effect: Allow
-      RoleName: !Sub '${AWS::StackName}-CodeBuild-${AWS::Region}'
+      RoleName: !Sub 'CICD-CodeBuild-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If
@@ -300,7 +300,7 @@ Resources:
                 Resource:
                   - !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}'
                 Effect: Allow
-      RoleName: !Sub '${AWS::StackName}-EventBridge-${AWS::Region}'
+      RoleName: !Sub 'CICD-EventBridge-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If
@@ -446,7 +446,7 @@ Resources:
                   - ecr:DescribeImages
                 Resource: '*'
                 Effect: Allow
-      RoleName: !Sub '${AWS::StackName}-CodePipeline-${AWS::Region}'
+      RoleName: !Sub 'CICD-CodePipeline-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If
@@ -468,7 +468,7 @@ Resources:
       Description: A role required for CloudFormation to access related resources.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
-      RoleName: !Sub '${AWS::StackName}-CloudFormation-${AWS::Region}'
+      RoleName: !Sub 'CICD-CFn-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If

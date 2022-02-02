@@ -47,10 +47,13 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | [運用の可用性に関する設定](/cloudops/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/template.yaml) |
 | [Slackへの通知](/notification/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
 | [Amplifyを用いたCI/CD環境を構築](/amplify/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Amplify&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/amplify/template.yaml) |
-| [エッジサービスの設定](/edge/README_JP.md) | | |
-| [ネットワークの設定](/network/README_JP.md) | | |
-| [**Media Services の設定**](/media/README_JP.md) | | |
-| [CloudWatch アラームの設定](/monitoring/README_JP.md) | | |
+
+本プロジェクトには、以下のサブモジュールも含まれます。
+
++ [エッジサービスの設定](/edge/README_JP.md)
++ [ネットワークの設定](/network/README_JP.md)
++ [**Media Services の設定**](/media/README_JP.md)
++ [CloudWatch アラームの設定](/monitoring/README_JP.md)
 
 ## アーキテクチャ
 
