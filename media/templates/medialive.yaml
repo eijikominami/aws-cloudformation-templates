@@ -460,7 +460,8 @@ Resources:
                         MediaStoreStorageClass: TEMPORAL
                         NumRetries: 10
                         RestartDelay: 15
-                    - !Ref AWS::NoValue
+                    - HlsS3Settings:
+                        CannedAcl: none
                   HlsId3SegmentTagging: DISABLED
                   IFrameOnlyPlaylists: DISABLED
                   IncompleteSegmentBehavior: AUTO
