@@ -43,6 +43,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontOriginAccessIdentity | String | | conditional | The origin access identity |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
+| CloudFrontOriginShield | true or false | false | ○ | Origin Shield 有効化フラグ |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
 | CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |

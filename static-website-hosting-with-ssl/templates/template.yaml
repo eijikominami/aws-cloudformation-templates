@@ -15,6 +15,7 @@ Metadata:
           - CloudFrontViewerProtocolPolicy
           - CloudFrontDefaultRootObject
           - CloudFrontAdditionalName
+          - CloudFrontOriginShield
           - CloudFrontSecondaryOriginId
           - CloudFrontRestrictViewerAccess
           - CloudFront403ErrorResponsePagePath
@@ -104,6 +105,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The CNAME attached to CloudFront
+  CloudFrontOriginShield:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+    Description: A flag that specifies whether Origin Shield is enabled [required]
   CloudFrontSecondaryOriginId:
     Type: String
     Default: ''
@@ -371,6 +379,7 @@ Resources:
         CloudFrontAdditionalName: !Ref CloudFrontAdditionalName
         CloudFrontOriginAccessIdentity: !Ref CloudFrontOriginAccessIdentity
         CloudFrontOriginDomainName: !GetAtt S3ForWebHosting.DomainName
+        CloudFrontOriginShield: !Ref CloudFrontOriginShield
         CloudFrontOriginType: S3
         CloudFrontSecondaryOriginId: !Ref CloudFrontSecondaryOriginId
         CloudFrontRestrictViewerAccess: !Ref CloudFrontRestrictViewerAccess

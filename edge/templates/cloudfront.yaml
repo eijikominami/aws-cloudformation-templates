@@ -17,6 +17,7 @@ Metadata:
           - CloudFrontAdditionalName
           - CloudFrontOriginAccessIdentity
           - CloudFrontOriginDomainName
+          - CloudFrontOriginShield
           - CloudFrontOriginType
           - CloudFrontSecondaryOriginId
           - CloudFrontRestrictViewerAccess
@@ -111,6 +112,13 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The origin domain [required]
+  CloudFrontOriginShield:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+    Description: A flag that specifies whether Origin Shield is enabled [required]
   CloudFrontOriginType:
     Type: String
     Default: S3
@@ -505,6 +513,9 @@ Resources:
             - SingleOrigin
             - - DomainName: !Ref CloudFrontOriginDomainName
                 Id: !Ref CloudFrontOriginDomainName
+                OriginShield: 
+                  Enabled: !Ref CloudFrontOriginShield
+                  OriginShieldRegion: !Ref AWS::Region
                 S3OriginConfig:
                   OriginAccessIdentity: !Join
                    - ''
@@ -512,6 +523,9 @@ Resources:
                      - !Ref CloudFrontOriginAccessIdentity
             - - DomainName: !Ref CloudFrontOriginDomainName
                 Id: !Ref CloudFrontOriginDomainName
+                OriginShield: 
+                  Enabled: !Ref CloudFrontOriginShield
+                  OriginShieldRegion: !Ref AWS::Region
                 S3OriginConfig:
                   OriginAccessIdentity: !Join
                   - ''
@@ -519,6 +533,9 @@ Resources:
                     - !Ref CloudFrontOriginAccessIdentity
               - DomainName: !Sub ${CloudFrontSecondaryOriginId}.s3.amazonaws.com
                 Id: !Ref CloudFrontSecondaryOriginId
+                OriginShield: 
+                  Enabled: !Ref CloudFrontOriginShield
+                  OriginShieldRegion: !Ref AWS::Region
                 S3OriginConfig:
                   OriginAccessIdentity: !Join
                   - ''
@@ -538,6 +555,9 @@ Resources:
                 - - HeaderName: User-Agent
                     HeaderValue: !Ref UserAgent
                 - !Ref AWS::NoValue
+              OriginShield: 
+                Enabled: !Ref CloudFrontOriginShield
+                OriginShieldRegion: !Ref AWS::Region
         ViewerCertificate: !If
           - BundleSSLCertification
           - AcmCertificateArn: !Ref CertificateManagerARN

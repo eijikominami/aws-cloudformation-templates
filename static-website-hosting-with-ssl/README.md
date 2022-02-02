@@ -104,6 +104,7 @@ You can provide optional parameters as follows.
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | CloudFront Viewer Protocol Policy |
 | CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront**. |
+| CloudFrontOriginShield | true or false | false | ○ | A flag that specifies whether Origin Shield is enabled |
 | CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Restrict Viewer Access |
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |

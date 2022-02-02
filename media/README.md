@@ -53,6 +53,7 @@ You can provide optional parameters as follows.
 | H264Profile | String | HIGH | ○ | H.264 Profile |
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264 Level |
 | Height | Number | 540 | ○ | Output video height, in pixels |
+| HlsBucket | String | | | The S3 bucket Name HLS files are sent |
 | MediaPackageChannelId | String | | | The MediaPackage channel id |
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
 | LiveSource | ENABLED or DISABLED | ENABLED | ○ | Enable or disable a live source |
