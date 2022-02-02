@@ -44,6 +44,7 @@ Metadata:
           - LogicalNamePrefix
           - Environment
           - AutoInputFailover
+          - TagKey
           - TagValue
 
 Parameters:
@@ -451,13 +452,15 @@ Resources:
                     DestinationRefId: !Sub ${LogicalNamePrefix}-for-HLS
                   DirectoryStructure: SINGLE_DIRECTORY
                   DiscontinuityTags: INSERT
-                  HlsCdnSettings: 
-                    HlsMediaStoreSettings: 
-                      ConnectionRetryInterval: 1
-                      FilecacheDuration: 300
-                      MediaStoreStorageClass: TEMPORAL
-                      NumRetries: 10
-                      RestartDelay: 15
+                  HlsCdnSettings: !If 
+                    - CreateDestinationForMediaStore
+                    - HlsMediaStoreSettings: 
+                        ConnectionRetryInterval: 1
+                        FilecacheDuration: 300
+                        MediaStoreStorageClass: TEMPORAL
+                        NumRetries: 10
+                        RestartDelay: 15
+                    - !Ref AWS::NoValue
                   HlsId3SegmentTagging: DISABLED
                   IFrameOnlyPlaylists: DISABLED
                   IncompleteSegmentBehavior: AUTO
@@ -483,7 +486,7 @@ Resources:
               Outputs:
                 - AudioDescriptionNames: 
                     - !Sub audio_2_aac${AudioBitrate}
-                  OutputName: !Sub mediastore_${Width}x${Height}_${VideoBitrate}
+                  OutputName: !Sub hls_${Width}x${Height}_${VideoBitrate}
                   OutputSettings: 
                     HlsOutputSettings:
                       H265PackagingType: HVC1
