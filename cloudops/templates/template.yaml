@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationSamples/cloudops sets basic configurations for CloudOps.
+Description: AWSCloudFormationTemplates/cloudops sets basic configurations for CloudOps.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -160,7 +160,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -177,7 +177,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
