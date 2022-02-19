@@ -10,7 +10,7 @@ Metadata:
         Parameters: 
           - IncidentManager
           - IncidentManagerAlias
-          - IncidentManagerChatbotSns
+          - IncidentManagerChatbotSnsArn
           - IncidentManagerDisplayName
           - IncidentManagerDurationInMinutes
           - IncidentManagerEmail
@@ -41,7 +41,7 @@ Parameters:
     Default: administrator
     AllowedPattern: ^[a-z0-9_\-]*$
     Description: The unique and identifiable alias of the contact or escalation plan [required]
-  IncidentManagerChatbotSns:
+  IncidentManagerChatbotSnsArn:
     Type: String
     Default: ''      
     Description: The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident
@@ -132,7 +132,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         Alias: !Ref IncidentManagerAlias
-        ChatbotSns: !Ref IncidentManagerChatbotSns
+        ChatbotSnsArn: !Ref IncidentManagerChatbotSnsArn
         DisplayName: !Ref IncidentManagerDisplayName
         DurationInMinutes: !Ref IncidentManagerDurationInMinutes
         Email: !Ref IncidentManagerEmail

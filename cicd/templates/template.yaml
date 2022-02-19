@@ -85,6 +85,7 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
+      - INCIDENT_MANAGER_DISABLED
       - DISABLED
     Description: Enable or disable deployment of CloudOps template [required]
   GlobalSettings:
@@ -796,8 +797,8 @@ Resources:
                   TemplatePath: Source-CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
                   ParameterOverrides: !If 
                     - Development
-                    - !Sub '{"IncidentManagerChatbotSns": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
-                    - !Sub '{"IncidentManagerChatbotSns": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
                   - Name: DeployArtifact-CICD

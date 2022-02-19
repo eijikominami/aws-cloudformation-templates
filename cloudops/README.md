@@ -47,3 +47,17 @@ This template sets a notification channel of ``AWS DevOps Guru``.
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
+
+### Incident Manager
+
+This template sets a notification channel of ``AWS Systems Manager Incident Manager``.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| Alias | String | admimistrator | ○ | The unique and identifiable alias of the contact or escalation plan |
+| ChatbotSnsArn | String | | | The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident |
+| DisplayName | String | Administrator | ○ | The full name of the contact or escalation plan |
+| DurationInMinutes | Number | 1 | ○ | The time to wait until beginning the next stage |
+| Email | String | | | The email address |
+| PhoneNumber | String | | | The Phone Number |
+| WorkloadName | String | the workloads in the account | ○ | The workload name |

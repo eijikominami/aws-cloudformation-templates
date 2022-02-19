@@ -9,7 +9,7 @@ Metadata:
           default: 'Incident Manager Configuration'
         Parameters: 
           - Alias
-          - ChatbotSns
+          - ChatbotSnsArn
           - DisplayName
           - DurationInMinutes
           - Email
@@ -28,7 +28,7 @@ Parameters:
     Default: administrator
     AllowedPattern: ^[a-z0-9_\-]*$
     Description: The unique and identifiable alias of the contact or escalation plan [required]
-  ChatbotSns:
+  ChatbotSnsArn:
     Type: String
     Default: ''      
     Description: The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident
@@ -46,11 +46,11 @@ Parameters:
   Email:
     Type: String
     Default: ''
-    Description: The email address [required]
+    Description: The email address
   PhoneNumber:
     Type: String
     Default: ''
-    Description: The Phone number [required]
+    Description: The Phone number
   WorkloadName:
     Type: String
     Default: the workloads in the account
@@ -73,7 +73,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  ChatbotSnsExists: !Not [ !Equals [ !Ref ChatbotSns, '' ] ]
+  ChatbotSnsExists: !Not [ !Equals [ !Ref ChatbotSnsArn, '' ] ]
   CreateEmailContactChannel: !Not [ !Equals [ !Ref Email, '' ] ]
   CreateTelContactChannel: !Not [ !Equals [ !Ref PhoneNumber, '' ] ]
 
@@ -151,7 +151,7 @@ Resources:
       ChatChannel: !If
         - ChatbotSnsExists
         - ChatbotSns: 
-            - !Ref ChatbotSns
+            - !Ref ChatbotSnsArn
         - !Ref AWS::NoValue
       DisplayName: !Sub Critical Impact to ${WorkloadName}
       Engagements:
@@ -160,7 +160,7 @@ Resources:
         Impact: 1
         NotificationTargets: !If
           - ChatbotSnsExists
-          - - SnsTopicArn: !Ref ChatbotSns
+          - - SnsTopicArn: !Ref ChatbotSnsArn
           - !Ref AWS::NoValue
         Summary: !Sub Critical Impact to ${WorkloadName}
         Title: !Sub Critical Impact to ${WorkloadName}
