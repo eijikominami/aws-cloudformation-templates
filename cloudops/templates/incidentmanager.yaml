@@ -53,7 +53,7 @@ Parameters:
     Description: The Phone number
   WorkloadName:
     Type: String
-    Default: the workloads in the account
+    Default: Workload
     AllowedPattern: .+
     Description: The workload name [required]
   Environment:
