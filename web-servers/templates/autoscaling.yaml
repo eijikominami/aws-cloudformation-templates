@@ -114,7 +114,7 @@ Parameters:
       - network
     Description: The LoadBalancer Type [required]
   Route53HostedZoneId:
-    Type: AWS::Route53::HostedZone::Id
+    Type: String
     Default: ''
     Description: Route53 hosted zone id
   SubnetId1ForELB:
@@ -150,6 +150,7 @@ Parameters:
 
 Conditions:
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
+  CreateCertificateManager: !Not [ !Equals [ !Ref ACMDomainName, ''] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref LoadBalancerType, network ]
   CreateRoute53: !And [ !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
 
@@ -232,6 +233,7 @@ Resources:
         - TCP
         - HTTP
   LoadBalancerListenerHttps:
+    Condition: CreateCertificateManager
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       Certificates:
@@ -319,6 +321,7 @@ Resources:
         - !Ref SubnetId2ForELB
   # CertificateManager
   CertificateManager:
+    Condition: CreateCertificateManager
     Type: AWS::CertificateManager::Certificate
     Properties: 
       DomainName: !Ref ACMDomainName

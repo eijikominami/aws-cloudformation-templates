@@ -187,7 +187,7 @@ Parameters:
     Description: Daily Snapshot time (HH:MM) [required]
   EC2ImageId:
     Type: AWS::EC2::Image::Id
-    Default: ami-00f045aed21a55240
+    Default: ami-08a8688fb7eacb171
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [required]
   EC2InstanceType:
@@ -221,7 +221,7 @@ Parameters:
     Default: ''
     Description: The custom S3 bucket name for access logging
   Route53HostedZoneId:
-    Type: AWS::Route53::HostedZone::Id
+    Type: String
     Default: ''
     Description: Route53 hosted zone id
   SSMPatchingAt:
@@ -621,7 +621,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -638,7 +638,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -855,7 +855,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

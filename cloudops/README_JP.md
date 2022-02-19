@@ -47,3 +47,17 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | **SNSForAlertArn** | String | | ○ | SNSトピックのARN |
+
+### Incident Manager
+
+このテンプレートは、``AWS Systems Manager Incident Manager`` を作成します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| Alias | String | admimistrator | ○ | 連絡先のエイリアス |
+| ChatbotSnsArn | String | | | AWS Chatbot の ARN |
+| DisplayName | String | Administrator | ○ | 連絡先のエイリアス |
+| DurationInMinutes | Number | 1 | ○ | 次のステージに移行する時間（分） |
+| Email | String | | | Eメールアドレス |
+| PhoneNumber | String | | | 電話番号 |
+| WorkloadName | String | the workloads in the account | ○ | ワークロード名 |

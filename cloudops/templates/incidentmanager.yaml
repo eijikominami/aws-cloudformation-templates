@@ -1,0 +1,172 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationSamples/cloudops/incidentmanager sets AWS Systems Manager Incident Manager.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'Incident Manager Configuration'
+        Parameters: 
+          - Alias
+          - ChatbotSnsArn
+          - DisplayName
+          - DurationInMinutes
+          - Email
+          - PhoneNumber
+          - WorkloadName
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  Alias:
+    Type: String
+    Default: administrator
+    AllowedPattern: ^[a-z0-9_\-]*$
+    Description: The unique and identifiable alias of the contact or escalation plan [required]
+  ChatbotSnsArn:
+    Type: String
+    Default: ''      
+    Description: The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident
+  DisplayName:
+    Type: String
+    Default: Administrator
+    AllowedPattern: ^[\p{L}\p{Z}\p{N}_.\-]*$
+    Description: The full name of the contact or escalation plan [required]
+  DurationInMinutes:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 30
+    Description: The time to wait until beginning the next stage [required]
+  Email:
+    Type: String
+    Default: ''
+    Description: The email address
+  PhoneNumber:
+    Type: String
+    Default: ''
+    Description: The Phone number
+  WorkloadName:
+    Type: String
+    Default: the workloads in the account
+    AllowedPattern: .+
+    Description: The workload name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  ChatbotSnsExists: !Not [ !Equals [ !Ref ChatbotSnsArn, '' ] ]
+  CreateEmailContactChannel: !Not [ !Equals [ !Ref Email, '' ] ]
+  CreateTelContactChannel: !Not [ !Equals [ !Ref PhoneNumber, '' ] ]
+
+Resources:
+  IAMRoleForIncidentManager:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ssm-incidents.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Description: A role required for AWS Systems Manager Incident Manager to access SSM.
+      Policies:
+        - PolicyName: Runbook
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ssm:StartAutomationExecution'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'sts:AssumeRole'
+                Resource: 'arn:aws:iam::*:role/AWS-SystemsManager-AutomationExecutionRole'
+      RoleName: !Sub '${AWS::StackName}-IncidentManager-${AWS::Region}'
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ReplicationSet:
+    Type: AWS::SSMIncidents::ReplicationSet
+    Properties: 
+      DeletionProtected: false
+      Regions: 
+        - RegionName: !Ref AWS::Region
+  VoiceContactChannel:
+    Condition: CreateTelContactChannel
+    Type: AWS::SSMContacts::ContactChannel
+    Properties: 
+      ChannelAddress: !Ref PhoneNumber
+      ChannelName: Tel
+      ChannelType: VOICE
+      ContactId: !GetAtt Contact.Arn
+      DeferActivation: true  
+  EmailContactChannel:
+    Condition: CreateEmailContactChannel
+    Type: AWS::SSMContacts::ContactChannel
+    Properties: 
+      ChannelAddress: !Ref Email
+      ChannelName: Email
+      ChannelType: EMAIL
+      ContactId: !GetAtt Contact.Arn
+      DeferActivation: true  
+  Contact:
+    Type: AWS::SSMContacts::Contact
+    Properties: 
+      Alias: !Ref Alias
+      DisplayName: !Ref DisplayName
+      Plan: 
+        - DurationInMinutes: !Ref DurationInMinutes
+      Type: PERSONAL
+  ResponsePlan:
+    Type: AWS::SSMIncidents::ResponsePlan
+    Properties: 
+      Actions: 
+        - SsmAutomation: 
+            DocumentName: AWSIncidents-CriticalIncidentRunbookTemplate
+            RoleArn: !GetAtt IAMRoleForIncidentManager.Arn
+            TargetAccount: RESPONSE_PLAN_OWNER_ACCOUNT
+      ChatChannel: !If
+        - ChatbotSnsExists
+        - ChatbotSns: 
+            - !Ref ChatbotSnsArn
+        - !Ref AWS::NoValue
+      DisplayName: !Sub Critical Impact to ${WorkloadName}
+      Engagements:
+        - !Ref Contact
+      IncidentTemplate: 
+        Impact: 1
+        NotificationTargets: !If
+          - ChatbotSnsExists
+          - - SnsTopicArn: !Ref ChatbotSnsArn
+          - !Ref AWS::NoValue
+        Summary: !Sub Critical Impact to ${WorkloadName}
+        Title: !Sub Critical Impact to ${WorkloadName}
+      Name: CriticalImpact
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

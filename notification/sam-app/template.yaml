@@ -210,7 +210,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -226,7 +226,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -243,7 +243,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -260,7 +260,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -271,7 +271,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -335,17 +335,10 @@ Resources:
                 Action:
                   - 'sns:Publish'
                 Resource: '*'
-        - PolicyName: CustomPolicy
+        - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - !If
-                - CreateKMSKey
-                - Effect: Allow
-                  Action:
-                    - 'kms:Decrypt'
-                  Resource: !GetAtt KMSKey.Arn
-                - !Ref AWS::NoValue
               - Effect: Allow
                 Action:
                   - 'logs:CreateLogStream'
@@ -353,7 +346,18 @@ Resources:
               - Effect: Allow
                 Action:
                   - 'logs:PutLogEvents'
-                Resource: '*'
+                Resource: '*' 
+        - !If
+          - CreateKMSKey
+          - PolicyName: CustomPolicy !If
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'kms:Decrypt'
+                  Resource: !GetAtt KMSKey.Arn
+          - !Ref AWS::NoValue
       RoleName: !Sub '${AWS::StackName}-LambdaForNotification-${AWS::Region}'
       Tags:
         - Key: environment
@@ -513,7 +517,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -584,7 +588,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -662,7 +666,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.6
+        SemanticVersion: 2.0.7
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -727,3 +731,7 @@ Outputs:
     Condition: CreateChatbotForAlert
     Description: Chatbot ARN
     Value: !GetAtt ChatbotForAlert.Outputs.ChatbotArn
+  SNSForFormattedAlert:
+    Description: SNS for Formatted Alert Arn
+    Value: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
+    
