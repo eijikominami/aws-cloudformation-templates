@@ -14,7 +14,7 @@ Metadata:
           - IncidentManagerDisplayName
           - IncidentManagerDurationInMinutes
           - IncidentManagerEmail
-          - IncidentTelephoneNumber
+          - IncidentPhoneNumber
           - IncidentManagerWorkloadName
       - Label: 
           default: 'Notofication Configuration'
@@ -59,9 +59,9 @@ Parameters:
   IncidentManagerEmail:
     Type: String
     Description: The email address
-  IncidentTelephoneNumber:
+  IncidentPhoneNumber:
     Type: String
-    Description: The telephone number
+    Description: The Phone number
   IncidentManagerWorkloadName:
     Type: String
     Default: the workloads in the account
@@ -134,7 +134,7 @@ Resources:
         DisplayName: !Ref IncidentManagerDisplayName
         DurationInMinutes: !Ref IncidentManagerDurationInMinutes
         Email: !Ref IncidentManagerEmail
-        TelephoneNumber: !Ref IncidentTelephoneNumber
+        PhoneNumber: !Ref IncidentPhoneNumber
         WorkloadName: !Ref IncidentManagerWorkloadName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
