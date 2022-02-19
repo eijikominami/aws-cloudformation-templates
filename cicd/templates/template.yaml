@@ -666,7 +666,7 @@ Resources:
                     - - !Sub '{"ArtifactBacketInVirginia": "${ArtifactBacketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
                       - !If
                         - Development
-                        - deployment
+                        - development
                         - production
                       - !Sub '","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
@@ -703,7 +703,7 @@ Resources:
                     - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
                       - !If
                         - Development
-                        - deployment
+                        - development
                         - production
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
@@ -741,7 +741,7 @@ Resources:
                   - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                     - !If
                       - Development
-                      - deployment
+                      - development
                       - production
                     - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
@@ -778,7 +778,7 @@ Resources:
                     - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings", "Environment": "'
                       - !If
                         - Development
-                        - deployment
+                        - development
                         - production
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
@@ -817,7 +817,7 @@ Resources:
                     - - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
-                        - deployment
+                        - development
                         - production
                       - !Sub '", "IncidentManager": "'
                       - !If
@@ -851,7 +851,7 @@ Resources:
                   - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                     - !If
                       - Development
-                      - deployment
+                      - development
                       - production
                     - !Sub '", "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
@@ -890,7 +890,7 @@ Resources:
                       - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
                         - !If
                           - Development
-                          - deployment
+                          - development
                           - production
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
@@ -898,7 +898,7 @@ Resources:
                       - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
                         - !If
                           - Development
-                          - deployment
+                          - development
                           - production
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
@@ -942,7 +942,7 @@ Resources:
                       - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                         - !If
                           - Development
-                          - deployment
+                          - development
                           - production
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
@@ -950,7 +950,7 @@ Resources:
                       - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                         - !If
                           - Development
-                          - deployment
+                          - development
                           - production
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
@@ -992,7 +992,7 @@ Resources:
                     - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                       - !If
                         - Development
-                        - deployment
+                        - development
                         - production
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
@@ -1030,7 +1030,7 @@ Resources:
                     - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                       - !If
                         - Development
-                        - deployment
+                        - development
                         - production
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
