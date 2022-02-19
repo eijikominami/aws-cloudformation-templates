@@ -58,9 +58,11 @@ Parameters:
     Description: The time to wait until beginning the next stage [required]
   IncidentManagerEmail:
     Type: String
+    Default: ''
     Description: The email address
   IncidentPhoneNumber:
     Type: String
+    Default: ''
     Description: The Phone number
   IncidentManagerWorkloadName:
     Type: String
