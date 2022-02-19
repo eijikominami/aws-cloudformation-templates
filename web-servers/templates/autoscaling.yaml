@@ -114,7 +114,7 @@ Parameters:
       - network
     Description: The LoadBalancer Type [required]
   Route53HostedZoneId:
-    Type: AWS::Route53::HostedZone::Id
+    Type: String
     Default: ''
     Description: Route53 hosted zone id
   SubnetId1ForELB:
