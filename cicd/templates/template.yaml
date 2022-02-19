@@ -795,15 +795,16 @@ Resources:
                   TemplatePath: Source-CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
                   ParameterOverrides: !If 
                     - Development
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
-                    - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"IncidentManagerChatbotSns": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "development","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                    - !Sub '{"IncidentManagerChatbotSns": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
                   - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact-Notification
                 Name: CloudOps
                 OutputArtifacts: 
                   - Name: DeployArtifact-CloudOps
-                RunOrder: 2
+                RunOrder: 3
               - !Ref AWS::NoValue
             # Deploy DefaultSecuritySettings-ConfigRules
             - ActionTypeId: 

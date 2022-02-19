@@ -6,6 +6,16 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 
+          default: 'Systems Manager Incident Manager Configuration'
+        Parameters: 
+          - IncidentManager
+          - IncidentManagerAlias
+          - IncidentManagerChatbotSns
+          - IncidentManagerDisplayName
+          - IncidentManagerDurationInMinutes
+          - IncidentManagerEmail
+          - IncidentManagerWorkloadName
+      - Label: 
           default: 'Notofication Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -18,6 +28,42 @@ Metadata:
           - TagValue
 
 Parameters:
+  IncidentManager:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable AWS Systems Manager Incident Manager [required]
+  IncidentManagerAlias:
+    Type: String
+    Default: administrator
+    AllowedPattern: ^[a-z0-9_\-]*$
+    Description: The unique and identifiable alias of the contact or escalation plan [required]
+  IncidentManagerChatbotSns:
+    Type: String
+    Default: ''      
+    Description: The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident
+  IncidentManagerDisplayName:
+    Type: String
+    Default: Administrator
+    AllowedPattern: ^[\p{L}\p{Z}\p{N}_.\-]*$
+    Description: The full name of the contact or escalation plan [required]
+  IncidentManagerDurationInMinutes:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 30
+    Description: The time to wait until beginning the next stage [required]
+  IncidentManagerEmail:
+    Type: String
+    AllowedPattern: .+
+    Description: The email address [required]
+  IncidentManagerWorkloadName:
+    Type: String
+    Default: the workloads in the account
+    AllowedPattern: .+
+    Description: The workload name [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -41,6 +87,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateIncidentManager: !Equals [ !Ref IncidentManager, '']
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -64,6 +111,38 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsguru.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsguru.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SystemsManagerIncidentManager:
+    Condition: CreateIncidentManager
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        Alias: !Ref IncidentManagerAlias
+        ChatbotSns: !Ref IncidentManagerChatbotSns
+        DisplayName: !Ref IncidentManagerDisplayName
+        DurationInMinutes: !Ref IncidentManagerDurationInMinutes
+        Email: !Ref IncidentManagerEmail
+        WorkloadName: !Ref IncidentManagerWorkloadName
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/incidentmanager.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/incidentmanager.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

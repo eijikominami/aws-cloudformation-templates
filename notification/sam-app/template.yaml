@@ -731,3 +731,7 @@ Outputs:
     Condition: CreateChatbotForAlert
     Description: Chatbot ARN
     Value: !GetAtt ChatbotForAlert.Outputs.ChatbotArn
+  SNSForFormattedAlert:
+    Description: SNS for Formatted Alert Arn
+    Value: !GetAtt SNSForFormattedAlert.Outputs.ChatbotArn
+    
