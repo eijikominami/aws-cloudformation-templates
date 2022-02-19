@@ -347,17 +347,17 @@ Resources:
                 Action:
                   - 'logs:PutLogEvents'
                 Resource: '*' 
-        - PolicyName: CustomPolicy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - !If
-                - CreateKMSKey
+        - !If
+          - CreateKMSKey
+          - PolicyName: CustomPolicy !If
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
                 - Effect: Allow
                   Action:
                     - 'kms:Decrypt'
                   Resource: !GetAtt KMSKey.Arn
-                - !Ref AWS::NoValue
+          - !Ref AWS::NoValue
       RoleName: !Sub '${AWS::StackName}-LambdaForNotification-${AWS::Region}'
       Tags:
         - Key: environment
