@@ -767,6 +767,7 @@ Resources:
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Notification.json
                     - !Ref AWS::NoValue
+                  OutputFileName: Output.json
                 InputArtifacts:
                   - Name: BuildArtifact-Notification
                   - !If
