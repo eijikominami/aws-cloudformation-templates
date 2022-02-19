@@ -13,6 +13,7 @@ Metadata:
           - DisplayName
           - DurationInMinutes
           - Email
+          - TelephoneNumber
           - WorkloadName
       - Label: 
           default: 'Tag Configuration'
@@ -46,6 +47,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The email address [required]
+  TelephoneNumber:
+    Type: String
+    Default: ''
+    Description: The telephone number [required]
   WorkloadName:
     Type: String
     Default: the workloads in the account
@@ -69,7 +74,8 @@ Parameters:
 
 Conditions:
   ChatbotSnsExists: !Not [ !Equals [ !Ref ChatbotSns, '' ] ]
-  CreateContactChannel: !Not [ !Equals [ !Ref Email, '' ] ]
+  CreateEmailContactChannel: !Not [ !Equals [ !Ref Email, '' ] ]
+  CreateTelContactChannel !Not [ !Equals [ !Ref TelephoneNumber, '' ] ]
 
 Resources:
   IAMRoleForIncidentManager:
@@ -108,8 +114,17 @@ Resources:
       DeletionProtected: false
       Regions: 
         - RegionName: !Ref AWS::Region
-  ContactChannel:
-    Condition: CreateContactChannel
+  VoiceContactChannel:
+    Condition: CreateTelContactChannel
+    Type: AWS::SSMContacts::ContactChannel
+    Properties: 
+      ChannelAddress: !Ref TelephoneNumber
+      ChannelName: Tel
+      ChannelType: VOICE
+      ContactId: !GetAtt Contact.Arn
+      DeferActivation: true  
+  EmailContactChannel:
+    Condition: CreateEmailContactChannel
     Type: AWS::SSMContacts::ContactChannel
     Properties: 
       ChannelAddress: !Ref Email

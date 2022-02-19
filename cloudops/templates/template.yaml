@@ -14,6 +14,7 @@ Metadata:
           - IncidentManagerDisplayName
           - IncidentManagerDurationInMinutes
           - IncidentManagerEmail
+          - IncidentTelephoneNumber
           - IncidentManagerWorkloadName
       - Label: 
           default: 'Notofication Configuration'
@@ -57,8 +58,10 @@ Parameters:
     Description: The time to wait until beginning the next stage [required]
   IncidentManagerEmail:
     Type: String
-    AllowedPattern: .+
-    Description: The email address [required]
+    Description: The email address
+  IncidentTelephoneNumber:
+    Type: String
+    Description: The telephone number
   IncidentManagerWorkloadName:
     Type: String
     Default: the workloads in the account
@@ -131,6 +134,7 @@ Resources:
         DisplayName: !Ref IncidentManagerDisplayName
         DurationInMinutes: !Ref IncidentManagerDurationInMinutes
         Email: !Ref IncidentManagerEmail
+        TelephoneNumber: !Ref IncidentTelephoneNumber
         WorkloadName: !Ref IncidentManagerWorkloadName
         Environment: !Ref Environment
         TagKey: !Ref TagKey

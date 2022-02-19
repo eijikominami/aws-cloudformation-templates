@@ -733,5 +733,5 @@ Outputs:
     Value: !GetAtt ChatbotForAlert.Outputs.ChatbotArn
   SNSForFormattedAlert:
     Description: SNS for Formatted Alert Arn
-    Value: !GetAtt SNSForFormattedAlert.Outputs.ChatbotArn
+    Value: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
     
