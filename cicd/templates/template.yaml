@@ -468,7 +468,7 @@ Resources:
       Description: A role required for CloudFormation to access related resources.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
-      RoleName: !Sub 'CICD-CFn-${AWS::Region}'
+      RoleName: !Sub 'CICD-CloudFormation-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !If

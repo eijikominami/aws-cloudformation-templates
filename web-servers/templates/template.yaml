@@ -187,7 +187,7 @@ Parameters:
     Description: Daily Snapshot time (HH:MM) [required]
   EC2ImageId:
     Type: AWS::EC2::Image::Id
-    Default: ami-00f045aed21a55240
+    Default: ami-08a8688fb7eacb171
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [required]
   EC2InstanceType:
@@ -221,7 +221,7 @@ Parameters:
     Default: ''
     Description: The custom S3 bucket name for access logging
   Route53HostedZoneId:
-    Type: AWS::Route53::HostedZone::Id
+    Type: String
     Default: ''
     Description: Route53 hosted zone id
   SSMPatchingAt:

@@ -335,6 +335,18 @@ Resources:
                 Action:
                   - 'sns:Publish'
                 Resource: '*'
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogStream'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:PutLogEvents'
+                Resource: '*' 
         - PolicyName: CustomPolicy
           PolicyDocument:
             Version: 2012-10-17
@@ -346,14 +358,6 @@ Resources:
                     - 'kms:Decrypt'
                   Resource: !GetAtt KMSKey.Arn
                 - !Ref AWS::NoValue
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogStream'
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - 'logs:PutLogEvents'
-                Resource: '*'
       RoleName: !Sub '${AWS::StackName}-LambdaForNotification-${AWS::Region}'
       Tags:
         - Key: environment

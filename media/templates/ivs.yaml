@@ -59,7 +59,7 @@ Parameters:
     AllowedPattern: .+
   TagValue:
     Type: String
-    Default: aws-cloudformation-samples 
+    Default: aws-cloudformation-templates 
     AllowedPattern: .+
 
 Resources:
