@@ -75,7 +75,7 @@ Parameters:
 Conditions:
   ChatbotSnsExists: !Not [ !Equals [ !Ref ChatbotSns, '' ] ]
   CreateEmailContactChannel: !Not [ !Equals [ !Ref Email, '' ] ]
-  CreateTelContactChannel !Not [ !Equals [ !Ref PhoneNumber, '' ] ]
+  CreateTelContactChannel: !Not [ !Equals [ !Ref PhoneNumber, '' ] ]
 
 Resources:
   IAMRoleForIncidentManager:
