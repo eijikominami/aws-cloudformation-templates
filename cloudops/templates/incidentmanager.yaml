@@ -122,7 +122,7 @@ Resources:
       ChannelName: Tel
       ChannelType: VOICE
       ContactId: !GetAtt Contact.Arn
-      DeferActivation: true  
+      DeferActivation: false  
   EmailContactChannel:
     Condition: CreateEmailContactChannel
     Type: AWS::SSMContacts::ContactChannel
@@ -131,7 +131,7 @@ Resources:
       ChannelName: Email
       ChannelType: EMAIL
       ContactId: !GetAtt Contact.Arn
-      DeferActivation: true  
+      DeferActivation: false  
   Contact:
     DependsOn:
       -  ReplicationSet

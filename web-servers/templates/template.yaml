@@ -51,11 +51,6 @@ Metadata:
         Parameters: 
           - EC2DailySnapshotScheduledAt
       - Label: 
-          default: 'SystemsManager Configuration'
-        Parameters: 
-          - IgnoreResourceConflicts
-          - SSMPatchingAt
-      - Label: 
           default: 'Domain Configuration'
         Parameters: 
           - ACMValidationMethod
@@ -183,7 +178,6 @@ Parameters:
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
-    AllowedPattern: ^[0-1][0-9]:[0-9][0-9]$
     Description: Daily Snapshot time (HH:MM) [required]
   EC2ImageId:
     Type: AWS::EC2::Image::Id
@@ -203,12 +197,6 @@ Parameters:
     Default: 8
     MinValue: 8
     Description: EC2 Volume Size [required]
-  IgnoreResourceConflicts:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
   Logging:
     Type: String
     Default: ENABLED
@@ -224,12 +212,6 @@ Parameters:
     Type: String
     Default: ''
     Description: Route53 hosted zone id
-  SSMPatchingAt:
-    Type: Number
-    Default: 3
-    MinValue: 0
-    MaxValue: 23
-    Description: Daily patching time (H) [required]
   SubnetPublicCidrBlockForAz1:
     Type: String
     Default: 10.0.0.0/24
@@ -482,38 +464,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/dlm.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
-  SystemsManager:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        IgnoreResourceConflicts: !Ref IgnoreResourceConflicts
-        PatchingAt: !Ref SSMPatchingAt
-        LogicalNamePrefix: !Ref AWS::StackName
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/ssm.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ssm.yaml
   WAF:
     Condition: CreateWAFForALB
     Type: AWS::CloudFormation::Stack
@@ -621,7 +571,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -638,7 +588,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -855,7 +805,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

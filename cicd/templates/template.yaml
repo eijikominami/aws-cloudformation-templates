@@ -107,7 +107,6 @@ Parameters:
     Default: DISABLED
     AllowedValues:
       - ENABLED
-      - SYSTEMS_MANAGER_ONLY
       - DISABLED
     Description: Enable or disable deployment of WebServers template [required]
   UploadArtifacts:
@@ -150,7 +149,6 @@ Conditions:
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
-  DeploySystemsManager: !Equals [ !Ref WebServers, SYSTEMS_MANAGER_ONLY]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]
 
@@ -162,7 +160,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -182,7 +180,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -197,7 +195,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       Parameters:
         TopicName: !Sub CICD-createdby-${AWS::StackName}
       Tags:
@@ -825,8 +823,16 @@ Resources:
                         - ENABLED
                         - DISABLED
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CloudOps.json
+                    - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
                   - Name: DeployArtifact-CICD
                   - Name: DeployArtifact-Notification
                 Name: CloudOps
@@ -973,44 +979,6 @@ Resources:
                   - Name: DeployArtifact-WebServers
                 RunOrder: 3
               - !Ref AWS::NoValue
-            # Deploy SystemsManager
-            - !If
-              - DeploySystemsManager
-              - ActionTypeId: 
-                  Category: Deploy
-                  Owner: AWS
-                  Provider: CloudFormation
-                  Version: '1'
-                Configuration:
-                  ActionMode: CREATE_UPDATE
-                  StackName: SystemsManager
-                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/ssm.yaml
-                  ParameterOverrides: !Join
-                    - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
-                      - !If
-                        - Development
-                        - development
-                        - production
-                      - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
-                  TemplateConfiguration: !If
-                    - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SystemsManager.json
-                    - !Ref AWS::NoValue
-                InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
-                  - !If
-                    - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
-                    - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
-                Name: SystemsManager
-                OutputArtifacts: 
-                  - Name: DeployArtifact-SystemsManager
-                RunOrder: 3
-              - !Ref AWS::NoValue
             # Deploy UploadArtifacts
             - !If
               - DeployUploadArtifacts
@@ -1064,7 +1032,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1088,7 +1056,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1112,7 +1080,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

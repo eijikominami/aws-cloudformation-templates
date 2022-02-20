@@ -30,6 +30,19 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 デプロイ時に、以下のパラメータを指定することができます。
 
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| IncidentManager | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
+| IncidentManagerAlias | String | admimistrator | ○ | 連絡先のエイリアス |
+| IncidentManagerChatbotSnsArn | String | | | AWS Chatbot の ARN |
+| IncidentManagerDisplayName | String | Administrator | ○ | 連絡先のエイリアス |
+| IncidentManagerDurationInMinutes | Number | 1 | ○ | 次のステージに移行する時間（分） |
+| IncidentManagerEmail | String | | | Eメールアドレス |
+| IncidentManagerPhoneNumber | String | | | 電話番号 |
+| IncidentManagerWorkloadName | String | Workload | ○ | ワークロード名 |
+| SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
+| SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
+
 ### CodeGuru Profiler
 
 このテンプレートは、``AWS CodeGuru Profiler`` のプロファイリンググループを作成します。
