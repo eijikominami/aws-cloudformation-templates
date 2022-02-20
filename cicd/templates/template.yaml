@@ -825,8 +825,16 @@ Resources:
                         - ENABLED
                         - DISABLED
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Notification.json
+                    - !Ref AWS::NoValue
                 InputArtifacts:
                   - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
                   - Name: DeployArtifact-CICD
                   - Name: DeployArtifact-Notification
                 Name: CloudOps

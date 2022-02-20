@@ -183,7 +183,6 @@ Parameters:
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
-    AllowedPattern: ^[0-1][0-9]:[0-9][0-9]$
     Description: Daily Snapshot time (HH:MM) [required]
   EC2ImageId:
     Type: AWS::EC2::Image::Id
