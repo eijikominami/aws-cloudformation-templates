@@ -6,6 +6,12 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'Incident Manager Configuration'
+        Parameters: 
+          - IncidentManagerArn
+          - IncidentDurationInSeconds
+          - IncidentSuccessPercentThreshold
+      - Label: 
           default: 'Synthetics Configuration'
         Parameters: 
           - CanaryName
@@ -26,6 +32,21 @@ Metadata:
           - TagValue
 
 Parameters:
+  IncidentManagerArn:
+    Type: String
+    Default: ''
+    Description: Systems Manager Incident Manager response plan ARN
+  IncidentDurationInSeconds:
+    Type: Number
+    Default: 600
+    MinValue: 0
+    Description: The time to wait until starting an incident [required]
+  IncidentSuccessPercentThreshold:
+    Type: Number
+    Default: 50
+    MinValue: 0
+    MaxValue: 100
+    Description: The threshold of success percent starting an incident [required]
   CanaryName:
     Type: String
     AllowedPattern: .+
@@ -72,6 +93,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateIncident: !Not [ !Equals [ !Ref IncidentManagerArn, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -235,6 +257,38 @@ Resources:
               Bool: 
                 aws:SecureTransport: false
   # CloudWatch Alarm
+  CloudWatchIncidentSynthetics:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        - !If 
+          - CreateIncident
+          - !Ref IncidentManagerArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${EndpointHostName}${EndpointPath} に対する ${Method} の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
+      AlarmName: !Sub 'Incident-${CanaryName}-Synthetics-AccessError'
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: CanaryName
+          Value: !Ref CanaryName
+      EvaluationPeriods: 1
+      MetricName: SuccessPercent
+      Namespace: CloudWatchSynthetics
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: !Ref IncidentDurationInSeconds
+      Statistic: Average
+      Threshold: !Ref IncidentSuccessPercentThreshold
+      TreatMissingData: notBreaching
   CloudWatchAlarmSynthetics:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -270,7 +324,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.7
+        SemanticVersion: 2.0.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -287,7 +341,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.7
+        SemanticVersion: 2.0.8
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

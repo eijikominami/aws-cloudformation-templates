@@ -60,4 +60,4 @@ This template sets a notification channel of ``AWS Systems Manager Incident Mana
 | DurationInMinutes | Number | 1 | ○ | The time to wait until beginning the next stage |
 | Email | String | | | The email address |
 | PhoneNumber | String | | | The Phone Number |
-| WorkloadName | String | the workloads in the account | ○ | The workload name |
+| WorkloadName | String | Workload | ○ | The workload name |

@@ -60,4 +60,4 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | DurationInMinutes | Number | 1 | ○ | 次のステージに移行する時間（分） |
 | Email | String | | | Eメールアドレス |
 | PhoneNumber | String | | | 電話番号 |
-| WorkloadName | String | the workloads in the account | ○ | ワークロード名 |
+| WorkloadName | String | Workload | ○ | ワークロード名 |

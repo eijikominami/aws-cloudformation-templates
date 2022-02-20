@@ -53,7 +53,7 @@ Parameters:
     Description: The Phone number
   WorkloadName:
     Type: String
-    Default: the workloads in the account
+    Default: Workload
     AllowedPattern: .+
     Description: The workload name [required]
   Environment:
@@ -102,7 +102,7 @@ Resources:
                 Action:
                   - 'sts:AssumeRole'
                 Resource: 'arn:aws:iam::*:role/AWS-SystemsManager-AutomationExecutionRole'
-      RoleName: !Sub '${AWS::StackName}-IncidentManager-${AWS::Region}'
+      RoleName: !Sub '${WorkloadName}-IncidentManager-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -133,6 +133,8 @@ Resources:
       ContactId: !GetAtt Contact.Arn
       DeferActivation: true  
   Contact:
+    DependsOn:
+      -  ReplicationSet
     Type: AWS::SSMContacts::Contact
     Properties: 
       Alias: !Ref Alias

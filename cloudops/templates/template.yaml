@@ -66,7 +66,7 @@ Parameters:
     Description: The Phone number
   IncidentManagerWorkloadName:
     Type: String
-    Default: the workloads in the account
+    Default: Workload
     AllowedPattern: .+
     Description: The workload name [required]
   SNSForAlertArn:
@@ -92,7 +92,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateIncidentManager: !Equals [ !Ref IncidentManager, '']
+  CreateIncidentManager: !Equals [ !Ref IncidentManager, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -141,10 +141,6 @@ Resources:
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
       TemplateURL: !If
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/incidentmanager.yaml
@@ -160,7 +156,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.7
+        SemanticVersion: 2.0.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -177,7 +173,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.7
+        SemanticVersion: 2.0.8
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
