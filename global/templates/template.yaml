@@ -184,7 +184,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -351,7 +351,7 @@ Resources:
         CertificateArn: !Ref CertificateManager
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -599,7 +599,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.8
+        SemanticVersion: 2.0.9
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
