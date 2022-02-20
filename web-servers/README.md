@@ -63,9 +63,7 @@ You can provide optional parameters as follows.
 | EC2PatchingAt | Number | 3 | ○ | Starting time of patching process. |
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set. |
 | EC2VolumeSize | Number | 8 | ○ | |
-| IgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created. |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
-| SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | Public subnet of AZ1 |
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | Public subnet of AZ2 |
 | TransitGatewayId | String | | | The ID of a transit gateway |

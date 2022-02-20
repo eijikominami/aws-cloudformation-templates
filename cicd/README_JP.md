@@ -81,4 +81,4 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | **Notification** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |
 | **Route53** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Route53` スタックがデプロイされます。 |
 | **StaticWebsiteHosting** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
-| **WebServers** | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |
+| **WebServers** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |

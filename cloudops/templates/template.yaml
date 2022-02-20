@@ -6,6 +6,11 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 
+          default: 'Systems ManagerConfiguration'
+        Parameters: 
+          - SSMIgnoreResourceConflicts
+          - SSMPatchingAt
+      - Label: 
           default: 'Systems Manager Incident Manager Configuration'
         Parameters: 
           - IncidentManager
@@ -69,6 +74,18 @@ Parameters:
     Default: Workload
     AllowedPattern: .+
     Description: The workload name [required]
+  SSMIgnoreResourceConflicts:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+  SSMPatchingAt:
+    Type: Number
+    Default: 3
+    MinValue: 0
+    MaxValue: 23
+    Description: Daily patching time (H) [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -121,6 +138,38 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  SystemsManager:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        IgnoreResourceConflicts: !Ref SSMIgnoreResourceConflicts
+        PatchingAt: !Ref SSMPatchingAt
+        LogicalNamePrefix: !Ref AWS::StackName
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/ssm.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/ssm.yaml
   SystemsManagerIncidentManager:
     Condition: CreateIncidentManager
     Type: AWS::CloudFormation::Stack

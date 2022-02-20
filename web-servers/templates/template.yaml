@@ -51,11 +51,6 @@ Metadata:
         Parameters: 
           - EC2DailySnapshotScheduledAt
       - Label: 
-          default: 'SystemsManager Configuration'
-        Parameters: 
-          - IgnoreResourceConflicts
-          - SSMPatchingAt
-      - Label: 
           default: 'Domain Configuration'
         Parameters: 
           - ACMValidationMethod
@@ -202,12 +197,6 @@ Parameters:
     Default: 8
     MinValue: 8
     Description: EC2 Volume Size [required]
-  IgnoreResourceConflicts:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
   Logging:
     Type: String
     Default: ENABLED
@@ -223,12 +212,6 @@ Parameters:
     Type: String
     Default: ''
     Description: Route53 hosted zone id
-  SSMPatchingAt:
-    Type: Number
-    Default: 3
-    MinValue: 0
-    MaxValue: 23
-    Description: Daily patching time (H) [required]
   SubnetPublicCidrBlockForAz1:
     Type: String
     Default: 10.0.0.0/24
@@ -481,38 +464,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/dlm.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
-  SystemsManager:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        IgnoreResourceConflicts: !Ref IgnoreResourceConflicts
-        PatchingAt: !Ref SSMPatchingAt
-        LogicalNamePrefix: !Ref AWS::StackName
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/ssm.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ssm.yaml
   WAF:
     Condition: CreateWAFForALB
     Type: AWS::CloudFormation::Stack

@@ -64,9 +64,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2PatchingAt | Number | 3 | ○ | パッチ処理を開始する時刻 |
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
 | EC2VolumeSize | Number | 8 | ○ | |
-| IgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
-| SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 の パブリックサブネット |
 | TransitGatewayId | String | | | Transit Gateway の Id |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGatewayに転送するアドレス範囲 |
