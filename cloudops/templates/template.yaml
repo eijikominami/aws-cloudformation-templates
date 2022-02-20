@@ -92,7 +92,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateIncidentManager: !Equals [ !Ref IncidentManager, '']
+  CreateIncidentManager: !Equals [ !Ref IncidentManager, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
