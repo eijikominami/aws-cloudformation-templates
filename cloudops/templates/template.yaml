@@ -141,10 +141,6 @@ Resources:
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
       TemplateURL: !If
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/incidentmanager.yaml
