@@ -809,7 +809,7 @@ Resources:
                 Configuration:
                   ActionMode: CREATE_UPDATE
                   StackName: CloudOps
-                  Capabilities: CAPABILITY_AUTO_EXPAND
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
                   TemplatePath: Source-CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
                   ParameterOverrides: !Join
