@@ -230,8 +230,8 @@ Resources:
           - CreateIncident
           - !Ref IncidentManagerArn
           - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
-      AlarmName: !Sub 'Notice-${CanaryName}-Synthetics-AccessError'
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
+      AlarmName: !Sub 'Incident-${CanaryName}-Synthetics-AccessError'
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
       Dimensions:
