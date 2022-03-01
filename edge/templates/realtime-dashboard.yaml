@@ -859,7 +859,7 @@ Resources:
           Value: !Ref TagValue 
   # ElasticSearch
   ElasticSearchDomain:
-    Type: AWS::Elasticsearch::Domain
+    Type: AWS::OpenSearchService::Domain
     Properties: 
       AccessPolicies:
         Version: '2012-10-17'
@@ -884,7 +884,7 @@ Resources:
         EBSEnabled: true
         VolumeSize: !Ref ElasticSearchVolumeSize
         VolumeType: gp2
-      ElasticsearchClusterConfig: 
+      ClusterConfig: 
         DedicatedMasterCount: 3
         DedicatedMasterEnabled: true
         DedicatedMasterType: !Ref ElasticSearchMasterType
@@ -893,7 +893,7 @@ Resources:
         ZoneAwarenessConfig: 
           AvailabilityZoneCount: 3
         ZoneAwarenessEnabled: true
-      ElasticsearchVersion: !Ref ElasticsearchVersion
+      EngineVersion: !Ref ElasticsearchVersion
       EncryptionAtRestOptions:
         Enabled: true
         KmsKeyId: !GetAtt KMSKey.Arn
