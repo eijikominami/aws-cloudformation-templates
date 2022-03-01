@@ -125,7 +125,7 @@ Resources:
     DeletionPolicy: Retain
     Properties: 
       AWSServiceName: inspector2.amazonaws.com
-      Description: A service-linked role required for Amazon Inspector to access your resources.
+      Description: Allowing Inspector to call AWS services on behalf of customers
   # IAM Role
   IAMRoleForInspectorEvents:
     Condition: IsSupportedRegion
