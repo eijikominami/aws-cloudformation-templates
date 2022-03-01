@@ -178,7 +178,7 @@ Parameters:
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
-    Description: Daily Snapshot time (HH:MM) [required]
+    Description: Daily Snapshot time (HH:MM)
   EC2ImageId:
     Type: AWS::EC2::Image::Id
     Default: ami-08a8688fb7eacb171
@@ -284,6 +284,7 @@ Conditions:
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreateCloudFront: !Equals [ !Ref CloudFrontState, ENABLED ]
+  CreateDataLifecycleManager: !Not [ !Equals [ !Ref EC2DailySnapshotScheduledAt, '' ] ]
   CreateRoute53: !And [ !Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -442,6 +443,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/autoscaling.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
   DataLifecycleManager:
+    Condition: CreateDataLifecycleManager
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:

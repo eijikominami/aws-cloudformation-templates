@@ -219,7 +219,7 @@ Conditions:
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
   CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
-  CreateDestinationForRTMP: !Equals [ !Ref OutputType, RTMP] 
+  CreateDestinationForRTMP: !Or [ !Equals [ !Ref OutputType, RTMP], !And [ !Not [ !Equals [ !Ref RtmpUrl1, ''] ], !Not [ !Equals [ !Ref RtmpStreamKey1, ''] ] ] ]
   CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
