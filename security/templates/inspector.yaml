@@ -172,8 +172,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'inspector2.enable'
-                  - 'inspector2.disable'
+                  - 'inspector2.Enable'
+                  - 'inspector2.Disable'
                 Resource:
                   - '*'
         - PolicyName: CloudWatchLogs
