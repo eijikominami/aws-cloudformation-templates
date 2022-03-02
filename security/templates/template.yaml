@@ -428,11 +428,33 @@ Resources:
           - Id: ExpirationInDays
             ExpirationInDays: 60
             Status: Enabled
+          - !If 
+            - CreateS3ReplicationForAnalysis
+            - Id: NoncurrentVersionExpirationInDays
+              NoncurrentVersionExpiration: 
+                NewerNoncurrentVersions: 90
+                NoncurrentDays: 0
+              Status: Enabled
+            - !Ref AWS::NoValue
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      ReplicationConfiguration: !If
+        - CreateS3ReplicationForAnalysis
+        - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-S3Replication-${AWS::Region}
+          Rules: 
+            - Destination: 
+                Account: !Ref AccountIdForAnalysis
+                Bucket: !Sub arn:aws:s3:::${BucketNameForAnalysis}
+              Id: Analysis
+              Status: Enabled
+        - !Ref AWS::NoValue
+      VersioningConfiguration: !If 
+        - CreateS3ReplicationForAnalysis
+        - Status: Enabled
+        - !Ref AWS::NoValue
       Tags:
         - Key: environment
           Value: !Ref Environment
