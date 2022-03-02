@@ -290,7 +290,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: cloudfront.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Policies:
         - PolicyName: KinesisStreams
           PolicyDocument:
@@ -309,7 +309,7 @@ Resources:
                   - kms:GenerateDataKey
                 Resource:
                   - !GetAtt KMSKey.Arn
-      RoleName: !Sub '${LogicalNamePrefix}-CloudFrontRealtimeLog-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-CloudFrontRealtimeLog-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -324,7 +324,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Lambda to access CloudFormation and CloudWatch Logs.
       Policies:
         - PolicyName: CodeGuru
@@ -357,7 +357,7 @@ Resources:
                   - cloudformation:DescribeStacks
                   - cloudformation:UpdateStack
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-LambdaForRealtimeDashboard-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-LambdaForRealtimeDashboard-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -372,7 +372,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: firehose.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for KinesisFirehose to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
       Policies:
         - PolicyName: CustomPolicy
@@ -452,7 +452,7 @@ Resources:
                     'kms:ViaService': kinesis.ap-northeast-1.amazonaws.com
                   StringLike:
                     'kms:EncryptionContext:aws:kinesis:arn': !GetAtt Kinesis.Arn
-      RoleName: !Sub '${LogicalNamePrefix}-Firehose-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-Firehose-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -849,7 +849,7 @@ Resources:
             Principal:
               Service: cloudtrail.amazonaws.com
             Action:
-              - 'kms:DescribeKey'
+              - kms:DescribeKey
             Resource:
               - '*'
       KeyUsage: ENCRYPT_DECRYPT

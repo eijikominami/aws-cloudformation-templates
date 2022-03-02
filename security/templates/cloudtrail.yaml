@@ -71,7 +71,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: cloudtrail.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for CloudTrail to access CloudWatch Logs.
       # Allow CloudTrail 'logs:PutLogEvents' and 'logs:CreateLogStream' permission.
       Policies:
@@ -81,11 +81,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
-                  - 'logs:CreateLogStream'
+                  - logs:PutLogEvents
+                  - logs:CreateLogStream
                 Resource:
                   - !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
-      RoleName: !Sub '${LogicalNamePrefix}-CloudTrail-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-CloudTrail-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -158,7 +158,7 @@ Resources:
             Principal:
               Service: cloudtrail.amazonaws.com
             Action:
-              - 'kms:DescribeKey'
+              - kms:DescribeKey
             Resource:
               - '*'
       KeyUsage: ENCRYPT_DECRYPT
@@ -209,14 +209,14 @@ Resources:
             Principal:
               Service: cloudtrail.amazonaws.com
             Action:
-              - 's3:GetBucketAcl'
+              - s3:GetBucketAcl
             Resource:
               - !GetAtt S3ForCloudTrail.Arn
           - Effect: Allow
             Principal:
               Service: cloudtrail.amazonaws.com
             Action:
-              - 's3:PutObject'
+              - s3:PutObject
             Resource:
               - !Join
                 - ''
@@ -265,7 +265,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *不正なAPIコールを検知* しました。CloudTrail および CloudWatch Logs で当該イベントを特定し、IAMロールなどの *権限設定に問題が無いかを確認してください* 。'
-      AlarmName: !Sub 'Notice-${LogicalNamePrefix}-CloudTrail-Unauthorized-API-Calls'
+      AlarmName: !Sub Notice-${LogicalNamePrefix}-CloudTrail-Unauthorized-API-Calls
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: UnauthorizedAPICalls
@@ -291,7 +291,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *MFAなしのログインを検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-Login-Without-MFA'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-Login-Without-MFA
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: LoginWithoutMFA
@@ -317,7 +317,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *ルートアカウントに対する変更を検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-For-RootAcount'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-For-RootAcount
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: ForRootAcount
@@ -343,7 +343,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *IAMポリシーの変更を検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-IamPolicy-Changes'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-IamPolicy-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: IamPolicyChanges
@@ -369,7 +369,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *CloudTrailの設定変更を検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-CloudTrailConfiguration-Changes'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-CloudTrailConfiguration-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: CloudTrailConfigurationChanges
@@ -395,7 +395,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *ログイン認証失敗を検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-AuthenticationFailures-Detected'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-AuthenticationFailures-Detected
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: AuthenticationFailuresDetected
@@ -421,7 +421,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *カスタマー作成CMKの無効化もしくは削除を検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-CustomerCreatedCMKs-Changes'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-CustomerCreatedCMKs-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: CustomerCreatedCMKsChanges
@@ -447,7 +447,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *S3のバケットポリシーの変更を検知* しました。'
-      AlarmName: !Sub 'Notice-${LogicalNamePrefix}-CloudTrail-S3BucketPolicy-Changes'
+      AlarmName: !Sub Notice-${LogicalNamePrefix}-CloudTrail-S3BucketPolicy-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: S3BucketPolicyChanges
@@ -473,7 +473,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *Configの設定変更を検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-ConfigConfiguration-Changes'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-ConfigConfiguration-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: ConfigConfigurationChanges
@@ -499,7 +499,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *セキュリティグループの変更を検知* しました。'
-      AlarmName: !Sub 'Warning-${LogicalNamePrefix}-CloudTrail-SecurityGroup-Changes'
+      AlarmName: !Sub Warning-${LogicalNamePrefix}-CloudTrail-SecurityGroup-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: SecurityGroupChanges
@@ -525,7 +525,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *NACLの変更を検知* しました。'
-      AlarmName: !Sub 'Notice-${LogicalNamePrefix}-CloudTrail-NACL-Changes'
+      AlarmName: !Sub Notice-${LogicalNamePrefix}-CloudTrail-NACL-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: NACLChanges
@@ -551,7 +551,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *ネットワークゲートウェイの変更を検知* しました。'
-      AlarmName: !Sub 'Notice-${LogicalNamePrefix}-CloudTrail-NetworkGateway-Changes'
+      AlarmName: !Sub Notice-${LogicalNamePrefix}-CloudTrail-NetworkGateway-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: NetworkGatewayChanges
@@ -577,7 +577,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *ルートテーブルの変更を検知* しました。'
-      AlarmName: !Sub 'Notice-${LogicalNamePrefix}-CloudTrail-RouteTable-Changes'
+      AlarmName: !Sub Notice-${LogicalNamePrefix}-CloudTrail-RouteTable-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: RouteTableChanges
@@ -603,7 +603,7 @@ Resources:
       AlarmActions:
         - !Ref SnsTopicARN
       AlarmDescription: '*CloudTrail* が *VPCの変更を検知* しました。'
-      AlarmName: !Sub 'Notice-${LogicalNamePrefix}-CloudTrail-Vpc-Changes'
+      AlarmName: !Sub Notice-${LogicalNamePrefix}-CloudTrail-Vpc-Changes
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: VpcChanges

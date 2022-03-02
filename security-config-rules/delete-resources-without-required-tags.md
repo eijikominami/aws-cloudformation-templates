@@ -43,9 +43,9 @@ You can give optional parameters as follows.
 
 | Name | Parameter | Details | 
 | --- | --- | --- | 
-| AutoRemediation | ENABLED / DISABLED | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled. |
-| RequiredTagKey | string | AWS Config removes AWS resouces without this tag. |
-| RequiredTagValue | string | AWS Config removes AWS resouces without this tag. |
+| AutoRemediation | ENABLED / DISABLED | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled |
+| RequiredTagKey | string | AWS Config removes AWS resouces without this tag |
+| RequiredTagValue | string | AWS Config removes AWS resouces without this tag |
 
 ---------------------------------------
 

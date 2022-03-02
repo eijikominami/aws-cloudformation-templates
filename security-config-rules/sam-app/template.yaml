@@ -120,7 +120,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Lambda to access API Gateway, CloudFront, Lambda and Config.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
@@ -132,8 +132,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'codeguru-profiler:ConfigureAgent'
-                  - 'codeguru-profiler:PostAgentProfile'
+                  - codeguru-profiler:ConfigureAgent
+                  - codeguru-profiler:PostAgentProfile
                 Resource: '*'
         - PolicyName: CloudWatchLambdaInsightsExecutionRolePolicy
           PolicyDocument:
@@ -141,8 +141,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
         - PolicyName: CustomPolicy
           PolicyDocument:
@@ -150,23 +150,23 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'apigateway:GET'
-                  - 'cloudfront:ListTagsForResource'
-                  - 'iam:GetRole'
-                  - 'lambda:ListTags'
+                  - apigateway:GET
+                  - cloudfront:ListTagsForResource
+                  - iam:GetRole
+                  - lambda:ListTags
                   - 'config:*'
                 Resource:
                   - '*'
               - Effect: Allow
                 Action:
-                  - 's3:GetObject'
-                  - 's3:ListObjects'
-                  - 's3:DeleteObject'
-                  - 's3:DeleteBucket'
-                  - 'dynamodb:deletetable'
-                  - 'apigateway:DELETE'
-                  - 'iam:ListRoles'
-                  - 'lambda:DeleteFunction'
+                  - s3:GetObject
+                  - s3:ListObjects
+                  - s3:DeleteObject
+                  - s3:DeleteBucket
+                  - dynamodb:deletetable
+                  - apigateway:DELETE
+                  - iam:ListRoles
+                  - lambda:DeleteFunction
                 Resource:
                   - '*'
         - PolicyName: CloudWatchLogs
@@ -175,13 +175,13 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogStream'
+                  - logs:CreateLogStream
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
+                  - logs:PutLogEvents
                 Resource: '*' 
-      RoleName: !Sub '${AWS::StackName}-Lambda-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-Lambda-${AWS::Region}
       Tags:
         - Key: !Ref RequiredTagKey
           Value: !Ref RequiredTagValue

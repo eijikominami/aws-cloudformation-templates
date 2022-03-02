@@ -25,7 +25,7 @@ Resources:
       AlarmDescription: '*DynamoDB* で *ユーザエラー* が発生しています。これは、認証の失敗、必須パラメータの欠落、またはテーブルにプロビジョニングされているスループットの超過など、リクエストに関連した問題が発生していることを示しています。 *設定値やアプリケーションを速やかに修正* してください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-DynamoDB-UserErrors'
+        - !Sub Warning-${CustomAlarmName}-DynamoDB-UserErrors
         - Warning-DynamoDB-UserErrors
       ComparisonOperator: GreaterThanOrEqualToThreshold
       # Not Needed
@@ -49,7 +49,7 @@ Resources:
       AlarmDescription: '*DynamoDB* で *システムエラー* が発生しています。これは、 *AWS側で問題が発生* していることを示しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-DynamoDB-SystemErrors'
+        - !Sub Warning-${CustomAlarmName}-DynamoDB-SystemErrors
         - Warning-DynamoDB-SystemErrors
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:

@@ -69,14 +69,14 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | ArtifactBacketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | The Docker image name for CodeBuild |
-| GitHubOAuthToken | String | | | The **OAuth token** to access GitHub. |
+| GitHubOAuthToken | String | | | The **OAuth token** to access GitHub |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | The **GitHub owner name** for CloudFormation Template Configuration files |
 | **GitHubRepoNameForTemplateConfiguration** | String | | | The **GitHub repository name** for CloudFormation Template Configuration files |
-| TemplateConfigurationBasePath | String | | | The base path of template configration files. |
-| **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed. |
-| **DefaultSecuritySettingsConfigRules** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
-| **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed. |
-| **Notification** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed. |
-| **Route53** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Route53` stack is deployed. |
-| **StaticWebsiteHosting** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed. |
-| **WebServers** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed. |
+| TemplateConfigurationBasePath | String | | | The base path of template configration files |
+| **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
+| **DefaultSecuritySettingsConfigRules** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings-ConfigRules` stack is deployed |
+| **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
+| **Notification** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed |
+| **Route53** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Route53` stack is deployed |
+| **StaticWebsiteHosting** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed |
+| **WebServers** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed |

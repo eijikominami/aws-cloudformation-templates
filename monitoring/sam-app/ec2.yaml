@@ -31,7 +31,7 @@ Resources:
       AlarmDescription: '*EC2* で *ステータスチェックエラー* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html|インスタンスの利用可能な CloudWatch メトリクスのリスト表示> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-EC2-StatusCheckFailed'
+        - !Sub Warning-${CustomAlarmName}-EC2-StatusCheckFailed
         - Warning-EC2-StatusCheckFailed
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
@@ -53,7 +53,7 @@ Resources:
       AlarmDescription: '*EC2* で *CPU使用率が上昇* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html|インスタンスの利用可能な CloudWatch メトリクスのリスト表示> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-EC2-CPU-Overloaded'
+        - !Sub Warning-${CustomAlarmName}-EC2-CPU-Overloaded
         - Warning-EC2-CPU-Overloaded
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1

@@ -51,6 +51,6 @@ You can provide optional parameters as follows.
 | IncidentManagerArn | String | | | Systems Manager Incident Manager response plan ARN |
 | IncidentDurationInSeconds | Number | 600 | ○ | The time to wait until starting an incident |
 | IncidentSuccessPercentThreshold | Number | 50 | ○ | The threshold of success percent starting an incident |
-| **CanaryName** | String | | ○ | The name for this canary. |
-| **DomainName** | String | | ○ | The domain name that hearbeat scripts watches. |
-| WatchedPagePath | String | /index.html | ○ | The page path that hearbeat scripts watches. |
+| **CanaryName** | String | | ○ | The name for this canary |
+| **DomainName** | String | | ○ | The domain name that hearbeat scripts watches |
+| WatchedPagePath | String | /index.html | ○ | The page path that hearbeat scripts watches |

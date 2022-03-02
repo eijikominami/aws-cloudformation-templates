@@ -491,7 +491,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: s3.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Policies:
         - PolicyName: S3Replication
           PolicyDocument:
@@ -499,19 +499,19 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 's3:GetReplicationConfiguration'
-                  - 's3:ListBucket'
+                  - s3:GetReplicationConfiguration
+                  - s3:ListBucket
                 Resource: !Join
                   - ''
                   - - 'arn:aws:s3:::'
                     - !Ref DomainName
               - Effect: Allow
                 Action:
-                  - 's3:GetObjectVersion'
-                  - 's3:GetObjectVersionAcl'
-                  - 's3:GetObjectVersionTagging'
-                  - 's3:GetObjectRetention'
-                  - 's3:GetObjectLegalHold'
+                  - s3:GetObjectVersion
+                  - s3:GetObjectVersionAcl
+                  - s3:GetObjectVersionTagging
+                  - s3:GetObjectRetention
+                  - s3:GetObjectLegalHold
                 Resource: !Join
                   - ''
                   - - 'arn:aws:s3:::'
@@ -519,9 +519,9 @@ Resources:
                     - /*
               - Effect: Allow
                 Action:
-                  - 's3:ReplicateObject'
-                  - 's3:ReplicateDelete'
-                  - 's3:ReplicateTags'
+                  - s3:ReplicateObject
+                  - s3:ReplicateDelete
+                  - s3:ReplicateTags
                 Resource: !Join
                   - ''
                   - - !Ref S3DestinationBucketArnOfCrossRegionReplication
@@ -601,8 +601,8 @@ Resources:
             Principal:
               AWS: !Sub arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}
             Action:
-              - 's3:GetObject'
-              - 's3:ListBucket'
+              - s3:GetObject
+              - s3:ListBucket
             Resource:
               - !Sub arn:aws:s3:::${S3ForWebHosting}/*
               - !Sub arn:aws:s3:::${S3ForWebHosting}

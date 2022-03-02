@@ -25,7 +25,6 @@
 | AWS CloudTrail | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalNamePrefix=CloudTrail) |
 | AWS Config | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalNamePrefix=Config) |
 | Amazon Macie | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalNamePrefix=Macie) |
-| AWS Audit Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AuditManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/auditmanager.yaml&param_LogicalNamePrefix=AuditManager) |
 
 ## アーキテクチャ
 
@@ -45,7 +44,7 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 
 ### Amazon Detective
 
-このテンプレートは、 ``AWS Detective`` の　behavior graph を有効化します。
+このテンプレートは、 ``AWS Detective`` の behavior graph を有効化します。
 
 ### Amazon GuardDuty
 
@@ -66,7 +65,7 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 + [Center for Internet Security (CIS) Benchmarks](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_cis.html)
 + [Security Best Practices for Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_security-best-practices.html)
 
-Amazon Inspector は、``Amazon EventBridge``　によって **毎週月曜日午前9時** に実行されます。
+Amazon Inspector は、``Amazon EventBridge`` によって **毎週月曜日午前9時** に実行されます。
 
 このテンプレートは、以下のリージョンをサポートしています。
 
@@ -105,10 +104,6 @@ Amazon Inspector は、``Amazon EventBridge``　によって **毎週月曜日�
 
 このテンプレートは、 ``AWS Macie`` を構成します。 
 
-### AWS Audit Manager
-
-このテンプレートは、``AWS Well Architected Framework`` , ``AWS Foundational Security Best Practices`` , ``AWS Operational Best Practices`` アセスメントを作成します。
-
 ### Amazon EventBridge
 
 このテンプレートは、 ``AWS Health`` に関する  ``CloudWatchイベント`` を作成します。
@@ -130,10 +125,12 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AccountIdForAnalysis | String | | | 転送先の分析用AWSアカウント |
 | AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Amazon Detective が有効化されます。|
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
+| BucketNameForAnalysis | String | | | 転送先の分析用S3バケット |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | セキュリティチェックに関する通知フィルタ | 
 

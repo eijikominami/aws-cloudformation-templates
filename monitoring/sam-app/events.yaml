@@ -29,8 +29,8 @@ Resources:
       AlarmDescription: !Sub '*${EventsRuleName}* の *呼び出しが失敗* しました。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Notice-${SNSTopicArn}-Events-${EventsRuleName}-FailedInvocations'
-        - !Sub 'Notice-Events-${EventsRuleName}-FailedInvocations'
+        - !Sub Notice-${SNSTopicArn}-Events-${EventsRuleName}-FailedInvocations
+        - !Sub Notice-Events-${EventsRuleName}-FailedInvocations
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: RuleName

@@ -56,17 +56,17 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| ArtifactBacketInVirginia | String | | | S3 artifact bucket name in N.Verginia region. |
+| ArtifactBacketInVirginia | String | | | S3 artifact bucket name in N.Verginia region |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
 | **GitHubOAuthToken** | String | | | OAuth token to access GitHub |
 | GitHubOwnerNameForTemplateConfiguration | String | | | GitHub owner name for CloudFormation Template Configuration files |
 | GitHubRepoNameForTemplateConfiguration | String | | | GitHub repository name for CloudFormation Template Configuration files |
 | GitHubStage | String | master | ○ | GitHub stage name of the repository CloudFormation templates are located |
-| DefaultSecuritySettingsConfigRules | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings-ConfigRules` stack is deployed. |
-| GlobalSettings | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed. |
-| Notification | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed. |
-| StaticWebsiteHosting | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed. |
-| WebServers | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed. |
+| DefaultSecuritySettingsConfigRules | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings-ConfigRules` stack is deployed |
+| GlobalSettings | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
+| Notification | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed |
+| StaticWebsiteHosting | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed |
+| WebServers | ENABLED / SYSTEMS_MANAGER_ONLY / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed |
 
 ---------------------------------------
 

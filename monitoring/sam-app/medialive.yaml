@@ -37,8 +37,8 @@ Resources:
       AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *4XX エラー* が発生しました。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-4XX-Error-Occured'
-        - !Sub 'Warning-MediaLive-${ChannelId}-4XX-Error-Occured'
+        - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-4XX-Error-Occured
+        - !Sub Warning-MediaLive-${ChannelId}-4XX-Error-Occured
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: OutputGroupName
@@ -65,8 +65,8 @@ Resources:
       AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *5XX エラー* が発生しました。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-5XX-Error-Occured'
-        - !Sub 'Warning-MediaLive-${ChannelId}-5XX-Error-Occured'
+        - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-5XX-Error-Occured
+        - !Sub Warning-MediaLive-${ChannelId}-5XX-Error-Occured
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: OutputGroupName
@@ -93,8 +93,8 @@ Resources:
       AlarmDescription: !Sub '*MediaLive* (${ChannelId}) で *アラートが発生* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Active-Alerts'
-        - !Sub 'Warning-MediaLive-${ChannelId}-Active-Alerts'
+        - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Active-Alerts
+        - !Sub Warning-MediaLive-${ChannelId}-Active-Alerts
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: ChannelId
@@ -119,8 +119,8 @@ Resources:
       AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の *現用入力が非アクティブ* です。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Primary-Input-Inactive'
-        - !Sub 'Warning-MediaLive-${ChannelId}-Primary-Input-Inactive'
+        - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Primary-Input-Inactive
+        - !Sub Warning-MediaLive-${ChannelId}-Primary-Input-Inactive
       ComparisonOperator: LessThanThreshold
       Dimensions:
         - Name: ChannelId

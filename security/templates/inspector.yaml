@@ -141,7 +141,7 @@ Resources:
                 Action:
                   - inspector:StartAssessmentRun
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-InspectorEvents-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-InspectorEvents-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

@@ -25,8 +25,8 @@ Resources:
       AlarmDescription: !Sub '*SSM (RunCommand)* で *タイムアウト* が発生しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-SSM-DeliveryTimedOut'
-        - !Sub Warning-SSM-DeliveryTimedOut
+        - !Sub Warning-${CustomAlarmName}-SSM-DeliveryTimedOut
+        - Warning-SSM-DeliveryTimedOut
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
@@ -47,8 +47,8 @@ Resources:
       AlarmDescription: !Sub '*SSM (RunCommand)* で *コマンド実行が失敗* しました。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-SSM-CommandsFailed'
-        - !Sub Warning-SSM-CommandsFailed
+        - !Sub Warning-${CustomAlarmName}-SSM-CommandsFailed
+        - Warning-SSM-CommandsFailed
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       EvaluationPeriods: 1

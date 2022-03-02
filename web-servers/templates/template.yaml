@@ -642,7 +642,7 @@ Resources:
                   - logs:DescribeLogGroups
                   - logs:DescribeLogStreams
                 Resource: '*'
-      RoleName: !Sub '${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

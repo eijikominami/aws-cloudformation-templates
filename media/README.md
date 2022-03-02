@@ -58,10 +58,10 @@ You can provide optional parameters as follows.
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
 | LiveSource | ENABLED or DISABLED | ENABLED | ○ | Enable or disable a live source |
 | OutputType | String | RTMP | ○ | OutputType |
-| RtmpUrl1 | String | | | The rtmp url a stream sends to. |
-| RtmpStreamName1 | String | | | The rtmp stream name a stream sends to. |
-| RtmpUrl2 | String | | | The rtmp url a stream sends to. |
-| RtmpStreamName2 | String | | | The rtmp stream name a stream sends to. |
+| RtmpUrl1 | String | | | The rtmp url a stream sends to |
+| RtmpStreamName1 | String | | | The rtmp stream name a stream sends to |
+| RtmpUrl2 | String | | | The rtmp url a stream sends to |
+| RtmpStreamName2 | String | | | The rtmp stream name a stream sends to |
 | StreamKey | String | stream | | A unique name for the location the RTMP stream is being pushed to |
 | VideoBitrate | Number | 2200000 | ○ | Average video bitrate in bits/second |
 | VodSourceBucket | String | | | The S3 bucket Name VOD contents exist |

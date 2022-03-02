@@ -118,13 +118,13 @@ Resources:
           - Effect: Allow
             Principal:
               Service: ec2.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Managed Instances.
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      RoleName: !Sub '${LogicalNamePrefix}-EC2SSM-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-EC2SSM-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

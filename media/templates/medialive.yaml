@@ -272,7 +272,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: medialive.amazonaws.com 
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for MediaLive to access S3.
       Policies:
         - PolicyName: CustomPolicy
@@ -320,9 +320,9 @@ Resources:
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'mediapackage:DescribeChannel'
+                  - mediapackage:DescribeChannel
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-MediaLive-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-MediaLive-${AWS::Region}
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue

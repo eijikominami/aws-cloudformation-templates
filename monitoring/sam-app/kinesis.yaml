@@ -39,8 +39,8 @@ Resources:
       AlarmDescription: !Sub '*Kinesis* (${KinesisStreamName}) で *GetRecords.IteratorAgeMillisecondsの値が増加* しています。これは、レコードを読み取る *アプリケーションの処理が遅延* していることを示しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Notice-${CustomAlarmName}-Kinesis-${KinesisStreamName}-IteratorAgeMilliseconds-is-Too-Long'
-        - !Sub 'Notice-Kinesis-${KinesisStreamName}-IteratorAgeMilliseconds-is-Too-Long'
+        - !Sub Notice-${CustomAlarmName}-Kinesis-${KinesisStreamName}-IteratorAgeMilliseconds-is-Too-Long
+        - !Sub Notice-Kinesis-${KinesisStreamName}-IteratorAgeMilliseconds-is-Too-Long
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 3
       Dimensions:
@@ -64,8 +64,8 @@ Resources:
       AlarmDescription: !Sub '*Kinesis* (${KinesisStreamName}) で *入力レコード数が増加* しています。このエラーが継続する場合は、 *トラフィックが増大* している可能性があります。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Kinesis-${KinesisStreamName}-PutRecord-Success-is-Too-High'
-        - !Sub 'Warning-Kinesis-${KinesisStreamName}-PutRecord-Success-is-Too-High'
+        - !Sub Warning-${CustomAlarmName}-Kinesis-${KinesisStreamName}-PutRecord-Success-is-Too-High
+        - !Sub Warning-Kinesis-${KinesisStreamName}-PutRecord-Success-is-Too-High
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: StreamName
@@ -89,8 +89,8 @@ Resources:
       AlarmDescription: !Sub '*Kinesis* (${KinesisStreamName}) で *スロットリングが発生* しています。これは、プロビジョニングされたスループット値を超えるリクエストが発生して、書き込み処理が中断されたことを示しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Kinesis-${KinesisStreamName}-WriteProvisionedThroughputExceeded'
-        - !Sub 'Warning-Kinesis-${KinesisStreamName}-WriteProvisionedThroughputExceeded'
+        - !Sub Warning-${CustomAlarmName}-Kinesis-${KinesisStreamName}-WriteProvisionedThroughputExceeded
+        - !Sub Warning-Kinesis-${KinesisStreamName}-WriteProvisionedThroughputExceeded
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: StreamName

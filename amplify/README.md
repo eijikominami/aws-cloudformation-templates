@@ -31,6 +31,6 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AmplifyConsoleAppId | String |  |  | You can provide this parameter after your first deployment. |
+| AmplifyConsoleAppId | String |  |  | You can provide this parameter after your first deployment |
 | **DomainName** | String | | ○ | The custom domain name for your Amplify Console application |
 | **RepositoryName** | String | | ○ | The repository name on CodeCommit | 

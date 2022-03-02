@@ -39,8 +39,8 @@ Resources:
       AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Errors'
-        - !Sub 'Warning-Lambda-${FunctionResouceName}-Errors'
+        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Errors
+        - !Sub Warning-Lambda-${FunctionResouceName}-Errors
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
@@ -66,8 +66,8 @@ Resources:
       AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でクライアントエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ClientError'
-        - !Sub 'Warning-Lambda-${FunctionResouceName}-ClientError'
+        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ClientError
+        - !Sub Warning-Lambda-${FunctionResouceName}-ClientError
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
@@ -93,8 +93,8 @@ Resources:
       AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でタイプエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-TypeError'
-        - !Sub 'Warning-Lambda-${FunctionResouceName}-TypeError'
+        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-TypeError
+        - !Sub Warning-Lambda-${FunctionResouceName}-TypeError
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
@@ -130,8 +130,8 @@ Resources:
       AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* からエラーログが出力されています。CloudWatch Logs から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ErrorLog'
-        - !Sub 'Warning-Lambda-${FunctionResouceName}-ErrorLog'
+        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ErrorLog
+        - !Sub Warning-Lambda-${FunctionResouceName}-ErrorLog
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: !Sub ${FunctionResouceName}-ErrorLog
@@ -152,8 +152,8 @@ Resources:
       AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* の実行時間がタイムアウト値に近づいています。X-Ray から詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Timeout-Will-Occur'
-        - !Sub 'Warning-Lambda-${FunctionResouceName}-Timeout-Will-Occur'
+        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Timeout-Will-Occur
+        - !Sub Warning-Lambda-${FunctionResouceName}-Timeout-Will-Occur
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
@@ -179,8 +179,8 @@ Resources:
       AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でスロットリングが発生しています。これは、プロビジョニングされたスループット値を超えるリクエストが発生して、Lambdaの実行が中断されたことを示しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Throttles'
-        - !Sub 'Warning-Lambda-${FunctionResouceName}-Throttles'
+        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-Throttles
+        - !Sub Warning-Lambda-${FunctionResouceName}-Throttles
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName

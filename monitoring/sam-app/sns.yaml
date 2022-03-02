@@ -30,7 +30,7 @@ Resources:
       AlarmName: !If
         - CreateCustomAlarmName
         - Warning-SNS-NumberOfNotificationsFailed-Occured
-        - !Sub 'Warning-${CustomAlarmName}-SNS-NumberOfNotificationsFailed-Occured'
+        - !Sub Warning-${CustomAlarmName}-SNS-NumberOfNotificationsFailed-Occured
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions: 
         - Name: TopicName
