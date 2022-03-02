@@ -192,7 +192,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  LambdauditManagerRegister:
+  LambdaAuditManagerRegister:
     Type: AWS::Lambda::Function
     Properties:
       Architectures:
@@ -230,10 +230,10 @@ Resources:
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.9
       Timeout: 60
-  LambdauditManagerRegisterLogGroup:
+  LambdaAuditManagerRegisterLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdauditManagerRegister}
+      LogGroupName: !Sub /aws/lambda/${LambdaAuditManagerRegister}
       RetentionInDays: 60
       Tags: 
         - Key: !Ref TagKey
