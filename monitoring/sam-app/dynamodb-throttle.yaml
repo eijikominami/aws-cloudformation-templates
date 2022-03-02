@@ -29,8 +29,8 @@ Resources:
       AlarmDescription: !Sub '*DynamoDB* (${TableName}) の *書き込み処理でスロットリングが発生* しています。これは、プロビジョニングされたスループット値を超えるリクエストが発生して、書き込み処理が中断されたことを示しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-DynamoDB-${TableName}-WriteThrottleEvents'
-        - !Sub 'Warning-DynamoDB-${TableName}-WriteThrottleEvents'
+        - !Sub Warning-${CustomAlarmName}-DynamoDB-${TableName}-WriteThrottleEvents
+        - !Sub Warning-DynamoDB-${TableName}-WriteThrottleEvents
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: TableName
@@ -54,8 +54,8 @@ Resources:
       AlarmDescription: !Sub '*DynamoDB* (${TableName}) の *読み込み処理でスロットリングが発生* しています。これは、プロビジョニングされたスループット値を超えるリクエストが発生して、読み込み処理が中断されたことを示しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-DynamoDB-${TableName}-ReadThrottleEvents'
-        - !Sub 'Warning-DynamoDB-${TableName}-ReadThrottleEvents'
+        - !Sub Warning-${CustomAlarmName}-DynamoDB-${TableName}-ReadThrottleEvents
+        - !Sub Warning-DynamoDB-${TableName}-ReadThrottleEvents
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: TableName

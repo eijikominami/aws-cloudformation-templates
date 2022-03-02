@@ -178,7 +178,7 @@ Parameters:
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
-    Description: Daily Snapshot time (HH:MM) [required]
+    Description: Daily Snapshot time (HH:MM)
   EC2ImageId:
     Type: AWS::EC2::Image::Id
     Default: ami-08a8688fb7eacb171
@@ -284,6 +284,7 @@ Conditions:
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreateCloudFront: !Equals [ !Ref CloudFrontState, ENABLED ]
+  CreateDataLifecycleManager: !Not [ !Equals [ !Ref EC2DailySnapshotScheduledAt, '' ] ]
   CreateRoute53: !And [ !Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -442,6 +443,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/autoscaling.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
   DataLifecycleManager:
+    Condition: CreateDataLifecycleManager
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -571,7 +573,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -588,7 +590,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -604,7 +606,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: ec2.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Managed Instances.
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
@@ -625,7 +627,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: vpc-flow-logs.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for VPC FlowLog.
       Policies:
         - PolicyName: CloudWatchLogs
@@ -634,13 +636,13 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                  - 'logs:DescribeLogGroups'
-                  - 'logs:DescribeLogStreams'
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
                 Resource: '*'
-      RoleName: !Sub '${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -805,7 +807,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

@@ -32,7 +32,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| IncidentManager | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, `IncidentManager` stack is deployed. |
+| IncidentManager | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, `IncidentManager` stack is deployed |
 | IncidentManagerAlias | String | admimistrator | ○ | The unique and identifiable alias of the contact or escalation plan |
 | IncidentManagerChatbotSnsArn | String | | | The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident |
 | IncidentManagerDisplayName | String | Administrator | ○ | The full name of the contact or escalation plan |
@@ -40,7 +40,7 @@ You can provide optional parameters as follows.
 | IncidentManagerEmail | String | | | The email address |
 | IncidentManagerPhoneNumber | String | | | The Phone Number |
 | IncidentManagerWorkloadName | String | Workload | ○ | The workload name |
-| SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created. |
+| SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created |
 | SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
 
 ### CodeGuru Profiler

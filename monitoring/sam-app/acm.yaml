@@ -29,8 +29,8 @@ Resources:
       AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り30日以下です。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Notice-${CustomAlarmName}-CertificateManager-DaysToExpiry-30'
-        - !Sub Notice-CertificateManager-DaysToExpiry-30
+        - !Sub Notice-${CustomAlarmName}-CertificateManager-DaysToExpiry-30
+        - Notice-CertificateManager-DaysToExpiry-30
       ComparisonOperator: LessThanOrEqualToThreshold
       Dimensions:
         - Name: CertificateArn
@@ -54,8 +54,8 @@ Resources:
       AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り7日以下です。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-7'
-        - !Sub Warning-CertificateManager-DaysToExpiry-7
+        - !Sub Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-7
+        - Warning-CertificateManager-DaysToExpiry-7
       ComparisonOperator: LessThanOrEqualToThreshold
       Dimensions:
         - Name: CertificateArn
@@ -79,8 +79,8 @@ Resources:
       AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り1日以下です。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-1'
-        - !Sub Warning-CertificateManager-DaysToExpiry-1
+        - !Sub Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-1
+        - Warning-CertificateManager-DaysToExpiry-1
       ComparisonOperator: LessThanOrEqualToThreshold
       Dimensions:
         - Name: CertificateArn

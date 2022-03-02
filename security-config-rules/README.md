@@ -57,6 +57,6 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AutoRemediation | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled. |
-| RequiredTagKey | String | createdby | ○ | AWS Config removes AWSnresouces without this tag. |
-| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Config removes AWSnresouces without this tag. |
+| AutoRemediation | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled |
+| RequiredTagKey | String | createdby | ○ | AWS Config removes AWSnresouces without this tag |
+| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Config removes AWSnresouces without this tag |

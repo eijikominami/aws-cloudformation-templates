@@ -184,7 +184,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -200,7 +200,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: budgets.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for CloudTrail to access CloudWatch Logs.
       # Allow Budget 'SNS:Publish'.
       Policies:
@@ -210,10 +210,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
+                  - logs:PutLogEvents
                 Resource:
                   - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-      RoleName: !Sub '${AWS::StackName}-Budget-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-Budget-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -229,7 +229,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Lambda to access SNS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
@@ -240,8 +240,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'codeguru-profiler:ConfigureAgent'
-                  - 'codeguru-profiler:PostAgentProfile'
+                  - codeguru-profiler:ConfigureAgent
+                  - codeguru-profiler:PostAgentProfile
                 Resource: '*'
         - PolicyName: SNS
           PolicyDocument:
@@ -249,7 +249,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'sns:publish'
+                  - sns:publish
                 Resource:
                   - !Ref SNSForAlertArn
         - PolicyName: CloudWatchLogs
@@ -258,13 +258,13 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogStream'
+                  - logs:CreateLogStream
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
+                  - logs:PutLogEvents
                 Resource: '*' 
-      RoleName: !Sub '${AWS::StackName}-LambdaForGlobal-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-LambdaForGlobal-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -351,7 +351,7 @@ Resources:
         CertificateArn: !Ref CertificateManager
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -375,7 +375,7 @@ Resources:
       AlarmActions:
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: !Sub '*概算請求金額* が *$ ${BillingAlertThreshold} を超過* しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-EstimatedCharges-is-Over-${BillingAlertThreshold}00-Yen'
+      AlarmName: !Sub Warning-${AWS::StackName}-EstimatedCharges-is-Over-${BillingAlertThreshold}00-Yen
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Currency
@@ -397,7 +397,7 @@ Resources:
       AlarmActions:
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *4XXエラー率が増加* しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-4XXErrorRate-Increased'
+      AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-4XXErrorRate-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Region
@@ -421,7 +421,7 @@ Resources:
       AlarmActions:
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *5XXエラー率が増加* しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-5XXErrorRate-Increased'
+      AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-5XXErrorRate-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Region
@@ -445,7 +445,7 @@ Resources:
       AlarmActions:
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *エラー率が増加* しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-TotalErrorRate-Increased'
+      AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-TotalErrorRate-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Region
@@ -469,7 +469,7 @@ Resources:
       AlarmActions:
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *リクエスト数が増加* しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-Requests-Increased'
+      AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-Requests-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Region
@@ -493,7 +493,7 @@ Resources:
       AlarmActions:
         - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *ダウンロードサイズが増加* しています。'
-      AlarmName: !Sub 'Warning-${AWS::StackName}-CloudFront-BytesDownloaded-Increased'
+      AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-BytesDownloaded-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Region
@@ -599,7 +599,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

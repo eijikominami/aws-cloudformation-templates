@@ -39,18 +39,18 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AutoScalingDesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created. | 
+| AutoScalingDesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created | 
 | AutoScalingMaxSize | Number | 1 | ○ | |
-| AutoScalingLoadBalancerType | None, application, network | None | ○ | If you set 'None', an ELB is NOT created. |
+| AutoScalingLoadBalancerType | None, application, network | None | ○ | If you set 'None', an ELB is NOT created |
 | ACMValidationMethod | String | DNS | Conditional | The validation method that you own or control the domain |
 | ACMDomainName | String | | | The domain name created by Certification Manager |
-| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** or **Elastic Load Balancer**. |
+| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** or **Elastic Load Balancer** |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | CloudFront Viewer Protocol Policy |
-| CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront**. |
-| CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
+| CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront** |
+| CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront** |
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Restrict Viewer Access |
 | CloudFrontState | DISABLED | | ○ | Enable or disable CloudFront |
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
@@ -60,15 +60,15 @@ You can provide optional parameters as follows.
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
 | EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
-| EC2PatchingAt | Number | 3 | ○ | Starting time of patching process. |
-| EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set. |
+| EC2PatchingAt | Number | 3 | ○ | Starting time of patching process |
+| EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set |
 | EC2VolumeSize | Number | 8 | ○ | |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | Public subnet of AZ1 |
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | Public subnet of AZ2 |
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
-| WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created. |
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
 | VPCCidrBlock | String | 10.0.0.0/21 | ○ | |
 

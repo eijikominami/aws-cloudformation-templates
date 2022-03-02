@@ -67,11 +67,11 @@ Resources:
           - Effect: Allow
             Principal:
               Service: amplify.amazonaws.com 
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: Allows Amplify Backend Deployment to access AWS resources on your behalf.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
-      RoleName: !Sub '${AWS::StackName}-AmplifyBackend-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-AmplifyBackend-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -197,7 +197,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

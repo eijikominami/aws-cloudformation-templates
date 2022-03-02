@@ -210,7 +210,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -226,7 +226,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -243,7 +243,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -260,7 +260,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -271,7 +271,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -304,7 +304,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Lambda to access X-Ray, KMS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
@@ -315,8 +315,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'codeguru-profiler:ConfigureAgent'
-                  - 'codeguru-profiler:PostAgentProfile'
+                  - codeguru-profiler:ConfigureAgent
+                  - codeguru-profiler:PostAgentProfile
                 Resource: '*'
         - PolicyName: CloudWatchLambdaInsightsExecutionRolePolicy
           PolicyDocument:
@@ -324,8 +324,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
         - PolicyName: SNS
           PolicyDocument:
@@ -333,7 +333,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'sns:Publish'
+                  - sns:Publish
                 Resource: '*'
         - PolicyName: CloudWatchLogs
           PolicyDocument:
@@ -341,11 +341,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogStream'
+                  - logs:CreateLogStream
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
+                  - logs:PutLogEvents
                 Resource: '*' 
         - !If
           - CreateKMSKey
@@ -355,10 +355,10 @@ Resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - 'kms:Decrypt'
+                    - kms:Decrypt
                   Resource: !GetAtt KMSKey.Arn
           - !Ref AWS::NoValue
-      RoleName: !Sub '${AWS::StackName}-LambdaForNotification-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-LambdaForNotification-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -373,7 +373,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: chatbot.amazonaws.com 
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Chatbot to access CloudWatch.
       Policies:
         - PolicyName: CloudWatch
@@ -517,7 +517,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -588,7 +588,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -666,7 +666,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

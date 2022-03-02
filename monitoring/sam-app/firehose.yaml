@@ -34,8 +34,8 @@ Resources:
       AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *Elasticsearchへの配信遅延が発生* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Data-Freshness'
-        - !Sub 'Notice-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Data-Freshness'
+        - !Sub Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Data-Freshness
+        - !Sub Notice-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Data-Freshness
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       Dimensions:
@@ -59,8 +59,8 @@ Resources:
       AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetShardIteratorが発生* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Shard-Iterator'
-        - !Sub 'Warning-Firehose-${FirehoseStreamName}-Throttled-Get-Shard-Iterator'
+        - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Shard-Iterator
+        - !Sub Warning-Firehose-${FirehoseStreamName}-Throttled-Get-Shard-Iterator
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       Dimensions:
@@ -84,8 +84,8 @@ Resources:
       AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetRecordsが発生* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Records'
-        - !Sub 'Warning-Firehose-${FirehoseStreamName}-Throttled-Get-Records'
+        - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Records
+        - !Sub Warning-Firehose-${FirehoseStreamName}-Throttled-Get-Records
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       Dimensions:
@@ -109,8 +109,8 @@ Resources:
       AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *Elasticsearchへのデータ配信が失敗* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Failed'
-        - !Sub 'Warning-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Failed'
+        - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Failed
+        - !Sub Warning-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Failed
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
       Dimensions:
@@ -134,8 +134,8 @@ Resources:
       AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *S3へのデータ配信が失敗* しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-S3-Failed'
-        - !Sub 'Warning-Firehose-${FirehoseStreamName}-Delivery-To-S3-Failed'
+        - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-S3-Failed
+        - !Sub Warning-Firehose-${FirehoseStreamName}-Delivery-To-S3-Failed
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
       Dimensions:

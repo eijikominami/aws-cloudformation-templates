@@ -257,7 +257,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -274,7 +274,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
       Tags:
@@ -290,7 +290,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: cloudfront.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Policies:
         - PolicyName: KinesisStreams
           PolicyDocument:
@@ -298,18 +298,18 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'kinesis:DescribeStreamSummary'
-                  - 'kinesis:DescribeStream'
-                  - 'kinesis:PutRecord'
-                  - 'kinesis:PutRecords'
+                  - kinesis:DescribeStreamSummary
+                  - kinesis:DescribeStream
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
                 Resource:
                   - !GetAtt Kinesis.Arn
               - Effect: Allow
                 Action:
-                  - 'kms:GenerateDataKey'
+                  - kms:GenerateDataKey
                 Resource:
                   - !GetAtt KMSKey.Arn
-      RoleName: !Sub '${LogicalNamePrefix}-CloudFrontRealtimeLog-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-CloudFrontRealtimeLog-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -324,7 +324,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Lambda to access CloudFormation and CloudWatch Logs.
       Policies:
         - PolicyName: CodeGuru
@@ -333,8 +333,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'codeguru-profiler:ConfigureAgent'
-                  - 'codeguru-profiler:PostAgentProfile'
+                  - codeguru-profiler:ConfigureAgent
+                  - codeguru-profiler:PostAgentProfile
                 Resource: '*'
         - PolicyName: CloudWatchLogs
           PolicyDocument:
@@ -342,11 +342,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogStream'
+                  - logs:CreateLogStream
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
+                  - logs:PutLogEvents
                 Resource: '*' 
         - PolicyName: CloudFormation
           PolicyDocument:
@@ -354,10 +354,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'cloudformation:DescribeStacks'
-                  - 'cloudformation:UpdateStack'
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-LambdaForRealtimeDashboard-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-LambdaForRealtimeDashboard-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -372,7 +372,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: firehose.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for KinesisFirehose to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
       Policies:
         - PolicyName: CustomPolicy
@@ -381,19 +381,19 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 's3:AbortMultipartUpload'
-                  - 's3:GetBucketLocation'
-                  - 's3:GetObject'
-                  - 's3:ListBucket'
-                  - 's3:ListBucketMultipartUploads'
-                  - 's3:PutObject'
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
                 Resource:
                   - !Sub 'arn:aws:s3:::${S3ForKinesisFirehose}'
                   - !Sub 'arn:aws:s3:::${S3ForKinesisFirehose}/*'
               - Effect: Allow
                 Action:
-                  - 'kms:Decrypt'
-                  - 'kms:GenerateDataKey'
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
                 Resource:
                   - !GetAtt KMSKey.Arn
                 Condition:
@@ -403,17 +403,17 @@ Resources:
                     'kms:EncryptionContext:aws:s3:arn': !Sub 'arn:aws:s3:::${S3ForKinesisFirehose}/*'
               - Effect: Allow
                 Action:
-                  - 'es:DescribeElasticsearchDomain'
-                  - 'es:DescribeElasticsearchDomains'
-                  - 'es:DescribeElasticsearchDomainConfig'
-                  - 'es:ESHttpPost'
-                  - 'es:ESHttpPut'
+                  - es:DescribeElasticsearchDomain
+                  - es:DescribeElasticsearchDomains
+                  - es:DescribeElasticsearchDomainConfig
+                  - es:ESHttpPost
+                  - es:ESHttpPut
                 Resource:
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}'
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/*'
               - Effect: Allow
                 Action:
-                  - 'es:ESHttpGet'
+                  - es:ESHttpGet
                 Resource:
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_all/_settings'
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/_cluster/stats'
@@ -425,26 +425,26 @@ Resources:
                   - !Sub 'arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${ElasticSearchDomainName}/realtime*/_stats'
               - Effect: Allow
                 Action:
-                  - 'kinesis:DescribeStream'
-                  - 'kinesis:GetShardIterator'
-                  - 'kinesis:GetRecords'
-                  - 'kinesis:ListShards'
+                  - kinesis:DescribeStream
+                  - kinesis:GetShardIterator
+                  - kinesis:GetRecords
+                  - kinesis:ListShards
                 Resource: !GetAtt Kinesis.Arn
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
+                  - logs:PutLogEvents
                 Resource:
                   - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CloudWatchLogsGroupForFirehose}:log-stream:${CloudWatchLogsStreamForFirehoseElasticSearch}'
                   - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${CloudWatchLogsGroupForFirehose}:log-stream:${CloudWatchLogsStreamForFirehoseS3}'
               - Effect: Allow
                 Action:
-                  - 'lambda:InvokeFunction'
-                  - 'lambda:GetFunctionConfiguration'
+                  - lambda:InvokeFunction
+                  - lambda:GetFunctionConfiguration
                 Resource:
                   - !GetAtt Lambda.Arn
               - Effect: Allow
                 Action:
-                  - 'kms:Decrypt'
+                  - kms:Decrypt
                 Resource:
                   - !GetAtt KMSKey.Arn
                 Condition:
@@ -452,7 +452,7 @@ Resources:
                     'kms:ViaService': kinesis.ap-northeast-1.amazonaws.com
                   StringLike:
                     'kms:EncryptionContext:aws:kinesis:arn': !GetAtt Kinesis.Arn
-      RoleName: !Sub '${LogicalNamePrefix}-Firehose-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-Firehose-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -546,7 +546,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -707,7 +707,7 @@ Resources:
         FunctionResouceName: !Ref Lambda
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -787,7 +787,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -849,7 +849,7 @@ Resources:
             Principal:
               Service: cloudtrail.amazonaws.com
             Action:
-              - 'kms:DescribeKey'
+              - kms:DescribeKey
             Resource:
               - '*'
       KeyUsage: ENCRYPT_DECRYPT
@@ -859,7 +859,7 @@ Resources:
           Value: !Ref TagValue 
   # ElasticSearch
   ElasticSearchDomain:
-    Type: AWS::Elasticsearch::Domain
+    Type: AWS::OpenSearchService::Domain
     Properties: 
       AccessPolicies:
         Version: '2012-10-17'
@@ -884,7 +884,7 @@ Resources:
         EBSEnabled: true
         VolumeSize: !Ref ElasticSearchVolumeSize
         VolumeType: gp2
-      ElasticsearchClusterConfig: 
+      ClusterConfig: 
         DedicatedMasterCount: 3
         DedicatedMasterEnabled: true
         DedicatedMasterType: !Ref ElasticSearchMasterType
@@ -893,7 +893,7 @@ Resources:
         ZoneAwarenessConfig: 
           AvailabilityZoneCount: 3
         ZoneAwarenessEnabled: true
-      ElasticsearchVersion: !Ref ElasticsearchVersion
+      EngineVersion: !Ref ElasticsearchVersion
       EncryptionAtRestOptions:
         Enabled: true
         KmsKeyId: !GetAtt KMSKey.Arn
@@ -922,7 +922,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elasticsearch
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1037,7 +1037,7 @@ Resources:
         FunctionResouceName: !Ref LambdaShutdownElasticSearch
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

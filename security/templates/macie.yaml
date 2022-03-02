@@ -56,7 +56,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: macie.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for CloudTrail to access CloudWatch Logs.
       Policies:
         - PolicyName: CustomPolicy

@@ -29,8 +29,8 @@ Resources:
       AlarmDescription: !Sub '*${ProjectName}* で *ビルドが失敗* しました。マネージメントコンソールから詳細を確認してください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub 'Notice-${CustomAlarmName}-CodeBuild-${ProjectName}-FailedBuilds'
-        - !Sub 'Notice-CodeBuild-${ProjectName}-FailedBuilds'
+        - !Sub Notice-${CustomAlarmName}-CodeBuild-${ProjectName}-FailedBuilds
+        - !Sub Notice-CodeBuild-${ProjectName}-FailedBuilds
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: ProjectName

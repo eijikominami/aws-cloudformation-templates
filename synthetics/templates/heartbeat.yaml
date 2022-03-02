@@ -96,31 +96,31 @@ Resources:
           - Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for CloudWatch Synthetics to access S3 and CloudWatch Logs.
       Policies:
-        - PolicyName: !Sub 'CloudWatchLogsSynthetics-${CanaryName}-${AWS::Region}'
+        - PolicyName: !Sub CloudWatchLogsSynthetics-${CanaryName}-${AWS::Region}
           PolicyDocument:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
                 Action:
-                  - 's3:PutObject'
-                  - 's3:GetBucketLocation'
+                  - s3:PutObject
+                  - s3:GetBucketLocation
                 Resource: !Sub arn:aws:s3:::${S3ForSynthetics}/*
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/cwsyn-${CanaryName}-*
               - Effect: Allow
                 Action:
-                  - 's3:ListAllMyBuckets'
+                  - s3:ListAllMyBuckets
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'cloudwatch:PutMetricData'
+                  - cloudwatch:PutMetricData
                 Resource: '*'
                 Condition:
                   StringEquals:
@@ -231,7 +231,7 @@ Resources:
           - !Ref IncidentManagerArn
           - !Ref SNSForAlertArn
       AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
-      AlarmName: !Sub 'Incident-${CanaryName}-Synthetics-AccessError'
+      AlarmName: !Sub Incident-${CanaryName}-Synthetics-AccessError
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
       Dimensions:
@@ -259,7 +259,7 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
       AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
-      AlarmName: !Sub 'Notice-${CanaryName}-Synthetics-AccessError'
+      AlarmName: !Sub Notice-${CanaryName}-Synthetics-AccessError
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
       Dimensions:
@@ -284,7 +284,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -301,7 +301,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

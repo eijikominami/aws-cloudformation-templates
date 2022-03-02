@@ -25,7 +25,6 @@ If you want to deploy each service individually, click the button below.
 | AWS CloudTrail | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalNamePrefix=CloudTrail) |
 | AWS Config | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalNamePrefix=Config) |
 | Amazon Macie | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalNamePrefix=Macie) |
-| AWS Audit Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AuditManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/auditmanager.yaml&param_LogicalNamePrefix=AuditManager) |
 
 ## Architecture
 
@@ -102,10 +101,6 @@ When ``AWS Config`` detects noncompliant resources, it sends a notification to `
 
 This templates configures ``Amazon Macie``. 
 
-### AWS Audit Manager
-
-This templates creates assesments such as ``AWS Well Architected Framework`` , ``AWS Foundational Security Best Practices`` and ``AWS Operational Best Practices``.
-
 ### Amazon EventBridge
 
 This template creates ``Amazon EventBridge`` for ``AWS Health``.
@@ -127,10 +122,12 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Amazon Detective is enabled. |
-| AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled. |
-| AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled. |
-| AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS AWS Configis enabled. |
+| AccountIdForAnalysis | String | | | The AWS account id for log analysis |
+| AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Amazon Detective is enabled |
+| AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled |
+| AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled |
+| AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS AWS Configis enabled |
+| BucketNameForAnalysis | String | | | The Amazon S3 bucket name for log analysis |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | Notification filter about Security Hub Security Checks | 
 
@@ -140,40 +137,40 @@ This template helps you to comply with the Center for Internet Security (CIS) Be
 
 | No. | Rules | Remediation |
 | --- | --- | --- |
-| 1.3 | Ensure credentials unused for 90 days or greater are disabled  | **Config** checks it and **Lambda** removes it automatically. |
-| 1.4 | Ensure access keys are rotated every 90 days or less  | **Config** checks it and **Lambda** removes it automatically. |
-| 1.5 | Ensure IAM password policy requires at least one uppercase letter | **Config** checks it and **SSM Automation** remediates the policy automatically. |
-| 1.6 | Ensure IAM password policy requires at least one lowercase letter | **Config** checks it and **SSM Automation** remediates the policy automatically. |
-| 1.7 | Ensure IAM password policy requires at least one symbol | **Config** checks it and **SSM Automation** remediates the policy automatically. |
-| 1.8 | Ensure IAM password policy requires at least one number | **Config** checks it and **SSM Automation** remediates the policy automatically. |
-| 1.9 | Ensure IAM password policy requires a minimum length of 14 or greater | **Config** checks it and **SSM Automation** remediates the policy automatically. |
-| 1.10 | Ensure IAM password policy prevents password reuse | **Config** checks it and **SSM Automation** remediates the policy automatically. |
-| 1.20 | Ensure a support role has been created to manage incidents with AWS Support | This template creates IAM Role for AWS Support. |
-| 2.1 | Ensure CloudTrail is enabled in all Regions | This template enables **CloudTrail** and related resources in all Regions. |
-| 2.2 | Ensure CloudTrail log file validation is enabled | This template enables **CloudTrail** and related resources in all Regions. |
-| 2.3 | Ensure the S3 bucket CloudTrail logs to is not publicly accessible | This template enables **CloudTrail** and related resources in all Regions. |
-| 2.4 | Ensure CloudTrail trails are integrated with Amazon CloudWatch Logs | This template enables **CloudTrail** and related resources in all Regions. |
-| 2.5 | Ensure CloudTrail trails are integrated with Amazon CloudWatch Logs | This template enables **Config** and related resources. |
-| 2.6 | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket | This template enables **CloudTrail** and related resources in all Regions. |
-| 2.7 | Ensure CloudTrail logs are encrypted at rest using AWS KMS CMKs | This template enables **CloudTrail** and related resources in all Regions. |
-| 2.9 | Ensure VPC flow logging is enabled in all VPCs | **Config** checks it and **SSM Automation** enables VPC flow log automatically. |
-| 3.1 | Ensure VPC flow logging is enabled in all VPCs | This template creates a log metric filter and alarm. |
-| 3.2 | Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA | This template creates a log metric filter and alarm. |
-| 3.3 | Ensure a log metric filter and alarm exist for usage of "root" account | This template creates a log metric filter and alarm. |
-| 3.4 | Ensure a log metric filter and alarm exist for IAM policy changes | This template creates a log metric filter and alarm. |
-| 3.5 | Ensure a log metric filter and alarm exist for CloudTrail configuration changes | This template creates a log metric filter and alarm. |
-| 3.6 | Ensure a log metric filter and alarm exist for AWS Management Console authentication failures | This template creates a log metric filter and alarm. |
-| 3.7 | Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs | This template creates a log metric filter and alarm. |
-| 3.8 | Ensure a log metric filter and alarm exist for S3 bucket policy changes | This template creates a log metric filter and alarm. |
-| 3.9 | Ensure a log metric filter and alarm exist for AWS Config configuration changes | This template creates a log metric filter and alarm. |
-| 3.10 | Ensure a log metric filter and alarm exist for security group changes | This template creates a log metric filter and alarm. |
-| 3.11 | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) | This template creates a log metric filter and alarm. |
-| 3.12 | Ensure a log metric filter and alarm exist for changes to network gateways | This template creates a log metric filter and alarm. |
-| 3.13 | Ensure a log metric filter and alarm exist for route table changes | This template creates a log metric filter and alarm. |
-| 3.14 | Ensure a log metric filter and alarm exist for VPC changes | This template creates a log metric filter and alarm. |
-| 4.1| Ensure no security groups allow ingress from 0.0.0.0/0 to port 22 | **Config** checks it and **SSM Automation** remediates the rules automatically. |
-| 4.2| Ensure no security groups allow ingress from 0.0.0.0/0 to port 3389 | **Config** checks it and **SSM Automation** remediates the rules automatically. |
-| 4.3| Ensure the default security group of every VPC restricts all traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+| 1.3 | Ensure credentials unused for 90 days or greater are disabled  | **Config** checks it and **Lambda** removes it automatically |
+| 1.4 | Ensure access keys are rotated every 90 days or less  | **Config** checks it and **Lambda** removes it automatically |
+| 1.5 | Ensure IAM password policy requires at least one uppercase letter | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| 1.6 | Ensure IAM password policy requires at least one lowercase letter | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| 1.7 | Ensure IAM password policy requires at least one symbol | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| 1.8 | Ensure IAM password policy requires at least one number | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| 1.9 | Ensure IAM password policy requires a minimum length of 14 or greater | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| 1.10 | Ensure IAM password policy prevents password reuse | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| 1.20 | Ensure a support role has been created to manage incidents with AWS Support | This template creates IAM Role for AWS Support |
+| 2.1 | Ensure CloudTrail is enabled in all Regions | This template enables **CloudTrail** and related resources in all Regions |
+| 2.2 | Ensure CloudTrail log file validation is enabled | This template enables **CloudTrail** and related resources in all Regions |
+| 2.3 | Ensure the S3 bucket CloudTrail logs to is not publicly accessible | This template enables **CloudTrail** and related resources in all Regions |
+| 2.4 | Ensure CloudTrail trails are integrated with Amazon CloudWatch Logs | This template enables **CloudTrail** and related resources in all Regions |
+| 2.5 | Ensure CloudTrail trails are integrated with Amazon CloudWatch Logs | This template enables **Config** and related resources |
+| 2.6 | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket | This template enables **CloudTrail** and related resources in all Regions |
+| 2.7 | Ensure CloudTrail logs are encrypted at rest using AWS KMS CMKs | This template enables **CloudTrail** and related resources in all Regions |
+| 2.9 | Ensure VPC flow logging is enabled in all VPCs | **Config** checks it and **SSM Automation** enables VPC flow log automatically |
+| 3.1 | Ensure VPC flow logging is enabled in all VPCs | This template creates a log metric filter and alarm |
+| 3.2 | Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA | This template creates a log metric filter and alarm |
+| 3.3 | Ensure a log metric filter and alarm exist for usage of "root" account | This template creates a log metric filter and alarm |
+| 3.4 | Ensure a log metric filter and alarm exist for IAM policy changes | This template creates a log metric filter and alarm |
+| 3.5 | Ensure a log metric filter and alarm exist for CloudTrail configuration changes | This template creates a log metric filter and alarm |
+| 3.6 | Ensure a log metric filter and alarm exist for AWS Management Console authentication failures | This template creates a log metric filter and alarm |
+| 3.7 | Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs | This template creates a log metric filter and alarm |
+| 3.8 | Ensure a log metric filter and alarm exist for S3 bucket policy changes | This template creates a log metric filter and alarm |
+| 3.9 | Ensure a log metric filter and alarm exist for AWS Config configuration changes | This template creates a log metric filter and alarm |
+| 3.10 | Ensure a log metric filter and alarm exist for security group changes | This template creates a log metric filter and alarm |
+| 3.11 | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) | This template creates a log metric filter and alarm |
+| 3.12 | Ensure a log metric filter and alarm exist for changes to network gateways | This template creates a log metric filter and alarm |
+| 3.13 | Ensure a log metric filter and alarm exist for route table changes | This template creates a log metric filter and alarm |
+| 3.14 | Ensure a log metric filter and alarm exist for VPC changes | This template creates a log metric filter and alarm |
+| 4.1| Ensure no security groups allow ingress from 0.0.0.0/0 to port 22 | **Config** checks it and **SSM Automation** remediates the rules automatically |
+| 4.2| Ensure no security groups allow ingress from 0.0.0.0/0 to port 3389 | **Config** checks it and **SSM Automation** remediates the rules automatically |
+| 4.3| Ensure the default security group of every VPC restricts all traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically |
 
 ## Comply with the PCI DSS controls
 
@@ -181,15 +178,15 @@ This template helps you to comply with the PCI DSS controls.
 
 | No. | Rules | Remediation |
 | --- | --- | --- |
-| PCI.CloudTrail.1 | CloudTrail logs should be encrypted at rest using AWS KMS CMKs.  | This template enables **CloudTrail** and related resources in all Regions. |
-| PCI.CloudTrail.2 | CloudTrail should be enabled. | This template enables **CloudTrail** and related resources in all Regions. |
-| PCI.CloudTrail.3 | CloudTrail log file validation should be enabled. | This template enables **CloudTrail** and related resources in all Regions. |
-| PCI.CloudTrail.4 | CloudTrail trails should be integrated with CloudWatch Logs. | This template enables **CloudTrail** and related resources in all Regions. |
-| PCI.Config.1 | AWS Config should be enabled. | This template enables **Config** and related resources in all Regions.  |
-| PCI.CW.1 | A log metric filter and alarm should exist for usage of the "root" user. | This template enables **CloudTrail** and related resources in all Regions. |
-| PCI.EC2.2 | VPC default security group should prohibit inbound and outbound traffic. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
-| PCI.IAM.1 | IAM root user access key should not exist. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
-| PCI.S3.4 | S3 buckets should have server-side encryption enabled. | **Config** checks it and **SSM Automation** remediates the default security group automatically.s |
+| PCI.CloudTrail.1 | CloudTrail logs should be encrypted at rest using AWS KMS CMKs.  | This template enables **CloudTrail** and related resources in all Regions |
+| PCI.CloudTrail.2 | CloudTrail should be enabled | This template enables **CloudTrail** and related resources in all Regions |
+| PCI.CloudTrail.3 | CloudTrail log file validation should be enabled | This template enables **CloudTrail** and related resources in all Regions |
+| PCI.CloudTrail.4 | CloudTrail trails should be integrated with CloudWatch Logs | This template enables **CloudTrail** and related resources in all Regions |
+| PCI.Config.1 | AWS Config should be enabled | This template enables **Config** and related resources in all Regions.  |
+| PCI.CW.1 | A log metric filter and alarm should exist for usage of the "root" user | This template enables **CloudTrail** and related resources in all Regions |
+| PCI.EC2.2 | VPC default security group should prohibit inbound and outbound traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically |
+| PCI.IAM.1 | IAM root user access key should not exist | **Config** checks it and **SSM Automation** remediates the default security group automatically |
+| PCI.S3.4 | S3 buckets should have server-side encryption enabled | **Config** checks it and **SSM Automation** remediates the default security group automatically.s |
 
 ## Comply with the AWS Foundational Security Best Practices standard 
 
@@ -197,11 +194,11 @@ This template helps you to comply with the AWS Foundational Security Best Practi
 
 | No. | Rules | Remediation |
 | --- | --- | --- |
-| CloudTrail.1 | CloudTrail should be enabled and configured with at least one multi-Region trail. | This template enables **CloudTrail** and related resources in all Regions. |
-| CloudTrail.2 | CloudTrail should have encryption at-rest enabled. | This template enables **CloudTrail** and related resources in all Regions. |
-| Config.1 | AWS Config should be enabled. | This template enables **Config** and related resources in all Regions. |
-| EC2.2 | The VPC default security group should not allow inbound and outbound traffic. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
-| GuardDuty.1 | GuardDuty should be enabled. | This template enables **GuardDuty** and related resources in all Regions. |
-| IAM.3 | IAM users' access keys should be rotated every 90 days or less. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
-| IAM.4 | IAM root user access key should not exist. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
-| S3.4 | S3 buckets should have server-side encryption enabled. | **Config** checks it and **SSM Automation** remediates the default security group automatically. |
+| CloudTrail.1 | CloudTrail should be enabled and configured with at least one multi-Region trail | This template enables **CloudTrail** and related resources in all Regions |
+| CloudTrail.2 | CloudTrail should have encryption at-rest enabled | This template enables **CloudTrail** and related resources in all Regions |
+| Config.1 | AWS Config should be enabled | This template enables **Config** and related resources in all Regions |
+| EC2.2 | The VPC default security group should not allow inbound and outbound traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically |
+| GuardDuty.1 | GuardDuty should be enabled | This template enables **GuardDuty** and related resources in all Regions |
+| IAM.3 | IAM users' access keys should be rotated every 90 days or less | **Config** checks it and **SSM Automation** remediates the default security group automatically |
+| IAM.4 | IAM root user access key should not exist | **Config** checks it and **SSM Automation** remediates the default security group automatically |
+| S3.4 | S3 buckets should have server-side encryption enabled | **Config** checks it and **SSM Automation** remediates the default security group automatically |

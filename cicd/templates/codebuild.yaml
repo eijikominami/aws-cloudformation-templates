@@ -111,7 +111,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -128,7 +128,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -145,7 +145,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -169,7 +169,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: codebuild.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
       Policies:
         - PolicyName: CustomPolicy
@@ -237,7 +237,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
                 Effect: Allow
-      RoleName: !Sub '${AWS::StackName}-CodeBuild-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-CodeBuild-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -252,7 +252,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: codebuild.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for CodeBuild to access CloudWatch Logs.
       Policies:
         - PolicyName: S3CloudWatchLogs
@@ -264,7 +264,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/UploadArtifacts:*
                 Effect: Allow
-      RoleName: !Sub '${AWS::StackName}-CodeBuildBudgePublicRead-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-CodeBuildBudgePublicRead-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -422,7 +422,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -443,7 +443,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -464,7 +464,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

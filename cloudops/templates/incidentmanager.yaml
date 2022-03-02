@@ -87,7 +87,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: ssm-incidents.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for AWS Systems Manager Incident Manager to access SSM.
       Policies:
         - PolicyName: Runbook
@@ -96,13 +96,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'ssm:StartAutomationExecution'
+                  - ssm:StartAutomationExecution
                 Resource: '*'
               - Effect: Allow
-                Action:
-                  - 'sts:AssumeRole'
+                Action: sts:AssumeRole
                 Resource: 'arn:aws:iam::*:role/AWS-SystemsManager-AutomationExecutionRole'
-      RoleName: !Sub '${WorkloadName}-IncidentManager-${AWS::Region}'
+      RoleName: !Sub ${WorkloadName}-IncidentManager-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

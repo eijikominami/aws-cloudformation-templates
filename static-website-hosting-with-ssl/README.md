@@ -97,15 +97,15 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront**. |
+| CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | CloudFront Viewer Protocol Policy |
-| CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront**. |
+| CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront** |
 | CloudFrontOriginShield | true or false | false | ○ | A flag that specifies whether Origin Shield is enabled |
-| CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront**. |
+| CloudFrontSecondaryOriginId | String | | | If it's NOT empty, **Secondary S3 bucket** is associated with **CloudFront** |
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Restrict Viewer Access |
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
@@ -117,15 +117,15 @@ You can provide optional parameters as follows.
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
 | RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
-| RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled. |
+| RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
-| S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3**. |
-| SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled. |
-| Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3**. |
-| LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}'. |
+| S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3** |
+| SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
+| LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' |
 | WebACLArn | String | | | The ARN of Web ACL |
 
 ### Manual Deployment

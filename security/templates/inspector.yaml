@@ -118,7 +118,7 @@ Resources:
     DeletionPolicy: Retain
     Properties: 
       AWSServiceName: inspector.amazonaws.com
-      Description: A service-linked role required for Amazon Inspector to access your resources.   
+      Description: A service-linked role required for Amazon Inspector to access your resources.
   # IAM Role
   IAMRoleForInspectorEvents:
     Condition: IsSupportedRegion
@@ -130,7 +130,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: events.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for EventBridge to access Inspector.
       Policies:
         - PolicyName: Inspector
@@ -139,9 +139,9 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'inspector:StartAssessmentRun'
+                  - inspector:StartAssessmentRun
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-InspectorEvents-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-InspectorEvents-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

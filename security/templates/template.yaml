@@ -24,6 +24,11 @@ Metadata:
           - IAMUserArnToAssumeAWSSupportRole
           - NotificationFilterAboutSecurityChecks
       - Label: 
+          default: 'Log Analysis Configuration'
+        Parameters: 
+          - AccountIdForAnalysis
+          - BucketNameForAnalysis
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -36,6 +41,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AccountIdForAnalysis:
+    Type: String
+    Default: ''
+    Description: The AWS account id for log analysis
   AWSConfig:
     Type: String
     Default: ENABLED
@@ -64,6 +73,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon Detective [required]
+  BucketNameForAnalysis:
+    Type: String
+    Default: ''
+    Description: The Amazon S3 bucket name for log analysis
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -99,11 +112,12 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
-  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
+  CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -301,43 +315,13 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  AuditManager:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters: 
-        LogicalNamePrefix: !Ref AWS::StackName
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/auditmanager.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/auditmanager.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -354,7 +338,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -371,16 +355,62 @@ Resources:
           - Effect: Allow
             Principal:
               AWS: !Ref IAMUserArnToAssumeAWSSupportRole
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for CIS AWS Foundations to access AWS Support.
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSSupportAccess
-      RoleName: !Sub '${AWS::StackName}-AWSSupport-${AWS::Region}'
+      RoleName: !Sub ${AWS::StackName}-AWSSupport-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForAnalysis:
+    Condition: CreateS3ReplicationForAnalysis
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceArn: !Sub 'arn:aws:s3:::${S3ForAccessLog}'
+      Description: A role required for S3 to access another S3 bucket for analysis.
+      Policies:
+        - PolicyName: S3Replication
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetReplicationConfiguration
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
+              - Effect: Allow
+                Action:
+                  - s3:GetObjectVersionForReplication
+                  - s3:GetObjectVersionAcl
+                  - s3:GetObjectVersionTagging
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
+              - Effect: Allow
+                Action:
+                  - s3:s3:ReplicateObject
+                  - s3:ReplicateDelete
+                  - s3:ReplicateTags
+                Resource:
+                  - !Sub 'arn:aws:s3:::${BucketNameForAnalysis}/*'
+      RoleName: !Sub ${AWS::StackName}-S3Replication-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
   # S3
   S3ForAccessLog:
     Type: AWS::S3::Bucket
@@ -398,11 +428,33 @@ Resources:
           - Id: ExpirationInDays
             ExpirationInDays: 60
             Status: Enabled
+          - !If 
+            - CreateS3ReplicationForAnalysis
+            - Id: NoncurrentVersionExpirationInDays
+              NoncurrentVersionExpiration: 
+                NewerNoncurrentVersions: 90
+                NoncurrentDays: 0
+              Status: Enabled
+            - !Ref AWS::NoValue
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      ReplicationConfiguration: !If
+        - CreateS3ReplicationForAnalysis
+        - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-S3Replication-${AWS::Region}
+          Rules: 
+            - Destination: 
+                Account: !Ref AccountIdForAnalysis
+                Bucket: !Sub arn:aws:s3:::${BucketNameForAnalysis}
+              Id: Analysis
+              Status: Enabled
+        - !Ref AWS::NoValue
+      VersioningConfiguration: !If 
+        - CreateS3ReplicationForAnalysis
+        - Status: Enabled
+        - !Ref AWS::NoValue
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -428,6 +480,30 @@ Resources:
             Condition:
               Bool: 
                 aws:SecureTransport: false
+  S3BucketPolicyForAccessLogAnalysis:
+    Condition: CreateS3ReplicationForAnalysis
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForAccessLog
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForAccessLog
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${IAMRoleForAnalysis}'
+            Action:
+              - s3:ReplicateDelete
+              - s3:ReplicateObject
+            Resource: !Sub 'arn:aws:s3:::${BucketNameForAnalysis}/*'
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${IAMRoleForAnalysis}'
+            Action:
+              - s3:List*
+              - s3:GetBucketVersioning
+              - s3:PutBucketVersioning
+            Resource: !Sub 'arn:aws:s3:::${BucketNameForAnalysis}'
   # EventBridge for Health
   CloudWatchEventsForHealth:
     Type: AWS::Events::Rule

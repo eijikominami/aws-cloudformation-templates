@@ -219,7 +219,7 @@ Conditions:
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
   CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
-  CreateDestinationForRTMP: !Equals [ !Ref OutputType, RTMP] 
+  CreateDestinationForRTMP: !Or [ !Equals [ !Ref OutputType, RTMP], !And [ !Not [ !Equals [ !Ref RtmpUrl1, ''] ], !Not [ !Equals [ !Ref RtmpStreamKey1, ''] ] ] ]
   CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
@@ -239,7 +239,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -256,7 +256,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -272,7 +272,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: medialive.amazonaws.com 
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for MediaLive to access S3.
       Policies:
         - PolicyName: CustomPolicy
@@ -281,48 +281,48 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 's3:ListBucket'
-                  - 's3:PutObject'
-                  - 's3:GetObject'
-                  - 's3:DeleteObject'
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'mediastore:ListContainers'
-                  - 'mediastore:PutObject'
-                  - 'mediastore:GetObject'
-                  - 'mediastore:DeleteObject'
-                  - 'mediastore:DescribeObject'
+                  - mediastore:ListContainers
+                  - mediastore:PutObject
+                  - mediastore:GetObject
+                  - mediastore:DeleteObject
+                  - mediastore:DescribeObject
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                  - 'logs:DescribeLogStreams'
-                  - 'logs:DescribeLogGroups'
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                  - logs:DescribeLogGroups
                 Resource: 'arn:aws:logs:*:*:*'
               - Effect: Allow
                 Action:
-                  - 'mediaconnect:ManagedDescribeFlow'
-                  - 'mediaconnect:ManagedAddOutput'
-                  - 'mediaconnect:ManagedRemoveOutput'
+                  - mediaconnect:ManagedDescribeFlow
+                  - mediaconnect:ManagedAddOutput
+                  - mediaconnect:ManagedRemoveOutput
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'ec2:describeSubnets'
-                  - 'ec2:describeNetworkInterfaces'
-                  - 'ec2:createNetworkInterface'
-                  - 'ec2:createNetworkInterfacePermission'
-                  - 'ec2:deleteNetworkInterface'
-                  - 'ec2:deleteNetworkInterfacePermission'
-                  - 'ec2:describeSecurityGroups'
+                  - ec2:describeSubnets
+                  - ec2:describeNetworkInterfaces
+                  - ec2:createNetworkInterface
+                  - ec2:createNetworkInterfacePermission
+                  - ec2:deleteNetworkInterface
+                  - ec2:deleteNetworkInterfacePermission
+                  - ec2:describeSecurityGroups
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'mediapackage:DescribeChannel'
+                  - mediapackage:DescribeChannel
                 Resource: '*'
-      RoleName: !Sub '${LogicalNamePrefix}-MediaLive-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-MediaLive-${AWS::Region}
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
@@ -741,7 +741,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -765,7 +765,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.9
+        SemanticVersion: 2.0.10
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

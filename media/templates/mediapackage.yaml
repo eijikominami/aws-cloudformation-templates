@@ -78,7 +78,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: mediapackage.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for MediaPackage to access S3.
       Policies:
         # Allow MediaPackage to access S3 for VOD workflows.
@@ -90,10 +90,10 @@ Resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - 's3:GetObject'
-                    - 's3:GetBucketLocation'
-                    - 's3:GetBucketRequestPayment'
-                    - 's3:ListBucket'
+                    - s3:GetObject
+                    - s3:GetBucketLocation
+                    - s3:GetBucketRequestPayment
+                    - s3:ListBucket
                   Resource:
                     - !Sub 'arn:aws:s3:::${VodSourceBucket}/*'
                     - !Sub 'arn:aws:s3:::${VodSourceBucket}'
@@ -107,9 +107,9 @@ Resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - 's3:PutObject'
-                    - 's3:ListBucket'
-                    - 's3:GetBucketLocation'
+                    - s3:PutObject
+                    - s3:ListBucket
+                    - s3:GetBucketLocation
                   Resource:
                     - !Sub 'arn:aws:s3:::${ArchiveBucket}/*'
                     - !Sub 'arn:aws:s3:::${ArchiveBucket}'
@@ -121,19 +121,19 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'secretsmanager:GetSecretValue'
-                  - 'secretsmanager:DescribeSecret'
-                  - 'secretsmanager:ListSecrets'
-                  - 'secretsmanager:ListSecretVersionIds'
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:ListSecrets
+                  - secretsmanager:ListSecretVersionIds
                 Resource:
                   - '*'
               - Effect: Allow
                 Action:
-                  - 'iam:GetRole'
-                  - 'iam:PassRole'
+                  - iam:GetRole
+                  - iam:PassRole
                 Resource:
                   - '*'
-      RoleName: !Sub '${LogicalNamePrefix}-MediaPackage-${AWS::Region}'
+      RoleName: !Sub ${LogicalNamePrefix}-MediaPackage-${AWS::Region}
       Tags:
         - Key: !Ref TagKey
           Value: !Ref TagValue
