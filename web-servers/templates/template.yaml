@@ -606,7 +606,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: ec2.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for Managed Instances.
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
@@ -627,7 +627,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: vpc-flow-logs.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for VPC FlowLog.
       Policies:
         - PolicyName: CloudWatchLogs
@@ -636,11 +636,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                  - 'logs:DescribeLogGroups'
-                  - 'logs:DescribeLogStreams'
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
                 Resource: '*'
       RoleName: !Sub '${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}'
       Tags:

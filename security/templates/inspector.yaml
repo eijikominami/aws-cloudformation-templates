@@ -119,13 +119,6 @@ Resources:
     Properties: 
       AWSServiceName: inspector.amazonaws.com
       Description: A service-linked role required for Amazon Inspector to access your resources.
-  ServiceLinkedRoleForInspector2:
-    Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties: 
-      AWSServiceName: inspector2.amazonaws.com
-      Description: Allowing Inspector to call AWS services on behalf of customers
   # IAM Role
   IAMRoleForInspectorEvents:
     Condition: IsSupportedRegion
@@ -137,7 +130,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service: events.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: sts:AssumeRole
       Description: A role required for EventBridge to access Inspector.
       Policies:
         - PolicyName: Inspector
@@ -146,49 +139,9 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'inspector:StartAssessmentRun'
+                  - inspector:StartAssessmentRun
                 Resource: '*'
       RoleName: !Sub '${LogicalNamePrefix}-InspectorEvents-${AWS::Region}'
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  IAMRoleForLambda:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: 'sts:AssumeRole'
-      Description: A role required for Lambda to access IAM and CloudWatch Logs.
-      Policies:
-        - PolicyName: Inspector
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'inspector2.Enable'
-                  - 'inspector2.Disable'
-                Resource:
-                  - '*'
-        - PolicyName: CloudWatchLogs
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogStream'
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - 'logs:PutLogEvents'
-                Resource: '*' 
-      RoleName: !Sub '${LogicalNamePrefix}-LambdaForInspector-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -221,59 +174,6 @@ Resources:
         - !FindInMap [RulePackages, !Ref "AWS::Region", NetworkReachability]
         # セキュリティのベストプラクティス
         - !FindInMap [RulePackages, !Ref "AWS::Region", Security]
-  CustomLambdaInspectorEnable:
-    DependsOn:
-      - ServiceLinkedRoleForInspector2
-    Type: Custom::LambdaInspectorEnable
-    Version: 1.0
-    Properties:
-      ServiceToken: !GetAtt LambdaInspectorEnable.Arn
-  LambdaInspectorEnable:
-    Type: AWS::Lambda::Function
-    Properties:
-      Architectures:
-        - arm64
-      Code:
-        ZipFile: |
-          import json
-          import boto3
-          import cfnresponse
-
-          def lambda_handler(event, context):
-            try:
-              client = boto3.client('inspector2')
-              if event['RequestType'] == 'Create':
-                response_data = client.enable(resourceTypes=['EC2'])
-              if event['RequestType'] == 'Delete':
-                response_data = client.disable(resourceTypes=['EC2'])
-              cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
-            except Exception as e:
-              cfnresponse.send(event, context, cfnresponse.FAILED, {}) 
-      Description: Inspectorの有効化/無効化を行います。
-      FunctionName: inspectorEnable
-      Handler: index.lambda_handler
-      MemorySize: 128
-      Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.9
-      Timeout: 60
-  LambdaInspectorEnableLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaInspectorEnable}
-      RetentionInDays: 60
-      Tags: 
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  InspectorFilter:
-    Type: AWS::InspectorV2::Filter
-    Properties: 
-      Description: Default
-      FilterAction: NONE
-      FilterCriteria: 
-        AwsAccountId:
-          - Comparison: EQUALS
-            Value: !Ref AWS::AccountId
-      Name: Default
   # EventBridge for Inspector
   CloudWatchEventsForInspector:
     Condition: IsSupportedRegion

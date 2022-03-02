@@ -150,8 +150,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'codeguru-profiler:ConfigureAgent'
-                  - 'codeguru-profiler:PostAgentProfile'
+                  - codeguru-profiler:ConfigureAgent
+                  - codeguru-profiler:PostAgentProfile
                 Resource: '*'
         - PolicyName: CustomPolicy
           PolicyDocument:
@@ -159,9 +159,9 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'kms:Decrypt'
-                  - 'events:PutTargets'
-                  - 'events:PutRule'
+                  - kms:Decrypt
+                  - events:PutTargets
+                  - events:PutRule
                 Resource:
                   - '*'
         - PolicyName: AuditManager
@@ -170,8 +170,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'auditmanager:RegisterAccount'
-                  - 'auditmanager:DeregisterAccount'
+                  - auditmanager:RegisterAccount
+                  - auditmanager:DeregisterAccount
                 Resource:
                   - '*'
         - PolicyName: CloudWatchLogs
@@ -180,11 +180,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'logs:CreateLogStream'
+                  - logs:CreateLogStream
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - 'logs:PutLogEvents'
+                  - logs:PutLogEvents
                 Resource: '*' 
       RoleName: !Sub '${LogicalNamePrefix}-LambdaForAuditManager-${AWS::Region}'
       Tags:
