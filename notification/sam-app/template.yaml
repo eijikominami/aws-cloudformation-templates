@@ -349,7 +349,7 @@ Resources:
                 Resource: '*' 
         - !If
           - CreateKMSKey
-          - PolicyName: CustomPolicy !If
+          - PolicyName: CustomPolicy
             PolicyDocument:
               Version: 2012-10-17
               Statement:
