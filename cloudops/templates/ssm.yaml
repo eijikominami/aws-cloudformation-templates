@@ -38,7 +38,7 @@ Parameters:
     Description: Daily patching time (H) [required]
   LogicalNamePrefix:
     Type: String
-    Default: WebServers
+    Default: SystemsManager
     Description: The custom prefix name [required]
   SNSForAlertArn:
     Type: String
