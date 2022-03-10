@@ -321,7 +321,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.10
+        SemanticVersion: 2.0.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -338,7 +338,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.10
+        SemanticVersion: 2.0.11
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -400,7 +400,7 @@ Resources:
                   - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
               - Effect: Allow
                 Action:
-                  - s3:s3:ReplicateObject
+                  - s3:ReplicateObject
                   - s3:ReplicateDelete
                   - s3:ReplicateTags
                 Resource:
@@ -432,8 +432,8 @@ Resources:
             - CreateS3ReplicationForAnalysis
             - Id: NoncurrentVersionExpirationInDays
               NoncurrentVersionExpiration: 
-                NewerNoncurrentVersions: 90
-                NoncurrentDays: 0
+                NewerNoncurrentVersions: 1
+                NoncurrentDays: 1
               Status: Enabled
             - !Ref AWS::NoValue
       PublicAccessBlockConfiguration: 
@@ -480,30 +480,6 @@ Resources:
             Condition:
               Bool: 
                 aws:SecureTransport: false
-  S3BucketPolicyForAccessLogAnalysis:
-    Condition: CreateS3ReplicationForAnalysis
-    Type: AWS::S3::BucketPolicy
-    Properties: 
-      Bucket: !Ref S3ForAccessLog
-      PolicyDocument:
-        Version: 2012-10-17
-        Id: !Ref S3ForAccessLog
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${IAMRoleForAnalysis}'
-            Action:
-              - s3:ReplicateDelete
-              - s3:ReplicateObject
-            Resource: !Sub 'arn:aws:s3:::${BucketNameForAnalysis}/*'
-          - Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${IAMRoleForAnalysis}'
-            Action:
-              - s3:List*
-              - s3:GetBucketVersioning
-              - s3:PutBucketVersioning
-            Resource: !Sub 'arn:aws:s3:::${BucketNameForAnalysis}'
   # EventBridge for Health
   CloudWatchEventsForHealth:
     Type: AWS::Events::Rule
