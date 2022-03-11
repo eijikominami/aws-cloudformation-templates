@@ -1,9 +1,15 @@
 AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/security/Inspector sets Amazon Inspector.
 
 Metadata: 
   AWS::CloudFormation::Interface:
-    ParameterGroups: 
+    ParameterGroups:
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -17,6 +23,14 @@ Parameters:
     Type: String
     Default: DefaultSecuritySettings
     Description: The custom prefix name [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
   Environment:
     Type: String
     Default: production
@@ -97,6 +111,8 @@ Mappings:
       Security: arn:aws:inspector:eu-north-1:453420244670:rulespackage/0-HfBQSbSf
  
 Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   # Supports limited regions as follows.
   IsSupportedRegion:
     !Or [!Equals [ !Ref "AWS::Region", us-east-1 ],
@@ -111,6 +127,36 @@ Conditions:
          !Equals [ !Ref "AWS::Region", eu-north-1 ]]
 
 Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.11
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${LogicalNamePrefix}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.11
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForInspector:
     Type: AWS::IAM::ServiceLinkedRole
@@ -192,3 +238,24 @@ Resources:
         - Arn: !GetAtt InspectorAssessmentTemplate.Arn
           Id: CloudWatchEventsForInspector
           RoleArn: !GetAtt IAMRoleForInspectorEvents.Arn
+  AlarmEventsForInspector:
+    Condition: IsSupportedRegion
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 2.0.11
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        EventsRuleName: !Ref CloudWatchEventsForInspector
+      Tags:
+        createdby: !Ref TagValue
