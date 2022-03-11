@@ -77,7 +77,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -94,7 +94,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -381,6 +381,27 @@ Resources:
             - !GetAtt SNSForAlert.Outputs.SNSTopicArn
             - !Ref SNSForAlertArn
           Id: SNSForAlert
+  AlarmEventsForSSM:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 2.0.12
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        EventsRuleName: !Ref EventBridgeForSSM
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   EventBridgeForSSMConfigurationCompliance:
     Type: AWS::Events::Rule
     Properties: 
@@ -402,6 +423,27 @@ Resources:
             - !GetAtt SNSForAlert.Outputs.SNSTopicArn
             - !Ref SNSForAlertArn
           Id: SNSForAlert
+  AlarmEventsForSSMConfigurationCompliance:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 2.0.12
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        EventsRuleName: !Ref EventBridgeForSSMConfigurationCompliance
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   EventBridgeForSSMMaintenanceWindow:
     Type: AWS::Events::Rule
     Properties: 
@@ -426,6 +468,27 @@ Resources:
             - !GetAtt SNSForAlert.Outputs.SNSTopicArn
             - !Ref SNSForAlertArn
           Id: SNSForAlert
+  AlarmEventsForSSMMaintenanceWindow:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 2.0.12
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        EventsRuleName: !Ref EventBridgeForSSMMaintenanceWindow
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   EventBridgeForSSMParameterStore:
     Type: AWS::Events::Rule
     Properties: 
@@ -443,6 +506,27 @@ Resources:
             - !GetAtt SNSForAlert.Outputs.SNSTopicArn
             - !Ref SNSForAlertArn
           Id: SNSForAlert
+  AlarmEventsForSSMParameterStore:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 2.0.12
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        EventsRuleName: !Ref EventBridgeForSSMParameterStore
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # CloudWatch Alarm for Systems Manager Run Command
   CloudWatchAlarmSSMCommand:
     Type: AWS::Serverless::Application
@@ -455,7 +539,7 @@ Resources:
             - !Ref SNSForAlertArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ssm-command
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

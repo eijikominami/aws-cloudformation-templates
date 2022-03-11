@@ -131,11 +131,16 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
-        SnsTopicARN: !If
+        SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
         Environment: !Ref Environment
+        LogicalNamePrefix: !Ref AWS::StackName
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
@@ -157,10 +162,16 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         NotificationFilterAboutSecurityChecks: !Ref NotificationFilterAboutSecurityChecks
-        SnsTopicARN: !If
+        SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        LogicalNamePrefix: !Ref AWS::StackName
+        TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securityhub.yaml
@@ -181,6 +192,14 @@ Resources:
       Parameters: 
         LogicalNamePrefix: !Ref AWS::StackName
         Environment: !Ref Environment
+        SNSForAlertArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
@@ -200,11 +219,17 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
-        SnsTopicARN: !If
+      Parameters:
+        LogicalNamePrefix: !Ref AWS::StackName
+        SNSForAlertArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        SNSForDeploymentArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/guardduty.yaml 
@@ -321,7 +346,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -338,7 +363,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -496,6 +521,26 @@ Resources:
             - !GetAtt SNSForAlert.Outputs.SNSTopicArn
             - !Ref SNSForAlertArn
           Id: CloudWatchEventsForHealth
+  AlarmEventsForHealth:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 2.0.12
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        EventsRuleName: !Ref CloudWatchEventsForHealth
+      Tags:
+        createdby: !Ref TagValue
 
 Outputs:
   SNSForAlertArn:

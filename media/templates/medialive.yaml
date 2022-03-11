@@ -239,7 +239,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -256,7 +256,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -726,7 +726,7 @@ Resources:
     Type: AWS::Serverless::Application
     Properties:
       Parameters:
-        CustomAlarmName: !Ref AWS::StackName
+        CustomAlarmName: !Sub ${AWS::StackName}-0
         ChannelId: !Ref MediaLiveChannel
         OutputGroupName: MediaPackage
         PipelineId: 0
@@ -741,7 +741,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -750,7 +750,7 @@ Resources:
     Type: AWS::Serverless::Application
     Properties:
       Parameters:
-        CustomAlarmName: !Ref AWS::StackName
+        CustomAlarmName: !Sub ${AWS::StackName}-1
         ChannelId: !Ref MediaLiveChannel
         OutputGroupName: MediaPackage
         PipelineId: 1
@@ -765,7 +765,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.11
+        SemanticVersion: 2.0.12
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
