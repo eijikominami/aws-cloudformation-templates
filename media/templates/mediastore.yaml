@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationSamples/media/mediastore sets Elemental MediaStore.
 
 Metadata: 
@@ -11,9 +12,15 @@ Metadata:
           - MaxAgeSeconds
           - UserAgent
       - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
           default: 'Tag Configuration'
         Parameters: 
           - LogicalNamePrefix
+          - Environment
           - TagKey
           - TagValue
 
@@ -37,6 +44,19 @@ Parameters:
     Default: MediaStore
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -48,8 +68,40 @@ Parameters:
 
 Conditions:
   UserAgentExists: !Not [ !Equals [ !Ref UserAgent, ''] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
 Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.11
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.11
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   MediaStore:
     Type: AWS::MediaStore::Container
     Properties: 
@@ -128,6 +180,27 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  CloudWatchAlarmMediaStore:
+    Type: AWS::Serverless::Application
+    Properties:
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        ContainerName: !Ref MediaStore
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediastore
+        SemanticVersion: 2.0.11
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
 
 Outputs:
   Endpoint:

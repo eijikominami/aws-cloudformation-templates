@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for AWS Elemental MediaStore
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom alram name
+  ContainerName:
+    Type: String
+    Default: ''
+    Description: The container name   
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmPutRequestsThrottle:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *PutRequestsでスロットリングが発生* しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaStore-${ContainerName}-PutRequests-Throttle
+        - !Sub Warning-MediaStore-${ContainerName}-PutRequests-Throttle
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ContainerName
+          Value: !Ref ContainerName
+        - Name: RequestType
+          Value: PutRequests
+      EvaluationPeriods: 1
+      MetricName: ThrottleCount
+      Namespace: AWS/MediaStore
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmListRequestsThrottle:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *ListRequestsでスロットリングが発生* しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaStore-${ContainerName}-ListRequests-Throttle
+        - !Sub Warning-MediaStore-${ContainerName}-ListRequests-Throttle
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ContainerName
+          Value: !Ref ContainerName
+        - Name: RequestType
+          Value: ListRequests
+      EvaluationPeriods: 1
+      MetricName: ThrottleCount
+      Namespace: AWS/MediaStore
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  AlarmDeleteRequestsThrottle:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *DeleteRequestsスロットリングが発生* しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaStore-${ContainerName}-DeleteRequests-Throttle
+        - !Sub Warning-MediaStore-${ContainerName}-DeleteRequests-Throttle
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ContainerName
+          Value: !Ref ContainerName
+        - Name: RequestType
+          Value: DeleteRequests
+      EvaluationPeriods: 1
+      MetricName: ThrottleCount
+      Namespace: AWS/MediaStore
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

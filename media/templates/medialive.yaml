@@ -726,7 +726,7 @@ Resources:
     Type: AWS::Serverless::Application
     Properties:
       Parameters:
-        CustomAlarmName: !Ref AWS::StackName
+        CustomAlarmName: !Sub ${AWS::StackName}-0
         ChannelId: !Ref MediaLiveChannel
         OutputGroupName: MediaPackage
         PipelineId: 0
@@ -750,7 +750,7 @@ Resources:
     Type: AWS::Serverless::Application
     Properties:
       Parameters:
-        CustomAlarmName: !Ref AWS::StackName
+        CustomAlarmName: !Sub ${AWS::StackName}-1
         ChannelId: !Ref MediaLiveChannel
         OutputGroupName: MediaPackage
         PipelineId: 1
