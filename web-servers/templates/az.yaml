@@ -109,6 +109,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-pub
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
@@ -120,6 +122,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-transit
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
@@ -131,6 +135,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-pub
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   RouteTableTransit:
@@ -140,6 +146,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-transit
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   RoutePublicToTransitGateway:
@@ -188,6 +196,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub eip-${LogicalNamePrefix}-${AvailabilityZone}-natgateway
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   EIPForNLB:
@@ -210,6 +220,8 @@ Resources:
       Tags: 
         - Key: Name
           Value: !Sub nat-${LogicalNamePrefix}-${AvailabilityZone}
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm

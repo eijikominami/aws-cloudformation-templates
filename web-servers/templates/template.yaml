@@ -663,6 +663,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Internet GW
@@ -672,6 +674,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub igw-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   InternetGatewayAttachment:
@@ -688,6 +692,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub eip-${AWS::StackName}-${AWS::Region}-ec2
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   EIPAssociation:
@@ -736,6 +742,8 @@ Resources:
       Tags: 
         - Key: Name
           Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Security Group
@@ -769,6 +777,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPC
@@ -782,12 +792,19 @@ Resources:
       ResourceId: !Ref VPC
       ResourceType: VPC
       TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchAlarmEC2:

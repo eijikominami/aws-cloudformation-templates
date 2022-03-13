@@ -556,7 +556,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteExpiredAccessKeys}
       RetentionInDays: 60
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm for Lambda

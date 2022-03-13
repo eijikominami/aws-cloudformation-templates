@@ -531,15 +531,20 @@ Resources:
   CloudWatchAlarmSSMCommand:
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ssm-command
+        SemanticVersion: 2.0.12
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
             - CreateSNSForAlert
             - !GetAtt SNSForAlert.Outputs.SNSTopicArn
             - !Ref SNSForAlertArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ssm-command
-        SemanticVersion: 2.0.12
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

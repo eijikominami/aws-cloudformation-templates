@@ -569,6 +569,11 @@ Resources:
           - CreateWebACL
           - !Ref WebACLArn
           - !Ref AWS::NoValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudFrontCachePolicy:
     Type: AWS::CloudFront::CachePolicy
     Properties: 

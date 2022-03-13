@@ -183,6 +183,8 @@ Resources:
                 Resource: '*' 
       RoleName: !Sub ${AWS::StackName}-Lambda-${AWS::Region}
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref RequiredTagKey
           Value: !Ref RequiredTagValue
   ConfigRequiredTags:
@@ -234,6 +236,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaCheckRequiredTags}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchEventsForConfigRequiredTags:
@@ -279,6 +283,7 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForConfigRequiredTags
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   LambdaDeleteUnapplicableResources:
     Type: AWS::Serverless::Function
@@ -305,5 +310,7 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteUnapplicableResources}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue

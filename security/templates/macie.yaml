@@ -145,5 +145,7 @@ Resources:
       LogGroupName: /aws/macie/classificationjobs
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
