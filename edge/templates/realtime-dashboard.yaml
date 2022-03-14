@@ -243,6 +243,7 @@ Resources:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
         SNSForAlertArn: !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -690,7 +691,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${Lambda}
       RetentionInDays: 60
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm for Lambda
@@ -757,7 +760,9 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/kinesisfirehose/${LogicalNamePrefix}'
       RetentionInDays: 60
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchLogsStreamForFirehoseS3:
@@ -855,6 +860,8 @@ Resources:
       KeyUsage: ENCRYPT_DECRYPT
       PendingWindowInDays: 30
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue 
   # ElasticSearch
@@ -902,6 +909,8 @@ Resources:
       SnapshotOptions: 
         AutomatedSnapshotStartHour: 0
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue 
   CloudWatchAlarmElasticsearch:

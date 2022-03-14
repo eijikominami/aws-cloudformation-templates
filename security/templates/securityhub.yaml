@@ -153,4 +153,5 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForSecurityHubFindings
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue

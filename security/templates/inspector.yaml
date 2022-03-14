@@ -258,4 +258,5 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForInspector
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue

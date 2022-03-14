@@ -229,6 +229,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
@@ -540,6 +541,7 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForHealth
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
 
 Outputs:

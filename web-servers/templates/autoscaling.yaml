@@ -197,6 +197,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub elb-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Type: !Ref LoadBalancerType
@@ -215,6 +217,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub target-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TargetType: instance
@@ -306,6 +310,9 @@ Resources:
           TopicARN: !Ref SNSTopicARN
       ServiceLinkedRoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling
       Tags:
+        - Key: environment
+          PropagateAtLaunch: true
+          Value: !Ref Environment
         - Key: !Ref TagKey
           PropagateAtLaunch: true
           Value: !Ref TagValue

@@ -196,6 +196,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -413,6 +414,8 @@ Resources:
       KeyUsage: ENCRYPT_DECRYPT
       PendingWindowInDays: 30
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Lambda
@@ -472,6 +475,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SNSSubscriptionForAlertToSlack:
@@ -558,6 +563,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaTransferNotificationToSNS}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SNSSubscriptionForAlertToSNS:
@@ -644,6 +651,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaAnalyzeUnauthorizedApiCalls}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm for Lambda

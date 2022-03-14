@@ -156,6 +156,7 @@ Resources:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
         SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -363,6 +364,8 @@ Resources:
       HostedZoneConfig: 
         Comment: !Ref DomainName
       HostedZoneTags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Name: !Ref DomainName
@@ -577,6 +580,8 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaTransferSNSTopic}
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # SNS

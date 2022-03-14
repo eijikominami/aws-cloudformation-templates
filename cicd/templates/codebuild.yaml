@@ -315,6 +315,8 @@ Resources:
               ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
@@ -356,7 +358,9 @@ Resources:
               Pattern: !Sub ^refs/heads/${GitHubBranchName}$
               ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
@@ -397,7 +401,9 @@ Resources:
               Pattern: ^refs/tags/.*-rc.*$
               ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
@@ -414,6 +420,8 @@ Resources:
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm

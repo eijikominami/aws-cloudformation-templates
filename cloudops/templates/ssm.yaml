@@ -310,6 +310,8 @@ Resources:
       Schedule: !Sub cron(0 ${PatchingAt} * * ? *)
       ScheduleTimezone: Asia/Tokyo
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   MaintenanceWindowTarget:

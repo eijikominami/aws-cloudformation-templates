@@ -208,6 +208,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub eip-${LogicalNamePrefix}-${AvailabilityZone}-nlb
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # NatGateway

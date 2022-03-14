@@ -138,4 +138,5 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref EventBridgeForAccessAnalyzer
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue

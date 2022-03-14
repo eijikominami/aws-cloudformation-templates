@@ -173,6 +173,8 @@ Resources:
       StartCanaryAfterCreation: true
       SuccessRetentionPeriod: 31
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3ForSynthetics:

@@ -91,6 +91,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -480,6 +481,7 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForIamAccessKeysRotated
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   LambdaDeleteExpiredAccessKeys:
     Type: AWS::Lambda::Function
@@ -934,4 +936,5 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForConfig
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue

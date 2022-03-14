@@ -14,6 +14,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - LogicalNamePrefix
+          - Environment
           - TagValue
 
 Parameters:
@@ -29,6 +30,13 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for deployment information
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagValue:
     Type: String
     Default: aws-cloudformation-templates
@@ -55,6 +63,7 @@ Resources:
       Parameters:
         TopicName: !Sub Alert-createdby-${LogicalNamePrefix}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   SNSForDeployment:
     Condition: CreateSNSForDeployment
@@ -66,6 +75,7 @@ Resources:
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForGuardDuty:
@@ -127,4 +137,5 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForGuardDuty
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue

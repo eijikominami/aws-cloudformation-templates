@@ -119,6 +119,8 @@ Resources:
             RetainRule:
               Count: !Ref SnapshotRetainRule
         TargetTags: 
+          - Key: environment
+            Value: !Ref Environment
           - Key: !Ref TagKey
             Value: !Ref TagValue
       State: ENABLED
