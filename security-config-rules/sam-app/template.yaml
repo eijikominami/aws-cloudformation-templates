@@ -42,13 +42,11 @@ Parameters:
     Description: Enable or disable auto remendentions [required]
   RequiredTagKey:
     Type: String
-    Default: createdby
-    AllowedPattern: ''
+    Default: ''
     Description: Required tag key
   RequiredTagValue:
     Type: String
-    Default: aws-cloudformation-templates
-    AllowedPattern: ''
+    Default: ''
     Description: Required tag key
   SNSForAlertArn:
     Type: String
