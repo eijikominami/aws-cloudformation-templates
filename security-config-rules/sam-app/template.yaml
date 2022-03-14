@@ -43,13 +43,13 @@ Parameters:
   RequiredTagKey:
     Type: String
     Default: createdby
-    AllowedPattern: .+
-    Description: Required tag key [required]
+    AllowedPattern: ''
+    Description: Required tag key
   RequiredTagValue:
     Type: String
     Default: aws-cloudformation-templates
-    AllowedPattern: .+
-    Description: Required tag key [required]
+    AllowedPattern: ''
+    Description: Required tag key
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -75,6 +75,7 @@ Parameters:
     AllowedPattern: .+
     
 Conditions:
+  CreateConfigRules: !Or [ !Not [ !Equals [ !Ref RequiredTagKey, '' ] ], !Not [ !Equals [ !Ref RequiredTagValue, '' ] ] ]
   CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -188,6 +189,7 @@ Resources:
         - Key: !Ref RequiredTagKey
           Value: !Ref RequiredTagValue
   ConfigRequiredTags:
+    Condition: CreateConfigRules
     Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: required-tags
@@ -199,10 +201,11 @@ Resources:
         Owner: AWS
         SourceIdentifier: REQUIRED_TAGS
   ConfigRequiredTagsExpanded:
+    Condition: CreateConfigRules
     Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: required-tags-expanded
-      Description: 指定したタグがリソースにあるかどうかを確認します。
+      Description: API Gateway と Lambda が指定したタグがリソースにあるかどうかを確認します。
       InputParameters:
         tagKey: !Ref RequiredTagKey
         tagValue: !Ref RequiredTagValue

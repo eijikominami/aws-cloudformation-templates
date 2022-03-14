@@ -864,7 +864,7 @@ Resources:
                       - Development
                       - development
                       - production
-                    - !Sub '", "RequiredTagKey": "${TagKey}", "RequiredTagValue": "${TagValue}", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                    - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
