@@ -71,7 +71,8 @@ Resources:
           - !Ref AgentPermission
       ProfilingGroupName: !Ref ProfilingGroupName
       Tags:
-
+        - Key: Environment
+          Value: !Ref Environment       
         - Key: !Ref TagKey
           Value: !Ref TagValue
 
