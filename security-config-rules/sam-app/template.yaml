@@ -184,8 +184,8 @@ Resources:
       Tags:
         - Key: environment
           Value: !Ref Environment
-        - Key: !Ref RequiredTagKey
-          Value: !Ref RequiredTagValue
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   ConfigRequiredTags:
     Condition: CreateConfigRules
     Type: AWS::Config::ConfigRule
