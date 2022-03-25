@@ -422,6 +422,7 @@ Resources:
                   - s3:GetObjectVersionForReplication
                   - s3:GetObjectVersionAcl
                   - s3:GetObjectVersionTagging
+                  - s3:ObjectOwnerOverrideToBucketOwner
                 Resource:
                   - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
               - Effect: Allow
@@ -472,6 +473,8 @@ Resources:
         - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-S3Replication-${AWS::Region}
           Rules: 
             - Destination: 
+                AccessControlTranslation:
+                  Owner: Destination
                 Account: !Ref AccountIdForAnalysis
                 Bucket: !Sub arn:aws:s3:::${BucketNameForAnalysis}
               Id: Analysis

@@ -107,7 +107,9 @@ Resources:
                 Action:
                   - s3:PutObject
                   - s3:GetBucketLocation
-                Resource: !Sub arn:aws:s3:::${S3ForSynthetics}/*
+                Resource:
+                  - !Sub arn:aws:s3:::${S3ForSynthetics}
+                  - !Sub arn:aws:s3:::${S3ForSynthetics}/*
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
@@ -166,7 +168,7 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-3.3
+      RuntimeVersion: syn-nodejs-puppeteer-3.4
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 
