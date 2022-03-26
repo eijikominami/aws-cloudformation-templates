@@ -422,7 +422,6 @@ Resources:
                   - s3:GetObjectVersionForReplication
                   - s3:GetObjectVersionAcl
                   - s3:GetObjectVersionTagging
-                  - s3:ObjectOwnerOverrideToBucketOwner
                 Resource:
                   - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
               - Effect: Allow
@@ -430,6 +429,7 @@ Resources:
                   - s3:ReplicateObject
                   - s3:ReplicateDelete
                   - s3:ReplicateTags
+                  - s3:ObjectOwnerOverrideToBucketOwner
                 Resource:
                   - !Sub 'arn:aws:s3:::${BucketNameForAnalysis}/*'
       RoleName: !Sub ${AWS::StackName}-S3Replication-${AWS::Region}
