@@ -17,6 +17,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment
           - TagKey
           - TagValue
 
@@ -34,6 +35,13 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The ARN of an Amazon SNS topic [required] 
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -62,7 +70,9 @@ Resources:
         Principals:
           - !Ref AgentPermission
       ProfilingGroupName: !Ref ProfilingGroupName
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment       
         - Key: !Ref TagKey
           Value: !Ref TagValue
 

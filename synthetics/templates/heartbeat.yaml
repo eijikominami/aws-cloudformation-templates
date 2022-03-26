@@ -107,7 +107,9 @@ Resources:
                 Action:
                   - s3:PutObject
                   - s3:GetBucketLocation
-                Resource: !Sub arn:aws:s3:::${S3ForSynthetics}/*
+                Resource:
+                  - !Sub arn:aws:s3:::${S3ForSynthetics}
+                  - !Sub arn:aws:s3:::${S3ForSynthetics}/*
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
@@ -166,13 +168,15 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-3.3
+      RuntimeVersion: syn-nodejs-puppeteer-3.4
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 
       StartCanaryAfterCreation: true
       SuccessRetentionPeriod: 31
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3ForSynthetics:
@@ -284,7 +288,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -301,7 +305,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

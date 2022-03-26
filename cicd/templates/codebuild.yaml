@@ -111,7 +111,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -128,7 +128,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -145,7 +145,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -315,6 +315,8 @@ Resources:
               ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
@@ -356,7 +358,9 @@ Resources:
               Pattern: !Sub ^refs/heads/${GitHubBranchName}$
               ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
@@ -397,7 +401,9 @@ Resources:
               Pattern: ^refs/tags/.*-rc.*$
               ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
@@ -414,6 +420,8 @@ Resources:
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm
@@ -422,7 +430,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -443,7 +451,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -464,7 +472,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

@@ -16,6 +16,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters: 
           - LogicalNamePrefix
+          - Environment
           - TagKey
           - TagValue
 
@@ -50,6 +51,13 @@ Parameters:
     Default: MediaPackage
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -135,6 +143,8 @@ Resources:
                   - '*'
       RoleName: !Sub ${LogicalNamePrefix}-MediaPackage-${AWS::Region}
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # MediaPackage
@@ -144,6 +154,8 @@ Resources:
       Description: !Sub Media Package Channel for ${LogicalNamePrefix}
       Id: !Ref LogicalNamePrefix
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   MediaPackageHlsOriginEndpoint:
@@ -164,6 +176,8 @@ Resources:
         - ALLOW
       StartoverWindowSeconds: !Ref StartoverWindowSeconds
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeDelaySeconds: 0
@@ -190,6 +204,8 @@ Resources:
         - ALLOW
       StartoverWindowSeconds: !Ref StartoverWindowSeconds
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeDelaySeconds: 0
@@ -202,6 +218,8 @@ Resources:
       SourceArn: !Sub 'arn:aws:s3:::${VodSourceBucket}'
       SourceRoleArn: !GetAtt IAMRoleForMediaPackage.Arn
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   MediaPackageDashAsset:  
@@ -213,6 +231,8 @@ Resources:
       SourceArn: !Sub 'arn:aws:s3:::${VodSourceBucket}'
       SourceRoleArn: !GetAtt IAMRoleForMediaPackage.Arn
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   MediaPackagePackagingGroup:
@@ -221,6 +241,8 @@ Resources:
     Properties: 
       Id: !Ref LogicalNamePrefix
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   MediaPackageHlsPackagingConfiguration:
@@ -237,6 +259,8 @@ Resources:
       Id: !Sub ${LogicalNamePrefix}-Hls
       PackagingGroupId: !Ref MediaPackagePackagingGroup
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   MediaPackageDashPackagingConfiguration:
@@ -254,6 +278,8 @@ Resources:
       Id: !Sub ${LogicalNamePrefix}-Dash
       PackagingGroupId: !Ref MediaPackagePackagingGroup
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
 

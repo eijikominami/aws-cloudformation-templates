@@ -239,7 +239,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -256,7 +256,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -324,6 +324,8 @@ Resources:
                 Resource: '*'
       RoleName: !Sub ${LogicalNamePrefix}-MediaLive-${AWS::Region}
       Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # MediaLive
@@ -684,6 +686,7 @@ Resources:
         - !Ref MediaLiveInputSecurityGroup
       Name: !Sub ${LogicalNamePrefix}-RtmpPush0
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
       Type: RTMP_PUSH
   MediaLiveInputRempPush1:
@@ -700,6 +703,7 @@ Resources:
         - !Ref MediaLiveInputSecurityGroup
       Name: !Sub ${LogicalNamePrefix}-RtmpPush1
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
       Type: RTMP_PUSH
   MediaLiveInputVod:
@@ -713,12 +717,14 @@ Resources:
           - Url: !Sub s3ssl://${VodSourceBucket}
         - - Url: !Sub s3ssl://${VodSourceBucket}
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
       Type: MP4_FILE   
   MediaLiveInputSecurityGroup:
     Type: AWS::MediaLive::InputSecurityGroup
     Properties: 
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
       WhitelistRules: 
         - Cidr: !Ref WhitelistRules
@@ -741,7 +747,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -765,7 +771,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

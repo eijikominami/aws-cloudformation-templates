@@ -42,14 +42,12 @@ Parameters:
     Description: Enable or disable auto remendentions [required]
   RequiredTagKey:
     Type: String
-    Default: createdby
-    AllowedPattern: .+
-    Description: Required tag key [required]
+    Default: ''
+    Description: Required tag key
   RequiredTagValue:
     Type: String
-    Default: aws-cloudformation-templates
-    AllowedPattern: .+
-    Description: Required tag key [required]
+    Default: ''
+    Description: Required tag key
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -75,6 +73,7 @@ Parameters:
     AllowedPattern: .+
     
 Conditions:
+  CreateConfigRules: !Or [ !Not [ !Equals [ !Ref RequiredTagKey, '' ] ], !Not [ !Equals [ !Ref RequiredTagValue, '' ] ] ]
   CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -87,7 +86,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -104,7 +103,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -183,9 +182,12 @@ Resources:
                 Resource: '*' 
       RoleName: !Sub ${AWS::StackName}-Lambda-${AWS::Region}
       Tags:
-        - Key: !Ref RequiredTagKey
-          Value: !Ref RequiredTagValue
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   ConfigRequiredTags:
+    Condition: CreateConfigRules
     Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: required-tags
@@ -197,10 +199,11 @@ Resources:
         Owner: AWS
         SourceIdentifier: REQUIRED_TAGS
   ConfigRequiredTagsExpanded:
+    Condition: CreateConfigRules
     Type: AWS::Config::ConfigRule
     Properties:
       ConfigRuleName: required-tags-expanded
-      Description: 指定したタグがリソースにあるかどうかを確認します。
+      Description: API Gateway と Lambda が指定したタグがリソースにあるかどうかを確認します。
       InputParameters:
         tagKey: !Ref RequiredTagKey
         tagValue: !Ref RequiredTagValue
@@ -234,6 +237,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaCheckRequiredTags}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchEventsForConfigRequiredTags:
@@ -265,7 +270,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -279,6 +284,7 @@ Resources:
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForConfigRequiredTags
       Tags:
+        environment: !Ref Environment
         createdby: !Ref TagValue
   LambdaDeleteUnapplicableResources:
     Type: AWS::Serverless::Function
@@ -305,5 +311,7 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaDeleteUnapplicableResources}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue

@@ -109,6 +109,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-pub
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
@@ -120,6 +122,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-transit
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
@@ -131,6 +135,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-pub
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   RouteTableTransit:
@@ -140,6 +146,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-transit
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   RoutePublicToTransitGateway:
@@ -188,6 +196,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub eip-${LogicalNamePrefix}-${AvailabilityZone}-natgateway
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   EIPForNLB:
@@ -198,6 +208,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub eip-${LogicalNamePrefix}-${AvailabilityZone}-nlb
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # NatGateway
@@ -210,6 +222,8 @@ Resources:
       Tags: 
         - Key: Name
           Value: !Sub nat-${LogicalNamePrefix}-${AvailabilityZone}
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm
@@ -224,7 +238,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

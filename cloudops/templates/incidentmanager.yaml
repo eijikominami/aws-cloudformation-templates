@@ -166,8 +166,3 @@ Resources:
         Summary: !Sub Critical Impact to ${WorkloadName}
         Title: !Sub Critical Impact to ${WorkloadName}
       Name: CriticalImpact
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue

@@ -196,6 +196,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -210,7 +211,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -226,7 +227,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -243,7 +244,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -260,7 +261,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -271,7 +272,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -413,6 +414,8 @@ Resources:
       KeyUsage: ENCRYPT_DECRYPT
       PendingWindowInDays: 30
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Lambda
@@ -472,6 +475,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SNSSubscriptionForAlertToSlack:
@@ -517,7 +522,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -558,6 +563,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaTransferNotificationToSNS}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SNSSubscriptionForAlertToSNS:
@@ -588,7 +595,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -644,6 +651,8 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${LambdaAnalyzeUnauthorizedApiCalls}
       RetentionInDays: 60
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm for Lambda
@@ -666,7 +675,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

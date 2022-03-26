@@ -156,6 +156,7 @@ Resources:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
         SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -184,7 +185,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -351,7 +352,7 @@ Resources:
         CertificateArn: !Ref CertificateManager
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -363,6 +364,8 @@ Resources:
       HostedZoneConfig: 
         Comment: !Ref DomainName
       HostedZoneTags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Name: !Ref DomainName
@@ -577,6 +580,8 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${LambdaTransferSNSTopic}
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # SNS
@@ -599,7 +604,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

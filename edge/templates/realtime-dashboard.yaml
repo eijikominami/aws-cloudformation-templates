@@ -243,6 +243,7 @@ Resources:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
         SNSForAlertArn: !Ref SNSForAlertArn
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
@@ -257,7 +258,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -274,7 +275,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
       Tags:
@@ -546,7 +547,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -690,7 +691,9 @@ Resources:
     Properties: 
       LogGroupName: !Sub /aws/lambda/${Lambda}
       RetentionInDays: 60
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm for Lambda
@@ -707,7 +710,7 @@ Resources:
         FunctionResouceName: !Ref Lambda
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -757,7 +760,9 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/kinesisfirehose/${LogicalNamePrefix}'
       RetentionInDays: 60
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchLogsStreamForFirehoseS3:
@@ -787,7 +792,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -855,6 +860,8 @@ Resources:
       KeyUsage: ENCRYPT_DECRYPT
       PendingWindowInDays: 30
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue 
   # ElasticSearch
@@ -902,6 +909,8 @@ Resources:
       SnapshotOptions: 
         AutomatedSnapshotStartHour: 0
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue 
   CloudWatchAlarmElasticsearch:
@@ -922,7 +931,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elasticsearch
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -945,7 +954,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1059,7 +1068,7 @@ Resources:
         FunctionResouceName: !Ref LambdaShutdownElasticSearch
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.12
+        SemanticVersion: 2.0.14
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

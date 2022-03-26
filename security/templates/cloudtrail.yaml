@@ -164,6 +164,8 @@ Resources:
       KeyUsage: ENCRYPT_DECRYPT
       PendingWindowInDays: 30
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # S3
@@ -246,6 +248,8 @@ Resources:
       LogGroupName: !Sub '/aws/cloudtrail/${LogicalNamePrefix}'
       RetentionInDays: 365
       Tags: 
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CIS 3.1 a log metric filter and alarm exist for unauthorized API calls 
