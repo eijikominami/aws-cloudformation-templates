@@ -125,12 +125,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AccountIdForAnalysis | String | | | 転送先の分析用AWSアカウント |
 | AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Amazon Detective が有効化されます。|
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
-| BucketNameForAnalysis | String | | | 転送先の分析用S3バケット |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | セキュリティチェックに関する通知フィルタ | 
 

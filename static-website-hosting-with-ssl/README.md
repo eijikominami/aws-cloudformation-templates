@@ -97,6 +97,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| AccountIdForAnalysis | String | | | The AWS account id for log analysis |
+| BucketNameForAnalysis | String | | | The Amazon S3 bucket name for log analysis |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
@@ -125,7 +127,7 @@ You can provide optional parameters as follows.
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3** |
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
-| LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' |
+| LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named '<DomainName>-logs-${AWS::Region}-${AWS::AccountId}' |
 | WebACLArn | String | | | The ARN of Web ACL |
 
 ### Manual Deployment

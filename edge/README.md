@@ -41,7 +41,7 @@ This template creates ``CloudFront`` distribution.
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
-| CloudFrontOriginAccessIdentity | String | | conditional | The origin access identity |
+| CloudFrontOriginAccessIdentity | String | | Conditional | The origin access identity |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
 | CloudFrontOriginShield | true or false | false | ○ | A flag that specifies whether Origin Shield is enabled |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 
@@ -70,7 +70,7 @@ This template creates ``CloudFront`` distribution.
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |
 | UserAgent | String | | | The secret key that 'User-Agent' header contains | 
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
-| LogBacketName | String | | ○ | If it's empty, the bucket name logging data are stored is named 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' |
+| LogBucketName | String | | Conditional | The custom S3 bucket name for access logging |
 | WebACLArn | String | | | The ARN of Web ACL |
 
 ### Realtime Dashboard

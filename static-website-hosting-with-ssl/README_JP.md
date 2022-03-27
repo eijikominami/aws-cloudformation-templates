@@ -95,6 +95,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AccountIdForAnalysis | String | | | 転送先の分析用AWSアカウント |
+| BucketNameForAnalysis | String | | | 転送先の分析用S3バケット |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** に **SSL証明書** が紐付けられます。 |
 | **DomainName** | String | | ○ | ドメイン名 |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
@@ -123,7 +125,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
-| LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
+| LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 '<DomainName>-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
 | WebACLArn | String | | | WebACL のARN |
 
 ### 手動設定
