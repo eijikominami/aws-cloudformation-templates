@@ -4,7 +4,12 @@ Description: AWSCloudFormationTemplates/static-web-hosting creates an environmen
 
 Metadata: 
   AWS::CloudFormation::Interface:
-    ParameterGroups: 
+    ParameterGroups:
+      - Label: 
+          default: 'Log Analysis Configuration'
+        Parameters: 
+          - AccountIdForAnalysis
+          - BucketNameForAnalysis
       - Label: 
           default: 'CloudFront Configuration'
         Parameters: 
@@ -23,7 +28,7 @@ Metadata:
           - CloudFront500ErrorResponsePagePath
           - DomainName
           - Logging
-          - LogBacketName
+          - LogBucketName
           - S3DestinationBucketArnOfCrossRegionReplication
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
@@ -65,6 +70,14 @@ Metadata:
           - TagValue
 
 Parameters:
+  AccountIdForAnalysis:
+    Type: String
+    Default: ''
+    Description: The AWS account id for log analysis
+  BucketNameForAnalysis:
+    Type: String
+    Default: ''
+    Description: The Amazon S3 bucket name for log analysis
   CertificateManagerARN:
     Default: ''
     Type: String
@@ -314,7 +327,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable logging [required]
-  LogBacketName:
+  LogBucketName:
     Type: String
     Default: ''
     Description: The custom S3 bucket name for access logging
@@ -349,10 +362,11 @@ Conditions:
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
   CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardState, ENABLED ]
+  CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
-  CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
+  CreateLogBucket: !Equals [ !Ref LogBucketName, '' ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -400,10 +414,10 @@ Resources:
         RealtimeKinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
         Route53HostedZoneId: !Ref Route53HostedZoneId
         Logging: !Ref Logging
-        LogBacketName: !If
-          - CustomLogBucketName
+        LogBucketName: !If
+          - CreateLogBucket
           - !Ref S3ForAccessLog
-          - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}.s3.amazonaws.com
+          - !Ref LogBucketName
         WebACLArn: !Ref WebACLArn
         SNSForAlertArn: !Ref SNSForAlertArn
         SNSForDeploymentArn: !Ref SNSForDeploymentArn
@@ -457,7 +471,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.14
+        SemanticVersion: 2.0.15
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -474,7 +488,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.14
+        SemanticVersion: 2.0.15
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -532,6 +546,62 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForAnalysis:
+    Condition: CreateS3ReplicationForAnalysis
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceArn: !If
+                  - CreateLogBucket
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
+                  - !Sub 'arn:aws:s3:::${LogBucketName}'
+      Description: A role required for S3 to access another S3 bucket for analysis.
+      Policies:
+        - PolicyName: S3Replication
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetReplicationConfiguration
+                  - s3:ListBucket
+                Resource:
+                  - !If 
+                    - CreateLogBucket
+                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
+                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+              - Effect: Allow
+                Action:
+                  - s3:GetObjectVersionForReplication
+                  - s3:GetObjectVersionAcl
+                  - s3:GetObjectVersionTagging
+                Resource:
+                  - !If
+                    - CreateLogBucket
+                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
+                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+              - Effect: Allow
+                Action:
+                  - s3:ReplicateObject
+                  - s3:ReplicateDelete
+                  - s3:ReplicateTags
+                  - s3:ObjectOwnerOverrideToBucketOwner
+                Resource:
+                  - !Sub 'arn:aws:s3:::${BucketNameForAnalysis}/*'
+      RoleName: !Sub ${AWS::StackName}-S3Replication-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
   # CloudFront
   CloudFrontOriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
@@ -559,9 +629,9 @@ Resources:
       LoggingConfiguration: !If
         - CreateLog
         - DestinationBucketName: !If
-          - CustomLogBucketName
+          - CreateLogBucket
           - !Ref S3ForAccessLog
-          - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}
+          - !Ref LogBucketName
           LogFilePrefix: !Sub S3-${DomainName}/
         - !Ref AWS::NoValue
       MetricsConfigurations: 
@@ -619,7 +689,7 @@ Resources:
               Bool: 
                 aws:SecureTransport: false
   S3ForAccessLog:
-    Condition: CustomLogBucketName
+    Condition: CreateLogBucket
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -629,24 +699,51 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
               SSEAlgorithm: AES256
-      BucketName: !Ref LogBacketName
+      BucketName: !Join 
+        - ''
+        - - !Join ["-", !Split [".", !Ref DomainName]]
+          - !Sub -logs-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
             ExpirationInDays: 60
             Status: Enabled
+          - !If 
+            - CreateS3ReplicationForAnalysis
+            - Id: NoncurrentVersionExpirationInDays
+              NoncurrentVersionExpiration: 
+                NewerNoncurrentVersions: 1
+                NoncurrentDays: 1
+              Status: Enabled
+            - !Ref AWS::NoValue
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      ReplicationConfiguration: !If
+        - CreateS3ReplicationForAnalysis
+        - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-S3Replication-${AWS::Region}
+          Rules: 
+            - Destination: 
+                AccessControlTranslation:
+                  Owner: Destination
+                Account: !Ref AccountIdForAnalysis
+                Bucket: !Sub arn:aws:s3:::${BucketNameForAnalysis}
+              Id: Analysis
+              Status: Enabled
+        - !Ref AWS::NoValue
+      VersioningConfiguration: !If 
+        - CreateS3ReplicationForAnalysis
+        - Status: Enabled
+        - !Ref AWS::NoValue
       Tags:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
-    Condition: CustomLogBucketName
+    Condition: CreateLogBucket
     Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForAccessLog

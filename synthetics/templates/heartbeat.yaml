@@ -168,7 +168,7 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-3.4
+      RuntimeVersion: syn-nodejs-puppeteer-3.5
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 
@@ -288,7 +288,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.14
+        SemanticVersion: 2.0.15
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -305,7 +305,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.14
+        SemanticVersion: 2.0.15
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

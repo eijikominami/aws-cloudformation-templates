@@ -41,7 +41,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
-| CloudFrontOriginAccessIdentity | String | | conditional | The origin access identity |
+| CloudFrontOriginAccessIdentity | String | | 条件付き | The origin access identity |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
 | CloudFrontOriginShield | true or false | false | ○ | Origin Shield 有効化フラグ |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 
@@ -70,7 +70,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | UserAgent | String | | | 'User-Agent' ヘッダが含む秘密鍵 | 
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
-| LogBacketName | String | | ○ | バケット名を指定しなかった場合、ログが保管されるバケット名は、 'defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}' になります。 |
+| LogBucketName | String | | 条件付き | ログを格納するバケット名 |
 | WebACLArn | String | | | WebACL のARN |
 
 ### Realtime Dashboard

@@ -26,7 +26,7 @@ Metadata:
           - CloudFront500ErrorResponsePagePath
           - DomainName
           - Logging
-          - LogBacketName
+          - LogBucketName
           - UserAgent
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
@@ -324,7 +324,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable logging [required]
-  LogBacketName:
+  LogBucketName:
     Type: String
     Default: ''
     Description: The custom S3 bucket name for access logging [conditional]
@@ -421,7 +421,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.14
+        SemanticVersion: 2.0.15
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -438,7 +438,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.14
+        SemanticVersion: 2.0.15
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -501,7 +501,7 @@ Resources:
         IPV6Enabled: false
         Logging: !If
           - CreateLog
-          - Bucket: !Ref LogBacketName
+          - Bucket: !Sub ${LogBucketName}.s3.amazonaws.com
             Prefix: !If
               - DomainNameExists
               - !Sub CloudFront-${DomainName}/
