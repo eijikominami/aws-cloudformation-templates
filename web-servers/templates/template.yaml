@@ -6,6 +6,11 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'Log Analysis Configuration'
+        Parameters: 
+          - AccountIdForAnalysis
+          - BucketNameForAnalysis
+      - Label: 
           default: 'AutoScaling Configuration'
         Parameters: 
           - AutoScalingDesiredCapacity
@@ -80,6 +85,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AccountIdForAnalysis:
+    Type: String
+    Default: ''
+    Description: The AWS account id for log analysis
   ACMValidationMethod:
     Type: String
     Default: DNS
@@ -91,6 +100,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The domain name created by Certification Manager
+  BucketNameForAnalysis:
+    Type: String
+    Default: ''
+    Description: The Amazon S3 bucket name for log analysis
   CertificateManagerARN:
     Default: ''
     Type: String
@@ -294,6 +307,7 @@ Conditions:
   CreateCloudFront: !Equals [ !Ref CloudFrontState, ENABLED ]
   CreateDataLifecycleManager: !Not [ !Equals [ !Ref EC2DailySnapshotScheduledAt, '' ] ]
   CreateRoute53: !And [ !Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
+  CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -717,6 +731,62 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForAnalysis:
+    Condition: CreateS3ReplicationForAnalysis
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceArn: !If
+                  - CreateLogBucket
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
+                  - !Sub 'arn:aws:s3:::${LogBucketName}'
+      Description: A role required for S3 to access another S3 bucket for analysis.
+      Policies:
+        - PolicyName: S3Replication
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetReplicationConfiguration
+                  - s3:ListBucket
+                Resource:
+                  - !If 
+                    - CreateLogBucket
+                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
+                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+              - Effect: Allow
+                Action:
+                  - s3:GetObjectVersionForReplication
+                  - s3:GetObjectVersionAcl
+                  - s3:GetObjectVersionTagging
+                Resource:
+                  - !If
+                    - CreateLogBucket
+                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
+                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+              - Effect: Allow
+                Action:
+                  - s3:ReplicateObject
+                  - s3:ReplicateDelete
+                  - s3:ReplicateTags
+                  - s3:ObjectOwnerOverrideToBucketOwner
+                Resource:
+                  - !Sub 'arn:aws:s3:::${BucketNameForAnalysis}/*'
+      RoleName: !Sub ${AWS::StackName}-S3Replication-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
   # InstanceProfile
   IamInstanceProfileForIAMRoleForEC2:
     Type: AWS::IAM::InstanceProfile
@@ -908,17 +978,44 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
               SSEAlgorithm: AES256
-      BucketName: !Ref LogBucketName
+      BucketName: !Join 
+        - ''
+        - - !Join ["-", !Split [".", !Ref DomainName]]
+          - !Sub -logs-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
             ExpirationInDays: 60
             Status: Enabled
+          - !If 
+            - CreateS3ReplicationForAnalysis
+            - Id: NoncurrentVersionExpirationInDays
+              NoncurrentVersionExpiration: 
+                NewerNoncurrentVersions: 1
+                NoncurrentDays: 1
+              Status: Enabled
+            - !Ref AWS::NoValue
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      ReplicationConfiguration: !If
+        - CreateS3ReplicationForAnalysis
+        - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-S3Replication-${AWS::Region}
+          Rules: 
+            - Destination: 
+                AccessControlTranslation:
+                  Owner: Destination
+                Account: !Ref AccountIdForAnalysis
+                Bucket: !Sub arn:aws:s3:::${BucketNameForAnalysis}
+              Id: Analysis
+              Status: Enabled
+        - !Ref AWS::NoValue
+      VersioningConfiguration: !If 
+        - CreateS3ReplicationForAnalysis
+        - Status: Enabled
+        - !Ref AWS::NoValue
       Tags:
         - Key: environment
           Value: !Ref Environment
