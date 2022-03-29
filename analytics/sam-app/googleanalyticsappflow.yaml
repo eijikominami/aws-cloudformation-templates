@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/analytics/googleanalytics creates an AppFlow flow for Google Analytics.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'AppFlow Configuration'
+        Parameters: 
+          - AppFlowConnectorProfileName
+          - AppFlowGoogleAnalyticsObject
+          - AppFlowScheduleRate
+          - S3BucketName
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  AppFlowConnectorProfileName:
+    Type: String
+    AllowedPattern: .+
+    Description: The profile name of AppFlow Connector for Google Analytics [required]
+  AppFlowGoogleAnalyticsObject:
+    Type: String
+    AllowedPattern: .+
+    Description: The object of Google Analytics [required]
+  AppFlowScheduleRate:
+    Type: Number
+    Default: 24
+    MinValue: 24
+    Description: The rate at which the scheduled flow will run [required]
+  S3BucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: The bucket name data are stored [required]
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples
+    AllowedPattern: .+
+
+Resources:  
+  AppFlow:
+    Type: AWS::AppFlow::Flow
+    Properties: 
+      Description: AppFlow For Google Analytics
+      DestinationFlowConfigList: 
+        - ConnectorType: S3
+          DestinationConnectorProperties: 
+            S3: 
+              BucketName: !Ref S3BucketName
+      FlowName: GoogleAnalytics
+      SourceFlowConfig: 
+        ConnectorProfileName: !Ref AppFlowConnectorProfileName
+        ConnectorType: Googleanalytics
+        SourceConnectorProperties: 
+          GoogleAnalytics: 
+            Object: !Ref AppFlowGoogleAnalyticsObject
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Tasks: 
+        - ConnectorOperator:
+            GoogleAnalytics: PROJECTION
+          SourceFields: 
+            - 'ga:dateHour|DIMENSION'  
+            - 'ga:deviceCategory|DIMENSION'
+            - 'ga:users|METRIC'  
+          TaskType: Filter
+      TriggerConfig:
+        TriggerProperties:
+          DataPullMode: Incremental
+          ScheduleExpression: !Sub rate(${AppFlowScheduleRate}hours)
+        TriggerType: Scheduled

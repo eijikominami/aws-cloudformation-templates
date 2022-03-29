@@ -46,17 +46,17 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 
 ## Deployment
 
-Execute the command to deploy with `ArtifactBacketInVirginia` and `GitHubOAuthToken` parameter.
+Execute the command to deploy with `ArtifactBucketInVirginia` and `GitHubOAuthToken` parameter.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBacketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
 ```
 
 You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| ArtifactBacketInVirginia | String | | | S3 artifact bucket name in N.Verginia region |
+| ArtifactBucketInVirginia | String | | | S3 artifact bucket name in N.Verginia region |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
 | **GitHubOAuthToken** | String | | | OAuth token to access GitHub |
 | GitHubOwnerNameForTemplateConfiguration | String | | | GitHub owner name for CloudFormation Template Configuration files |
@@ -117,17 +117,17 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 
 ## デプロイ
 
-`ArtifactBacketInVirginia` パラメータと `GitHubOAuthToken` パラメータを指定して、デプロイを実行してください。
+`ArtifactBucketInVirginia` パラメータと `GitHubOAuthToken` パラメータを指定して、デプロイを実行してください。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBacketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| ArtifactBacketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
+| ArtifactBucketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
 | **GitHubOAuthToken** | String | | | GitHubからコードを取得する際に用いるOAuthトークン |
 | GitHubOwnerNameForTemplateConfiguration | String | | | TemplateConfigurationファイルが置かれているGitHubリポジトリの所有者名　|

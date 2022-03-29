@@ -57,17 +57,17 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 
 ## Deployment
 
-Execute the command to deploy with `ArtifactBacketInVirginia` and `GitHubOAuthToken` parameter.
+Execute the command to deploy with `ArtifactBucketInVirginia` and `GitHubOAuthToken` parameter.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBacketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
 ```
 
 You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| ArtifactBacketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
+| ArtifactBucketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | The Docker image name for CodeBuild |
 | GitHubOAuthToken | String | | | The **OAuth token** to access GitHub |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | The **GitHub owner name** for CloudFormation Template Configuration files |

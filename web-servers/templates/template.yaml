@@ -32,7 +32,7 @@ Metadata:
           - CloudFront500ErrorResponsePagePath
           - DomainName
           - Logging
-          - LogBacketName
+          - LogBucketName
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
@@ -63,6 +63,10 @@ Metadata:
         Parameters: 
           - WebACL
           - WebACLArnForCloudFront
+      - Label: 
+          default: 'Log Configuration'
+        Parameters: 
+          - LogGroupNameTransferredToS3
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -204,10 +208,14 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable logging [required]
-  LogBacketName:
+  LogBucketName:
     Type: String
     Default: ''
     Description: The custom S3 bucket name for access logging
+  LogGroupNameTransferredToS3:
+    Type: String
+    Default: ''
+    Description: The log group name transfferd to an S3 bucket.
   Route53HostedZoneId:
     Type: String
     Default: ''
@@ -291,7 +299,8 @@ Conditions:
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateWAFForCloudFront: !And [!Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref WebACL, ENABLED ] ]
   CreateWAFForALB: !And [!Equals [ !Ref CloudFrontState, DISABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
-  CustomLogBucketName: !Not [ !Equals [ !Ref LogBacketName, '' ] ]
+  CreateLogBucket: !Equals [ !Ref LogBucketName, '' ]
+  CreateKinesisFirehose: !Not [ !Equals [ !Ref LogGroupNameTransferredToS3, '' ] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -520,10 +529,10 @@ Resources:
         CloudFrontOriginType: NOT_S3
         Route53HostedZoneId: !Ref Route53HostedZoneId
         Logging: !Ref Logging
-        LogBacketName: !If
-          - CustomLogBucketName
+        LogBucketName: !If
+          - CreateLogBucket
           - !Ref S3ForAccessLog
-          - !Sub defaultsecuritysettings-logs-${AWS::Region}-${AWS::AccountId}.s3.amazonaws.com
+          - !Ref LogBucketName
         WebACLArn: !If
           - CreateWAFForCloudFront
           - !Ref WebACLArnForCloudFront
@@ -573,7 +582,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.15
+        SemanticVersion: 2.0.17
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -590,7 +599,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.15
+        SemanticVersion: 2.0.17
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -643,6 +652,66 @@ Resources:
                   - logs:DescribeLogStreams
                 Resource: '*'
       RoleName: !Sub ${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForFirehose:
+    Condition: CreateKinesisFirehose
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Kinesis Firehose.
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                Resource: '*'
+      RoleName: !Sub ${AWS::StackName}-Firehose-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCloudWatchLogs:
+    Condition: CreateKinesisFirehose
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: !Sub logs.${AWS::Region}.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for CloudWatch Logs.
+      Policies:
+        - PolicyName: Firehose
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:PutRecord
+                  - firehose:PutRecords
+                Resource: '*'
+      RoleName: !Sub ${AWS::StackName}-CloudWatchLogs-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -824,12 +893,12 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.15
+        SemanticVersion: 2.0.17
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   S3ForAccessLog:
-    Condition: CustomLogBucketName
+    Condition: CreateLogBucket
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -839,7 +908,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
               SSEAlgorithm: AES256
-      BucketName: !Ref LogBacketName
+      BucketName: !Ref LogBucketName
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
@@ -856,7 +925,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
-    Condition: CustomLogBucketName
+    Condition: CreateLogBucket
     Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForAccessLog
@@ -876,6 +945,36 @@ Resources:
             Condition:
               Bool: 
                 aws:SecureTransport: false
+  # CloudWatch Logs to S3
+  SubscriptionFilter:
+    Condition: CreateKinesisFirehose
+    Type: AWS::Logs::SubscriptionFilter
+    Properties: 
+      DestinationArn: !GetAtt Firehose.Arn
+      FilterPattern: ''
+      LogGroupName: !Ref LogGroupNameTransferredToS3
+      RoleArn: !GetAtt IAMRoleForCloudWatchLogs.Arn
+  Firehose:
+    Condition: CreateKinesisFirehose
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamName: CloudWatchLogsToS3-created-by-${AWS:StackName}
+      DeliveryStreamType: DirectPut
+      S3DestinationConfiguration: 
+        BucketARN: !If 
+          - CreateLogBucket
+          - !GetAtt S3ForAccessLog.Arn
+          - !Sub arn:aws:s3:::${LogBucketName}
+        BufferingHints: 
+          IntervalInSeconds: 300
+          SizeInMBs: 5
+        Prefix: !Sub CloudWatchLogs${LogGroupNameTransferredToS3}
+        RoleARN: !GetAtt IAMRoleForFirehose.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 
 Outputs:
   CloudFrontURL:
