@@ -236,7 +236,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         AuditOtherRegions: !Ref AuditOtherRegions
-        LogBacketName: !Ref S3ForAccessLog
+        LogBucketName: !Ref S3ForAccessLog
         LogicalNamePrefix: !Ref AWS::StackName
         SnsTopicARN: !If
           - CreateSNSForAlert

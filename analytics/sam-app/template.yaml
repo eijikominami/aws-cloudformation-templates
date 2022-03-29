@@ -1,0 +1,479 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationSamples/analytics/datalake creates a data lake.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'AppFlow Configuration for Gogole Analytics'
+        Parameters: 
+          - AppFlowConnectorProfileName
+          - AppFlowGoogleAnalyticsObject
+          - AppFlowScheduleRate
+      - Label: 
+          default: 'CloudFront Configuration'
+        Parameters: 
+          - CloudFrontLogPrefix
+      - Label: 
+          default: 'Glue Configuration'
+        Parameters: 
+          - GlueDatabaseName
+      - Label: 
+          default: 'S3 Access Log Configuration'
+        Parameters: 
+          - S3AccessLogPrefix
+      - Label: 
+          default: 'S3 Replication Configuration'
+        Parameters: 
+          - SourceAccountIAMRoleArn
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  AppFlowConnectorProfileName:
+    Type: String
+    Default: ''
+    Description: The profile name of AppFlow Connector for Google Analytics
+  AppFlowGoogleAnalyticsObject:
+    Type: String
+    Default: ''
+    Description: The object of Google Analytics
+  AppFlowScheduleRate:
+    Type: Number
+    Default: 24
+    MinValue: 24
+    Description: The rate at which the scheduled flow will run [required]
+  CloudFrontLogPrefix:
+    Type: String
+    Default: ''
+    Description: The S3 prefix that is used in the configuration of your Amazon CloudFront distribution for log storage. 
+  SourceAccountIAMRoleArn:
+    Type: String
+    Default: ''
+    Description: The role arn of account id source bucket is contained
+  GlueDatabaseName: 
+    Type: String
+    Default: 'datalake'
+    AllowedPattern: '[a-z0-9\_]+'
+    MinLength: 1
+    MaxLength: 20
+    Description: Prefix that is used for the created resources (20 chars, a-z, 0-9 and _ only) [required]
+  S3AccessLogPrefix:
+    Type: String
+    Default: ''
+    Description: The S3 prefix that is used in the configuration of your Amazon S3 distribution for log storage. 
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateTableForCloudFront: !Not [ !Equals [ !Ref CloudFrontLogPrefix, ''] ] 
+  CreateTableForGoogleAnalytics: !And [ !Not [ !Equals [ !Ref AppFlowConnectorProfileName, ''] ], !Not [ !Equals [ !Ref AppFlowGoogleAnalyticsObject, ''] ] ]
+  CreateTableForS3: !Not [ !Equals [ !Ref S3AccessLogPrefix, ''] ]
+  CreateBucketPolicy: !Not [ !Equals [ !Ref SourceAccountIAMRoleArn, ''] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.15
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.15
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  IAMRoleForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Lambda to access S3 and CloudWatch Logs.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: 
+                  - !Sub arn:aws:s3:::datalake-source-${AWS::Region}-${AWS::AccountId}
+                  - !Sub arn:aws:s3:::datalake-source-${AWS::Region}-${AWS::AccountId}/*
+      RoleName: !Sub ${AWS::StackName}-Lambda-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3ForSource:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Join
+        - ''
+        - - datasource-
+          - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
+          - !Sub -${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: NoncurrentVersionExpirationInDays
+            NoncurrentVersionExpiration: 
+              NewerNoncurrentVersions: 1
+              NoncurrentDays: 1
+            Status: Enabled
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - !If
+            - CreateTableForCloudFront
+            - Event: s3:ObjectCreated:*
+              Filter: 
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: !Ref CloudFrontLogPrefix
+              Function: !GetAtt AmazonCloudfrontAccessLogsQueries.Outputs.MoveNewAccessLogsFnArn
+            - !Ref AWS::NoValue
+          - !If
+            - CreateTableForGoogleAnalytics
+            - Event: s3:ObjectCreated:*
+              Filter: 
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: GoogleAnalytics
+              Function: !GetAtt GoogleAnalyticsLogsQueries.Outputs.LambdaArn
+            - !Ref AWS::NoValue
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3ForSourceBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForSource
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForSource
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForSource.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForSource.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
+          - !If
+            - CreateBucketPolicy
+            - Effect: Allow
+              Principal:
+                AWS: !Ref SourceAccountIAMRoleArn
+              Action:
+                - s3:ReplicateDelete
+                - s3:ReplicateObject
+                - s3:ObjectOwnerOverrideToBucketOwner
+              Resource: !Join
+                  - ''
+                  - - !GetAtt S3ForSource.Arn
+                    - /*
+            - !Ref AWS::NoValue
+          - !If
+            - CreateBucketPolicy
+            - Effect: Allow
+              Principal:
+                AWS: !Ref SourceAccountIAMRoleArn
+              Action:
+                - 's3:List*'
+                - s3:GetBucketVersioning
+                - s3:PutBucketVersioning
+              Resource: !GetAtt S3ForSource.Arn
+            - !Ref AWS::NoValue
+          - !If
+            - CreateTableForGoogleAnalytics
+            - Effect: Allow
+              Principal:
+                Service: appflow.amazonaws.com
+              Action:
+                - s3:PutObject
+                - s3:AbortMultipartUpload
+                - s3:ListMultipartUploadParts
+                - s3:ListBucketMultipartUploads
+                - s3:GetBucketAcl
+                - s3:PutObjectAcl
+              Resource:
+                - !GetAtt S3ForSource.Arn
+                - !Join
+                  - ''
+                  - - !GetAtt S3ForSource.Arn
+                    - /*
+            - !Ref AWS::NoValue
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Description: !Sub Database for ${GlueDatabaseName} created by ${AWS::StackName}
+        Name: !Ref GlueDatabaseName
+  # CloudFront
+  AmazonCloudfrontAccessLogsQueries:
+    Condition: CreateTableForCloudFront
+    Type: AWS::Serverless::Application
+    Properties:
+      Parameters:
+        GlueDatabase: !Ref GlueDatabase
+        GzKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-gz/
+        NewKeyPrefix: !Sub ${CloudFrontLogPrefix}/
+        ParquetKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-parquet/
+        S3BucketName: !Join
+        - ''
+        - - datasource-
+          - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
+          - !Sub -${AWS::Region}-${AWS::AccountId}
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagValue
+        TagValue: !Ref TagValue
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/amazon-cloudfront-access-logs-queries
+        SemanticVersion: 1.0.10
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # S3
+  TableForS3:
+    Condition: CreateTableForS3
+    Type: AWS::Glue::Table
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref GlueDatabase
+      TableInput:
+        Name: s3_access_log
+        Description: Parquet format Amazon S3 access logs
+        TableType: EXTERNAL_TABLE
+        StorageDescriptor:
+          Columns:
+            - Name: bucketowner
+              Type: string
+            - Name: bucket_name
+              Type: string
+            - Name: requestdatetime
+              Type: string
+            - Name: remoteip
+              Type: string
+            - Name: requester
+              Type: string
+            - Name: requestid
+              Type: string
+            - Name: operation
+              Type: string
+            - Name: key
+              Type: string
+            - Name: request_uri
+              Type: string
+            - Name: httpstatus
+              Type: string
+            - Name: errorcode
+              Type: string
+            - Name: bytessent
+              Type: bigint
+            - Name: objectsize
+              Type: bigint
+            - Name: totaltime
+              Type: string
+            - Name: turnaroundtime
+              Type: string
+            - Name: referrer
+              Type: string
+            - Name: useragent
+              Type: string
+            - Name: versionid
+              Type: string
+            - Name: hostid
+              Type: string
+            - Name: sigv
+              Type: string
+            - Name: ciphersuite
+              Type: string
+            - Name: authtype
+              Type: string
+            - Name: endpoint
+              Type: string
+            - Name: tlsversion
+              Type: string
+          InputFormat: org.apache.hadoop.mapred.TextInputFormat
+          Location: !Sub s3://${S3ForSource}/${S3AccessLogPrefix}/
+          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          SerdeInfo:
+            Parameters:
+              input.regex: '([^ ]*) ([^ ]*) \[(.*?)\] ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ("[^"]*"|-) (-|[0-9]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ("[^"]*"|-) ([^ ]*)(?: ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*))?.*$'
+            SerializationLibrary: org.apache.hadoop.hive.serde2.RegexSerDe
+  # Google Analytics
+  GoogleAnalyticsLogsQueries:
+    Condition: CreateTableForGoogleAnalytics
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        LogicalNamePrefix: !Ref GlueDatabaseName
+        S3BucketName: !Join
+          - ''
+          - - datasource-
+            - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
+            - !Sub -${AWS::Region}-${AWS::AccountId}
+        SNSForAlertArn: !If 
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-packaged.yaml
+        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-packaged.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  GoogleAnalyticsAppFlow:
+    DependsOn:
+      - S3ForSourceBucketPolicy
+    Condition: CreateTableForGoogleAnalytics
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        AppFlowConnectorProfileName: !Ref AppFlowConnectorProfileName
+        AppFlowGoogleAnalyticsObject: !Ref AppFlowGoogleAnalyticsObject
+        AppFlowScheduleRate: !Ref AppFlowScheduleRate
+        S3BucketName: !Ref S3ForSource
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalyticsappflow.yaml
+        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalyticsappflow.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Athena
+  AthenaWorkgroup:
+    Type: AWS::Athena::WorkGroup
+    Properties: 
+      Description: !Sub Workgroup for ${AWS::StackName}
+      Name: !Ref AWS::StackName
+      RecursiveDeleteOption: false
+      State: ENABLED
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      WorkGroupConfiguration: 
+        EnforceWorkGroupConfiguration: false
+        PublishCloudWatchMetricsEnabled: true
+        RequesterPaysEnabled: false
+        ResultConfiguration: 
+          OutputLocation: !Sub s3://${S3ForSource}/athena-query-results/

@@ -12,7 +12,7 @@ Metadata:
       - Label: 
           default: 'GlobalSettings Stack Configuration'
         Parameters: 
-          - ArtifactBacketInVirginia
+          - ArtifactBucketInVirginia
           - GlobalSettings
       - Label: 
           default: 'Source Configuration'
@@ -43,7 +43,7 @@ Metadata:
           - TagValue
 
 Parameters: 
-  ArtifactBacketInVirginia:
+  ArtifactBucketInVirginia:
     Type: String
     Default: ''  
     Description: The S3 artifact bucket name in N.Verginia region
@@ -146,7 +146,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
   DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
-  DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBacketInVirginia, ''] ] ]
+  DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
@@ -551,7 +551,7 @@ Resources:
         - !If
           - DeployGlobalSettings
           - ArtifactStore:
-              Location: !Ref ArtifactBacketInVirginia
+              Location: !Ref ArtifactBucketInVirginia
               Type: S3
             Region: us-east-1
           - !Ref AWS::NoValue
@@ -666,7 +666,7 @@ Resources:
                   - !Ref AWS::NoValue
                   - !Join
                     - ''
-                    - - !Sub '{"ArtifactBacketInVirginia": "${ArtifactBacketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
+                    - - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
                       - !If
                         - Development
                         - development

@@ -58,17 +58,17 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 
 ## デプロイ
 
-`ArtifactBacketInVirginia` パラメータと `GitHubOAuthToken` パラメータを指定して、デプロイを実行してください。
+`ArtifactBucketInVirginia` パラメータと `GitHubOAuthToken` パラメータを指定して、デプロイを実行してください。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBacketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| ArtifactBacketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
+| ArtifactBucketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
 | GitHubOAuthToken | String | | | GitHubからコードを取得する際に用いる **OAuthトークン** |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリの所有者名** |

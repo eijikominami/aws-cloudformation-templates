@@ -8,7 +8,7 @@ Metadata:
           default: 'CloudTrail Configuration'
         Parameters: 
           - AuditOtherRegions
-          - LogBacketName
+          - LogBucketName
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -29,7 +29,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]
-  LogBacketName:
+  LogBucketName:
     Type: String
     AllowedPattern: .+
     Description: The S3 log bucket Name [required]
@@ -186,7 +186,7 @@ Resources:
             ExpirationInDays: 60
             Status: Enabled
       LoggingConfiguration:
-        DestinationBucketName: !Ref LogBacketName
+        DestinationBucketName: !Ref LogBucketName
         LogFilePrefix: CloudTrail/
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
