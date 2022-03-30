@@ -477,3 +477,8 @@ Resources:
         RequesterPaysEnabled: false
         ResultConfiguration: 
           OutputLocation: !Sub s3://${S3ForSource}/athena-query-results/
+
+Outputs:
+  S3BucketNameArn:
+    Description: S3 bucket ARN for source files
+    Value: !GetAtt S3ForSource.Arn

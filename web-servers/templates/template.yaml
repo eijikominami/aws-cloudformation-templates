@@ -728,7 +728,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  IAMRoleForAnalysis:
+  IAMRoleForS3Replication:
     Condition: CreateS3ReplicationForAnalysis
     Type: AWS::IAM::Role
     Properties:
@@ -1086,6 +1086,10 @@ Outputs:
     Condition: AutoScalingDisabled
     Description: EC2 IP address
     Value: !Ref EIPForEC2Instance
+  IAMRoleForS3Replication:
+    Condition: CreateS3ReplicationForAnalysis
+    Description: IAM Role ARN for S3 Replication 
+    Value: !GetAtt IAMRoleForS3Replication.Arn 
   NatGatewayIP1:
     Description: NatGateway IP address
     Value: !GetAtt Az1.Outputs.NatGatewayIP

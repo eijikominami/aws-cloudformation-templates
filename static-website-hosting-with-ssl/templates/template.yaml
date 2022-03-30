@@ -546,7 +546,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  IAMRoleForAnalysis:
+  IAMRoleForS3Replication:
     Condition: CreateS3ReplicationForAnalysis
     Type: AWS::IAM::Role
     Properties:
@@ -768,6 +768,10 @@ Outputs:
   CloudFrontURL:
     Description: CloudFront URL
     Value: !GetAtt CloudFront.Outputs.CloudFrontURL
+  IAMRoleForS3Replication:
+    Condition: CreateS3ReplicationForAnalysis
+    Description: IAM Role ARN for S3 Replication 
+    Value: !GetAtt IAMRoleForS3Replication.Arn
   KibanaURL:
     Condition: CreateRealtimeDashboard
     Description: Kibana URL
