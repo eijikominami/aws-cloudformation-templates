@@ -10,6 +10,7 @@ Metadata:
         Parameters: 
           - AccountIdForAnalysis
           - BucketNameForAnalysis
+          - LogGroupNameTransferredToS3
       - Label: 
           default: 'AutoScaling Configuration'
         Parameters: 
@@ -68,10 +69,6 @@ Metadata:
         Parameters: 
           - WebACL
           - WebACLArnForCloudFront
-      - Label: 
-          default: 'Log Configuration'
-        Parameters: 
-          - LogGroupNameTransferredToS3
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -1055,7 +1052,7 @@ Resources:
     Condition: CreateKinesisFirehose
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties: 
-      DeliveryStreamName: CloudWatchLogsToS3-created-by-${AWS:StackName}
+      DeliveryStreamName: !Sub CloudWatchLogsToS3-created-by-${AWS::StackName}
       DeliveryStreamType: DirectPut
       S3DestinationConfiguration: 
         BucketARN: !If 
@@ -1065,7 +1062,7 @@ Resources:
         BufferingHints: 
           IntervalInSeconds: 300
           SizeInMBs: 5
-        Prefix: !Sub CloudWatchLogs${LogGroupNameTransferredToS3}
+        Prefix: !Sub CloudWatchLogs${LogGroupNameTransferredToS3}/
         RoleARN: !GetAtt IAMRoleForFirehose.Arn
       Tags: 
         - Key: environment
