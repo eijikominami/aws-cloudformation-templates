@@ -19,15 +19,15 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TableName` | String |  | ○ | |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-dynamodb-throttole(ja)
 
-cloudwatch-alarm-about-apigateway は、Amazon DynamoDB の スロットルメトリクス に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-dynamodb-throttole は、Amazon DynamoDB の スロットルメトリクス に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -44,6 +44,6 @@ cloudwatch-alarm-about-apigateway は、Amazon DynamoDB の スロットルメ�
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TableName` | String |  | ○ | |

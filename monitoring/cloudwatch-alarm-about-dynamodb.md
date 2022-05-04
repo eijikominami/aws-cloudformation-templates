@@ -19,14 +19,14 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-dynamodb(ja)
 
-cloudwatch-alarm-about-apigateway は、Amazon DynamoDB に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-dynamodb は、Amazon DynamoDB に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -43,5 +43,5 @@ cloudwatch-alarm-about-apigateway は、Amazon DynamoDB に関する Amazon Clou
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

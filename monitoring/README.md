@@ -62,7 +62,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -90,7 +90,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `ProjectName` | String |  | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
@@ -120,7 +120,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -144,8 +144,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TableName` | String |  | ○ | |
 
 ### Syntax
@@ -174,7 +174,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -198,8 +198,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ### Syntax
 
@@ -226,7 +226,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -279,7 +279,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -302,7 +302,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `EventsRuleName` | String | | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
@@ -332,7 +332,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -357,7 +357,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | |
 | `KinesisStreamName` | String | | ○ | |
 | `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
@@ -391,7 +391,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -420,7 +420,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `FunctionResouceName` | String | | ○ | |
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | Metric filter pattern | 
 | `SNSTopicArn` | String | | ○ | |
@@ -453,7 +453,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -478,8 +478,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ### Syntax
 
@@ -506,7 +506,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 
@@ -528,8 +528,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `SNSTopicName` | String | | ○ | |
 
 ### Syntax
@@ -558,7 +558,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 2.0.19
+    SemanticVersion: 2.0.22
   NotificationARNs: 
     - String
   Parameters: 

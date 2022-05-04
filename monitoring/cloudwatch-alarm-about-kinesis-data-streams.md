@@ -20,17 +20,17 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | |
-| `KinesisStreamName` | String | | ○ | |
-| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | The threshold of IteratorAgeMilliseconds |
+| `KinesisStreamName` | String | | ○ | The Kinesis stream name |
+| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | The threshold of PutRecord per minute |
+| `SNSTopicArn` | String | | ○ | The custom Alram name |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-kinesis-data-streams(ja)
 
-cloudwatch-alarm-about-apigateway は、Amazon Kinesis Data Streams に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-kinesis-data-streams は、Amazon Kinesis Data Streams に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -48,8 +48,8 @@ cloudwatch-alarm-about-apigateway は、Amazon Kinesis Data Streams に関する
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | |
-| `KinesisStreamName` | String | | ○ | |
-| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | IteratorAgeMilliseconds の閾値 |
+| `KinesisStreamName` | String | | ○ | ストリーム名 |
+| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | 分間の PutRecord 数の閾値 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

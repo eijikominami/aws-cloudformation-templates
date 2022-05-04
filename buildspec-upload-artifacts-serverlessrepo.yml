@@ -21,6 +21,7 @@ phases:
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb-throttle --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/dynamodb.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ec2 --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/ec2.yaml --region us-east-1  
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ec2-cwagent --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml --region us-east-1  
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-elasticsearch --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/elasticsearch.yaml --region us-east-1   
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-events --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/events.yaml --region us-east-1    
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-kinesis-data-streams --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/kinesis.yaml --region us-east-1
@@ -48,6 +49,8 @@ phases:
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-dynamodb.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-ec2.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ec2 --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-ec2.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-ec2-cwagent.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-ec2-cwagent --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-ec2-cwagent.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-elasticsearch.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-elasticsearch --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-elasticsearch.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-events.md s3://${BUCKET_NAME}/readme/
@@ -60,8 +63,10 @@ phases:
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-lambda --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-lambda.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-natgateway.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-natgateway --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-natgateway.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-medialive.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-medialive --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-medialive.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-mediastore.md s3://${BUCKET_NAME}/readme/
-      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-mediastore --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-medialive.md --region us-east-1
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-mediastore --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-mediastore.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-sns.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-sns --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-sns.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-ssm-command.md s3://${BUCKET_NAME}/readme/

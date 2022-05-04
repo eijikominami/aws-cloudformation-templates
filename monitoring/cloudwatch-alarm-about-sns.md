@@ -18,15 +18,15 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
-| `SNSTopicName` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `SNSTopicName` | String | | ○ | The SNS topic name |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-sns(ja)
 
-cloudwatch-alarm-about-apigateway は、Amazon SNS に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-sns は、Amazon SNS に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -42,6 +42,6 @@ cloudwatch-alarm-about-apigateway は、Amazon SNS に関する Amazon CloudWatc
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
-| `SNSTopicName` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `SNSTopicName` | String | | ○ | SNSトピック名 |

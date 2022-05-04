@@ -18,15 +18,15 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `EventsRuleName` | String | | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `EventsRuleName` | String | | ○ | The EventBridge rule name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-events(ja)
 
-cloudwatch-alarm-about-apigateway は、Amazon EventBridge に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-events は、Amazon EventBridge に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -42,6 +42,6 @@ cloudwatch-alarm-about-apigateway は、Amazon EventBridge に関する Amazon C
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `EventsRuleName` | String | | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `EventsRuleName` | String | | ○ | EventBridge のルール名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

@@ -18,15 +18,15 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `ProjectName` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom alram name |
+| `ProjectName` | String |  | ○ | The CodeBuild project name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-codebuild(ja)
 
-cloudwatch-alarm-about-apigateway は、AWS CodeBuild に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-codebuild は、AWS CodeBuild に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -42,6 +42,6 @@ cloudwatch-alarm-about-apigateway は、AWS CodeBuild に関する Amazon CloudW
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `ProjectName` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `ProjectName` | String |  | ○ | プロジェクト名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

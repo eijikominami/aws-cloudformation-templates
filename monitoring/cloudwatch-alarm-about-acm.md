@@ -20,8 +20,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `CertificateArn` | String | | ○ | The Certificate ARN |
 
 ---------------------------------------
@@ -46,6 +46,6 @@ cloudwatch-alarm-about-acm は、Certificate Manager に関する Amazon CloudWa
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `CertificateArn` | String | | ○ | 証明書の ARN |

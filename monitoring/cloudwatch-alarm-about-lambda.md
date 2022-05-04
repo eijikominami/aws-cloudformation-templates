@@ -22,17 +22,17 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `FunctionResouceName` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `FunctionResouceName` | String | | ○ | The resource name of the Lambda function |
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | Metric filter pattern | 
-| `SNSTopicArn` | String | | ○ | |
-| `TimeoutMilliseconds` | Integer | 24000 | ○ | |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `TimeoutMilliseconds` | Integer | 24000 | ○ | The threshold of Duration |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-lambda(ja)
 
-cloudwatch-alarm-about-apigateway は、AWS Lambda に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-lambda は、AWS Lambda に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -52,8 +52,8 @@ cloudwatch-alarm-about-apigateway は、AWS Lambda に関する Amazon CloudWatc
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `FunctionResouceName` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `FunctionResouceName` | String | | ○ | Lambda のリソース名 |
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | メトリックフィルタパターン | 
-| `SNSTopicArn` | String | | ○ | |
-| `TimeoutMilliseconds` | Integer | 24000 | ○ | |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `TimeoutMilliseconds` | Integer | 24000 | ○ | 実行時間の閾値 |
