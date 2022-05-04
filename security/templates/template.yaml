@@ -19,6 +19,10 @@ Metadata:
         Parameters: 
           - AmazonDetective
       - Label: 
+          default: 'Macie Configuration'
+        Parameters: 
+          - AmazonMacie
+      - Label: 
           default: 'SecurityHub Configuration'
         Parameters: 
           - IAMUserArnToAssumeAWSSupportRole
@@ -64,6 +68,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon Detective [required]
+  AmazonMacie:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable Amazon Detective [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -102,6 +113,7 @@ Conditions:
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
+  CreateMacie: !Equals [ !Ref AmazonMacie, ENABLED]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -307,6 +319,7 @@ Resources:
           Value: !Ref TagValue
   Macie:
     Type: AWS::CloudFormation::Stack
+    Condition: CreateMacie
     Properties:
       NotificationARNs:
         - !If

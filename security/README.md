@@ -123,6 +123,7 @@ You can provide optional parameters as follows:
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
 | AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Amazon Detective is enabled |
+| AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled|
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled |
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS AWS Configis enabled |
