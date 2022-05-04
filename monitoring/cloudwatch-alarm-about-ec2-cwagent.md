@@ -19,11 +19,13 @@ You can give optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `DiskUsedPercentThreshold` | Number | 100 | ○ | The threshold of disk used percent |
-| `MemUsedPercentThreshold` | Number | 100 | ○ | The threshold of memory used percent |
-| `ImageId` | String | | | The image id |
-| `InstanceId` | String | | | The instance id |
 | `CustomAlarmName` | String | | | The custom alram name |
+| `DiskUsedPercentThreshold` | Number | 100 | ○ | The threshold of disk used percent |
+| `FileSystemType` | String | xfs | ○ | The custom alram name |
+| `ImageId` | String | | ○ | The image id |
+| `InstanceId` | String | | ○ | The instance id |
+| `MemUsedPercentThreshold` | Number | 100 | ○ | The threshold of memory used percent |
+| `StorageDeviceName` | String | | ○ | A volume device name of the target storage |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
@@ -47,9 +49,11 @@ cloudwatch-alarm-about-ec2-cwagent は、Amazon EC2 に関する Amazon CloudWat
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `DiskUsedPercentThreshold` | Number | 100 | ○ | ディスク使用率の閾値 |
-| `MemUsedPercentThreshold` | Number | 100 | ○ | メモリ使用率の閾値 |
-| `ImageId` | String | | | AMI の ID |
-| `InstanceId` | String | | | インスタンスID |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `DiskUsedPercentThreshold` | Number | 100 | ○ | ディスク使用率の閾値 |
+| `FileSystemType` | String | xfs | ○ | ファイルシステムタイプ |
+| `ImageId` | String | | ○ | AMI の ID |
+| `InstanceId` | String | | ○ | インスタンスID |
+| `MemUsedPercentThreshold` | Number | 100 | ○ | メモリ使用率の閾値 |
+| `StorageDeviceName` | String | | ○ | ボリュームデバイス名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
