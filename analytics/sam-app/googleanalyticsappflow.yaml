@@ -62,7 +62,7 @@ Resources:
           DestinationConnectorProperties: 
             S3: 
               BucketName: !Ref S3BucketName
-      FlowName: GoogleAnalytics
+      FlowName: !Sub ${AppFlowConnectorProfileName}-${AppFlowGoogleAnalyticsObject}
       SourceFlowConfig: 
         ConnectorProfileName: !Ref AppFlowConnectorProfileName
         ConnectorType: Googleanalytics

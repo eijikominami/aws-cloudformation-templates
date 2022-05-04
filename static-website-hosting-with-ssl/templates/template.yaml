@@ -471,7 +471,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.18
+        SemanticVersion: 2.0.19
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -488,7 +488,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.18
+        SemanticVersion: 2.0.19
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -546,7 +546,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  IAMRoleForAnalysis:
+  IAMRoleForS3Replication:
     Condition: CreateS3ReplicationForAnalysis
     Type: AWS::IAM::Role
     Properties:
@@ -768,6 +768,10 @@ Outputs:
   CloudFrontURL:
     Description: CloudFront URL
     Value: !GetAtt CloudFront.Outputs.CloudFrontURL
+  IAMRoleForS3Replication:
+    Condition: CreateS3ReplicationForAnalysis
+    Description: IAM Role ARN for S3 Replication 
+    Value: !GetAtt IAMRoleForS3Replication.Arn
   KibanaURL:
     Condition: CreateRealtimeDashboard
     Description: Kibana URL
