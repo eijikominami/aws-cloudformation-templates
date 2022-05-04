@@ -1137,6 +1137,11 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       BucketName: !Sub cicd-artifact-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 7
+            Status: Enabled
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
