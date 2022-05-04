@@ -7,30 +7,49 @@ Parameters:
     Type: String
     Default: ''
     Description: The custom alram name
-  SNSTopicArn:
-    Type: String
-    AllowedPattern: .+
-    Description: The SNS topic ARN [required]
   DiskUsedPercentThreshold:
     Type: Number
     Default: 100
     MinValue: 0
     MaxValue: 100
     Description: The threshold of disk used percent [required]
+  FileSystemType:
+    Type: String
+    Default: xfs
+    AllowedPattern: .+
+    Description: A file system type the target instance [required]
+  ImageId:
+    Type: String
+    AllowedPattern: .+
+    Description: A image id the target instance [required]
+  InstanceId:
+    Type: String
+    AllowedPattern: .+
+    Description: A instance id the target instance [required]
+  InstanceType:
+    Type: String
+    AllowedPattern: .+
+    Description: A instance type of the target instance [required]
+  StorageDeviceName:
+    Type: String
+    Default: nvme0n1p1
+    AllowedPattern: .+
+    Description: A volume device name of the target storage [required]
+  StoragePath:
+    Type: String
+    Default: /
+    AllowedPattern: .+
+    Description: A volume device path of the target storage [required]
   MemUsedPercentThreshold:
     Type: Number
     Default: 100
     MinValue: 0
     MaxValue: 100
     Description: The threshold of memory used percent [required]
-  ImageId:
+  SNSTopicArn:
     Type: String
     AllowedPattern: .+
-    Description: The image id [required]
-  InstanceId:
-    Type: String
-    AllowedPattern: .+
-    Description: The instance id [required]
+    Description: The SNS topic ARN [required]
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
@@ -54,6 +73,14 @@ Resources:
           Value: !Ref InstanceId
         - Name: ImageId
           Value: !Ref ImageId
+        - Name: InstanceType
+          Value: !Ref InstanceType
+        - Name: device
+          Value: !Ref StorageDeviceName
+        - Name: fstype
+          Value: !Ref FileSystemType
+        - Name: path
+          Value: !Ref StoragePath
       EvaluationPeriods: 1
       MetricName: disk_used_percent
       Namespace: CWAgent
@@ -81,6 +108,8 @@ Resources:
           Value: !Ref InstanceId
         - Name: ImageId
           Value: !Ref ImageId
+        - Name: InstanceType
+          Value: !Ref InstanceType
       EvaluationPeriods: 1
       MetricName: mem_used_percent
       Namespace: CWAgent
