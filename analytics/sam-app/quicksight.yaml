@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationSamples/analytics/quicksight creates QuickSight.
+
+Parameters:
+  AnalysisId:
+    Type: String
+    Default: defaultbi
+    Description: The ID for the analysis that you're creating [required]
+  Name:
+    Type: String
+    Default: defaultbi
+    Description: A descriptive name for the analysis that you're creating [required]
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples
+    AllowedPattern: .+
+
+Resources:
+  QuickSightAnalysis:
+    Type: AWS::QuickSight::Analysis
+    Properties: 
+      AnalysisId: !Ref AnalysisId
+      AwsAccountId: !Ref AWS::AccountId
+      Name: !Ref Name
+      SourceEntity: 
+        SourceTemplate: 
+          Arn: String
+          DataSetReferences: 
+            - DataSetReference
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
