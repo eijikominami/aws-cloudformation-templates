@@ -32,8 +32,14 @@ Parameters:
     Description: A instance type of the target instance [required]
   StorageDeviceName:
     Type: String
+    Default: nvme0n1p1
     AllowedPattern: .+
     Description: A volume device name of the target storage [required]
+  StoragePath:
+    Type: String
+    Default: /
+    AllowedPattern: .+
+    Description: A volume device path of the target storage [required]
   MemUsedPercentThreshold:
     Type: Number
     Default: 100
@@ -73,6 +79,8 @@ Resources:
           Value: !Ref StorageDeviceName
         - Name: fstype
           Value: !Ref FileSystemType
+        - Name: path
+          Value: !Ref StoragePath
       EvaluationPeriods: 1
       MetricName: disk_used_percent
       Namespace: CWAgent

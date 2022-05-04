@@ -26,6 +26,7 @@ You can give optional parameters as follows.
 | `InstanceId` | String | | ○ | The instance id |
 | `MemUsedPercentThreshold` | Number | 100 | ○ | The threshold of memory used percent |
 | `StorageDeviceName` | String | | ○ | A volume device name of the target storage |
+| `StoragePath` | String | | ○ | A volume device path of the target storage |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
@@ -56,4 +57,5 @@ cloudwatch-alarm-about-ec2-cwagent は、Amazon EC2 に関する Amazon CloudWat
 | `InstanceId` | String | | ○ | インスタンスID |
 | `MemUsedPercentThreshold` | Number | 100 | ○ | メモリ使用率の閾値 |
 | `StorageDeviceName` | String | | ○ | ボリュームデバイス名 |
+| `StoragePath` | String | | ○ | パス名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
