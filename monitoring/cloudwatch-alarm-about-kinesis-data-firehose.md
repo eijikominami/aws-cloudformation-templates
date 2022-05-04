@@ -21,10 +21,10 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `FirehoseStreamName` | String | | ○ | |
-| `OldestRecordAge` | Number | 120 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `FirehoseStreamName` | String | | ○ | The Firehose stream name |
+| `OldestRecordAge` | Number | 120 | ○ | The threshold of the age of the oldest record |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
@@ -49,7 +49,7 @@ cloudwatch-alarm-about-kinesis-data-firehose は、 Amazon Kinesis Data Firehose
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `FirehoseStreamName` | String | | ○ | |
-| `OldestRecordAge` | Number | 120 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `FirehoseStreamName` | String | | ○ | ストリーム名 |
+| `OldestRecordAge` | Number | 120 | ○ | 最も古いレコードの閾値 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

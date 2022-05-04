@@ -21,14 +21,13 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `ApiCount` | Number | 0 | ○ | The threshold of ApiCount per minute |
 | `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | |
-| `ApiName` | String |  | ○ | |
-| `ApiResourcePath` | String | | ○ | |
-| `ApiStageName` | String | | ○ | |
-| `CustomAlarmName` | String | | | |
-| `ApiCount` | Number | 0 | ○ | |
-| `LatencyThreshold` | Number | 2000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ApiName` | String |  | ○ | The API Gateway api name |
+| `ApiStageName` | String | | ○ | The API Gateway stage name |
+| `CustomAlarmName` | String | | | The custom alram name |
+| `LatencyThreshold` | Number | 2000 | ○ | The threshold of Latency |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
@@ -53,10 +52,10 @@ cloudwatch-alarm-about-apigateway は、 Amazon API Gateway に関する Amazon 
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | |
-| `ApiName` | String |  | ○ | |
-| `ApiStageName` | String | | ○ | |
-| `CustomAlarmName` | String | | | |
-| `ApiCount` | Number | 0 | ○ | |
-| `LatencyThreshold` | Number | 2000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ApiCount` | Number | 0 | ○ | リクエストの合計数 |
+| `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | メソッド名 |
+| `ApiName` | String |  | ○ | API名 |
+| `ApiStageName` | String | | ○ | ステージ名 |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `LatencyThreshold` | Number | 2000 | ○ | Latency の閾値 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

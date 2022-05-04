@@ -596,7 +596,7 @@ Resources:
                   - s3:ObjectOwnerOverrideToBucketOwner
                 Resource:
                   - !Sub 'arn:aws:s3:::${BucketNameForAnalysis}/*'
-      RoleName: !Sub ${AWS::StackName}-S3Replication-${AWS::Region}
+      RoleName: !Sub ${AWS::StackName}-S3-Replication-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -723,7 +723,7 @@ Resources:
         RestrictPublicBuckets: true
       ReplicationConfiguration: !If
         - CreateS3ReplicationForAnalysis
-        - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-S3Replication-${AWS::Region}
+        - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-S3-Replication-${AWS::Region}
           Rules: 
             - Destination: 
                 AccessControlTranslation:

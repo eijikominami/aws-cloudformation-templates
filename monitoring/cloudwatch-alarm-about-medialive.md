@@ -21,11 +21,11 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `ChannelId` | String |  | ○ | |
-| `CustomAlarmName` | String | | | |
-| `OutputGroupName` | String |  | ○ | |
-| `PipelineId` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ChannelId` | String |  | ○ | The channel Id |
+| `CustomAlarmName` | String | | | The custom alram name |
+| `OutputGroupName` | String |  | ○ | The output group name |
+| `PipelineId` | String |  | ○ | The pipeline id |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
@@ -50,8 +50,8 @@ cloudwatch-alarm-about-medialive は、 AWS Elemental MediaLive に関する Ama
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `ChannelId` | String |  | ○ | |
-| `CustomAlarmName` | String | | | |
-| `OutputGroupName` | String |  | ○ | |
-| `PipelineId` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ChannelId` | String |  | ○ | チャンネルID |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `OutputGroupName` | String |  | ○ | Output Group 名 |
+| `PipelineId` | String |  | ○ | パイプラインID |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

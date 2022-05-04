@@ -28,10 +28,10 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `DomainName` | String | | ○ | |
-| `FreeStorageSpaceThreshold` | Number | | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `DomainName` | String | | ○ | The domain name |
+| `FreeStorageSpaceThreshold` | Number | | ○ | The threshold of the free storage space (MB) |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
@@ -63,7 +63,7 @@ cloudwatch-alarm-about-elasticsearch は、 Amazon Elasticsearch Service に関�
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `DomainName` | String | | ○ | |
-| `FreeStorageSpaceThreshold` | Number | | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `DomainName` | String | | ○ | ドメイン名 |
+| `FreeStorageSpaceThreshold` | Number | | ○ | ストレージの空き容量の閾値（MB） |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

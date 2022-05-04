@@ -19,15 +19,15 @@ You can give optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CPUUtilizationThreshold` | Number | 100 | ○ | |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CPUUtilizationThreshold` | Number | 100 | ○ | The threshold of CPU Utilization |
+| `CustomAlarmName` | String | | | The custom alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
 # cloudwatch-alarm-about-ec2(ja)
 
-cloudwatch-alarm-about-apigateway は、Amazon EC2 に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-ec2 は、Amazon EC2 に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
@@ -44,6 +44,6 @@ cloudwatch-alarm-about-apigateway は、Amazon EC2 に関する Amazon CloudWatc
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CPUUtilizationThreshold` | Number | 100 | ○ | |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CPUUtilizationThreshold` | Number | 100 | ○ | CPU使用率の閾値 |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

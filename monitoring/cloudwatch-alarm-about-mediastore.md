@@ -20,8 +20,9 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `ContainerName` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `ContainerName` | String |  | ○ | The container name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
 
@@ -45,5 +46,6 @@ cloudwatch-alarm-about-mediastore は、 AWS Elemental MediaStore に関する A
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `ContainerName` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `ContainerName` | String |  | ○ | コンテナ名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |

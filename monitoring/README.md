@@ -90,7 +90,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `ProjectName` | String |  | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
@@ -144,8 +144,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TableName` | String |  | ○ | |
 
 ### Syntax
@@ -198,8 +198,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ### Syntax
 
@@ -302,7 +302,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `EventsRuleName` | String | | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
@@ -357,7 +357,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | |
 | `KinesisStreamName` | String | | ○ | |
 | `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
@@ -420,7 +420,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | The custom Alram name |
 | `FunctionResouceName` | String | | ○ | |
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | Metric filter pattern | 
 | `SNSTopicArn` | String | | ○ | |
@@ -478,8 +478,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ### Syntax
 
@@ -528,8 +528,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `SNSTopicName` | String | | ○ | |
 
 ### Syntax

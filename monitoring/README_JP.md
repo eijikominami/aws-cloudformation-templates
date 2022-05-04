@@ -88,7 +88,7 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `ProjectName` | String |  | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
@@ -142,8 +142,8 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TableName` | String |  | ○ | |
 
 ### Syntax
@@ -196,8 +196,8 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 
 ### Syntax
 
@@ -300,7 +300,7 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `EventsRuleName` | String | | ○ | |
 | `SNSTopicArn` | String | | ○ | |
 
@@ -355,7 +355,7 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | |
 | `KinesisStreamName` | String | | ○ | |
 | `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
@@ -418,7 +418,7 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `FunctionResouceName` | String | | ○ | |
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | メトリックフィルタパターン | 
 | `SNSTopicArn` | String | | ○ | |
@@ -476,8 +476,8 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 
 ### Syntax
 
@@ -526,8 +526,8 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `SNSTopicName` | String | | ○ | |
 
 ### Syntax
