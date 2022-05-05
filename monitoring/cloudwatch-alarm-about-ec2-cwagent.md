@@ -6,7 +6,7 @@ cloudwatch-alarm-about-ec2-cwagent creates Amazon CloudWatch Alarm about Amazon 
 
 ## CloudWatch Alarm
 
-The template provide the following alarms.
+The template creates the following alarms.
 
 | Namespace | MetricName | Threshold |
 | --- | --- | --- |
@@ -25,8 +25,8 @@ You can give optional parameters as follows.
 | `ImageId` | String | | ○ | The image id |
 | `InstanceId` | String | | ○ | The instance id |
 | `MemUsedPercentThreshold` | Number | 100 | ○ | The threshold of memory used percent |
-| `StorageDeviceName` | String | | ○ | A volume device name of the target storage |
-| `StoragePath` | String | | ○ | A volume device path of the target storage |
+| `StorageDeviceName` | String | nvme0n1p1 | ○ | A volume device name of the target storage |
+| `StoragePath` | String | / | ○ | A volume device path of the target storage |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 
 ---------------------------------------
@@ -56,6 +56,6 @@ cloudwatch-alarm-about-ec2-cwagent は、Amazon EC2 に関する Amazon CloudWat
 | `ImageId` | String | | ○ | AMI の ID |
 | `InstanceId` | String | | ○ | インスタンスID |
 | `MemUsedPercentThreshold` | Number | 100 | ○ | メモリ使用率の閾値 |
-| `StorageDeviceName` | String | | ○ | ボリュームデバイス名 |
-| `StoragePath` | String | | ○ | パス名 |
+| `StorageDeviceName` | String | nvme0n1p1 | ○ | ボリュームデバイス名 |
+| `StoragePath` | String | / | ○ | パス名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |

@@ -238,7 +238,7 @@ Properties:
 
 ## EC2
 
-The template provide the following alarms.
+The template creates the following alarms.
 
 | Namespace | MetricName | Threshold |
 | --- | --- | --- |
