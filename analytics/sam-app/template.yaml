@@ -307,6 +307,7 @@ Resources:
         GzKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-gz/
         NewKeyPrefix: !Sub ${CloudFrontLogPrefix}/
         ParquetKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-parquet/
+        ResourcePrefix: !Ref AWS::StackName
         S3BucketName: !Join
         - ''
         - - datasource-
