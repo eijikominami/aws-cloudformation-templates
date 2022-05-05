@@ -6,7 +6,7 @@ cloudwatch-alarm-about-ec2 creates Amazon CloudWatch Alarm about Amazon EC2.
 
 ## CloudWatch Alarm
 
-The template provide the following alarms.
+The template creates the following alarms.
 
 | Namespace | MetricName | Threshold |
 | --- | --- | --- |

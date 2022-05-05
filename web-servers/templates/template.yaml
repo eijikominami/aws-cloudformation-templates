@@ -593,7 +593,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.23
+        SemanticVersion: 2.0.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -610,7 +610,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.23
+        SemanticVersion: 2.0.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -960,7 +960,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.23
+        SemanticVersion: 2.0.24
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -970,14 +970,15 @@ Resources:
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
+        DiskUsedPercentThreshold: 70
+        ImageId: !Ref EC2ImageId
+        InstanceId: !Ref EC2
+        InstanceType: !Ref EC2InstanceType
+        MemUsedPercentThreshold: 70
         SNSTopicArn: !If 
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-        DiskUsedPercentThreshold: 70
-        MemUsedPercentThreshold: 70
-        ImageId: !Ref EC2ImageId
-        InstanceId: !Ref EC2
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -985,7 +986,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.0.23
+        SemanticVersion: 2.0.24
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
