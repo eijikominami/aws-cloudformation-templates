@@ -387,6 +387,20 @@ Resources:
                   - 'cloudwatch:Get*'
                   - 'cloudwatch:List*'
                 Resource: '*'
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:Describe*'
+                  - 'logs:Get*'
+                  - 'logs:List*'
+                  - 'logs:StartQuery'
+                  - 'logs:StopQuery'
+                  - 'logs:TestMetricFilter'
+                  - 'logs:FilterLogEvents'
+                Resource: '*'
       RoleName: !Sub '${AWS::StackName}-Chatbot-${AWS::Region}'
       Tags:
         - Key: environment
