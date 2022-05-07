@@ -28,7 +28,6 @@ Metadata:
           - CloudFront500ErrorResponsePagePath
           - DomainName
           - Logging
-          - LogBucketName
           - S3DestinationBucketArnOfCrossRegionReplication
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
@@ -327,10 +326,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable logging [required]
-  LogBucketName:
-    Type: String
-    Default: ''
-    Description: The custom S3 bucket name for access logging
   WebACLArn:
     Type: String
     Default: '' 
@@ -366,7 +361,6 @@ Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
-  CreateLogBucket: !Equals [ !Ref LogBucketName, '' ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -414,10 +408,7 @@ Resources:
         RealtimeKinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
         Route53HostedZoneId: !Ref Route53HostedZoneId
         Logging: !Ref Logging
-        LogBucketName: !If
-          - CreateLogBucket
-          - !Ref S3ForAccessLog
-          - !Ref LogBucketName
+        LogBucketName: !Ref S3ForAccessLog
         WebACLArn: !Ref WebACLArn
         SNSForAlertArn: !Ref SNSForAlertArn
         SNSForDeploymentArn: !Ref SNSForDeploymentArn
@@ -559,10 +550,7 @@ Resources:
             Action: sts:AssumeRole
             Condition:
               StringEquals:
-                aws:SourceArn: !If
-                  - CreateLogBucket
-                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
-                  - !Sub 'arn:aws:s3:::${LogBucketName}'
+                aws:SourceArn: !Sub 'arn:aws:s3:::${S3ForAccessLog}'
       Description: A role required for S3 to access another S3 bucket for analysis.
       Policies:
         - PolicyName: S3Replication
@@ -574,20 +562,14 @@ Resources:
                   - s3:GetReplicationConfiguration
                   - s3:ListBucket
                 Resource:
-                  - !If 
-                    - CreateLogBucket
-                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
-                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
               - Effect: Allow
                 Action:
                   - s3:GetObjectVersionForReplication
                   - s3:GetObjectVersionAcl
                   - s3:GetObjectVersionTagging
                 Resource:
-                  - !If
-                    - CreateLogBucket
-                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
-                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
               - Effect: Allow
                 Action:
                   - s3:ReplicateObject
@@ -628,10 +610,7 @@ Resources:
             Status: Enabled
       LoggingConfiguration: !If
         - CreateLog
-        - DestinationBucketName: !If
-          - CreateLogBucket
-          - !Ref S3ForAccessLog
-          - !Ref LogBucketName
+        - DestinationBucketName: !Ref S3ForAccessLog
           LogFilePrefix: !Sub S3-${DomainName}/
         - !Ref AWS::NoValue
       MetricsConfigurations: 
@@ -689,7 +668,6 @@ Resources:
               Bool: 
                 aws:SecureTransport: false
   S3ForAccessLog:
-    Condition: CreateLogBucket
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -743,7 +721,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
-    Condition: CreateLogBucket
     Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForAccessLog

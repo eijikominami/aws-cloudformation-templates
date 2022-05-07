@@ -38,7 +38,6 @@ Metadata:
           - CloudFront500ErrorResponsePagePath
           - DomainName
           - Logging
-          - LogBucketName
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
@@ -218,10 +217,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable logging [required]
-  LogBucketName:
-    Type: String
-    Default: ''
-    Description: The custom S3 bucket name for access logging
   LogGroupNameTransferredToS3:
     Type: String
     Default: ''
@@ -310,7 +305,6 @@ Conditions:
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateWAFForCloudFront: !And [!Equals [ !Ref CloudFrontState, ENABLED ], !Equals [ !Ref WebACL, ENABLED ] ]
   CreateWAFForALB: !And [!Equals [ !Ref CloudFrontState, DISABLED ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
-  CreateLogBucket: !Equals [ !Ref LogBucketName, '' ]
   CreateKinesisFirehose: !Not [ !Equals [ !Ref LogGroupNameTransferredToS3, '' ] ]
   Development: !Equals [ !Ref Environment, development]
 
@@ -540,10 +534,7 @@ Resources:
         CloudFrontOriginType: NOT_S3
         Route53HostedZoneId: !Ref Route53HostedZoneId
         Logging: !Ref Logging
-        LogBucketName: !If
-          - CreateLogBucket
-          - !Ref S3ForAccessLog
-          - !Ref LogBucketName
+        LogBucketName: !Ref S3ForAccessLog
         WebACLArn: !If
           - CreateWAFForCloudFront
           - !Ref WebACLArnForCloudFront
@@ -741,10 +732,7 @@ Resources:
             Action: sts:AssumeRole
             Condition:
               StringEquals:
-                aws:SourceArn: !If
-                  - CreateLogBucket
-                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
-                  - !Sub 'arn:aws:s3:::${LogBucketName}'
+                aws:SourceArn: !Sub 'arn:aws:s3:::${S3ForAccessLog}'
       Description: A role required for S3 to access another S3 bucket for analysis.
       Policies:
         - PolicyName: S3Replication
@@ -756,20 +744,14 @@ Resources:
                   - s3:GetReplicationConfiguration
                   - s3:ListBucket
                 Resource:
-                  - !If 
-                    - CreateLogBucket
-                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
-                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}'
               - Effect: Allow
                 Action:
                   - s3:GetObjectVersionForReplication
                   - s3:GetObjectVersionAcl
                   - s3:GetObjectVersionTagging
                 Resource:
-                  - !If
-                    - CreateLogBucket
-                    - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
-                    - !Sub 'arn:aws:s3:::${LogBucketName}'
+                  - !Sub 'arn:aws:s3:::${S3ForAccessLog}/*'
               - Effect: Allow
                 Action:
                   - s3:ReplicateObject
@@ -991,7 +973,6 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   S3ForAccessLog:
-    Condition: CreateLogBucket
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -1045,7 +1026,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForAccessLog:
-    Condition: CreateLogBucket
     Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForAccessLog
@@ -1081,10 +1061,7 @@ Resources:
       DeliveryStreamName: !Sub CloudWatchLogsToS3-created-by-${AWS::StackName}
       DeliveryStreamType: DirectPut
       S3DestinationConfiguration: 
-        BucketARN: !If 
-          - CreateLogBucket
-          - !GetAtt S3ForAccessLog.Arn
-          - !Sub arn:aws:s3:::${LogBucketName}
+        BucketARN: !GetAtt S3ForAccessLog.Arn
         BufferingHints: 
           IntervalInSeconds: 300
           SizeInMBs: 5
