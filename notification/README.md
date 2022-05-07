@@ -134,6 +134,7 @@ You can provide optional parameters as follows.
 | ScheduledEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about ScheduledEvents is enabled |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Tag Events is enabled |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Trusted Advisor is enabled |
+| UnauthorizedApiCallsCloudWatchAlarmName | | UnauthorizedApiCallsCloudWatchAlarmName | ○ | The CloudWatch Alarm name to notify unauthorized API calls |
 | SNSForAlertArn | String | | | Amazon SNS Topic ARN for alert | 
 | SNSForAlertArn | String | | | Amazon SNS Topic ARN for CI/CD information | 
 | SNSForDeploymentArn | String | | | Amazon SNS Topic ARN for deployment information |

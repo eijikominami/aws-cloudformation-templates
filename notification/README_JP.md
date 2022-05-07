@@ -134,6 +134,7 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | ScheduledEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、ScheduledEvents に関するイベントルールを作成します。 |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ |ENABLEDを指定した場合、Tag Events に関するイベントルールを作成します。 |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Trusted Advisor に関するイベントルールを作成します。 |
+| UnauthorizedApiCallsCloudWatchAlarmName | | UnauthorizedApiCallsCloudWatchAlarmName | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
 | SNSForAlertArn | String | | | アラート用 Amazon SNS トピックの ARN | 
 | SNSForAlertArn | String | | | CI/CD用 Amazon SNS トピックの ARN | 
 | SNSForDeploymentArn | String | | | デプロイ用 Amazon SNS トピックの ARN |

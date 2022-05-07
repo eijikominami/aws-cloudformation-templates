@@ -22,6 +22,12 @@ def lambda_handler(event, context):
     sns = boto3.client('sns')
     for record in event['Records']:
         
+        message = json.loads(record['Sns']['Message'])
+        logger.structure_logs(append=True, sns_message_body=message)
+        logger.structure_logs(append=True, sns_message_type=type(message).__name__)
+        logger.structure_logs(append=True, sns_message_length=str(len(message)))
+        logger.info("Analyzing the received message.")
+        
         try:
             decoded_message = json.loads(record['Sns']['Message'])
             if isinstance(decoded_message, dict):

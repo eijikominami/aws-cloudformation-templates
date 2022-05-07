@@ -111,7 +111,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -128,7 +128,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -307,6 +307,7 @@ Resources:
         GzKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-gz/
         NewKeyPrefix: !Sub ${CloudFrontLogPrefix}/
         ParquetKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-parquet/
+        ResourcePrefix: !Ref AWS::StackName
         S3BucketName: !Join
         - ''
         - - datasource-
@@ -321,7 +322,7 @@ Resources:
         TagValue: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/amazon-cloudfront-access-logs-queries
-        SemanticVersion: 1.0.10
+        SemanticVersion: 1.0.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

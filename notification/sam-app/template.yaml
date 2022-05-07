@@ -152,6 +152,11 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Trusted Advisor [required]
+  UnauthorizedApiCallsCloudWatchAlarmName:
+    Type: String
+    Default: Notice-DefaultSecuritySettings-CloudTrail-Unauthorized-API-Calls
+    AllowedPattern: .+
+    Description: The CloudWatch Alarm name to notify unauthorized API calls [required]    
   Environment:
     Type: String
     Default: production
@@ -211,7 +216,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -227,7 +232,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -244,7 +249,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -261,7 +266,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -272,7 +277,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -328,6 +333,15 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
+        - PolicyName: AnalyzeUnauthorizedApiCalls
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                  - cloudwatch:DescribeAlarms
+                Resource: '*'
         - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
@@ -350,7 +364,7 @@ Resources:
                 Resource: '*' 
         - !If
           - CreateKMSKey
-          - PolicyName: CustomPolicy
+          - PolicyName: KMS
             PolicyDocument:
               Version: 2012-10-17
               Statement:
@@ -386,6 +400,20 @@ Resources:
                   - 'cloudwatch:Describe*'
                   - 'cloudwatch:Get*'
                   - 'cloudwatch:List*'
+                Resource: '*'
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:Describe*'
+                  - 'logs:Get*'
+                  - 'logs:List*'
+                  - 'logs:StartQuery'
+                  - 'logs:StopQuery'
+                  - 'logs:TestMetricFilter'
+                  - 'logs:FilterLogEvents'
                 Resource: '*'
       RoleName: !Sub '${AWS::StackName}-Chatbot-${AWS::Region}'
       Tags:
@@ -522,7 +550,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -595,7 +623,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -605,12 +633,14 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: analyzeUnauthorizedApiCalls/
-      Description: Unauthorized API Calls イベントの詳細をSlackに送信します。
+      Description: Unauthorized API Calls イベントの詳細を Slack と SNS に送信します。
       Environment:
         Variables:
+          ALARM_NAME: !Ref UnauthorizedApiCallsCloudWatchAlarmName
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
+          SNS_TOPIC_ARN: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
           AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
@@ -675,7 +705,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.24
+        SemanticVersion: 2.0.25
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
