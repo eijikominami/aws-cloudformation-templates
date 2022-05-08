@@ -235,16 +235,8 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
+          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
       Policies:
-        - PolicyName: CodeGuru
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - codeguru-profiler:ConfigureAgent
-                  - codeguru-profiler:PostAgentProfile
-                Resource: '*'
         - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
