@@ -22,6 +22,12 @@
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
 | Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/systemsmanagerincidentmanager.yaml) |
 
+## アーキテクチャ
+
+このテンプレートが作成するAWSリソースのアーキテクチャ図は、以下の通りです。
+
+![](../images/architecture-cloudops.png)
+
 ## デプロイ
 
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
