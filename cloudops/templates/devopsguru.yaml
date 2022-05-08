@@ -46,4 +46,4 @@ Resources:
       State: ENABLED
       Targets:
         - Arn: 'arn:aws:devops-guru-prod-0:ap-northeast-1:::'
-          Id: DevOpsGuru
+          Id: DevOps-Guru
