@@ -58,9 +58,34 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
+  CodeGuruCodeProfiler:
+    Condition: Development
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        ProfilingGroupName: !Ref AWS::StackName
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -101,7 +126,19 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Description: A role required for Lambda to access S3 and CloudWatch Logs.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
+        - PolicyName: CodeGuru
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codeguru-profiler:ConfigureAgent
+                  - codeguru-profiler:PostAgentProfile
+                Resource: '*'
         - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
@@ -136,7 +173,19 @@ Resources:
     Properties:
       CodeUri: gaConverter/
       Description: Google Analytics のデータを変換します。
+      Environment:
+        Variables:
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: !Sub gaConverter-createdby-${LogicalNamePrefix}
+      Layers: !If
+        - Development
+        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+        - !Ref AWS::NoValue
       Handler: lambda_function.lambda_handler
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn

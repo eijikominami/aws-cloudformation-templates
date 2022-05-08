@@ -5,9 +5,6 @@ Description: AWSCloudFormationTemplates/notification sends notifications to Slac
 Globals:
   Function:
     Handler: lambda_function.lambda_handler
-    Layers:
-      # NOTE: AWS Lambda Extensions for Lambda Insights
-      - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
     Runtime: python3.9
     Tracing: Active
 
@@ -480,8 +477,11 @@ Resources:
         - CreateKMSKey
         - !GetAtt KMSKey.Arn
         - !Ref AWS::NoValue
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+      Layers: !If
+        - Development
+        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+        - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
@@ -568,8 +568,11 @@ Resources:
               - !Ref SNSForAlertArn
           Type: SNS
       FunctionName: !Sub transferNotificationToSNS-createdby-${AWS::StackName}
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+      Layers: !If
+        - Development
+        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+        - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30

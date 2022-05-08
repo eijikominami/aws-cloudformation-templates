@@ -241,7 +241,10 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         ProfilingGroupName: !Ref AWS::StackName
-        SNSForAlertArn: !Ref SNSForAlertArn
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
@@ -326,6 +329,9 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Description: A role required for Lambda to access CloudFormation and CloudWatch Logs.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: CodeGuru
           PolicyDocument:

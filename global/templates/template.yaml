@@ -233,6 +233,7 @@ Resources:
       Description: A role required for Lambda to access SNS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: CodeGuru
           PolicyDocument:

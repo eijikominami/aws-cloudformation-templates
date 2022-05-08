@@ -77,9 +77,34 @@ Conditions:
   CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
+  CodeGuruCodeProfiler:
+    Condition: Development
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        ProfilingGroupName: !Ref AWS::StackName
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -218,7 +243,19 @@ Resources:
     Properties:
       CodeUri: checkRequiredTags/
       Description: 指定したタグがリソースにあるかどうかを確認します。
+      Environment:
+        Variables:
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: checkRequiredTags
+      Layers: !If
+        - Development
+        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+        - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
@@ -290,8 +327,20 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: deleteUnapplicableResources/
+      Environment:
+        Variables:
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       Description: 指定したタグがないリソースを削除します。
       FunctionName: deleteUnapplicableResources
+      Layers: !If
+        - Development
+        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+        - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
