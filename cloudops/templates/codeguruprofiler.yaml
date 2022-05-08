@@ -8,6 +8,7 @@ Metadata:
       - Label: 
           default: 'CodeGuru Configuration'
         Parameters:
+          - AgentPermission
           - ProfilingGroupName
       - Label: 
           default: 'Notification Configuration'
@@ -21,6 +22,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AgentPermission:
+    Type: String
+    AllowedPattern: .+
+    Description: The agent permissions attached to this profiling group [required]
   ProfilingGroupName:
     Type: String
     Default: Default
@@ -55,25 +60,6 @@ Resources:
     Properties: 
       AWSServiceName: codeguru-profiler.amazonaws.com
       Description: The Service Linked Role is used by Amazon CodeGuru Profiler.
-  IAMRoleForCodeGuru:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Description: Lambda to access CodeGuru Profilier.
-      ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
-      RoleName: !Sub ${ProfilingGroupName}-CodeGuruProfiler-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   CodeGuruProfiler:
     Type: AWS::CodeGuruProfiler::ProfilingGroup
     Properties:
@@ -82,7 +68,7 @@ Resources:
       ComputePlatform: AWSLambda
       AgentPermissions:
         Principals:
-          - !Ref IAMRoleForCodeGuru
+          - !Ref AgentPermission
       ProfilingGroupName: !Ref ProfilingGroupName
       Tags:
         - Key: environment

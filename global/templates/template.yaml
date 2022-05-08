@@ -153,6 +153,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
+        AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
         SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         Environment: !Ref Environment
