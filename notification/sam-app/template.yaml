@@ -184,8 +184,9 @@ Resources:
   # Nested Stack
   CodeGuruCodeProfiler:
     Condition: Development
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
+      Location: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -202,11 +203,8 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
