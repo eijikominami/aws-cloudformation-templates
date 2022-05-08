@@ -956,7 +956,7 @@ Resources:
         ImageId: !Ref EC2ImageId
         InstanceId: !Ref EC2
         InstanceType: !Ref EC2InstanceType
-        MemUsedPercentThreshold: 70
+        MemUsedPercentThreshold: 90
         SNSTopicArn: !If 
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

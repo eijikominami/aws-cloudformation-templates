@@ -195,7 +195,6 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -314,6 +313,7 @@ Resources:
       Description: A role required for Lambda to access X-Ray, KMS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
       Policies:
         - PolicyName: CodeGuru
           PolicyDocument:
@@ -324,15 +324,6 @@ Resources:
                   - codeguru-profiler:ConfigureAgent
                   - codeguru-profiler:PostAgentProfile
                 Resource: '*'
-        - PolicyName: CloudWatchLambdaInsightsExecutionRolePolicy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
         - PolicyName: AnalyzeUnauthorizedApiCalls
           PolicyDocument:
             Version: 2012-10-17
@@ -658,8 +649,11 @@ Resources:
         - CreateKMSKey
         - !GetAtt KMSKey.Arn
         - !Ref AWS::NoValue
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+      Layers: !If
+        - Development
+        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+        - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Timeout: 30
