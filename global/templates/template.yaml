@@ -156,7 +156,7 @@ Resources:
       Parameters:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
-        SNSForAlertArn: !GetAtt SNSForAlert.Arn
+        SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
