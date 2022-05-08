@@ -149,22 +149,14 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
   CodeGuruCodeProfiler:
-    Condition: Development
+    Condition: CreateCodeGuruCodeProfiler
     Type: AWS::Serverless::Application
     Properties:
       Location: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
       Parameters:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
+        SNSForAlertArn: !GetAtt SNSForAlert.Arn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
