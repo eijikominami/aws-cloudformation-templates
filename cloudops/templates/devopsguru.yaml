@@ -33,16 +33,16 @@ Resources:
       Config: 
         Sns: 
           TopicArn: !Ref SNSForAlertArn
-  EventBridge:
+  EventBridgeForDevOpsGuru:
     Type: AWS::Events::Rule
     Properties: 
-      Description: !Sub Rule for DevOps Guru created by ${AWS::StackName}.
+      Description: This rule is used to route aws.codeguru-profiler Events to DevOps-Guru
       EventPattern:
         source:
           - aws.codeguru-profiler
         detail-type: 
           - CodeGuru Profiler Recommendations State Change
-      Name: DevOpsGuruManagedRuleForCodeGuruProfiler
+      Name: DevOpsGuruManagedRuleForCodeGuruProfiler-DO_NOT_DELETE
       State: ENABLED
       Targets:
         - Arn: 'arn:aws:devops-guru-prod-0:ap-northeast-1:::'
