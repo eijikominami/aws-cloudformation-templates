@@ -436,6 +436,7 @@ Resources:
           ENCRYPT: !Ref Encrypt
           ALERT_HOOK_URL: !Ref HookUrlForAlert
           DEPLOYMENT_HOOK_URL: !Ref HookUrlForDeployment
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
@@ -545,6 +546,7 @@ Resources:
       Environment:
         Variables:
           SNS_TOPIC_ARN: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn

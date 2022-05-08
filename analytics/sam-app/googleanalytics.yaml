@@ -166,6 +166,7 @@ Resources:
       Description: Google Analytics のデータを変換します。
       Environment:
         Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
