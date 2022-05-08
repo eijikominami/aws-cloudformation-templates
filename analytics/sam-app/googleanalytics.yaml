@@ -58,16 +58,40 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
+  CodeGuruCodeProfiler:
+    Condition: Development
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AgentPermission: !GetAtt IAMRoleForLambda.Arn
+        ProfilingGroupName: !Ref AWS::StackName
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -84,7 +108,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -101,6 +125,10 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Description: A role required for Lambda to access S3 and CloudWatch Logs.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
+          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
       Policies:
         - PolicyName: CloudWatchLogs
           PolicyDocument:
@@ -136,7 +164,20 @@ Resources:
     Properties:
       CodeUri: gaConverter/
       Description: Google Analytics のデータを変換します。
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
+            - Development
+            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
+            - !Ref AWS::NoValue
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
       FunctionName: !Sub gaConverter-createdby-${LogicalNamePrefix}
+      Layers: !If
+        - Development
+        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+        - !Ref AWS::NoValue
       Handler: lambda_function.lambda_handler
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -182,7 +223,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

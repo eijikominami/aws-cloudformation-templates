@@ -111,7 +111,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -128,53 +128,12 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  IAMRoleForLambda:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Description: A role required for Lambda to access S3 and CloudWatch Logs.
-      Policies:
-        - PolicyName: CloudWatchLogs
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - logs:PutLogEvents
-                Resource: '*'
-        - PolicyName: S3
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:PutObject
-                Resource: 
-                  - !Sub arn:aws:s3:::datalake-source-${AWS::Region}-${AWS::AccountId}
-                  - !Sub arn:aws:s3:::datalake-source-${AWS::Region}-${AWS::AccountId}/*
-      RoleName: !Sub ${AWS::StackName}-Lambda-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   S3ForSource:
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain

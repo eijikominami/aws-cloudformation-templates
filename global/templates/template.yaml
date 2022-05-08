@@ -150,8 +150,9 @@ Resources:
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
   CodeGuruCodeProfiler:
     Condition: CreateCodeGuruCodeProfiler
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
+      Location: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
       Parameters:
         AgentPermission: !GetAtt IAMRoleForLambda.Arn
         ProfilingGroupName: !Ref AWS::StackName
@@ -160,11 +161,8 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   CostExplorer:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -185,7 +183,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -234,16 +232,9 @@ Resources:
       Description: A role required for Lambda to access SNS and CloudWatch Logs.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
+          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
       Policies:
-        - PolicyName: CodeGuru
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - codeguru-profiler:ConfigureAgent
-                  - codeguru-profiler:PostAgentProfile
-                Resource: '*'
         - PolicyName: SNS
           PolicyDocument:
             Version: 2012-10-17
@@ -352,7 +343,7 @@ Resources:
         CertificateArn: !Ref CertificateManager
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -604,7 +595,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.26
+        SemanticVersion: 2.0.29
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
