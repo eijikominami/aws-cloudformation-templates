@@ -354,8 +354,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -400,8 +400,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -576,8 +576,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/route53.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/route53.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/route53.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/route53.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

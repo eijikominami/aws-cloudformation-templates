@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/web-servers/route53 creates a Route53 Resolver.
+Description: AWSCloudFormationTemplates/network/route53 creates a Route53 Resolver.
 
 Parameters:
   SecurityGroupId:

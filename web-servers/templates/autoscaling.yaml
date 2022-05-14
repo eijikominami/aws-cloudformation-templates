@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/static-web-hosting/autoscaling creates Auto Scaling Group and Application Load Balancer or Network Load Balancer.
+Description: AWSCloudFormationTemplates/web-servers/autoscaling creates Auto Scaling Group and Application Load Balancer or Network Load Balancer.
 
 Metadata: 
   AWS::CloudFormation::Interface:

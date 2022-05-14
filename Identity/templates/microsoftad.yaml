@@ -1,0 +1,227 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/security/microsoftad sets AWS Directory Service for Microsoft Active Directory.
+
+Parameters:
+  Edition:
+    Type: String
+    Default: Standard
+    AllowedValues:
+      - Enterprise
+      - Standard
+    Description: The edition of AWS Directory Service for Microsoft Active Directory [required]
+  EnableSso:
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+    Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [required]
+  Name:
+    Type: String
+    Default: corp.example.com
+    AllowedPattern: ^([a-zA-Z0-9]+[\\.-])+([a-zA-Z0-9])+$
+    Description: The fully qualified domain name for the AWS Managed Microsoft AD directory [required]
+  Password:
+    Type: String
+    Default: Password1+
+    AllowedPattern: (?=^.{8,64}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*[a-z])|(?=.*[^A-Za-z0-9\s])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9\s]))^.*
+    NoEcho: true
+    Description: The password of ElasticSearch Service [required]
+  ShortName:
+    Type: String
+    Default: CORP
+    AllowedPattern: ^[^\\/:*?"<>|.]+[^\\/:*?"<>|]*$
+    Description: The NetBIOS name for your domain [required]
+  SubnetPublicCidrBlockForAz1:
+    Type: String
+    Default: 10.0.0.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ1 [required]
+  SubnetTransitCidrBlockAz1:
+    Type: String
+    Default: 10.0.3.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block
+  SubnetPublicCidrBlockForAz2:
+    Type: String
+    Default: 10.0.4.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ2 [required]
+  SubnetTransitCidrBlockAz2:
+    Type: String
+    Default: 10.0.7.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block
+  TransitGatewayId:
+    Type: String
+    Default: ''
+    Description: The ID of a transit gateway
+  TransitGatewayDestinationCidrBlock:
+    Type: String
+    Default: ''
+    Description: The IPv4 CIDR block forward to TransitGateway
+  VPCCidrBlock:
+    Type: String
+    Default: 10.0.0.0/21
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''   
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
+
+Resources:
+  # Nested Stack
+  Az1:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select 
+          - 0
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn   
+        TransitGatewayId: !Ref TransitGatewayId
+        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+  Az2:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 1
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
+        TransitGatewayId: !Ref TransitGatewayId
+        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.29
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.0.29
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref VPCCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ActiveDirectory:
+    Type: AWS::DirectoryService::MicrosoftAD
+    Properties: 
+      CreateAlias: true
+      Edition: !Ref Edition
+      EnableSso: !Ref EnableSso
+      Name: !Ref Name
+      Password: !Ref Password
+      ShortName: !Ref ShortName
+      VpcSettings: 
+          SubnetIds: 
+            - !GetAtt Az1.Outputs.PublicSubnetId
+            - !GetAtt Az2.Outputs.PublicSubnetId
+          VpcId: !Ref VPC

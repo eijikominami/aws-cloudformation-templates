@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/static-web-hosting/az creates a VPC Subnet and related resources.
+Description: AWSCloudFormationTemplates/network/az creates a VPC Subnet and related resources.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -38,8 +38,7 @@ Parameters:
     Description: The Availability Zone name [required]
   InternetGatewayId:
     Type: String
-    AllowedPattern: .+
-    Description: The Internet Gateway Id [required]
+    Description: The Internet Gateway Id
   NetworkLoadBalancer:
     Type: String
     Default: DISABLED
@@ -96,6 +95,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateNatGateway: !Equals [ !Ref InternetGatewayId, '' ] 
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
 
@@ -171,7 +171,7 @@ Resources:
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !Ref RouteTableTransit
   RouteTransitToNATGateway:
-    Condition: TransitGatewayExists
+    Condition: CreateNatGateway
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
@@ -189,7 +189,7 @@ Resources:
       SubnetId: !Ref SubnetTransit
   # Elastic IP
   EIPForNatGateway:
-    Condition: TransitGatewayExists
+    Condition: CreateNatGateway
     Type: AWS::EC2::EIP
     Properties:
       Domain: !Ref VPCId
@@ -214,7 +214,7 @@ Resources:
           Value: !Ref TagValue
   # NatGateway
   NatGateway:
-    Condition: TransitGatewayExists
+    Condition: CreateNatGateway
     Type: AWS::EC2::NatGateway
     Properties: 
       AllocationId: !GetAtt EIPForNatGateway.AllocationId
@@ -228,7 +228,7 @@ Resources:
           Value: !Ref TagValue
   # CloudWatch Alarm
   CloudWatchAlarmNATGateway:
-    Condition: TransitGatewayExists
+    Condition: CreateNatGateway
     Type: AWS::Serverless::Application
     Properties:
       Parameters:
@@ -265,6 +265,6 @@ Outputs:
   NatGatewayIP:
     Description: NAT Gateway IP address
     Value: !If
-      - TransitGatewayExists
+      - CreateNatGateway
       - !Ref EIPForNatGateway
       - ''
