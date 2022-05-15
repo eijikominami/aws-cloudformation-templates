@@ -1136,6 +1136,10 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
       BucketName: !Sub cicd-artifact-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:

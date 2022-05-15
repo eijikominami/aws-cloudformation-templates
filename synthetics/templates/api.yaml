@@ -224,6 +224,10 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
       BucketName: !Sub synthetics-${CanaryName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:

@@ -48,7 +48,7 @@ phases:
       - pip install -U awscli
   pre_build:
     commands:
-      # - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
+      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${ANALYTICS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
