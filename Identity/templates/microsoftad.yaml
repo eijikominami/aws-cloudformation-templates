@@ -96,6 +96,9 @@ Conditions:
 Resources:
   # Nested Stack
   Az1:
+    DependsOn:
+      # NATGateway requires provisioned Internet Gateway.
+      - InternetGatewayAttachment  
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -107,6 +110,7 @@ Resources:
         AvailabilityZone: !Select 
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !Ref InternetGateway
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
@@ -134,6 +138,9 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
   Az2:
+    DependsOn:
+      # NATGateway requires provisioned Internet Gateway.
+      - InternetGatewayAttachment  
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -145,6 +152,7 @@ Resources:
         AvailabilityZone: !Select
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !Ref InternetGateway
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
@@ -200,6 +208,21 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties: 
+      Tags:
+        - Key: Name
+          Value: !Sub igw-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
   VPC:
     Type: AWS::EC2::VPC
     Properties: 
