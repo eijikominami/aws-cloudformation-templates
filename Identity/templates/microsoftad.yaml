@@ -27,7 +27,7 @@ Parameters:
     Default: Password1+
     AllowedPattern: (?=^.{8,64}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*[a-z])|(?=.*[^A-Za-z0-9\s])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9\s]))^.*
     NoEcho: true
-    Description: The password of ElasticSearch Service [required]
+    Description: The password for the default administrative user named Admin [required]
   ShortName:
     Type: String
     Default: CORP
@@ -40,19 +40,19 @@ Parameters:
     Description: The public subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.0.3.0/24
+    Default: 10.0.2.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block
+    Description: The transit subnet CIDR block at AZ1 [required] 
   SubnetPublicCidrBlockForAz2:
     Type: String
-    Default: 10.0.4.0/24
+    Default: 10.0.1.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.0.7.0/24
+    Default: 10.0.3.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block
+    Description: The transit subnet CIDR block at AZ2 [required]
   TransitGatewayId:
     Type: String
     Default: ''
