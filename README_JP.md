@@ -14,25 +14,25 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 | アプリケーション名 | 最新バージョン | リンク |
 | --- | --- | --- |
-| [codepipeline-default-settings](cicd/codepipeline-default-settings.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~codepipeline-default-settings) |
-| [cloudwatch-alarm-about-apigateway](monitoring/cloudwatch-alarm-about-apigateway.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-apigateway) |
-| [cloudwatch-alarm-about-codebuild](monitoring/cloudwatch-alarm-about-codebuild.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-codebuild) |
-| [cloudwatch-alarm-about-dynamodb-throttle](monitoring/cloudwatch-alarm-about-dynamodb-throttle.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-dynamodb-throttle) |
-| [cloudwatch-alarm-about-dynamodb](monitorining/cloudwatch-alarm-about-dynamodb.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-dynamodb) |
-| [cloudwatch-alarm-about-ec2](monitoring/cloudwatch-alarm-about-ec2.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ec2) |
-| [cloudwatch-alarm-about-ec2-cwagent](monitoring/cloudwatch-alarm-about-ec2-cwagent.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ec2-cwagent) |
-| [cloudwatch-alarm-about-elasticsearch](monitoring/cloudwatch-alarm-about-elasticsearch.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-elasticsearch) |
-| [cloudwatch-alarm-about-events](monitoring/cloudwatch-alarm-about-events.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-events) |
-| [cloudwatch-alarm-about-kinesis-data-streams](monitoring/cloudwatch-alarm-about-kinesis-data-streams.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-kinesis-data-streams) |
-| [cloudwatch-alarm-about-kinesis-data-firehose](monitoring/cloudwatch-alarm-about-kinesis-data-firehose.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-kinesis-data-firehose) |
-| [cloudwatch-alarm-about-lambda](monitoring/cloudwatch-alarm-about-lambda.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-lambda) |
-| [cloudwatch-alarm-about-medialive](monitoring/cloudwatch-alarm-about-medialive.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-medialive) |
-| [cloudwatch-alarm-about-mediastore](monitoring/cloudwatch-alarm-about-mediastore.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-mediastore) |
-| [cloudwatch-alarm-about-natgateway](monitoring/cloudwatch-alarm-about-natgateway.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-natgateway) |
-| [cloudwatch-alarm-about-sns](monitoring/cloudwatch-alarm-about-sns.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-sns) |
-| [sns-topic](notification/sns-topic.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~sns-topic) |
-| [eventbridge-rules](eventbridge-rules.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~eventbridge-rules) |
-| [delete-resources-without-required-tags](security-config-rules/delete-resources-without-required-tags.md) | 2.0.29 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~delete-resources-without-required-tags) |
+| [codepipeline-default-settings](cicd/codepipeline-default-settings.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~codepipeline-default-settings) |
+| [cloudwatch-alarm-about-apigateway](monitoring/cloudwatch-alarm-about-apigateway.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-apigateway) |
+| [cloudwatch-alarm-about-codebuild](monitoring/cloudwatch-alarm-about-codebuild.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-codebuild) |
+| [cloudwatch-alarm-about-dynamodb-throttle](monitoring/cloudwatch-alarm-about-dynamodb-throttle.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-dynamodb-throttle) |
+| [cloudwatch-alarm-about-dynamodb](monitorining/cloudwatch-alarm-about-dynamodb.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-dynamodb) |
+| [cloudwatch-alarm-about-ec2](monitoring/cloudwatch-alarm-about-ec2.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ec2) |
+| [cloudwatch-alarm-about-ec2-cwagent](monitoring/cloudwatch-alarm-about-ec2-cwagent.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ec2-cwagent) |
+| [cloudwatch-alarm-about-elasticsearch](monitoring/cloudwatch-alarm-about-elasticsearch.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-elasticsearch) |
+| [cloudwatch-alarm-about-events](monitoring/cloudwatch-alarm-about-events.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-events) |
+| [cloudwatch-alarm-about-kinesis-data-streams](monitoring/cloudwatch-alarm-about-kinesis-data-streams.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-kinesis-data-streams) |
+| [cloudwatch-alarm-about-kinesis-data-firehose](monitoring/cloudwatch-alarm-about-kinesis-data-firehose.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-kinesis-data-firehose) |
+| [cloudwatch-alarm-about-lambda](monitoring/cloudwatch-alarm-about-lambda.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-lambda) |
+| [cloudwatch-alarm-about-medialive](monitoring/cloudwatch-alarm-about-medialive.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-medialive) |
+| [cloudwatch-alarm-about-mediastore](monitoring/cloudwatch-alarm-about-mediastore.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-mediastore) |
+| [cloudwatch-alarm-about-natgateway](monitoring/cloudwatch-alarm-about-natgateway.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-natgateway) |
+| [cloudwatch-alarm-about-sns](monitoring/cloudwatch-alarm-about-sns.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-sns) |
+| [sns-topic](notification/sns-topic.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~sns-topic) |
+| [eventbridge-rules](eventbridge-rules.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~eventbridge-rules) |
+| [delete-resources-without-required-tags](security-config-rules/delete-resources-without-required-tags.md) | 2.0.31 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~delete-resources-without-required-tags) |
 
 ## テンプレート
 
@@ -54,10 +54,11 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 本プロジェクトには、以下のサブモジュールも含まれます。
 
-+ [エッジサービスの設定](/edge/README_JP.md)
-+ [ネットワークの設定](/network/README_JP.md)
-+ [**Media Services の設定**](/media/README_JP.md)
 + [CloudWatch アラームの設定](/monitoring/README_JP.md)
++ [エッジサービスの設定](/edge/README_JP.md)
++ [アイデンティティの設定](/identity/README_JP.md)
++ [**Media Services の設定**](/media/README_JP.md)
++ [ネットワークの設定](/network/README_JP.md)
 
 ## アーキテクチャ
 

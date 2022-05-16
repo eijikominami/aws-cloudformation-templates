@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/static-web-hosting/az creates a VPC Subnet and related resources.
+Description: AWSCloudFormationTemplates/network/az creates a VPC Subnet and related resources.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -238,7 +238,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.0.29
+        SemanticVersion: 2.0.31
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

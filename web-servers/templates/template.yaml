@@ -354,8 +354,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -400,8 +400,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/az.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -576,15 +576,15 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/route53.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/route53.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/route53.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/route53.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.29
+        SemanticVersion: 2.0.31
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -601,7 +601,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.29
+        SemanticVersion: 2.0.31
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -942,7 +942,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.29
+        SemanticVersion: 2.0.31
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -968,7 +968,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.0.29
+        SemanticVersion: 2.0.31
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

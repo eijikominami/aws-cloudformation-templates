@@ -10,16 +10,22 @@ env:
     CICD_DIST_DIR: aws-cloudformation-templates/cicd
     CLOUDOPS_SRC_DIR: cloudops/templates
     CLOUDOPS_DIST_DIR: aws-cloudformation-templates/cloudops
-    GLOBAL_SRC_DIR: global/templates
-    GLOBAL_DIST_DIR: aws-cloudformation-templates/global
-    MONITORING_SRC_DIR: monitoring/sam-app
-    MONITORING_DIST_DIR: aws-cloudformation-templates/monitoring
+    EC2_SRC_DIR: web-servers/templates
+    EC2_DIST_DIR: aws-cloudformation-templates/web-servers
     EDGE_SRC_DIR: edge/templates
     EDGE_DIST_DIR: aws-cloudformation-templates/edge
-    NETWORK_SRC_DIR: network/templates
-    NETWORK_DIST_DIR: aws-cloudformation-templates/network
+    GLOBAL_SRC_DIR: global/templates
+    GLOBAL_DIST_DIR: aws-cloudformation-templates/global
+    HOSTING_SRC_DIR: static-website-hosting-with-ssl/templates
+    HOSTING_DIST_DIR: aws-cloudformation-templates/static-website-hosting-with-ssl
+    IDENTITY_SRC_DIR: identity/templates
+    IDENTITY_DIST_DIR: aws-cloudformation-templates/identity
     MEDIA_SRC_DIR: media/templates
     MEDIA_DIST_DIR: aws-cloudformation-templates/media
+    MONITORING_SRC_DIR: monitoring/sam-app
+    MONITORING_DIST_DIR: aws-cloudformation-templates/monitoring
+    NETWORK_SRC_DIR: network/templates
+    NETWORK_DIST_DIR: aws-cloudformation-templates/network
     NOTIFICATION_SAM_SRC_DIR: notification/sam-app
     NOTIFICATION_CFN_SRC_DIR: notification/templates
     NOTIFICATION_DIST_DIR: aws-cloudformation-templates/notification
@@ -27,12 +33,8 @@ env:
     SECURITY_DIST_DIR: aws-cloudformation-templates/security
     SECURITY_CONFIG_RULES_SRC_DIR: security-config-rules/sam-app
     SECURITY_CONFIG_RULES_DIST_DIR: aws-cloudformation-templates/security-config-rules
-    HOSTING_SRC_DIR: static-website-hosting-with-ssl/templates
-    HOSTING_DIST_DIR: aws-cloudformation-templates/static-website-hosting-with-ssl
     SYNTHETICS_SRC_DIR: synthetics/templates
     SYNTHETICS_DIST_DIR: aws-cloudformation-templates/synthetics
-    EC2_SRC_DIR: web-servers/templates
-    EC2_DIST_DIR: aws-cloudformation-templates/web-servers
 
 phases:
   install:
@@ -48,21 +50,23 @@ phases:
       - pip install -U awscli
   pre_build:
     commands:
-      # - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
+      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${ANALYTICS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CLOUDOPS_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${EDGE_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${IDENTITY_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${MEDIA_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${NETWORK_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive
-      - aws s3 rm s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive
-      - aws s3 rm s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive
   build:
     commands:
       - sam validate --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml
@@ -84,15 +88,16 @@ phases:
        - aws s3 cp ${ANALYTICS_SRC_DIR}/ s3://${BUCKET_NAME}/${ANALYTICS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${CICD_SRC_DIR}/ s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${CLOUDOPS_SRC_DIR}/ s3://${BUCKET_NAME}/${CLOUDOPS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${EC2_SRC_DIR}/ s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${EDGE_SRC_DIR}/ s3://${BUCKET_NAME}/${EDGE_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${GLOBAL_SRC_DIR}/ s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${HOSTING_SRC_DIR}/ s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${IDENTITY_SRC_DIR}/ s3://${BUCKET_NAME}/${IDENTITY_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${MEDIA_SRC_DIR}/ s3://${BUCKET_NAME}/${MEDIA_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${MONITORING_SRC_DIR}/ s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${NETWORK_SRC_DIR}/ s3://${BUCKET_NAME}/${NETWORK_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
-       - aws s3 cp ${MEDIA_SRC_DIR}/ s3://${BUCKET_NAME}/${MEDIA_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${NOTIFICATION_SAM_SRC_DIR}/ s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${NOTIFICATION_CFN_SRC_DIR}/ s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SECURITY_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SECURITY_CONFIG_RULES_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
-       - aws s3 cp ${HOSTING_SRC_DIR}/ s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SYNTHETICS_SRC_DIR}/ s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
-       - aws s3 cp ${EC2_SRC_DIR}/ s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'

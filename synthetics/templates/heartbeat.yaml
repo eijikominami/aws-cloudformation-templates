@@ -181,9 +181,14 @@ Resources:
           Value: !Ref TagValue
   S3ForSynthetics:
     Type: AWS::S3::Bucket
+    
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
       BucketName: !Sub synthetics-${CanaryName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
@@ -288,7 +293,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.29
+        SemanticVersion: 2.0.31
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -305,7 +310,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.29
+        SemanticVersion: 2.0.31
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
