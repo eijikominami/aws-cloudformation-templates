@@ -54,10 +54,11 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 本プロジェクトには、以下のサブモジュールも含まれます。
 
-+ [エッジサービスの設定](/edge/README_JP.md)
-+ [ネットワークの設定](/network/README_JP.md)
-+ [**Media Services の設定**](/media/README_JP.md)
 + [CloudWatch アラームの設定](/monitoring/README_JP.md)
++ [エッジサービスの設定](/edge/README_JP.md)
++ [アイデンティティの設定](/identity/README_JP.md)
++ [**Media Services の設定**](/media/README_JP.md)
++ [ネットワークの設定](/network/README_JP.md)
 
 ## アーキテクチャ
 
