@@ -43,6 +43,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
+| AdMarker | ENABLED or DISABLED | DISABLED | ○ | Enable or disable ad marker |
 | AudioBitrate | Number | 96000 | ○ | Average audio bitrate in bits/second |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Enable or disable automatic input failover |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | Select the class of channel you intend to attach this input to |
@@ -72,10 +73,12 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| ArchiveBucket | String | | | The S3 bucket Name LIVE-to-VOD contents are stored |
+| ManifestName | String | index | ○ | A short string that's appended to the end of the endpoint URL |
+| OutputType | APPLE_HLS, ISO_DASH, ALL | APPLE_HLS | ○ | Output type |
 | StartoverWindowSeconds | Number | 0 | ○ | Maximum duration seconds of content to retain for startover playback |
 | SegmentDurationSeconds | Number | 3 | ○ | Duration (in seconds) of each fragment |
 | VodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
-| VodDestinationBucket | String | | | The S3 bucket Name LIVE-to-VOD contents are stored |
 
 ### MediaStore
 
@@ -84,3 +87,14 @@ You can provide optional parameters as follows.
 | ExpirationDate | Number | 1 | ○ |  The date objects to expire |
 | MaxAgeSeconds | Number | 30000 | ○ | The time in seconds that browser caches the preflight response |
 | UserAgent | String | | ○ | The secret key that 'User-Agent' header contains |
+
+### MediaTailor
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| **AdDecisionServerUrl** | String | | ○ | The URL for the ad decision server (ADS) for pre-roll ads |
+| CdnContentSegmentUrlPrefix | String | | ○ | A content delivery network (CDN) to cache content segments, so that content requests don’t always have to go to the origin server. |
+| MaxDurationSeconds | Number | 120 | ○ | The maximum allowed duration for the pre-roll ad avail |
+| PersonalizationThresholdSeconds | Number | 8 | ○ | Defines the maximum duration of underfilled ad time (in seconds) allowed in an ad break |
+| **SlateAdUrl** | String | | ○ | The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads |
+| **VideoContentSourceUrl** | String | | ○ | The URL prefix for the parent manifest for the stream, minus the asset ID |

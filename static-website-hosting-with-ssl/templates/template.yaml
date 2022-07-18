@@ -753,3 +753,6 @@ Outputs:
     Condition: CreateRealtimeDashboard
     Description: Kibana URL
     Value: !GetAtt CloudFront.Outputs.KibanaURL
+  S3BucketURL:
+    Description: S3 Bucket URL
+    Value: !Sub https://${S3ForWebHosting}.s3-${AWS::Region}.amazonaws.com

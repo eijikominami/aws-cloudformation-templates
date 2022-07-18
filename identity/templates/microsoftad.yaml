@@ -28,6 +28,15 @@ Parameters:
     AllowedPattern: (?=^.{8,64}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*[a-z])|(?=.*[^A-Za-z0-9\s])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9\s]))^.*
     NoEcho: true
     Description: The password for the default administrative user named Admin [required]
+  RemoteDesktopGatewayEC2KeyName:
+    Type: String
+    AllowedPattern: .+
+    Description: The name of an existing EC2 KeyPair to enable SSH access to the instance [required]
+  RemoteDesktopGatewayWhitelistRules:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Default: 0.0.0.0/0
+    Description: A list of one or more IPv4 CIDR addresses to allow (e.g. 0.0.0.0/0) [required]
   ShortName:
     Type: String
     Default: CORP
@@ -40,7 +49,7 @@ Parameters:
     Description: The public subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.0.2.0/24
+    Default: 10.0.4.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ1 [required] 
   SubnetPublicCidrBlockForAz2:
@@ -50,7 +59,7 @@ Parameters:
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.0.3.0/24
+    Default: 10.0.5.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2 [required]
   TransitGatewayId:
@@ -95,6 +104,32 @@ Conditions:
 
 Resources:
   # Nested Stack
+  RemoteDesktopGateway:
+    DependsOn:
+      - ActiveDirectory  
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        DomainAdminPassword: !Ref Password
+        DomainNetBIOSName: !Ref ShortName
+        DomainDNSName: !Ref Name
+        DomainMemberSGID: !Ref SecurityGroupForRemoteDesktopGateway
+        KeyPairName: !Ref RemoteDesktopGatewayEC2KeyName
+        PublicSubnet1ID: !GetAtt Az1.Outputs.PublicSubnetId
+        PublicSubnet2ID: !GetAtt Az2.Outputs.PublicSubnetId
+        RDGWCIDR: !Ref RemoteDesktopGatewayWhitelistRules
+        VPCID: !Ref VPC
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://aws-quickstart.s3.amazonaws.com/quickstart-microsoft-rdgateway/templates/rdgw-domain.template
   Az1:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -218,6 +253,31 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  SecurityGroupForRemoteDesktopGateway:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      # 'sg-' prefix is NOT permitted.
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
+      GroupDescription: Security Group for Remote Desktop Gateway
+      SecurityGroupIngress:
+        - CidrIp: !Ref RemoteDesktopGatewayWhitelistRules
+          Description: rdp
+          FromPort: 3389
+          ToPort: 3389
+          IpProtocol: TCP
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPC
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties: 
@@ -248,3 +308,11 @@ Resources:
             - !GetAtt Az1.Outputs.PublicSubnetId
             - !GetAtt Az2.Outputs.PublicSubnetId
           VpcId: !Ref VPC
+
+Outputs:
+  RemoteDesktopGatewayUrl:
+    Description: ELB DNS name to connect to RDP Gateway.
+    Value: !GetAtt RemoteDesktopGateway.Outputs.RDPURL
+  RemoteDesktopGatewaySecurityGroupId:
+    Description: Remote Desktop Gateway security group ID.
+    Value: !GetAtt RemoteDesktopGateway.Outputs.RemoteDesktopGatewaySGID

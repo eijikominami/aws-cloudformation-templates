@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationSamples/media/medialive sets Elemental MediaLive.
+Description: AWSCloudFormationTemplates/media/medialive sets Elemental MediaLive.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -8,6 +8,7 @@ Metadata:
       - Label: 
           default: 'MediaLive Configuration'
         Parameters: 
+          - AdMarker
           - ArchiveBucket
           - AudioBitrate
           - AutoInputFailover
@@ -48,6 +49,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AdMarker:
+    Type: String
+    AllowedValues:
+      - ENABLED
+      - DISABLED  
+    Default: DISABLED
+    Description: Enable or disable automatic ad maker [required]
   ArchiveBucket:
     Type: String
     Default: ''
@@ -216,6 +224,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  AdMarkerEnabled: !Equals [ !Ref AdMarker, ENABLED]
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
   CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
@@ -346,9 +355,9 @@ Resources:
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
-                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-a/main
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live/main
                 - StreamName: ''
-                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-b/main
+                  Url: !Sub mediastoressl://${MediaStoreEndpoint}/live-backup/main
               - - StreamName: ''
                   Url: !Sub mediastoressl://${MediaStoreEndpoint}/live/main
           - !Ref AWS::NoValue
@@ -370,11 +379,11 @@ Resources:
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-a
+                  Url: !Sub s3ssl://${HlsBucket}/live/main
                 - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-a
+                  Url: !Sub s3ssl://${HlsBucket}/live-backup/main
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-b
+                  Url: !Sub s3ssl://${HlsBucket}/live/main
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForArchive
@@ -447,7 +456,11 @@ Resources:
             - CreateDestinationForMediaStoreOrS3
             - Name: HLS
               OutputGroupSettings: 
-                HlsGroupSettings: 
+                HlsGroupSettings:
+                  AdMarkers: !If
+                    - AdMarkerEnabled
+                    - - ELEMENTAL_SCTE35
+                    - !Ref AWS::NoValue
                   CaptionLanguageSetting: OMIT
                   CodecSpecification: RFC_4281
                   Destination: 
@@ -504,7 +517,10 @@ Resources:
                             PcrControl: PCR_EVERY_PES_PACKET
                             PmtPid: '480'
                             ProgramNum: 1
-                            Scte35Behavior: NO_PASSTHROUGH
+                            Scte35Behavior: !If
+                              - AdMarkerEnabled
+                              - PASSTHROUGH
+                              - NO_PASSTHROUGH
                             Scte35Pid: '500'
                             TimedMetadataBehavior: NO_PASSTHROUGH
                             TimedMetadataPid: '502'
@@ -780,6 +796,10 @@ Outputs:
   ChannelId:
     Description: Channel Id
     Value: !Ref MediaLiveChannel
+  ManifestFile:
+    Condition: CreateDestinationForMediaStoreOrS3
+    Description: Manifest file path
+    Value: live
   RtmpPrimary1:
     Condition: CreateLIVEWorkflow
     Description: The RTMP primary address 1

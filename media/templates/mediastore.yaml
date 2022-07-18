@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationSamples/media/mediastore sets Elemental MediaStore.
+Description: AWSCloudFormationTemplates/media/mediastore sets Elemental MediaStore.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -160,11 +160,11 @@ Resources:
                     "mediastore:GetObject",
                     "mediastore:DescribeObject"
                   ],
-                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",'
+                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",
+                  "Condition": {'
           - !If
             - UserAgentExists
             - !Sub ' 
-                  "Condition": {
                     "StringEquals": {
                       "aws:UserAgent": "${UserAgent}"
                     },'

@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/media/mediastore sets Elemental MediaStore.
+
+Parameters:
+  AdDecisionServerUrl:
+    Type: String
+    AllowedPattern: .+
+    Description: The URL for the ad decision server (ADS) for pre-roll ads [required]
+  CdnContentSegmentUrlPrefix:
+    Type: String
+    Default: ''
+    Description: "A content delivery network (CDN) to cache content segments, so that content requests don’t always have to go to the origin server."   
+  LogicalNamePrefix:
+    Type: String
+    Default: MediaTailor
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  MaxDurationSeconds:
+    Type: Number
+    Default: 120
+    MinValue: 0
+    Description: The maximum allowed duration for the pre-roll ad avail  
+  PersonalizationThresholdSeconds:
+    Type: Number
+    Default: 8
+    MinValue: 0
+    Description: Defines the maximum duration of underfilled ad time (in seconds) allowed in an ad break 
+  SlateAdUrl: 
+    Type: String
+    Default: ''
+    Description: The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads [required]
+  VideoContentSourceUrl:
+    Type: String
+    AllowedPattern: .+
+    Description: The URL prefix for the parent manifest for the stream, minus the asset ID [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates 
+    AllowedPattern: .+
+
+Resources:
+  MediaTailorPlaybackConfiguration:
+    Type: AWS::MediaTailor::PlaybackConfiguration
+    Properties: 
+      AdDecisionServerUrl: !Ref AdDecisionServerUrl
+      Bumper: 
+        EndUrl: ''
+        StartUrl: ''
+      CdnConfiguration: 
+        AdSegmentUrlPrefix: ''
+        ContentSegmentUrlPrefix: !Ref CdnContentSegmentUrlPrefix
+      DashConfiguration: 
+        ManifestEndpointPrefix: ''
+        MpdLocation: EMT_DEFAULT
+        OriginManifestType: MULTI_PERIOD
+      LivePreRollConfiguration: 
+        AdDecisionServerUrl: ''
+        MaxDurationSeconds: !Ref MaxDurationSeconds
+      ManifestProcessingRules: 
+        AdMarkerPassthrough:
+          Enabled: false
+      Name: !Ref LogicalNamePrefix
+      PersonalizationThresholdSeconds: !Ref PersonalizationThresholdSeconds
+      SlateAdUrl: !Ref SlateAdUrl
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VideoContentSourceUrl: !Ref VideoContentSourceUrl
+
+Outputs:
+  PlaybackEndpointPrefix:
+    Description: The URL that the player accesses to get a manifest from MediaTailor.
+    Value: !GetAtt MediaTailorPlaybackConfiguration.PlaybackEndpointPrefix
+  SessionInitializationEndpointPrefix:
+    Description: The URL that the player uses to initialize a session that uses client-side reporting.
+    Value: !GetAtt MediaTailorPlaybackConfiguration.SessionInitializationEndpointPrefix

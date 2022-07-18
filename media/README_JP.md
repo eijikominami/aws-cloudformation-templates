@@ -43,6 +43,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
+| AdMarker | ENABLED or DISABLED | DISABLED | ○ | Ad Markerを使用するかどうか |
 | AudioBitrate | Number | 96000 | ○ | 音声ビットレート（bps） |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
@@ -72,10 +73,12 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
+| ArchiveBucket | String | | | LIVE-to-VODコンテンツの格納先バケット名 |
+| ManifestName | String | index | ○ | マニフェスト名 |
+| OutputType | APPLE_HLS, ISO_DASH, ALL | APPLE_HLS | ○ | アウトプットタイプ |
 | StartoverWindowSeconds | Number | 0 | ○ | 時間シフト（秒） |
 | SegmentDurationSeconds | Number | 3 | ○ | フラグメント長（秒） |
 | VodSourceBucket | String | | | VODのソースバケット名 |
-| VodDestinationBucket | String | | | LIVE-to-VODコンテンツの格納先バケット名 |
 
 ### MediaStore
 
@@ -84,3 +87,14 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | ExpirationDate | Number | 1 | ○ | 有効期限（日） |
 | MaxAgeSeconds | Number | 30000 | ○ | ブラウザキャッシュのプリフライト時間 |
 | UserAgent | String | | ○ | ユーザエージェント |
+
+### MediaTailor
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
+| --- | --- | --- | --- | --- |
+| **AdDecisionServerUrl** | String | | ○ | ADS の URL |
+| CdnContentSegmentUrlPrefix | String | | ○ | コンテンツをキャッシュしている CDN のURL |
+| MaxDurationSeconds | Number | 120 | ○ | プリロールの最大秒 |
+| PersonalizationThresholdSeconds | Number | 8 | ○ | 埋められなかった広告時間の最大秒 |
+| **SlateAdUrl** | String | | ○ | 広告で使用されなかった時間に挿入されるスレートのURL |
+| **VideoContentSourceUrl** | String | | ○ | マニフェストファイルのURL |
