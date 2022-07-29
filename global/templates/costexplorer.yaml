@@ -2,6 +2,16 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationSamples/cloudops/costexplorer configures Cost Explorer.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Cost Explorer Configuration'
+        Parameters: 
+          - Frequency
+          - NotificationThreshold
+          - SNSForAlertArn
+
 Parameters:
   Frequency:
     Type: String

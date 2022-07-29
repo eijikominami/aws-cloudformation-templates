@@ -2,6 +2,24 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/media/mediaconvert sets Elemental MediaConvert.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'MediaConvert Configuration'
+        Parameters: 
+          - AccelerationSettings
+          - Category
+          - Name
+          - StatusUpdateInterval
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+          - Environment
+          - TagKey
+          - TagValue
+
 Parameters:
   AccelerationSettings:
     Type: String

@@ -2,6 +2,26 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/media/mediastore sets Elemental MediaTailor.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'IVS Configuration'
+        Parameters: 
+          - AdDecisionServerUrl
+          - CdnContentSegmentUrlPrefix
+          - MaxDurationSeconds
+          - PersonalizationThresholdSeconds
+          - SlateAdUrl
+          - VideoContentSourceUrl
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalNamePrefix
+          - Environment
+          - TagKey
+          - TagValue
+
 Parameters:
   AdDecisionServerUrl:
     Type: String
