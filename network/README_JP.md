@@ -27,6 +27,25 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 
 デプロイ時に、以下のパラメータを指定することができます。
 
+### Global Accelerator
+
+このテンプレートは、 ``Global Accelerator`` を構成します。
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| EndpointId | String | ○ | | ELBのARN, Elastic IP, EC2のインスタンスID |
+| EndpointGroupRegion | String | ○ | | エンドポイントグループを置くリージョン |
+| FromPort | Number | | 80 |  ポートの開始番号 |
+| HealthCheckIntervalSeconds | 10 / 30 | | 30 | エンドポイントへのヘルスチェック感覚 |
+| HealthCheckPath | String | | / | HTTP、HTTPSの場合のヘルスチェックパス |
+| HealthCheckPort | Number | | 80 | エンドポイントへのヘルスチェックポート |
+| HealthCheckProtocol | TCP / HTTP / HTTPS | | TCP |エンドポイントへのヘルスチェックプロトコル |
+| IpAddressType | IPV6 / IPV4 | | IPV4 | サポートするIPアドレスタイプ |
+| Name | String | | Default | アクセラレータの名前 |
+| Protocol | TCP / UDP | | TCP | クライアントがアクセラレータにアクセスするプロトコル |
+| ThresholdCount | Number | | 3 | 正常もしくは異常と判断するヘルスチェックの数 |
+| ToPort | Number | | 80 | ポートの終了番号 |
+
 ### Transit Gateway
 
 このテンプレートは、 ``Transit Gateway`` を構成します。

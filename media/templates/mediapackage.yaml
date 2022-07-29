@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: AWSCloudFormationSamples/media/mediapackage sets Elemental MediaPackage.
+Description: AWSCloudFormationTemplates/media/mediapackage sets Elemental MediaPackage.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -8,6 +8,7 @@ Metadata:
           default: 'MediaPackage Configuration'
         Parameters: 
           - ArchiveBucket
+          - ManifestName
           - StartoverWindowSeconds
           - SegmentDurationSeconds
           - OutputType
@@ -25,6 +26,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The S3 bucket Name LIVE-to-VOD contents are stored.
+  ManifestName:
+    Type: String
+    Default: index
+    Description: A short string that's appended to the end of the endpoint URL to create a unique path to this endpoint [required]
   StartoverWindowSeconds:
     Type: Number
     Default: 0
@@ -41,7 +46,7 @@ Parameters:
       - ISO_DASH
       - ALL  
     Default: APPLE_HLS
-    Description: OutputType [required] 
+    Description: Output type [required] 
   VodSourceBucket:
     Type: String
     Default: ''
@@ -169,7 +174,7 @@ Resources:
         IncludeIframeOnlyStream: false
         SegmentDurationSeconds: !Ref SegmentDurationSeconds
       Id: !Sub ${LogicalNamePrefix}-Hls
-      ManifestName: index
+      ManifestName: !Ref ManifestName
       Origination: !If 
         - CreateLiveToVODWorkflow
         - DENY
@@ -197,7 +202,7 @@ Resources:
         SuggestedPresentationDelaySeconds: 20     
       Description: !Sub Media Package OriginEndpoint for ${LogicalNamePrefix}
       Id: !Sub ${LogicalNamePrefix}-Dash
-      ManifestName: !Ref LogicalNamePrefix
+      ManifestName: !Ref ManifestName
       Origination: !If 
         - CreateLiveToVODWorkflow
         - DENY
@@ -252,7 +257,7 @@ Resources:
       HlsPackage:
         HlsManifests: 
           - IncludeIframeOnlyStream: false
-            ManifestName: index
+            ManifestName: !Ref ManifestName
             RepeatExtXKey: false
         SegmentDurationSeconds: !Ref SegmentDurationSeconds
         UseAudioRenditionGroup: false
@@ -270,7 +275,7 @@ Resources:
       DashPackage:
         DashManifests: 
           - ManifestLayout: FULL
-            ManifestName: index
+            ManifestName: !Ref ManifestName
             MinBufferTimeSeconds: 30
             Profile: NONE
         SegmentDurationSeconds: !Ref SegmentDurationSeconds
@@ -293,6 +298,9 @@ Outputs:
       - CreateHlsEndPoint
       - !GetAtt MediaPackageHlsOriginEndpoint.Url
       - ''
+  ManifestFile:
+    Description: A short string that's appended to the end of the endpoint URL to create a unique path to this endpoint
+    Value: !Ref ManifestName
   DashEndpointUrl:
     Description: Endpoint Url
     Value: !If

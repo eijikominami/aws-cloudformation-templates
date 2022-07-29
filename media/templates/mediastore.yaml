@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationSamples/media/mediastore sets Elemental MediaStore.
+Description: AWSCloudFormationTemplates/media/mediastore sets Elemental MediaStore.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -79,7 +79,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.31
+        SemanticVersion: 2.0.32
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -96,7 +96,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.31
+        SemanticVersion: 2.0.32
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -160,11 +160,11 @@ Resources:
                     "mediastore:GetObject",
                     "mediastore:DescribeObject"
                   ],
-                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",'
+                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",
+                  "Condition": {'
           - !If
             - UserAgentExists
             - !Sub ' 
-                  "Condition": {
                     "StringEquals": {
                       "aws:UserAgent": "${UserAgent}"
                     },'
@@ -199,7 +199,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediastore
-        SemanticVersion: 2.0.31
+        SemanticVersion: 2.0.32
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

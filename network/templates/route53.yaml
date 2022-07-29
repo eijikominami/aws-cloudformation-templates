@@ -1,6 +1,23 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/network/route53 creates a Route53 Resolver.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Route53 Configuration'
+        Parameters:
+          - SecurityGroupId
+          - SubnetId1
+          - SubnetId2
+          - SubnetId3
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
 Parameters:
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id

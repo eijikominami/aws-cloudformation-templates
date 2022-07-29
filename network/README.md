@@ -27,6 +27,25 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 
 You can provide optional parameters as follows.
 
+### Global Accelerator
+
+This template configures ``Global Accelerator``.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| EndpointId | String | ○ | | The Amazon Resource Name (ARN) of the ELB, the Elastic IP address or  the EC2 instance ID |
+| EndpointGroupRegion | String | ○ | | The AWS Regions where the endpoint group is located |
+| FromPort | Number | | 80 |  The first port in the range of ports, inclusive |
+| HealthCheckIntervalSeconds | 10 / 30 | | 30 | The time—10 seconds or 30 seconds—between health checks for each endpoint |
+| HealthCheckPath | String | | / | If the protocol is HTTP/S, then this value provides the ping path that Global Accelerator uses for the destination on the endpoints for health checks |
+| HealthCheckPort | Number | | 80 | The port that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
+| HealthCheckProtocol | TCP / HTTP / HTTPS | | TCP | The protocol that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
+| IpAddressType | IPV6 / IPV4 | | IPV4 | The IP address type that an accelerator supports |
+| Name | String | | Default | The name of the accelerator |
+| Protocol | TCP / UDP | | TCP | The protocol for the connections from clients to the accelerator |
+| ThresholdCount | Number | | 3 | The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy |
+| ToPort | Number | | 80 | The last port in the range of ports, inclusive |
+
 ### Transit Gateway
 
 This template configures ``Transit Gateway``.
