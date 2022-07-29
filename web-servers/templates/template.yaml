@@ -441,10 +441,14 @@ Resources:
         Route53HostedZoneId: !Ref Route53HostedZoneId
         SubnetId1ForELB: !GetAtt Az1.Outputs.PublicSubnetId
         SubnetId2ForELB: !GetAtt Az2.Outputs.PublicSubnetId
-        SNSTopicARN: !If
+        SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
         VPCId: !Ref VPC
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -570,6 +574,9 @@ Resources:
           - !GetAtt AutoScaling.Outputs.LoadBalancerArn
           - !Ref EIPForEC2Instance
         EndpointGroupRegion: !Ref AWS::Region
+        HealthCheckPath: /
+        HealthCheckPort: 80
+        HealthCheckProtocol: HTTP
         Name: !Ref AWS::StackName
       Tags:
         - Key: environment
