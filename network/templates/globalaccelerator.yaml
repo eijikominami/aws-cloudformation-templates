@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/network/globalaccelerator creates a Global Accelerator.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Accelerator Configuration'
+        Parameters:
+          - IpAddressType
+          - Name
+      - Label: 
+          default: 'Listener Configuration'
+        Parameters:
+          - FromPort
+          - ToPort
+          - Protocol
+      - Label: 
+          default: 'Endpoint Configuration'
+        Parameters:
+          - EndpointId
+          - EndpointGroupRegion
+          - HealthCheckIntervalSeconds
+          - HealthCheckPath
+          - HealthCheckPort
+          - HealthCheckProtocol
+          - ThresholdCount
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  EndpointId:
+    Type: String
+    Default: ''
+    MaxLength: 255
+    Description: The Amazon Resource Name (ARN) of the ELB, the Elastic IP address or  the EC2 instance ID [required]   
+  EndpointGroupRegion:
+    Type: String
+    Default: ''
+    Description: The AWS Regions where the endpoint group is located [required]  
+  FromPort:
+    Type: Number
+    Default: 80
+    Description: The first port in the range of ports, inclusive
+  HealthCheckIntervalSeconds:
+    Type: Number
+    Default: 30
+    AllowedValues:
+      - 10
+      - 30
+    Description: The time—10 seconds or 30 seconds—between health checks for each endpoint
+  HealthCheckPath:
+    Type: String
+    Default: /
+    AllowedPattern: ^/[-a-zA-Z0-9@:%_\\+.~#?&/=]*$
+    MaxLength: 255
+    Description: If the protocol is HTTP/S, then this value provides the ping path that Global Accelerator uses for the destination on the endpoints for health checks
+  HealthCheckPort:
+    Type: Number
+    Default: 80
+    MinValue: 1
+    MaxValue: 655535
+    Description: The port that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group  
+  HealthCheckProtocol:
+    Type: String
+    Default: TCP
+    AllowedValues:
+      - TCP
+      - HTTP
+      - HTTPS
+    Description: The protocol that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group
+  IpAddressType:
+    Type: String
+    Default: IPV4
+    AllowedValues:
+      - DUAL_STACK
+      - IPV4  
+    Description: The IP address type that an accelerator supports
+  Name:
+    Type: String
+    Default: Default
+    Description: The name of the accelerator
+  Protocol:
+    Type: String
+    Default: TCP
+    AllowedValues:
+      - TCP
+      - UDP  
+    Description: The protocol for the connections from clients to the accelerator
+  ThresholdCount:
+    Type: Number
+    Default: 3
+    MinValue: 1
+    MaxValue: 10
+    Description: The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy   
+  ToPort:
+    Type: Number
+    Default: 80
+    Description: The last port in the range of ports, inclusive
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  Accelerator:
+    Type: AWS::GlobalAccelerator::Accelerator
+    Properties: 
+      Enabled: true
+      IpAddressType: !Ref IpAddressType
+      Name: !Ref Name
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  EndpointGroup:
+    Type: AWS::GlobalAccelerator::EndpointGroup
+    Properties: 
+      EndpointConfigurations: 
+        - EndpointId: !Ref EndpointId
+          Weight: 100
+      EndpointGroupRegion: !Ref EndpointGroupRegion
+      HealthCheckIntervalSeconds: !Ref HealthCheckIntervalSeconds
+      HealthCheckPath: !Ref HealthCheckPath
+      HealthCheckPort: !Ref HealthCheckPort
+      HealthCheckProtocol: !Ref HealthCheckProtocol
+      ListenerArn: !GetAtt Listener.ListenerArn
+      ThresholdCount: !Ref ThresholdCount
+      TrafficDialPercentage: 100    
+  Listener:
+    Type: AWS::GlobalAccelerator::Listener
+    Properties: 
+      AcceleratorArn: !GetAtt Accelerator.AcceleratorArn
+      PortRanges: 
+        - FromPort: !Ref FromPort
+          ToPort: !Ref ToPort
+      Protocol: !Ref Protocol
