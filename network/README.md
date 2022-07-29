@@ -13,6 +13,8 @@ If you just want to deploy the stack, click the button below.
 
 | Services | Launchers |
 | --- | --- |
+| Availability Zone | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AvailabilityZone&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/az.yaml) |
+| Global Accelerator | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=GlobalAccelerator&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/globalaccelerator.yaml) |
 | TransitGateway | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=TransitGateway&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/transitgateway.yaml) |
 | VPN | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=VPN&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/vpn.yaml) |
 
@@ -21,11 +23,27 @@ If you just want to deploy the stack, click the button below.
 Execute the command to deploy.
 
 ```bash
+aws cloudformation deploy --template-file az.yaml --stack-name AvailabilityZone
+aws cloudformation deploy --template-file globalaccelerator.yaml --stack-name GlobalAccelerator
 aws cloudformation deploy --template-file transitgateway.yaml --stack-name TransitGateway
 aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 ```
 
 You can provide optional parameters as follows.
+
+### Availability Zone
+
+This template configures ``Availability Zone``.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| AvailabilityZone | AWS::EC2::AvailabilityZone::Name | | ○ | The Availability Zone name |
+| InternetGatewayId | String | | ○ | The Internet Gateway Id |
+| SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | The Public subnet CIDR block |
+| SubnetTransitCidrBlock | String | | | The transit subnet CIDR block |
+| TransitGatewayId | String | | | The ID of a transit gateway |
+| TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
+| VPCId | AWS::EC2::VPC::Id | | ○ | The VPC id  |
 
 ### Global Accelerator
 

@@ -570,6 +570,7 @@ Resources:
           - !GetAtt AutoScaling.Outputs.LoadBalancerArn
           - !Ref EIPForEC2Instance
         EndpointGroupRegion: !Ref AWS::Region
+        Name: !Ref AWS::StackName
       Tags:
         - Key: environment
           Value: !Ref Environment
