@@ -661,12 +661,18 @@ Resources:
       Description: CloudFrontログを変換します。
       Environment:
         Variables:
-          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_LAMBDA_EXEC_WRAPPER:  !If
+            - Development
+            - /opt/codeguru_profiler_lambda_exec
+            - !Ref AWS::NoValue
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
             - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
+            - Development
+            - !Ref AWS::Region
+            - !Ref AWS::NoValue
       FunctionName: realtimeLogsTransformer
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
@@ -1010,12 +1016,18 @@ Resources:
       Description: Elasticsearchを削除します。
       Environment:
         Variables:
-          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_LAMBDA_EXEC_WRAPPER:  !If
+            - Development
+            - /opt/codeguru_profiler_lambda_exec
+            - !Ref AWS::NoValue
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
             - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
+            - Development
+            - !Ref AWS::Region
+            - !Ref AWS::NoValue
       FunctionName: shutdownElasticSearch
       Handler: index.lambda_handler
       Layers:

@@ -515,12 +515,18 @@ Resources:
       Description: 有効期限が過ぎたアクセスキーを削除します。
       Environment:
         Variables:
-          AWS_LAMBDA_EXEC_WRAPPER: /opt/codeguru_profiler_lambda_exec
+          AWS_LAMBDA_EXEC_WRAPPER:  !If
+            - Development
+            - /opt/codeguru_profiler_lambda_exec
+            - !Ref AWS::NoValue
           AWS_CODEGURU_PROFILER_GROUP_ARN: !If
             - Development
             - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
             - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !Ref AWS::Region
+          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
+            - Development
+            - !Ref AWS::Region
+            - !Ref AWS::NoValue
       FunctionName: deleteExpiredAccessKeys
       Handler: index.lambda_handler
       Layers: !If
