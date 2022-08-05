@@ -10,7 +10,7 @@ Parameters:
   LoadBalancer:
     Type: String
     AllowedPattern: .+
-    Description: The target group id [required]  
+    Description: The load balancer name [required]  
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
