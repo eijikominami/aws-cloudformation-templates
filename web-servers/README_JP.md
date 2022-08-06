@@ -52,7 +52,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
 | CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
-| CloudFrontState | DISABLED | | ○ | CloudFront を有効にするかどうか |
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
@@ -63,6 +62,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2PatchingAt | Number | 3 | ○ | パッチ処理を開始する時刻 |
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
 | EC2VolumeSize | Number | 8 | ○ | |
+| GlobalInfrastructure | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | | ○ | CloudFront や Global Accelerator を有効にするかどうか |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 の パブリックサブネット |
 | TransitGatewayId | String | | | Transit Gateway の Id |

@@ -22,19 +22,19 @@ Parameters:
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     AllowedPattern: .+
-    Description: The ID of one or more security groups that control access to this VPC.   
+    Description: The ID of one or more security groups that control access to this VPC [required]
   SubnetId1:
     Type: String
     AllowedPattern: .+
-    Description: The ID of the subnet that DNS queries originate from.
+    Description: The ID of the subnet that DNS queries originate from [required]
   SubnetId2:
     Type: String
     Default: ''
-    Description: The ID of the subnet that DNS queries originate from.
+    Description: The ID of the subnet that DNS queries originate from
   SubnetId3:
     Type: String
     Default: ''
-    Description: The ID of the subnet that DNS queries originate from.
+    Description: The ID of the subnet that DNS queries originate from
   Environment:
     Type: String
     Default: production

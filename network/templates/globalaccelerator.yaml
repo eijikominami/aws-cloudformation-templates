@@ -151,3 +151,8 @@ Resources:
         - FromPort: !Ref FromPort
           ToPort: !Ref ToPort
       Protocol: !Ref Protocol
+
+Outputs:
+  DnsName:
+    Description: The array of IPv4 addresses in the IP address set. 
+    Value: !GetAtt Accelerator.DnsName

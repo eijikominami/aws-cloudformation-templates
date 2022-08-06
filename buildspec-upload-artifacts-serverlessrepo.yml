@@ -16,6 +16,7 @@ phases:
   build:
     commands:
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-acm --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/acm.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-application-elb --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/application-elb.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-apigateway --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/apigateway.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-codebuild --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/codebuild.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-dynamodb-throttle --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml --region us-east-1
@@ -39,6 +40,8 @@ phases:
     commands:
       - aws s3 cp monitoring/cloudwatch-alarm-about-acm.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-acm --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-acm.md --region us-east-1
+      - aws s3 cp monitoring/cloudwatch-alarm-about-application-elb.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-application-elb --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-application-elb.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-apigateway.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/cloudwatch-alarm-about-apigateway --readme-url s3://${BUCKET_NAME}/readme/cloudwatch-alarm-about-apigateway.md --region us-east-1
       - aws s3 cp monitoring/cloudwatch-alarm-about-codebuild.md s3://${BUCKET_NAME}/readme/

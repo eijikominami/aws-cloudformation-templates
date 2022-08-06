@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Application Load Balancer
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  LoadBalancer:
+    Type: String
+    AllowedPattern: .+
+    Description: The load balancer name [required]  
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  TargetGroup:
+    Type: String
+    AllowedPattern: .+
+    Description: The target group id [required] 
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  UnHealthyHost:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *異常なホストが検出* されました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-ALB-UnHealthyHost
+        - Warning-ALB-UnHealthyHost
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Dimensions:
+        - Name: TargetGroup
+          Value: !Ref TargetGroup
+        - Name: LoadBalancer
+          Value: !Ref LoadBalancer
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: UnHealthyHostCount
+      Namespace: AWS/ApplicationELB
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  HTTPCodeTarget5XX:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *5XXレスポンスが発生* しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Notice-${CustomAlarmName}-ALB-HTTPCode-Target-5XX-Count
+        - Notice-ALB-HTTPCode-Target-5XX-Count
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Dimensions:
+        - Name: TargetGroup
+          Value: !Ref TargetGroup
+        - Name: LoadBalancer
+          Value: !Ref LoadBalancer
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: HTTPCode_Target_5XX_Count
+      Namespace: AWS/ApplicationELB
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
