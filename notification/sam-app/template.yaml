@@ -290,6 +290,10 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
         TagEventsRule: !Ref TagEventsRule
         TrustedAdvisorEventsRule: !Ref TrustedAdvisorEventsRule
       Tags:
