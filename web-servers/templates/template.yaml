@@ -986,7 +986,7 @@ Resources:
     Properties:
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
-        DiskUsedPercentThreshold: 70
+        DiskUsedPercentThreshold: 90
         ImageId: !Ref EC2ImageId
         InstanceId: !Ref EC2
         InstanceType: !Ref EC2InstanceType
