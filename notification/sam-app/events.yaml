@@ -22,6 +22,7 @@ Metadata:
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
@@ -109,12 +110,40 @@ Parameters:
     Type: String
     Default: ''
     Description: Amazon SNS Topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+    Description: Amazon SNS Topic ARN for deployment
 
 Conditions:
   SubscribeAutoScalingErrorEventOnly: !Equals [ !Ref AutoScalingEventsRule, ERROR_ONLY]
   SubscribeEBSErrorEventOnly: !Equals [ !Ref EBSEventsRule, ERROR_ONLY]
 
 Resources:
+  EventBridgeForCloudFormation:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for CloudFormation created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.cloudformation
+        detail-type: 
+          - CloudFormation Stack Status Change
+        detail:
+          status-details:
+            status: 
+              - CREATE_FAILED
+              - DELETE_FAILED
+              - ROLLBACK_COMPLETE
+              - ROLLBACK_FAILED
+              - UPDATE_FAILED
+              - UPDATE_ROLLBACK_COMPLETE
+              - UPDATE_ROLLBACK_FAILED
+      Name: !Sub ${LogicalNamePrefix}-CloudFormation
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForDeploymentArn
+          Id: SNSForAlert
   EventBridgeForScheduledEvents:
     Type: AWS::Events::Rule
     Properties: 
