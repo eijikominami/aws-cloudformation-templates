@@ -37,6 +37,7 @@ phases:
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/eventbridge-rules --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/notification/events.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/iam-access-analyzer --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/security/iam.yaml --region us-east-1
       - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/delete-resources-without-required-tags --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/security-config-rules/packaged.yaml --region us-east-1
+      - aws serverlessrepo create-application-version --source-code-url ${SOURCE_CODE_URL} --application-id ${APP_ARN_PREFIX}/availability-zone --semantic-version ${SEMANTIC_VERSION} --template-url s3://${BUCKET_NAME}/aws-cloudformation-templates/network/az.yaml --region us-east-1
   post_build:
     commands:
       - aws s3 cp monitoring/readme/cloudwatch-alarm-about-acm.md s3://${BUCKET_NAME}/readme/
@@ -83,3 +84,5 @@ phases:
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/iam-access-analyzer --readme-url s3://${BUCKET_NAME}/readme/iam-access-analyzer.md --region us-east-1
       - aws s3 cp security-config-rules/delete-resources-without-required-tags.md s3://${BUCKET_NAME}/readme/
       - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/delete-resources-without-required-tags --readme-url s3://${BUCKET_NAME}/readme/delete-resources-without-required-tags.md --region us-east-1
+      - aws s3 cp network/readme/availability-zone.md s3://${BUCKET_NAME}/readme/
+      - aws serverlessrepo update-application --application-id ${APP_ARN_PREFIX}/availability-zone --readme-url s3://${BUCKET_NAME}/readme/availability-zone.md --region us-east-1
