@@ -290,6 +290,12 @@ Outputs:
       - CreatePublicSubnet
       - !Ref SubnetPublic
       - ''
+  PrivateSubnetId:
+    Description: Subnet ID
+    Value: !If
+      - CreatePrivateSubnet
+      - !Ref SubnetPrivate
+      - ''
   TransitSubnetId:
     Condition: CreateTransitSubnet
     Description: Subnet ID
