@@ -316,7 +316,7 @@ Resources:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
       - InternetGatewayAttachment
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
       NotificationARNs:
         - !If
@@ -350,19 +350,16 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.35
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
       - InternetGatewayAttachment
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
       NotificationARNs:
         - !If
@@ -396,14 +393,11 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.35
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -618,7 +612,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.34
+        SemanticVersion: 2.0.35
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -635,7 +629,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.34
+        SemanticVersion: 2.0.35
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -976,7 +970,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.34
+        SemanticVersion: 2.0.35
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1002,7 +996,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.0.34
+        SemanticVersion: 2.0.35
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
