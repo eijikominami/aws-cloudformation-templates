@@ -145,9 +145,9 @@ Conditions:
   CreateSNSForCICD: !Equals [ !Ref SNSForCICDArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
-  DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
+  DeployNotificationAndCloudOps: !And [ !Equals [ !Ref Notification, ENABLED], !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ] ]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]
@@ -803,7 +803,7 @@ Resources:
               - !Ref AWS::NoValue
             # Deploy CloudOps
             - !If
-              - DeployCloudOps
+              - DeployNotificationAndCloudOps
               - ActionTypeId: 
                   Category: Deploy
                   Owner: AWS
