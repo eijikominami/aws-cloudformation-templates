@@ -33,11 +33,10 @@ Resources:
   CURReport:
     Type: AWS::CUR::ReportDefinition
     Properties:
-      BillingViewArn: String
       Compression: GZIP
       Format: textORcsv
       RefreshClosedReports: true
-      ReportName: String
+      ReportName: default
       ReportVersioning: OVERWRITE_REPORT
       S3Bucket: !Ref S3ForCUR
       S3Prefix: /csv
