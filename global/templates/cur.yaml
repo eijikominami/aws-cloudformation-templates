@@ -94,6 +94,8 @@ Resources:
                 aws:SourceArn: !Sub 'arn:aws:cur:${AWS::Region}:${AWS::AccountId}:definition/*'
                 aws:SourceAccount: !Ref AWS::AccountId
   AWSUsageQueries:
+    DependsOn:
+      - CURReport
     Type: AWS::Serverless::Application
     Properties:
       Location:
