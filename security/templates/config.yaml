@@ -475,6 +475,8 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   LambdaDeleteExpiredAccessKeys:
+    DependsOn:
+      - LambdaDeleteExpiredAccessKeysLogGroup
     Type: AWS::Lambda::Function
     Properties:
       Architectures:
@@ -556,7 +558,7 @@ Resources:
   LambdaDeleteExpiredAccessKeysLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaDeleteExpiredAccessKeys}
+      LogGroupName: /aws/lambda/deleteExpiredAccessKeys
       RetentionInDays: 60
       Tags:
         - Key: environment

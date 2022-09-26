@@ -431,6 +431,8 @@ Resources:
           Value: !Ref TagValue
   # Lambda
   LambdaSendNotificationToSlack:
+    DependsOn:
+      - LogGroupForLambdaSendNotificationToSlack
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: sendNotificationToSlack/
@@ -493,7 +495,7 @@ Resources:
   LogGroupForLambdaSendNotificationToSlack:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
+      LogGroupName: !Sub /aws/lambda/sendNotificationToSlack-createdby-${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -549,6 +551,8 @@ Resources:
         createdby: !Ref TagValue
   # Lambda
   LambdaTransferNotificationToSNS:
+    DependsOn:
+      - LogGroupForLambdaTransferNotificationToSNS
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: transferNotificationToSNS/
@@ -591,7 +595,7 @@ Resources:
   LogGroupForLambdaTransferNotificationToSNS:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaTransferNotificationToSNS}
+      LogGroupName: !Sub /aws/lambda/transferNotificationToSNS-createdby-${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -633,6 +637,8 @@ Resources:
   # Lambda
   LambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
+    DependsOn:
+      - LogGroupForLambdaAnalyzeUnauthorizedApiCalls
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: analyzeUnauthorizedApiCalls/
@@ -690,7 +696,7 @@ Resources:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaAnalyzeUnauthorizedApiCalls}
+      LogGroupName: !Sub /aws/lambda/analyzeUnauthorizedApiCalls-createdby-${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
