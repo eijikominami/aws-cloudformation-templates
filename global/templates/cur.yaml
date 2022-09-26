@@ -39,7 +39,7 @@ Resources:
       ReportName: default
       ReportVersioning: OVERWRITE_REPORT
       S3Bucket: !Ref S3ForCUR
-      S3Prefix: /csv
+      S3Prefix: /source
       S3Region: !Ref AWS::Region
       TimeUnit: MONTHLY
   # S3
