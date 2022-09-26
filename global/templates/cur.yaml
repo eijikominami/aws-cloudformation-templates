@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationSamples/cloudops/cur configures Cost and Usage Reports.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  CURReport:
+    Type: AWS::CUR::ReportDefinition
+    Properties:
+      Compression: GZIP
+      Format: textORcsv
+      RefreshClosedReports: true
+      ReportName: default
+      ReportVersioning: OVERWRITE_REPORT
+      S3Bucket: !Ref S3ForCUR
+      S3Prefix: /source
+      S3Region: !Ref AWS::Region
+      TimeUnit: MONTHLY
+  # S3
+  S3ForCUR:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: AES256
+      BucketName: !Sub defaultsecuritysettings-cur-${AWS::Region}-${AWS::AccountId}
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForCUR:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForCUR
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForCUR
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: billingreports.amazonaws.com
+            Action:
+              - s3:GetBucketAcl
+              - s3:GetBucketPolicy
+            Resource:
+              - !GetAtt S3ForCUR.Arn
+          - Effect: Allow
+            Principal:
+              Service: billingreports.amazonaws.com
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Join
+                - ''
+                - - !GetAtt S3ForCUR.Arn
+                  - /*
+            Condition:
+              StringEquals:
+                aws:SourceArn: !Sub 'arn:aws:cur:${AWS::Region}:${AWS::AccountId}:definition/*'
+                aws:SourceAccount: !Ref AWS::AccountId
+  AWSUsageQueries:
+    DependsOn:
+      - CURReport
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:387304072572:applications/aws-usage-queries
+        SemanticVersion: 0.1.1+10.571d25
+      Parameters:
+        CurBucketName: !Ref S3ForCUR
+        ReportName: default
+        ReportPathPrefix: /source
+      Tags:
+        environment: Environment
+        createdby: !Ref TagValue

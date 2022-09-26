@@ -77,7 +77,7 @@ Parameters:
     Type: String
     Default: IPV4
     AllowedValues:
-      - IPV6
+      - DUAL_STACK
       - IPV4  
     Description: The IP address type that an accelerator supports
   Name:

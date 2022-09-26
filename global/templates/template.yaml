@@ -16,6 +16,7 @@ Metadata:
         Parameters: 
           - BillingAlertThreshold
           - BudgetName
+          - CostUsageReport
           - NotificationThreshold
       - Label: 
           default: 'CloudFront Alarm Configuration'
@@ -61,6 +62,13 @@ Parameters:
     Default: Total
     AllowedPattern: .+  
     Description: The budget name [required]
+  CostUsageReport:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable AWS Config [required]
   CloudFrontErrorRateThreshold:
     Type: Number
     Default: 0
@@ -116,6 +124,7 @@ Parameters:
 
 Conditions:
   CreateACMCertificate: !Not [ !Equals [ !Ref ACMDomainName, '' ] ]
+  CreateCostUsageReport: !Equals [ !Ref CostUsageReport, ENABLED]
   CreateSNSForAlertTransfer: !Not [ !Equals [ !Ref SNSForAlertArn, ''] ]
   CreateBudget: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
   CreateCloudWatchAlarmBilling: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
@@ -178,12 +187,29 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  CUR:
+    Condition: CreateCostUsageReport
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/global/cur.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/global/cur.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   SNSForAlert:
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.34
+        SemanticVersion: 2.0.37
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -343,7 +369,7 @@ Resources:
         CertificateArn: !Ref CertificateManager
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.0.34
+        SemanticVersion: 2.0.37
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -601,7 +627,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.34
+        SemanticVersion: 2.0.37
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
