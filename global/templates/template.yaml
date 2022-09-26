@@ -178,6 +178,22 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  CostUsageReport:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/global/cur.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/global/cur.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   SNSForAlert:
     Type: AWS::Serverless::Application
     Properties:
