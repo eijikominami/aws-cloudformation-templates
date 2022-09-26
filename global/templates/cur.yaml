@@ -33,8 +33,6 @@ Resources:
   CURReport:
     Type: AWS::CUR::ReportDefinition
     Properties:
-      AdditionalArtifacts:
-        - QUICKSIGHT
       Compression: GZIP
       Format: textORcsv
       RefreshClosedReports: true
