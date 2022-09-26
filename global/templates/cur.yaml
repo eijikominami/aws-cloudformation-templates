@@ -92,5 +92,5 @@ Resources:
                   - /*
             Condition:
               StringEquals:
-                aws:SourceArn: !Sub arn:aws:cur:${AWS::Region}:${AWS::AccountId}:definition/*",
+                aws:SourceArn: !Sub 'arn:aws:cur:${AWS::Region}:${AWS::AccountId}:definition/*'
                 aws:SourceAccount: !Ref AWS::AccountId
