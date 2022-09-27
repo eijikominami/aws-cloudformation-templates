@@ -549,6 +549,8 @@ Resources:
         createdby: !Ref TagValue
   # Lambda
   Lambda:
+    DependsOn:
+      - LambdaLogGroup
     Type: AWS::Lambda::Function
     Properties:
       Architectures:
@@ -691,7 +693,7 @@ Resources:
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${Lambda}
+      LogGroupName: /aws/lambda/realtimeLogsTransformer
       RetentionInDays: 60
       Tags:
         - Key: environment
@@ -975,6 +977,8 @@ Resources:
   # Lambda
   LambdaShutdownElasticSearch:
     Condition: CreateShutdownElasticSearchWorker
+    DependsOn:
+      - LambdaShutdownElasticSearchLogGroup
     Type: AWS::Lambda::Function
     Properties:
       Architectures:
@@ -1056,7 +1060,7 @@ Resources:
     Condition: CreateShutdownElasticSearchWorker
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaShutdownElasticSearch}
+      LogGroupName: /aws/lambda/shutdownElasticSearch
       RetentionInDays: 60
       Tags: 
         - Key: !Ref TagKey

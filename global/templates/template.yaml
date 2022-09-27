@@ -532,6 +532,8 @@ Resources:
   # Lambda
   LambdaTransferSNSTopic:
     Condition: CreateSNSForAlertTransfer
+    DependsOn:
+      - LambdaTransferSNSTopicLogGroup
     Type: AWS::Lambda::Function
     Properties:
       Architectures:
@@ -601,7 +603,7 @@ Resources:
     Condition: CreateSNSForAlertTransfer
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaTransferSNSTopic}
+      LogGroupName: /aws/lambda/transferSNSTopic
       Tags: 
         - Key: environment
           Value: !Ref Environment

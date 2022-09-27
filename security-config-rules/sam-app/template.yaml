@@ -203,6 +203,8 @@ Resources:
             MessageType: ConfigurationItemChangeNotification
         SourceIdentifier: !GetAtt LambdaCheckRequiredTags.Arn
   LambdaCheckRequiredTags:
+    DependsOn:
+      - LambdaCheckRequiredTagsLogGroup
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: checkRequiredTags/
@@ -228,7 +230,7 @@ Resources:
   LambdaCheckRequiredTagsLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaCheckRequiredTags}
+      LogGroupName: /aws/lambda/checkRequiredTags
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -281,6 +283,8 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   LambdaDeleteUnapplicableResources:
+    DependsOn:
+      - LambdaDeleteUnapplicableResourcesLogGroup
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: deleteUnapplicableResources/
@@ -307,7 +311,7 @@ Resources:
   LambdaDeleteUnapplicableResourcesLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaDeleteUnapplicableResources}
+      LogGroupName: /aws/lambda/deleteUnapplicableResources
       RetentionInDays: 60
       Tags: 
         - Key: environment
