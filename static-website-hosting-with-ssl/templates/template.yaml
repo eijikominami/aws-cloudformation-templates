@@ -385,7 +385,7 @@ Resources:
         CloudFrontViewerProtocolPolicy: !Ref CloudFrontViewerProtocolPolicy
         CloudFrontDefaultRootObject: !Ref CloudFrontDefaultRootObject
         CloudFrontAdditionalName: !Ref CloudFrontAdditionalName
-        CloudFrontOriginAccessIdentity: !Ref CloudFrontOriginAccessIdentity
+        CloudFrontOriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
         CloudFrontOriginDomainName: !GetAtt S3ForWebHosting.DomainName
         CloudFrontOriginShield: !Ref CloudFrontOriginShield
         CloudFrontOriginType: S3
@@ -585,11 +585,15 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue  
   # CloudFront
-  CloudFrontOriginAccessIdentity:
-    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
-    Properties:
-      CloudFrontOriginAccessIdentityConfig: 
-        Comment: !Sub access-identity-${DomainName}
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties: 
+      OriginAccessControlConfig: 
+        Description: !Sub Origin access control for ${S3ForWebHosting}
+        Name: !GetAtt S3ForWebHosting.DomainName
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
   # S3
   S3ForWebHosting:
     Type: AWS::S3::Bucket
@@ -648,13 +652,17 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}
+              Service: cloudfront.amazonaws.com
             Action:
               - s3:GetObject
-              - s3:ListBucket
             Resource:
               - !Sub arn:aws:s3:::${S3ForWebHosting}/*
-              - !Sub arn:aws:s3:::${S3ForWebHosting}
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Join 
+                  - ''
+                  - - !Sub arn:aws:cloudfront::${AWS::Region}:distribution/
+                    - !GetAtt CloudFront.Outputs.Id
           - Effect: Deny
             Principal: '*'
             Action: 's3:*'
