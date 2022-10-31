@@ -393,8 +393,8 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         ElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
-        ElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
-        ElasticSearchMasterType: !Ref RealtimeDashboardElasticSearchMasterType
+        ElasticSearchInstanceType: 'r5.large.search'
+        ElasticSearchMasterType: 'r5.large.search'
         ElasticSearchLifetime: !Ref RealtimeDashboardElasticSearchLifetime
         ElasticSearchMasterUserName: !Ref RealtimeDashboardElasticSearchMasterUserName
         ElasticSearchMasterUserPassword: !Ref RealtimeDashboardElasticSearchMasterUserPassword
