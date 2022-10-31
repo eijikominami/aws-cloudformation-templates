@@ -41,7 +41,7 @@ This template creates ``CloudFront`` distribution.
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
-| CloudFrontOriginAccessIdentity | String | | Conditional | The origin access identity |
+| CloudFrontOriginAccessControl | String | | Conditional | The origin access control |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
 | CloudFrontOriginShield | true or false | false | ○ | A flag that specifies whether Origin Shield is enabled |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 

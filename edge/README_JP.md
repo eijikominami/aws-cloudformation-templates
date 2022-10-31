@@ -41,7 +41,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
-| CloudFrontOriginAccessIdentity | String | | 条件付き | The origin access identity |
+| CloudFrontOriginAccessControl | String | | 条件付き | The origin access control |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
 | CloudFrontOriginShield | true or false | false | ○ | Origin Shield 有効化フラグ |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 

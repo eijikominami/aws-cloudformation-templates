@@ -101,6 +101,7 @@ You can provide optional parameters as follows.
 | BucketNameForAnalysis | String | | | The Amazon S3 bucket name for log analysis |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
+| CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, additional metrics is enabled |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |

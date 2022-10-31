@@ -9,6 +9,7 @@ Metadata:
           default: 'CloudFront Configuration'
         Parameters: 
           - CertificateManagerARN
+          - CloudFrontAdditionalMetrics
           - CloudFrontDefaultTTL
           - CloudFrontMinimumTTL
           - CloudFrontMaximumTTL
@@ -72,6 +73,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The CNAME attached to CloudFront [conditional]
+  CloudFrontAdditionalMetrics:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudFront additional metrics [required]      
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -361,6 +369,7 @@ Conditions:
   DomainNameExists: !Not [ !Equals [ !Ref DomainName, '' ] ]
   SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
   S3Origin: !Equals [ !Ref CloudFrontOriginType, S3 ]
+  CreateAdditionalMetrics: !Equals [ !Ref CloudFrontAdditionalMetrics, ENABLED ]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
   CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardState, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -588,6 +597,14 @@ Resources:
               - Authorization
           QueryStringsConfig: 
             QueryStringBehavior: none
+  AdditionalMetrics:
+    Condition: CreateAdditionalMetrics
+    Type: AWS::CloudFront::MonitoringSubscription
+    Properties: 
+      DistributionId: !GetAtt CloudFront.Id
+      MonitoringSubscription: 
+        RealtimeMetricsSubscriptionConfig: 
+          RealtimeMetricsSubscriptionStatus: Enabled
   # Route53
   Route53RecordSet:
     Condition: CreateRoute53
