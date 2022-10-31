@@ -14,6 +14,7 @@ Metadata:
           default: 'CloudFront Configuration'
         Parameters: 
           - CertificateManagerARN
+          - CloudFrontAdditionalMetrics
           - CloudFrontDefaultTTL
           - CloudFrontMinimumTTL
           - CloudFrontMaximumTTL
@@ -85,6 +86,13 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The CNAME attached to CloudFront [required]
+  CloudFrontAdditionalMetrics:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudFront additional metrics [required]
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -379,6 +387,7 @@ Resources:
           - CertificateExists
           - !Ref DomainName
           - ''
+        CloudFrontAdditionalMetrics: !Ref CloudFrontAdditionalMetrics
         CloudFrontDefaultTTL: !Ref CloudFrontDefaultTTL
         CloudFrontMinimumTTL: !Ref CloudFrontMinimumTTL
         CloudFrontMaximumTTL: !Ref CloudFrontMaximumTTL

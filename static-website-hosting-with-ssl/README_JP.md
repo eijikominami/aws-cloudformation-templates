@@ -99,6 +99,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | BucketNameForAnalysis | String | | | 転送先の分析用S3バケット |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** に **SSL証明書** が紐付けられます。 |
 | **DomainName** | String | | ○ | ドメイン名 |
+| CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 追加のメトリクスが有効化されます。 |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL |  Number | 31536000 | ○ | CloudFront Maximum TTL |
