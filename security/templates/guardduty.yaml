@@ -15,6 +15,7 @@ Metadata:
         Parameters:
           - LogicalNamePrefix
           - Environment
+          - TagKey
           - TagValue
 
 Parameters:
@@ -37,6 +38,10 @@ Parameters:
       - production
       - test
       - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
   TagValue:
     Type: String
     Default: aws-cloudformation-templates
@@ -91,7 +96,18 @@ Resources:
       - ServiceLinkedRoleForGuardDuty
     Type: AWS::GuardDuty::Detector
     Properties:
+      DataSources: 
+        MalwareProtection: 
+          ScanEc2InstanceWithFindings: 
+            EbsVolumes: true
+        S3Logs:
+          Enable: true      
       Enable: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # EventBridge for GuardDuty
   CloudWatchEventsForGuardDuty:
     Type: AWS::Events::Rule
