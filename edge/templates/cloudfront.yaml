@@ -517,18 +517,24 @@ Resources:
                 OriginShield: 
                   Enabled: !Ref CloudFrontOriginShield
                   OriginShieldRegion: !Ref AWS::Region
+                S3OriginConfig:
+                  OriginAccessIdentity: ''
             - - DomainName: !Ref CloudFrontOriginDomainName
                 Id: !Ref CloudFrontOriginDomainName
                 OriginAccessControlId: !Ref CloudFrontOriginAccessControlId 
                 OriginShield: 
                   Enabled: !Ref CloudFrontOriginShield
                   OriginShieldRegion: !Ref AWS::Region
+                S3OriginConfig:
+                  OriginAccessIdentity: ''
               - DomainName: !Sub ${CloudFrontSecondaryOriginId}.s3.amazonaws.com
                 Id: !Ref CloudFrontSecondaryOriginId
                 OriginAccessControlId: !Ref CloudFrontOriginAccessControlId 
                 OriginShield: 
                   Enabled: !Ref CloudFrontOriginShield
                   OriginShieldRegion: !Ref AWS::Region
+                S3OriginConfig:
+                  OriginAccessIdentity: ''
           - - DomainName: !Ref CloudFrontOriginDomainName
               Id: !Ref CloudFrontOriginDomainName
               CustomOriginConfig:
