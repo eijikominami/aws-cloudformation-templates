@@ -662,7 +662,7 @@ Resources:
                 AWS:SourceArn: !Join 
                   - ''
                   - - !Sub arn:aws:cloudfront::${AWS::Region}:distribution/
-                    - !!GetAtt CloudFront.Outputs.Id
+                    - !GetAtt CloudFront.Outputs.Id
           - Effect: Deny
             Principal: '*'
             Action: 's3:*'
