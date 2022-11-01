@@ -60,6 +60,21 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 + [**Media Services の設定**](/media/README_JP.md)
 + [ネットワークの設定](/network/README_JP.md)
 
+## 環境
+
+本プロジェクトは、以下のモジュールで構成されています。
+
+| サービス | リソース | 変数 | バージョン |
+| --- | --- | --- | --- |
+| Amazon CloudWatch Synthetics | Runtime | | syn-nodejs-puppeteer-3.7 |
+| AWS Codebuild | Image | ○ | aws/codebuild/amazonlinux2-aarch64-standard:2.0 |
+| AWS Lambda | CodeGuru Profiler | | 11 |
+| AWS Lambda | Lambda Insights | | 32 |
+| AWS Lambda | Python | | 3.9 |
+| AWS Systems Manager | SSM Document Schema (Automation) | | 0.3 |
+| AWS Systems Manager | SSM Document Schema (Command) | | 2.2 |
+| Amazon OpenSearch Service | OpenSearch | ○ | 1.3 |
+
 ## アーキテクチャ
 
 これらのテンプレートが作成するAWSリソースのアーキテクチャ図は、以下の通りです。

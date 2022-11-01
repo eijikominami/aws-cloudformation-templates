@@ -60,6 +60,21 @@ This contains sub modules as follows.
 + [**Media Services**](/media/README.md)
 + [Network](/network/README.md)
 
+## Environment
+
+This project uses the following modules.
+
+| Service | Resource | Variable | Version |
+| --- | --- | --- | --- |
+| Amazon CloudWatch Synthetics | Runtime | | syn-nodejs-puppeteer-3.7 |
+| AWS Codebuild | Image | ○ | aws/codebuild/amazonlinux2-aarch64-standard:2.0 |
+| AWS Lambda | CodeGuru Profiler | | 11 |
+| AWS Lambda | Lambda Insights | | 32 |
+| AWS Lambda | Python | | 3.9 |
+| AWS Systems Manager | SSM Document Schema (Automation) | | 0.3 |
+| AWS Systems Manager | SSM Document Schema (Command) | | 2.2 |
+| Amazon OpenSearch Service | OpenSearch | ○ | 1.3 |
+
 ## Architecture
 
 The following section describes the individual components of the architecture.
