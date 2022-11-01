@@ -211,7 +211,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -227,7 +227,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -244,7 +244,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -261,7 +261,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -272,7 +272,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -431,6 +431,8 @@ Resources:
           Value: !Ref TagValue
   # Lambda
   LambdaSendNotificationToSlack:
+    DependsOn:
+      - LogGroupForLambdaSendNotificationToSlack
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: sendNotificationToSlack/
@@ -493,7 +495,7 @@ Resources:
   LogGroupForLambdaSendNotificationToSlack:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaSendNotificationToSlack}
+      LogGroupName: !Sub /aws/lambda/sendNotificationToSlack-createdby-${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -543,12 +545,14 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # Lambda
   LambdaTransferNotificationToSNS:
+    DependsOn:
+      - LogGroupForLambdaTransferNotificationToSNS
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: transferNotificationToSNS/
@@ -591,7 +595,7 @@ Resources:
   LogGroupForLambdaTransferNotificationToSNS:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaTransferNotificationToSNS}
+      LogGroupName: !Sub /aws/lambda/transferNotificationToSNS-createdby-${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -626,13 +630,15 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # Lambda
   LambdaAnalyzeUnauthorizedApiCalls:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
+    DependsOn:
+      - LogGroupForLambdaAnalyzeUnauthorizedApiCalls
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: analyzeUnauthorizedApiCalls/
@@ -690,7 +696,7 @@ Resources:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaAnalyzeUnauthorizedApiCalls}
+      LogGroupName: !Sub /aws/lambda/analyzeUnauthorizedApiCalls-createdby-${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -717,7 +723,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

@@ -104,7 +104,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -121,7 +121,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
       Tags:
@@ -458,7 +458,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -475,6 +475,8 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   LambdaDeleteExpiredAccessKeys:
+    DependsOn:
+      - LambdaDeleteExpiredAccessKeysLogGroup
     Type: AWS::Lambda::Function
     Properties:
       Architectures:
@@ -556,7 +558,7 @@ Resources:
   LambdaDeleteExpiredAccessKeysLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaDeleteExpiredAccessKeys}
+      LogGroupName: /aws/lambda/deleteExpiredAccessKeys
       RetentionInDays: 60
       Tags:
         - Key: environment
@@ -577,7 +579,7 @@ Resources:
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -922,7 +924,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

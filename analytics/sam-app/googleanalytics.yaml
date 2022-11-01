@@ -91,7 +91,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -108,7 +108,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -160,6 +160,8 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   LambdaGaConverter:
+    DependsOn:
+      - LogGroupForLambdaGaConverter
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: gaConverter/
@@ -204,7 +206,7 @@ Resources:
   LogGroupForLambdaGaConverter:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/lambda/${LambdaGaConverter}
+      LogGroupName: !Sub /aws/lambda/gaConverter-createdby-${LogicalNamePrefix}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -229,7 +231,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.37
+        SemanticVersion: 2.0.39
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

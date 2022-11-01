@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationSamples/cloudops/cur configures Cost and Usage Reports.
+Description: AWSCloudFormationTemplates/cloudops/cur configures Cost and Usage Reports.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -39,9 +39,9 @@ Resources:
       ReportName: default
       ReportVersioning: OVERWRITE_REPORT
       S3Bucket: !Ref S3ForCUR
-      S3Prefix: /source
+      S3Prefix: source
       S3Region: !Ref AWS::Region
-      TimeUnit: MONTHLY
+      TimeUnit: DAILY
   # S3
   S3ForCUR:
     Type: AWS::S3::Bucket
@@ -104,7 +104,7 @@ Resources:
       Parameters:
         CurBucketName: !Ref S3ForCUR
         ReportName: default
-        ReportPathPrefix: /source
+        ReportPathPrefix: source
       Tags:
         environment: Environment
         createdby: !Ref TagValue

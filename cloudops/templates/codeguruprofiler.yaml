@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationSamples/cloudops/codeguruprofiler creates a CodeGuru Profiler group.
+Description: AWSCloudFormationTemplates/cloudops/codeguruprofiler creates a CodeGuru Profiler group.
 
 Metadata: 
   AWS::CloudFormation::Interface:

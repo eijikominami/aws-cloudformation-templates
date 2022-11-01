@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationSamples/media/medialive sets Interactive Video Service.
+Description: AWSCloudFormationTemplates/media/medialive sets Interactive Video Service.
 
 Metadata: 
   AWS::CloudFormation::Interface:
