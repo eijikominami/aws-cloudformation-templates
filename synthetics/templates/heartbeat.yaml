@@ -168,7 +168,7 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-3.7
+      RuntimeVersion: syn-nodejs-puppeteer-3.8
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 

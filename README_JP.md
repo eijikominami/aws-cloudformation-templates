@@ -66,7 +66,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 | サービス | リソース | 変数 | バージョン |
 | --- | --- | --- | --- |
-| Amazon CloudWatch Synthetics | Runtime | | syn-nodejs-puppeteer-3.7 |
+| Amazon CloudWatch Synthetics | Runtime | | syn-nodejs-puppeteer-3.8 |
 | AWS Codebuild | Image | ○ | aws/codebuild/amazonlinux2-aarch64-standard:2.0 |
 | AWS Lambda | CodeGuru Profiler | | 11 |
 | AWS Lambda | Lambda Insights | | 32 |

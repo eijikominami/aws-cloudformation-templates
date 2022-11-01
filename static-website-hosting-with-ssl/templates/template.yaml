@@ -670,7 +670,7 @@ Resources:
               StringEquals:
                 AWS:SourceArn: !Join 
                   - ''
-                  - - !Sub arn:aws:cloudfront::${AWS::Region}:distribution/
+                  - - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/
                     - !GetAtt CloudFront.Outputs.Id
           - Effect: Deny
             Principal: '*'
