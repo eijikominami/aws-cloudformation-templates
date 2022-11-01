@@ -284,7 +284,7 @@ Parameters:
     Description: The password of ElasticSearch Service [required]
   RealtimeDashboardElasticsearchVersion:
     Type: String
-    Default: '7.8'
+    Default: '1.3'
     AllowedPattern: .+
     Description: The version of ElasticSearch Service [required]
   RealtimeDashboardKinesisFirehoseStreamNameSuffix:
@@ -471,7 +471,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -488,7 +488,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -670,7 +670,7 @@ Resources:
               StringEquals:
                 AWS:SourceArn: !Join 
                   - ''
-                  - - !Sub arn:aws:cloudfront::${AWS::Region}:distribution/
+                  - - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/
                     - !GetAtt CloudFront.Outputs.Id
           - Effect: Deny
             Principal: '*'

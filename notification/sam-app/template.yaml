@@ -4,6 +4,8 @@ Description: AWSCloudFormationTemplates/notification sends notifications to Slac
 
 Globals:
   Function:
+    Architectures:
+      - arm64
     Handler: lambda_function.lambda_handler
     Runtime: python3.9
     Tracing: Active
@@ -211,7 +213,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -227,7 +229,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -244,7 +246,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -261,7 +263,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -272,7 +274,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -484,7 +486,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:2
         - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -545,7 +547,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -584,7 +586,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:2
         - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -630,7 +632,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -676,7 +678,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:2
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:2
         - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -723,7 +725,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.39
+        SemanticVersion: 2.0.40
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

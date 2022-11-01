@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      -   id: cfn-guard
+          name: AWS CloudFormation Guard
+          description: Validate code against your Guard rules
+          entry: bash -c 'for template in "$@"; do cfn-guard validate -r ./security-standards.ruleset -d "$template" || SCAN_RESULT="FAILED"; done; if [[ "$SCAN_RESULT" = "FAILED" ]]; then exit 1; fi'
+          language: rust
+          files: \.(json|yaml|yml|template\.json|template)$
+          additional_dependencies:
+            - cli:cfn-guard
