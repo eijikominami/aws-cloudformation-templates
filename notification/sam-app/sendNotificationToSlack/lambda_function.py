@@ -3,6 +3,8 @@ import json
 import logging
 import os
 import sys
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 # Lambda Powertools
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools import Tracer
