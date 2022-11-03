@@ -612,6 +612,9 @@ Resources:
                   "cs-headers": "str",
                   "cs-header-names": "str",
                   "cs-headers-count": "int",
+                  "origin-fbl": "int",
+                  "origin-lbl": "int",
+                  "asn": "int"
               }
 
               for record in event["records"]:
