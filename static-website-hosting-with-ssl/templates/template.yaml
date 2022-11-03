@@ -284,7 +284,7 @@ Parameters:
     Description: The password of ElasticSearch Service [required]
   RealtimeDashboardElasticsearchVersion:
     Type: String
-    Default: '1.3'
+    Default: 'OpenSearch_1.3'
     AllowedPattern: .+
     Description: The version of ElasticSearch Service [required]
   RealtimeDashboardKinesisFirehoseStreamNameSuffix:

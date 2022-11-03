@@ -73,7 +73,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | AWS Lambda | Python | | 3.9 |
 | AWS Systems Manager | SSM Document Schema (Automation) | | 0.3 |
 | AWS Systems Manager | SSM Document Schema (Command) | | 2.2 |
-| Amazon OpenSearch Service | OpenSearch | ○ | 1.3 |
+| Amazon OpenSearch Service | OpenSearch | ○ | OpenSearch_1.3 |
 
 ## アーキテクチャ
 
