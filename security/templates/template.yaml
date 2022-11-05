@@ -75,6 +75,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon Detective [required]
+  AWSSecurityHub:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable AWS SecurityHub [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -114,6 +121,7 @@ Conditions:
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !Equals [ !Ref AmazonMacie, ENABLED]
+  CreateSecurityHub: !Equals [ !Ref AWSSecurityHub, ENABLED]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -151,6 +159,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SecurityHub:
+    Condition: CreateSecurityHub
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
