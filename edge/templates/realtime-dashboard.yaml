@@ -897,7 +897,7 @@ Resources:
       EBSOptions: 
         EBSEnabled: true
         VolumeSize: !Ref ElasticSearchVolumeSize
-        VolumeType: gp2
+        VolumeType: gp3
       ClusterConfig: 
         DedicatedMasterCount: 3
         DedicatedMasterEnabled: true
