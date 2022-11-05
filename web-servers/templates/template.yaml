@@ -813,6 +813,23 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # TransitGateway
+  TransitGatewayAttachment:
+    Condition: CreateTransitGateway
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties: 
+      SubnetIds:
+        - TransitSubnetId1
+        - TransitSubnetId2
+      Tags:
+        - Key: Name
+          Value: !Sub tgw-attach-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGatewayId
+      VpcId: !Ref VPC
   # Internet GW
   InternetGateway:
     Type: AWS::EC2::InternetGateway
