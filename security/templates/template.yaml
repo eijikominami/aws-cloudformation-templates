@@ -19,6 +19,10 @@ Metadata:
         Parameters: 
           - AmazonDetective
       - Label: 
+          default: 'GuardDuty Configuration'
+        Parameters: 
+          - AmazonGuardDuty
+      - Label: 
           default: 'Macie Configuration'
         Parameters: 
           - AmazonMacie
@@ -27,6 +31,7 @@ Metadata:
         Parameters: 
           - IAMUserArnToAssumeAWSSupportRole
           - NotificationFilterAboutSecurityChecks
+          - AWSSecurityHub
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -61,6 +66,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable auto remediation [required]
+  AmazonGuardDuty:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable Amazon GuardDuty [required]
   AmazonDetective:
     Type: String
     Default: DISABLED
@@ -74,7 +86,7 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
-    Description: Enable or disable Amazon Detective [required]
+    Description: Enable or disable Amazon Macie [required]
   AWSSecurityHub:
     Type: String
     Default: ENABLED
@@ -119,6 +131,7 @@ Parameters:
 Conditions:
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
+  CreateGuardDuty: !Equals [ !Ref AmazonGuardDuty, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !Equals [ !Ref AmazonMacie, ENABLED]
   CreateSecurityHub: !Equals [ !Ref AWSSecurityHub, ENABLED]
@@ -219,6 +232,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   GuardDuty:
+    Condition: CreateGuardDuty
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
