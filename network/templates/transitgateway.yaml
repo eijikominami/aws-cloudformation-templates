@@ -66,40 +66,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpnEcmpSupport: enable
-  TransitGatewayAttachment:
-    Type: AWS::EC2::TransitGatewayAttachment
-    Properties: 
-      SubnetIds: !Ref SubnetIds
-      Tags:
-        - Key: Name
-          Value: !Sub tgw-attach-${LogicalNamePrefix}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TransitGatewayId: !Ref TransitGateway
-      VpcId: !Ref VpcId
-  TransitGatewayRouteTable:
-    Type: AWS::EC2::TransitGatewayRouteTable
-    Properties: 
-      Tags: 
-        - Key: Name
-          Value: !Sub tgw-rtb-${LogicalNamePrefix}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TransitGatewayId: !Ref TransitGateway
-  TransitGatewayRouteTableAssociation:
-    Type: AWS::EC2::TransitGatewayRouteTableAssociation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
-  TransitGatewayRouteTablePropagation:
-    Type: AWS::EC2::TransitGatewayRouteTablePropagation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
 
 Outputs:
   TransitGatewayId:

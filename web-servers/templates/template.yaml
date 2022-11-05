@@ -830,6 +830,30 @@ Resources:
           Value: !Ref TagValue
       TransitGatewayId: !Ref TransitGatewayId
       VpcId: !Ref VPC
+  TransitGatewayRouteTable:
+    Condition: CreateTransitGateway
+    Type: AWS::EC2::TransitGatewayRouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: !Sub tgw-rtb-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGateway
+  TransitGatewayRouteTableAssociation:
+    Condition: CreateTransitGateway
+    Type: AWS::EC2::TransitGatewayRouteTableAssociation
+    Properties: 
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+  TransitGatewayRouteTablePropagation:
+    Condition: CreateTransitGateway
+    Type: AWS::EC2::TransitGatewayRouteTablePropagation
+    Properties: 
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
   # Internet GW
   InternetGateway:
     Type: AWS::EC2::InternetGateway
