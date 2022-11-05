@@ -28,6 +28,7 @@ Metadata:
           - CloudOps
           - StaticWebsiteHosting
           - Notification
+          - Network
           - WebServers
           - UploadArtifacts
       - Label: 
@@ -95,6 +96,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of GlobalSettings template [required]
+  Network:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of Network template [required]
   Notification:
     Type: String
     Default: DISABLED
@@ -148,6 +156,7 @@ Conditions:
   DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
+  DeployNetwork: !Equals [ !Ref Network, ENABLED]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]
@@ -801,6 +810,45 @@ Resources:
                   - Name: DeployArtifact-Notification
                 RunOrder: 2
               - !Ref AWS::NoValue
+            # Deploy Network
+            - !If
+              - DeployNetwork
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: Notification
+                  Capabilities: APABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::cloudops/network/template.yaml
+                  ParameterOverrides: !Join
+                    - ''
+                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - !If
+                        - Development
+                        - development
+                        - production
+                      - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Network.json
+                    - !Ref AWS::NoValue
+                  OutputFileName: Output.json
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: Network
+                OutputArtifacts:
+                  - Name: DeployArtifact-Network
+                RunOrder: 2
+              - !Ref AWS::NoValue
             # Deploy CloudOps
             - !If
               - DeployCloudOps
@@ -966,7 +1014,11 @@ Resources:
                           - Development
                           - development
                           - production
-                        - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                        - !If
+                          - DeployNetwork
+                          - '", "TransitGatewayId": { "Fn::GetParam": ["DeployArtifact-Network", "Output.json", "TransitGatewayId"]}, '
+                          - '", '
+                        - !Sub '"TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}WebServers.json
@@ -982,6 +1034,7 @@ Resources:
                     - Name: GlobalSettings
                     - !Ref AWS::NoValue
                   - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact-Network
                 Name: WebServers
                 OutputArtifacts: 
                   - Name: DeployArtifact-WebServers

@@ -84,3 +84,8 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+
+Outputs:
+  TransitGatewayId:
+    Description: Transit Gateway Id
+    Value: !GetAtt TransitGateway.Outputs.TransitGatewayId

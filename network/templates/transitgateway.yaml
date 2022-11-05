@@ -6,11 +6,6 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: 'Network Configuration'
-        Parameters:
-          - SubnetIds
-          - VpcId
-      - Label: 
           default: 'Tag Configuration'
         Parameters:
           - Environment
@@ -18,14 +13,7 @@ Metadata:
           - TagKey
           - TagValue
 
-Parameters:
-  SubnetIds:
-    Type: List<AWS::EC2::Subnet::Id>
-    Description: The IDs of one or more subnets [required]  
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-    AllowedPattern: .+
-    Description: The ID of the VPC [required]     
+Parameters:   
   Environment:
     Type: String
     Default: production
@@ -71,9 +59,3 @@ Outputs:
   TransitGatewayId:
     Description: Transit Gateway Id
     Value: !Ref TransitGateway
-  TransitGatewayAttachmentId:
-    Description: Transit Gateway Attachment Id
-    Value: !Ref TransitGatewayAttachment  
-  TransitGatewayRouteTableId:
-    Description: Transit Gateway Route Table Id
-    Value: !Ref TransitGatewayRouteTable

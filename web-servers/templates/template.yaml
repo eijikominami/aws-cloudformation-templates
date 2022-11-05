@@ -841,7 +841,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TransitGatewayId: !Ref TransitGateway
+      TransitGatewayId: !Ref TransitGatewayId
   TransitGatewayRouteTableAssociation:
     Condition: CreateTransitGateway
     Type: AWS::EC2::TransitGatewayRouteTableAssociation
