@@ -75,6 +75,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon Detective [required]
+  AWSSecurityHub:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable AWS SecurityHub [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -114,6 +121,7 @@ Conditions:
   CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !Equals [ !Ref AmazonMacie, ENABLED]
+  CreateSecurityHub: !Equals [ !Ref AWSSecurityHub, ENABLED]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -151,6 +159,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SecurityHub:
+    Condition: CreateSecurityHub
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -347,7 +356,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.40
+        SemanticVersion: 2.0.42
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -364,7 +373,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.40
+        SemanticVersion: 2.0.42
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -459,7 +468,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.40
+        SemanticVersion: 2.0.42
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -502,7 +511,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.40
+        SemanticVersion: 2.0.42
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

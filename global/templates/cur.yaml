@@ -52,7 +52,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault: 
               SSEAlgorithm: AES256
-      BucketName: !Sub defaultsecuritysettings-cur-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub globalsettings-cur-${AWS::Region}-${AWS::AccountId}
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
