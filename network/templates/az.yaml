@@ -307,3 +307,9 @@ Outputs:
       - TransitGatewayExists
       - !Ref EIPForNatGateway
       - ''
+  RouteTableIdTransit:
+    Description: Route table for Transit Gateway
+    Value: !If
+      - CreateTransitSubnet
+      - !GetAtt RouteTableTransit.RouteTableId
+      - ''
