@@ -187,13 +187,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  RoutePublicToTransitGateway:
-    Condition: TransitGatewayAndPublicSubnetExist
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-      TransitGatewayId: !Ref TransitGatewayId
-      RouteTableId: !Ref RouteTablePublic
   RoutePublicToInternetGateway:
     Condition: CreatePublicSubnet
     Type: AWS::EC2::Route
@@ -201,13 +194,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGatewayId
       RouteTableId: !Ref RouteTablePublic
-  RouteTransitToTransitGateway:
-    Condition: TransitGatewayExists
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-      TransitGatewayId: !Ref TransitGatewayId
-      RouteTableId: !Ref RouteTableTransit
   RouteTransitToNATGateway:
     Condition: TransitGatewayAndPublicSubnetExist
     Type: AWS::EC2::Route
