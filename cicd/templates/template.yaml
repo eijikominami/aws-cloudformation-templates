@@ -820,10 +820,10 @@ Resources:
                   Version: '1'
                 Configuration:
                   ActionMode: CREATE_UPDATE
-                  StackName: Notification
-                  Capabilities: APABILITY_AUTO_EXPAND
+                  StackName: Network
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::cloudops/network/template.yaml
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::network/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
                     - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
@@ -1034,7 +1034,10 @@ Resources:
                     - Name: GlobalSettings
                     - !Ref AWS::NoValue
                   - Name: DeployArtifact-CICD
-                  - Name: DeployArtifact-Network
+                  - !If
+                    - DeployNetwork
+                    - Name: DeployArtifact-Network
+                    - !Ref AWS::NoValue
                 Name: WebServers
                 OutputArtifacts: 
                   - Name: DeployArtifact-WebServers

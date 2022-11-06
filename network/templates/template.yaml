@@ -16,6 +16,10 @@ Parameters:
       - production
       - test
       - development
+  PrincipalsToAssociateWithTransitGateway:
+    Type: String
+    Default: ''
+    Description: Specifies a list of one or more principals to associate with Transit Gateway.
   TagKey:
     Type: String
     Default: createdby
@@ -28,6 +32,7 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateRAMForTransitGateway: !Not [ !Equals [ !Ref PrincipalsToAssociateWithTransitGateway, ''] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -41,8 +46,6 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
-        SubnetIds:
-        VpcId:
         LogicalNamePrefix: !Ref AWS::StackName
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
@@ -84,6 +87,27 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # AWS Resource Access Manager
+  RAMForTransitGateway:
+    Condition: CreateRAMForTransitGateway
+    Type: AWS::RAM::ResourceShare
+    Properties: 
+      AllowExternalPrincipals: false
+      Name: TransitGateway
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionTransitGateway
+      Principals: 
+        - !Ref PrincipalsToAssociateWithTransitGateway
+      ResourceArns: 
+        - !Join 
+          - ''
+          - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/
+            - !GetAtt TransitGateway.Outputs.TransitGatewayId
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 
 Outputs:
   TransitGatewayId:
