@@ -2,7 +2,80 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/network sets basic configurations for network.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'AvailabilityZone Configuration'
+        Parameters: 
+          - SubnetPublicCidrBlockForAz1
+          - SubnetTransitCidrBlockAz1
+          - SubnetPrivateCidrBlockForAz1
+          - SubnetPublicCidrBlockForAz2
+          - SubnetTransitCidrBlockAz2
+          - SubnetPrivateCidrBlockForAz1
+          - VPCCidrBlock     
+      - Label:
+          default: 'Transit Gateway Configuration'
+        Parameters:
+          - PrincipalsToAssociateWithTransitGateway
+          - TransitGatewayDestinationCidrBlock    
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
 Parameters:
+  VPCCidrBlock:
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block [required]
+  PrincipalsToAssociateWithTransitGateway:
+    Type: String
+    Default: ''
+    Description: Specifies a list of one or more principals to associate with Transit Gateway.
+  SubnetPublicCidrBlockForAz1:
+    Type: String
+    Default: 10.0.0.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ1 [required]
+  SubnetTransitCidrBlockAz1:
+    Type: String
+    Default: 10.0.1.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block
+  SubnetPrivateCidrBlockForAz1:
+    Type: String
+    Default: 10.0.2.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ1 [required]
+  SubnetPublicCidrBlockForAz2:
+    Type: String
+    Default: 10.0.4.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ2 [required]
+  SubnetTransitCidrBlockAz2:
+    Type: String
+    Default: 10.0.5.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block
+  SubnetPrivateCidrBlockForAz2:
+    Type: String
+    Default: 10.0.6.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ1 [required]
+  TransitGatewayDestinationCidrBlock:
+    Type: String
+    Default: ''
+    Description: The IPv4 CIDR block forward to TransitGateway
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -16,10 +89,6 @@ Parameters:
       - production
       - test
       - development
-  PrincipalsToAssociateWithTransitGateway:
-    Type: String
-    Default: ''
-    Description: Specifies a list of one or more principals to associate with Transit Gateway.
   TagKey:
     Type: String
     Default: createdby
@@ -37,6 +106,86 @@ Conditions:
 
 Resources:
   # Nested Stack
+  Az1:
+    DependsOn:
+      # NATGateway requires provisioned Internet Gateway.
+      - InternetGatewayAttachment
+    Type: AWS::Serverless::Application
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select 
+          - 0
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !Ref InternetGateway
+        LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn   
+        TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.42
+  Az2:
+    DependsOn:
+      # NATGateway requires provisioned Internet Gateway.
+      - InternetGatewayAttachment
+    Type: AWS::Serverless::Application
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 1
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !Ref InternetGateway
+        LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
+        TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.42
   TransitGateway:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -53,6 +202,30 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/transitgateway.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/transitgateway.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  NetworkFirewall:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        SubnetFirewallCidrBlockForAz1: !GetAtt Az1.Outputs.PrivateSubnetId
+        SubnetFirewallCidrBlockForAz2: !GetAtt Az2.Outputs.PrivateSubnetId
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/networkfirewall.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/networkfirewall.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -87,7 +260,90 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # AWS Resource Access Manager
+  # IAM
+  IAMRoleForVPCFlowLog:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for VPC FlowLog.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: '*'
+      RoleName: !Sub ${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # VPC
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref VPCCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchLogsGroupForVPCFlowLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Internet GW
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties: 
+      Tags:
+        - Key: Name
+          Value: !Sub igw-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  # Transit Gateway
   RAMForTransitGateway:
     Condition: CreateRAMForTransitGateway
     Type: AWS::RAM::ResourceShare
@@ -108,6 +364,42 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  TransitGatewayAttachment:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties: 
+      SubnetIds:
+        - !GetAtt Az1.Outputs.TransitSubnetId
+        - !GetAtt Az2.Outputs.TransitSubnetId
+      Tags:
+        - Key: Name
+          Value: !Sub tgw-attach-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      VpcId: !Ref VPC
+  TransitGatewayRouteTable:
+    Type: AWS::EC2::TransitGatewayRouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: !Sub tgw-rtb-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+  TransitGatewayRouteTableAssociation:
+    Type: AWS::EC2::TransitGatewayRouteTableAssociation
+    Properties: 
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+  TransitGatewayRouteTablePropagation:
+    Type: AWS::EC2::TransitGatewayRouteTablePropagation
+    Properties: 
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
 
 Outputs:
   TransitGatewayId:

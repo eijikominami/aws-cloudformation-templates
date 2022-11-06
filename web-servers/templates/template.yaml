@@ -228,22 +228,22 @@ Parameters:
     Description: Route53 hosted zone id
   SubnetPublicCidrBlockForAz1:
     Type: String
-    Default: 10.0.0.0/24
+    Default: 10.1.0.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.0.3.0/24
+    Default: 10.1.3.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block
   SubnetPublicCidrBlockForAz2:
     Type: String
-    Default: 10.0.4.0/24
+    Default: 10.1.4.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.0.7.0/24
+    Default: 10.1.7.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block
   TransitGatewayId:
@@ -256,7 +256,7 @@ Parameters:
     Description: The IPv4 CIDR block forward to TransitGateway
   VPCCidrBlock:
     Type: String
-    Default: 10.0.0.0/21
+    Default: 10.1.0.0/21
     AllowedPattern: ^[0-9./]*$
     Description: The VPC CIDR block [required]
   WebACL:
@@ -819,8 +819,8 @@ Resources:
     Type: AWS::EC2::TransitGatewayAttachment
     Properties: 
       SubnetIds:
-        - TransitSubnetId1
-        - TransitSubnetId2
+        - !GetAtt Az1.Outputs.TransitSubnetId
+        - !GetAtt Az2.Outputs.TransitSubnetId
       Tags:
         - Key: Name
           Value: !Sub tgw-attach-${AWS::StackName}-${AWS::Region}
