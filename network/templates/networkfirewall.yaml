@@ -8,8 +8,8 @@ Metadata:
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
-          - SubnetFirewallCidrBlockForAz1
-          - SubnetFirewallCidrBlockForAz2
+          - FirewallSubnetIdForAz1
+          - FirewallSubnetIdForAz2
           - VPCId
       - Label: 
           default: 'Tag Configuration'
@@ -19,15 +19,13 @@ Metadata:
           - TagValue
 
 Parameters:
-  SubnetFirewallCidrBlockForAz1:
+  FirewallSubnetIdForAz1:
     Type: String
-    Default: 10.0.2.0/24
-    AllowedPattern: ^[0-9./]*$
+    AllowedPattern: .+
     Description: The firewall subnet CIDR block at AZ1 [required]
-  SubnetFirewallCidrBlockForAz2:
+  FirewallSubnetIdForAz2:
     Type: String
-    Default: 10.0.6.0/24
-    AllowedPattern: ^[0-9./]*$
+    AllowedPattern: .+
     Description: The firewall subnet CIDR block at AZ1 [required]
   VPCId:
     Type: AWS::EC2::VPC::Id
@@ -60,8 +58,8 @@ Resources:
       FirewallPolicyChangeProtection: true
       SubnetChangeProtection: true
       SubnetMappings: 
-        - SubnetId: !Ref SubnetFirewallCidrBlockForAz1
-        - SubnetId: !Ref SubnetFirewallCidrBlockForAz2
+        - SubnetId: !Ref FirewallSubnetIdForAz1
+        - SubnetId: !Ref FirewallSubnetIdForAz2
       Tags: 
         - Key: environment
           Value: !Ref Environment
