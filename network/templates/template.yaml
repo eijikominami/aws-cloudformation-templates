@@ -8,10 +8,8 @@ Metadata:
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
-          - SubnetPublicCidrBlockForAz1
           - SubnetTransitCidrBlockAz1
           - SubnetPrivateCidrBlockForAz1
-          - SubnetPublicCidrBlockForAz2
           - SubnetTransitCidrBlockAz2
           - SubnetPrivateCidrBlockForAz1
           - VPCCidrBlock     
@@ -42,11 +40,6 @@ Parameters:
     Type: String
     Default: ''
     Description: Specifies a list of one or more principals to associate with Transit Gateway.
-  SubnetPublicCidrBlockForAz1:
-    Type: String
-    Default: 10.0.0.0/24
-    AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
     Default: 10.0.1.0/24
@@ -57,11 +50,6 @@ Parameters:
     Default: 10.0.2.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
-  SubnetPublicCidrBlockForAz2:
-    Type: String
-    Default: 10.0.4.0/24
-    AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
     Default: 10.0.5.0/24
@@ -106,9 +94,6 @@ Conditions:
 Resources:
   # Nested Stack
   Az1:
-    DependsOn:
-      # NATGateway requires provisioned Internet Gateway.
-      - InternetGatewayAttachment
     Type: AWS::Serverless::Application
     Properties:
       NotificationARNs:
@@ -120,9 +105,7 @@ Resources:
         AvailabilityZone: !Select 
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
-        InternetGatewayId: !Ref InternetGateway
         LogicalNamePrefix: !Ref AWS::StackName
-        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
         SNSForAlertArn: !If
@@ -144,11 +127,8 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.45
+        SemanticVersion: 2.0.46
   Az2:
-    DependsOn:
-      # NATGateway requires provisioned Internet Gateway.
-      - InternetGatewayAttachment
     Type: AWS::Serverless::Application
     Properties:
       NotificationARNs:
@@ -160,9 +140,7 @@ Resources:
         AvailabilityZone: !Select
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
-        InternetGatewayId: !Ref InternetGateway
         LogicalNamePrefix: !Ref AWS::StackName
-        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
         SNSForAlertArn: !If
@@ -184,7 +162,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.45
+        SemanticVersion: 2.0.46
   TransitGateway:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -237,7 +215,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.45
+        SemanticVersion: 2.0.46
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -254,7 +232,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.45
+        SemanticVersion: 2.0.46
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -327,22 +305,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # Internet GW
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties: 
-      Tags:
-        - Key: Name
-          Value: !Sub igw-${AWS::StackName}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties: 
-      InternetGatewayId: !Ref InternetGateway
-      VpcId: !Ref VPC
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Type: AWS::EC2::TransitGatewayAttachment
