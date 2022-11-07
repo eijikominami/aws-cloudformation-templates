@@ -16,7 +16,11 @@ Metadata:
           - SubnetTransitCidrBlockAz2
           - SubnetPrivateCidrBlockForAz1
           - SubnetFirewallCidrBlockForAz2
-          - VPCCidrBlock     
+          - VPCCidrBlock
+      - Label: 
+          default: 'IPAM Configuration'
+        Parameters: 
+          - IPAMProvisionedCidrs  
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
@@ -35,6 +39,11 @@ Metadata:
           - TagValue
 
 Parameters:
+  IPAMProvisionedCidrs:
+    Type: String
+    Default: 10.0.0.0/8
+    AllowedPattern: ^[0-9./]*$
+    Description: The CIDR provisioned to the IPAM pool [required]
   VPCCidrBlock:
     Type: String
     Default: 10.0.0.0/16
@@ -245,6 +254,28 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IPAM:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        ProvisionedCidrs: !Ref IPAMProvisionedCidrs
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/ipam.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/ipam.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

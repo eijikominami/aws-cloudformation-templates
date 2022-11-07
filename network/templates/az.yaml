@@ -115,7 +115,7 @@ Conditions:
   CreatePublicSubnet: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] ]
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
-  CreateFirewallSubnet: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref NetworkFirewallId, '' ] ] ]
+  CreateFirewallSubnet: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ], !Not [ !Equals [ !Ref NetworkFirewallId, '' ] ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
   TransitGatewayAndPublicSubnetExist: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
