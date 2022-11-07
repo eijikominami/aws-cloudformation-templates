@@ -38,7 +38,7 @@ Parameters:
     Description: The Availability Zone name [required]
   InternetGatewayId:
     Type: String
-    AllowedPattern: .+
+    Default: ''
     Description: The Internet Gateway Id [required]
   NetworkLoadBalancer:
     Type: String
@@ -99,7 +99,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreatePublicSubnet: !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ]
+  CreatePublicSubnet: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] ]
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
