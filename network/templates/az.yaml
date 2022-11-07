@@ -237,6 +237,13 @@ Resources:
         - 0.0.0.0/0
       GatewayId: !Ref InternetGatewayId
       RouteTableId: !Ref RouteTablePublic
+  RouteFirewallToInternetGateway:
+    Condition: CreateFirewallSubnet
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGatewayId
+      RouteTableId: !Ref RouteTableFirewall
   RouteTransitToNATGateway:
     Condition: TransitGatewayAndPublicSubnetExist
     Type: AWS::EC2::Route
@@ -307,7 +314,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.0.47
+        SemanticVersion: 2.0.48
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

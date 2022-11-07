@@ -21,7 +21,7 @@ Parameters:
   PrincipalsToAssociateWithTransitGateway:
     Type: String
     Default: ''
-    Description: Specifies a list of one or more principals to associate with Transit Gateway.
+    Description: Specifies a list of one or more principals to associate with Transit Gateway
   Environment:
     Type: String
     Default: production

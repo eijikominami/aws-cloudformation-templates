@@ -11,9 +11,11 @@ Metadata:
           - SubnetPublicCidrBlockForAz1
           - SubnetTransitCidrBlockAz1
           - SubnetPrivateCidrBlockForAz1
+          - SubnetFirewallCidrBlockForAz1
           - SubnetPublicCidrBlockForAz2
           - SubnetTransitCidrBlockAz2
           - SubnetPrivateCidrBlockForAz1
+          - SubnetFirewallCidrBlockForAz2
           - VPCCidrBlock     
       - Label:
           default: 'Transit Gateway Configuration'
@@ -44,32 +46,42 @@ Parameters:
     Description: Specifies a list of one or more principals to associate with Transit Gateway.
   SubnetPublicCidrBlockForAz1:
     Type: String
-    Default: 10.0.0.0/24
+    Default: 10.0.0.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.0.1.0/24
+    Default: 10.0.0.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block
+  SubnetFirewallCidrBlockForAz1:
+    Type: String
+    Default: 10.0.0.128/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The firewall subnet CIDR block at AZ1 [required]
   SubnetPrivateCidrBlockForAz1:
     Type: String
-    Default: 10.0.2.0/24
+    Default: 10.0.1.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   SubnetPublicCidrBlockForAz2:
     Type: String
-    Default: 10.0.4.0/24
+    Default: 10.0.4.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.0.5.0/24
+    Default: 10.0.4.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block
+  SubnetFirewallCidrBlockForAz2:
+    Type: String
+    Default: 10.0.4.128/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The firewall subnet CIDR block at AZ2 [required]
   SubnetPrivateCidrBlockForAz2:
     Type: String
-    Default: 10.0.6.0/24
+    Default: 10.0.5.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   TransitGatewayDestinationCidrBlock:
@@ -125,6 +137,7 @@ Resources:
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
+        SubnetFirewallCidrBlock: !Ref SubnetFirewallCidrBlockForAz1
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -144,7 +157,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.47
+        SemanticVersion: 2.0.48
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -165,6 +178,7 @@ Resources:
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
+        SubnetFirewallCidrBlock: !Ref SubnetFirewallCidrBlockForAz2
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -184,7 +198,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.47
+        SemanticVersion: 2.0.48
   TransitGateway:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -216,8 +230,8 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
-        FirewallSubnetIdForAz1: !GetAtt Az1.Outputs.PrivateSubnetId
-        FirewallSubnetIdForAz2: !GetAtt Az2.Outputs.PrivateSubnetId
+        SubnetIdAz1: !GetAtt Az1.Outputs.PrivateSubnetId
+        SubnetIdAz2: !GetAtt Az2.Outputs.PrivateSubnetId
         VPCId: !Ref VPC
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -237,7 +251,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.47
+        SemanticVersion: 2.0.48
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -254,7 +268,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.47
+        SemanticVersion: 2.0.48
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

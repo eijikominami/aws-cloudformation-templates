@@ -8,8 +8,9 @@ Metadata:
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
-          - FirewallSubnetIdForAz1
-          - FirewallSubnetIdForAz2
+          - SubnetIdAz1
+          - SubnetIdAz2
+          - SubnetIdAz3
           - VPCId
       - Label: 
           default: 'Tag Configuration'
@@ -19,14 +20,18 @@ Metadata:
           - TagValue
 
 Parameters:
-  FirewallSubnetIdForAz1:
+  SubnetIdAz1:
     Type: String
     AllowedPattern: .+
-    Description: The firewall subnet CIDR block at AZ1 [required]
-  FirewallSubnetIdForAz2:
+    Description: The subnet id at AZ1 [required]
+  SubnetIdAz2:
     Type: String
-    AllowedPattern: .+
-    Description: The firewall subnet CIDR block at AZ1 [required]
+    Default: ''
+    Description: The subnet id at AZ2
+  SubnetIdAz3:
+    Type: String
+    Default: ''
+    Description: The subnet id at AZ3
   VPCId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
@@ -47,6 +52,10 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateSubnetAz2: !Not [ !Equals [ !Ref SubnetIdAz2, ''] ]
+  CreateSubnetAz3: !Not [ !Equals [ !Ref SubnetIdAz3, ''] ]
+
 Resources:
   NetworkFirewall:
     Type: AWS::NetworkFirewall::Firewall
@@ -58,8 +67,15 @@ Resources:
       FirewallPolicyChangeProtection: true
       SubnetChangeProtection: true
       SubnetMappings: 
-        - SubnetId: !Ref FirewallSubnetIdForAz1
-        - SubnetId: !Ref FirewallSubnetIdForAz2
+        - SubnetId: !Ref SubnetIdAz1
+        - !If
+          - CreateSubnetAz2
+          - SubnetId: !Ref SubnetIdAz2
+          - !Ref AWS::NoValue
+        - !If
+          - CreateSubnetAz3
+          - SubnetId: !Ref SubnetIdAz3
+          - !Ref AWS::NoValue
       Tags: 
         - Key: environment
           Value: !Ref Environment

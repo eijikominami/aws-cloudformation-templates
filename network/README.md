@@ -40,9 +40,11 @@ This template configures ``Availability Zone``.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AvailabilityZone | AWS::EC2::AvailabilityZone::Name | | ○ | The Availability Zone name |
-| InternetGatewayId | String | | ○ | The Internet Gateway Id |
+| InternetGatewayId | String | | | The Internet Gateway Id |
+| NetworkFirewallId | String | | | The Network Firewall Id |
 | SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | The Public subnet CIDR block |
 | SubnetTransitCidrBlock | String | | | The transit subnet CIDR block |
+| SubnetFirewallCidrBlock | String | | | The firewall subnet CIDR block |
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | VPCId | AWS::EC2::VPC::Id | | ○ | The VPC id  |
@@ -66,6 +68,16 @@ This template configures ``Global Accelerator``.
 | ThresholdCount | Number | | 3 | The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy |
 | ToPort | Number | | 80 | The last port in the range of ports, inclusive |
 
+### Network Firewall
+
+This template configures ``Network Firewall``.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| SubnetIdAz1 | String | | | The firewall subnet id in AZ1 |
+| SubnetIdAz2 | String | | | The firewall subnet id in AZ2 |
+| SubnetIdAz3 | String | | | The firewall subnet id in AZ3 |
+
 ### Route 53
 
 This template configures ``Route 53``.
@@ -83,8 +95,7 @@ This template configures ``Transit Gateway``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| **CertificateManagerARN** | List<AWS::EC2::Subnet::Id> | | ○ | The IDs of one or more subnets |
-| **CertificateManagerARN** | AWS::EC2::VPC::Id | | ○ | The ID of the VPC |
+| PrincipalsToAssociateWithTransitGateway | String | | | Specifies a list of one or more principals to associate with Transit Gateway |
 
 ### VPN
 

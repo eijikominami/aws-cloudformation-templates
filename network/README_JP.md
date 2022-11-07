@@ -40,9 +40,11 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AvailabilityZone | AWS::EC2::AvailabilityZone::Name | | ○ | AZ名 |
-| InternetGatewayId | String | | ○ | Internet Gateway Id |
+| InternetGatewayId | String | | | Internet Gateway Id |
+| NetworkFirewallId | String | | | Network Firewall Id |
 | SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | パブリックサブネットのCIDRブロック |
 | SubnetTransitCidrBlock | String | | | トランジットサブネットのCIDRブロック |
+| SubnetFirewallCidrBlock | String | | | Firewall サブネットのCIDRブロック |
 | TransitGatewayId | String | | | Transit GatewayのId |
 | TransitGatewayDestinationCidrBlock | String | | |  Transit Gatewayに転送するCIDRブロック |
 | VPCId | AWS::EC2::VPC::Id | | ○ | VPC id  |
@@ -66,6 +68,16 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 | ThresholdCount | Number | | 3 | 正常もしくは異常と判断するヘルスチェックの数 |
 | ToPort | Number | | 80 | ポートの終了番号 |
 
+### Network Firewall
+
+このテンプレートは、 ``Network Firewall`` を構成します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| SubnetIdAz1 | String | | | The firewall subnet id in AZ1 |
+| SubnetIdAz2 | String | | | The firewall subnet id in AZ2 |
+| SubnetIdAz3 | String | | | The firewall subnet id in AZ3 |
+
 ### Route 53
 
 このテンプレートは、 ``Route 53`` を構成します。
@@ -83,8 +95,7 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **CertificateManagerARN** | List<AWS::EC2::Subnet::Id> | | ○ | サブネットID |
-| **CertificateManagerARN** | AWS::EC2::VPC::Id | | ○ | VPC ID |
+| PrincipalsToAssociateWithTransitGateway | String | | | Transit Gateway を共有するプリンシパル |
 
 ### VPN
 
