@@ -13,12 +13,17 @@ Metadata:
           - NetworkLoadBalancer
           - SubnetPublicCidrBlock
           - SubnetTransitCidrBlock
+          - SubnetFirewallCidrBlock
           - VPCId   
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
           - TransitGatewayId
           - TransitGatewayDestinationCidrBlock  
+      - Label:
+          default: 'Network Firewall Configuration'
+        Parameters:
+          - NetworkFirewallId
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -70,14 +75,22 @@ Parameters:
     Type: String
     Default: ''
     Description: The transit subnet CIDR block
+  SubnetFirewallCidrBlock:
+    Type: String
+    Default: ''
+    Description: The firewall subnet CIDR block
   TransitGatewayId:
     Type: String
     Default: ''
-    Description: The ID of a transit gateway
+    Description: The ID of a Transit Gateway
   TransitGatewayDestinationCidrBlock:
     Type: String
     Default: ''
     Description: The IPv4 CIDR block forward to TransitGateway
+  NetworkFirewallId:
+    Type: String
+    Default: ''
+    Description: The ID of a Network Firewall
   VPCId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
@@ -102,6 +115,7 @@ Conditions:
   CreatePublicSubnet: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] ]
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
+  CreateFirewallSubnet: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref NetworkFirewallId, '' ] ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
   TransitGatewayAndPublicSubnetExist: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -150,6 +164,20 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
+  SubnetFirewall:
+    Condition: CreateFirewallSubnet
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      CidrBlock: !Ref SubnetFirewallCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub subnet-${LogicalNamePrefix}-${AvailabilityZone}-firewall
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
   # Route Table
   RouteTablePublic:
     Condition: CreatePublicSubnet
@@ -187,11 +215,26 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RouteTableFirewall:
+    Condition: CreateFirewallSubnet
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub rtb-${LogicalNamePrefix}-${AvailabilityZone}-firewall
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   RoutePublicToInternetGateway:
     Condition: CreatePublicSubnet
     Type: AWS::EC2::Route
     Properties:
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: !If
+        - CreateFirewallSubnet
+        - !Ref NetworkFirewallId
+        - 0.0.0.0/0
       GatewayId: !Ref InternetGatewayId
       RouteTableId: !Ref RouteTablePublic
   RouteTransitToNATGateway:
@@ -264,7 +307,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.47
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
