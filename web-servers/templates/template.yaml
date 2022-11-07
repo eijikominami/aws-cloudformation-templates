@@ -354,7 +354,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.43
+        SemanticVersion: 2.0.45
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -397,7 +397,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.43
+        SemanticVersion: 2.0.45
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -612,7 +612,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.43
+        SemanticVersion: 2.0.45
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -629,7 +629,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.43
+        SemanticVersion: 2.0.45
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -813,7 +813,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # TransitGateway
+  # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Condition: CreateTransitGateway
     Type: AWS::EC2::TransitGatewayAttachment
@@ -854,6 +854,26 @@ Resources:
     Properties: 
       TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
       TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+  RouteTransitToTransitGatewayAz1:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
+  RouteTransitToTransitGatewayAz2:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
   # Internet GW
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -1011,7 +1031,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.43
+        SemanticVersion: 2.0.45
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1037,7 +1057,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.0.43
+        SemanticVersion: 2.0.45
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

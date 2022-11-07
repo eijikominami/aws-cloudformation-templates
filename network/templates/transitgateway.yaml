@@ -6,6 +6,10 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'RAM Configuration'
+        Parameters:
+          - PrincipalsToAssociateWithTransitGateway
+      - Label: 
           default: 'Tag Configuration'
         Parameters:
           - Environment
@@ -13,7 +17,11 @@ Metadata:
           - TagKey
           - TagValue
 
-Parameters:   
+Parameters:
+  PrincipalsToAssociateWithTransitGateway:
+    Type: String
+    Default: ''
+    Description: Specifies a list of one or more principals to associate with Transit Gateway.
   Environment:
     Type: String
     Default: production
@@ -35,6 +43,9 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateRAMForTransitGateway: !Not [ !Equals [ !Ref PrincipalsToAssociateWithTransitGateway, ''] ]
+
 Resources:
   TransitGateway:
     Type: AWS::EC2::TransitGateway
@@ -54,6 +65,23 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpnEcmpSupport: enable
+  RAMForTransitGateway:
+    Condition: CreateRAMForTransitGateway
+    Type: AWS::RAM::ResourceShare
+    Properties: 
+      AllowExternalPrincipals: false
+      Name: TransitGateway
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionTransitGateway
+      Principals: 
+        - !Ref PrincipalsToAssociateWithTransitGateway
+      ResourceArns: 
+        - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 
 Outputs:
   TransitGatewayId:
