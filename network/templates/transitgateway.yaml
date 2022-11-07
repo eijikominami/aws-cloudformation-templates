@@ -89,11 +89,12 @@ Resources:
       Description: Default
       Tags:
         - Key: Name
-          Value: Default
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+          Value: default
+  NetworkManagerTransitGatewayRegistration:
+    Type: AWS::NetworkManager::TransitGatewayRegistration
+    Properties: 
+      GlobalNetworkId: !Ref NetworkManagerGlobalNetwork
+      TransitGatewayArn: !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}
 
 Outputs:
   TransitGatewayId:
