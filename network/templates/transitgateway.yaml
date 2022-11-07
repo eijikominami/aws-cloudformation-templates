@@ -83,6 +83,17 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  NetworkManagerGlobalNetwork:
+    Type: AWS::NetworkManager::GlobalNetwork
+    Properties: 
+      Description: Default
+      Tags:
+        - Key: Name
+          Value: Default
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 
 Outputs:
   TransitGatewayId:
