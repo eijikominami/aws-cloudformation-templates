@@ -4,7 +4,15 @@ Description: AWSCloudFormationTemplates/network/az creates an Amazon VPC IP Addr
 
 Metadata: 
   AWS::CloudFormation::Interface:
-    ParameterGroups: 
+    ParameterGroups:
+      - Label: 
+          default: 'RAM Configuration'
+        Parameters:
+          - PrincipalsToAssociateWithIPAM
+      - Label: 
+          default: 'IPAM Configuration'
+        Parameters:
+          - ProvisionedCidrs
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -13,6 +21,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  PrincipalsToAssociateWithIPAM:
+    Type: String
+    Default: ''
+    Description: Specifies a list of one or more principals to associate with IPAM
   ProvisionedCidrs:
     Type: String
     Default: 10.0.0.0/8
@@ -65,6 +77,22 @@ Resources:
       Tags: 
         - Key: Name
           Value: default
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  RAMForIPAM:
+    Type: AWS::RAM::ResourceShare
+    Properties: 
+      AllowExternalPrincipals: false
+      Name: IPAM
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionsIpamPool
+      Principals: 
+        - !Ref PrincipalsToAssociateWithIPAM
+      ResourceArns: 
+        - !GetAtt IPAMPool.Arn
+      Tags: 
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
