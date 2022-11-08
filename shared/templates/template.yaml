@@ -1,25 +1,28 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/security/microsoftad sets AWS Directory Service for Microsoft Active Directory.
+Description: AWSCloudFormationTemplates/shared sets shared services.
 
 Metadata: 
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: ' Microsoft Active Directory Configuration'
+          default: 'Microsoft Active Directory Configuration'
         Parameters: 
-          - Edition
-          - EnableSso
-          - Name
-          - Password
-          - ShortName
-          - SubnetPublicCidrBlockForAz1
-          - SubnetTransitCidrBlockAz1
-          - SubnetPublicCidrBlockForAz2
-          - SubnetTransitCidrBlockAz2
+          - AdEdition
+          - AdEnableSso
+          - AdName
+          - AdPassword
+          - AdShortName
+          - AdSubnetPrivateCidrBlockForAz1
+          - AdSubnetTransitCidrBlockAz1
+          - AdSubnetPrivateCidrBlockForAz2
+          - AdSubnetTransitCidrBlockAz2
+      - Label: 
+          default: 'VPC Configuration'
+        Parameters: 
           - TransitGatewayId
           - TransitGatewayDestinationCidrBlock
-          - VPCId
+          - VPCCidrBlock
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -33,52 +36,52 @@ Metadata:
           - TagValue
 
 Parameters:
-  Edition:
+  AdEdition:
     Type: String
     Default: Standard
     AllowedValues:
       - Enterprise
       - Standard
     Description: The edition of AWS Directory Service for Microsoft Active Directory [required]
-  EnableSso:
+  AdEnableSso:
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
     Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [required]
-  Name:
+  AdName:
     Type: String
     Default: corp.example.com
     AllowedPattern: ^([a-zA-Z0-9]+[\\.-])+([a-zA-Z0-9])+$
     Description: The fully qualified domain name for the AWS Managed Microsoft AD directory [required]
-  Password:
+  AdPassword:
     Type: String
     Default: Password1+
     AllowedPattern: (?=^.{8,64}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*[a-z])|(?=.*[^A-Za-z0-9\s])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9\s]))^.*
     NoEcho: true
     Description: The password for the default administrative user named Admin [required]
-  ShortName:
+  AdShortName:
     Type: String
     Default: CORP
     AllowedPattern: ^[^\\/:*?"<>|.]+[^\\/:*?"<>|]*$
     Description: The NetBIOS name for your domain [required]
-  SubnetPublicCidrBlockForAz1:
+  AdSubnetPrivateCidrBlockForAz1:
     Type: String
     Default: 10.1.0.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
-  SubnetTransitCidrBlockAz1:
+  AdSubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.1.4.128/26
+    Default: 10.1.0.128/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ1 [required] 
-  SubnetPublicCidrBlockForAz2:
+  AdSubnetPrivateCidrBlockForAz2:
     Type: String
     Default: 10.1.1.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
-  SubnetTransitCidrBlockAz2:
+  AdSubnetTransitCidrBlockAz2:
     Type: String
     Default: 10.1.5.128/26
     AllowedPattern: ^[0-9./]*$
@@ -91,13 +94,14 @@ Parameters:
     Type: String
     Default: ''
     Description: The IPv4 CIDR block forward to TransitGateway
-  VPCId:
-    Type: AWS::EC2::VPC::Id
-    AllowedPattern: .+
-    Description: The VPC id [required]
+  VPCCidrBlock:
+    Type: String
+    Default: 10.1.0.0/16
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block [required]
   SNSForAlertArn:
     Type: String
-    Default: ''   
+    Default: '' 
   SNSForDeploymentArn:
     Type: String
     Default: ''
@@ -124,7 +128,7 @@ Conditions:
 
 Resources:
   # Nested Stack
-  Az1:
+  MicrosoftAD:
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -132,74 +136,30 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters:
-        AvailabilityZone: !Select 
-          - 0
-          - Fn::GetAZs: !Ref 'AWS::Region'
-        LogicalNamePrefix: !Ref AWS::StackName
-        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn   
+      Parameters: 
+        Edition: !Ref AdEdition
+        EnableSso: !Ref AdEnableSso
+        Name: !Ref AdName
+        Password: !Ref AdPassword
+        ShortName: !Ref AdShortName
+        SubnetPrivateCidrBlockForAz1: !Ref AdSubnetPrivateCidrBlockForAz1
+        SubnetPrivateCidrBlockForAz2: !Ref AdSubnetPrivateCidrBlockForAz2
+        SubnetTransitCidrBlockAz1: !Ref AdSubnetTransitCidrBlockAz1
+        SubnetTransitCidrBlockAz2: !Ref AdSubnetTransitCidrBlockAz2
         TransitGatewayId: !Ref TransitGatewayId
         TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-        VPCId: !Ref VPCId
-        Environment: !Ref Environment
+        VPCCidrBlock: !Ref VPCCidrBlock
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/microsoftad.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/microsoftad.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
-  Az2:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        AvailabilityZone: !Select
-          - 1
-          - Fn::GetAZs: !Ref 'AWS::Region'
-        LogicalNamePrefix: !Ref AWS::StackName
-        SubnetPrivateCidrBlock: !Ref SubnetPublicCidrBlockForAz2
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn 
-        TransitGatewayId: !Ref TransitGatewayId
-        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-        VPCId: !Ref VPCId
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -229,17 +189,70 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  ActiveDirectory:
-    Type: AWS::DirectoryService::MicrosoftAD
+  # IAM
+  IAMRoleForVPCFlowLog:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for VPC FlowLog.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: '*'
+      RoleName: !Sub ${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # VPC
+  VPC:
+    Type: AWS::EC2::VPC
     Properties: 
-      CreateAlias: true
-      Edition: !Ref Edition
-      EnableSso: !Ref EnableSso
-      Name: !Ref Name
-      Password: !Ref Password
-      ShortName: !Ref ShortName
-      VpcSettings: 
-          SubnetIds: 
-            - !GetAtt Az1.Outputs.PublicSubnetId
-            - !GetAtt Az2.Outputs.PublicSubnetId
-          VpcId: !Ref VPCId
+      CidrBlock: !Ref VPCCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchLogsGroupForVPCFlowLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

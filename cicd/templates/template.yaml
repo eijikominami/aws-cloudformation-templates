@@ -896,6 +896,44 @@ Resources:
                   - Name: DeployArtifact-CloudOps
                 RunOrder: 3
               - !Ref AWS::NoValue
+            # Deploy Shared Services
+            - !If
+              - DeploySharedServices
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: SharedServices
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::shared/templates/template.yaml
+                  ParameterOverrides: !Join
+                    - ''
+                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - !If
+                        - Development
+                        - development
+                        - production
+                      - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SharedServices.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: SharedServices
+                OutputArtifacts: 
+                  - Name: DeployArtifact-SharedServices
+                RunOrder: 3
+              - !Ref AWS::NoValue
             # Deploy DefaultSecuritySettings-ConfigRules
             - ActionTypeId: 
                 Category: Deploy
