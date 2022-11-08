@@ -26,6 +26,7 @@ Metadata:
           default: 'Stack Configuration'
         Parameters: 
           - CloudOps
+          - SharedServices
           - StaticWebsiteHosting
           - Notification
           - Network
@@ -110,6 +111,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of Notification template [required]
+  SharedServices:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of CloudOps template [required]
   WebServers:
     Type: String
     Default: DISABLED
@@ -157,6 +165,7 @@ Conditions:
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployNetwork: !Equals [ !Ref Network, ENABLED]
+  DeploySharedServices: !Equals [ !Ref SharedServices, ENABLED]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]

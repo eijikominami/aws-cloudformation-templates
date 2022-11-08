@@ -148,7 +148,7 @@ Resources:
         SubnetTransitCidrBlockAz2: !Ref AdSubnetTransitCidrBlockAz2
         TransitGatewayId: !Ref TransitGatewayId
         TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-        VPCCidrBlock: !Ref VPCCidrBlock
+        VPCId: !Ref VPC
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
