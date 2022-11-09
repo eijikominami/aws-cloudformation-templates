@@ -11,13 +11,25 @@ English / [**日本語**](README_JP.md)
 
 If you just want to deploy the stack, click the button below.
 
+[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml)
+
+If you want to deploy each service individually, click the button below.
+
 | Services | Launchers |
 | --- | --- |
 | Availability Zone | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AvailabilityZone&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/az.yaml) |
 | Global Accelerator | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=GlobalAccelerator&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/globalaccelerator.yaml) |
+| IPAM | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IPAM&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/ipam.yaml) |
+| Network Firewall | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=NetworkFirewall&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/networkfirewall.yaml) |
 | Route 53 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Route53&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/route53.yaml) |
 | TransitGateway | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=TransitGateway&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/transitgateway.yaml) |
 | VPN | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=VPN&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/vpn.yaml) |
+
+## Architecture
+
+The following sections describe the individual components of the architecture.
+
+![](../images/architecture-network.png)
 
 ## Deployment
 
@@ -31,7 +43,27 @@ aws cloudformation deploy --template-file transitgateway.yaml --stack-name Trans
 aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 ```
 
-You can provide optional parameters as follows.
+You can provide optional parameters as follows:
+
+| Name | Type | Default | Requied | Details | 
+| --- | --- | --- | --- | --- |
+| IPAMProvisionedCidrs | String | 10.0.0.0/8 | ○ | The CIDR provisioned to the IPAM pool | 
+| PrincipalsToAssociateWithIPAM | String | | | Specifies a list of one or more principals to associate with IPAM | 
+| PrincipalsToAssociateWithTransitGateway | String | | | Specifies a list of one or more principals to associate with Transit Gateway | 
+| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block at AZ1 | 
+| SubnetTransitCidrBlockAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block at AZ1 | 
+| SubnetPrivateCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | The public subnet CIDR block at AZ1 | 
+| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | The firewall subnet CIDR block at AZ1 | 
+| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block at AZ2 | 
+| SubnetTransitCidrBlockAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block at AZ2 | 
+| SubnetPrivateCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | The public subnet CIDR block at AZ2 | 
+| SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26 | ○ | The firewall subnet CIDR block at AZ2 | 
+| TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
+| VPCCidrBlock | String | 10.0.0.0/16 | ○ | The VPC CIDR block | 
+
+### Integrate IPAM with AWS Organizations
+
+If you use Amazon Transit Gateway or Amazon VPC IP Address Manager (IPAM) in your `Network` account, enable `AWS Resource Access Manager` in `AWS Organizations`.
 
 ### Availability Zone
 
@@ -67,6 +99,15 @@ This template configures ``Global Accelerator``.
 | Protocol | TCP / UDP | | TCP | The protocol for the connections from clients to the accelerator |
 | ThresholdCount | Number | | 3 | The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy |
 | ToPort | Number | | 80 | The last port in the range of ports, inclusive |
+
+### IP Address Manager (IPAM)
+
+This template configures ``IP Address Manager (IPAM)``.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| PrincipalsToAssociateWithIPAM | String | | | Specifies a list of one or more principals to associate with IPAM |
+| ProvisionedCidrs | String | 10.0.0.0/8 | ○ | The CIDR provisioned to the IPAM pool |
 
 ### Network Firewall
 

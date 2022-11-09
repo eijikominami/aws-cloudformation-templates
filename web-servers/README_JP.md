@@ -64,12 +64,13 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2VolumeSize | Number | 8 | ○ | |
 | GlobalInfrastructure | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | | ○ | CloudFront や Global Accelerator を有効にするかどうか |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
-| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 の パブリックサブネット |
+| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
 | TransitGatewayId | String | | | Transit Gateway の Id |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGatewayに転送するアドレス範囲 |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
 | WebACLArnForCloudFront | String | | | CloudFrontにアタッチするWAFのARN |
-| VPCCidrBlock | String | 10.0.0.0/21 | ○ | |
+| VPCCidrBlock | String | 10.0.0.0/21 | ○ | VPC の CIDR ブロック |
 
 ## トラブルシューティング
 

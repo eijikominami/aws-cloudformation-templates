@@ -132,6 +132,10 @@ You can provide optional parameters as follows:
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | Notification filter about Security Hub Security Checks | 
 
+### Designating a GuardDuty and a Security Hub administrator account
+
+If you use Amazon GuardDuty or AWS Security Hub in your `Security tooling` or `Security view-only (Audit)` account, [set these accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/designate-orgs-admin-account.html) as the delegated administrator accounts in the management accounts.
+
 ## Comply with the Center for Internet Security (CIS) Benchmarks
 
 This template helps you to comply with the Center for Internet Security (CIS) Benchmarks.

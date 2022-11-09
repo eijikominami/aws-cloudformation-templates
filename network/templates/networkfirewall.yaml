@@ -153,3 +153,7 @@ Resources:
           Value: !Ref TagValue
       Type: STATELESS
 
+Outputs:
+  NetworkFirewallId:
+    Description: Network Firewall Id
+    Value: !GetAtt NetworkFirewall.FirewallId

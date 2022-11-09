@@ -20,10 +20,6 @@ Metadata:
         Parameters:
           - TransitGatewayId
           - TransitGatewayDestinationCidrBlock  
-      - Label:
-          default: 'Network Firewall Configuration'
-        Parameters:
-          - NetworkFirewallId
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -87,10 +83,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The IPv4 CIDR block forward to TransitGateway
-  NetworkFirewallId:
-    Type: String
-    Default: ''
-    Description: The ID of a Network Firewall
   VPCId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
@@ -115,7 +107,8 @@ Conditions:
   CreatePublicSubnet: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] ]
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
-  CreateFirewallSubnet: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ], !Not [ !Equals [ !Ref NetworkFirewallId, '' ] ] ]
+  CreateFirewallSubnet: !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
+  CreateRoutePublicToInternetGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] , !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
   TransitGatewayAndPublicSubnetExist: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -228,13 +221,10 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   RoutePublicToInternetGateway:
-    Condition: CreatePublicSubnet
+    Condition: CreateRoutePublicToInternetGateway
     Type: AWS::EC2::Route
     Properties:
-      DestinationCidrBlock: !If
-        - CreateFirewallSubnet
-        - !Ref NetworkFirewallId
-        - 0.0.0.0/0
+      DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGatewayId
       RouteTableId: !Ref RouteTablePublic
   RouteFirewallToInternetGateway:
@@ -362,4 +352,10 @@ Outputs:
     Value: !If
       - CreateTransitSubnet
       - !GetAtt RouteTableTransit.RouteTableId
+      - ''
+  RouteTableIdPublic:
+    Description: Route table for Public Subnet
+    Value: !If
+      - CreatePublicSubnet
+      - !GetAtt RouteTablePublic.RouteTableId
       - ''

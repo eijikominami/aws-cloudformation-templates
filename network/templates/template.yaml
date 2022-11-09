@@ -14,7 +14,7 @@ Metadata:
           - SubnetFirewallCidrBlockForAz1
           - SubnetPublicCidrBlockForAz2
           - SubnetTransitCidrBlockAz2
-          - SubnetPrivateCidrBlockForAz1
+          - SubnetPrivateCidrBlockForAz2
           - SubnetFirewallCidrBlockForAz2
           - VPCCidrBlock
       - Label: 
@@ -48,11 +48,11 @@ Parameters:
   PrincipalsToAssociateWithIPAM:
     Type: String
     Default: ''
-    Description: Specifies a list of one or more principals to associate with IPAM.
+    Description: Specifies a list of one or more principals to associate with IPAM
   PrincipalsToAssociateWithTransitGateway:
     Type: String
     Default: ''
-    Description: Specifies a list of one or more principals to associate with Transit Gateway.
+    Description: Specifies a list of one or more principals to associate with Transit Gateway
   SubnetPublicCidrBlockForAz1:
     Type: String
     Default: 10.0.0.0/26
@@ -62,7 +62,7 @@ Parameters:
     Type: String
     Default: 10.0.0.64/26
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block
+    Description: The transit subnet CIDR block at AZ1 [required]
   SubnetFirewallCidrBlockForAz1:
     Type: String
     Default: 10.0.0.128/26
@@ -82,7 +82,7 @@ Parameters:
     Type: String
     Default: 10.0.4.64/26
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block
+    Description: The transit subnet CIDR block at AZ2 [required]
   SubnetFirewallCidrBlockForAz2:
     Type: String
     Default: 10.0.4.128/26
@@ -259,6 +259,18 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RoutePublicToInternetGatewayAz1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !GetAtt NetworkFirewall.Outputs.NetworkFirewallId
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
+  RoutePublicToInternetGatewayAz2:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !GetAtt NetworkFirewall.Outputs.NetworkFirewallId
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
   IPAM:
     Type: AWS::CloudFormation::Stack
     Properties:

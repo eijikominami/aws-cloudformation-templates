@@ -69,7 +69,7 @@ You can provide optional parameters as follows.
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
-| VPCCidrBlock | String | 10.0.0.0/21 | ○ | |
+| VPCCidrBlock | String | 10.0.0.0/21 | ○ | The VPC CIDR block |
 
 ## Trouble Shooting
 
