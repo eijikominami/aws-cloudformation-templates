@@ -354,7 +354,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.49
+        SemanticVersion: 2.0.50
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -397,7 +397,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.49
+        SemanticVersion: 2.0.50
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -612,7 +612,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.49
+        SemanticVersion: 2.0.50
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -629,7 +629,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.49
+        SemanticVersion: 2.0.50
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -1033,7 +1033,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.49
+        SemanticVersion: 2.0.50
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1059,7 +1059,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.0.49
+        SemanticVersion: 2.0.50
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

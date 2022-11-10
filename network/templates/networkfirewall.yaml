@@ -154,6 +154,8 @@ Resources:
       Type: STATELESS
 
 Outputs:
-  NetworkFirewallId:
-    Description: Network Firewall Id
-    Value: !GetAtt NetworkFirewall.FirewallId
+  EndpointIds:
+    Description: Endpoint Ids
+    Value: !Join
+     - ','
+     - !GetAtt NetworkFirewall.EndpointIds
