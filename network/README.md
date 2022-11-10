@@ -73,7 +73,6 @@ This template configures ``Availability Zone``.
 | --- | --- | --- | --- | --- |
 | AvailabilityZone | AWS::EC2::AvailabilityZone::Name | | ○ | The Availability Zone name |
 | InternetGatewayId | String | | | The Internet Gateway Id |
-| NetworkFirewallId | String | | | The Network Firewall Id |
 | SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | The Public subnet CIDR block |
 | SubnetTransitCidrBlock | String | | | The transit subnet CIDR block |
 | SubnetFirewallCidrBlock | String | | | The firewall subnet CIDR block |

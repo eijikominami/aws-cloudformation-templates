@@ -73,7 +73,6 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | --- | --- | --- | --- | --- |
 | AvailabilityZone | AWS::EC2::AvailabilityZone::Name | | ○ | AZ名 |
 | InternetGatewayId | String | | | Internet Gateway Id |
-| NetworkFirewallId | String | | | Network Firewall Id |
 | SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | パブリックサブネットのCIDRブロック |
 | SubnetTransitCidrBlock | String | | | トランジットサブネットのCIDRブロック |
 | SubnetFirewallCidrBlock | String | | | Firewall サブネットのCIDRブロック |

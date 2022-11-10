@@ -21,8 +21,7 @@ Metadata:
 
 Parameters:
   SubnetIdAz1:
-    Type: String
-    AllowedPattern: .+
+    Type: AWS::EC2::Subnet::Id
     Description: The subnet id at AZ1 [required]
   SubnetIdAz2:
     Type: String

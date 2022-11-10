@@ -144,10 +144,10 @@ Resources:
         ShortName: !Ref AdShortName
         SubnetPrivateCidrBlockForAz1: !Ref AdSubnetPrivateCidrBlockForAz1
         SubnetPrivateCidrBlockForAz2: !Ref AdSubnetPrivateCidrBlockForAz2
-        SubnetTransitCidrBlockAz1: !Ref AdSubnetTransitCidrBlockAz1
-        SubnetTransitCidrBlockAz2: !Ref AdSubnetTransitCidrBlockAz2
-        TransitGatewayId: !Ref TransitGatewayId
-        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+        SubnetTransitCidrBlockAz1: ''
+        SubnetTransitCidrBlockAz2: ''
+        TransitGatewayId: ''
+        TransitGatewayDestinationCidrBlock: ''
         VPCId: !Ref VPC
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
@@ -256,3 +256,17 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+
+Outputs:
+  SubnetTransitCidrBlockAz1:
+    Description: test
+    Value: !Ref AdSubnetTransitCidrBlockAz1
+  SubnetTransitCidrBlockAz2:
+    Description: test
+    Value: !Ref AdSubnetTransitCidrBlockAz2
+  TransitGatewayId:
+    Description: test
+    Value: !Ref TransitGatewayId
+  TransitGatewayDestinationCidrBlock:
+    Description: test
+    Value: !Ref TransitGatewayDestinationCidrBlock

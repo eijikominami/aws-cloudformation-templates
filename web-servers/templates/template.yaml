@@ -813,6 +813,20 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Condition: CreateTransitGateway
@@ -830,37 +844,10 @@ Resources:
           Value: !Ref TagValue
       TransitGatewayId: !Ref TransitGatewayId
       VpcId: !Ref VPC
-  TransitGatewayRouteTable:
-    Condition: CreateTransitGateway
-    DependsOn:
-      - TransitGatewayAttachment
-    Type: AWS::EC2::TransitGatewayRouteTable
-    Properties: 
-      Tags: 
-        - Key: Name
-          Value: !Sub tgw-rtb-${AWS::StackName}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TransitGatewayId: !Ref TransitGatewayId
-  TransitGatewayRouteTableAssociation:
-    Condition: CreateTransitGateway
-    Type: AWS::EC2::TransitGatewayRouteTableAssociation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
-  TransitGatewayRouteTablePropagation:
-    Condition: CreateTransitGateway
-    Type: AWS::EC2::TransitGatewayRouteTablePropagation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
   RouteTransitToTransitGatewayAz1:
     Condition: CreateTransitGateway
     DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
+      - TransitGatewayAttachment
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
@@ -869,8 +856,7 @@ Resources:
   RouteTransitToTransitGatewayAz2:
     Condition: CreateTransitGateway
     DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
+      - TransitGatewayAttachment
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
@@ -991,21 +977,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPC
-  # VPC FlowLog
-  VPCFlowLog:
-    Type: AWS::EC2::FlowLog
-    Properties: 
-      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
-      LogDestinationType: cloud-watch-logs
-      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
-      ResourceId: !Ref VPC
-      ResourceType: VPC
-      TrafficType: ALL
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
     Properties:

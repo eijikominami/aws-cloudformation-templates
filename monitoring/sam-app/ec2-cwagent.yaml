@@ -19,12 +19,10 @@ Parameters:
     AllowedPattern: .+
     Description: A file system type the target instance [required]
   ImageId:
-    Type: String
-    AllowedPattern: .+
+    Type: AWS::EC2::Image::Id
     Description: A image id the target instance [required]
   InstanceId:
-    Type: String
-    AllowedPattern: .+
+    Type: AWS::EC2::Instance::Id
     Description: A instance id the target instance [required]
   InstanceType:
     Type: String

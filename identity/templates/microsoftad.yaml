@@ -120,13 +120,15 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
   Az1:
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.50
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -154,17 +156,14 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   Az2:
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.50
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -192,14 +191,8 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -240,6 +233,6 @@ Resources:
       ShortName: !Ref ShortName
       VpcSettings: 
           SubnetIds: 
-            - !GetAtt Az1.Outputs.PublicSubnetId
-            - !GetAtt Az2.Outputs.PublicSubnetId
+            - !GetAtt Az1.Outputs.PrivateSubnetId
+            - !GetAtt Az2.Outputs.PrivateSubnetId
           VpcId: !Ref VPCId

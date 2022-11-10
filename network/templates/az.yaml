@@ -40,7 +40,7 @@ Parameters:
   InternetGatewayId:
     Type: String
     Default: ''
-    Description: The Internet Gateway Id [required]
+    Description: The Internet Gateway Id
   NetworkLoadBalancer:
     Type: String
     Default: DISABLED
@@ -108,7 +108,7 @@ Conditions:
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
   CreateFirewallSubnet: !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
-  CreateRoutePublicToInternetGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] , !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
+  CreateRoutePublicToInternetGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
   TransitGatewayAndPublicSubnetExist: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -311,20 +311,20 @@ Resources:
 
 Outputs:
   PublicSubnetId:
-    Description: Subnet ID
+    Description: Public subnet id
     Value: !If
       - CreatePublicSubnet
       - !Ref SubnetPublic
       - ''
   PrivateSubnetId:
-    Description: Subnet ID
+    Description: Private subnet id
     Value: !If
       - CreatePrivateSubnet
       - !Ref SubnetPrivate
       - ''
   TransitSubnetId:
     Condition: CreateTransitSubnet
-    Description: Subnet ID
+    Description: Transit subnet id
     Value: !If
       - CreateTransitSubnet
       - !Ref SubnetTransit

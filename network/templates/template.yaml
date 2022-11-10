@@ -262,14 +262,14 @@ Resources:
   RoutePublicToNetworkFirewallAz1:
     Type: AWS::EC2::Route
     Properties:
-      VpcEndpointId: !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ]
-      GatewayId: !Ref InternetGateway
+      DestinationCidrBlock: 0.0.0.0/0
+      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
   RoutePublicToNetworkFirewallAz2:
     Type: AWS::EC2::Route
     Properties:
-      VpcEndpointId: !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ]
-      GatewayId: !Ref InternetGateway
+      DestinationCidrBlock: 0.0.0.0/0 
+      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
   IPAM:
     Type: AWS::CloudFormation::Stack
