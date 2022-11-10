@@ -113,7 +113,7 @@ Parameters:
     Description: Enable or disable deployment of Notification template [required]
   SharedServices:
     Type: String
-    Default: ENABLED
+    Default: DISABLED
     AllowedValues:
       - ENABLED
       - DISABLED
