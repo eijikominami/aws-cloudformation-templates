@@ -110,8 +110,10 @@ Conditions:
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
   CreateFirewallSubnet: !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
   CreateRoutePublicToInternetGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
+  FirewallSubnetAndPublicSubnetExist: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ],  !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
   TransitGatewayAndPublicSubnetExist: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
+  TransitGatewayAndPublicSubnetOnlyExist: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ], !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
 
 Resources:
@@ -253,15 +255,15 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGatewayId
       RouteTableId: !Ref RouteTablePublic
-  RouteFirewallToInternetGateway:
-    Condition: CreateFirewallSubnet
+  RouteFirewallToNatGateway:
+    Condition: FirewallSubnetAndPublicSubnetExist
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGatewayId
+      NatGatewayId: !Ref NatGateway
       RouteTableId: !Ref RouteTableFirewall
   RouteTransitToNATGateway:
-    Condition: TransitGatewayAndPublicSubnetExist
+    Condition: TransitGatewayAndPublicSubnetOnlyExist
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
