@@ -977,6 +977,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPC
+  # CloudWatch
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
     Properties:

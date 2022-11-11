@@ -12,6 +12,7 @@ Metadata:
           - InternetGatewayId
           - NetworkLoadBalancer
           - SubnetPublicCidrBlock
+          - SubnetPrivateCidrBlock
           - SubnetTransitCidrBlock
           - SubnetFirewallCidrBlock
           - VPCId   
@@ -184,6 +185,12 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RouteTablePublicAssociation:
+    Condition: CreatePublicSubnet
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref RouteTablePublic
+      SubnetId: !Ref SubnetPublic
   RouteTablePrivate:
     Condition: CreatePrivateSubnet
     Type: AWS::EC2::RouteTable
@@ -196,6 +203,12 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RouteTablePrivateAssociation:
+    Condition: CreatePrivateSubnet
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      SubnetId: !Ref SubnetPrivate
   RouteTableTransit:
     Condition: CreateTransitSubnet
     Type: AWS::EC2::RouteTable
@@ -208,6 +221,12 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RouteTableTransitAssociation:
+    Condition: CreateTransitSubnet
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableTransit
+      SubnetId: !Ref SubnetTransit
   RouteTableFirewall:
     Condition: CreateFirewallSubnet
     Type: AWS::EC2::RouteTable
@@ -220,6 +239,13 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RouteTableFirewallAssociation:
+    Condition: CreateFirewallSubnet
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableFirewall
+      SubnetId: !Ref SubnetFirewall
+  # Route
   RoutePublicToInternetGateway:
     Condition: CreateRoutePublicToInternetGateway
     Type: AWS::EC2::Route
@@ -241,18 +267,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway
       RouteTableId: !Ref RouteTableTransit
-  RouteTablePublicAssociation:
-    Condition: CreatePublicSubnet
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties: 
-      RouteTableId: !Ref RouteTablePublic
-      SubnetId: !Ref SubnetPublic
-  RouteTableTransitAssociation:
-    Condition: CreateTransitSubnet
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref RouteTableTransit
-      SubnetId: !Ref SubnetTransit
   # Elastic IP
   EIPForNatGateway:
     Condition: TransitGatewayExists
@@ -347,15 +361,27 @@ Outputs:
       - TransitGatewayExists
       - !Ref EIPForNatGateway
       - ''
+  RouteTableIdPublic:
+    Description: Route table for public subnet
+    Value: !If
+      - CreatePublicSubnet
+      - !GetAtt RouteTablePublic.RouteTableId
+      - ''
+  RouteTableIdPrivate:
+    Description: Route table for private subnet
+    Value: !If
+      - CreatePrivateSubnet
+      - !GetAtt RouteTablePrivate.RouteTableId
+      - ''
   RouteTableIdTransit:
     Description: Route table for Transit Gateway
     Value: !If
       - CreateTransitSubnet
       - !GetAtt RouteTableTransit.RouteTableId
       - ''
-  RouteTableIdPublic:
-    Description: Route table for Public Subnet
+  RouteTableIdFirewall:
+    Description: Route table for firewall subnet
     Value: !If
-      - CreatePublicSubnet
-      - !GetAtt RouteTablePublic.RouteTableId
+      - CreateFirewallSubnet
+      - !GetAtt RouteTableFirewall.RouteTableId
       - ''

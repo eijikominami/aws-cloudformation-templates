@@ -14,11 +14,7 @@ Metadata:
           - Password
           - ShortName
           - SubnetPrivateCidrBlockForAz1
-          - SubnetTransitCidrBlockAz1
           - SubnetPrivateCidrBlockForAz2
-          - SubnetTransitCidrBlockAz2
-          - TransitGatewayId
-          - TransitGatewayDestinationCidrBlock
           - VPCId
       - Label: 
           default: 'Notification Configuration'
@@ -68,29 +64,11 @@ Parameters:
     Default: 10.1.0.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The private subnet CIDR block at AZ1 [required]
-  SubnetTransitCidrBlockAz1:
-    Type: String
-    Default: 10.1.4.128/26
-    AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block at AZ1 [required] 
   SubnetPrivateCidrBlockForAz2:
     Type: String
     Default: 10.1.1.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The private subnet CIDR block at AZ2 [required]
-  SubnetTransitCidrBlockAz2:
-    Type: String
-    Default: 10.1.5.128/26
-    AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block at AZ2 [required]
-  TransitGatewayId:
-    Type: String
-    Default: ''
-    Description: The ID of a transit gateway
-  TransitGatewayDestinationCidrBlock:
-    Type: String
-    Default: ''
-    Description: The IPv4 CIDR block forward to TransitGateway
   VPCId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
@@ -140,7 +118,6 @@ Resources:
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -149,8 +126,6 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn   
-        TransitGatewayId: !Ref TransitGatewayId
-        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
         VPCId: !Ref VPCId
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -175,7 +150,6 @@ Resources:
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalNamePrefix: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -184,8 +158,6 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn 
-        TransitGatewayId: !Ref TransitGatewayId
-        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
         VPCId: !Ref VPCId
         Environment: !Ref Environment
         TagKey: !Ref TagKey
