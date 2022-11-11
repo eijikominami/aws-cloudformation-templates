@@ -171,7 +171,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.50
+        SemanticVersion: 2.0.51
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -212,7 +212,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.50
+        SemanticVersion: 2.0.51
   TransitGateway:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -259,6 +259,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # Route to Network Firewawll
   RoutePublicToNetworkFirewallAz1:
     Type: AWS::EC2::Route
     Properties:
@@ -271,6 +272,31 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0 
       VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
+  # Route to Transit Gateway
+  RoutePublicToTransitGatewayAz1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
+  RoutePublicToTransitGatewayAz2:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
+  RoutePrivateToTransitGatewayAz1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPrivate
+  RoutePrivateToTransitGatewayAz2:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPrivate
   IPAM:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -300,7 +326,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.50
+        SemanticVersion: 2.0.51
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -317,7 +343,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.50
+        SemanticVersion: 2.0.51
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
