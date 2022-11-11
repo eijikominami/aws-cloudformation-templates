@@ -62,7 +62,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -120,7 +120,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -174,7 +174,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -226,7 +226,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -279,7 +279,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -332,7 +332,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -391,7 +391,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -453,7 +453,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -506,7 +506,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 
@@ -558,7 +558,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 2.0.51
+    SemanticVersion: 2.0.53
   NotificationARNs: 
     - String
   Parameters: 

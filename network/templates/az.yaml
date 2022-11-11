@@ -109,9 +109,11 @@ Conditions:
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
   CreateFirewallSubnet: !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
+  CreateNATGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateRoutePublicToInternetGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
+  CreateRouteFirewallToNatGateway: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ],  !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
+  CreateRouteTransitToNATGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ], !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
-  TransitGatewayAndPublicSubnetExist: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
 
 Resources:
@@ -253,15 +255,15 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGatewayId
       RouteTableId: !Ref RouteTablePublic
-  RouteFirewallToInternetGateway:
-    Condition: CreateFirewallSubnet
+  RouteFirewallToNatGateway:
+    Condition: CreateRouteFirewallToNatGateway
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGatewayId
+      NatGatewayId: !Ref NatGateway
       RouteTableId: !Ref RouteTableFirewall
   RouteTransitToNATGateway:
-    Condition: TransitGatewayAndPublicSubnetExist
+    Condition: CreateRouteTransitToNATGateway
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
@@ -294,7 +296,7 @@ Resources:
           Value: !Ref TagValue
   # NatGateway
   NatGateway:
-    Condition: TransitGatewayAndPublicSubnetExist
+    Condition: CreateNATGateway
     Type: AWS::EC2::NatGateway
     Properties: 
       AllocationId: !GetAtt EIPForNatGateway.AllocationId
@@ -318,7 +320,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.0.51
+        SemanticVersion: 2.0.53
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
