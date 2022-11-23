@@ -59,7 +59,7 @@ Resources:
   NetworkFirewall:
     Type: AWS::NetworkFirewall::Firewall
     Properties: 
-      DeleteProtection: true
+      DeleteProtection: false
       Description: Network Firewall for Egress VPC
       FirewallName: Default
       FirewallPolicyArn: !GetAtt NetworkFirewallPolicy.FirewallPolicyArn

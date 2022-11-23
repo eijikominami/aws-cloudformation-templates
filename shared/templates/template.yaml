@@ -140,6 +140,7 @@ Resources:
       Parameters: 
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
+        LogicalNamePrefix: !Ref AWS::StackName
         Name: !Ref ActiveDirectoryName
         Password: !Ref ActiveDirectoryPassword
         ShortName: !Ref ActiveDirectoryShortName
@@ -290,6 +291,9 @@ Resources:
     Type: AWS::EC2::VPC
     Properties: 
       CidrBlock: !Ref VPCCidrBlock
+      # VPC endpoint uses a private DNS.
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
       Tags:
         - Key: Name
           Value: !Sub vpc-${AWS::StackName}-${AWS::Region}

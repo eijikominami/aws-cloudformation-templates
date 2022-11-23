@@ -6,7 +6,7 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: ' Microsoft Active Directory Configuration'
+          default: 'Microsoft Active Directory Configuration'
         Parameters: 
           - Edition
           - EnableSso
@@ -17,6 +17,10 @@ Metadata:
           - SubnetPrivateCidrBlockForAz2
           - VPCId
       - Label: 
+          default: 'Management Instance Configuration'
+        Parameters: 
+          - EC2ImageId
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -24,11 +28,17 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - LogicalNamePrefix
           - Environment 
           - TagKey
           - TagValue
 
 Parameters:
+  EC2ImageId:
+    Type: AWS::EC2::Image::Id
+    Default: ami-099772c3838a3bec1
+    AllowedPattern: ^ami-.+$
+    Description: The EC2 Image Id [required]
   Edition:
     Type: String
     Default: Standard
@@ -43,6 +53,11 @@ Parameters:
       - true
       - false
     Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [required]
+  LogicalNamePrefix:
+    Type: String
+    Default: MicrosoftAD
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Name:
     Type: String
     Default: corp.example.com
@@ -194,6 +209,54 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # IAM
+  IAMRoleForManagementInstance:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Managed Instances.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        # for Microsoft AD
+        - arn:aws:iam::aws:policy/AmazonSSMDirectoryServiceAccess
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub 'arn:aws:s3:::aws-ssm-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::aws-windows-downloads-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::amazon-ssm-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::amazon-ssm-packages-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::${AWS::Region}-birdwatcher-prod/*'
+                  - !Sub 'arn:aws:s3:::aws-ssm-distributor-file-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::aws-ssm-document-attachments-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::patch-baseline-snapshot-${AWS::Region}/*'
+      RoleName: !Sub '${LogicalNamePrefix}-AWSEC2Role-${AWS::Region}'
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IamInstanceProfileForIAMRoleForManagementInstance:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName: !Ref IAMRoleForManagementInstance
+      Roles: 
+        - !Ref IAMRoleForManagementInstance
+  # Active Directory
   ActiveDirectory:
     Type: AWS::DirectoryService::MicrosoftAD
     Properties: 
@@ -208,3 +271,185 @@ Resources:
             - !GetAtt Az1.Outputs.PrivateSubnetId
             - !GetAtt Az2.Outputs.PrivateSubnetId
           VpcId: !Ref VPCId
+  DHCPOptions:
+    Type: AWS::EC2::DHCPOptions
+    Properties: 
+      DomainName: !Ref Name
+      DomainNameServers: 
+        - AmazonProvidedDNS
+      Tags: 
+        - Key: Name
+          Value: !Sub dopt-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  DHCPOptionsAssociation:
+    Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Properties: 
+      DhcpOptionsId: !GetAtt DHCPOptions.DhcpOptionsId
+      VpcId: !Ref VPCId
+  # EC2
+  ManagementInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      BlockDeviceMappings: 
+        - DeviceName: /dev/sda1
+          Ebs: 
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 30
+            VolumeType: gp3
+      EbsOptimized: true
+      ImageId: !Ref EC2ImageId
+      IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForManagementInstance
+      InstanceInitiatedShutdownBehavior: stop
+      InstanceType: t3.micro
+      Monitoring: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForManagementInstance
+      SsmAssociations: 
+        - AssociationParameters: 
+            - Key: directoryId
+              Value:
+               - !Ref ActiveDirectory
+            - Key: directoryName
+              Value:
+               - !Ref Name
+            - Key: dnsIpAddresses
+              Value: !GetAtt ActiveDirectory.DnsIpAddresses
+          DocumentName: !Ref EC2DomainJoin
+      SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
+      Tags: 
+        - Key: Name
+          Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  EC2DomainJoin:
+    Type: AWS::SSM::Document
+    Properties: 
+      Content: 
+        schemaVersion: '1.2'
+        description: Join instances to an AWS Directory Service domain.
+        parameters: 
+          directoryId: 
+            type: String
+            description: (Required) The ID of the AWS Directory Service directory.
+          directoryName: 
+            type: String
+            description: (Required) The name of the directory; for example, test.example.com
+          dnsIpAddresses: 
+            type: StringList
+            description: (Optional) The IP addresses of the DNS servers in the directory. Required when DHCP is not configured. Learn more at http://docs.aws.amazon.com/directoryservice/latest/simple-ad/join_get_dns_addresses.html
+        runtimeConfig: 
+          aws:domainJoin: 
+            properties: 
+              directoryId: '{{ directoryId }}'
+              directoryName: '{{ directoryName }}'
+              dnsIpAddresses: '{{ dnsIpAddresses }}'
+  SecurityGroupForManagementInstance:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt
+      GroupDescription: Security Group for a management instance
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  SSMEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PolicyDocument:
+        Statement:
+          Principal: '*'
+          Action:
+            - ssm:ListCommands
+            - ssm:ListCommandInvocations
+            - ssm:GetCommandInvocation
+          Effect: Allow
+          Resource: '*'
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  SSMMessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PolicyDocument:
+        Statement:
+          Principal: '*'
+          Action:
+            - ssm:ListCommands
+            - ssm:ListCommandInvocations
+            - ssm:GetCommandInvocation
+          Effect: Allow
+          Resource: '*'
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  EC2MessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Statement:
+          Principal: '*'
+          Action:
+            - ssm:ListCommands
+            - ssm:ListCommandInvocations
+            - ssm:GetCommandInvocation
+          Effect: Allow
+          Resource: '*'
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2messages
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  SecurityGroupForEndpoint:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+      GroupDescription: Security Group for VPC Endpoints
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId

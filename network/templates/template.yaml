@@ -272,38 +272,44 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0 
       VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
-  RoutePublicToNetworkFirewallAz1:
+  RouteInternetGatewayToNetworkFirewall:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+      GatewayId: !Ref InternetGateway
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
-  RoutePublicToNetworkFirewallAz2:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
-      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
   # Route to Transit Gateway
   RouteFirewallToTransitGatewayAz1:
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdFirewall
   RouteFirewallToTransitGatewayAz2:
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdFirewall
   RoutePrivateToTransitGatewayAz1:
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPrivate
   RoutePrivateToTransitGatewayAz2:
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
