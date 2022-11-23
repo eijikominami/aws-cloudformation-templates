@@ -269,12 +269,19 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  RouteInternetGatewayToNetworkFirewall:
+  # Single-AZ (SPOF)
+  RouteInternetGatewayToNetworkFirewallAz1:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-      GatewayId: !Ref InternetGateway
+      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
       RouteTableId: !Ref RouteTableInternetGateway
+#  RouteInternetGatewayToNetworkFirewallAz2:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+#      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+#      RouteTableId: !Ref RouteTableInternetGateway
   # Route to Transit Gateway
   RouteFirewallToTransitGatewayAz1:
     DependsOn:

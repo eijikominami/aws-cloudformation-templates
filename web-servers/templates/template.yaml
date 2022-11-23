@@ -948,6 +948,11 @@ Resources:
       # 'sg-' prefix is NOT permitted.
       GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
       GroupDescription: Security Group for Web Server
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
           Description: http
@@ -964,11 +969,6 @@ Resources:
           FromPort: -1
           ToPort: -1
           IpProtocol: ICMP
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
       Tags:
         - Key: Name
           Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-web

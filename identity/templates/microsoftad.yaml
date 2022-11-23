@@ -305,6 +305,7 @@ Resources:
       IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForManagementInstance
       InstanceInitiatedShutdownBehavior: stop
       InstanceType: t3.micro
+      KeyName: !Ref EC2KeyPair
       Monitoring: true
       SecurityGroupIds: 
         - !Ref SecurityGroupForManagementInstance
@@ -327,6 +328,11 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # Key is stored in AWS Systems Manager Parameter Store
+  EC2KeyPair:
+    Type: 'AWS::EC2::KeyPair'
+    Properties:
+      KeyName: !Sub ec2-${AWS::StackName}-${AWS::Region}
   EC2DomainJoin:
     Type: AWS::SSM::Document
     Properties: 
@@ -359,6 +365,11 @@ Resources:
           FromPort: 0
           ToPort: 0
           IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
       Tags:
         - Key: Name
           Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt
@@ -367,18 +378,10 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
+  # SSM
   SSMEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties: 
-      PolicyDocument:
-        Statement:
-          Principal: '*'
-          Action:
-            - ssm:ListCommands
-            - ssm:ListCommandInvocations
-            - ssm:GetCommandInvocation
-          Effect: Allow
-          Resource: '*'
       PrivateDnsEnabled: true
       SecurityGroupIds: 
         - !Ref SecurityGroupForEndpoint
@@ -391,15 +394,6 @@ Resources:
   SSMMessagesEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties: 
-      PolicyDocument:
-        Statement:
-          Principal: '*'
-          Action:
-            - ssm:ListCommands
-            - ssm:ListCommandInvocations
-            - ssm:GetCommandInvocation
-          Effect: Allow
-          Resource: '*'
       PrivateDnsEnabled: true
       SecurityGroupIds: 
         - !Ref SecurityGroupForEndpoint
@@ -412,15 +406,6 @@ Resources:
   EC2MessagesEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      PolicyDocument:
-        Statement:
-          Principal: '*'
-          Action:
-            - ssm:ListCommands
-            - ssm:ListCommandInvocations
-            - ssm:GetCommandInvocation
-          Effect: Allow
-          Resource: '*'
       PrivateDnsEnabled: true
       SecurityGroupIds: 
         - !Ref SecurityGroupForEndpoint
@@ -436,15 +421,25 @@ Resources:
       GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
       GroupDescription: Security Group for VPC Endpoints
       SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz2
           FromPort: 0
           ToPort: 0
           IpProtocol: '-1'
       SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz2
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
       Tags:
         - Key: Name
           Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
@@ -452,4 +447,10 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
       VpcId: !Ref VPCId
