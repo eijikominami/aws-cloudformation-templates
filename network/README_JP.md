@@ -52,11 +52,9 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 | PrincipalsToAssociateWithTransitGateway | String | | | Specifies a list of one or more principals to associate with Transit Gateway | 
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック | 
 | SubnetTransitCidrBlockAz1 | String | 10.0.0.64/26 | ○ | AZ1 の Transit サブネットの CIDR ブロック | 
-| SubnetPrivateCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | AZ1 の プライベートサブネットの CIDR ブロック| 
 | SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | AZ1 の Firewall サブネットの CIDR ブロック | 
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック | 
 | SubnetTransitCidrBlockAz2 | String | 10.0.4.64/26 | ○ | AZ2 の Transit サブネットの CIDR ブロック | 
-| SubnetPrivateCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | AZ2 の プライベートサブネットの CIDR ブロック | 
 | SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26 | ○ | AZ2 の Firewall サブネットの CIDR ブロック | 
 | TransitGatewayDestinationCidrBlock | String | | | Transit Gateway に転送するサブネットの CIDR ブロック | 
 | VPCCidrBlock | String | 10.0.0.0/16 | ○ | VPC の CIDR ブロック | 

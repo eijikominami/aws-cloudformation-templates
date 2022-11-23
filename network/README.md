@@ -52,11 +52,9 @@ You can provide optional parameters as follows:
 | PrincipalsToAssociateWithTransitGateway | String | | | Specifies a list of one or more principals to associate with Transit Gateway | 
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block at AZ1 | 
 | SubnetTransitCidrBlockAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block at AZ1 | 
-| SubnetPrivateCidrBlockForAz1 | String | 10.0.1.0/24 | ○ | The public subnet CIDR block at AZ1 | 
 | SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | The firewall subnet CIDR block at AZ1 | 
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block at AZ2 | 
 | SubnetTransitCidrBlockAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block at AZ2 | 
-| SubnetPrivateCidrBlockForAz2 | String | 10.0.5.0/24 | ○ | The public subnet CIDR block at AZ2 | 
 | SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26 | ○ | The firewall subnet CIDR block at AZ2 | 
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
 | VPCCidrBlock | String | 10.0.0.0/16 | ○ | The VPC CIDR block | 
