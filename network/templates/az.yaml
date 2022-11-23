@@ -345,6 +345,12 @@ Outputs:
       - CreateTransitSubnet
       - !Ref SubnetTransit
       - ''
+  FirewallSubnetId:
+    Description: Firewall subnet id
+    Value: !If
+      - CreateFirewallSubnet
+      - !Ref SubnetFirewall
+      - ''
   NetworkLoadBalancerIPAllocationId:
     Description: Network Load Balancer IP Allocation Id
     Value: !If
