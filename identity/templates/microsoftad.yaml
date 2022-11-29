@@ -317,9 +317,7 @@ Resources:
             - Key: directoryName
               Value:
                - !Ref Name
-            - Key: dnsIpAddresses
-              Value: !GetAtt ActiveDirectory.DnsIpAddresses
-          DocumentName: !Ref EC2DomainJoin
+          DocumentName: AWS-JoinDirectoryServiceDomain
       SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
       Tags: 
         - Key: Name
@@ -328,37 +326,16 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # Key is stored in AWS Systems Manager Parameter Store
+  # The key is stored in AWS Systems Manager Parameter Store
   EC2KeyPair:
-    Type: 'AWS::EC2::KeyPair'
+    Type: AWS::EC2::KeyPair
     Properties:
       KeyName: !Sub ec2-${AWS::StackName}-${AWS::Region}
-  EC2DomainJoin:
-    Type: AWS::SSM::Document
-    Properties: 
-      Content: 
-        schemaVersion: '1.2'
-        description: Join instances to an AWS Directory Service domain.
-        parameters: 
-          directoryId: 
-            type: String
-            description: (Required) The ID of the AWS Directory Service directory.
-          directoryName: 
-            type: String
-            description: (Required) The name of the directory; for example, test.example.com
-          dnsIpAddresses: 
-            type: StringList
-            description: (Optional) The IP addresses of the DNS servers in the directory. Required when DHCP is not configured. Learn more at http://docs.aws.amazon.com/directoryservice/latest/simple-ad/join_get_dns_addresses.html
-        runtimeConfig: 
-          aws:domainJoin: 
-            properties: 
-              directoryId: '{{ directoryId }}'
-              directoryName: '{{ directoryName }}'
-              dnsIpAddresses: '{{ dnsIpAddresses }}'
   SecurityGroupForManagementInstance:
     Type: AWS::EC2::SecurityGroup
-    Properties: 
-      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt
+    Properties:
+      # CloudFormation cannot update a stack when a custom-named resource requires replacing.
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt-20221129
       GroupDescription: Security Group for a management instance
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
@@ -415,10 +392,22 @@ Resources:
         - !GetAtt Az2.Outputs.PrivateSubnetId
       VpcEndpointType: Interface
       VpcId: !Ref VPCId
+  CloudWatchLogsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
   SecurityGroupForEndpoint:
     Type: AWS::EC2::SecurityGroup
     Properties: 
-      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce-20221129
       GroupDescription: Security Group for VPC Endpoints
       SecurityGroupEgress:
         - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
@@ -454,3 +443,14 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcEndpointType: Gateway
       VpcId: !Ref VPCId
+
+Outputs:
+  RouteTableIdPrivateAz1:
+    Description: Route table for private subnet
+    Value: !GetAtt Az1.Outputs.RouteTableIdPrivate
+  RouteTableIdPrivateAz2:
+    Description: Route table for private subnet
+    Value: !GetAtt Az2.Outputs.RouteTableIdPrivate
+  WindowsServerKeyPair:
+    Description: The key pair for Windows Server
+    Value: The key is stored in AWS Systems Manager Parameter Store.

@@ -72,7 +72,7 @@ Parameters:
     Description: The CNAME attached to Elastic Load Balancer
   EC2ImageId:
     Type: AWS::EC2::Image::Id
-    Default: ami-068a6cefc24c301d2
+    Default: ami-099772c3838a3bec1
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [required]
   EC2InstanceType:

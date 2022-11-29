@@ -315,6 +315,24 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RoutePrivateToTransitGatewayAz1:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz1
+  RoutePrivateToTransitGatewayAz2:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz2
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Condition: CreateTransitGateway
