@@ -135,6 +135,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | セキュリティチェックに関する通知フィルタ | 
 
+### マルチアカウント対応
+
+Amazon GuardDuty や AWS Security Hub を `Security tooling` アカウント、もしくは `Security view-only (Audit)` アカウントで使用する場合は、これらのアカウントを管理アカウントにて[管理者アカウントに指定](https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/designate-orgs-admin-account.html)してください。
+
 ## Center for Internet Security (CIS) ベンチマークへの準拠
 
 このテンプレートを実行することで、Center for Internet Security (CIS) ベンチマークの以下の項目に準拠します。

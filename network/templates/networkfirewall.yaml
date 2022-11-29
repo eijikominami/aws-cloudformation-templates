@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/network/networkfirewall creates an Network Firewall.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'AvailabilityZone Configuration'
+        Parameters: 
+          - SubnetIdAz1
+          - SubnetIdAz2
+          - SubnetIdAz3
+          - VPCId
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  SubnetIdAz1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id at AZ1 [required]
+  SubnetIdAz2:
+    Type: String
+    Default: ''
+    Description: The subnet id at AZ2
+  SubnetIdAz3:
+    Type: String
+    Default: ''
+    Description: The subnet id at AZ3
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    AllowedPattern: .+
+    Description: The VPC id [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateSubnetAz2: !Not [ !Equals [ !Ref SubnetIdAz2, ''] ]
+  CreateSubnetAz3: !Not [ !Equals [ !Ref SubnetIdAz3, ''] ]
+
+Resources:
+  NetworkFirewall:
+    Type: AWS::NetworkFirewall::Firewall
+    Properties: 
+      DeleteProtection: false
+      Description: Network Firewall for Egress VPC
+      FirewallName: Default
+      FirewallPolicyArn: !GetAtt NetworkFirewallPolicy.FirewallPolicyArn
+      FirewallPolicyChangeProtection: false
+      SubnetChangeProtection: false
+      SubnetMappings: 
+        - SubnetId: !Ref SubnetIdAz1
+        - !If
+          - CreateSubnetAz2
+          - SubnetId: !Ref SubnetIdAz2
+          - !Ref AWS::NoValue
+        - !If
+          - CreateSubnetAz3
+          - SubnetId: !Ref SubnetIdAz3
+          - !Ref AWS::NoValue
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  NetworkFirewallPolicy:
+    Type: AWS::NetworkFirewall::FirewallPolicy
+    Properties: 
+      Description: Network Firewall policy for Egress VPC
+      FirewallPolicy: 
+        StatelessDefaultActions:
+          - 'aws:pass'
+        StatelessFragmentDefaultActions:
+          - 'aws:drop'
+        StatefulRuleGroupReferences:
+          - ResourceArn: !Ref NetworkFirewallPolicyStatefullGroup
+        StatelessRuleGroupReferences:
+          - ResourceArn: !Ref NetworkFirewallPolicyStatelessGroup
+            Priority: 100
+      FirewallPolicyName: Default
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  NetworkFirewallPolicyStatefullGroup:
+    Type: AWS::NetworkFirewall::RuleGroup
+    Properties: 
+      Capacity: 100
+      Description: Network Firewall rule group for Egress VPC
+      RuleGroup: 
+        RulesSource:
+          RulesString: >-
+            pass tcp 10.20.20.0/24 45400:45500 <> 10.10.10.0/24 5203
+            (msg:"test";sid:1;rev:1;)
+      RuleGroupName: StatefullDefault
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: STATEFUL
+  NetworkFirewallPolicyStatelessGroup:
+    Type: AWS::NetworkFirewall::RuleGroup
+    Properties: 
+      Capacity: 100
+      Description: Network Firewall rule group for Egress VPC
+      RuleGroup: 
+        RulesSource:
+          StatelessRulesAndCustomActions:
+            StatelessRules:
+              - RuleDefinition:
+                  MatchAttributes:
+                    Sources:
+                      - AddressDefinition: 0.0.0.0/0
+                    Destinations:
+                      - AddressDefinition: 10.0.0.0/8
+                    SourcePorts:
+                      - FromPort: 15000
+                        ToPort: 30000
+                    DestinationPorts:
+                      - FromPort: 443
+                        ToPort: 443
+                    Protocols:
+                      - 6
+                  Actions:
+                    - 'aws:pass'
+                Priority: 1
+      RuleGroupName: StatelessDefault
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: STATELESS
+
+Outputs:
+  EndpointIds:
+    Description: Endpoint Ids
+    Value: !Join
+     - ','
+     - !GetAtt NetworkFirewall.EndpointIds

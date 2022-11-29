@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/network/ipam creates an Amazon VPC IP Address Manager (IPAM).
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'RAM Configuration'
+        Parameters:
+          - PrincipalsToAssociateWithIPAM
+      - Label: 
+          default: 'IPAM Configuration'
+        Parameters:
+          - ProvisionedCidrs
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  PrincipalsToAssociateWithIPAM:
+    Type: String
+    Default: ''
+    Description: Specifies a list of one or more principals to associate with IPAM
+  ProvisionedCidrs:
+    Type: String
+    Default: 10.0.0.0/8
+    AllowedPattern: ^[0-9./]*$
+    Description: The CIDR provisioned to the IPAM pool [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  IPAM:
+    Type: AWS::EC2::IPAM
+    Properties: 
+      Description: Default IPAM
+      OperatingRegions: 
+        - RegionName: !Ref AWS::Region
+      Tags:
+        - Key: Name
+          Value: default
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IPAMPool:
+    Type: AWS::EC2::IPAMPool
+    Properties: 
+      AddressFamily: ipv4
+      AllocationDefaultNetmaskLength: 24
+      AllocationResourceTags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      AutoImport: true
+      Description: Top level pool
+      IpamScopeId: !GetAtt IPAM.PrivateDefaultScopeId
+      Locale: !Ref AWS::Region
+      ProvisionedCidrs: 
+        - Cidr: !Ref ProvisionedCidrs
+      Tags: 
+        - Key: Name
+          Value: default
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  RAMForIPAM:
+    Type: AWS::RAM::ResourceShare
+    Properties: 
+      AllowExternalPrincipals: false
+      Name: IPAM
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionsIpamPool
+      Principals: 
+        - !Ref PrincipalsToAssociateWithIPAM
+      ResourceArns: 
+        - !GetAtt IPAMPool.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

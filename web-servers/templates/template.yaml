@@ -228,22 +228,22 @@ Parameters:
     Description: Route53 hosted zone id
   SubnetPublicCidrBlockForAz1:
     Type: String
-    Default: 10.0.0.0/24
+    Default: 10.1.0.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.0.3.0/24
+    Default: 10.1.3.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block
   SubnetPublicCidrBlockForAz2:
     Type: String
-    Default: 10.0.4.0/24
+    Default: 10.1.4.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.0.7.0/24
+    Default: 10.1.7.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block
   TransitGatewayId:
@@ -256,7 +256,7 @@ Parameters:
     Description: The IPv4 CIDR block forward to TransitGateway
   VPCCidrBlock:
     Type: String
-    Default: 10.0.0.0/21
+    Default: 10.1.0.0/21
     AllowedPattern: ^[0-9./]*$
     Description: The VPC CIDR block [required]
   WebACL:
@@ -354,7 +354,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -397,7 +397,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -612,7 +612,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -629,7 +629,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -813,6 +813,55 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Peering connections with Transit Gateway and VPC for outbound traffic
+  TransitGatewayAttachment:
+    Condition: CreateTransitGateway
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties: 
+      SubnetIds:
+        - !GetAtt Az1.Outputs.TransitSubnetId
+        - !GetAtt Az2.Outputs.TransitSubnetId
+      Tags:
+        - Key: Name
+          Value: !Sub tgw-attach-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGatewayId
+      VpcId: !Ref VPC
+  RouteTransitToTransitGatewayAz1:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
+  RouteTransitToTransitGatewayAz2:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
   # Internet GW
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -899,6 +948,11 @@ Resources:
       # 'sg-' prefix is NOT permitted.
       GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
       GroupDescription: Security Group for Web Server
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
           Description: http
@@ -915,11 +969,6 @@ Resources:
           FromPort: -1
           ToPort: -1
           IpProtocol: ICMP
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
       Tags:
         - Key: Name
           Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
@@ -928,21 +977,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPC
-  # VPC FlowLog
-  VPCFlowLog:
-    Type: AWS::EC2::FlowLog
-    Properties: 
-      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
-      LogDestinationType: cloud-watch-logs
-      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
-      ResourceId: !Ref VPC
-      ResourceType: VPC
-      TrafficType: ALL
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+  # CloudWatch
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -970,7 +1005,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -996,7 +1031,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

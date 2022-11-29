@@ -6,22 +6,20 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: ' Microsoft Active Directory Configuration'
+          default: 'Microsoft Active Directory Configuration'
         Parameters: 
           - Edition
           - EnableSso
           - Name
           - Password
-          - RemoteDesktopGatewayEC2KeyName
-          - RemoteDesktopGatewayWhitelistRules
           - ShortName
-          - SubnetPublicCidrBlockForAz1
-          - SubnetTransitCidrBlockAz1
-          - SubnetPublicCidrBlockForAz2
-          - SubnetTransitCidrBlockAz2
-          - TransitGatewayId
-          - TransitGatewayDestinationCidrBlock
-          - VPCCidrBlock
+          - SubnetPrivateCidrBlockForAz1
+          - SubnetPrivateCidrBlockForAz2
+          - VPCId
+      - Label: 
+          default: 'Management Instance Configuration'
+        Parameters: 
+          - EC2ImageId
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -30,11 +28,17 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - LogicalNamePrefix
           - Environment 
           - TagKey
           - TagValue
 
 Parameters:
+  EC2ImageId:
+    Type: AWS::EC2::Image::Id
+    Default: ami-099772c3838a3bec1
+    AllowedPattern: ^ami-.+$
+    Description: The EC2 Image Id [required]
   Edition:
     Type: String
     Default: Standard
@@ -49,6 +53,11 @@ Parameters:
       - true
       - false
     Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [required]
+  LogicalNamePrefix:
+    Type: String
+    Default: MicrosoftAD
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Name:
     Type: String
     Default: corp.example.com
@@ -60,53 +69,25 @@ Parameters:
     AllowedPattern: (?=^.{8,64}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*[a-z])|(?=.*[^A-Za-z0-9\s])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9\s]))^.*
     NoEcho: true
     Description: The password for the default administrative user named Admin [required]
-  RemoteDesktopGatewayEC2KeyName:
-    Type: String
-    AllowedPattern: .+
-    Description: The name of an existing EC2 KeyPair to enable SSH access to the instance [required]
-  RemoteDesktopGatewayWhitelistRules:
-    Type: String
-    AllowedPattern: ^[0-9./]*$
-    Default: 0.0.0.0/0
-    Description: A list of one or more IPv4 CIDR addresses to allow (e.g. 0.0.0.0/0) [required]
   ShortName:
     Type: String
     Default: CORP
     AllowedPattern: ^[^\\/:*?"<>|.]+[^\\/:*?"<>|]*$
     Description: The NetBIOS name for your domain [required]
-  SubnetPublicCidrBlockForAz1:
+  SubnetPrivateCidrBlockForAz1:
     Type: String
-    Default: 10.0.0.0/24
+    Default: 10.1.0.64/26
     AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ1 [required]
-  SubnetTransitCidrBlockAz1:
+    Description: The private subnet CIDR block at AZ1 [required]
+  SubnetPrivateCidrBlockForAz2:
     Type: String
-    Default: 10.0.4.0/24
+    Default: 10.1.1.64/26
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block at AZ1 [required] 
-  SubnetPublicCidrBlockForAz2:
-    Type: String
-    Default: 10.0.1.0/24
-    AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ2 [required]
-  SubnetTransitCidrBlockAz2:
-    Type: String
-    Default: 10.0.5.0/24
-    AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block at AZ2 [required]
-  TransitGatewayId:
-    Type: String
-    Default: ''
-    Description: The ID of a transit gateway
-  TransitGatewayDestinationCidrBlock:
-    Type: String
-    Default: ''
-    Description: The IPv4 CIDR block forward to TransitGateway
-  VPCCidrBlock:
-    Type: String
-    Default: 10.0.0.0/21
-    AllowedPattern: ^[0-9./]*$
-    Description: The VPC CIDR block [required]
+    Description: The private subnet CIDR block at AZ2 [required]
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    AllowedPattern: .+
+    Description: The VPC id [required]
   SNSForAlertArn:
     Type: String
     Default: ''   
@@ -132,42 +113,15 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
-  RemoteDesktopGateway:
-    DependsOn:
-      - ActiveDirectory  
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        DomainAdminPassword: !Ref Password
-        DomainNetBIOSName: !Ref ShortName
-        DomainDNSName: !Ref Name
-        DomainMemberSGID: !Ref SecurityGroupForRemoteDesktopGateway
-        KeyPairName: !Ref RemoteDesktopGatewayEC2KeyName
-        PublicSubnet1ID: !GetAtt Az1.Outputs.PublicSubnetId
-        PublicSubnet2ID: !GetAtt Az2.Outputs.PublicSubnetId
-        RDGWCIDR: !Ref RemoteDesktopGatewayWhitelistRules
-        VPCID: !Ref VPC
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: https://aws-quickstart.s3.amazonaws.com/quickstart-microsoft-rdgateway/templates/rdgw-domain.template
   Az1:
-    DependsOn:
-      # NATGateway requires provisioned Internet Gateway.
-      - InternetGatewayAttachment  
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -177,10 +131,8 @@ Resources:
         AvailabilityZone: !Select 
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
-        InternetGatewayId: !Ref InternetGateway
         LogicalNamePrefix: !Ref AWS::StackName
-        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -189,27 +141,19 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn   
-        TransitGatewayId: !Ref TransitGatewayId
-        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-        VPCId: !Ref VPC
+        VPCId: !Ref VPCId
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   Az2:
-    DependsOn:
-      # NATGateway requires provisioned Internet Gateway.
-      - InternetGatewayAttachment  
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -219,10 +163,8 @@ Resources:
         AvailabilityZone: !Select
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
-        InternetGatewayId: !Ref InternetGateway
         LogicalNamePrefix: !Ref AWS::StackName
-        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -231,28 +173,20 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn 
-        TransitGatewayId: !Ref TransitGatewayId
-        TransitGatewayDestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-        VPCId: !Ref VPC
+        VPCId: !Ref VPCId
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/az.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/az.yaml
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -269,63 +203,60 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties: 
+  # IAM
+  IAMRoleForManagementInstance:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Managed Instances.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        # for Microsoft AD
+        - arn:aws:iam::aws:policy/AmazonSSMDirectoryServiceAccess
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub 'arn:aws:s3:::aws-ssm-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::aws-windows-downloads-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::amazon-ssm-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::amazon-ssm-packages-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::${AWS::Region}-birdwatcher-prod/*'
+                  - !Sub 'arn:aws:s3:::aws-ssm-distributor-file-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::aws-ssm-document-attachments-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::patch-baseline-snapshot-${AWS::Region}/*'
+      RoleName: !Sub '${LogicalNamePrefix}-AWSEC2Role-${AWS::Region}'
       Tags:
-        - Key: Name
-          Value: !Sub igw-${AWS::StackName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  SecurityGroupForRemoteDesktopGateway:
-    Type: AWS::EC2::SecurityGroup
+  IamInstanceProfileForIAMRoleForManagementInstance:
+    Type: AWS::IAM::InstanceProfile
     Properties: 
-      # 'sg-' prefix is NOT permitted.
-      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
-      GroupDescription: Security Group for Remote Desktop Gateway
-      SecurityGroupIngress:
-        - CidrIp: !Ref RemoteDesktopGatewayWhitelistRules
-          Description: rdp
-          FromPort: 3389
-          ToPort: 3389
-          IpProtocol: TCP
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
-      Tags:
-        - Key: Name
-          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      VpcId: !Ref VPC
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties: 
-      InternetGatewayId: !Ref InternetGateway
-      VpcId: !Ref VPC
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties: 
-      CidrBlock: !Ref VPCCidrBlock
-      Tags:
-        - Key: Name
-          Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+      InstanceProfileName: !Ref IAMRoleForManagementInstance
+      Roles: 
+        - !Ref IAMRoleForManagementInstance
+  # Active Directory
   ActiveDirectory:
     Type: AWS::DirectoryService::MicrosoftAD
     Properties: 
@@ -337,14 +268,189 @@ Resources:
       ShortName: !Ref ShortName
       VpcSettings: 
           SubnetIds: 
-            - !GetAtt Az1.Outputs.PublicSubnetId
-            - !GetAtt Az2.Outputs.PublicSubnetId
-          VpcId: !Ref VPC
-
-Outputs:
-  RemoteDesktopGatewayUrl:
-    Description: ELB DNS name to connect to RDP Gateway.
-    Value: !GetAtt RemoteDesktopGateway.Outputs.RDPURL
-  RemoteDesktopGatewaySecurityGroupId:
-    Description: Remote Desktop Gateway security group ID.
-    Value: !GetAtt RemoteDesktopGateway.Outputs.RemoteDesktopGatewaySGID
+            - !GetAtt Az1.Outputs.PrivateSubnetId
+            - !GetAtt Az2.Outputs.PrivateSubnetId
+          VpcId: !Ref VPCId
+  DHCPOptions:
+    Type: AWS::EC2::DHCPOptions
+    Properties: 
+      DomainName: !Ref Name
+      DomainNameServers: 
+        - AmazonProvidedDNS
+      Tags: 
+        - Key: Name
+          Value: !Sub dopt-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  DHCPOptionsAssociation:
+    Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Properties: 
+      DhcpOptionsId: !GetAtt DHCPOptions.DhcpOptionsId
+      VpcId: !Ref VPCId
+  # EC2
+  ManagementInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      BlockDeviceMappings: 
+        - DeviceName: /dev/sda1
+          Ebs: 
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 30
+            VolumeType: gp3
+      EbsOptimized: true
+      ImageId: !Ref EC2ImageId
+      IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForManagementInstance
+      InstanceInitiatedShutdownBehavior: stop
+      InstanceType: t3.micro
+      KeyName: !Ref EC2KeyPair
+      Monitoring: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForManagementInstance
+      SsmAssociations: 
+        - AssociationParameters: 
+            - Key: directoryId
+              Value:
+               - !Ref ActiveDirectory
+            - Key: directoryName
+              Value:
+               - !Ref Name
+            - Key: dnsIpAddresses
+              Value: !GetAtt ActiveDirectory.DnsIpAddresses
+          DocumentName: !Ref EC2DomainJoin
+      SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
+      Tags: 
+        - Key: Name
+          Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Key is stored in AWS Systems Manager Parameter Store
+  EC2KeyPair:
+    Type: 'AWS::EC2::KeyPair'
+    Properties:
+      KeyName: !Sub ec2-${AWS::StackName}-${AWS::Region}
+  EC2DomainJoin:
+    Type: AWS::SSM::Document
+    Properties: 
+      Content: 
+        schemaVersion: '1.2'
+        description: Join instances to an AWS Directory Service domain.
+        parameters: 
+          directoryId: 
+            type: String
+            description: (Required) The ID of the AWS Directory Service directory.
+          directoryName: 
+            type: String
+            description: (Required) The name of the directory; for example, test.example.com
+          dnsIpAddresses: 
+            type: StringList
+            description: (Optional) The IP addresses of the DNS servers in the directory. Required when DHCP is not configured. Learn more at http://docs.aws.amazon.com/directoryservice/latest/simple-ad/join_get_dns_addresses.html
+        runtimeConfig: 
+          aws:domainJoin: 
+            properties: 
+              directoryId: '{{ directoryId }}'
+              directoryName: '{{ directoryName }}'
+              dnsIpAddresses: '{{ dnsIpAddresses }}'
+  SecurityGroupForManagementInstance:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt
+      GroupDescription: Security Group for a management instance
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  # SSM
+  SSMEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  SSMMessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  EC2MessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2messages
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  SecurityGroupForEndpoint:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+      GroupDescription: Security Group for VPC Endpoints
+      SecurityGroupEgress:
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz2
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz2
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      VpcId: !Ref VPCId

@@ -6,10 +6,9 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: 'Network Configuration'
+          default: 'RAM Configuration'
         Parameters:
-          - SubnetIds
-          - VpcId
+          - PrincipalsToAssociateWithTransitGateway
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -19,13 +18,10 @@ Metadata:
           - TagValue
 
 Parameters:
-  SubnetIds:
-    Type: List<AWS::EC2::Subnet::Id>
-    Description: The IDs of one or more subnets [required]  
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-    AllowedPattern: .+
-    Description: The ID of the VPC [required]     
+  PrincipalsToAssociateWithTransitGateway:
+    Type: String
+    Default: ''
+    Description: Specifies a list of one or more principals to associate with Transit Gateway
   Environment:
     Type: String
     Default: production
@@ -47,12 +43,16 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateRAMForTransitGateway: !Not [ !Equals [ !Ref PrincipalsToAssociateWithTransitGateway, ''] ]
+
 Resources:
   TransitGateway:
     Type: AWS::EC2::TransitGateway
     Properties: 
       AmazonSideAsn: 64512
-      AutoAcceptSharedAttachments: disable
+      # Enable automatic acceptance of attachment requests.
+      AutoAcceptSharedAttachments: enable
       DefaultRouteTableAssociation: enable
       DefaultRouteTablePropagation: enable
       Description: !Sub Transit Gateway created by ${AWS::StackName}
@@ -66,48 +66,37 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpnEcmpSupport: enable
-  TransitGatewayAttachment:
-    Type: AWS::EC2::TransitGatewayAttachment
+  RAMForTransitGateway:
+    Condition: CreateRAMForTransitGateway
+    Type: AWS::RAM::ResourceShare
     Properties: 
-      SubnetIds: !Ref SubnetIds
+      AllowExternalPrincipals: false
+      Name: TransitGateway
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionTransitGateway
+      Principals: 
+        - !Ref PrincipalsToAssociateWithTransitGateway
+      ResourceArns: 
+        - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  NetworkManagerGlobalNetwork:
+    Type: AWS::NetworkManager::GlobalNetwork
+    Properties: 
+      Description: Default
       Tags:
         - Key: Name
-          Value: !Sub tgw-attach-${LogicalNamePrefix}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TransitGatewayId: !Ref TransitGateway
-      VpcId: !Ref VpcId
-  TransitGatewayRouteTable:
-    Type: AWS::EC2::TransitGatewayRouteTable
+          Value: default
+  NetworkManagerTransitGatewayRegistration:
+    Type: AWS::NetworkManager::TransitGatewayRegistration
     Properties: 
-      Tags: 
-        - Key: Name
-          Value: !Sub tgw-rtb-${LogicalNamePrefix}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TransitGatewayId: !Ref TransitGateway
-  TransitGatewayRouteTableAssociation:
-    Type: AWS::EC2::TransitGatewayRouteTableAssociation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
-  TransitGatewayRouteTablePropagation:
-    Type: AWS::EC2::TransitGatewayRouteTablePropagation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+      GlobalNetworkId: !Ref NetworkManagerGlobalNetwork
+      TransitGatewayArn: !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}
 
 Outputs:
   TransitGatewayId:
     Description: Transit Gateway Id
     Value: !Ref TransitGateway
-  TransitGatewayAttachmentId:
-    Description: Transit Gateway Attachment Id
-    Value: !Ref TransitGatewayAttachment  
-  TransitGatewayRouteTableId:
-    Description: Transit Gateway Route Table Id
-    Value: !Ref TransitGatewayRouteTable

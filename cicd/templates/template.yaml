@@ -26,8 +26,10 @@ Metadata:
           default: 'Stack Configuration'
         Parameters: 
           - CloudOps
+          - SharedServices
           - StaticWebsiteHosting
           - Notification
+          - Network
           - WebServers
           - UploadArtifacts
       - Label: 
@@ -95,6 +97,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of GlobalSettings template [required]
+  Network:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of Network template [required]
   Notification:
     Type: String
     Default: DISABLED
@@ -102,6 +111,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of Notification template [required]
+  SharedServices:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of CloudOps template [required]
   WebServers:
     Type: String
     Default: DISABLED
@@ -148,6 +164,8 @@ Conditions:
   DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
+  DeployNetwork: !Equals [ !Ref Network, ENABLED]
+  DeploySharedServices: !Equals [ !Ref SharedServices, ENABLED]
   DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]
@@ -160,7 +178,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -180,7 +198,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -195,7 +213,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -801,6 +819,45 @@ Resources:
                   - Name: DeployArtifact-Notification
                 RunOrder: 2
               - !Ref AWS::NoValue
+            # Deploy Network
+            - !If
+              - DeployNetwork
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: Network
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::network/templates/template.yaml
+                  ParameterOverrides: !Join
+                    - ''
+                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - !If
+                        - Development
+                        - development
+                        - production
+                      - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Network.json
+                    - !Ref AWS::NoValue
+                  OutputFileName: Output.json
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: Network
+                OutputArtifacts:
+                  - Name: DeployArtifact-Network
+                RunOrder: 2
+              - !Ref AWS::NoValue
             # Deploy CloudOps
             - !If
               - DeployCloudOps
@@ -846,6 +903,44 @@ Resources:
                 Name: CloudOps
                 OutputArtifacts: 
                   - Name: DeployArtifact-CloudOps
+                RunOrder: 3
+              - !Ref AWS::NoValue
+            # Deploy Shared Services
+            - !If
+              - DeploySharedServices
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: SharedServices
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::shared/templates/template.yaml
+                  ParameterOverrides: !Join
+                    - ''
+                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - !If
+                        - Development
+                        - development
+                        - production
+                      - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SharedServices.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: SharedServices
+                OutputArtifacts: 
+                  - Name: DeployArtifact-SharedServices
                 RunOrder: 3
               - !Ref AWS::NoValue
             # Deploy DefaultSecuritySettings-ConfigRules
@@ -966,7 +1061,11 @@ Resources:
                           - Development
                           - development
                           - production
-                        - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                        - !If
+                          - DeployNetwork
+                          - '", "TransitGatewayId": { "Fn::GetParam": ["DeployArtifact-Network", "Output.json", "TransitGatewayId"]}, '
+                          - '", '
+                        - !Sub '"TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}WebServers.json
@@ -982,6 +1081,10 @@ Resources:
                     - Name: GlobalSettings
                     - !Ref AWS::NoValue
                   - Name: DeployArtifact-CICD
+                  - !If
+                    - DeployNetwork
+                    - Name: DeployArtifact-Network
+                    - !Ref AWS::NoValue
                 Name: WebServers
                 OutputArtifacts: 
                   - Name: DeployArtifact-WebServers
@@ -1040,7 +1143,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1064,7 +1167,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1088,7 +1191,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.0.42
+        SemanticVersion: 2.0.55
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
