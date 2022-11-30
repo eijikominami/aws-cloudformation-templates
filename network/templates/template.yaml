@@ -65,7 +65,7 @@ Parameters:
     Type: String
     Default: 10.0.0.128/26
     AllowedPattern: ^[0-9./]*$
-    Description: The firewall subnet CIDR block at AZ1 [required]
+    Description: The firewall subnet CIDR block at AZ1
   SubnetPublicCidrBlockForAz2:
     Type: String
     Default: 10.0.4.0/26
@@ -80,7 +80,7 @@ Parameters:
     Type: String
     Default: 10.0.4.128/26
     AllowedPattern: ^[0-9./]*$
-    Description: The firewall subnet CIDR block at AZ2 [required]
+    Description: The firewall subnet CIDR block at AZ2
   TransitGatewayDestinationCidrBlock:
     Type: String
     Default: ''
@@ -113,6 +113,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateNetworkFirewall: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -222,6 +223,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   NetworkFirewall:
+    Condition: CreateNetworkFirewall
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -247,43 +249,22 @@ Resources:
           Value: !Ref TagValue
   # Route to Network Firewawll
   RouteTransitToNetworkFirewallAz1:
+    Condition: CreateNetworkFirewall
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
   RouteTransitToNetworkFirewallAz2:
+    Condition: CreateNetworkFirewall
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0 
       VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
-  RouteTableInternetGateway:
-    Type: AWS::EC2::RouteTable
-    Properties: 
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub rtb-${AWS::StackName}-${AWS::Region}-igw
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  # Single-AZ (SPOF)
-  RouteInternetGatewayToNetworkFirewallAz1:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
-      RouteTableId: !Ref RouteTableInternetGateway
-#  RouteInternetGatewayToNetworkFirewallAz2:
-#    Type: AWS::EC2::Route
-#    Properties:
-#      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
-#      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
-#      RouteTableId: !Ref RouteTableInternetGateway
   # Route to Transit Gateway
   RouteFirewallToTransitGatewayAz1:
+    Condition: CreateNetworkFirewall
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
@@ -293,6 +274,7 @@ Resources:
       TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdFirewall
   RouteFirewallToTransitGatewayAz2:
+    Condition: CreateNetworkFirewall
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
