@@ -116,7 +116,6 @@ Conditions:
   CreateNetworkFirewall: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  DisableNetworkFirewall: !Or [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''], !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -248,36 +247,88 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # Route to NAT Gateway
-  RouteTransitToNatGatewatAz1:
-    Condition: DisableNetworkFirewall
+  # The route of the transit subnet
+  RouteTransitAz1:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: Az1.Outputs.NatGatewayId
+      NatGatewayId: !If
+        - CreateNetworkFirewall
+        - !Ref AWS::NoValue
+        - !GetAtt Az1.Outputs.NatGatewayId
+      VpcEndpointId: !If
+        - CreateNetworkFirewall
+        - !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+        - !Ref AWS::NoValue        
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
-  RouteTransitToNatGatewatAz2:
-    Condition: DisableNetworkFirewall
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: Az2.Outputs.NatGatewayId
-      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
-  # Route to Network Firewawll
-  RouteTransitToNetworkFirewallAz1:
-    Condition: CreateNetworkFirewall
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
-      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
-  RouteTransitToNetworkFirewallAz2:
-    Condition: CreateNetworkFirewall
+  RouteTransitAz2:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0 
-      VpcEndpointId: !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+      NatGatewayId: !If
+        - CreateNetworkFirewall
+        - !Ref AWS::NoValue
+        - !GetAtt Az2.Outputs.NatGatewayId
+      VpcEndpointId: !If
+        - CreateNetworkFirewall
+        - !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+        - !Ref AWS::NoValue  
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
+  # The route of the public subnet
+  RoutePubliAz1:
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !If
+        - CreateNetworkFirewall
+        - !Ref AWS::NoValue
+        - !GetAtt TransitGateway.Outputs.TransitGatewayId
+      VpcEndpointId: !If
+        - CreateNetworkFirewall
+        - !Select [ 1, !Split [ ':', !Select [ 0, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+        - !Ref AWS::NoValue
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
+  RoutePublicAz2:
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !If
+        - CreateNetworkFirewall
+        - !Ref AWS::NoValue
+        - !GetAtt TransitGateway.Outputs.TransitGatewayId
+      VpcEndpointId: !If
+        - CreateNetworkFirewall
+        - !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+        - !Ref AWS::NoValue
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
+  # The route of the firewall subnet
+  RouteFirewallToTransitGatewayAz1:
+    Condition: CreateNetworkFirewall
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdFirewall
+  RouteFirewallToTransitGatewayAz2:
+    Condition: CreateNetworkFirewall
+    DependsOn:
+      - TransitGatewayRouteTableAssociation
+      - TransitGatewayRouteTablePropagation
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdFirewall
+  # IPAM
   IPAM:
     Type: AWS::CloudFormation::Stack
     Properties:
