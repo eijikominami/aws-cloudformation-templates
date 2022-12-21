@@ -36,7 +36,7 @@ Metadata:
 Parameters:
   IncidentManager:
     Type: String
-    Default: ENABLED
+    Default: DISABLED
     AllowedValues:
       - ENABLED
       - DISABLED

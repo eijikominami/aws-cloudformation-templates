@@ -40,7 +40,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| IncidentManager | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
+| IncidentManager | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
 | IncidentManagerAlias | String | admimistrator | ○ | 連絡先のエイリアス |
 | IncidentManagerChatbotSnsArn | String | | | AWS Chatbot の ARN |
 | IncidentManagerDisplayName | String | Administrator | ○ | 連絡先のエイリアス |
