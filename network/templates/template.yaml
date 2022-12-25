@@ -24,6 +24,7 @@ Metadata:
           default: 'Transit Gateway Configuration'
         Parameters:
           - PrincipalsToAssociateWithTransitGateway
+          - TransitGatewayDefaultRouteTableId
           - TransitGatewayDestinationCidrBlock    
       - Label: 
           default: 'Notification Configuration'
@@ -64,7 +65,6 @@ Parameters:
   SubnetFirewallCidrBlockForAz1:
     Type: String
     Default: 10.0.0.128/26
-    AllowedPattern: ^[0-9./]*$
     Description: The firewall subnet CIDR block at AZ1
   SubnetPublicCidrBlockForAz2:
     Type: String
@@ -79,12 +79,15 @@ Parameters:
   SubnetFirewallCidrBlockForAz2:
     Type: String
     Default: 10.0.4.128/26
-    AllowedPattern: ^[0-9./]*$
     Description: The firewall subnet CIDR block at AZ2
   TransitGatewayDestinationCidrBlock:
     Type: String
     Default: ''
     Description: The IPv4 CIDR block forward to TransitGateway
+  TransitGatewayDefaultRouteTableId:
+    Type: String
+    Default: ''
+    Description: The id of the default Transit Gateway Route Table
   VPCCidrBlock:
     Type: String
     Default: 10.0.0.0/16
@@ -114,6 +117,8 @@ Parameters:
 
 Conditions:
   CreateNetworkFirewall: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ] ]
+  CreateNetworkFirewallAndTransitGatewayRoute: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ], !Not [ !Equals [ !Ref TransitGatewayDefaultRouteTableId, ''] ] ]
+  CreateTransitGatewayRoute: !Not [ !Equals [ !Ref TransitGatewayDefaultRouteTableId, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -276,6 +281,7 @@ Resources:
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
   # The route of the public subnet
   RoutePubliAz1:
+    Condition: CreateNetworkFirewallAndTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
@@ -292,6 +298,7 @@ Resources:
         - !Ref AWS::NoValue
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
   RoutePublicAz2:
+    Condition: CreateNetworkFirewallAndTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
@@ -309,7 +316,7 @@ Resources:
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
   # The route of the firewall subnet
   RouteFirewallToTransitGatewayAz1:
-    Condition: CreateNetworkFirewall
+    Condition: CreateNetworkFirewallAndTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
@@ -319,7 +326,7 @@ Resources:
       TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdFirewall
   RouteFirewallToTransitGatewayAz2:
-    Condition: CreateNetworkFirewall
+    Condition: CreateNetworkFirewallAndTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
@@ -352,6 +359,28 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue  
+  # Network Access Analyzer
+  NetworkAccessAnalyzer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/networkaccessanalyzer.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/networkaccessanalyzer.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue    
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -480,28 +509,28 @@ Resources:
           Value: !Ref TagValue
       TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
       VpcId: !Ref VPC
-  TransitGatewayRouteTable:
-    Type: AWS::EC2::TransitGatewayRouteTable
+  TransitGatewayRouteToInternet:
+    Condition: CreateTransitGatewayRoute
+    Type: AWS::EC2::TransitGatewayRoute
     Properties: 
-      Tags: 
-        - Key: Name
-          Value: !Sub tgw-rtb-${AWS::StackName}-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+      Blackhole: false
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      TransitGatewayRouteTableId: !Ref TransitGatewayDefaultRouteTableId  
   TransitGatewayRouteTableAssociation:
+    Condition: CreateTransitGatewayRoute
     Type: AWS::EC2::TransitGatewayRouteTableAssociation
     Properties: 
       TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+      TransitGatewayRouteTableId: !Ref TransitGatewayDefaultRouteTableId
   TransitGatewayRouteTablePropagation:
+    Condition: CreateTransitGatewayRoute
     Type: AWS::EC2::TransitGatewayRouteTablePropagation
     Properties: 
       TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayRouteTable
+      TransitGatewayRouteTableId: !Ref TransitGatewayDefaultRouteTableId
   RouteTransitToTransitGatewayAz1:
+    Condition: CreateTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
@@ -511,6 +540,7 @@ Resources:
       TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
   RouteTransitToTransitGatewayAz2:
+    Condition: CreateTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation

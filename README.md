@@ -70,7 +70,7 @@ This project uses the following modules.
 | AWS Codebuild | Image | ○ | aws/codebuild/amazonlinux2-aarch64-standard:2.0 |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-072bfb8ae2c884cc4 |
-| Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-099772c3838a3bec1 |
+| Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-0659e3a420d8a74ea |
 | AWS Lambda | CodeGuru Profiler | | 11 |
 | AWS Lambda | Lambda Insights | | Arm64:2 |
 | AWS Lambda | Python | | 3.9 |

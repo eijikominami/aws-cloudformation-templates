@@ -36,7 +36,7 @@ Metadata:
 Parameters:
   EC2ImageId:
     Type: AWS::EC2::Image::Id
-    Default: ami-099772c3838a3bec1
+    Default: ami-0659e3a420d8a74ea
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [required]
   Edition:
@@ -317,6 +317,8 @@ Resources:
             - Key: directoryName
               Value:
                - !Ref Name
+            - Key: dnsIpAddresses
+              Value: !GetAtt ActiveDirectory.DnsIpAddresses       
           DocumentName: AWS-JoinDirectoryServiceDomain
       SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
       Tags: 
@@ -445,11 +447,16 @@ Resources:
       VpcId: !Ref VPCId
 
 Outputs:
+  MicrosoftAdDnsIpAddresses:
+    Description: The IP addresses of the DNS servers for Active Directory
+    Value: !Join
+      - ','
+      - !GetAtt ActiveDirectory.DnsIpAddresses
   RouteTableIdPrivateAz1:
-    Description: Route table for private subnet
+    Description: The route table for private subnet
     Value: !GetAtt Az1.Outputs.RouteTableIdPrivate
   RouteTableIdPrivateAz2:
-    Description: Route table for private subnet
+    Description: The route table for private subnet
     Value: !GetAtt Az2.Outputs.RouteTableIdPrivate
   WindowsServerKeyPair:
     Description: The key pair for Windows Server

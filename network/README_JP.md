@@ -56,12 +56,13 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック | 
 | SubnetTransitCidrBlockAz2 | String | 10.0.4.64/26 | ○ | AZ2 の Transit サブネットの CIDR ブロック | 
 | SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26 | | AZ2 の Firewall サブネットの CIDR ブロック | 
+| TransitGatewayDefaultRouteTableId | String | | | Transit Gateway のデフォルトルートテーブル ID | 
 | TransitGatewayDestinationCidrBlock | String | | | Transit Gateway に転送するサブネットの CIDR ブロック | 
 | VPCCidrBlock | String | 10.0.0.0/16 | ○ | VPC の CIDR ブロック | 
 
 ### マルチアカウント対応
 
-Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` アカウントで使用する場合には、`AWS Organizations` にて `AWS Resource Access Manager` を有効化してください。
+Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` アカウントで使用する場合には、`AWS Organizations` にて `AWS Resource Access Manager` を有効化してください。 VPC Reachability Analyzer を `Network` アカウントで使用する場合には、VPC Reachability Analyzer の Settings から `信頼されたアクセス` を有効化してください。
 
 ### Availablity Zone
 
