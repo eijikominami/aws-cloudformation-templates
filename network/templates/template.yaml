@@ -164,7 +164,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.57
+        SemanticVersion: 2.0.58
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -204,7 +204,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.57
+        SemanticVersion: 2.0.58
   TransitGateway:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -387,7 +387,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.57
+        SemanticVersion: 2.0.58
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -404,7 +404,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.57
+        SemanticVersion: 2.0.58
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
