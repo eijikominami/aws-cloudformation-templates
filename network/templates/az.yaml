@@ -15,7 +15,7 @@ Metadata:
           - SubnetPrivateCidrBlock
           - SubnetTransitCidrBlock
           - SubnetFirewallCidrBlock
-          - VPCId   
+          - VPCId
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
@@ -109,10 +109,9 @@ Conditions:
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
   CreateFirewallSubnet: !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
-  CreateNATGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
+  CreateNatGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateRoutePublicToInternetGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] ]
   CreateRouteFirewallToNatGateway: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ],  !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
-  CreateRouteTransitToNATGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ], !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
   TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
 
@@ -262,13 +261,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway
       RouteTableId: !Ref RouteTableFirewall
-  RouteTransitToNATGateway:
-    Condition: CreateRouteTransitToNATGateway
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway
-      RouteTableId: !Ref RouteTableTransit
   # Elastic IP
   EIPForNatGateway:
     Condition: TransitGatewayExists
@@ -296,7 +288,7 @@ Resources:
           Value: !Ref TagValue
   # NatGateway
   NatGateway:
-    Condition: CreateNATGateway
+    Condition: CreateNatGateway
     Type: AWS::EC2::NatGateway
     Properties: 
       AllocationId: !GetAtt EIPForNatGateway.AllocationId
@@ -309,7 +301,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # CloudWatch Alarm
-  CloudWatchAlarmNATGateway:
+  CloudWatchAlarmNatGateway:
     Condition: TransitGatewayExists
     Type: AWS::Serverless::Application
     Properties:
@@ -320,75 +312,81 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
 
 Outputs:
   PublicSubnetId:
-    Description: Public subnet id
+    Description: The ID of the public subnet
     Value: !If
       - CreatePublicSubnet
       - !Ref SubnetPublic
       - ''
   PrivateSubnetId:
-    Description: Private subnet id
+    Description: The ID of the private subnet
     Value: !If
       - CreatePrivateSubnet
       - !Ref SubnetPrivate
       - ''
   TransitSubnetId:
     Condition: CreateTransitSubnet
-    Description: Transit subnet id
+    Description: The ID of the transit subnet
     Value: !If
       - CreateTransitSubnet
       - !Ref SubnetTransit
       - ''
   FirewallSubnetId:
-    Description: Firewall subnet id
+    Description: The ID of the firewall subnet
     Value: !If
       - CreateFirewallSubnet
       - !Ref SubnetFirewall
       - ''
   NetworkLoadBalancerIPAllocationId:
-    Description: Network Load Balancer IP Allocation Id
+    Description: The allocation ID of the Network Load Balancer IP
     Value: !If
       - NetworkLoadBalancerExists
       - !GetAtt EIPForNLB.AllocationId
       - ''
   NetworkLoadBalancerIP:
-    Description: Network Load Balancer IP address
+    Description: The IP address of the Network Load Balancer
     Value: !If
        - NetworkLoadBalancerExists
        - !Ref EIPForNLB
        - ''
+  NatGatewayId:
+    Description: The ID of the NAT gateway
+    Value: !If
+      - CreateNatGateway
+      - !GetAtt NatGateway.NatGatewayId
+      - ''
   NatGatewayIP:
-    Description: NAT Gateway IP address
+    Description: The IP address of the NAT Gateway
     Value: !If
       - TransitGatewayExists
       - !Ref EIPForNatGateway
       - ''
   RouteTableIdPublic:
-    Description: Route table for public subnet
+    Description: The route table ID of the public subnet
     Value: !If
       - CreatePublicSubnet
       - !GetAtt RouteTablePublic.RouteTableId
       - ''
   RouteTableIdPrivate:
-    Description: Route table for private subnet
+    Description: The oute table ID of the private subnet
     Value: !If
       - CreatePrivateSubnet
       - !GetAtt RouteTablePrivate.RouteTableId
       - ''
   RouteTableIdTransit:
-    Description: Route table for Transit Gateway
+    Description: The route table ID of the Transit Gateway
     Value: !If
       - CreateTransitSubnet
       - !GetAtt RouteTableTransit.RouteTableId
       - ''
   RouteTableIdFirewall:
-    Description: Route table for firewall subnet
+    Description: The route table ID of the firewall subnet
     Value: !If
       - CreateFirewallSubnet
       - !GetAtt RouteTableFirewall.RouteTableId

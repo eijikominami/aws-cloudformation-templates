@@ -52,16 +52,17 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 | PrincipalsToAssociateWithTransitGateway | String | | | Specifies a list of one or more principals to associate with Transit Gateway | 
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック | 
 | SubnetTransitCidrBlockAz1 | String | 10.0.0.64/26 | ○ | AZ1 の Transit サブネットの CIDR ブロック | 
-| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | AZ1 の Firewall サブネットの CIDR ブロック | 
+| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | | AZ1 の Firewall サブネットの CIDR ブロック | 
 | SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック | 
 | SubnetTransitCidrBlockAz2 | String | 10.0.4.64/26 | ○ | AZ2 の Transit サブネットの CIDR ブロック | 
-| SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26 | ○ | AZ2 の Firewall サブネットの CIDR ブロック | 
+| SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26 | | AZ2 の Firewall サブネットの CIDR ブロック | 
+| TransitGatewayDefaultRouteTableId | String | | | Transit Gateway のデフォルトルートテーブル ID | 
 | TransitGatewayDestinationCidrBlock | String | | | Transit Gateway に転送するサブネットの CIDR ブロック | 
 | VPCCidrBlock | String | 10.0.0.0/16 | ○ | VPC の CIDR ブロック | 
 
 ### マルチアカウント対応
 
-Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` アカウントで使用する場合には、`AWS Organizations` にて `AWS Resource Access Manager` を有効化してください。
+Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` アカウントで使用する場合には、`AWS Organizations` にて `AWS Resource Access Manager` を有効化してください。 VPC Reachability Analyzer を `Network` アカウントで使用する場合には、VPC Reachability Analyzer の Settings から `信頼されたアクセス` を有効化してください。
 
 ### Availablity Zone
 

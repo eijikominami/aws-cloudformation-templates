@@ -187,7 +187,7 @@ Parameters:
     Description: Daily Snapshot time (HH:MM)
   EC2ImageId:
     Type: AWS::EC2::Image::Id
-    Default: ami-08a8688fb7eacb171
+    Default: ami-099772c3838a3bec1
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [required]
   EC2InstanceType:
@@ -354,7 +354,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -397,7 +397,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -612,7 +612,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -629,7 +629,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -946,7 +946,8 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties: 
       # 'sg-' prefix is NOT permitted.
-      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
+      # CloudFormation cannot update a stack when a custom-named resource requires replacing.
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-web-20221129
       GroupDescription: Security Group for Web Server
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
@@ -1005,7 +1006,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1031,7 +1032,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

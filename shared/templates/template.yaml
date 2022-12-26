@@ -163,7 +163,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -197,7 +197,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -232,7 +232,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -249,7 +249,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.55
+        SemanticVersion: 2.0.58
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -315,6 +315,24 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RoutePrivateToTransitGatewayAz1:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz1
+  RoutePrivateToTransitGatewayAz2:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz2
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Condition: CreateTransitGateway

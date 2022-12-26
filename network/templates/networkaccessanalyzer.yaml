@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/network/networkaccessanalyzer creates an Network Access Analyzer.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  AccessScopeAwsVpcEgres:
+    Type: AWS::EC2::NetworkInsightsAccessScope
+    Properties: 
+      MatchPaths: 
+        - Destination: 
+            ResourceStatement: 
+              ResourceTypes:
+                - AWS::EC2::InternetGateway
+                - AWS::EC2::VPCPeeringConnection
+                - AWS::EC2::VPCEndpoint
+                - AWS::EC2::TransitGatewayAttachment
+                - AWS::EC2::VPNGateway
+          Source: 
+            ResourceStatement: 
+              ResourceTypes:
+                - AWS::EC2::NetworkInterface
+      Tags: 
+        - Key: Name
+          Value: !Sub AWS-VPC-Egres
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AccessScopeAwsVpcIngress:
+    Type: AWS::EC2::NetworkInsightsAccessScope
+    Properties: 
+      MatchPaths: 
+        - Destination: 
+            ResourceStatement: 
+              ResourceTypes:
+                - AWS::EC2::NetworkInterface
+          Source: 
+            ResourceStatement: 
+              ResourceTypes:
+                - AWS::EC2::InternetGateway
+                - AWS::EC2::VPCPeeringConnection
+                - AWS::EC2::VPCEndpointService
+                - AWS::EC2::TransitGatewayAttachment
+                - AWS::EC2::VPNGateway
+      Tags: 
+        - Key: Name
+          Value: !Sub AWS-VPC-Ingress
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AccessScopeAllIgwIngress:
+    Type: AWS::EC2::NetworkInsightsAccessScope
+    Properties: 
+      MatchPaths: 
+        - Destination: 
+            ResourceStatement: 
+              ResourceTypes:
+                - AWS::EC2::NetworkInterface
+          Source: 
+            ResourceStatement: 
+              ResourceTypes:
+                - AWS::EC2::InternetGateway
+      Tags: 
+        - Key: Name
+          Value: !Sub All-IGW-Ingress
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AccessScopeAwsIgwEgress:
+    Type: AWS::EC2::NetworkInsightsAccessScope
+    Properties: 
+      MatchPaths: 
+        - Destination: 
+            ResourceStatement: 
+              ResourceTypes:
+                - AWS::EC2::InternetGateway
+          Source: 
+            ResourceStatement:
+              ResourceTypes:
+                - AWS::EC2::NetworkInterface
+      Tags: 
+        - Key: Name
+          Value: !Sub AWS-IGW-Egress
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

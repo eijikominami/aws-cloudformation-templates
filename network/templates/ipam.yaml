@@ -47,7 +47,16 @@ Parameters:
     AllowedPattern: .+
 
 Resources:
+  ServiceLinkedRoleForIPAM:
+    Type: AWS::IAM::ServiceLinkedRole
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: ipam.amazonaws.com
+      Description: The Service Linked Role used by AWS IPAM.
   IPAM:
+    DependsOn:
+      - ServiceLinkedRoleForIPAM
     Type: AWS::EC2::IPAM
     Properties: 
       Description: Default IPAM
