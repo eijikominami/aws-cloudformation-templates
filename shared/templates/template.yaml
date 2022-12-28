@@ -68,12 +68,12 @@ Parameters:
     Description: The NetBIOS name for your domain [required]
   ActiveDirectorySubnetCidrBlockForAz1:
     Type: String
-    Default: 10.1.0.64/26
+    Default: 10.3.0.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   ActiveDirectorySubnetCidrBlockForAz2:
     Type: String
-    Default: 10.1.1.64/26
+    Default: 10.3.4.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz1:
