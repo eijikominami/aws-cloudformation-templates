@@ -14,7 +14,9 @@ Metadata:
           - Password
           - ShortName
           - SubnetPrivateCidrBlockForAz1
+          - SubnetPrivateIdForAz1
           - SubnetPrivateCidrBlockForAz2
+          - SubnetPrivateIdForAz2
           - VPCId
       - Label: 
           default: 'Management Instance Configuration'
@@ -76,14 +78,22 @@ Parameters:
     Description: The NetBIOS name for your domain [required]
   SubnetPrivateCidrBlockForAz1:
     Type: String
-    Default: 10.1.0.64/26
+    Default: 10.3.0.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ1 [required]
+    Description: The private subnet CIDR block at AZ1 [conditional]
+  SubnetPrivateIdForAz1:
+    Type: String
+    Default: ''
+    Description: The private subnet id at AZ1 [conditional]
   SubnetPrivateCidrBlockForAz2:
     Type: String
-    Default: 10.1.1.64/26
+    Default: 10.3.4.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ2 [required]
+    Description: The private subnet CIDR block at AZ2 [conditional]
+  SubnetPrivateIdForAz2:
+    Type: String
+    Default: ''
+    Description: The private subnet id at AZ2 [conditional]
   VPCId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
@@ -111,17 +121,20 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateAz1: !Equals [ !Ref SubnetPrivateIdForAz1, '']
+  CreateAz2: !Equals [ !Ref SubnetPrivateIdForAz2, '']
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
 Resources:
   # Nested Stack
   Az1:
+    Condition: CreateAz1
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -149,11 +162,12 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   Az2:
+    Condition: CreateAz2
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -186,7 +200,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -203,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -267,9 +281,15 @@ Resources:
       Password: !Ref Password
       ShortName: !Ref ShortName
       VpcSettings: 
-          SubnetIds: 
-            - !GetAtt Az1.Outputs.PrivateSubnetId
-            - !GetAtt Az2.Outputs.PrivateSubnetId
+          SubnetIds:
+            - !If 
+              - CreateAz1
+              - !GetAtt Az1.Outputs.PrivateSubnetId
+              - !Ref SubnetPrivateIdForAz1
+            - !If 
+              - CreateAz2
+              - !GetAtt Az2.Outputs.PrivateSubnetId
+              - !Ref SubnetPrivateIdForAz2
           VpcId: !Ref VPCId
   DHCPOptions:
     Type: AWS::EC2::DHCPOptions
@@ -320,7 +340,10 @@ Resources:
             - Key: dnsIpAddresses
               Value: !GetAtt ActiveDirectory.DnsIpAddresses       
           DocumentName: AWS-JoinDirectoryServiceDomain
-      SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
+      SubnetId: !If 
+        - CreateAz1
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !Ref SubnetPrivateIdForAz1
       Tags: 
         - Key: Name
           Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
@@ -366,8 +389,14 @@ Resources:
         - !Ref SecurityGroupForEndpoint
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
       SubnetIds: 
-        - !GetAtt Az1.Outputs.PrivateSubnetId
-        - !GetAtt Az2.Outputs.PrivateSubnetId
+        - !If 
+          - CreateAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz1
+        - !If 
+          - CreateAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz2
       VpcEndpointType: Interface
       VpcId: !Ref VPCId
   SSMMessagesEndpoint:
@@ -378,8 +407,14 @@ Resources:
         - !Ref SecurityGroupForEndpoint
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
       SubnetIds: 
-        - !GetAtt Az1.Outputs.PrivateSubnetId
-        - !GetAtt Az2.Outputs.PrivateSubnetId
+        - !If 
+          - CreateAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz1
+        - !If 
+          - CreateAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz2
       VpcEndpointType: Interface
       VpcId: !Ref VPCId
   EC2MessagesEndpoint:
@@ -390,8 +425,14 @@ Resources:
         - !Ref SecurityGroupForEndpoint
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2messages
       SubnetIds: 
-        - !GetAtt Az1.Outputs.PrivateSubnetId
-        - !GetAtt Az2.Outputs.PrivateSubnetId
+        - !If 
+          - CreateAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz1
+        - !If 
+          - CreateAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz2
       VpcEndpointType: Interface
       VpcId: !Ref VPCId
   CloudWatchLogsEndpoint:
@@ -402,8 +443,14 @@ Resources:
         - !Ref SecurityGroupForEndpoint
       ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
       SubnetIds: 
-        - !GetAtt Az1.Outputs.PrivateSubnetId
-        - !GetAtt Az2.Outputs.PrivateSubnetId
+        - !If 
+          - CreateAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz1
+        - !If 
+          - CreateAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetPrivateIdForAz2
       VpcEndpointType: Interface
       VpcId: !Ref VPCId
   SecurityGroupForEndpoint:
@@ -452,12 +499,21 @@ Outputs:
     Value: !Join
       - ','
       - !GetAtt ActiveDirectory.DnsIpAddresses
+  MicrosoftAdId:
+    Description: The Id of the Active Directory
+    Value: !Ref ActiveDirectory
   RouteTableIdPrivateAz1:
     Description: The route table for private subnet
-    Value: !GetAtt Az1.Outputs.RouteTableIdPrivate
+    Value: !If 
+      - CreateAz1
+      - !GetAtt Az1.Outputs.RouteTableIdPrivate
+      - ''
   RouteTableIdPrivateAz2:
     Description: The route table for private subnet
-    Value: !GetAtt Az2.Outputs.RouteTableIdPrivate
+    Value: !If 
+      - CreateAz2
+      - !GetAtt Az2.Outputs.RouteTableIdPrivate
+      - ''
   WindowsServerKeyPair:
     Description: The key pair for Windows Server
     Value: The key is stored in AWS Systems Manager Parameter Store.

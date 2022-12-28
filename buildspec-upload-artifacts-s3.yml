@@ -33,6 +33,8 @@ env:
     SECURITY_DIST_DIR: aws-cloudformation-templates/security
     SECURITY_CONFIG_RULES_SRC_DIR: security-config-rules/sam-app
     SECURITY_CONFIG_RULES_DIST_DIR: aws-cloudformation-templates/security-config-rules
+    SHARED_SRC_DIR: shared/templates
+    SHARED_DIST_DIR: aws-cloudformation-templates/shared
     SYNTHETICS_SRC_DIR: synthetics/templates
     SYNTHETICS_DIST_DIR: aws-cloudformation-templates/synthetics
 
@@ -100,4 +102,5 @@ phases:
        - aws s3 cp ${NOTIFICATION_CFN_SRC_DIR}/ s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SECURITY_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SECURITY_CONFIG_RULES_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${SHARED_SRC_DIR}/ s3://${BUCKET_NAME}/${SHARED_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SYNTHETICS_SRC_DIR}/ s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'

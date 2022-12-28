@@ -20,6 +20,7 @@
 | Availability Zone | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AvailabilityZone&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/az.yaml) |
 | Global Accelerator | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=GlobalAccelerator&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/globalaccelerator.yaml) |
 | IPAM | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IPAM&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/ipam.yaml) |
+| Network Access Analyzer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=NetworkAccessAnalyzer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/networkaccessanalyzer.yaml) |
 | Network Firewall | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=NetworkFirewall&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/networkfirewall.yaml) |
 | Route 53 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Route53&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/route53.yaml) |
 | TransitGateway | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=TransitGateway&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/transitgateway.yaml) |
@@ -38,8 +39,11 @@
 ```bash
 aws cloudformation deploy --template-file az.yaml --stack-name AvailabilityZone
 aws cloudformation deploy --template-file globalaccelerator.yaml --stack-name GlobalAccelerator
-aws cloudformation deploy --template-file transitgateway.yaml --stack-name TransitGateway
+aws cloudformation deploy --template-file ipam.yaml --stack-name IPAM
+aws cloudformation deploy --template-file networkaccessanalyzer.yaml --stack-name NetworkAccessAnalyzer
+aws cloudformation deploy --template-file networkfirewall.yaml --stack-name NetworkFirewall
 aws cloudformation deploy --template-file route53.yaml --stack-name Route53
+aws cloudformation deploy --template-file transitgateway.yaml --stack-name TransitGateway
 aws cloudformation deploy --template-file vpn.yaml --stack-name VPN
 ```
 
@@ -72,11 +76,12 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | --- | --- | --- | --- | --- |
 | AvailabilityZone | AWS::EC2::AvailabilityZone::Name | | ○ | AZ名 |
 | InternetGatewayId | String | | | Internet Gateway Id |
+| NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| | NAT Gateway を作成するかどうか |
+| NetworkLoadBalancer | ENABLED / DISABLED | DISABLED　| | NetworkLoadBalancer を作成するかどうか |
+| SubnetPrivateCidrBlock | String | 10.0.0.0/24 | ○ | プライベートサブネットのCIDRブロック |
 | SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | パブリックサブネットのCIDRブロック |
 | SubnetTransitCidrBlock | String | | | トランジットサブネットのCIDRブロック |
 | SubnetFirewallCidrBlock | String | | | Firewall サブネットのCIDRブロック |
-| TransitGatewayId | String | | | Transit GatewayのId |
-| TransitGatewayDestinationCidrBlock | String | | |  Transit Gatewayに転送するCIDRブロック |
 | VPCId | AWS::EC2::VPC::Id | | ○ | VPC id  |
 
 ### Global Accelerator
