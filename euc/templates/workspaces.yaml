@@ -75,12 +75,12 @@ Parameters:
     Type: String
     Default: 10.2.8.0/23
     AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ1 [conditional]
+    Description: The public subnet CIDR block at AZ1 [required]
   SubnetPrivateCidrBlockForAz2:
     Type: String
     Default: 10.2.12.0/23
     AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ2 [conditional]
+    Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
     Default: 10.2.11.0/24
@@ -140,7 +140,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -173,7 +173,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -237,7 +237,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -254,7 +254,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.61
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
