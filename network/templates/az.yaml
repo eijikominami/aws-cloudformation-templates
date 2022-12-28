@@ -10,17 +10,13 @@ Metadata:
         Parameters: 
           - AvailabilityZone
           - InternetGatewayId
+          - NetworkAddressTranslation
           - NetworkLoadBalancer
           - SubnetPublicCidrBlock
           - SubnetPrivateCidrBlock
           - SubnetTransitCidrBlock
           - SubnetFirewallCidrBlock
           - VPCId
-      - Label:
-          default: 'Transit Gateway Configuration'
-        Parameters:
-          - TransitGatewayId
-          - TransitGatewayDestinationCidrBlock  
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -42,6 +38,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The Internet Gateway Id
+  NetworkAddressTranslation:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable NetworkAddressTranslation (NAT) [required]
   NetworkLoadBalancer:
     Type: String
     Default: DISABLED
@@ -76,14 +79,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The firewall subnet CIDR block
-  TransitGatewayId:
-    Type: String
-    Default: ''
-    Description: The ID of a Transit Gateway
-  TransitGatewayDestinationCidrBlock:
-    Type: String
-    Default: ''
-    Description: The IPv4 CIDR block forward to TransitGateway
   VPCId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
@@ -109,11 +104,10 @@ Conditions:
   CreatePrivateSubnet: !Not [ !Equals [ !Ref SubnetPrivateCidrBlock, '' ] ]
   CreateTransitSubnet: !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ]
   CreateFirewallSubnet: !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ]
-  CreateNatGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
+  CreateNatGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Equals [ !Ref NetworkAddressTranslation, ENABLED ] ]
   CreateRoutePublicToInternetGateway: !And [ !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ] ]
-  CreateRouteFirewallToNatGateway: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ],  !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
+  CreateRouteFirewallToNatGateway: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlock, '' ] ], !Not [ !Equals [ !Ref SubnetPublicCidrBlock, '' ] ], !Not [ !Equals [ !Ref InternetGatewayId, '' ] ], !Equals [ !Ref NetworkAddressTranslation, ENABLED ] ]
   NetworkLoadBalancerExists: !Equals [ !Ref NetworkLoadBalancer, ENABLED ]
-  TransitGatewayExists: !And [ !Not [ !Equals [ !Ref SubnetTransitCidrBlock, '' ] ], !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
 
 Resources:
   # Subnet
@@ -263,7 +257,7 @@ Resources:
       RouteTableId: !Ref RouteTableFirewall
   # Elastic IP
   EIPForNatGateway:
-    Condition: TransitGatewayExists
+    Condition: CreateNatGateway
     Type: AWS::EC2::EIP
     Properties:
       Domain: !Ref VPCId
@@ -302,7 +296,7 @@ Resources:
           Value: !Ref TagValue
   # CloudWatch Alarm
   CloudWatchAlarmNatGateway:
-    Condition: TransitGatewayExists
+    Condition: CreateNatGateway
     Type: AWS::Serverless::Application
     Properties:
       Parameters:
@@ -312,7 +306,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.0.58
+        SemanticVersion: 2.0.57
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -364,7 +358,7 @@ Outputs:
   NatGatewayIP:
     Description: The IP address of the NAT Gateway
     Value: !If
-      - TransitGatewayExists
+      - CreateNatGateway
       - !Ref EIPForNatGateway
       - ''
   RouteTableIdPublic:

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/shared sets shared services.
+Description: AWSCloudFormationTemplates/euc/workspaces sets Amazon Workspaces.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -10,14 +10,15 @@ Metadata:
         Parameters: 
           - ActiveDirectoryEdition
           - ActiveDirectoryEnableSso
+          - ActiveDirectoryId
           - ActiveDirectoryName
           - ActiveDirectoryPassword
           - ActiveDirectoryShortName
-          - ActiveDirectorySubnetCidrBlockForAz1
-          - ActiveDirectorySubnetCidrBlockForAz2
       - Label: 
-          default: 'VPC Configuration'
+          default: 'Workspaces Configuration'
         Parameters: 
+          - SubnetPrivateCidrBlockForAz1
+          - SubnetPrivateCidrBlockForAz2
           - SubnetTransitCidrBlockAz1
           - SubnetTransitCidrBlockAz2
           - TransitGatewayId
@@ -42,48 +43,52 @@ Parameters:
     AllowedValues:
       - Enterprise
       - Standard
-    Description: The edition of AWS Directory Service for Microsoft Active Directory [required]
+    Description: The edition of AWS Directory Service for Microsoft Active Directory [conditional]
   ActiveDirectoryEnableSso:
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
-    Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [required]
+    Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [conditional]
   ActiveDirectoryName:
     Type: String
     Default: corp.example.com
     AllowedPattern: ^([a-zA-Z0-9]+[\\.-])+([a-zA-Z0-9])+$
-    Description: The fully qualified domain name for the AWS Managed Microsoft AD directory [required]
+    Description: The fully qualified domain name for the AWS Managed Microsoft AD directory [conditional]
   ActiveDirectoryPassword:
     Type: String
     Default: Password1+
     AllowedPattern: (?=^.{8,64}$)((?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*[a-z])|(?=.*[^A-Za-z0-9\s])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9\s]))^.*
     NoEcho: true
-    Description: The password for the default administrative user named Admin [required]
+    Description: The password for the default administrative user named Admin [conditional]
   ActiveDirectoryShortName:
     Type: String
     Default: CORP
     AllowedPattern: ^[^\\/:*?"<>|.]+[^\\/:*?"<>|]*$
-    Description: The NetBIOS name for your domain [required]
-  ActiveDirectorySubnetCidrBlockForAz1:
+    Description: The NetBIOS name for your domain [conditional]
+  ActiveDirectoryId:
     Type: String
-    Default: 10.1.0.64/26
-    AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ1 [required]
-  ActiveDirectorySubnetCidrBlockForAz2:
+    Default: ''
+    Description: The identifier of the AWS Directory Service directory for the WorkSpace [conditional]
+  SubnetPrivateCidrBlockForAz1:
     Type: String
-    Default: 10.1.1.64/26
+    Default: 10.2.8.0/23
     AllowedPattern: ^[0-9./]*$
-    Description: The public subnet CIDR block at AZ2 [required]
+    Description: The public subnet CIDR block at AZ1 [conditional]
+  SubnetPrivateCidrBlockForAz2:
+    Type: String
+    Default: 10.2.12.0/23
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ2 [conditional]
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.3.1.0/24
+    Default: 10.2.11.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ1
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.3.5.0/24
+    Default: 10.2.15.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2
   TransitGatewayId:
@@ -96,7 +101,7 @@ Parameters:
     Description: The IPv4 CIDR block forward to TransitGateway
   VPCCidrBlock:
     Type: String
-    Default: 10.3.0.0/16
+    Default: 10.2.8.0/21
     AllowedPattern: ^[0-9./]*$
     Description: The VPC CIDR block [required]
   SNSForAlertArn:
@@ -122,6 +127,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateDirectory: !Not [ !Equals [ !Ref ActiveDirectoryId, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -129,35 +135,6 @@ Conditions:
 
 Resources:
   # Nested Stack
-  MicrosoftAD:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters: 
-        Edition: !Ref ActiveDirectoryEdition
-        EnableSso: !Ref ActiveDirectoryEnableSso
-        LogicalNamePrefix: !Ref AWS::StackName
-        Name: !Ref ActiveDirectoryName
-        Password: !Ref ActiveDirectoryPassword
-        ShortName: !Ref ActiveDirectoryShortName
-        SubnetPrivateCidrBlockForAz1: !Ref ActiveDirectorySubnetCidrBlockForAz1
-        SubnetPrivateCidrBlockForAz2: !Ref ActiveDirectorySubnetCidrBlockForAz2
-        VPCId: !Ref VPC
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/microsoftad.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/microsoftad.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   Az1:
     Type: AWS::Serverless::Application
     Properties:
@@ -174,6 +151,7 @@ Resources:
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -206,6 +184,7 @@ Resources:
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -222,6 +201,36 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  MicrosoftAD:
+    Condition: CreateDirectory
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        Edition: !Ref ActiveDirectoryEdition
+        EnableSso: !Ref ActiveDirectoryEnableSso
+        LogicalNamePrefix: !Ref AWS::StackName
+        Name: !Ref ActiveDirectoryName
+        Password: !Ref ActiveDirectoryPassword
+        ShortName: !Ref ActiveDirectoryShortName
+        SubnetPrivateIdForAz1: !GetAtt Az1.Outputs.PrivateSubnetId
+        SubnetPrivateIdForAz2: !GetAtt Az1.Outputs.PrivateSubnetId
+        VPCId: !Ref VPC
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/microsoftad.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/microsoftad.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -319,7 +328,10 @@ Resources:
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !Ref TransitGatewayId
-      RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz1
+      RouteTableId: !If
+        - CreateDirectory
+        - !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz1
+        - !GetAtt Az1.Outputs.RouteTableIdPrivate
   RoutePrivateToTransitGatewayAz2:
     Condition: CreateTransitGateway
     DependsOn:
@@ -328,7 +340,10 @@ Resources:
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !Ref TransitGatewayId
-      RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz2
+      RouteTableId: !If
+        - CreateDirectory
+        - !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz2
+        - !GetAtt Az2.Outputs.RouteTableIdPrivate
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Condition: CreateTransitGateway

@@ -12,15 +12,15 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | `AvailabilityZone` | String | | ○ | The Availability Zone name |
 | `InternetGatewayId` | String | | ○ | The Internet Gateway Id |
-| `NetworkLoadBalancer` | ENABLED / DISABLED | | ○ | Enable or disable Network LoadBalaner |
+| `NetworkAddressTranslation` | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable NetworkAddressTranslation (NAT) |
+| `NetworkLoadBalancer` | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable Network LoadBalaner |
 | `LogicalNamePrefix` | String | WebServers | ○ | The custom prefix name |
 | `SNSForAlertArn` | String | | ○ | The ARN of SNS for alert |
 | `SNSForDeploymentArn` | String | | ○ | The ARN of SNS for development |
+| `SubnetPrivateCidrBlock` | String | 10.0.0.0/24 | ○ | The Private subnet CIDR block |
 | `SubnetPublicCidrBlock` | String | | | The Public subnet CIDR block |
 | `SubnetPrivateCidrBlock` | String | | | The Private subnet CIDR block |
 | `SubnetTransitCidrBlock` | String | | | The transit subnet CIDR block |
-| `TransitGatewayId` | String | | | The ID of a transit gateway |
-| `TransitGatewayDestinationCidrBlock` | String | | | The IPv4 CIDR block forward to TransitGateway |
 | `VPCId` | String | | ○ | The VPC id |
 
 ---------------------------------------
@@ -37,13 +37,13 @@ availability-zone は、VPC 上に Availability Zone を設定します。
 | --- | --- | --- | --- | --- |
 | `AvailabilityZone` | String | | ○ | AZ名 |
 | `InternetGatewayId` | String | | ○ | Internet Gateway ID |
-| `NetworkLoadBalancer` | ENABLED / DISABLED | | ○ | NLB を有効化するかどうか |
+| `NetworkAddressTranslation` | ENABLED / DISABLED | DISABLED　| ○ | NAT Gateway を有効化するかどうか |
+| `NetworkLoadBalancer` | ENABLED / DISABLED | DISABLED　| ○ | NLB を有効化するかどうか |
 | `LogicalNamePrefix` | String | WebServers | ○ | カスタムプリフィックス名 |
 | `SNSForAlertArn` | String | | ○ | アラート用SNSのARN |
 | `SNSForDeploymentArn` | String | | ○ | デプロイメント用SNSのARN |
+| `SubnetPrivateCidrBlock` | String | | | パブリックサブネットのCIDRブロック |
 | `SubnetPublicCidrBlock` | String | | | パブリックサブネットのCIDRブロック |
 | `SubnetPrivateCidrBlock` | String | | | プライベートサブネットのCIDRブロック |
 | `SubnetTransitCidrBlock` | String | | | Transit Gateway用のサブネットのCIDRブロック |
-| `TransitGatewayId` | String | | | Transit Gateway Id |
-| `TransitGatewayDestinationCidrBlock` | String | | | TransitGatewayに転送するCIDRブロック |
 | `VPCId` | String | | ○ | VPC ID |

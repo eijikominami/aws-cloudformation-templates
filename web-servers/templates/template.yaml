@@ -581,31 +581,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/globalaccelerator.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/network/globalaccelerator.yaml
-  Route53Resolver:
-    Condition: CreateTransitGateway
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        SecurityGroupId: !Ref SecurityGroupWeb
-        SubnetId1: !GetAtt Az1.Outputs.PublicSubnetId
-        SubnetId2: !GetAtt Az2.Outputs.PublicSubnetId
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagKey
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/route53.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/route53.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
