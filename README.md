@@ -57,7 +57,6 @@ This project contains **Cloudformation templates** as follows.
 This contains sub modules as follows.
 
 + [CloudWatch Alarm](/monitoring/README.md)
-+ [Edge Services](/edge/README.md)
 + [Identity Services ](/identity/README.md)
 + [**Media Services**](/media/README.md)
 

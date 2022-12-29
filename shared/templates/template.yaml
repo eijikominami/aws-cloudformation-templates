@@ -282,6 +282,34 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # IAM Role for multi account automation
+  SSMMasterAccountRole: 
+    Type: AWS::IAM::Role
+    Properties: 
+      RoleName: AWS-SystemsManager-AutomationAdministrationRole
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+            Principal: 
+              Service: ssm.amazonaws.com
+            Action: 
+              - sts:AssumeRole
+      Path: '/'
+      Policies: 
+        - PolicyName: AssumeRole-AWSSystemsManagerAutomationExecutionRole
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: 
+                - sts:AssumeRole
+                Resource: arn:aws:iam::*:role/AWS-SystemsManager-AutomationExecutionRole
+              - Effect: Allow
+                Action: 
+                  - organizations:ListAccountsForParent
+                Resource: 
+                  - '*'
   # VPC
   VPC:
     Type: AWS::EC2::VPC
