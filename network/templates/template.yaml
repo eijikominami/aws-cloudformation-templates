@@ -279,7 +279,7 @@ Resources:
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
   # The route of the public subnet
   RoutePubliAz1:
-    Condition: CreateNetworkFirewallAndTransitGatewayRoute
+    Condition: CreateTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
@@ -296,7 +296,7 @@ Resources:
         - !Ref AWS::NoValue
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
   RoutePublicAz2:
-    Condition: CreateNetworkFirewallAndTransitGatewayRoute
+    Condition: CreateTransitGatewayRoute
     DependsOn:
       - TransitGatewayRouteTableAssociation
       - TransitGatewayRouteTablePropagation
