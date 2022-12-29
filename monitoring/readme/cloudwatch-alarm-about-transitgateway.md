@@ -20,7 +20,7 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
-| `TransitGateway` | String | | ○ | The id of the Transit Gateway |
+| `TransitGatewayId` | String | | ○ | The id of the Transit Gateway |
 
 ---------------------------------------
 
@@ -44,4 +44,4 @@ cloudwatch-alarm-about-transitgateway は、AWS Transit Gateway に関する Ama
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
-| `TransitGateway` | String | | ○ | Transit Gateway の ID |
+| `TransitGatewayId` | String | | ○ | Transit Gateway の ID |
