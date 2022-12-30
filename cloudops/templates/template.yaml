@@ -8,7 +8,9 @@ Metadata:
       - Label: 
           default: 'Systems ManagerConfiguration'
         Parameters: 
+          - SSMAdminAccountId
           - SSMIgnoreResourceConflicts
+          - SSMOrganizationID
           - SSMPatchingAt
       - Label: 
           default: 'Systems Manager Incident Manager Configuration'
@@ -74,12 +76,20 @@ Parameters:
     Default: Workload
     AllowedPattern: .+
     Description: The workload name [required]
+  SSMAdminAccountId:
+    Type: String
+    Default: ''
+    Description: AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated)  
   SSMIgnoreResourceConflicts:
     Type: String
     Default: DISABLED
     AllowedValues:
       - ENABLED
       - DISABLED
+  SSMOrganizationID:
+    Type: String
+    Default: ''
+    Description: AWS Organizations ID
   SSMPatchingAt:
     Type: Number
     Default: 3
@@ -147,7 +157,9 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AdminAccountId: !Ref SSMAdminAccountId
         IgnoreResourceConflicts: !Ref SSMIgnoreResourceConflicts
+        OrganizationID: !Ref SSMOrganizationID
         PatchingAt: !Ref SSMPatchingAt
         LogicalNamePrefix: !Ref AWS::StackName
         SNSForAlertArn: !If
@@ -205,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.63
+        SemanticVersion: 2.0.64
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -222,7 +234,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.63
+        SemanticVersion: 2.0.64
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

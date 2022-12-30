@@ -48,7 +48,9 @@ You can provide optional parameters as follows.
 | IncidentManagerEmail | String | | | The email address |
 | IncidentManagerPhoneNumber | String | | | The Phone Number |
 | IncidentManagerWorkloadName | String | Workload | ○ | The workload name |
+| SSMAdminAccountId | Strig | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created |
+| OrganizationID | String | | | AWS Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
 
 ### CodeGuru Profiler
