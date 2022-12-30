@@ -20,7 +20,7 @@ If you just want to deploy the stack, click the button below.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file microsoftad.yaml --stack-name MicrosoftAD
+aws cloudformation deploy --template-file microsoftad.yaml --stack-name MicrosoftAD --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows.
