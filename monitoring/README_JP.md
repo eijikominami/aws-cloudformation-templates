@@ -60,7 +60,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
@@ -118,12 +118,68 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     ProjectName : String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Directory Service
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | ディレクトリ ID | ドメインコントローラ IP | メトリックカテゴリ | 閾値 |
+| --- | --- | --- | --- | --- | --- |
+| AWS/DirectoryService | **Recursive Query Failure/sec** | `DirectoryId` | `DomainControllerIp` | DNS | 1分間に1回以上 |
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `DirectoryId` | String | | ○ | ディレクトリの ID |
+| `DomainControllerIp` | String | | ○ | ドメインコントローラの IP |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    DomainControllerIp: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    DomainControllerIp: String
     SNSTopicArn : String
   Tags: Map
   TimeoutInMinutes: Integer
@@ -172,7 +228,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
@@ -224,7 +280,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
@@ -277,12 +333,134 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## EC2 CloudWatch Agent
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | 閾値 |
+| --- | --- | --- |
+| AWS/EC2 | **StatusCheckFailed** | 1分間に1回以上 | 
+| AWS/EC2 | **CPUUtilization** | `CPUUtilizationThreshold` | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CPUUtilizationThreshold` | Number | 100 | ○ | CPU使用率の閾値 |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters:
+    CPUUtilizationThreshold: Integer
+    CustomAlarmName : String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CPUUtilizationThreshold: Integer
+    CustomAlarmName : String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## OpenSearch Service
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | DomainName | ClientId | 閾値 |
+| --- | --- | --- | --- | --- |
+| AWS/ES | **ClusterStatus.green** | `DomainName` | `AWS::AccountId` | 0 | 
+| AWS/ES | **ClusterIndexWritesBlocked** | `DomainName` | `AWS::AccountId` | 1分間に1回以上 | 
+| AWS/ES | **MasterReachableFromNode** | `DomainName` | `AWS::AccountId` | 0 | 
+| AWS/ES | **AutomatedSnapshotFailure** | `DomainName` | `AWS::AccountId` | 1分間に1回以上 | 
+| AWS/ES | **KibanaHealthyNodes** | `DomainName` | `AWS::AccountId` | 0 | 
+| AWS/ES | **FreeStorageSpace** | `DomainName` | `AWS::AccountId` | `FreeStorageSpaceThreshold` | 
+| AWS/ES | **MasterCPUUtilization** | `DomainName` | `AWS::AccountId` | >50 | 
+| AWS/ES | **MasterJVMMemoryPressure** | `DomainName` | `AWS::AccountId` | >80 | 
+| AWS/ES | **CPUUtilization** | `DomainName` | `AWS::AccountId` | >50 | 
+| AWS/ES | **JVMMemoryPressure** | `DomainName` | `AWS::AccountId` | >80 | 
+| AWS/ES | **SysMemoryUtilization** | `DomainName` | `AWS::AccountId` | >80 | 
+
+## パラメータ
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `DomainName` | String | | ○ | ドメイン名 |
+| `FreeStorageSpaceThreshold` | Number | | ○ | ストレージの空き容量の閾値（MB） |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters:
+    CustomAlarmName : String
+    DomainName: String
+    FreeStorageSpaceThreshold: Integer
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elasticsearch.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-elasticsearch
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DomainName: String
+    FreeStorageSpaceThreshold: Integer
     SNSTopicArn : String
   Tags: Map
   TimeoutInMinutes: Integer
@@ -330,7 +508,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
@@ -389,7 +567,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
@@ -397,6 +575,68 @@ Properties:
     IteratorAgeMillisecondsThreshold: Integer
     KinesisStreamName : String
     NumberOfPutRecordThreshold : Integer
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Kinesis Firehose
+
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | StreamName | 閾値 |
+| --- | --- | --- | --- |
+| AWS/Kinesis | **GetRecords.IteratorAgeMilliseconds** | `KinesisStreamName` | `IteratorAgeMillisecondsThreshold` |
+| AWS/Kinesis | **PutRecord.Success** | `KinesisStreamName` | `NumberOfPutRecordThreshold` |  
+| AWS/Kinesis | **WriteProvisionedThroughputExceeded** | `KinesisStreamName` | 1分間に1回以上 | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | IteratorAgeMilliseconds の閾値 |
+| `KinesisStreamName` | String | | ○ | ストリーム名 |
+| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | 分間の PutRecord 数の閾値 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    IteratorAgeMillisecondsThreshold: Integer
+    KinesisStreamName: String
+    NumberOfPutRecordThreshold: Integer
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    IteratorAgeMillisecondsThreshold: Integer
+    KinesisStreamName: String
+    NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
   Tags: Map
   TimeoutInMinutes: Integer
@@ -451,7 +691,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
@@ -459,6 +699,123 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## MediaLive
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | OutputGroupName | ChannelId | Pipeline | 閾値 |
+| --- | --- | --- | --- | --- | --- |
+| AWS/MediaLive | **Output4xxErrors** | `OutputGroupName` | `ChannelId` | `Pipeline` | 1分間に1回以上 | 
+| AWS/MediaLive | **Output5xxErrors** | `OutputGroupName` | `ChannelId` | `Pipeline` | 1分間に1回以上 |
+| AWS/MediaLive | **ActiveAlerts** | | `ChannelId` | `Pipeline` | 1分間に1回以上 | 
+| AWS/MediaLive | **PrimaryInputActive** | | `ChannelId` | `Pipeline` | <1 | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `ChannelId` | String |  | ○ | チャンネルID |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `OutputGroupName` | String |  | ○ | Output Group 名 |
+| `PipelineId` | String |  | ○ | パイプラインID |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    ChannelId: String
+    CustomAlarmName : String
+    OutputGroupName: String
+    PipelineId: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/medialive.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    ChannelId: String
+    CustomAlarmName : String
+    OutputGroupName: String
+    PipelineId: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## MediaStore
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | ContainerName | RequestType | 閾値 |
+| --- | --- | --- | --- | --- |
+| AWS/MediaStore | **ThrottleCount** | `ContainerName` | PutRequests | 1分間に1回以上 | 
+| AWS/MediaStore | **ThrottleCount** | `ContainerName` | ListRequests | 1分間に1回以上 | 
+| AWS/MediaStore | **ThrottleCount** | `ContainerName` | PutRequests | 1分間に1回以上 | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `ContainerName` | String |  | ○ | コンテナ名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    ContainerName: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediastore.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediastore
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    ContainerName: String
+    SNSTopicArn : String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -504,7 +861,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
@@ -556,13 +913,241 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 2.0.61
+    SemanticVersion: 2.0.69
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
     SNSTopicName: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Transit Gateway
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | TopicName | 閾値 |
+| --- | --- | --- |
+| AWS/TransitGateway | **PacketDropCountNoRoute** | `TransitGateway` | 1分間に1回以上 |
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `TransitGatewayId` | String | | ○ | Transit Gateway の ID |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    TransitGatewayId: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    TransitGatewayId: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+# Transit Gateway アタッチメント
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | TransitGateway | TransitGateway アタッチメント | 閾値 |
+| --- | --- | --- |
+| AWS/TransitGateway | **PacketDropCountNoRoute** | `TransitGatewayId` | `TransitGatewayAttachmentId` | 1分間に1回以上 |
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `TransitGatewayId` | String | | ○ | Transit Gateway の ID |
+| `TransitGatewayAttachmentId` | String | | ○ | Transit Gateway アタッチメントの ID |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    TransitGatewayId: String
+    TransitGatewayAttachmentId: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    TransitGatewayId: String
+    TransitGatewayAttachmentId: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## VPC エンドポイント
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | VPC ID | VPC エンドポイント ID | エンドポイントタイプ | サービス名 | 閾値 |
+| --- | --- | --- | --- | --- | --- | --- |
+| AWS/PrivateLinkEndpoints | **PacketsDropped** | `VPCId` | `VPCEndpointId` | `EndpointType` | `ServiceName`  | 1分間に1回以上 |
+
+## パラメータ
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `EndpointType` | String | | ○ | エンドポイントタイプ | 
+| `ServiceName` | String | | ○ | サービス名 | 
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `VPCEndpointId` | String | | ○ | エンドポイント ID | 
+| `VPCId` | String | | ○ | VPC ID | 
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointType: String
+    ServiceName: String
+    SNSTopicArn : String
+    VPCEndpointId: String
+    VPCId: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoint
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointType: String
+    ServiceName: String
+    SNSTopicArn : String
+    VPCEndpointId: String
+    VPCId: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Workspaces
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | ディレクトリ ID | 閾値 |
+| --- | --- | --- |
+| AWS/WorkSpaces | **PacketDropCountNoRoute** | `DirectoryId` | 1分間に1回以上 |
+
+## パラメータ
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `DirectoryId` | String | | ○ | The id of the Workspaces directory |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-workspaces
+    SemanticVersion: 2.0.69
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    SNSTopicArn : String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
