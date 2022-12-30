@@ -131,6 +131,62 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## Directory Service
+
+The template creates the following alarms.
+
+| Namespace | MetricName | Directory Id | Domain Controller IP | Metric Category | Threshold |
+| --- | --- | --- | --- | --- | --- |
+| AWS/DirectoryService | **Recursive Query Failure/sec** | `DirectoryId` | `DomainControllerIp` | DNS | At least once a minute |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `DirectoryId` | String | | ○ | The id of the directory |
+| `DomainControllerIp` | String | | ○ | The IP of the domain controller |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    DomainControllerIp: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
+    SemanticVersion: 2.0.62
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    DomainControllerIp: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## DynamoDB throttle
 
 The template creates the following alarms.

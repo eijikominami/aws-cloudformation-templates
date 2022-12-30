@@ -129,6 +129,62 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## Directory Service
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | ディレクトリ ID | ドメインコントローラ IP | メトリックカテゴリ | 閾値 |
+| --- | --- | --- | --- | --- | --- |
+| AWS/DirectoryService | **Recursive Query Failure/sec** | `DirectoryId` | `DomainControllerIp` | DNS | 1分間に1回以上 |
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `DirectoryId` | String | | ○ | ディレクトリの ID |
+| `DomainControllerIp` | String | | ○ | ドメインコントローラの IP |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    DomainControllerIp: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
+    SemanticVersion: 2.0.62
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    DomainControllerIp: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## DynamoDB throttle
 
 このテンプレートは、以下のアラームを作成します。
