@@ -1095,3 +1095,58 @@ Properties:
   Tags: Map
   TimeoutInMinutes: Integer
 ```
+
+## Workspaces
+
+The template creates the following alarms.
+
+| Namespace | MetricName | DirectoryId | Threshold |
+| --- | --- | --- |
+| AWS/WorkSpaces | **PacketDropCountNoRoute** | `DirectoryId` | At least once a minute |
+
+## Parameters
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `DirectoryId` | String | | ○ | The id of the Workspaces directory |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-workspaces
+    SemanticVersion: 2.0.68
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DirectoryId: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```

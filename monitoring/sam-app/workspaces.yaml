@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Amazon Workspaces
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  DirectoryId:
+    Type: String
+    AllowedPattern: .+
+    Description: The id of the Workspaces directory [required]    
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  Unhealthy:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Workspaces* (${DirectoryId}) に正常ではない端末があります。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-Workspaces-Unhealthy-${DirectoryId}
+        - !Sub Warning-Workspaces-Unhealthy-${DirectoryId}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: DirectoryId
+          Value: !Ref DirectoryId
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: Unhealthy
+      Namespace: AWS/WorkSpaces
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

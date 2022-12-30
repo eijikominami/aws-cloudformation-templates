@@ -2,7 +2,7 @@ Please scroll down for the Japanese version. / **日本語の説明は下にあ�
 
 # cloudwatch-alarm-about-transitgateway-attachment(en)
 
-cloudwatch-alarm-about-transitgateway creates Amazon CloudWatch Alarm about AWS Transit Gateway attachements.
+cloudwatch-alarm-about-transitgateway-attachment creates Amazon CloudWatch Alarm about AWS Transit Gateway attachements.
 
 ## CloudWatch Alarm
 
@@ -27,7 +27,7 @@ You can provide optional parameters as follows.
 
 # cloudwatch-alarm-about-transitgateway-attachment(ja)
 
-cloudwatch-alarm-about-transitgateway は、AWS Transit Gateway アタッチメントに関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-transitgateway-attachment は、AWS Transit Gateway アタッチメントに関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
