@@ -7,18 +7,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The custom Alram name
-  SNSTopicArn:
-    Type: String
-    AllowedPattern: .+
-    Description: The SNS topic ARN [required]
-  VPCId:
-    Type: String
-    AllowedPattern: .+
-    Description: The VPC id [required]
-  VPCEndpointId:
-    Type: String
-    AllowedPattern: .+
-    Description: The id of the endpoint [required]
   EndpointType:
     Type: String
     AllowedPattern: .+
@@ -27,6 +15,18 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The service name [required]
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  VPCEndpointId:
+    Type: String
+    AllowedPattern: .+
+    Description: The id of the endpoint [required]
+  VPCId:
+    Type: String
+    AllowedPattern: .+
+    Description: The VPC id [required]
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
