@@ -33,8 +33,8 @@ Resources:
       AlarmDescription: !Sub '*Directory Service* (${CustomAlarmName}) で再帰的なクエリの失敗が発生しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Notice-${CustomAlarmName}-DirectoryService-RecursiveQueryFailure
-        - Notice-DirectoryService-RecursiveQueryFailure
+        - !Sub Notice-${CustomAlarmName}-DirectoryService-RecursiveQueryFailure-{DirectoryId}
+        - !Sub Notice-DirectoryService-RecursiveQueryFailure-{DirectoryId}
       ComparisonOperator: LessThanOrEqualToThreshold
       Dimensions:
         - Name: Metric Category
