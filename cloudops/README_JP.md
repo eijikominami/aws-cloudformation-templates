@@ -50,7 +50,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | IncidentManagerWorkloadName | String | Workload | ○ | ワークロード名 |
 | SSMAdminAccountId | Strig | | | SSM の管理を行う AWS アカウントの ID |
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
-| OrganizationID | String | | | AWS Organizations ID |
+| SSMOrganizationID | String | | | AWS Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
 
 ### CodeGuru Profiler

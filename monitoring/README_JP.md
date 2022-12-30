@@ -1032,3 +1032,67 @@ Properties:
   Tags: Map
   TimeoutInMinutes: Integer
 ```
+
+## VPC エンドポイント
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | VPC ID | VPC エンドポイント ID | エンドポイントタイプ | サービス名 | 閾値 |
+| --- | --- | --- | --- | --- | --- | --- |
+| AWS/PrivateLinkEndpoints | **PacketsDropped** | `VPCId` | `VPCEndpointId` | `EndpointType` | `ServiceName`  | 1分間に1回以上 |
+
+## パラメータ
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `EndpointType` | String | | ○ | エンドポイントタイプ | 
+| `ServiceName` | String | | ○ | サービス名 | 
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `VPCEndpointId` | String | | ○ | エンドポイント ID | 
+| `VPCId` | String | | ○ | VPC ID | 
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointType: String
+    ServiceName: String
+    SNSTopicArn : String
+    VPCEndpointId: String
+    VPCId: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoint
+    SemanticVersion: 2.0.64
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointType: String
+    ServiceName: String
+    SNSTopicArn : String
+    VPCEndpointId: String
+    VPCId: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```

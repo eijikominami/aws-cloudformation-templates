@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for VPC Endpoint
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  VPCId:
+    Type: String
+    AllowedPattern: .+
+    Description: The VPC id [required]
+  VPCEndpointId:
+    Type: String
+    AllowedPattern: .+
+    Description: The id of the endpoint [required]
+  EndpointType:
+    Type: String
+    AllowedPattern: .+
+    Description: The type of endpoint [required]
+  ServiceName:
+    Type: String
+    AllowedPattern: .+
+    Description: The service name [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AlarmPacketsDropped:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*PrivateLinkEndpoints* (${VPCEndpointId}) で *パケットのドロップ* が発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-PrivateLinkEndpoints-PacketsDropped-Occured-${VPCEndpointId}
+        - !Sub Warning-${CustomAlarmName}-PrivateLinkEndpoints-PacketsDropped-Occured-${VPCEndpointId}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions: 
+        - Name: VPC Id
+          Value: !Ref VPCId
+        - Name: VPC Endpoint Id
+          Value: !Ref VPCEndpointId
+        - Name: Endpoint Type
+          Value: !Ref EndpointType
+        - Name: Service Name
+          Value: !Ref ServiceName
+      EvaluationPeriods: 1
+      MetricName: PacketsDropped
+      Namespace: AWS/PrivateLinkEndpoints
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
