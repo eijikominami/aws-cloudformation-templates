@@ -217,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.68
+        SemanticVersion: 2.0.69
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -234,7 +234,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.68
+        SemanticVersion: 2.0.69
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
