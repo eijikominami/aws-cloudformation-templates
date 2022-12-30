@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for AWS AQDirectory Service
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  DirectoryId:
+    Type: String
+    AllowedPattern: .+
+    Description: The id of the directory
+  DomainControllerIp:
+    Type: String
+    AllowedPattern: .+
+    Description: The IP of the domain controller   
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  RecursiveQueryFailure:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Directory Service* (${CustomAlarmName}) で再帰的なクエリの失敗が発生しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Notice-${CustomAlarmName}-DirectoryService-RecursiveQueryFailure
+        - Notice-DirectoryService-RecursiveQueryFailure
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Dimensions:
+        - Name: Metric Category
+          Value: DNS
+        - Name: Domain Controller IP
+          Value: !Ref DomainControllerIp
+        - Name: Directory ID
+          Value: !Ref DirectoryId
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: Recursive Query Failure/sec
+      Namespace: AWS/DirectoryService
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

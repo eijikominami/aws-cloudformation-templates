@@ -8,9 +8,9 @@ cloudwatch-alarm-about-transitgateway creates Amazon CloudWatch Alarm about AWS 
 
 The template creates the following alarms.
 
-| Namespace | MetricName | TopicName | Threshold |
+| Namespace | MetricName | TransitGateway | Threshold |
 | --- | --- | --- |
-| AWS/TransitGateway | **PacketDropCountNoRoute** | `TransitGateway` | At least once a minute |
+| AWS/TransitGateway | **PacketDropCountNoRoute** | `TransitGatewayId` | At least once a minute |
 
 ## Parameters
 
@@ -32,9 +32,9 @@ cloudwatch-alarm-about-transitgateway は、AWS Transit Gateway に関する Ama
 
 このテンプレートは、以下のアラームを作成します。
 
-| ネームスペース | メトリクス | TopicName | 閾値 |
+| ネームスペース | メトリクス | TransitGateway | 閾値 |
 | --- | --- | --- |
-| AWS/TransitGateway | **PacketDropCountNoRoute** | `TransitGateway` | 1分間に1回以上 |
+| AWS/TransitGateway | **PacketDropCountNoRoute** | `TransitGatewayId` | 1分間に1回以上 |
 
 ## パラメータ
 
