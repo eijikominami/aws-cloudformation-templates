@@ -35,7 +35,7 @@ Resources:
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-DirectoryService-RecursiveQueryFailure-{DirectoryId}
         - !Sub Notice-DirectoryService-RecursiveQueryFailure-{DirectoryId}
-      ComparisonOperator: LessThanOrEqualToThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: Metric Category
           Value: DNS

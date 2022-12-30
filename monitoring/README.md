@@ -1033,3 +1033,65 @@ Properties:
   Tags: Map
   TimeoutInMinutes: Integer
 ```
+
+## VPC Endpoint
+
+The template creates the following alarms.
+
+| Namespace | MetricName | VPCId | VPCEndpointId | EndpointType | ServiceName | Threshold |
+| --- | --- | --- | --- | --- | --- | --- |
+| AWS/PrivateLinkEndpoints | **PacketsDropped** | `VPCId` | `VPCEndpointId` | `EndpointType` | `ServiceName` | At least once a minute |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `EndpointType` | String | | ○ | The type of endpoint | 
+| `ServiceName` | String | | ○ | The service name | 
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `VPCEndpointId` | String | | ○ | The id of the endpoint | 
+| `VPCId` | String | | ○ | The VPC id | 
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointType: String
+    ServiceName: String
+    SNSTopicArn : String
+    VPCEndpointId: String
+    VPCId: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoint
+    SemanticVersion: 2.0.64
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointType: String
+    ServiceName: String
+    SNSTopicArn : String
+    VPCEndpointId: String
+    VPCId: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
