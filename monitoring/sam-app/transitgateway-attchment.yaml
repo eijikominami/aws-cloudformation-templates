@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for AWS Transit Gateway
+Description: CloudWatch alarm for AWS Transit Gateway attachments
 
 Parameters:
   CustomAlarmName:
@@ -11,6 +11,10 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS topic ARN [required]
+  TransitGatewayAttachmentId:
+    Type: String
+    AllowedPattern: .+
+    Description: The id of the Transit Gateway attachment [required]
   TransitGatewayId:
     Type: String
     AllowedPattern: .+
@@ -26,15 +30,17 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*TransitGateway* (${TransitGatewayId}) で *パケットのドロップ* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/vpc/latest/tgw/transit-gateway-cloudwatch-metrics.html> をご覧ください。'
+      AlarmDescription: !Sub '*TransitGateway* (${TransitGatewayId}/${TransitGatewayAttachmentId}) で *パケットのドロップ* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/vpc/latest/tgw/transit-gateway-cloudwatch-metrics.html> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-TransitGateway-PacketDropCountNoRoute-Occured-${TransitGatewayId}
-        - !Sub Warning-${CustomAlarmName}-TransitGateway-PacketDropCountNoRoute-Occured-${TransitGatewayId}
+        - !Sub Warning-TransitGatewayAttachment-PacketDropCountNoRoute-Occured-${TransitGatewayId}-${TransitGatewayAttachmentId}
+        - !Sub Warning-${CustomAlarmName}-TransitGateway-PacketDropCountNoRoute-Occured-${TransitGatewayId}-${TransitGatewayAttachmentId}
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions: 
         - Name: TransitGateway
           Value: !Ref TransitGatewayId
+        - Name: TransitGatewayAttachment
+          Value: !Ref TransitGatewayAttachmentId
       EvaluationPeriods: 1
       MetricName: PacketDropCountNoRoute
       Namespace: AWS/TransitGateway
