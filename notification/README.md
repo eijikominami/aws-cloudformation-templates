@@ -58,6 +58,7 @@ This template creates ``EventBridge Events Rule`` for [supported AWS Services](h
 
 | Events | Source | Detail Type |
 | --- | --- | --- |
+| AWS CloudFormation Events | aws.cloudformation | CloudFormation Stack Status Change |
 | Amazon EventBridge Scheduled Events | aws.events | Scheduled Event |
 | Amazon EBS Events | aws.ec2 | EBS Volume Notification |
 | Amazon EBS Events | aws.ec2 | EBS Snapshot Notification |
@@ -75,6 +76,16 @@ This template creates ``EventBridge Events Rule`` for [supported AWS Services](h
 | AWS KMS Events | aws.kms | KMS Imported Key Material Expiration |
 | AWS KMS Events | aws.kms | KMS CMK Deletion |
 | AWS Management Console Sign-in Events | aws.signin | AWS Console Sign In via CloudTrail |
+| AWS Application Migration Service Events | aws.mgn | MGN Source Server Launch Result |
+| AWS Application Migration Service Events | aws.mgn | MGN Source Server Lifecycle State Change |
+| AWS Application Migration Service Events | aws.mgn | MGN Source Server Data Replication Stalled Change |
+| AWS Transit Gateway Network Manager | aws.networkmanager | Network Manager Topology Change | 
+| AWS Transit Gateway Network Manager | aws.networkmanager | Network Manager Routing Update | 
+| AWS Transit Gateway Network Manager | aws.networkmanager | Network Manager Status Update | 
+| Savings Plans | aws.savingsplans | Savings Plans State Change | 
+| Savings Plans | aws.savingsplans | Savings Plans State Change Alert | 
+| Amazon EventBridge | aws.events | Scheduled Event |
+| AWS Support | aws.support | Support Case Update |
 | Tag Change Events on AWS Resources | aws.tag | Tag Change on Resource |
 | AWS Trusted Advisor Events | aws.trustedadvisor | Trusted Advisor Check Item Refresh Notification |
 
@@ -131,7 +142,10 @@ You can provide optional parameters as follows.
 | EC2EventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about EC2 is enabled |
 | KMSEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about KMS is enabled |
 | ManagementConsoleEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Management Console is enabled |
+| NetworkManagerEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about AWS Transit Gateway Network Manager is enabled |  
+| SavingsPlansEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Savings Plans is enabled | 
 | ScheduledEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about ScheduledEvents is enabled |
+| SupportEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about AWS Support is enabled |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Tag Events is enabled |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Trusted Advisor is enabled |
 | UnauthorizedApiCallsCloudWatchAlarmName | | UnauthorizedApiCallsCloudWatchAlarmName | ○ | The CloudWatch Alarm name to notify unauthorized API calls |

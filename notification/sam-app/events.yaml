@@ -15,7 +15,10 @@ Metadata:
           - ManagementConsoleEventsRule
           - MediaLiveEventsRule
           - MGNEventsRule
+          - NetworkManagerEventsRule
+          - SavingsPlansEventsRule
           - ScheduledEventsRule
+          - SupportEventsRule
           - TagEventsRule
           - TrustedAdvisorEventsRule
       - Label: 
@@ -85,6 +88,20 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about MGN [required]
+  NetworkManagerEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about AWS Transit Gateway Network Manager [required]
+  SavingsPlansEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about Savings Plans Events [required]
   ScheduledEventsRule:
     Type: String
     Default: ENABLED
@@ -92,6 +109,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Scheduled Events [required]
+  SupportEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about AWS Support [required]
   TagEventsRule:
     Type: String
     Default: ENABLED
@@ -143,20 +167,6 @@ Resources:
       State: ENABLED
       Targets:
         - Arn: !Ref SNSForDeploymentArn
-          Id: SNSForAlert
-  EventBridgeForScheduledEvents:
-    Type: AWS::Events::Rule
-    Properties: 
-      Description: !Sub Rule for Scheduled Events created by ${AWS::StackName}.
-      EventPattern:
-        source:
-          - aws.events
-        detail-type: 
-          - Scheduled Event
-      Name: !Sub ${LogicalNamePrefix}-ScheduledEvents
-      State: !Ref ScheduledEventsRule
-      Targets:
-        - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
   EventBridgeForEBS:
     Type: AWS::Events::Rule
@@ -281,6 +291,65 @@ Resources:
           - MGN Source Server Data Replication Stalled Change
       Name: !Sub ${LogicalNamePrefix}-MGN
       State: !Ref MGNEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForNetworkManager:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for Network Manager created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.networkmanager
+        detail-type: 
+          - Network Manager Topology Change
+          - Network Manager Routing Update
+          - Network Manager Status Update
+      Name: !Sub ${LogicalNamePrefix}-NetworkManager
+      State: !Ref NetworkManagerEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForSavingsPlans:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for Savings Plans Events created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.savingsplans
+        detail-type: 
+          - Savings Plans State Change
+          - Savings Plans State Change Alert
+      Name: !Sub ${LogicalNamePrefix}-SavingsPlans
+      State: !Ref SavingsPlansEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForScheduledEvents:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for Scheduled Events created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.events
+        detail-type: 
+          - Scheduled Event
+      Name: !Sub ${LogicalNamePrefix}-ScheduledEvents
+      State: !Ref ScheduledEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForSupport:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for Support created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.support
+        detail-type: 
+          - Support Case Update
+      Name: !Sub ${LogicalNamePrefix}-Support
+      State: !Ref SupportEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert
