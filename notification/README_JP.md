@@ -58,6 +58,7 @@
 
 | イベント | ソース | 詳細タイプ |
 | --- | --- | --- |
+| AWS CloudFormation Events | aws.cloudformation | CloudFormation Stack Status Change |
 | Amazon EventBridge Scheduled Events | aws.events | Scheduled Event |
 | Amazon EBS Events | aws.ec2 | EBS Volume Notification |
 | Amazon EBS Events | aws.ec2 | EBS Snapshot Notification |
@@ -75,6 +76,16 @@
 | AWS KMS Events | aws.kms | KMS Imported Key Material Expiration |
 | AWS KMS Events | aws.kms | KMS CMK Deletion |
 | AWS Management Console Sign-in Events | aws.signin | AWS Console Sign In via CloudTrail |
+| AWS Application Migration Service Events | aws.mgn | MGN Source Server Launch Result |
+| AWS Application Migration Service Events | aws.mgn | MGN Source Server Lifecycle State Change |
+| AWS Application Migration Service Events | aws.mgn | MGN Source Server Data Replication Stalled Change |
+| AWS Transit Gateway Network Manager | aws.networkmanager | Network Manager Topology Change | 
+| AWS Transit Gateway Network Manager | aws.networkmanager | Network Manager Routing Update | 
+| AWS Transit Gateway Network Manager | aws.networkmanager | Network Manager Status Update | 
+| Savings Plans | aws.savingsplans | Savings Plans State Change | 
+| Savings Plans | aws.savingsplans | Savings Plans State Change Alert | 
+| Amazon EventBridge | aws.events | Scheduled Event |
+| AWS Support | aws.support | Support Case Update |
 | Tag Change Events on AWS Resources | aws.tag | Tag Change on Resource |
 | AWS Trusted Advisor Events | aws.trustedadvisor | Trusted Advisor Check Item Refresh Notification |
 
@@ -131,7 +142,10 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | EC2EventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、EC2 に関するイベントルールを作成します。 |
 | KMSEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、KMS に関するイベントルールを作成します。 |
 | ManagementConsoleEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Management Console に関するイベントルールを作成します。 |
+| NetworkManagerEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Transit Gateway Network Manager に関するイベントルールを作成します。 |  
+| SavingsPlansEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Savings Plans に関するイベントルールを作成します。 | 
 | ScheduledEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、ScheduledEvents に関するイベントルールを作成します。 |
+| SupportEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Suport に関するイベントルールを作成します。 |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ |ENABLEDを指定した場合、Tag Events に関するイベントルールを作成します。 |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Trusted Advisor に関するイベントルールを作成します。 |
 | UnauthorizedApiCallsCloudWatchAlarmName | | UnauthorizedApiCallsCloudWatchAlarmName | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
