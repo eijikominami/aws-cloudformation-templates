@@ -71,6 +71,21 @@ This template sets a notification channel of ``AWS DevOps Guru``.
 | --- | --- | --- | --- | --- |
 | **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
 
+### Systems Manager
+
+This template sets ``AWS Systems Manager``.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| **AdminAccountId** | String | | | AWS Systems Manager Automation を設定する AWS アカウント ID |
+| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | AWS Systems Manager Incident Manager を有効化するかどうか |
+| **OrganizationID** | String | | | AWS Organizations ID |
+| **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
+
+#### マルチアカウント対応
+
+If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` in `AWS Organizations`.
+
 ### Systems Manager Incident Manager
 
 This template sets a notification channel of ``AWS Systems Manager Incident Manager``.

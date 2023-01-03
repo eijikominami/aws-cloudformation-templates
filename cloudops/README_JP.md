@@ -71,6 +71,21 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | --- | --- | --- | --- | --- |
 | **SNSForAlertArn** | String | | ○ | SNSトピックのARN |
 
+### Systems Manager
+
+このテンプレートは、``AWS Systems Manager`` を作成します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| **AdminAccountId** | String | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
+| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
+| **OrganizationID** | String | | | AWS Organizations ID |
+| **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
+
+#### マルチアカウント対応
+
+AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて **アクセス有効化** を設定してください。
+
 ### Systems Manager Incident Manager
 
 このテンプレートは、``AWS Systems Manager Incident Manager`` を作成します。

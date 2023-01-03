@@ -286,7 +286,6 @@ Resources:
   SSMMasterAccountRole: 
     Type: AWS::IAM::Role
     Properties: 
-      RoleName: AWS-SystemsManager-AutomationAdministrationRole
       AssumeRolePolicyDocument: 
         Version: 2012-10-17
         Statement: 
@@ -310,6 +309,7 @@ Resources:
                   - organizations:ListAccountsForParent
                 Resource: 
                   - '*'
+      RoleName: AWS-SystemsManager-AutomationAdministrationRole
   # VPC
   VPC:
     Type: AWS::EC2::VPC

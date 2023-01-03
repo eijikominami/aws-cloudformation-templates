@@ -32,10 +32,12 @@ This project contains **AWS SAM–based serverless applications** and they are p
 | [cloudwatch-alarm-about-medialive](monitoring/readme/cloudwatch-alarm-about-medialive.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-medialive) |
 | [cloudwatch-alarm-about-mediastore](monitoring/readme/cloudwatch-alarm-about-mediastore.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-mediastore) |
 | [cloudwatch-alarm-about-natgateway](monitoring/readme/cloudwatch-alarm-about-natgateway.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-natgateway) |
-| [cloudwatch-alarm-about-sns](monitoring/readme/cloudwatch-alarm-about-sns.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-sns) |
 | [cloudwatch-alarm-about-privateendpoint](monitoring/readme/cloudwatch-alarm-about-privateendpoint.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-privateendpoint) |
+| [cloudwatch-alarm-about-sns](monitoring/readme/cloudwatch-alarm-about-sns.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-sns) |
+| [cloudwatch-alarm-about-ssm-command](monitoring/readme/cloudwatch-alarm-about-ssm-command.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ssm-command) |
 | [cloudwatch-alarm-about-transitgateway](monitoring/readme/cloudwatch-alarm-about-transitgateway.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-transitgateway) |
 | [cloudwatch-alarm-about-transitgatewat-attachment](monitoring/readme/cloudwatch-alarm-about-trasitgateway-attachment.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-transitgateway-attachment) |
+| [cloudwatch-alarm-about-workspaces](monitoring/readme/cloudwatch-alarm-about-workspaces.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-workspaces) |
 | [sns-topic](notification/sns-topic.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~sns-topic) |
 | [eventbridge-rules](eventbridge-rules.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~eventbridge-rules) |
 | [delete-resources-without-required-tags](security-config-rules/delete-resources-without-required-tags.md) | 2.0.69 | [AWS Serverless Application Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~delete-resources-without-required-tags) |
@@ -55,7 +57,6 @@ This project contains **Cloudformation templates** as follows.
 | [EC2-based Web Servers](/web-servers/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WebServers&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/template.yaml)  |
 | [**Synthetics Monitoring**](/synthetics/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) |
 | [Shared Servivces](/shared/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
-| [Systems Manager](/cloudops/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml&param_LogicalNamePrefix=SystemsManager) |
 | [CloudOps](/cloudops/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/template.yaml) |
 | [Send Notification to Slack](/notification/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
 | [Amplify Console](/amplify/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Amplify&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/amplify/template.yaml) |
@@ -98,13 +99,13 @@ The following section describes the individual components of the architecture.
 
 ![](images/architecture-delete-resources-without-required-tags.png)
 
-### Static Website Hosting Template
-
-![](images/architecture-static-website-hosting.png)
-
 ### Global Settings Template
 
 ![](images/architecture-global.png)
+
+### Static Website Hosting Template
+
+![](images/architecture-static-website-hosting.png)
 
 ### Network Template
 
@@ -118,14 +119,18 @@ The following section describes the individual components of the architecture.
 
 ![](images/architecture-synthetics.png)
 
+### Shared Services
+
+![](images/architecture-shared.png)
+
 ### CloudOps Template
 
 ![](images/architecture-cloudops.png)
 
-### Amplify Console Template
-
-![](images/architecture-amplify.png)
-
 ### Send Notification to Slack
 
 ![](images/architecture-notification.png)
+
+### Amplify Console Template
+
+![](images/architecture-amplify.png)
