@@ -36,6 +36,7 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
+    Description: Enable or disable AWS Systems Manager Incident Manager [required]
   OrganizationID:
     Type: String
     Default: ''
@@ -77,6 +78,7 @@ Parameters:
 Conditions:
   CreateIAMRoleForMultiAccount: !And [ !Not [ !Equals [ !Ref AdminAccountId, ''] ], !Not [ !Equals [ !Ref OrganizationID, ''] ] ]
   CreateResource: !Equals [ !Ref IgnoreResourceConflicts, DISABLED ]
+  CreateResourceDataSync: !Equals [ !Ref AdminAccountId, !Ref AWS::AccountId ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -119,7 +121,14 @@ Resources:
     Properties: 
       AWSServiceName: ssm.amazonaws.com
       Description: Provides access to AWS Resources managed or used by Amazon SSM.
-  # IAM Role
+  ServiceLinkedRoleForSystemsManagerAccountDiscovery:
+    Type: AWS::IAM::ServiceLinkedRole
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties: 
+      AWSServiceName: accountdiscovery.ssm.amazonaws.com
+      Description: Provides access to AWS Resources managed or used by Amazon SSM AccountDiscovery.
+  # IAM Role for EC2
   IAMRoleForEC2:
     Type: AWS::IAM::Role
     Properties:
@@ -187,7 +196,59 @@ Resources:
               - Effect: Allow
                 Action: 
                   - iam:PassRole
-                Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/AWS-SystemsManager-AutomationExecutionRole    
+                Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/AWS-SystemsManager-AutomationExecutionRole   
+      RoleName: !Sub ${LogicalNamePrefix}-SystemsManager-AutomationExecutionRole-${AWS::Region}
+  # IAM Role for SSM Explorer
+  AWSSystemsManagerOpsItemsCWERole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+        - Effect: Allow
+          Principal: 
+            Service: events.amazonaws.com
+          Action: 
+          - sts:AssumeRole
+      Policies: 
+        - PolicyName: OpsItemCWE
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: 
+                  - ssm:CreateOpsItem
+                Resource: '*'
+              - Effect: Allow
+                Action: 
+                  - ssm:AddTagsToResource
+                Resource: arn:aws:ssm:*:*:opsitem/*
+      RoleName: OpsItem-CWE-Role
+  AWSSystemsManagerEnableExplorerRole: 
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+        - Effect: Allow
+          Principal: 
+            Service: ssm.amazonaws.com
+          Action: 
+          - sts:AssumeRole
+      Policies: 
+        - PolicyName: EnableExplorer
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: 
+                  - ssm:GetServiceSetting
+                  - ssm:UpdateServiceSetting
+                  - config:DescribeConfigurationRecorders
+                  - compute-optimizer:GetEnrollmentStatus
+                  - iam:ListRoles
+                Resource: '*'
+      RoleName: !Sub ${LogicalNamePrefix}-SystemsManager-EnableExplorerRole-${AWS::Region}
   # Document
   CloudWatchAgentInstallAndConfigure:
     Type: AWS::SSM::Document
@@ -306,10 +367,6 @@ Resources:
           windowsUpdates:
             - Enabled
       ScheduleExpression: rate(30 minutes)
-      Targets: 
-        - Key: !Sub tag:${TagKey}
-          Values:
-            - !Sub value:${TagValue}
   # Scan instances for missing patches daily
   SystemAssociationForScanningPatches:
     Type: AWS::SSM::Association
@@ -349,6 +406,232 @@ Resources:
         - Key: !Sub tag:${TagKey}
           Values:
             - !Sub value:${TagValue}
+  # Enable SSM Explorer
+  SystemAssociationForSSMExplorer:
+    Type: AWS::SSM::Association
+    Properties: 
+      AssociationName: SystemAssociationForAWSSSMExplorer
+      Name: AWS-EnableExplorer
+      Parameters:
+          AutomationAssumeRole:
+            - !GetAtt AWSSystemsManagerEnableExplorerRole.Arn
+  ResourceDataSync:
+    Condition: CreateResourceDataSync
+    DependsOn:
+      - ServiceLinkedRoleForSystemsManagerAccountDiscovery
+    Type: AWS::SSM::ResourceDataSync
+    Properties: 
+      SyncName: Default
+      SyncSource: 
+        AwsOrganizationsSource: 
+          OrganizationSourceType: EntireOrganization
+        IncludeFutureRegions: true
+        SourceRegions: 
+          - us-east-1
+          - us-west-1
+          - us-west-2
+          - sa-east-1
+          - eu-west-1
+          - ap-southeast-2
+          - eu-central-1
+          - ap-southeast-1
+          - ap-northeast-1
+          - ap-south-1
+          - ap-northeast-2
+          - ap-northeast-3
+          - eu-north-1
+          - us-east-2
+          - eu-west-2
+          - eu-west-3
+          - ca-central-1
+        SourceType: AwsOrganizations
+      SyncType: SyncFromSource
+  EventBridgeRuleForSSMOpsItemsAutoscalingInstanceLaunchFailure:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems when EC2 Auto Scaling instance launch failed
+      EventPattern:
+        source:
+          - aws.autoscaling
+        detail-type: 
+          - EC2 Instance Launch Unsuccessful
+        detail:
+          StatusCode:
+            - Failed
+      Name: SSMOpsItems-Autoscaling-instance-launch-failure
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsAutoscalingInstanceTerminationFailure:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems when EC2 Auto Scaling instance termination failed
+      EventPattern:
+        source:
+          - aws.autoscaling
+        detail-type: 
+          - EC2 Instance Terminate Unsuccessful
+        detail:
+          StatusCode:
+            - Failed
+      Name: SSMOpsItems-Autoscaling-instance-termination-failure
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsEBSSnapshotCopyFailed:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems when EBS snapshot copy failed
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type: 
+          - EBS Snapshot Notificatio
+        detail:
+          event: 
+            - copySnapshot
+          result:
+            - failed
+      Name: SSMOpsItems-EBS-snapshot-copy-failed
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsEBSSnapshotCreationFailed:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems when EBS snapshot creation failed
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type: 
+          - EBS Snapshot Notificatio
+        detail:
+          event: 
+            - createSnapshot
+          result:
+            - failed
+      Name: SSMOpsItems-EBS-snapshot-creation-failed
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsEBSVolumePerformanceIssue:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems for EBS volume performance issue
+      EventPattern:
+        source:
+          - aws.health
+        detail-type: 
+          - AWS Health Event
+        detail:
+          service: 
+            - EBS
+          eventTypeCategory:
+            - issue
+          eventTypeCode:
+            - AWS_EBS_DEGRADED_EBS_VOLUME_PERFORMANCE
+      Name: SSMOpsItems-EBS-volume-performance-issue
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsEC2Issue:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems for any EC2 issue
+      EventPattern:
+        source:
+          - aws.health
+        detail-type: 
+          - AWS Health Event
+        detail:
+          service: 
+            - EC2
+          eventTypeCategory:
+            - issue
+      Name: SSMOpsItems-EC2-issue
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsEC2ScheduledChange:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems for EC2 scheduled changes
+      EventPattern:
+        source:
+          - aws.health
+        detail-type: 
+          - AWS Health Event
+        detail:
+          service: 
+            - EC2
+          eventTypeCategory:
+            - scheduledChange
+      Name: SSMOpsItems-EC2-scheduled-change
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsRDSIssue:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems for any RDS issue
+      EventPattern:
+        source:
+          - aws.health
+        detail-type: 
+          - AWS Health Event
+        detail:
+          service: 
+            - RDS
+          eventTypeCategory:
+            - issue
+      Name: SSMOpsItems-RDS-issue
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsRDSScheduledChange:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems for any RDS issue
+      EventPattern:
+        source:
+          - aws.health
+        detail-type: 
+          - AWS Health Event
+        detail:
+          service: 
+            - RDS
+          eventTypeCategory:
+            - scheduledChange
+      Name: SSMOpsItems-RDS-scheduled-change
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeRuleForSSMOpsItemsSSMMaintenanceWindowExecutionFailed:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Rule for SSM OpsCenter to create OpsItems for any RDS issue
+      EventPattern:
+        source:
+          - aws.ssm
+        detail-type: 
+          - Maintenance Window Execution State-change Notification
+        detail:
+          status: 
+            - FAILED
+      Name: SSMOpsItems-SSM-maintenance-window-execution-failed
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
   # Maintenance Window
   MaintenanceWindow:
     Type: AWS::SSM::MaintenanceWindow
