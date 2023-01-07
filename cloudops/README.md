@@ -77,10 +77,10 @@ This template sets ``AWS Systems Manager``.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| **AdminAccountId** | String | | | AWS Systems Manager Automation を設定する AWS アカウント ID |
-| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | AWS Systems Manager Incident Manager を有効化するかどうか |
+| **AdminAccountId** | String | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
+| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
 | **OrganizationID** | String | | | AWS Organizations ID |
-| **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
+| **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
 #### マルチアカウント対応
 
