@@ -91,7 +91,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.69
+        SemanticVersion: 2.1.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -108,7 +108,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.0.69
+        SemanticVersion: 2.1.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -231,7 +231,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.0.69
+        SemanticVersion: 2.1.0
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
