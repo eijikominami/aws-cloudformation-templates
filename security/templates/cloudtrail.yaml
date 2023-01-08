@@ -264,7 +264,7 @@ Resources:
     Properties:
       FilterPattern: !If
         - BucketExists
-        - !Sub '({($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}) && ($.requestParameters.bucketName!="${BucketNameToExcludeAlarms}")'
+        - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ($.requestParameters.bucketName!="${BucketNameToExcludeAlarms}")}'
         - '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
