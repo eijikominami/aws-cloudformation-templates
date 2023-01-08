@@ -8,6 +8,7 @@ Metadata:
           default: 'CloudTrail Configuration'
         Parameters: 
           - AuditOtherRegions
+          - BucketNameToExcludeAlarms
           - LogBucketName
       - Label: 
           default: 'Notification Configuration'
@@ -29,6 +30,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]
+  BucketNameToExcludeAlarms:
+    Type: String
+    Default: ''
+    Description: The S3 bucket name to exclude CloudWatch alarms
   LogBucketName:
     Type: String
     AllowedPattern: .+
@@ -58,6 +63,7 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
+  BucketExists: !Not [ !Equals [ !Ref BucketNameToExcludeAlarms, '' ] ]
   CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
 
 Resources:
@@ -256,7 +262,10 @@ Resources:
   CloudWatchLogsMetricFilterCloudTrailUnauthorizedAPICalls:
     Type: AWS::Logs::MetricFilter
     Properties:
-      FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
+      FilterPattern: !If
+        - BucketExists
+        - !Sub '({($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}) && ($.requestParameters.bucketName!="${BucketNameToExcludeAlarms}")'
+        - '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: UnauthorizedAPICalls 

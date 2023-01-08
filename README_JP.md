@@ -71,19 +71,19 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 本プロジェクトは、以下のモジュールで構成されています。
 
-| サービス | リソース | 変数 | バージョン |
-| --- | --- | --- | --- |
-| Amazon CloudWatch Synthetics | Runtime | | syn-nodejs-puppeteer-3.8 |
-| AWS Codebuild | Image | ○ | aws/codebuild/amazonlinux2-aarch64-standard:2.0 |
+| サービス | リソース | バージョン |
+| --- | --- | --- |
+| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-3.8 |
+| AWS Codebuild | Image | aws/codebuild/amazonlinux2-aarch64-standard:2.0 |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-072bfb8ae2c884cc4 |
-| Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-099772c3838a3bec1 |
-| AWS Lambda | CodeGuru Profiler | | 11 |
-| AWS Lambda | Lambda Insights | | 32 |
-| AWS Lambda | Python | | 3.9 |
-| AWS Systems Manager | SSM Document Schema (Automation) | | 0.3 |
-| AWS Systems Manager | SSM Document Schema (Command) | | 2.2 |
-| Amazon OpenSearch Service | OpenSearch | ○ | OpenSearch_1.3 |
+| Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-0659e3a420d8a74ea |
+| AWS Lambda | CodeGuru Profiler | 11 |
+| AWS Lambda | Lambda Insights | Arm64:2 |
+| AWS Lambda | Python | 3.9 |
+| AWS Systems Manager | SSM Document Schema (Automation) | 0.3 |
+| AWS Systems Manager | SSM Document Schema (Command) | 2.2 |
+| Amazon OpenSearch Service | OpenSearch | OpenSearch_1.3 |
 
 ## アーキテクチャ
 

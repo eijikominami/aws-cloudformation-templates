@@ -5,7 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/cloudops`` は、``CodeGuru Profiler`` や ``DevOps Guru`` などの運用の可用性に関するサービスを構築します。
+``AWSCloudFormationTemplates/cloudops`` は、``Systems Manager`` や ``DevOps Guru`` などの運用の可用性に関するサービスを構築します。
 
 ## TL;DR
 
@@ -77,10 +77,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **AdminAccountId** | String | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
-| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
+| **AdminAccountId** | String | | | AWS Systems Manager Automation を設定する AWS アカウント ID |
+| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | AWS Systems Manager Incident Manager を有効化するかどうか |
 | **OrganizationID** | String | | | AWS Organizations ID |
-| **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
+| **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
 
 #### マルチアカウント対応
 
