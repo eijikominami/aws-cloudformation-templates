@@ -84,7 +84,7 @@ This template sets ``AWS Systems Manager``.
 
 #### マルチアカウント対応
 
-If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` in `AWS Organizations`.
+If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.
 
 ### Systems Manager Incident Manager
 

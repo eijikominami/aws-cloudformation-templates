@@ -84,7 +84,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 #### マルチアカウント対応
 
-AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて **アクセス有効化** を設定してください。
+AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて  **Systems Manager** と **AWS Trusted Advisor** の `アクセス有効化` を設定してください。
 
 ### Systems Manager Incident Manager
 

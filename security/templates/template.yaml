@@ -8,8 +8,8 @@ Metadata:
       - Label: 
           default: 'CloudTrail and Config Configuration'
         Parameters: 
+          - AdditionalCloudWatchLogsMetricFilters
           - AuditOtherRegions
-          - BucketNameToExcludeAlarms
           - AutoRemediation
       - Label: 
           default: 'Config Configuration'
@@ -46,6 +46,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AdditionalCloudWatchLogsMetricFilters:
+    Type: String
+    Default: ''
+    Description: Additional expression of CloudWatch Logs metric filters
   AWSConfig:
     Type: String
     Default: ENABLED
@@ -95,10 +99,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable AWS SecurityHub [required]
-  BucketNameToExcludeAlarms:
-    Type: String
-    Default: ''
-    Description: The S3 bucket name to exclude CloudWatch alarms
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -277,7 +277,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         AuditOtherRegions: !Ref AuditOtherRegions
-        BucketNameToExcludeAlarms: !Ref BucketNameToExcludeAlarms
+        AdditionalCloudWatchLogsMetricFilters: !Ref AdditionalCloudWatchLogsMetricFilters
         LogBucketName: !Ref S3ForAccessLog
         LogicalNamePrefix: !Ref AWS::StackName
         SnsTopicARN: !If
