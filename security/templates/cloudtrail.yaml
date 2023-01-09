@@ -7,8 +7,8 @@ Metadata:
       - Label: 
           default: 'CloudTrail Configuration'
         Parameters: 
+          - AdditionalCloudWatchLogsMetricFilters
           - AuditOtherRegions
-          - BucketNameToExcludeAlarms
           - LogBucketName
       - Label: 
           default: 'Notification Configuration'
@@ -23,6 +23,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AdditionalCloudWatchLogsMetricFilters:
+    Type: String
+    Default: ''
+    Description: Additional expression of CloudWatch Logs metric filters
   AuditOtherRegions:
     Type: String
     Default: ENABLED
@@ -30,10 +34,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]
-  BucketNameToExcludeAlarms:
-    Type: String
-    Default: ''
-    Description: The S3 bucket name to exclude CloudWatch alarms
   LogBucketName:
     Type: String
     AllowedPattern: .+
@@ -63,7 +63,7 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
-  BucketExists: !Not [ !Equals [ !Ref BucketNameToExcludeAlarms, '' ] ]
+  CreateAdditionalFilters: !Not [ !Equals [ !Ref AdditionalCloudWatchLogsMetricFilters, '' ] ]
   CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
 
 Resources:
@@ -263,8 +263,8 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: !If
-        - BucketExists
-        - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ($.requestParameters.bucketName!="${BucketNameToExcludeAlarms}")}'
+        - CreateAdditionalFilters
+        - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ${AdditionalCloudWatchLogsMetricFilters}}'
         - '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:

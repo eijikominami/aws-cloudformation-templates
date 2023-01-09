@@ -129,7 +129,7 @@ You can provide optional parameters as follows:
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Security Hub enabled |
-| BucketNameToExcludeAlarms | String | | The S3 bucket name to exclude CloudWatch 'Unauthorizaed API Calls' alarms |
+| AdditionalCloudWatchLogsMetricFilters | String | | Additional expression of CloudWatch Logs metric filters |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | Notification filter about Security Hub Security Checks | 
 

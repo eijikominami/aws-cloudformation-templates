@@ -132,7 +132,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
-| BucketNameToExcludeAlarms | String | | CloudWatch 'Unauthorizaed API Calls' アラームから除外する S3 バケット名 |
+| AdditionalCloudWatchLogsMetricFilters | String | | 追加の CloudWatch Logs メトリクスフィルター |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | セキュリティチェックに関する通知フィルタ | 
 
