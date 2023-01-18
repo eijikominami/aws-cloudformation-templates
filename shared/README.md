@@ -38,6 +38,7 @@ You can provide optional parameters as follows.
 | ActiveDirectoryShortName | String | CORP | ○ | The NetBIOS name for your domain |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.1.64/26 | ○ | The public subnet CIDR block at AZ2 |
+| IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
 | SubnetTransitCidrBlockAz1 | String | 10.3.1.0/24 | ○ | The transit subnet CIDR block at AZ1 |
 | SubnetTransitCidrBlockAz2 | String | 10.3.5.0/24 | ○ | The transit subnet CIDR block at AZ2 |
 | TransitGatewayId | String | | | The ID of a transit gateway |

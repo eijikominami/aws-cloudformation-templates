@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/security/microsoftad sets AWS IAM Identity Center.
+
+Parameters:
+  DefaultSessionDuration:
+    Type: String
+    Default: PT12H
+    MinLength: 1
+    MaxLength: 100
+    AllowedPattern: ^(-?)P(?=\d|T\d)(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)([DW]))?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$
+    Description: The length of time that the application user sessions are valid for in the ISO-8601 standard.
+  InstanceArn:
+    Type: String
+    Default: ''
+    Description: The ARN of the IAM Identity Center instance under which the operation will be executed.
+  LogicalNamePrefix:
+    Type: String
+    Default: IdentityCenter
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreatePermissionSet: !Not [ !Equals [ !Ref InstanceArn, ''] ]
+
+Resources:
+  AdministratorAccess:
+    Condition: CreatePermissionSet
+    Type: AWS::SSO::PermissionSet
+    Properties: 
+      Description: !Sub Provides full access to AWS services and resources created by ${AWS::StackName}
+      InstanceArn: !Ref InstanceArn
+      ManagedPolicies: 
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      Name: !Sub ${LogicalNamePrefix}Administrator
+      SessionDuration: !Ref DefaultSessionDuration
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  PowerUserAccess:
+    Condition: CreatePermissionSet
+    Type: AWS::SSO::PermissionSet
+    Properties: 
+      Description: !Sub Provides full access to AWS services and resources, but does not allow management of Users and groups created by ${AWS::StackName}
+      InstanceArn: !Ref InstanceArn
+      ManagedPolicies: 
+        - arn:aws:iam::aws:policy/PowerUserAccess
+      Name: !Sub ${LogicalNamePrefix}PowerUser
+      SessionDuration: !Ref DefaultSessionDuration
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
+  OrganizationsFullAccess:
+    Condition: CreatePermissionSet
+    Type: AWS::SSO::PermissionSet
+    Properties: 
+      Description: !Sub Provides full access to AWS Organizations created by ${AWS::StackName}
+      InstanceArn: !Ref InstanceArn
+      ManagedPolicies: 
+        - arn:aws:iam::aws:policy/AWSOrganizationsFullAccess
+      Name: !Sub ${LogicalNamePrefix}OrganizationsFull
+      SessionDuration: !Ref DefaultSessionDuration
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ReadOnlyAccess:
+    Condition: CreatePermissionSet
+    Type: AWS::SSO::PermissionSet
+    Properties: 
+      Description: !Sub This policy grants permissions to view resources and basic metadata across all AWS services created by ${AWS::StackName}
+      InstanceArn: !Ref InstanceArn
+      ManagedPolicies: 
+        - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
+      Name: !Sub ${LogicalNamePrefix}ReadOnly
+      SessionDuration: !Ref DefaultSessionDuration
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
