@@ -12,7 +12,7 @@ Metadata:
           - AZDeploymentMode
           - FSxThroughput
           - PrimarySubnetAccess
-          - SourcePrefixListId
+          - IngressCidrIp
           - StorageCapacity
           - SubnetIds
           - VPCId
@@ -51,13 +51,13 @@ Parameters:
       The throughput capacity of an Amazon FSx file system, measured in megabytes per second 
       in powers of 2 (8, 16, 32, ... , 1024), with the recommended value based on the file 
       system size: 8 for <800 GiB, 16 for <1600 GiB, ... 512 for <51200 GiB, 1024 for >=51200 GiB
+  IngressCidrIp:
+    Type: String
+    AllowedPattern: .+
+    Description: The IPv4 address range, in CIDR format
   PrimarySubnetAccess:
     Type: AWS::EC2::Subnet::Id
     Description: Specifies the primary subnet that the file system will be accessible from
-  SourcePrefixListId:
-    Type: String
-    AllowedPattern: .+
-    Description: The ID of a prefix list
   StorageCapacity:
     Type: String
     Default: 1024
@@ -108,12 +108,12 @@ Resources:
       SecurityGroupIngress:
         - IpProtocol: tcp
           Description: "Directory Services SMB file sharing"
-          SourcePrefixListId: !Ref SourcePrefixListId
+          CidrIp: !Ref IngressCidrIp
           FromPort: 445
           ToPort: 445
         - IpProtocol: tcp
           Description: "WinRM 2.0 (Microsoft Windows Remote Management)"
-          SourcePrefixListId: !Ref SourcePrefixListId
+          CidrIp: !Ref IngressCidrIp
           FromPort: 5985
           ToPort: 5985
   FSx:

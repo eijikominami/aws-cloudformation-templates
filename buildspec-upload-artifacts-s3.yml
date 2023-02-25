@@ -35,8 +35,6 @@ env:
     SECURITY_CONFIG_RULES_DIST_DIR: aws-cloudformation-templates/security-config-rules
     SHARED_SRC_DIR: shared/templates
     SHARED_DIST_DIR: aws-cloudformation-templates/shared
-    STORAGE_SRC_DIR: storage/templates
-    STORAGE_DIST_DIR: aws-cloudformation-templates/storage
     SYNTHETICS_SRC_DIR: synthetics/templates
     SYNTHETICS_DIST_DIR: aws-cloudformation-templates/synthetics
 
@@ -71,7 +69,6 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SHARED_DIST_DIR}/ --recursive
-      - aws s3 rm s3://${BUCKET_NAME}/${STORAGE_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive
   build:
     commands:
@@ -107,5 +104,4 @@ phases:
        - aws s3 cp ${SECURITY_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SECURITY_CONFIG_RULES_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SHARED_SRC_DIR}/ s3://${BUCKET_NAME}/${SHARED_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
-       - aws s3 cp ${STORAGE_SRC_DIR}/ s3://${BUCKET_NAME}/${STORAGE_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SYNTHETICS_SRC_DIR}/ s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
