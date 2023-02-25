@@ -27,6 +27,7 @@ Metadata:
       - Label: 
           default: 'Slack Configuration'
         Parameters:
+          - AdditionalCloudWatchLogsMetricFilters
           - CloudTrailLogGroup
           - Encrypt
           - HookUrlForDeployment
@@ -48,6 +49,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AdditionalCloudWatchLogsMetricFilters:
+    Type: String
+    Default: ''
+    Description: Additional expression of CloudWatch Logs metric filters
   CloudTrailLogGroup:
     Type: String
     Default: ''
@@ -173,6 +178,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateAdditionalFilters: !Not [ !Equals [ !Ref AdditionalCloudWatchLogsMetricFilters, '' ] ]
   CreateAnalyzeUnauthorizedApiCallsFunction: !Not [ !Equals [ !Ref CloudTrailLogGroup, ''] ]
   CreateKMSKey: !Equals [ !Ref Encrypt, 'true'] 
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -667,7 +673,10 @@ Resources:
       Events:
         CloudWatchLogs:
           Properties:
-            FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
+            FilterPattern:  !If
+              - CreateAdditionalFilters
+              - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ${AdditionalCloudWatchLogsMetricFilters}}'
+              - '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
             LogGroupName: !Ref CloudTrailLogGroup
           Type: CloudWatchLogs
       FunctionName: !Sub analyzeUnauthorizedApiCalls-createdby-${AWS::StackName}
