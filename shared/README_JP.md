@@ -38,6 +38,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | ActiveDirectoryShortName | String | CORP | ○ | NetBIOS 名 |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.1.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |
 | SubnetTransitCidrBlockAz1 | String | 10.3.1.0/24 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
 | SubnetTransitCidrBlockAz2 | String | 10.3.5.0/24 | ○ | AZ2 の トランジットサブネットの CIDR ブロック |
 | TransitGatewayId | String | | | Transit Gateway の ID |

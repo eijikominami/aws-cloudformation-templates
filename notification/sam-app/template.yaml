@@ -27,6 +27,7 @@ Metadata:
       - Label: 
           default: 'Slack Configuration'
         Parameters:
+          - AdditionalCloudWatchLogsMetricFilters
           - CloudTrailLogGroup
           - Encrypt
           - HookUrlForDeployment
@@ -48,6 +49,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AdditionalCloudWatchLogsMetricFilters:
+    Type: String
+    Default: ''
+    Description: Additional expression of CloudWatch Logs metric filters
   CloudTrailLogGroup:
     Type: String
     Default: ''
@@ -173,6 +178,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateAdditionalFilters: !Not [ !Equals [ !Ref AdditionalCloudWatchLogsMetricFilters, '' ] ]
   CreateAnalyzeUnauthorizedApiCallsFunction: !Not [ !Equals [ !Ref CloudTrailLogGroup, ''] ]
   CreateKMSKey: !Equals [ !Ref Encrypt, 'true'] 
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -213,7 +219,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -229,7 +235,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -246,7 +252,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -263,7 +269,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -274,7 +280,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -547,7 +553,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -632,7 +638,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -667,7 +673,10 @@ Resources:
       Events:
         CloudWatchLogs:
           Properties:
-            FilterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
+            FilterPattern:  !If
+              - CreateAdditionalFilters
+              - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ${AdditionalCloudWatchLogsMetricFilters}}'
+              - '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
             LogGroupName: !Ref CloudTrailLogGroup
           Type: CloudWatchLogs
       FunctionName: !Sub analyzeUnauthorizedApiCalls-createdby-${AWS::StackName}
@@ -725,7 +734,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.0
+        SemanticVersion: 2.1.1
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
