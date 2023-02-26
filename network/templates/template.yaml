@@ -68,17 +68,17 @@ Parameters:
     Description: The firewall subnet CIDR block at AZ1
   SubnetPublicCidrBlockForAz2:
     Type: String
-    Default: 10.0.4.0/26
+    Default: 10.0.64.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.0.4.64/26
+    Default: 10.0.64.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2 [required]
   SubnetFirewallCidrBlockForAz2:
     Type: String
-    Default: 10.0.4.128/26
+    Default: 10.0.64.128/26
     Description: The firewall subnet CIDR block at AZ2
   TransitGatewayDestinationCidrBlock:
     Type: String
@@ -163,7 +163,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.1
+        SemanticVersion: 2.1.0
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
@@ -202,7 +202,7 @@ Resources:
         createdby: !Ref TagValue
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.1
+        SemanticVersion: 2.1.0
   TransitGateway:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -393,7 +393,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.1
+        SemanticVersion: 2.1.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -410,7 +410,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.1
+        SemanticVersion: 2.1.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -574,7 +574,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.1.1
+        SemanticVersion: 2.1.0
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

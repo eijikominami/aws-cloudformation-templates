@@ -79,12 +79,12 @@ Parameters:
     Description: The NetBIOS name for your domain [required]
   ActiveDirectorySubnetCidrBlockForAz1:
     Type: String
-    Default: 10.3.0.0/24
+    Default: 10.3.0.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   ActiveDirectorySubnetCidrBlockForAz2:
     Type: String
-    Default: 10.3.4.0/24
+    Default: 10.3.64.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   FSxDeploymentMode:
@@ -126,14 +126,24 @@ Parameters:
     Type: String
     Default: ''
     Description: The ARN of the IAM Identity Center instance under which the operation will be executed.
+  SubnetPrivateCidrBlockAz1:
+    Type: String
+    Default: 10.3.0.64/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ1
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.3.1.0/24
+    Default: 10.3.0.128/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ1
+  SubnetPrivateCidrBlockAz2:
+    Type: String
+    Default: 10.3.64.64/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ2
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.3.5.0/24
+    Default: 10.3.64.128/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2
   TransitGatewayId:
@@ -225,6 +235,7 @@ Resources:
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -257,6 +268,7 @@ Resources:
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalNamePrefix: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SNSForAlertArn: !If
           - CreateSNSForAlert
