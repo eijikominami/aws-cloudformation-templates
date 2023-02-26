@@ -6,13 +6,6 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: 'FSx Configuration'
-        Parameters: 
-          - FSxDeploymentMode
-          - FSxIngressCidrIp
-          - FSxStorageSize
-          - FSxThroughput
-      - Label: 
           default: 'Microsoft Active Directory Configuration'
         Parameters: 
           - ActiveDirectoryEdition
@@ -87,41 +80,6 @@ Parameters:
     Default: 10.3.64.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
-  FSxDeploymentMode:
-    Type: String
-    Default: SINGLE_AZ_2
-    AllowedValues:
-      - NONE
-      - SINGLE_AZ_2
-      - MULTI_AZ_1
-    Description: Specifies the file system deployment type
-  FSxIngressCidrIp:
-    Type: String
-    Default: 0.0.0.0/0
-    Description: The IPv4 address range, in CIDR format
-  FSxStorageSize:
-    Type: Number
-    Default: 1024
-    MinValue: 32
-    MaxValue: 65536
-    Description: The storage capacity of the file system being created. 32 GiB - 65,536 GiB (64 TiB)
-  FSxThroughput:
-    Type: Number
-    AllowedValues:
-      - 8
-      - 16
-      - 32
-      - 64
-      - 128
-      - 256
-      - 512
-      - 1024
-      - 2048
-    Default: 16
-    Description: >
-      The throughput capacity of an Amazon FSx file system, measured in megabytes per second 
-      in powers of 2 (8, 16, 32, ... , 1024), with the recommended value based on the file 
-      system size: 8 for <800 GiB, 16 for <1600 GiB, ... 512 for <51200 GiB, 1024 for >=51200 GiB
   IdentityCenterArn:
     Type: String
     Default: ''
@@ -182,7 +140,6 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateFSx: !Not [ !Equals [ !Ref FSxDeploymentMode, NONE ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -304,39 +261,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/identitycenter.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/identitycenter.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  FSxForWindows:
-    Condition: CreateFSx
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters: 
-        ActiveDirectoryId: !GetAtt MicrosoftAD.Outputs.MicrosoftAdId
-        AZDeploymentMode: !Ref FSxDeploymentMode
-        FSxThroughput: !Ref FSxThroughput
-        IngressCidrIp: !Ref FSxIngressCidrIp
-        PrimarySubnetAccess: !GetAtt Az1.Outputs.PrivateSubnetId
-        StorageCapacity: !Ref FSxStorageSize
-        SubnetIds: !Join
-          - ','
-          - - !GetAtt Az1.Outputs.PrivateSubnetId
-            - !GetAtt Az2.Outputs.PrivateSubnetId
-        VPCId: !Ref VPC
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/shared/fsx.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/shared/fsx.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
