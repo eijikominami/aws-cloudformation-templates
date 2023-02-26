@@ -25,9 +25,9 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 
 You can provide optional parameters as follows.
 
-### Allow seamless directory sharing across multiple AWS accounts
+### Installing the Active Directory administration tools
 
-Choose the **Scale & share** tab and in the **Shared directories** section, choose **Actions**, and then choose **Create new shared directory**. On the **Choose which AWS accounts to share with page**, choose one of the following sharing methods depending on your business needs.
+After deploying this template, [install the Active Directory Administration Tools on Windows Server](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html#install_ad_tools_winserver). Next, switch the user to '*DOMAIN*\Admin' and [create users and groups](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html) with the 'Active Directory Users and Computers tool'.
 
 ### AWS Managed Microsoft AD
 
@@ -41,8 +41,8 @@ This template configures ``AWS Managed Microsoft AD``.
 | Password | String | Password1+ | ○ | The password for the default administrative user named Admin |
 | ShortName | String | CORP | ○ | The NetBIOS name for your domain |
 | SubnetPrivateCidrBlockForAz1 | String | 10.0.0.0/24 | conditional | The private subnet CIDR block at AZ1 |
-| SubnetPrivateIdForAz1 | String | 10.0.0.2/24 | conditional | The private subnet id at AZ1 |
+| SubnetPrivateIdForAz1 | String | | conditional | The private subnet id at AZ1 |
 | SubnetPrivateCidrBlockForAz2 | String | 10.0.1.0/24 | conditional | The private subnet CIDR block at AZ2 |
-| SubnetPrivateIdForAz1 | String | 10.0.3.0/24 | conditional | The private subnet id at AZ2 |
+| SubnetPrivateIdForAz1 | String | | conditional | The private subnet id at AZ2 |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | VPCCidrBlock | String | String | 10.0.0.0/21 | The VPC CIDR block |
