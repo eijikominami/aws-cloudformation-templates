@@ -55,17 +55,17 @@ You can provide optional parameters as follows.
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264 Level |
 | Height | Number | 540 | ○ | Output video height, in pixels |
 | HlsBucket | String | | | The S3 bucket Name HLS files are sent |
+| InputType | RTMP / ELEMENTAL_LINK / S3 | ENABLED | ○ | Input type |
+| InputStreamKey | String | stream | | A unique name for the location the RTMP stream is being pushed to |
+| InputVodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
 | MediaPackageChannelId | String | | | The MediaPackage channel id |
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
-| LiveSource | ENABLED or DISABLED | ENABLED | ○ | Enable or disable a live source |
-| OutputType | String | RTMP | ○ | OutputType |
-| RtmpUrl1 | String | | | The rtmp url a stream sends to |
-| RtmpStreamName1 | String | | | The rtmp stream name a stream sends to |
-| RtmpUrl2 | String | | | The rtmp url a stream sends to |
-| RtmpStreamName2 | String | | | The rtmp stream name a stream sends to |
-| StreamKey | String | stream | | A unique name for the location the RTMP stream is being pushed to |
+| OutputType | String | RTMP | ○ | Output type |
+| OutputRtmpUrl1 | String | | | The rtmp url a stream sends to |
+| OutputRtmpStreamName1 | String | | | The rtmp stream name a stream sends to |
+| OutputRtmpUrl2 | String | | | The rtmp url a stream sends to |
+| OutputRtmpStreamName2 | String | | | The rtmp stream name a stream sends to |
 | VideoBitrate | Number | 2200000 | ○ | Average video bitrate in bits/second |
-| VodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
 | Width | Number | 960 | ○ | Output video width, in pixels |
 | WhitelistRules | String | 0.0.0.0/0 | ○ | A list of one or more IPv4 CIDR addresses to allow |
 
