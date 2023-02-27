@@ -6,6 +6,15 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'MediaLive Input Configuration'
+        Parameters: 
+          - InputType
+          - InputStreamKey
+          - InputWhitelistRules
+          - ElementalLinkId1
+          - ElementalLinkId2
+          - VodSourceBucket
+      - Label: 
           default: 'MediaLive Configuration'
         Parameters: 
           - AdMarker
@@ -20,20 +29,19 @@ Metadata:
           - H264Profile
           - H264Level
           - Height
-          - HlsBucket
+          - VideoBitrate
+          - Width
+      - Label: 
+          default: 'MediaLive Output Configuration'
+        Parameters: 
+          - OutputType
+          - OutputHlsBucket
           - MediaPackageChannelId
           - MediaStoreEndpoint
-          - LiveSource
-          - OutputType
-          - RtmpUrl1
-          - RtmpStreamKey1
-          - RtmpUrl2
-          - RtmpStreamKey2
-          - StreamKey
-          - VideoBitrate
-          - VodSourceBucket
-          - Width
-          - WhitelistRules
+          - OutputRtmpUrl1
+          - OutputRtmpStreamKey1
+          - OutputRtmpUrl2
+          - OutputRtmpStreamKey2
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -59,7 +67,7 @@ Parameters:
   ArchiveBucket:
     Type: String
     Default: ''
-    Description: The S3 bucket Name LIVE-to-VOD contents are stored.
+    Description: The S3 bucket Name LIVE-to-VOD contents are stored
   AudioBitrate:
     Type: Number
     Default: 96000
@@ -78,6 +86,14 @@ Parameters:
       - SINGLE_PIPELINE
     Default: STANDARD
     Description: Select the class of channel you intend to attach this input to [required] 
+  ElementalLinkId1:
+    Type: String
+    Default: ''
+    Description: The unique ID for the Elemental Link device [conditional]  
+  ElementalLinkId2:
+    Type: String
+    Default: ''
+    Description: The unique ID for the Elemental Link device [conditional]            
   FramerateDenominator:
     Type: Number
     Default: 1001
@@ -131,10 +147,6 @@ Parameters:
     Type: Number
     Default: 540
     Description: Output video height, in pixels [required]
-  HlsBucket:
-    Type: String
-    Default: ''
-    Description: The S3 bucket Name HLS files are sent [conditional]
   MediaPackageChannelId:
     Type: String
     Default: ''
@@ -143,42 +155,50 @@ Parameters:
     Type: String
     Default: ''
     Description: The endpoint of MediaStore [conditional]
-  LiveSource:
-    Type: String     
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Default: ENABLED
-    Description: Enable or disable a live source [required]    
-  OutputType:
+  InputType:
     Type: String
     AllowedValues:
-      - MEDIA_PACKAGE
-      - MEDIA_STORE
       - RTMP
+      - ELEMENTAL_LINK
       - S3
-    Default: RTMP
-    Description: Output type [required]
-  RtmpUrl1:
-    Type: String
-    Default: ''
-    Description: The rtmp url a stream sends to
-  RtmpStreamKey1:
-    Type: String
-    Default: ''
-    Description: The rtmp stream name a stream sends to
-  RtmpUrl2:
-    Type: String
-    Default: ''
-    Description: The rtmp url a stream sends to
-  RtmpStreamKey2:
-    Type: String
-    Default: ''
-    Description: The rtmp stream name a stream sends to
-  StreamKey:
+  InputStreamKey:
     Type: String
     Default: stream
     Description: A unique name for the location the RTMP stream is being pushed to [conditional]
+  InputWhitelistRules:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Default: 0.0.0.0/0
+    Description: A list of one or more IPv4 CIDR addresses to allow (e.g. 0.0.0.0/0) [required]
+  OutputType:
+    Type: String
+    AllowedValues:
+      - S3
+      - MEDIA_PACKAGE
+      - MEDIA_STORE
+      - RTMP
+    Default: RTMP
+    Description: Output type [required]
+  OutputHlsBucket:
+    Type: String
+    Default: ''
+    Description: The S3 bucket Name HLS files are sent [conditional]
+  OutputRtmpUrl1:
+    Type: String
+    Default: ''
+    Description: The rtmp url a stream sends to [conditional]
+  OutputRtmpStreamKey1:
+    Type: String
+    Default: ''
+    Description: The rtmp stream name a stream sends to [conditional]
+  OutputRtmpUrl2:
+    Type: String
+    Default: ''
+    Description: The rtmp url a stream sends to [conditional]
+  OutputRtmpStreamKey2:
+    Type: String
+    Default: ''
+    Description: The rtmp stream name a stream sends to [conditional]
   VideoBitrate:
     Type: Number
     Default: 2200000
@@ -186,16 +206,11 @@ Parameters:
   VodSourceBucket:
     Type: String
     Default: ''
-    Description: The S3 bucket Name VOD contents exist
+    Description: The S3 bucket Name VOD contents exist [conditional]
   Width:
     Type: Number
     Default: 960
     Description: Output video width, in pixels [required]
-  WhitelistRules:
-    Type: String
-    AllowedPattern: ^[0-9./]*$
-    Default: 0.0.0.0/0
-    Description: A list of one or more IPv4 CIDR addresses to allow (e.g. 0.0.0.0/0) [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -227,16 +242,18 @@ Conditions:
   AdMarkerEnabled: !Equals [ !Ref AdMarker, ENABLED]
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
-  CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
-  CreateDestinationForRTMP: !Or [ !Equals [ !Ref OutputType, RTMP], !And [ !Not [ !Equals [ !Ref RtmpUrl1, ''] ], !Not [ !Equals [ !Ref RtmpStreamKey1, ''] ] ] ]
-  CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref HlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
+  CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref OutputHlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
+  CreateDestinationForRTMP: !Or [ !Equals [ !Ref OutputType, RTMP], !And [ !Not [ !Equals [ !Ref OutputRtmpUrl1, ''] ], !Not [ !Equals [ !Ref OutputRtmpStreamKey1, ''] ] ] ]
+  CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref OutputHlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
+  CreateElementalLinkLIVEWorkflow: !Equals [ !Ref InputType, ELEMENTAL_LINK ]
+  CreateElementalLinkLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref InputType, ELEMENTAL_LINK ] , !Equals [ !Ref AutoInputFailover, ENABLED] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
   CreateTwoPipelinesAndTwoInput: !And [ !Equals [ !Ref ChannelClass, STANDARD], !Equals [ !Ref AutoInputFailover, ENABLED] ]
-  CreateLIVEWorkflow: !Equals [ !Ref LiveSource, ENABLED ]
-  CreateVODWorkflow: !Not [ !Equals [ !Ref VodSourceBucket, '' ] ]
-  CreateLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref LiveSource, ENABLED ], !Equals [ !Ref AutoInputFailover, ENABLED] ]
+  CreateRTMPLIVEWorkflow: !Equals [ !Ref InputType, RTMP ]
+  CreateRTMPLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref InputType, RTMP ] , !Equals [ !Ref AutoInputFailover, ENABLED] ]
+  CreateVODWorkflow: !And [ !Equals [ !Ref InputType, S3 ], !Not [ !Equals [ !Ref VodSourceBucket, '' ] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -366,12 +383,12 @@ Resources:
           - Id: !Sub ${LogicalNamePrefix}-for-RTMP
             Settings: !If
               - CreateTwoPipelines
-              - - StreamName: !Ref RtmpStreamKey1
-                  Url: !Ref RtmpUrl1
-                - StreamName: !Ref RtmpStreamKey2
-                  Url: !Ref RtmpUrl2
-              - - StreamName: !Ref RtmpStreamKey1
-                  Url: !Ref RtmpUrl1
+              - - StreamName: !Ref OutputRtmpStreamKey1
+                  Url: !Ref OutputRtmpUrl1
+                - StreamName: !Ref OutputRtmpStreamKey2
+                  Url: !Ref OutputRtmpUrl2
+              - - StreamName: !Ref OutputRtmpStreamKey1
+                  Url: !Ref OutputRtmpUrl1
           - !Ref AWS::NoValue
         - !If 
           - CreateDestinationForS3
@@ -379,11 +396,11 @@ Resources:
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live/main
+                  Url: !Sub s3ssl://${OutputHlsBucket}/live/main
                 - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live-backup/main
+                  Url: !Sub s3ssl://${OutputHlsBucket}/live-backup/main
               - - StreamName: ''
-                  Url: !Sub s3ssl://${HlsBucket}/live/main
+                  Url: !Sub s3ssl://${OutputHlsBucket}/live/main
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForArchive
@@ -624,7 +641,7 @@ Resources:
             Width: !Ref Width
       InputAttachments:
         - !If 
-          - CreateLIVEWorkflow
+          - CreateRTMPLIVEWorkflow
           - AutomaticInputFailoverSettings: !If
               - CreateTwoInput
               - ErrorClearTimeMsec: 60000
@@ -653,7 +670,7 @@ Resources:
               SourceEndBehavior: CONTINUE
           - !Ref AWS::NoValue
         - !If 
-          - CreateLIVEWorkflow
+          - CreateRTMPLIVEWorkflow
           - !If
               - CreateTwoInput
               - InputAttachmentName: !Sub ${LogicalNamePrefix}-Rtmp1
@@ -666,6 +683,33 @@ Resources:
                   Smpte2038DataPreference: IGNORE
                   SourceEndBehavior: CONTINUE
               - !Ref AWS::NoValue
+          - !Ref AWS::NoValue
+        - !If 
+          - CreateElementalLinkLIVEWorkflow
+          - AutomaticInputFailoverSettings: !If
+              - CreateTwoInput
+              - ErrorClearTimeMsec: 60000
+                FailoverConditions: 
+                  - FailoverConditionSettings:
+                      AudioSilenceSettings: 
+                        AudioSilenceThresholdMsec: 15000
+                  - FailoverConditionSettings:
+                      InputLossSettings: 
+                        InputLossThresholdMsec: 15000
+                  - FailoverConditionSettings:
+                      VideoBlackSettings: 
+                        BlackDetectThreshold: 0.1
+                        VideoBlackThresholdMsec: 15000
+              - !Ref AWS::NoValue
+            InputAttachmentName: !Sub ${LogicalNamePrefix}-ElementalLink
+            InputId: !Ref MediaLiveInputElementalLink
+            InputSettings: 
+              DeblockFilter: DISABLED
+              DenoiseFilter: DISABLED
+              FilterStrength: 1
+              InputFilter: AUTO
+              Smpte2038DataPreference: IGNORE
+              SourceEndBehavior: CONTINUE                      
           - !Ref AWS::NoValue
         - !If 
           - CreateVODWorkflow
@@ -688,15 +732,29 @@ Resources:
       RoleArn: !GetAtt IAMRoleForMediaLive.Arn
       Tags: 
         createdby: !Ref TagValue
+  MediaLiveInputElementalLink:
+    Condition: CreateElementalLinkLIVEWorkflow
+    Type: AWS::MediaLive::Input
+    Properties:
+      InputDevices: !If
+        - CreateElementalLinkLIVEWorkflowAndTwoInput
+        - - Id: !Ref ElementalLinkId1
+        - - Id: !Ref ElementalLinkId1
+          - Id: !Ref ElementalLinkId2
+      Name: !Sub ${LogicalNamePrefix}-ElementalLink
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Type: INPUT_DEVICE
   MediaLiveInputRempPush0:
-    Condition: CreateLIVEWorkflow
+    Condition: CreateRTMPLIVEWorkflow
     Type: AWS::MediaLive::Input
     Properties:
       Destinations:
-        - StreamName: !Sub ${LogicalNamePrefix}-0/${StreamKey}-a
+        - StreamName: !Sub ${LogicalNamePrefix}-0/${InputStreamKey}-a
         - !If
           - CreateTwoPipelines
-          - StreamName: !Sub ${LogicalNamePrefix}-0/${StreamKey}-b
+          - StreamName: !Sub ${LogicalNamePrefix}-0/${InputStreamKey}-b
           - !Ref AWS::NoValue
       InputSecurityGroups: 
         - !Ref MediaLiveInputSecurityGroup
@@ -706,14 +764,14 @@ Resources:
         createdby: !Ref TagValue
       Type: RTMP_PUSH
   MediaLiveInputRempPush1:
-    Condition: CreateLIVEWorkflowAndTwoInput
+    Condition: CreateRTMPLIVEWorkflowAndTwoInput
     Type: AWS::MediaLive::Input
     Properties: 
       Destinations:
-        - StreamName: !Sub ${LogicalNamePrefix}-1/${StreamKey}-a
+        - StreamName: !Sub ${LogicalNamePrefix}-1/${InputStreamKey}-a
         - !If
           - CreateTwoPipelines
-          - StreamName: !Sub ${LogicalNamePrefix}-1/${StreamKey}-b
+          - StreamName: !Sub ${LogicalNamePrefix}-1/${InputStreamKey}-b
           - !Ref AWS::NoValue
       InputSecurityGroups: 
         - !Ref MediaLiveInputSecurityGroup
@@ -743,7 +801,7 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
       WhitelistRules: 
-        - Cidr: !Ref WhitelistRules
+        - Cidr: !Ref InputWhitelistRules
   CloudWatchAlarmMediaLive0:
     Type: AWS::Serverless::Application
     Properties:
@@ -801,25 +859,25 @@ Outputs:
     Description: Manifest file path
     Value: live
   RtmpPrimary1:
-    Condition: CreateLIVEWorkflow
+    Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP primary address 1
     Value: !Select [0, !GetAtt MediaLiveInputRempPush0.Destinations]
   RtmpPrimary2:
-    Condition: CreateLIVEWorkflow
+    Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP primary address 2
     Value: !If
       - CreateTwoPipelines
       - !Select [1, !GetAtt MediaLiveInputRempPush0.Destinations]
       - ''
   RtmpSecondary1:
-    Condition: CreateLIVEWorkflow
+    Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP secondary address 1
     Value: !If
       - CreateTwoInput
       - !Select [0, !GetAtt MediaLiveInputRempPush1.Destinations]
       - ''
   RtmpSecondary2:
-    Condition: CreateLIVEWorkflow
+    Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP secondary address 2
     Value: !If
       - CreateTwoPipelinesAndTwoInput
