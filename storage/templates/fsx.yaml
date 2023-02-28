@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/storage/fsx sets Amazon FSx for Windows Server.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'FSx Configuration'
+        Parameters: 
+          - ActiveDirectoryId
+          - AZDeploymentMode
+          - FSxThroughput
+          - PrimarySubnetAccess
+          - IngressCidrIp
+          - StorageCapacity
+          - SubnetIds
+          - VPCId
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  ActiveDirectoryId:
+    Type: String
+    AllowedPattern: ^d-[0-9a-f]{10}$
+    Description: The ID for an existing AWS Managed Microsoft Active Directory (AD) instance that the file system should join when it's created
+  AZDeploymentMode:
+    Type: String
+    Default: SINGLE_AZ_2
+    AllowedValues:
+      - SINGLE_AZ_2
+      - MULTI_AZ_1
+    Description: Specifies the file system deployment type
+  FSxThroughput:
+    Type: Number
+    AllowedValues:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+      - 256
+      - 512
+      - 1024
+      - 2048
+    Description: >
+      The throughput capacity of an Amazon FSx file system, measured in megabytes per second 
+      in powers of 2 (8, 16, 32, ... , 1024), with the recommended value based on the file 
+      system size: 8 for <800 GiB, 16 for <1600 GiB, ... 512 for <51200 GiB, 1024 for >=51200 GiB
+  IngressCidrIp:
+    Type: String
+    AllowedPattern: .+
+    Description: The IPv4 address range, in CIDR format
+  PrimarySubnetAccess:
+    Type: AWS::EC2::Subnet::Id
+    Description: Specifies the primary subnet that the file system will be accessible from
+  StorageCapacity:
+    Type: String
+    Default: 1024
+    Description: Sets the storage capacity of the file system that you're creating
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Specifies the IDs of the subnets that the file system will be accessible from
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    AllowedPattern: .+
+    Description: The VPC id [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples
+    AllowedPattern: .+
+
+Conditions:
+  MultiAZ: !Equals [!Ref AZDeploymentMode, MULTI_AZ_1]
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Base Security Group for SecGrp
+      VpcId: !Ref VPCId
+      SecurityGroupEgress:
+        - IpProtocol: udp
+          Description: "All UDP Traffic"
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          Description: "All TCP Traffic"
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          Description: "Directory Services SMB file sharing"
+          CidrIp: !Ref IngressCidrIp
+          FromPort: 445
+          ToPort: 445
+        - IpProtocol: tcp
+          Description: "WinRM 2.0 (Microsoft Windows Remote Management)"
+          CidrIp: !Ref IngressCidrIp
+          FromPort: 5985
+          ToPort: 5985
+  FSx:
+    Type: AWS::FSx::FileSystem
+    Properties: 
+      FileSystemType: WINDOWS
+      SecurityGroupIds: 
+        - !Ref SecurityGroup
+      StorageCapacity: !Ref StorageCapacity
+      StorageType: SSD
+      SubnetIds: !Ref SubnetIds
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      WindowsConfiguration: 
+        ActiveDirectoryId: !Ref ActiveDirectoryId
+        AutomaticBackupRetentionDays: 0
+        DeploymentType: !Ref AZDeploymentMode
+        PreferredSubnetId: !If 
+          - MultiAZ
+          - !Ref PrimarySubnetAccess
+          - !Ref AWS::NoValue
+        ThroughputCapacity: !Ref FSxThroughput

@@ -25,9 +25,9 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 
 デプロイ時に、以下のパラメータを指定することができます。
 
-### 複数の AWS アカウントを跨いだディレクトリの共有
+### AWS Managed Microsoft AD を用いたユーザーとグループを管理
 
-**スケールと共有** タブを選択したあとに、 **共有ディレクトリセクション** の **アクション** ボタンを選択してください。次に、 **新しい共有ディレクトリを作成** を選択します。 **共有する AWS アカウントを選択** から要件に合った共有方法を選択してください。
+このテンプレートのデプロイ完了後、 [Active Directory 管理ツールのインストール](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html) を行ってください。次に '*DOMAIN*\Admin' ユーザに切り替えた上で、 *Active Directory Users and Computers tool* を用いて、 [ユーザとグループの作成](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html)　を行ってください。
 
 ### AWS Managed Microsoft AD
 
@@ -41,8 +41,8 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 | Password | String | Password1+ | ○ | Admin ユーザのドメイン名 |
 | ShortName | String | CORP | ○ | The NetBIOS name for your domain |
 | SubnetPrivateCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 にあるプライベートサブネットのCIDRブロック |
-| SubnetPrivateIdForAz1 | String | 10.0.0.2/24 | ○ | AZ1 のプライベートサブネット ID |
+| SubnetPrivateIdForAz1 | String | | ○ | AZ1 のプライベートサブネット ID |
 | SubnetPrivateCidrBlockForAz2 | String | 10.0.1.0/24 | ○ | AZ2 にあるプライベートサブネットのCIDRブロック |
-| SubnetPrivateIdForAz1 | String | 10.0.3.0/24 | ○ | AZ2 のプライベートサブネット ID |
+| SubnetPrivateIdForAz1 | String | | ○ | AZ2 のプライベートサブネット ID |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGateway のCIDRブロック |
 | VPCCidrBlock | String | String | 10.0.0.0/21 | VPC のCIDRブロック |

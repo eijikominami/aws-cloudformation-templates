@@ -57,9 +57,9 @@ You can provide optional parameters as follows:
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block at AZ1 | 
 | SubnetTransitCidrBlockAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block at AZ1 | 
 | SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | | The firewall subnet CIDR block at AZ1 | 
-| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block at AZ2 | 
-| SubnetTransitCidrBlockAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block at AZ2 | 
-| SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26 | | The firewall subnet CIDR block at AZ2 | 
+| SubnetPublicCidrBlockForAz2 | String | 10.0.64.0/26 | ○ | The public subnet CIDR block at AZ2 | 
+| SubnetTransitCidrBlockAz2 | String | 10.0.64.64/26 | ○ | The transit subnet CIDR block at AZ2 | 
+| SubnetFirewallCidrBlockForAz2 | String | 10.0.64.128/26 | | The firewall subnet CIDR block at AZ2 | 
 | TransitGatewayDefaultRouteTableId | String | | | The id of the default Transit Gateway Route Table | 
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
 | VPCCidrBlock | String | 10.0.0.0/16 | ○ | The VPC CIDR block | 

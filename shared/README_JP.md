@@ -37,10 +37,12 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | ActiveDirectoryPassword | String | Password1+ | ○ | 管理者権限を有する Admin ユーザのパスワード |
 | ActiveDirectoryShortName | String | CORP | ○ | NetBIOS 名 |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
-| ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.1.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.64.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
 | IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |
-| SubnetTransitCidrBlockAz1 | String | 10.3.1.0/24 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
-| SubnetTransitCidrBlockAz2 | String | 10.3.5.0/24 | ○ | AZ2 の トランジットサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz1 | String | 10.3.0.128/26 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz2 | String | 10.3.64.128/26 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
 | TransitGatewayId | String | | | Transit Gateway の ID |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGateway に転送する CIDR ブロック |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | VPC の CIDR ブロック |

@@ -33,7 +33,7 @@ Parameters:
     Description: Indicates whether the VPN connection uses static routes only [required] 
   TransitGatewayId:
     Type: String
-    Default: .+
+    AllowedPattern: .+
     Description: The ID of the transit gateway associated with the VPN connection [required]
   Environment:
     Type: String

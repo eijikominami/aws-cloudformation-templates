@@ -55,19 +55,19 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264レベル |
 | Height | Number | 540 | ○ | ビデオの高さ（px）|
 | HlsBucket | String | | | HLSファイルの送信バケット名 |
+| InputType | RTMP / ELEMENTAL_LINK / S3 | ENABLED | ○ | 入力タイプ |
+| InputStreamKey | String | stream | | ストリームキー |
+| InputWhitelistRules | String | 0.0.0.0/0 | ○ | 許可するIPアドレス範囲 |
 | MediaPackageChannelId | String | | | MediaPackage のチャネルID |
 | MediaStoreEndpoint | String | | | MediaStore のエンドポイントURL |
-| LiveSource | ENABLED or DISABLED | ENABLED | ○ | ライブソースを使用するかどうか |
 | OutputType | String | RTMP | ○ | 出力先のタイプ |
-| RtmpUrl1 | String | | | 出力先のRTMP URL1 |
-| RtmpStreamName1 | String | | | 出力先のRTMPストリーム名1 |
-| RtmpUrl2 | String | | | 出力先のRTMP URL2 |
-| RtmpStreamName2 | String | | | 出力先のRTMPストリーム名2 |
-| StreamKey | String | stream | | ストリームキー |
+| OutputRtmpUrl1 | String | | | 出力先のRTMP URL1 |
+| OutputRtmpStreamName1 | String | | | 出力先のRTMPストリーム名1 |
+| OutputRtmpUrl2 | String | | | 出力先のRTMP URL2 |
+| OutputRtmpStreamName2 | String | | | 出力先のRTMPストリーム名2 |
 | VideoBitrate | Number | 2200000 | ○ | ビデオビットレート(bps) |
 | VodSourceBucket | String | | | VODのソースバケット名 |
 | Width | Number | 960 | ○ | ビデオの幅（px） |
-| WhitelistRules | String | 0.0.0.0/0 | ○ | 許可するIPアドレス範囲 |
 
 ### MediaPackage
 

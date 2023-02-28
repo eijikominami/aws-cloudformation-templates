@@ -36,11 +36,13 @@ You can provide optional parameters as follows.
 | ActiveDirectoryName | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
 | ActiveDirectoryPassword | String | Password1+ | ○ | The password for the default administrative user named Admin |
 | ActiveDirectoryShortName | String | CORP | ○ | The NetBIOS name for your domain |
-| ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
-| ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.1.64/26 | ○ | The public subnet CIDR block at AZ2 |
+| ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
+| ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.64/26 | ○ | The public subnet CIDR block at AZ2 |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
-| SubnetTransitCidrBlockAz1 | String | 10.3.1.0/24 | ○ | The transit subnet CIDR block at AZ1 |
-| SubnetTransitCidrBlockAz2 | String | 10.3.5.0/24 | ○ | The transit subnet CIDR block at AZ2 |
+| SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
+| SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |
+| SubnetTransitCidrBlockAz1 | String | 10.3.0.128/26 | ○ | The transit subnet CIDR block at AZ1 |
+| SubnetTransitCidrBlockAz2 | String | 10.3.64.128/26 | ○ | The transit subnet CIDR block at AZ2 |
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | The VPC CIDR block |
