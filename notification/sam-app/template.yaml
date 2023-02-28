@@ -524,7 +524,10 @@ Resources:
     Properties: 
       Endpoint: !GetAtt LambdaSendNotificationToSlack.Arn
       Protocol: lambda
-      TopicArn: !Ref SNSForCICDArn
+      TopicArn: !If
+        - CreateSNSForCICD
+        - !GetAtt SNSForCICD.Outputs.SNSTopicArn
+        - !Ref SNSForCICDArn
   SNSSubscriptionForDeploymentToSlack:
     Type: AWS::SNS::Subscription
     Properties: 
