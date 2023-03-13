@@ -466,6 +466,63 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+# Elemental Link
+
+The template creates the following alarms.
+
+| Namespace | MetricName | InputDeviceId | DeviceType | Threshold |
+| --- | --- | --- | --- | --- |
+| AWS/MediaLive | **Temperature** | `InputDeviceId` | HD / UHD | < 40 | 
+| AWS/MediaLive | **NotRecoveredPackets** | `InputDeviceId` | HD / UHD | At least once a minute |
+| AWS/MediaLive | **ErrorSeconds** | `InputDeviceId` | `Pipeline` | HD / UHD | At least once a minute | 
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `InputDeviceId` | String |  | ○ | Input device Id |
+| `DeviceType` | HD / UHD | | | The device type |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DeviceType: String
+    InputDeviceId: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
+    SemanticVersion: 2.1.2
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DeviceType: String
+    InputDeviceId: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## EventBridge
 
 The template creates the following alarms.

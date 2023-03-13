@@ -47,6 +47,8 @@ You can provide optional parameters as follows.
 | AudioBitrate | Number | 96000 | ○ | Average audio bitrate in bits/second |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Enable or disable automatic input failover |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | Select the class of channel you intend to attach this input to |
+| ElementalLinkId1 | String | | ○ | The unique ID for the Elemental Link device | 
+| ElementalLinkId2 | String | | ○ | The unique ID for the Elemental Link device |
 | FramerateDenominator | Number | 1001 | ○ | Framerate denominator |
 | FramerateNumerator | Number | 30000 | ○ | Framerate numerator |
 | GopNumBFrames | Number | 3 | ○ | Number of B-frames between reference frames |

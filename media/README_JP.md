@@ -47,6 +47,8 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | AudioBitrate | Number | 96000 | ○ | 音声ビットレート（bps） |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
+| ElementalLinkId1 | String | | ○ | The unique ID for the Elemental Link device | 
+| ElementalLinkId2 | String | | ○ | The unique ID for the Elemental Link device |
 | FramerateDenominator | Number | 1001 | ○ | Framerate denominator |
 | FramerateNumerator | Number | 30000 | ○ | Framerate numerator |
 | GopNumBFrames | Number | 3 | ○ | リファレンスフレームあたりのBフレームの数 |
