@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for AWS Elemental MediaLive
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom alram name
+  InputDeviceId:
+    Type: String
+    Default: ''
+    Description: Input device Id
+  DeviceType:
+    Type: String
+    Default: HD
+    AllowedValues:
+      - HD
+      - UHD
+    Description: The device type 
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  Temperature:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) の *筐体温度が上昇* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-Temperature-Over-40
+        - !Sub Warning-ElementalLink-${InputDeviceId}-Temperature-Over-40
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: InputDeviceId
+          Value: !Ref InputDeviceId
+        - Name: DeviceType
+          Value: !Ref DeviceType
+      EvaluationPeriods: 1
+      MetricName: Temperature
+      Namespace: AWS/MediaLive
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Average
+      Threshold: 1
+      TreatMissingData: notBreaching
+  NotRecoveredPackets:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) で *エラーが発生* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-NotRecoveredPackets
+        - !Sub Warning-ElementalLink-${InputDeviceId}-NotRecoveredPackets
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: InputDeviceId
+          Value: !Ref InputDeviceId
+        - Name: DeviceType
+          Value: !Ref DeviceType
+      EvaluationPeriods: 1
+      MetricName: NotRecoveredPackets
+      Namespace: AWS/MediaLive
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  ErrorSeconds:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) で *エラーが発生* しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-ErrorSeconds
+        - !Sub Warning-ElementalLink-${InputDeviceId}-ErrorSeconds
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: InputDeviceId
+          Value: !Ref InputDeviceId
+        - Name: DeviceType
+          Value: !Ref DeviceType
+      EvaluationPeriods: 1
+      MetricName: ErrorSeconds
+      Namespace: AWS/MediaLive
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
