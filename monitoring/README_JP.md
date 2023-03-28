@@ -466,6 +466,65 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+# Elemental Link
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | InputDeviceId | DeviceType | 閾値 |
+| --- | --- | --- | --- | --- |
+| AWS/MediaLive | **Temperature** | `InputDeviceId` | HD / UHD | 40度以上 | 
+| AWS/MediaLive | **NotRecoveredPackets** | `InputDeviceId` | HD / UHD | 1分間に1回以上 |
+| AWS/MediaLive | **ErrorSeconds** | `InputDeviceId` | `Pipeline` | HD / UHD | 1分間に1回以上 | 
+
+## パラメータ
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `InputDeviceId` | String |  | ○ | インプットデバイスID |
+| `DeviceType` | HD / UHD | | | デバイスID |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DeviceType: String
+    InputDeviceId: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
+    SemanticVersion: 2.1.3
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    DeviceType: String
+    InputDeviceId: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## EventBridge
 
 このテンプレートは、以下のアラームを作成します。

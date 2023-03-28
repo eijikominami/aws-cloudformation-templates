@@ -171,10 +171,12 @@ Parameters:
     Description: The endpoint of MediaStore [conditional]
   InputType:
     Type: String
+    Default: RTMP
     AllowedValues:
       - RTMP
       - ELEMENTAL_LINK
       - S3
+    Description: The input type [required]
   InputStreamKey:
     Type: String
     Default: stream
