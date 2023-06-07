@@ -56,7 +56,7 @@ You can provide optional parameters as follows.
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
 | DomainName | String | | | Domain name | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
-| EC2ImageId | AWS::EC2::Image::Id | ami-068a6cefc24c301d2 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
 | EC2PatchingAt | Number | 3 | ○ | Starting time of patching process |
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set |
