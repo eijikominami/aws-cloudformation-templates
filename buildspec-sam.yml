@@ -16,7 +16,7 @@ phases:
       - pip install -U aws-lambda-powertools
   pre_build:
     commands:
-      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint
+      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS
   build:
     commands:
        - sam validate --template ${TEMPLATE_FILE_PATH}template.yaml
