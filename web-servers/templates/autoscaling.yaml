@@ -72,7 +72,7 @@ Parameters:
     Description: The CNAME attached to Elastic Load Balancer
   EC2ImageId:
     Type: AWS::EC2::Image::Id
-    Default: ami-099772c3838a3bec1
+    Default: ami-03dceaabddff8067e
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [required]
   EC2InstanceType:
@@ -169,7 +169,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.3
+        SemanticVersion: 2.1.4
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -186,7 +186,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.3
+        SemanticVersion: 2.1.4
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -411,7 +411,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-application-elb
-        SemanticVersion: 2.1.3
+        SemanticVersion: 2.1.4
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
