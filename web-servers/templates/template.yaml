@@ -1058,6 +1058,9 @@ Resources:
                 NoncurrentDays: 1
               Status: Enabled
             - !Ref AWS::NoValue
+      OwnershipControls:
+        Rules: 
+          - ObjectOwnership: ObjectWriter
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true

@@ -437,6 +437,9 @@ Resources:
           - Id: ExpirationInDays
             ExpirationInDays: 60
             Status: Enabled
+      OwnershipControls:
+        Rules: 
+          - ObjectOwnership: ObjectWriter
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
