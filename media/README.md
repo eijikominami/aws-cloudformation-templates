@@ -46,32 +46,32 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | DestinationIpAddressOrEntitlementArn1 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort1 | String | 5001 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol1 | String | The protocol that is used by the distination |
+| DestinationPort1 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol1 | String | | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn2 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort2 | String | 5002 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol2 | String | The protocol that is used by the distination |
+| DestinationPort2 | String | 5002 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol2 | String | | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn3 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort3 | String | 5001 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol4 | String | The protocol that is used by the distination |
+| DestinationPort3 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol4 | String | | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn1 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort4 | String | 5001 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol4 | String | The protocol that is used by the distination |
+| DestinationPort4 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol4 | String | | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn5 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort5 | String | 5001 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol5 | String | The protocol that is used by the distination |
+| DestinationPort5 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol5 | String | | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn6 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort6 | String | 5001 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol6 | String | The protocol that is used by the distination |
+| DestinationPort6 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol6 | String | | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn7 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort7 | String | 5001 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol7 | String | The protocol that is used by the distination |
+| DestinationPort7 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol7 | String | | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn8 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort8 | String | 5001 | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol8 | String | The protocol that is used by the distination |
+| DestinationPort8 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol8 | String | | | The protocol that is used by the distination |
 | FujitsuQoSSenderControlPort | Number | 9900 | | The port that the flow uses to send outbound requests to initiate connection with the sender |
 | IngestPort | Number | 9177 | | The port that the flow listens on for incoming content |
-| InputAllowedCidr | String | 0.0.0.0/0 | The range of IP addresses that are allowed to contribute content to your source |
+| InputAllowedCidr | String | 0.0.0.0/0 | | The range of IP addresses that are allowed to contribute content to your source |
 | MinLatency | Number | 100 | | The minimum latency in milliseconds for SRT-based streams |
 | OutputAllowedCidr | String | 0.0.0.0/0 | | The range of IP addresses that are allowed to initiate output requests to this flow |
 | SenderIpAddressOrEntitlementArn | String | | | The IP address or the ARN of the the sender |

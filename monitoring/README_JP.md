@@ -641,7 +641,6 @@ Properties:
 
 ## Kinesis Firehose
 
-
 このテンプレートは、以下のアラームを作成します。
 
 | ネームスペース | メトリクス | StreamName | 閾値 |
@@ -780,7 +779,7 @@ Properties:
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceTransportError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | 1分間に1回以上 | 
-| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | > 0 | 
 
 以下のパラメータを指定できます。
 

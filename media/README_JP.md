@@ -46,32 +46,32 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | DestinationIpAddressOrEntitlementArn1 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort1 | String | 5001 | MediaConnectが送信に用いるポート |
-| DestinationProtocol1 | String | 送信に用いるプロトコル |
+| DestinationPort1 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol1 | String | | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn2 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort2 | String | 5002 | MediaConnectが送信に用いるポート |
-| DestinationProtocol2 | String | 送信に用いるプロトコル |
+| DestinationPort2 | String | 5002 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol2 | String | | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn3 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort3 | String | 5001 | MediaConnectが送信に用いるポート |
-| DestinationProtocol4 | String | 送信に用いるプロトコル |
+| DestinationPort3 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol4 | String | | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn1 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort4 | String | 5001 | MediaConnectが送信に用いるポート |
-| DestinationProtocol4 | String | 送信に用いるプロトコル |
+| DestinationPort4 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol4 | String | | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn5 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort5 | String | 5001 | MediaConnectが送信に用いるポート |
-| DestinationProtocol5 | String | 送信に用いるプロトコル |
+| DestinationPort5 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol5 | String | | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn6 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort6 | String | 5001 | MediaConnectが送信に用いるポート |
-| DestinationProtocol6 | String | 送信に用いるプロトコル |
+| DestinationPort6 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol6 | String | | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn7 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort7 | String | 5001 | MediaConnectが送信に用いるポート |
-| DestinationProtocol7 | String | 送信に用いるプロトコル |
+| DestinationPort7 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol7 | String | | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn8 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort8 | String | 5001 | MediaConnectが送信に用いるポート |
-| DestinationProtocol8 | String | 送信に用いるプロトコル |
+| DestinationPort8 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol8 | String | | | 送信に用いるプロトコル |
 | FujitsuQoSSenderControlPort | Number | 9900 | | 送信リクエストを行う際に用いるポート |
 | IngestPort | Number | 9177 | | 受信ポート |
-| InputAllowedCidr | String | 0.0.0.0/0 | 送信元のIPアドレスの範囲 |
+| InputAllowedCidr | String | 0.0.0.0/0 | | 送信元のIPアドレスの範囲 |
 | MinLatency | Number | 100 | | SRTを用いる際の最小遅延値 |
 | OutputAllowedCidr | String | 0.0.0.0/0 | |  送信先のIPアドレスの範囲 |
 | SenderIpAddressOrEntitlementArn | String | | | 送信元のIPアドレスもしくはARN |

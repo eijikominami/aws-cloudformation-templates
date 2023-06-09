@@ -22,7 +22,7 @@ The template creates the following alarms.
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceTransportError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | At least once a minute | 
-| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | > 0 | 
 
 ## Parameters
 
@@ -59,7 +59,7 @@ cloudwatch-alarm-about-mediaconnect-source は、 AWS Elemental MediaConnect sou
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceTransportError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | 1分間に1回以上 | 
-| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | > 0 | 
 
 ## パラメータ
 
@@ -67,7 +67,7 @@ cloudwatch-alarm-about-mediaconnect-source は、 AWS Elemental MediaConnect sou
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `ChannelId` | String |  | ○ | チャンネルID |
+| `CustomAlarmName` | String |  | ○ | カスタムアラーム名 |
 | `SourceName` | String |  | ○ | ソース名 |
 | `SourceARN` | String |  | ○ | ソース ARN |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |

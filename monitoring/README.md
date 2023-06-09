@@ -777,7 +777,7 @@ The template creates the following alarms.
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceTransportError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | At least once a minute | 
-| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | > 0 | 
 
 You can provide optional parameters as follows.
 
