@@ -85,7 +85,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort1:
-    Type: String
+    Type: Number
     Default: 5001
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol1:
@@ -106,7 +106,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort2:
-    Type: String
+    Type: Number
     Default: 5002
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol2:
@@ -127,7 +127,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort3:
-    Type: String
+    Type: Number
     Default: 5003
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol3:
@@ -148,7 +148,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort4:
-    Type: String
+    Type: Number
     Default: 5004
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol4:
@@ -169,7 +169,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort5:
-    Type: String
+    Type: Number
     Default: 5005
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol5:
@@ -190,7 +190,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort6:
-    Type: String
+    Type: Number
     Default: 5006
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol6:
@@ -211,7 +211,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort7:
-    Type: String
+    Type: Number
     Default: 5007
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol7:
@@ -232,7 +232,7 @@ Parameters:
     Default: ''
     Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationPort8:
-    Type: String
+    Type: Number
     Default: 5008
     Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
   DestinationProtocol8:
@@ -273,7 +273,7 @@ Parameters:
   OutputAllowedCidr:
     Type: String
     Default: 0.0.0.0/0
-    Description: The range of IP addresses that are allowed to initiate output requests to this flow []
+    Description: The range of IP addresses that are allowed to initiate output requests to this flow [fujitsu-qos, srt-listener]
   SenderIpAddressOrEntitlementArn:
     Type: String
     Default: ''
