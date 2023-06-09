@@ -759,6 +759,74 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## MediaConnect
+
+The template creates the following alarms.
+
+| Namespace | MetricName | SourceARN | Threshold |
+| --- | --- | --- | --- |
+| AWS/MediaConnect | **SourcePTSError** | `SourceARN` | At least once a minute |
+| AWS/MediaConnect | **SourcePCRAccuracyError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceCRCError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePIDError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceCATError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePCRError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePMTError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePATError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceTransportError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | At least once a minute | 
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom alram name |
+| `SourceName` | String |  | ○ | The source name |
+| `SourceARN` | String |  | ○ | The source ARN |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SourceName: String
+    SourceARN: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconnect-source
+    SemanticVersion: 2.1.4
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SourceName: String
+    SourceARN: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## MediaLive
 
 The template creates the following alarms.

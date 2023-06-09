@@ -1,0 +1,338 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for AWS Elemental MediaConnect source
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom alram name
+  SourceName:
+    Type: String
+    Default: Unknown
+    Description: The source name  
+  SourceARN:
+    Type: String
+    AllowedPattern: .+
+    Description: The source ARN 
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  SourcePTSError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePTSError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePTSError
+        - !Sub Warning-MediaConnect-${SourceName}-SourcePTSError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourcePTSError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourcePCRAccuracyError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePCRAccuracyError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePCRAccuracyError
+        - !Sub Warning-MediaConnect-${SourceName}-SourcePCRAccuracyError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourcePCRAccuracyError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourceCRCError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceCRCError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceCRCError
+        - !Sub Warning-MediaConnect-${SourceName}-SourceCRCError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourceCRCError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourcePIDError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePIDError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePIDError
+        - !Sub Warning-MediaConnect-${SourceName}-SourcePIDError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourcePIDError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourceCATError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceCATError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceCATError
+        - !Sub Warning-MediaConnect-${SourceName}-SourceCATError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourceCATError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourceTSByteError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTSByteError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceTSByteError
+        - !Sub Warning-MediaConnect-${SourceName}-SourceTSByteError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourceTSByteError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourcePCRError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePCRError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePCRError
+        - !Sub Warning-MediaConnect-${SourceName}-SourcePCRError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourcePCRError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourcePMTError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePMTError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePMTError
+        - !Sub Warning-MediaConnect-${SourceName}-SourcePMTError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourcePMTError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourceTSSyncLoss:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTSSyncLoss* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceTSSyncLoss
+        - !Sub Warning-MediaConnect-${SourceName}-SourceTSSyncLoss
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourceTSSyncLoss
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourcePATError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePATError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePATError
+        - !Sub Warning-MediaConnect-${SourceName}-SourcePATError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourcePATError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourceTransportError:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTransportError* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceTransportError
+        - !Sub Warning-MediaConnect-${SourceName}-SourceTransportError
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourceTransportError
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourceDroppedPackets:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceDroppedPackets* が発生しました。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceDroppedPackets
+        - !Sub Warning-MediaConnect-${SourceName}-SourceDroppedPackets
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourceDroppedPackets
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+  SourcePacketLossPercent:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePacketLossPercent* が上昇しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePacketLossPercent
+        - !Sub Warning-MediaConnect-${SourceName}-SourcePacketLossPercent
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: SourceARN
+          Value: !Ref SourceARN
+      EvaluationPeriods: 1
+      MetricName: SourcePacketLossPercent
+      Namespace: AWS/MediaConnect
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

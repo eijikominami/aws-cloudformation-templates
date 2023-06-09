@@ -762,6 +762,74 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## MediaConnect
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | SourceARN | 閾値 |
+| --- | --- | --- | --- |
+| AWS/MediaConnect | **SourcePTSError** | `SourceARN` | 1分間に1回以上 |
+| AWS/MediaConnect | **SourcePCRAccuracyError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceCRCError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePIDError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceCATError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePCRError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePMTError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePATError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceTransportError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | 1分間に1回以上 | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `ChannelId` | String |  | ○ | チャンネルID |
+| `SourceName` | String |  | ○ | ソース名 |
+| `SourceARN` | String |  | ○ | ソース ARN |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SourceName: String
+    SourceARN: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconnect-source
+    SemanticVersion: 2.1.4
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SourceName: String
+    SourceARN: String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## MediaLive
 
 このテンプレートは、以下のアラームを作成します。
