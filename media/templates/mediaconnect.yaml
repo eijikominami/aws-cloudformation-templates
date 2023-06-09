@@ -1,0 +1,636 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/media/mediaconnect sets Elemental MediaConnect.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'MediaConnect Flow Configuration'
+        Parameters:
+          - SenderIpAddressOrEntitlementArn
+          - SenderType
+          - IngestPort
+          - FujitsuQoSSenderControlPort
+          - SrtCallerSourceListenerPort
+          - MinLatency
+          - InputAllowedCidr
+      - Label: 
+          default: 'Destination Configuration'
+        Parameters:
+          - OutputAllowedCidr
+      - Label: 
+          default: '1. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn1
+          - DestinationProtocol1
+          - DestinationPort1
+      - Label: 
+          default: '2. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn2
+          - DestinationProtocol2
+          - DestinationPort2
+      - Label: 
+          default: '3. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn3
+          - DestinationProtocol3
+          - DestinationPort3
+      - Label: 
+          default: '4. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn4
+          - DestinationProtocol4
+          - DestinationPort4
+      - Label: 
+          default: '5. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn5
+          - DestinationProtocol5
+          - DestinationPort5
+      - Label: 
+          default: '6. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn6
+          - DestinationProtocol6
+          - DestinationPort6
+      - Label: 
+          default: '7. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn7
+          - DestinationProtocol7
+          - DestinationPort7
+      - Label: 
+          default: '8. Destination Configuration'
+        Parameters:
+          - DestinationIpAddressOrEntitlementArn8
+          - DestinationProtocol8
+          - DestinationPort8
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  DestinationIpAddressOrEntitlementArn1:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort1:
+    Type: String
+    Default: 5001
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol1:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  DestinationIpAddressOrEntitlementArn2:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort2:
+    Type: String
+    Default: 5002
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol2:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  DestinationIpAddressOrEntitlementArn3:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort3:
+    Type: String
+    Default: 5003
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol3:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  DestinationIpAddressOrEntitlementArn4:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort4:
+    Type: String
+    Default: 5004
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol4:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  DestinationIpAddressOrEntitlementArn5:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort5:
+    Type: String
+    Default: 5005
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol5:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  DestinationIpAddressOrEntitlementArn6:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort6:
+    Type: String
+    Default: 5006
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol6:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  DestinationIpAddressOrEntitlementArn7:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort7:
+    Type: String
+    Default: 5007
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol7:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  DestinationIpAddressOrEntitlementArn8:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationPort8:
+    Type: String
+    Default: 5008
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  DestinationProtocol8:
+    Type: String
+    AllowedValues:
+      - NONE
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: NONE
+    Description: The protocol that is used by the distination [required]
+  FujitsuQoSSenderControlPort:
+    Type: Number
+    Default: 9900
+    MinValue: 1024
+    MaxValue: 64000
+    Description: The port that the flow uses to send outbound requests to initiate connection with the sender [fujitsu-qos]
+  IngestPort:
+    Type: Number
+    Default: 9177
+    MinValue: 1024
+    MaxValue: 65535
+    Description: The port that the flow listens on for incoming content. If the protocol of the source is Zixi, the port set to 2088 automatically. [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  InputAllowedCidr:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: The range of IP addresses that are allowed to contribute content to your source [srt-listener, zixi-push, rist ,rtp-fec, rtp]
+  MinLatency:
+    Type: Number
+    Default: 100
+    MinValue: 100
+    MaxValue: 15000
+    Description: The minimum latency in milliseconds for SRT-based streams [srt-listener, srt-caller]
+  OutputAllowedCidr:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: The range of IP addresses that are allowed to initiate output requests to this flow []
+  SenderIpAddressOrEntitlementArn:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the sender [fujitsu-qos, srt-caller, edia Connect]
+  SenderType:
+    Type: String
+    AllowedValues:
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+      - Media Connect
+    Default: srt-listener
+    Description: The protocol that is used by the source [required]
+  SrtCallerSourceListenerPort:
+    Type: Number
+    Default: 2000
+    MinValue: 1024
+    MaxValue: 65535
+    Description: Source port for SRT-caller protocol [srt-caller]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates 
+    AllowedPattern: .+
+
+Conditions:
+  CreateDestinationProtocol1: !Not [ !Equals [ !Ref DestinationProtocol1, NONE] ]
+  CreateDestinationProtocol2: !Not [ !Equals [ !Ref DestinationProtocol2, NONE] ]
+  CreateDestinationProtocol3: !Not [ !Equals [ !Ref DestinationProtocol3, NONE] ]
+  CreateDestinationProtocol4: !Not [ !Equals [ !Ref DestinationProtocol4, NONE] ]
+  CreateDestinationProtocol5: !Not [ !Equals [ !Ref DestinationProtocol5, NONE] ]
+  CreateDestinationProtocol6: !Not [ !Equals [ !Ref DestinationProtocol6, NONE] ]
+  CreateDestinationProtocol7: !Not [ !Equals [ !Ref DestinationProtocol7, NONE] ]
+  CreateDestinationProtocol8: !Not [ !Equals [ !Ref DestinationProtocol8, NONE] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  EnableIngestPort: !Or [ !Equals [ !Ref SenderType, fujitsu-qos], !Equals [ !Ref SenderType, srt-listener], !Equals [ !Ref SenderType, zixi-push], !Equals [!Ref SenderType, rist], !Equals [!Ref SenderType, rtp-fec], !Equals [!Ref SenderType, rtp] ]
+  EnableMinLatency: !Or [ !Equals [ !Ref SenderType, srt-listener], !Equals [ !Ref SenderType, srt-caller] ]
+  EnableWhitelistCidr: !Or [ !Equals [ !Ref SenderType, srt-listener], !Equals [ !Ref SenderType, zixi-push], !Equals [!Ref SenderType, rist], !Equals [!Ref SenderType, rtp-fec], !Equals [!Ref SenderType, rtp] ]
+  EntitlementResource: !Equals [ !Ref SenderType, Media Connect]
+  Development: !Equals [ !Ref Environment, development]
+  FujitsuQoSResource: !Equals [ !Ref SenderType, fujitsu-qos]
+  SrtCallerResouurce: !Equals [ !Ref SenderType, srt-caller]
+  ZixiPushResouurce: !Equals [ !Ref SenderType, zixi-push]
+
+Resources:
+  MediaConnectFlow:
+    Type: AWS::MediaConnect::Flow
+    Properties: 
+      Name: !Ref AWS::StackName
+      Source:
+        Description: !If
+          - EntitlementResource
+          - !Sub MediaConnect created by ${AWS::StackName}
+          - !Sub ${SenderType} created by ${AWS::StackName}
+        EntitlementArn: !If
+          - EntitlementResource
+          - !Ref SenderIpAddressOrEntitlementArn
+          - !Ref AWS::NoValue
+        IngestPort: !If
+          - EnableIngestPort
+          - !If
+            - ZixiPushResouurce
+            - 2088
+            - !Ref IngestPort
+          - !Ref AWS::NoValue
+        MinLatency: !If
+          - EnableMinLatency
+          - !Ref MinLatency
+          - !Ref AWS::NoValue
+        Name: !Ref AWS::StackName
+        Protocol: !If
+          - EntitlementResource
+          - !Ref AWS::NoValue
+          - !Ref SenderType
+        SenderControlPort: !If
+          - FujitsuQoSResource
+          - !Ref FujitsuQoSSenderControlPort
+          - !Ref AWS::NoValue
+        SenderIpAddress: !If
+          - FujitsuQoSResource
+          - !Ref SenderIpAddressOrEntitlementArn
+          - !Ref AWS::NoValue
+        SourceListenerAddress: !If
+          - SrtCallerResouurce
+          - !Ref SenderIpAddressOrEntitlementArn
+          - !Ref AWS::NoValue
+        SourceListenerPort: !If
+          - SrtCallerResouurce
+          - !Ref SrtCallerSourceListenerPort
+          - !Ref AWS::NoValue
+        WhitelistCidr: !If
+          - EnableWhitelistCidr
+          - !Ref InputAllowedCidr
+          - !Ref AWS::NoValue
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.4
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.4
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  MediaConnectFlowOutput1:
+    Condition: CreateDestinationProtocol1
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn1
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output1
+        Port: !Ref DestinationPort1
+        Protocol: !Ref DestinationProtocol1
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaConnectFlowOutput2:
+    Condition: CreateDestinationProtocol2
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn2
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output2
+        Port: !Ref DestinationPort2
+        Protocol: !Ref DestinationProtocol2
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaConnectFlowOutput3:
+    Condition: CreateDestinationProtocol3
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn3
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output3
+        Port: !Ref DestinationPort3
+        Protocol: !Ref DestinationProtocol3
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaConnectFlowOutput4:
+    Condition: CreateDestinationProtocol4
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn4
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output4
+        Port: !Ref DestinationPort4
+        Protocol: !Ref DestinationProtocol4
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaConnectFlowOutput5:
+    Condition: CreateDestinationProtocol5
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn5
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output5
+        Port: !Ref DestinationPort5
+        Protocol: !Ref DestinationProtocol5
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaConnectFlowOutput6:
+    Condition: CreateDestinationProtocol6
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn6
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output6
+        Port: !Ref DestinationPort6
+        Protocol: !Ref DestinationProtocol6
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaConnectFlowOutput7:
+    Condition: CreateDestinationProtocol7
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn7
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output7
+        Port: !Ref DestinationPort7
+        Protocol: !Ref DestinationProtocol7
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  MediaConnectFlowOutput8:
+    Condition: CreateDestinationProtocol8
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        CidrAllowList: !Ref OutputAllowedCidr
+        DestinationIpAddressOrEntitlementArn: !Ref DestinationIpAddressOrEntitlementArn8
+        FlowArn: !Ref MediaConnectFlow
+        MinLatency: !Ref MinLatency
+        Name: Output8
+        Port: !Ref DestinationPort8
+        Protocol: !Ref DestinationProtocol8
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  IngestIp:
+    Description: Ingest Ip
+    Value: !GetAtt MediaConnectFlow.Source.IngestIp
+  SourceIngestPort:
+    Description: Source Ingest Port
+    Value: !GetAtt MediaConnectFlow.Source.SourceIngestPort

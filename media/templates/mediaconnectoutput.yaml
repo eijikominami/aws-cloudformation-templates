@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWSCloudFormationTemplates/media/mediaconnectoutput sets Elemental MediaConnect output.
+
+Parameters:
+  CidrAllowList:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: The range of IP addresses that are allowed to initiate output requests to this flow [fujitsu-qos, srt-listener]
+  DestinationIpAddressOrEntitlementArn:
+    Type: String
+    Default: ''
+    Description: The IP address or the ARN of the the distination [srt-caller, zixi-push, rist, rtp-fec, rtp]
+  FlowArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The Amazon Resource Name (ARN) of the flow this output is attached to [required] 
+  MinLatency:
+    Type: Number
+    Default: 100
+    MinValue: 100
+    MaxValue: 15000
+    Description: The minimum latency in milliseconds for SRT-based streams [srt-listener, srt-caller]
+  Name:
+    Type: String
+    Default: Default
+    AllowedPattern: .+
+    Description: The name of the VPC interface
+  Port:
+    Type: Number
+    Default: 9177
+    MinValue: 1024
+    MaxValue: 64000
+    Description: The port to use when MediaConnect distributes content to the output [fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp]
+  Protocol:
+    Type: String
+    AllowedValues:
+      - fujitsu-qos
+      - srt-listener
+      - srt-caller
+      - zixi-push
+      - rist
+      - rtp-fec
+      - rtp
+    Default: srt-listener
+    Description: The protocol that is used by the source [required]
+
+Conditions:
+  EnableCidrAllowList: !Or [ !Equals [!Ref Protocol, fujitsu-qos], !Equals [!Ref Protocol, srt-listener] ]
+  EnableDestination: !Or [ !Equals [!Ref Protocol, srt-caller], !Equals [!Ref Protocol, zixi-push], !Equals [!Ref Protocol, rist], !Equals [!Ref Protocol, rtp-fec], !Equals [!Ref Protocol, rtp] ]
+  EnableMinLatency: !Or [ !Equals [!Ref Protocol, srt-listener], !Equals [!Ref Protocol, srt-caller] ]
+  EnablePort: !Or [ !Equals [!Ref Protocol, fujitsu-qos], !Equals [!Ref Protocol, srt-listener], !Equals [!Ref Protocol, srt-caller], !Equals [!Ref Protocol, zixi-push], !Equals [!Ref Protocol, rist], !Equals [!Ref Protocol, rtp-fec], !Equals [!Ref Protocol, rtp] ]
+
+Resources:
+  MediaConnectFlowOutput:
+    Type: AWS::MediaConnect::FlowOutput
+    Properties: 
+      CidrAllowList: !If
+        - EnableCidrAllowList
+        - - !Ref CidrAllowList
+        - !Ref AWS::NoValue
+      Description: !Sub ${Protocol} created by ${AWS::StackName}
+      Destination: !If
+        - EnableDestination
+        - !Ref DestinationIpAddressOrEntitlementArn
+        - !Ref AWS::NoValue
+      FlowArn: !Ref FlowArn
+      MinLatency: !If
+        - EnableMinLatency
+        - !Ref MinLatency
+        - !Ref AWS::NoValue
+      Name: !Ref Name
+      Port: !If
+        - EnablePort
+        - !Ref Port
+        - !Ref AWS::NoValue
+      Protocol: !Ref Protocol
