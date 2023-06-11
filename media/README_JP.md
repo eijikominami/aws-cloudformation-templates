@@ -14,6 +14,7 @@
 | 作成されるAWSサービス | リージョン | 個別のCloudFormationテンプレート |
 | --- | --- | --- |
 | IVS | 東京 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
+| MediaConnect | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaConnect&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediaconnect.yaml) |
 | MediaLive | 東京 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
 | MediaPackage | 東京 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
 | MediaStore | 東京 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
@@ -24,6 +25,7 @@
 
 ```bash
 aws cloudformation deploy --template-file ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
 aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
@@ -38,6 +40,43 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | Authorized | true or false | false | ○ | 再生承認の有効化 |
 | LatencyMode | NORMAL or LOW | LOW | ○ | 動画レイテンシー |
 | Type | STANDARD or BASIC | STANDARD | ○ | チャンネルタイプ |
+
+### MediaConnect
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| DestinationIpAddressOrEntitlementArn1 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort1 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol1 | String | | | 送信に用いるプロトコル |
+| DestinationIpAddressOrEntitlementArn2 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort2 | String | 5002 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol2 | String | | | 送信に用いるプロトコル |
+| DestinationIpAddressOrEntitlementArn3 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort3 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol4 | String | | | 送信に用いるプロトコル |
+| DestinationIpAddressOrEntitlementArn1 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort4 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol4 | String | | | 送信に用いるプロトコル |
+| DestinationIpAddressOrEntitlementArn5 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort5 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol5 | String | | | 送信に用いるプロトコル |
+| DestinationIpAddressOrEntitlementArn6 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort6 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol6 | String | | | 送信に用いるプロトコル |
+| DestinationIpAddressOrEntitlementArn7 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort7 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol7 | String | | | 送信に用いるプロトコル |
+| DestinationIpAddressOrEntitlementArn8 | String | | | 送信先のIPアドレスもしくはARN |
+| DestinationPort8 | String | 5001 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol8 | String | | | 送信に用いるプロトコル |
+| FujitsuQoSSenderControlPort | Number | 9900 | | 送信リクエストを行う際に用いるポート |
+| IngestPort | Number | 9177 | | 受信ポート |
+| InputAllowedCidr | String | 0.0.0.0/0 | | 送信元のIPアドレスの範囲 |
+| MinLatency | Number | 100 | | SRTを用いる際の最小遅延値 |
+| OutputAllowedCidr | String | 0.0.0.0/0 | |  送信先のIPアドレスの範囲 |
+| SenderIpAddressOrEntitlementArn | String | | | 送信元のIPアドレスもしくはARN |
+| SenderType | String | srt-listener | ○ | 受信に用いるプロトコル |
+| SrtCallerSourceListenerPort | Number | 2000 | | SRT caller を用いる際の送信元ポート |
 
 ### MediaLive
 

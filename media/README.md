@@ -14,6 +14,7 @@ If you just want to deploy the stack, click the button below.
 | Services | AWS Region Code | Launchers |
 | --- | --- | --- |
 | IVS | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
+| MediaConnect | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaConnect&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediaconnect.yaml) |
 | MediaLive | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
 | MediaPackage | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaPackage&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediapackage.yaml) |
 | MediaStore | ap-northeast-1 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaStore&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediastore.yaml) |
@@ -24,6 +25,7 @@ Execute the command to deploy.
 
 ```bash
 aws cloudformation deploy --template-file ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
 aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
@@ -38,6 +40,43 @@ You can provide optional parameters as follows.
 | Authorized | true or false | false | ○ | Whether the channel is authorized |
 | LatencyMode | NORMAL or LOW | LOW | ○ | Channel latency mode |
 | Type | STANDARD or BASIC | STANDARD | ○ | The channel type |
+
+### MediaConnect
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| DestinationIpAddressOrEntitlementArn1 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort1 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol1 | String | | | The protocol that is used by the distination |
+| DestinationIpAddressOrEntitlementArn2 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort2 | String | 5002 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol2 | String | | | The protocol that is used by the distination |
+| DestinationIpAddressOrEntitlementArn3 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort3 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol4 | String | | | The protocol that is used by the distination |
+| DestinationIpAddressOrEntitlementArn1 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort4 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol4 | String | | | The protocol that is used by the distination |
+| DestinationIpAddressOrEntitlementArn5 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort5 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol5 | String | | | The protocol that is used by the distination |
+| DestinationIpAddressOrEntitlementArn6 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort6 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol6 | String | | | The protocol that is used by the distination |
+| DestinationIpAddressOrEntitlementArn7 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort7 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol7 | String | | | The protocol that is used by the distination |
+| DestinationIpAddressOrEntitlementArn8 | String | | | The IP address or the ARN of the the distination |
+| DestinationPort8 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol8 | String | | | The protocol that is used by the distination |
+| FujitsuQoSSenderControlPort | Number | 9900 | | The port that the flow uses to send outbound requests to initiate connection with the sender |
+| IngestPort | Number | 9177 | | The port that the flow listens on for incoming content |
+| InputAllowedCidr | String | 0.0.0.0/0 | | The range of IP addresses that are allowed to contribute content to your source |
+| MinLatency | Number | 100 | | The minimum latency in milliseconds for SRT-based streams |
+| OutputAllowedCidr | String | 0.0.0.0/0 | | The range of IP addresses that are allowed to initiate output requests to this flow |
+| SenderIpAddressOrEntitlementArn | String | | | The IP address or the ARN of the the sender |
+| SenderType | String | srt-listener | ○ | The protocol that is used by the source |
+| SrtCallerSourceListenerPort | Number | 2000 | | Source port for SRT-caller protocol |
 
 ### MediaLive
 

@@ -60,7 +60,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -118,7 +118,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -173,7 +173,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -228,7 +228,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -280,7 +280,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -333,7 +333,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -387,7 +387,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -454,7 +454,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-elasticsearch
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -513,7 +513,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -567,7 +567,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -626,7 +626,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -640,7 +640,6 @@ Properties:
 ```
 
 ## Kinesis Firehose
-
 
 このテンプレートは、以下のアラームを作成します。
 
@@ -688,7 +687,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -750,7 +749,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -758,6 +757,74 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## MediaConnect
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | SourceARN | 閾値 |
+| --- | --- | --- | --- |
+| AWS/MediaConnect | **SourcePTSError** | `SourceARN` | 1分間に1回以上 |
+| AWS/MediaConnect | **SourcePCRAccuracyError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceCRCError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePIDError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceCATError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePCRError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePMTError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePATError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceTransportError** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | 1分間に1回以上 | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | > 0 | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `ChannelId` | String |  | ○ | チャンネルID |
+| `SourceName` | String |  | ○ | ソース名 |
+| `SourceARN` | String |  | ○ | ソース ARN |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SourceName: String
+    SourceARN: String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconnect-source
+    SemanticVersion: 2.1.6
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SourceName: String
+    SourceARN: String
+    SNSTopicArn : String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -811,7 +878,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -868,7 +935,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediastore
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -920,7 +987,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -972,7 +1039,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -1025,7 +1092,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -1080,7 +1147,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -1142,7 +1209,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoint
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
@@ -1200,7 +1267,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-workspaces
-    SemanticVersion: 2.1.4
+    SemanticVersion: 2.1.6
   NotificationARNs: 
     - String
   Parameters: 
