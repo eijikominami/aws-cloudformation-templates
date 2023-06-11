@@ -617,6 +617,21 @@ Resources:
       Endpoint: !GetAtt LambdaTransferSNSTopic.Arn
       Protocol: lambda
       TopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+  SNSTopicPolicy:
+    Condition: CreateSNSForAlertTransfer
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: 
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AWSAnomalyDetectionSNSPublishingPermissions
+            Effect: Allow
+            Principal:
+              Service: costalerts.amazonaws.com
+            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            Action: 'sns:Publish'
   # CloudWatch Alarm for Lambda
   AlarmLambdaTransferSNSTopic:
     Condition: CreateSNSForAlertTransfer
