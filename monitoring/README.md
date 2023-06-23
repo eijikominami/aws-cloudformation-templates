@@ -766,12 +766,10 @@ The template creates the following alarms.
 | Namespace | MetricName | SourceARN | Threshold |
 | --- | --- | --- | --- |
 | AWS/MediaConnect | **SourcePTSError** | `SourceARN` | At least once a minute |
-| AWS/MediaConnect | **SourcePCRAccuracyError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceCRCError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourcePIDError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceCATError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | At least once a minute | 
-| AWS/MediaConnect | **SourcePCRError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourcePMTError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | At least once a minute | 

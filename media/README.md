@@ -101,7 +101,7 @@ You can provide optional parameters as follows.
 | InputVodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
 | MediaPackageChannelId | String | | | The MediaPackage channel id |
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
-| OutputType | String | RTMP | ○ | Output type |
+| OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | Output type |
 | OutputRtmpUrl1 | String | | | The rtmp url a stream sends to |
 | OutputRtmpStreamName1 | String | | | The rtmp stream name a stream sends to |
 | OutputRtmpUrl2 | String | | | The rtmp url a stream sends to |

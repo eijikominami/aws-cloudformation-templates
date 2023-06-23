@@ -101,7 +101,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | InputWhitelistRules | String | 0.0.0.0/0 | ○ | 許可するIPアドレス範囲 |
 | MediaPackageChannelId | String | | | MediaPackage のチャネルID |
 | MediaStoreEndpoint | String | | | MediaStore のエンドポイントURL |
-| OutputType | String | RTMP | ○ | 出力先のタイプ |
+| OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | 出力先のタイプ |
 | OutputRtmpUrl1 | String | | | 出力先のRTMP URL1 |
 | OutputRtmpStreamName1 | String | | | 出力先のRTMPストリーム名1 |
 | OutputRtmpUrl2 | String | | | 出力先のRTMP URL2 |

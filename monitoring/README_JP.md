@@ -768,12 +768,10 @@ Properties:
 | ネームスペース | メトリクス | SourceARN | 閾値 |
 | --- | --- | --- | --- |
 | AWS/MediaConnect | **SourcePTSError** | `SourceARN` | 1分間に1回以上 |
-| AWS/MediaConnect | **SourcePCRAccuracyError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceCRCError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourcePIDError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceCATError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | 1分間に1回以上 | 
-| AWS/MediaConnect | **SourcePCRError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourcePMTError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | 1分間に1回以上 | 

@@ -13,6 +13,8 @@ Metadata:
           - InputWhitelistRules
           - ElementalLinkId1
           - ElementalLinkId2
+          - ElementalLinkType1
+          - ElementalLinkType2
           - VodSourceBucket
       - Label:
           default: 'MediaLive Configuration'
@@ -38,9 +40,9 @@ Metadata:
           - MediaStoreEndpoint
           - OutputType
           - OutputHlsBucket
-          - OutputRtmpUrl1
+          - OutputRtmpRtpUrl1
           - OutputRtmpStreamKey1
-          - OutputRtmpUrl2
+          - OutputRtmpRtpUrl2
           - OutputRtmpStreamKey2
       - Label: 
           default: 'Notification Configuration'
@@ -52,7 +54,6 @@ Metadata:
         Parameters: 
           - LogicalNamePrefix
           - Environment
-          - AutoInputFailover
           - TagKey
           - TagValue
 
@@ -89,25 +90,25 @@ Parameters:
   ElementalLinkId1:
     Type: String
     Default: ''
-    Description: The unique ID for the Elemental Link device [conditional]  
+    Description: The unique ID for the Elemental Link device [ELEMENTAL_LINK]  
   ElementalLinkId2:
     Type: String
     Default: ''
-    Description: The unique ID for the Elemental Link device [conditional]
-  ElementalLinkType0:
-    Type: String
-    Default: HD
-    AllowedValues:
-      - HD
-      - UHD
-    Description: The type for the Elemental Link device [conditional]   
+    Description: The unique ID for the Elemental Link device [ELEMENTAL_LINK]
   ElementalLinkType1:
     Type: String
     Default: HD
     AllowedValues:
       - HD
       - UHD
-    Description: The type for the Elemental Link device [conditional]           
+    Description: The type for the Elemental Link device [ELEMENTAL_LINK]   
+  ElementalLinkType2:
+    Type: String
+    Default: HD
+    AllowedValues:
+      - HD
+      - UHD
+    Description: The type for the Elemental Link device [ELEMENTAL_LINK]           
   FramerateDenominator:
     Type: Number
     Default: 1001
@@ -164,11 +165,11 @@ Parameters:
   MediaPackageChannelId:
     Type: String
     Default: ''
-    Description: The MediaPackage channel id [conditional]
+    Description: The MediaPackage channel id [MEDIA_PACKAGE]
   MediaStoreEndpoint:
     Type: String
     Default: ''
-    Description: The endpoint of MediaStore [conditional]
+    Description: The endpoint of MediaStore [MEDIA_STORE]
   InputType:
     Type: String
     Default: RTMP
@@ -180,7 +181,7 @@ Parameters:
   InputStreamKey:
     Type: String
     Default: stream
-    Description: A unique name for the location the RTMP stream is being pushed to [conditional]
+    Description: A unique name for the location the RTMP stream is being pushed to [RTMP]
   InputWhitelistRules:
     Type: String
     AllowedPattern: ^[0-9./]*$
@@ -193,28 +194,29 @@ Parameters:
       - MEDIA_PACKAGE
       - MEDIA_STORE
       - RTMP
+      - RTP
     Default: RTMP
     Description: Output type [required]
   OutputHlsBucket:
     Type: String
     Default: ''
-    Description: The S3 bucket Name HLS files are sent [conditional]
-  OutputRtmpUrl1:
+    Description: The S3 bucket Name HLS files are sent [S3]
+  OutputRtmpRtpUrl1:
     Type: String
     Default: ''
-    Description: The rtmp url a stream sends to [conditional]
+    Description: The rtmp/rtp url a stream sends to [RTMP, RTP]
   OutputRtmpStreamKey1:
     Type: String
     Default: ''
-    Description: The rtmp stream name a stream sends to [conditional]
-  OutputRtmpUrl2:
+    Description: The rtmp/rtp stream name a stream sends to [RTMP]
+  OutputRtmpRtpUrl2:
     Type: String
     Default: ''
-    Description: The rtmp url a stream sends to [conditional]
+    Description: The rtmp/rtp url a stream sends to [RTMP, RTP]
   OutputRtmpStreamKey2:
     Type: String
     Default: ''
-    Description: The rtmp stream name a stream sends to [conditional]
+    Description: The rtmp/rtp stream name a stream sends to [RTMP]
   VideoBitrate:
     Type: Number
     Default: 2200000
@@ -222,7 +224,7 @@ Parameters:
   VodSourceBucket:
     Type: String
     Default: ''
-    Description: The S3 bucket Name VOD contents exist [conditional]
+    Description: The S3 bucket Name VOD contents exist [S3]
   Width:
     Type: Number
     Default: 960
@@ -259,7 +261,8 @@ Conditions:
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
   CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref OutputHlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
-  CreateDestinationForRTMP: !Or [ !Equals [ !Ref OutputType, RTMP], !And [ !Not [ !Equals [ !Ref OutputRtmpUrl1, ''] ], !Not [ !Equals [ !Ref OutputRtmpStreamKey1, ''] ] ] ]
+  CreateDestinationForRTMP: !Or [ !Equals [ !Ref OutputType, RTMP], !And [ !Not [ !Equals [ !Ref OutputRtmpRtpUrl1, ''] ], !Not [ !Equals [ !Ref OutputRtmpStreamKey1, ''] ] ] ]
+  CreateDestinationForRTP: !Or [ !Equals [ !Ref OutputType, RTP], !Not [ !Equals [ !Ref OutputRtmpRtpUrl1, ''] ] ]
   CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref OutputHlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
   CreateElementalLinkLIVEWorkflow: !And [ !Equals [ !Ref InputType, ELEMENTAL_LINK ], !Not [ !Equals [ !Ref ElementalLinkId1, ''] ] ]
@@ -400,11 +403,23 @@ Resources:
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: !Ref OutputRtmpStreamKey1
-                  Url: !Ref OutputRtmpUrl1
+                  Url: !Ref OutputRtmpRtpUrl1
                 - StreamName: !Ref OutputRtmpStreamKey2
-                  Url: !Ref OutputRtmpUrl2
+                  Url: !Ref OutputRtmpRtpUrl2
               - - StreamName: !Ref OutputRtmpStreamKey1
-                  Url: !Ref OutputRtmpUrl1
+                  Url: !Ref OutputRtmpRtpUrl1
+          - !Ref AWS::NoValue
+        - !If
+          - CreateDestinationForRTP
+          - Id: !Sub ${LogicalNamePrefix}-for-RTP
+            Settings: !If
+              - CreateTwoPipelines
+              - - StreamName: ''
+                  Url: !Ref OutputRtmpRtpUrl1
+                - StreamName: ''
+                  Url: !Ref OutputRtmpRtpUrl2
+              - - StreamName: ''
+                  Url: !Ref OutputRtmpRtpUrl1
           - !Ref AWS::NoValue
         - !If 
           - CreateDestinationForS3
@@ -483,6 +498,40 @@ Resources:
                       Destination: 
                         DestinationRefId: !Sub ${LogicalNamePrefix}-for-RTMP
                       NumRetries: 10
+                  VideoDescriptionName: !Sub video_${Width}_${Height}
+            - !Ref AWS::NoValue
+          - !If
+            - CreateDestinationForRTP
+            - Name: RTP
+              OutputGroupSettings:
+                UdpGroupSettings:
+                  InputLossAction: EMIT_PROGRAM
+                  TimedMetadataId3Frame: NONE
+                  TimedMetadataId3Period: 10
+              Outputs: 
+                - AudioDescriptionNames: 
+                    - !Sub audio_2_aac${AudioBitrate}
+                  OutputName: !Sub rtmp_${Width}x${Height}_${VideoBitrate}
+                  OutputSettings:
+                    UdpOutputSettings:
+                      BufferMsec: 1000
+                      ContainerSettings: 
+                        M2tsSettings:
+                          AbsentInputAudioBehavior: ENCODE_SILENCE
+                          AudioBufferModel: ATSC
+                          AudioFramesPerPes: 2
+                          AudioStreamType: DVB
+                          BufferModel: MULTIPLEX
+                          CcDescriptor: DISABLED
+                          EbpAudioInterval: VIDEO_INTERVAL
+                          EbpPlacement: VIDEO_AND_AUDIO_PIDS
+                          EsRateInPes: EXCLUDE
+                          ProgramNum: 1
+                          RateMode: CBR
+                          SegmentationMarkers: NONE
+                          SegmentationStyle: MAINTAIN_CADENCE                     
+                      Destination: 
+                        DestinationRefId: !Sub ${LogicalNamePrefix}-for-RTP
                   VideoDescriptionName: !Sub video_${Width}_${Height}
             - !Ref AWS::NoValue
           - !If 
@@ -755,8 +804,8 @@ Resources:
       InputDevices: !If
         - CreateElementalLinkLIVEWorkflowAndTwoInput
         - - Id: !Ref ElementalLinkId1
-        - - Id: !Ref ElementalLinkId1
           - Id: !Ref ElementalLinkId2
+        - - Id: !Ref ElementalLinkId1
       Name: !Sub ${LogicalNamePrefix}-ElementalLink
       Tags:
         environment: !Ref Environment
@@ -871,7 +920,7 @@ Resources:
     Properties:
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-0
-        DeviceType: !Ref ElementalLinkType0
+        DeviceType: !Ref ElementalLinkType1
         InputDeviceId: !Ref ElementalLinkId1
         SNSTopicArn: !If
           - CreateSNSForAlert
@@ -894,7 +943,7 @@ Resources:
     Properties:
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-1
-        DeviceType: !Ref ElementalLinkType1
+        DeviceType: !Ref ElementalLinkType2
         InputDeviceId: !Ref ElementalLinkId1
         SNSTopicArn: !If
           - CreateSNSForAlert
