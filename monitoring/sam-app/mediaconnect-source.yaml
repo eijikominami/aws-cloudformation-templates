@@ -48,30 +48,6 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
-  SourcePCRAccuracyError:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePCRAccuracyError* が発生しました。'
-      AlarmName: !If
-        - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePCRAccuracyError
-        - !Sub Warning-MediaConnect-${SourceName}-SourcePCRAccuracyError
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: SourceARN
-          Value: !Ref SourceARN
-      EvaluationPeriods: 1
-      MetricName: SourcePCRAccuracyError
-      Namespace: AWS/MediaConnect
-      OKActions:
-        - !Ref SNSTopicArn
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
   SourceCRCError:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -161,30 +137,6 @@ Resources:
           Value: !Ref SourceARN
       EvaluationPeriods: 1
       MetricName: SourceTSByteError
-      Namespace: AWS/MediaConnect
-      OKActions:
-        - !Ref SNSTopicArn
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-  SourcePCRError:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePCRError* が発生しました。'
-      AlarmName: !If
-        - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePCRError
-        - !Sub Warning-MediaConnect-${SourceName}-SourcePCRError
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: SourceARN
-          Value: !Ref SourceARN
-      EvaluationPeriods: 1
-      MetricName: SourcePCRError
       Namespace: AWS/MediaConnect
       OKActions:
         - !Ref SNSTopicArn

@@ -11,12 +11,10 @@ The template creates the following alarms.
 | Namespace | MetricName | SourceARN | Threshold |
 | --- | --- | --- | --- |
 | AWS/MediaConnect | **SourcePTSError** | `SourceARN` | At least once a minute |
-| AWS/MediaConnect | **SourcePCRAccuracyError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceCRCError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourcePIDError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceCATError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | At least once a minute | 
-| AWS/MediaConnect | **SourcePCRError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourcePMTError** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | At least once a minute | 
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | At least once a minute | 
@@ -48,12 +46,10 @@ cloudwatch-alarm-about-mediaconnect-source は、 AWS Elemental MediaConnect sou
 | ネームスペース | メトリクス | SourceARN | 閾値 |
 | --- | --- | --- | --- |
 | AWS/MediaConnect | **SourcePTSError** | `SourceARN` | 1分間に1回以上 |
-| AWS/MediaConnect | **SourcePCRAccuracyError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceCRCError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourcePIDError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceCATError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | 1分間に1回以上 | 
-| AWS/MediaConnect | **SourcePCRError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourcePMTError** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | 1分間に1回以上 | 
 | AWS/MediaConnect | **SourcePATError** | `SourceARN` | 1分間に1回以上 | 

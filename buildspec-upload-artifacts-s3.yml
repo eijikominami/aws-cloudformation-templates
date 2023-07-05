@@ -22,6 +22,8 @@ env:
     IDENTITY_DIST_DIR: aws-cloudformation-templates/identity
     MEDIA_SRC_DIR: media/templates
     MEDIA_DIST_DIR: aws-cloudformation-templates/media
+    ML_SRC_DIR: ml/templates
+    ML_DIST_DIR: aws-cloudformation-templates/ml
     MONITORING_SRC_DIR: monitoring/sam-app
     MONITORING_DIST_DIR: aws-cloudformation-templates/monitoring
     NETWORK_SRC_DIR: network/templates
@@ -65,6 +67,7 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${IDENTITY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${MEDIA_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${ML_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${NETWORK_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive
@@ -100,6 +103,7 @@ phases:
        - aws s3 cp ${HOSTING_SRC_DIR}/ s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${IDENTITY_SRC_DIR}/ s3://${BUCKET_NAME}/${IDENTITY_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${MEDIA_SRC_DIR}/ s3://${BUCKET_NAME}/${MEDIA_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${ML_SRC_DIR}/ s3://${BUCKET_NAME}/${ML_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${MONITORING_SRC_DIR}/ s3://${BUCKET_NAME}/${MONITORING_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${NETWORK_SRC_DIR}/ s3://${BUCKET_NAME}/${NETWORK_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${NOTIFICATION_SAM_SRC_DIR}/ s3://${BUCKET_NAME}/${NOTIFICATION_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'

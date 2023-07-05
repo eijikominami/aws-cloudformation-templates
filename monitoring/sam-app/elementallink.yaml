@@ -59,12 +59,12 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) で *エラーが発生* しています。'
+      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) が *パケットを受信できていません* 。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-NotRecoveredPackets
         - !Sub Warning-ElementalLink-${InputDeviceId}-NotRecoveredPackets
-      ComparisonOperator: LessThanThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: InputDeviceId
           Value: !Ref InputDeviceId
@@ -90,7 +90,7 @@ Resources:
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-ErrorSeconds
         - !Sub Warning-ElementalLink-${InputDeviceId}-ErrorSeconds
-      ComparisonOperator: LessThanThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: InputDeviceId
           Value: !Ref InputDeviceId
