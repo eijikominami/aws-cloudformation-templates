@@ -1,0 +1,503 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/ml/medialive sets Amazon Kendra.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Kendra Configuration'
+        Parameters: 
+          - KendraEdition
+          - KendraIndexName
+          - KendraSyncRunSchedule
+          - KendraFaqS3Key
+      - Label: 
+          default: 'S3 Configuration'
+        Parameters: 
+          - S3Crawler
+          - S3BucketName
+      - Label: 
+          default: 'Slack Configuration'
+        Parameters: 
+          - SlackCrawler
+          - SlackWorkspaceId
+          - SlackToken
+      - Label: 
+          default: 'Web Crawler Configuration'
+        Parameters: 
+          - WebCrawler
+          - WebCrawlerUrls
+          - WebCrawlDepth
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  KendraEdition:
+    Type: String
+    AllowedValues:
+      - DEVELOPER_EDITION
+      - ENTERPRISE_EDITION
+    Default: DEVELOPER_EDITION
+    Description: Indicates whether the index is a Enterprise Edition index or a Developer Edition index [required] 
+  KendraIndexName:
+    Type: String
+    Default: Default
+    AllowedPattern: '[a-zA-Z0-9][a-zA-Z0-9_-]*'
+    Description: The name of the index [required]
+  KendraSyncRunSchedule:
+    Type: String
+    AllowedValues:
+      - HOURLY
+      - DAILY
+      - WEEKLY
+      - MONTHLY
+    Default: DAILY
+    Description: Sets the frequency that Amazon Kendra checks the documents in your data source and updates the index [required]   
+  KendraFaqS3Key:
+    Type: String
+    Default: ''
+    Description: The name of the FAQ file
+  S3Crawler:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable S3 crawler [required]
+  S3BucketName:
+    Type: String
+    Default: ''
+    Description: The name of the Amazon S3 bucket
+  SlackCrawler:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable Slack crawler [required]
+  SlackToken:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: The user or bot token created in Slack
+  SlackWorkspaceId:
+    Type: String
+    Default: ''
+    Description: Slack Workspace Name
+  WebCrawler:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable web crawler for Kendra datasource [required]
+  WebCrawlerUrls:
+    Type: CommaDelimitedList
+    Description: The list of seed or starting point URLs of the websites you want to crawl
+  WebCrawlDepth:
+    Type: Number
+    Default: 2
+    MinValue: 0
+    MaxValue: 10
+    Description: The 'depth' or number of levels from the seed level to crawl
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  UpdateHourly: !Equals [ !Ref KendraSyncRunSchedule, HOURLY]
+  UpdateDaily: !Equals [ !Ref KendraSyncRunSchedule, DAILY]
+  UpdateWeekly: !Equals [ !Ref KendraSyncRunSchedule, WEEKLY]
+  UpdateMonthly: !Equals [ !Ref KendraSyncRunSchedule, MONTHLY]
+  CreateS3Datasource: !And [ !Equals [ !Ref S3Crawler, ENABLED], !Not [ !Equals [ !Ref S3BucketName, ''] ] ]
+  CreateSlackDatasource: !And [ !Equals [ !Ref SlackCrawler, ENABLED], !Not [ !Equals [ !Ref SlackToken, ''] ] , !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ] ]
+  CreateWebCrawlerDatasource: !Equals [ !Ref WebCrawler, ENABLED]
+  CreateFaq: !Not [ !Equals [ !Ref KendraFaqS3Key, ''] ]
+
+Resources:
+  # IAM Role
+  IAMRoleForKendra:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Kendra to access CloudWatch Logs.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    cloudwatch:namespace: AWS/Kendra
+              - Effect: Allow
+                Action:
+                  - logs:DescribeLogGroups
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kendra/*
+              - Effect: Allow
+                Action:
+                  - logs:DescribeLogStreams
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kendra/*:log-stream:*
+      RoleName: !Sub ${AWS::StackName}-Kendra-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForKendraExperience:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Kendra Experience to access Kendra.
+      Policies:
+        - PolicyName: KendraAndIdentityCenter
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kendra:GetQuerySuggestions
+                  - kendra:Query
+                  - kendra:DescribeIndex
+                  - kendra:ListFaqs
+                  - kendra:DescribeDataSource
+                  - kendra:ListDataSources
+                  - kendra:DescribeFaq
+                  - kendra:SubmitFeedback
+                Resource: !GetAtt KendraIndex.Arn
+              - Effect: Allow
+                Action:
+                  - kendra:DescribeDataSource
+                  - kendra:DescribeFaq
+                Resource: !Join
+                  - ''
+                  - - !GetAtt KendraIndex.Arn
+                    - /data-source/*
+              - Effect: Allow
+                Action:
+                  - sso-directory:ListGroupsForUser
+                  - sso-directory:SearchGroups
+                  - sso-directory:SearchUsers
+                  - sso-directory:DescribeUser
+                  - sso-directory:DescribeGroup
+                  - sso-directory:DescribeGroups
+                  - sso-directory:DescribeUsers
+                  - sso-directory:IsMemberInGroup
+                Resource: '*'
+      RoleName: !Sub ${AWS::StackName}-KendraExperience-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForKendraS3:
+    Condition: CreateS3Datasource
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for S3 crawler to access S3.
+      Policies:
+        - PolicyName: SecretsManager
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub arn:aws:s3:::${S3BucketName}/*
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub arn:aws:s3:::${S3BucketName}
+              - Effect: Allow
+                Action:
+                  - kendra:BatchPutDocument
+                  - kendra:BatchDeleteDocument
+                Resource: !GetAtt KendraIndex.Arn
+      RoleName: !Sub ${AWS::StackName}-KendraS3Crawler-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForKendraSlack:
+    Condition: CreateSlackDatasource
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Slack crawler to access SecretsManager.
+      Policies:
+        - PolicyName: SecretsManager
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref SecretsManagerForSlack
+        - PolicyName: KMS
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+                Condition:
+                  StringLike:
+                    kms:ViaService:
+                      - secretsmanager.*.amazonaws.com
+      RoleName: !Sub ${AWS::StackName}-KendraSlackCrawler-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForKendraWebCrawler:
+    Condition: CreateWebCrawlerDatasource
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for web crawler to access Kendra.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kendra:BatchPutDocument
+                  - kendra:BatchDeleteDocument
+                Resource: !GetAtt KendraIndex.Arn
+      RoleName: !Sub ${AWS::StackName}-KendraWebCrawler-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForKendraFAQ:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kendra.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Kendra FAQ to access S3.
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub arn:aws:s3:::${S3BucketName}/*
+      RoleName: !Sub ${AWS::StackName}-KendraFAQ-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Secret Manager
+  SecretsManagerForSlack:
+    Condition: CreateSlackDatasource
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Sub ${AWS::StackName}/SlackToken
+      SecretString: 
+        !Sub slackToken/${SlackToken}
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Kendra
+  KendraIndex:
+    Type: AWS::Kendra::Index
+    Properties:
+      Edition: !Ref KendraEdition
+      Name: !Ref KendraIndexName
+      RoleArn: !GetAtt IAMRoleForKendra.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Datasource
+  S3:
+    Condition: CreateS3Datasource
+    Type: AWS::Kendra::DataSource
+    Properties: 
+      DataSourceConfiguration: 
+        S3Configuration:
+          BucketName: !Ref S3BucketName
+      Description: !Sub ${S3BucketName} bucket in Amazon S3
+      IndexId: !GetAtt KendraIndex.Id
+      Name: !Sub ${AWS::StackName}-S3
+      RoleArn: !GetAtt IAMRoleForKendraS3.Arn
+      Schedule: !If
+        - UpdateHourly
+        - cron(0 * * * ? *)
+        - !If
+          - UpdateDaily
+          - cron(0 0 * * ? *)
+          - !If
+            - UpdateWeekly
+            - cron(0 0 * * 1 *)
+            - !If
+              - UpdateMonthly
+              - cron(0 0 1 * ? *)
+              - !Ref AWS::NoValue
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: S3
+  Slack:
+    Condition: CreateSlackDatasource
+    Type: AWS::Kendra::DataSource
+    Properties: 
+      DataSourceConfiguration: 
+        SlackConfiguration:
+          SecretArn: !Ref SecretsManagerForSlack
+          SinceCrawlDate: 2022-06-01
+          SlackEntityList: PUBLIC_CHANNEL
+          TeamId: !Ref SlackWorkspaceId
+          CrawlBotMessage: TRUE
+      Description: !Sub ${SlackWorkspaceId} in Slack
+      IndexId: !GetAtt KendraIndex.Id
+      Name: !Sub ${AWS::StackName}-Slack
+      RoleArn: !GetAtt IAMRoleForKendraSlack.Arn
+      Schedule: !If
+        - UpdateHourly
+        - cron(0 * * * ? *)
+        - !If
+          - UpdateDaily
+          - cron(0 0 * * ? *)
+          - !If
+            - UpdateWeekly
+            - cron(0 0 * * 1 *)
+            - !If
+              - UpdateMonthly
+              - cron(0 0 1 * ? *)
+              - !Ref AWS::NoValue
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: SLACK
+  Web:
+    Condition: CreateWebCrawlerDatasource
+    Type: AWS::Kendra::DataSource
+    Properties: 
+      DataSourceConfiguration: 
+        WebCrawlerConfiguration:
+          CrawlDepth: !Ref WebCrawlDepth
+          MaxContentSizePerPageInMegaBytes: 50
+          MaxLinksPerPage: 100
+          MaxUrlsPerMinuteCrawlRate: 300
+          Urls: 
+            SeedUrlConfiguration: 
+              SeedUrls: !Ref WebCrawlerUrls
+              WebCrawlerMode: SUBDOMAINS
+      Description: Web
+      IndexId: !GetAtt KendraIndex.Id
+      Name: !Sub ${AWS::StackName}-WebCrawler
+      RoleArn: !GetAtt IAMRoleForKendraWebCrawler.Arn
+      Schedule: !If
+        - UpdateHourly
+        - cron(0 * * * ? *)
+        - !If
+          - UpdateDaily
+          - cron(0 0 * * ? *)
+          - !If
+            - UpdateWeekly
+            - cron(0 0 * * 1 *)
+            - !If
+              - UpdateMonthly
+              - cron(0 0 1 * ? *)
+              - !Ref AWS::NoValue
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: WEBCRAWLER
+  # FAQ
+  FAQ:
+    Condition: CreateFaq
+    Type: AWS::Kendra::Faq
+    Properties: 
+      FileFormat: CSV
+      IndexId: !GetAtt KendraIndex.Id
+      Name: !Sub ${AWS::StackName}-FAQ
+      RoleArn: !GetAtt IAMRoleForKendraFAQ.Arn
+      S3Path:
+        Bucket: !Ref S3BucketName
+        Key: !Ref KendraFaqS3Key
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

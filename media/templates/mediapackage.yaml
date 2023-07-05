@@ -127,7 +127,7 @@ Resources:
                     - !Sub 'arn:aws:s3:::${ArchiveBucket}/*'
                     - !Sub 'arn:aws:s3:::${ArchiveBucket}'
           - !Ref AWS::NoValue
-        # Allow MediaPackage to access SecretManager.
+        # Allow MediaPackage to access SecretsManager.
         - PolicyName: SecretsManager
           PolicyDocument:
             Version: 2012-10-17
