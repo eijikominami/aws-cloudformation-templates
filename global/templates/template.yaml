@@ -216,34 +216,6 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
-  IAMRoleForBudget:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: budgets.amazonaws.com
-            Action: sts:AssumeRole
-      Description: A role required for CloudTrail to access CloudWatch Logs.
-      # Allow Budget 'SNS:Publish'.
-      Policies:
-        - PolicyName: SNS
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:PutLogEvents
-                Resource:
-                  - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-      RoleName: !Sub ${AWS::StackName}-Budget-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue 
   IAMRoleForLambda:
     Condition: CreateSNSForAlertTransfer
     Type: AWS::IAM::Role
@@ -632,6 +604,17 @@ Resources:
               Service: costalerts.amazonaws.com
             Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
             Action: 'sns:Publish'
+          - Sid: AWSBudgetsSNSPublishingPermissions
+            Effect: Allow
+            Principal:
+              Service: budgets.amazonaws.com
+            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            Action: 'sns:Publish'
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:budgets::${AWS::AccountId}:*
   # CloudWatch Alarm for Lambda
   AlarmLambdaTransferSNSTopic:
     Condition: CreateSNSForAlertTransfer
