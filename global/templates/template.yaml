@@ -209,41 +209,13 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.8
+        SemanticVersion: 2.1.9
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
-  IAMRoleForBudget:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: budgets.amazonaws.com
-            Action: sts:AssumeRole
-      Description: A role required for CloudTrail to access CloudWatch Logs.
-      # Allow Budget 'SNS:Publish'.
-      Policies:
-        - PolicyName: SNS
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:PutLogEvents
-                Resource:
-                  - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-      RoleName: !Sub ${AWS::StackName}-Budget-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue 
   IAMRoleForLambda:
     Condition: CreateSNSForAlertTransfer
     Type: AWS::IAM::Role
@@ -369,7 +341,7 @@ Resources:
         CertificateArn: !Ref CertificateManager
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.1.8
+        SemanticVersion: 2.1.9
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -632,6 +604,17 @@ Resources:
               Service: costalerts.amazonaws.com
             Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
             Action: 'sns:Publish'
+          - Sid: AWSBudgetsSNSPublishingPermissions
+            Effect: Allow
+            Principal:
+              Service: budgets.amazonaws.com
+            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            Action: 'sns:Publish'
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:budgets::${AWS::AccountId}:*
   # CloudWatch Alarm for Lambda
   AlarmLambdaTransferSNSTopic:
     Condition: CreateSNSForAlertTransfer
@@ -644,7 +627,7 @@ Resources:
         FunctionResouceName: !Ref LambdaTransferSNSTopic
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.8
+        SemanticVersion: 2.1.9
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
