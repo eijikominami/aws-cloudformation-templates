@@ -102,9 +102,9 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | MediaPackageChannelId | String | | | MediaPackage のチャネルID |
 | MediaStoreEndpoint | String | | | MediaStore のエンドポイントURL |
 | OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | 出力先のタイプ |
-| OutputRtmpUrl1 | String | | | 出力先のRTMP URL1 |
+| OutputRtmpRtpUrl1 | String | | | 出力先のRTMP URL1 |
 | OutputRtmpStreamName1 | String | | | 出力先のRTMPストリーム名1 |
-| OutputRtmpUrl2 | String | | | 出力先のRTMP URL2 |
+| OutputRtmpRtpUrl2 | String | | | 出力先のRTMP URL2 |
 | OutputRtmpStreamName2 | String | | | 出力先のRTMPストリーム名2 |
 | VideoBitrate | Number | 2200000 | ○ | ビデオビットレート(bps) |
 | VodSourceBucket | String | | | VODのソースバケット名 |

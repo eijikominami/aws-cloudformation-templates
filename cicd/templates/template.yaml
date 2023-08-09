@@ -51,8 +51,8 @@ Parameters:
     Description: The S3 artifact bucket name in N.Verginia region
   CodeBuildImageName:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Default: aws/codebuild/amazonlinux2-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
     Description: The Docker image name for CodeBuild [required]
   GitHubOAuthToken:
     Type: String

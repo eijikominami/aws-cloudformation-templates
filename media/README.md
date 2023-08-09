@@ -102,9 +102,9 @@ You can provide optional parameters as follows.
 | MediaPackageChannelId | String | | | The MediaPackage channel id |
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
 | OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | Output type |
-| OutputRtmpUrl1 | String | | | The rtmp url a stream sends to |
+| OutputRtmpRtpUrl1 | String | | | The rtmp url a stream sends to |
 | OutputRtmpStreamName1 | String | | | The rtmp stream name a stream sends to |
-| OutputRtmpUrl2 | String | | | The rtmp url a stream sends to |
+| OutputRtmpRtpUrl2 | String | | | The rtmp url a stream sends to |
 | OutputRtmpStreamName2 | String | | | The rtmp stream name a stream sends to |
 | VideoBitrate | Number | 2200000 | ○ | Average video bitrate in bits/second |
 | Width | Number | 960 | ○ | Output video width, in pixels |
