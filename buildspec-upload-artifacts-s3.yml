@@ -45,7 +45,7 @@ env:
 phases:
   install:
     runtime-versions:
-       python: 3.9
+       python: 3.11
     commands:
       - pip install -U pip
       - pip install -U aws-sam-cli
