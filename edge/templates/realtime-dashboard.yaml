@@ -684,7 +684,7 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.9
+      Runtime: python3.11
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -1041,7 +1041,7 @@ Resources:
         - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.9
+      Runtime: python3.11
       Tags:
         - Key: environment
           Value: !Ref Environment

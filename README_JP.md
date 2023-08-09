@@ -80,7 +80,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-0659e3a420d8a74ea |
 | AWS Lambda | CodeGuru Profiler | 11 |
 | AWS Lambda | Lambda Insights | Arm64:2 |
-| AWS Lambda | Python | 3.9 |
+| AWS Lambda | Python | 3.11 |
 | AWS Systems Manager | SSM Document Schema (Automation) | 0.3 |
 | AWS Systems Manager | SSM Document Schema (Command) | 2.2 |
 | Amazon OpenSearch Service | OpenSearch | OpenSearch_1.3 |

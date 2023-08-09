@@ -469,7 +469,7 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
-  # CIS 3.9 a log metric filter and alarm exist for AWS Config configuration changes 
+  # CIS 3.11 a log metric filter and alarm exist for AWS Config configuration changes 
   CloudWatchLogsMetricFilterCloudTrailConfigConfigurationChanges:
     Type: AWS::Logs::MetricFilter
     Properties: 
@@ -521,7 +521,7 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
-  # CIS 3.9 a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
+  # CIS 3.11 a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
   CloudWatchLogsMetricFilterCloudTrailNACLChanges:
     Type: AWS::Logs::MetricFilter
     Properties: 

@@ -168,9 +168,9 @@ This template helps you to comply with the Center for Internet Security (CIS) Be
 | 3.6 | Ensure a log metric filter and alarm exist for AWS Management Console authentication failures | This template creates a log metric filter and alarm |
 | 3.7 | Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs | This template creates a log metric filter and alarm |
 | 3.8 | Ensure a log metric filter and alarm exist for S3 bucket policy changes | This template creates a log metric filter and alarm |
-| 3.9 | Ensure a log metric filter and alarm exist for AWS Config configuration changes | This template creates a log metric filter and alarm |
+| 3.11 | Ensure a log metric filter and alarm exist for AWS Config configuration changes | This template creates a log metric filter and alarm |
 | 3.10 | Ensure a log metric filter and alarm exist for security group changes | This template creates a log metric filter and alarm |
-| 3.9 | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) | This template creates a log metric filter and alarm |
+| 3.11 | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) | This template creates a log metric filter and alarm |
 | 3.12 | Ensure a log metric filter and alarm exist for changes to network gateways | This template creates a log metric filter and alarm |
 | 3.13 | Ensure a log metric filter and alarm exist for route table changes | This template creates a log metric filter and alarm |
 | 3.14 | Ensure a log metric filter and alarm exist for VPC changes | This template creates a log metric filter and alarm |
