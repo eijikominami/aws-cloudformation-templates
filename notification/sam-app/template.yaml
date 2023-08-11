@@ -192,9 +192,8 @@ Resources:
   # Nested Stack
   CodeGuruCodeProfiler:
     Condition: Development
-    Type: AWS::Serverless::Application
+    Type: AWS::CloudFormation::Stack
     Properties:
-      Location: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -211,8 +210,11 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -307,6 +309,12 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # Service-linked Role
+  ServiceLinkedRoleForChatbot:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties: 
+      AWSServiceName: management.chatbot.amazonaws.com
+      Description: The Service Linked Role used by AWS Chatbot.
   # IAM
   IAMRoleForLambda:
     Type: AWS::IAM::Role
@@ -541,6 +549,14 @@ Resources:
   AlarmLambdaSendNotificationToSlack:
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
@@ -549,14 +565,6 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaSendNotificationToSlack
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -626,6 +634,14 @@ Resources:
   AlarmLambdaTransferNotificationToSNS:
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
@@ -634,14 +650,6 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaTransferNotificationToSNS
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -722,6 +730,14 @@ Resources:
     Condition: CreateAnalyzeUnauthorizedApiCallsFunction
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
@@ -730,23 +746,16 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaAnalyzeUnauthorizedApiCalls
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # Chatbot
   ChatbotForAlert:
     Condition: CreateChatbotForAlert
-    Type: AWS::Serverless::Application
+    DependsOn:
+      - ServiceLinkedRoleForChatbot
+    Type: AWS::CloudFormation::Stack
     Properties:
-      Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -759,13 +768,20 @@ Resources:
         SlackChannelId: !Ref SlackChannelIdForAlert
         SNSArn: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
       Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/chatbot.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
   ChatbotForCICD:
     Condition: CreateChatbotForCICD
-    Type: AWS::Serverless::Application
+    DependsOn:
+      - ServiceLinkedRoleForChatbot
+    Type: AWS::CloudFormation::Stack
     Properties:
-      Location: https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -781,8 +797,14 @@ Resources:
           - !GetAtt SNSForCICD.Outputs.SNSTopicArn
           - !Ref SNSForCICDArn
       Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/chatbot.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
   # CloudWatch Dashboard
   Dashboard:
     Type: AWS::CloudWatch::Dashboard
@@ -795,13 +817,17 @@ Outputs:
     Description: Lambda ARN of sendNotificationToSlack()
     Value: !GetAtt LambdaSendNotificationToSlack.Arn
   ChatbotForChatbotForCICD:
-    Condition: CreateChatbotForCICD
-    Description: Chatbot ARN for CI/CD
-    Value: 'CICD'
+    Description: Chatbot ARN for CICD
+    Value: !If
+      - CreateChatbotForCICD
+      - !GetAtt ChatbotForCICD.Outputs.ChatbotArn
+      - ''
   ChatbotForAlert:
-    Condition: CreateChatbotForAlert
-    Description: Chatbot ARN
-    Value: !GetAtt ChatbotForAlert.Outputs.ChatbotArn
+    Description: Chatbot ARN for alart
+    Value: !If
+      - CreateChatbotForAlert
+      - !GetAtt ChatbotForAlert.Outputs.ChatbotArn
+      - ''
   SNSForFormattedAlert:
     Description: SNS for Formatted Alert Arn
     Value: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn

@@ -318,6 +318,9 @@ Resources:
       - InternetGatewayAttachment
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.1.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -350,15 +353,15 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.11
   Az2:
     DependsOn:
       # NATGateway requires provisioned Internet Gateway.
       - InternetGatewayAttachment
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.1.11
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -391,9 +394,6 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.11
   AutoScaling:
     Condition: AutoScalingEnabled
     Type: AWS::CloudFormation::Stack
@@ -963,6 +963,14 @@ Resources:
   CloudWatchAlarmEC2:
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If 
@@ -970,14 +978,6 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         CPUUtilizationThreshold: 70
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -985,6 +985,14 @@ Resources:
     Condition: AutoScalingDisabled
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         DiskUsedPercentThreshold: 90
@@ -996,14 +1004,6 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1011,6 +1011,14 @@ Resources:
     Condition: CreateTransitGateway
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If 
@@ -1019,14 +1027,6 @@ Resources:
           - !Ref SNSForAlertArn
         TransitGatewayId: !Ref TransitGatewayId
         TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

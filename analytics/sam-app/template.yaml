@@ -265,6 +265,9 @@ Resources:
     Condition: CreateTableForCloudFront
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/amazon-cloudfront-access-logs-queries
+        SemanticVersion: 1.0.0
       Parameters:
         GlueDatabase: !Ref GlueDatabase
         GzKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-gz/
@@ -283,9 +286,6 @@ Resources:
         Environment: !Ref Environment
         TagKey: !Ref TagValue
         TagValue: !Ref TagValue
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/amazon-cloudfront-access-logs-queries
-        SemanticVersion: 1.0.0
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

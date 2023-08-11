@@ -85,8 +85,6 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForGuardDuty:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: guardduty.amazonaws.com
       Description: A service-linked role required for Amazon GuardDuty to access your resources.

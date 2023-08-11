@@ -879,6 +879,14 @@ Resources:
   CloudWatchAlarmMediaLive0:
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-0
         ChannelId: !Ref MediaLiveChannel
@@ -888,14 +896,6 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -903,6 +903,14 @@ Resources:
     Condition: CreateTwoPipelines
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-1
         ChannelId: !Ref MediaLiveChannel
@@ -912,14 +920,6 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -927,6 +927,14 @@ Resources:
     Condition: CreateElementalLinkLIVEWorkflow
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-0
         DeviceType: !Ref ElementalLinkType1
@@ -935,14 +943,6 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -950,6 +950,14 @@ Resources:
     Condition: CreateElementalLinkLIVEWorkflowAndTwoInput
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-1
         DeviceType: !Ref ElementalLinkType2
@@ -958,14 +966,6 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

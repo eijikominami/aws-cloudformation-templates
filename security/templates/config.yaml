@@ -77,9 +77,9 @@ Resources:
   # Nested Stack
   CodeGuruCodeProfiler:
     Condition: Development
-    Type: AWS::Serverless::Application
+    Type: AWS::CloudFormation::Stack
     Properties:
-      Location: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -96,8 +96,10 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -130,15 +132,11 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForConfig:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: config.amazonaws.com
       Description: A service-linked role required for AWS Config to access your resources.
   ServiceLinkedRoleForConfigRemediation:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: remediation.config.amazonaws.com 
       Description: A service-linked role required for AWS Config Remediation to access your resources.
@@ -338,12 +336,7 @@ Resources:
       Source:
         Owner: AWS
         SourceIdentifier: CLOUDFORMATION_STACK_NOTIFICATION_CHECK
-  # CIS 1.5 – Ensure IAM password policy requires at least one uppercase letter 
-  # CIS 1.6 – Ensure IAM password policy requires at least one lowercase letter 
-  # CIS 1.7 – Ensure IAM password policy requires at least one symbol 
-  # CIS 1.8 – Ensure IAM password policy requires at least one number 
-  # CIS 1.9 – Ensure IAM password policy requires a minimum length of 14 or greater 
-  # CIS 1.10 – Ensure IAM password policy prevents password reuse 
+  # [IAM.7] Password policies for IAM users should have strong AWS Configurations (AWS FSBP)
   ConfigIamPasswordPolicy:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
@@ -357,7 +350,7 @@ Resources:
         RequireLowercaseCharacters: true
         RequireSymbols: true
         RequireNumbers: true
-        MinimumPasswordLength: 14
+        MinimumPasswordLength: 8
         PasswordReusePrevention: 24
       Source:
         Owner: AWS
@@ -412,8 +405,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # CIS 1.3 – Ensure credentials unused for 90 days or greater are disabled
-  # CIS 1.4 – Ensure access keys are rotated every 90 days or less 
+  # [IAM.3] IAM users' access keys should be rotated every 90 days or less (AWS FSBP)
   ConfigIamAccessKeysRotated:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
@@ -569,14 +561,6 @@ Resources:
   AlarmLambda:
     Type: AWS::Serverless::Application
     Properties:
-      Parameters:
-        CustomAlarmName: !Ref AWS::StackName
-        SNSTopicArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-        MetricFilterPattern: ''
-        FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
         SemanticVersion: 2.1.11
@@ -585,10 +569,18 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        MetricFilterPattern: ''
+        FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # CIS 2.9 – Ensure VPC flow logging is enabled in all VPCs 
+  # [EC2.6] VPC flow logging should be enabled in all VPCs (AWS FSBP)
   ConfigVpcFlowLogsEnabled:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
@@ -672,8 +664,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # CIS 4.1 – Ensure no security groups allow ingress from 0.0.0.0/0 to port 22
-  # CIS 4.2 – Ensure no security groups allow ingress from 0.0.0.0/0 to port 3389 
+  # [EC2.21] Network ACLs should not allow ingress from 0.0.0.0/0 to port 22 or port 3389 (AWS FSBP)
   ConfigSVpcSgOpenOnlyToAuthorizedPorts:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
@@ -707,7 +698,7 @@ Resources:
       RetryAttemptSeconds: 30
       TargetId: AWS-DisablePublicAccessForSecurityGroup
       TargetType: SSM_DOCUMENT
-  # CIS 4.3 – Ensure the default security group of every VPC restricts all traffic 
+  # [EC2.22] Unused Amazon EC2 security groups should be removed (AWS FSBP)
   ConfigVpcDefaultSecurityGroupClosed:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
@@ -789,8 +780,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # PCI S3.4 S3 buckets should have server-side encryption enabled 
-  # AWS Foundational Security Best Practices S3.4 S3 buckets should have server-side encryption enabled
+  # [S3.4] S3 buckets should have server-side encryption enabled (AWS FSBP)
   ConfigS3BucketServerSideEncryptionEnabled:
     # Must create a configuration recorder before you can create or update a Config rule.
     DependsOn:
@@ -856,6 +846,18 @@ Resources:
         Version: 2012-10-17
         Id: !Ref S3ForConfig
         Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForConfig.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForConfig.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
           - Effect: Allow
             Principal:
               Service: config.amazonaws.com
@@ -879,18 +881,6 @@ Resources:
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForConfig.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForConfig.Arn
-                  - /*
-            Condition:
-              Bool: 
-                aws:SecureTransport: false
   CloudWatchEventsForConfig:
     Type: AWS::Events::Rule
     Properties: 

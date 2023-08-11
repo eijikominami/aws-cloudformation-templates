@@ -116,15 +116,11 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForSSM:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: ssm.amazonaws.com
       Description: Provides access to AWS Resources managed or used by Amazon SSM.
   ServiceLinkedRoleForSystemsManagerAccountDiscovery:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: accountdiscovery.ssm.amazonaws.com
       Description: Provides access to AWS Resources managed or used by Amazon SSM AccountDiscovery.
@@ -198,6 +194,11 @@ Resources:
                   - iam:PassRole
                 Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/AWS-SystemsManager-AutomationExecutionRole   
       RoleName: !Sub ${LogicalNamePrefix}-SystemsManager-AutomationExecutionRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # IAM Role for SSM Explorer
   AWSSystemsManagerOpsItemsCWERole:
     Type: AWS::IAM::Role
@@ -224,6 +225,11 @@ Resources:
                   - ssm:AddTagsToResource
                 Resource: arn:aws:ssm:*:*:opsitem/*
       RoleName: OpsItem-CWE-Role
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AWSSystemsManagerEnableExplorerRole: 
     Type: AWS::IAM::Role
     Properties:
@@ -249,6 +255,11 @@ Resources:
                   - iam:ListRoles
                 Resource: '*'
       RoleName: !Sub ${LogicalNamePrefix}-SystemsManager-EnableExplorerRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # Document
   CloudWatchAgentInstallAndConfigure:
     Type: AWS::SSM::Document

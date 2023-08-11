@@ -660,6 +660,18 @@ Resources:
         Version: 2012-10-17
         Id: !Ref S3ForWebHosting
         Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForWebHosting.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForWebHosting.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
           - Effect: Allow
             Principal:
               Service: cloudfront.amazonaws.com
@@ -673,18 +685,6 @@ Resources:
                   - ''
                   - - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/
                     - !GetAtt CloudFront.Outputs.Id
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForWebHosting.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForWebHosting.Arn
-                  - /*
-            Condition:
-              Bool: 
-                aws:SecureTransport: false
   S3ForAccessLog:
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain

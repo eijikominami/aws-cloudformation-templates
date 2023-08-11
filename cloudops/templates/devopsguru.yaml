@@ -22,8 +22,6 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForDevOpsGuru:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: devops-guru.amazonaws.com
       Description: AWS service role used to execute actions on your behalf.

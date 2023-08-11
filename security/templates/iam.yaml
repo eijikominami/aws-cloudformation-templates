@@ -85,8 +85,6 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForAccessAnalyzer:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: access-analyzer.amazonaws.com 
       Description: A service-linked role required for Access Analyzer to access your resources.

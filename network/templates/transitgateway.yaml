@@ -142,6 +142,14 @@ Resources:
   CloudWatchAlarmTransitGateway:
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
+        SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If 
@@ -149,14 +157,6 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         TransitGatewayId: !Ref TransitGateway
-      NotificationARNs: 
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
