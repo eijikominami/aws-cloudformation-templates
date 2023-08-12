@@ -52,7 +52,7 @@ Parameters:
     AllowedPattern: .+
 
 Resources:
-  # Service-linked Role will be created automatically.
+  # AWSServiceRoleForCodeGuruProfiler will be created automatically.
   CodeGuruProfiler:
     Type: AWS::CodeGuruProfiler::ProfilingGroup
     Properties:

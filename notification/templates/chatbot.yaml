@@ -46,7 +46,7 @@ Parameters:
     Description: The SNS Topic ARN [required]
 
 Resources:
-  # This template requires Service-linked Role.
+  # AWSServiceRoleForAWSChatbot Role will be created automatically.
   Chatbot:
     Type: AWS::Chatbot::SlackChannelConfiguration
     Properties: 
