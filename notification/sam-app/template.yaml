@@ -190,31 +190,6 @@ Conditions:
 
 Resources:
   # Nested Stack
-  CodeGuruCodeProfiler:
-    Condition: Development
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        AgentPermission: !GetAtt IAMRoleForLambda.Arn
-        ProfilingGroupName: !Ref AWS::StackName
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -462,10 +437,6 @@ Resources:
             - Development
             - /opt/codeguru_profiler_lambda_exec
             - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
-            - Development
-            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
-            - !Ref AWS::NoValue
           AWS_CODEGURU_PROFILER_TARGET_REGION: !If
             - Development
             - !Ref AWS::Region
@@ -583,14 +554,6 @@ Resources:
             - Development
             - /opt/codeguru_profiler_lambda_exec
             - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
-            - Development
-            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
-            - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
-            - Development
-            - !Ref AWS::Region
-            - !Ref AWS::NoValue
       Events:
         SNSForAlert:
           Properties:
@@ -673,14 +636,6 @@ Resources:
             - Development
             - /opt/codeguru_profiler_lambda_exec
             - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
-            - Development
-            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
-            - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
-            - Development
-            - !Ref AWS::Region
-            - !Ref AWS::NoValue
       Events:
         CloudWatchLogs:
           Properties:
@@ -749,62 +704,6 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # Chatbot
-  ChatbotForAlert:
-    Condition: CreateChatbotForAlert
-    DependsOn:
-      - ServiceLinkedRoleForChatbot
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
-        LogicalNamePrefix: Alert
-        SlackWorkspaceId: !Ref SlackWorkspaceId
-        SlackChannelId: !Ref SlackChannelIdForAlert
-        SNSArn: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/chatbot.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
-  ChatbotForCICD:
-    Condition: CreateChatbotForCICD
-    DependsOn:
-      - ServiceLinkedRoleForChatbot
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
-        LogicalNamePrefix: CICD
-        SlackWorkspaceId: !Ref SlackWorkspaceId
-        SlackChannelId: !Ref SlackChannelIdForDeployment
-        SNSArn: !If
-          - CreateSNSForCICD
-          - !GetAtt SNSForCICD.Outputs.SNSTopicArn
-          - !Ref SNSForCICDArn
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/chatbot.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
   # CloudWatch Dashboard
   Dashboard:
     Type: AWS::CloudWatch::Dashboard
@@ -816,18 +715,6 @@ Outputs:
   LambdaSendNotificationToSlackARN:
     Description: Lambda ARN of sendNotificationToSlack()
     Value: !GetAtt LambdaSendNotificationToSlack.Arn
-  ChatbotForChatbotForCICD:
-    Description: Chatbot ARN for CICD
-    Value: !If
-      - CreateChatbotForCICD
-      - !GetAtt ChatbotForCICD.Outputs.ChatbotArn
-      - ''
-  ChatbotForAlert:
-    Description: Chatbot ARN for alart
-    Value: !If
-      - CreateChatbotForAlert
-      - !GetAtt ChatbotForAlert.Outputs.ChatbotArn
-      - ''
   SNSForFormattedAlert:
     Description: SNS for Formatted Alert Arn
     Value: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
