@@ -213,6 +213,18 @@ Resources:
         Version: 2012-10-17
         Id: !Ref S3ForCloudTrail
         Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForCloudTrail.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForCloudTrail.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
           - Effect: Allow
             Principal:
               Service: cloudtrail.amazonaws.com
@@ -235,18 +247,6 @@ Resources:
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForCloudTrail.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForCloudTrail.Arn
-                  - /*
-            Condition:
-              Bool: 
-                aws:SecureTransport: false
   # CloudWatch Logs
   CloudWatchLogsGroupForCloudTrail:
     Type: AWS::Logs::LogGroup

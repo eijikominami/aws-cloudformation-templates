@@ -300,14 +300,14 @@ Resources:
     Condition: CreateNatGatewayAlarm
     Type: AWS::Serverless::Application
     Properties:
-      Parameters:
-        CustomAlarmName: !Ref AWS::StackName
-        SNSTopicArn: !Ref SNSForAlertArn
-      NotificationARNs: 
-        - !Ref SNSForDeploymentArn
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
         SemanticVersion: 2.1.11
+      NotificationARNs: 
+        - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !Ref SNSForAlertArn
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

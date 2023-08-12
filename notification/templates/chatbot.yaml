@@ -46,17 +46,8 @@ Parameters:
     Description: The SNS Topic ARN [required]
 
 Resources:
-  # Service-linked Role
-  ServiceLinkedRoleForChatbot:
-    Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties: 
-      AWSServiceName: management.chatbot.amazonaws.com
-      Description: The Service Linked Role used by AWS Chatbot.
+  # This template requires Service-linked Role.
   Chatbot:
-    DependsOn:
-      - ServiceLinkedRoleForChatbot
     Type: AWS::Chatbot::SlackChannelConfiguration
     Properties: 
       ConfigurationName: !Sub ${LogicalNamePrefix}-${AWS::StackName}-${AWS::Region}

@@ -71,6 +71,18 @@ Resources:
         Version: 2012-10-17
         Id: !Ref S3ForCUR
         Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForCUR.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForCUR.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
           - Effect: Allow
             Principal:
               Service: billingreports.amazonaws.com

@@ -154,8 +154,6 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForCodeStar:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: codestar-notifications.amazonaws.com
       Description: Allows AWS CodeStar Notifications to access Amazon EventBridge on your behalf

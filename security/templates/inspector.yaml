@@ -160,8 +160,6 @@ Resources:
   # Service-linked Role
   ServiceLinkedRoleForInspector:
     Type: AWS::IAM::ServiceLinkedRole
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
     Properties: 
       AWSServiceName: inspector.amazonaws.com
       Description: A service-linked role required for Amazon Inspector to access your resources.

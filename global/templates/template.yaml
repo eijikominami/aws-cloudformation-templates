@@ -133,7 +133,6 @@ Conditions:
   CreateCloudWatchAlarmCloudFrontBytesDownloaded: !And [ !Not [ !Equals [ !Ref CloudFrontBytesDownloadedPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateRoute53: !Not [ !Equals [ !Ref DomainName, '' ] ]
   CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
-  CreateCodeGuruCodeProfiler: !And [ !Not [ !Equals [ !Ref SNSForAlertArn, ''] ], !Equals [ !Ref Environment, development] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -157,21 +156,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
-  CodeGuruCodeProfiler:
-    Condition: CreateCodeGuruCodeProfiler
-    Type: AWS::Serverless::Application
-    Properties:
-      Location: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
-      Parameters:
-        AgentPermission: !GetAtt IAMRoleForLambda.Arn
-        ProfilingGroupName: !Ref AWS::StackName
-        SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
   CostExplorer:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -335,13 +319,13 @@ Resources:
     Condition: CreateACMCertificate
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
+        SemanticVersion: 2.1.11
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         CertificateArn: !Ref CertificateManager
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -539,10 +523,6 @@ Resources:
             - Development
             - /opt/codeguru_profiler_lambda_exec
             - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_GROUP_ARN: !If
-            - Development
-            - !GetAtt CodeGuruCodeProfiler.Outputs.ProfilerArn
-            - !Ref AWS::NoValue
           AWS_CODEGURU_PROFILER_TARGET_REGION: !If
             - Development
             - !Ref AWS::Region
@@ -620,14 +600,14 @@ Resources:
     Condition: CreateSNSForAlertTransfer
     Type: AWS::Serverless::Application
     Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
+        SemanticVersion: 2.1.11
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaTransferSNSTopic
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.11
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
