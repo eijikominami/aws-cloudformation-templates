@@ -309,12 +309,6 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # Service-linked Role
-  ServiceLinkedRoleForChatbot:
-    Type: AWS::IAM::ServiceLinkedRole
-    Properties: 
-      AWSServiceName: management.chatbot.amazonaws.com
-      Description: The Service Linked Role used by AWS Chatbot.
   # IAM
   IAMRoleForLambda:
     Type: AWS::IAM::Role
@@ -732,8 +726,6 @@ Resources:
   # Chatbot
   ChatbotForAlert:
     Condition: CreateChatbotForAlert
-    DependsOn:
-      - ServiceLinkedRoleForChatbot
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -758,8 +750,6 @@ Resources:
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/notification/chatbot.yaml
   ChatbotForCICD:
     Condition: CreateChatbotForCICD
-    DependsOn:
-      - ServiceLinkedRoleForChatbot
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
