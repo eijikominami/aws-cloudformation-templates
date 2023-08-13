@@ -82,7 +82,7 @@ This template sets ``AWS Systems Manager``.
 | **OrganizationID** | String | | | AWS Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
-#### マルチアカウント対応
+#### Multi account
 
 If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.
 

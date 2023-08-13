@@ -84,7 +84,7 @@ Parameters:
     Description: Enable or disable deployment of StaticWebsiteHosting template [required]
   CloudOps:
     Type: String
-    Default: ENABLED
+    Default: DISABLED
     AllowedValues:
       - ENABLED
       - INCIDENT_MANAGER_DISABLED
@@ -106,7 +106,7 @@ Parameters:
     Description: Enable or disable deployment of Network template [required]
   Notification:
     Type: String
-    Default: DISABLED
+    Default: ENABLED
     AllowedValues:
       - ENABLED
       - DISABLED

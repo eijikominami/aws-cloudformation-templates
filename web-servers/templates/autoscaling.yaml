@@ -301,6 +301,7 @@ Resources:
         HttpTokens: required
       SecurityGroups: 
         - !Ref EC2SecurityGroupId
+  # AWSServiceRoleForAutoScaling will be created automatically.
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties: 

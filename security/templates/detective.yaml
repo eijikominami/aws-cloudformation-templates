@@ -1,6 +1,0 @@
-AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/security/Detective sets Amazon Detective.
-
-Resources:
-  Detective:
-    Type: AWS::Detective::Graph

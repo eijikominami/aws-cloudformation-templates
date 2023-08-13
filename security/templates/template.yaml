@@ -16,10 +16,6 @@ Metadata:
         Parameters: 
           - AWSConfig
       - Label: 
-          default: 'Detective Configuration'
-        Parameters: 
-          - AmazonDetective
-      - Label: 
           default: 'GuardDuty Configuration'
         Parameters: 
           - AmazonGuardDuty
@@ -33,6 +29,7 @@ Metadata:
           - IAMUserArnToAssumeAWSSupportRole
           - NotificationFilterAboutSecurityChecks
           - AWSSecurityHub
+          - AWSSecurityHubStandards
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -78,13 +75,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon GuardDuty [required]
-  AmazonDetective:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable Amazon Detective [required]
   AmazonMacie:
     Type: String
     Default: ENABLED
@@ -99,6 +89,15 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable AWS SecurityHub [required]
+  AWSSecurityHubStandards:
+    Type: CommaDelimitedList
+    Default: FSBP, CIS
+    AllowedValues:
+      - FSBP
+      - CIS
+      - NIST
+      - PCIDSS
+    Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -135,7 +134,6 @@ Parameters:
 
 Conditions:
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
-  CreateDetective: !Equals [ !Ref AmazonDetective, ENABLED]
   CreateGuardDuty: !Equals [ !Ref AmazonGuardDuty, ENABLED]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !Equals [ !Ref AmazonMacie, ENABLED]
@@ -186,6 +184,9 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        SecurityHubStandards: !Join 
+          - ','
+          - !Ref AWSSecurityHubStandards
         NotificationFilterAboutSecurityChecks: !Ref NotificationFilterAboutSecurityChecks
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -201,36 +202,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securityhub.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securityhub.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  Inspector:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters: 
-        LogicalNamePrefix: !Ref AWS::StackName
-        Environment: !Ref Environment
-        SNSForAlertArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/inspector.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/inspector.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -324,24 +295,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/config.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  Detective:
-    Condition: CreateDetective
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/detective.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/detective.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

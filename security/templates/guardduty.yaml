@@ -19,6 +19,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  FindingPublishingFrequency:
+    Type: String
+    Default: SIX_HOURS
+    AllowedValues:
+      - FIFTEEN_MINUTES
+      - ONE_HOUR
+      - SIX_HOURS
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
@@ -101,6 +108,7 @@ Resources:
         S3Logs:
           Enable: true      
       Enable: true
+      FindingPublishingFrequency: !Ref FindingPublishingFrequency
       Tags:
         - Key: environment
           Value: !Ref Environment

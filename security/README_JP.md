@@ -19,8 +19,6 @@
 | --- | --- |
 | IAM | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IAM&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/iam.yaml) |
 | AWS Security Hub | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SecurityHub&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/securityhub.yaml) |
-| Amazon Detective | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Detective&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/detective.yaml) |
-| Amazon Inspector | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Inspector&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/inspector.yaml&param_LogicalNamePrefix=Inspector) |
 | Amazon GuardDuty | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=GuardDuty&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/guardduty.yaml) |
 | AWS CloudTrail | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalNamePrefix=CloudTrail) |
 | AWS Config | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalNamePrefix=Config) |
@@ -42,10 +40,6 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
 また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon EventBridge`` 経由でメッセージを受け取ります。
 
-### Amazon Detective
-
-このテンプレートは、 ``AWS Detective`` の behavior graph を有効化します。
-
 ### Amazon GuardDuty
 
 このテンプレートは、 ``Amazon GuardDuty`` を有効化します。
@@ -55,31 +49,6 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 
 このテンプレートは、 ``AWS CloudTrail`` を有効化し、ログを蓄積する ``S3バケット`` を生成します。
 S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``CMK`` によって暗号化されます。
-
-### Amazon Inspector
-
-このテンプレートは、以下の Amazon Inspector ``アセスメントターゲット`` といくつかの ``アセスメントテンプレート`` を作成します。
-
-+ [Network Reachability](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_network-reachability.html)
-+ [Common Vulnerabilities and Exposures](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_cves.html)
-+ [Center for Internet Security (CIS) Benchmarks](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_cis.html)
-+ [Security Best Practices for Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_security-best-practices.html)
-
-Amazon Inspector は、``Amazon EventBridge`` によって **毎週月曜日午前9時** に実行されます。
-
-このテンプレートは、以下のリージョンをサポートしています。
-
-+ US East (N. Virginia)
-+ US East (Ohio)
-+ US West (N. California)
-+ US West (Oregon)
-+ Asia Pacific (Tokyo)
-+ Asia Pacific (Seoul)
-+ Asia Pacific (Sydney)
-+ EU (Frankfurt)
-+ EU (Ireland)
-+ EU (London)
-+ EU (Stockholm)
 
 ### AWS Config
 
@@ -125,15 +94,16 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Amazon Detective が有効化されます。|
 | AmazonGuardDuty | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon GuardDuty が有効化されます。|
 | AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。|
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
 | AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
+| AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
 | AdditionalCloudWatchLogsMetricFilters | String | | 追加の CloudWatch Logs メトリクスフィルター |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
+| MasterAccount | Boolean | false | ○ | マスターアカウントであるかどうか |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | セキュリティチェックに関する通知フィルタ | 
 
 ### マルチアカウント対応
