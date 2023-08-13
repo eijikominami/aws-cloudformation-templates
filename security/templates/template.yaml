@@ -20,6 +20,10 @@ Metadata:
         Parameters: 
           - AmazonGuardDuty
       - Label: 
+          default: 'IAM Acceess Analyzer Configuration'
+        Parameters: 
+          - IAMAccessAnalyzer
+      - Label: 
           default: 'Macie Configuration'
         Parameters: 
           - AmazonMacie
@@ -98,6 +102,14 @@ Parameters:
       - NIST
       - PCIDSS
     Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
+  IAMAccessAnalyzer:
+    Type: String
+    Default: ACCOUNT
+    AllowedValues:
+      - ACCOUNT
+      - ORGANIZATION
+      - DISABLED
+    Description: Enable or disable IAM Access Analyzer [required]
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -135,6 +147,7 @@ Parameters:
 Conditions:
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
   CreateGuardDuty: !Equals [ !Ref AmazonGuardDuty, ENABLED]
+  CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref IAMAccessAnalyzer, DISABLED] ]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !Equals [ !Ref AmazonMacie, ENABLED]
   CreateSecurityHub: !Equals [ !Ref AWSSecurityHub, ENABLED]
@@ -145,6 +158,7 @@ Conditions:
 Resources:
   # Nested Stack
   IAM:
+    Condition: CreateIAMAccessAnalyzer
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -153,6 +167,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
+        AnalyzerType: !Ref IAMAccessAnalyzer
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

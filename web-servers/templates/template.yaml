@@ -606,6 +606,17 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # Service-linked Role
+  ServiceLinkedRoleForAutoScaling:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties: 
+      AWSServiceName: autoscaling.amazonaws.com
+      Description: Default Service-Linked Role enables access to AWS Services and Resources used or managed by Auto Scaling
+  ServiceLinkedRoleForElasticLoadBalancing:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties: 
+      AWSServiceName: elasticloadbalancing.amazonaws.com 
+      Description: Allows ELB to call AWS services on your behalf.
   # IAM
   IAMRoleForEC2:
     Type: AWS::IAM::Role

@@ -74,7 +74,7 @@ You can provide optional parameters as follows.
 | **GitHubRepoNameForTemplateConfiguration** | String | | | The **GitHub repository name** for CloudFormation Template Configuration files |
 | TemplateConfigurationBasePath | String | | | The base path of template configration files |
 | **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
-| **DefaultSecuritySettingsConfigRules** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings-ConfigRules` stack is deployed |
+| **DefaultSecuritySettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings` stack is deployed |
 | **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
 | **Network** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Network` stack is deployed |
 | **Notification** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed |

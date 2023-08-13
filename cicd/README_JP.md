@@ -76,7 +76,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | GitHubStage | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |
 | TemplateConfigurationBasePath | String | | | 設定プロパティのあるディレクトリのパス |
 | **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
-| **DefaultSecuritySettingsConfigRules** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettingsConfigRules` スタックがデプロイされます。 |
+| **DefaultSecuritySettings** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettings` スタックがデプロイされます。 |
 | **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
 | **Network** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Network` スタックがデプロイされます。 |
 | **Notification** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |

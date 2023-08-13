@@ -6,6 +6,10 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'IAM Access Analyzer Configuration'
+        Parameters: 
+          - AnalyzerType
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -19,6 +23,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AnalyzerType:
+    Type: String
+    Default: ACCOUNT
+    AllowedValues:
+      - ACCOUNT
+      - ORGANIZATION
+    Description: The type represents the zone of trust for the analyzer [required]
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
@@ -99,7 +110,7 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      Type: ACCOUNT
+      Type: !Ref AnalyzerType
   EventBridgeForAccessAnalyzer:    
     Type: AWS::Events::Rule
     Properties: 

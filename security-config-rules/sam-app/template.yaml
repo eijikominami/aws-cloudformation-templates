@@ -7,7 +7,7 @@ Globals:
     Architectures:
       - arm64
     Handler: lambda_function.lambda_handler
-    Runtime: python3.11
+    Runtime: python3.9
     Tracing: Active
 
 Metadata: 
@@ -215,7 +215,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:2
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:11
         - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -295,7 +295,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:2
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:11
         - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn

@@ -33,17 +33,21 @@
 ### IAM AccessAnalyzer
 
 このテンプレートは、 ``IAM Access Analyzer`` を有効化します。
-IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に結果を通知します。
+IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に結果を通知します。 
+**デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
 
 ### AWS Security Hub
 
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
 また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon EventBridge`` 経由でメッセージを受け取ります。
+ **デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
 
 ### Amazon GuardDuty
 
 このテンプレートは、 ``Amazon GuardDuty`` を有効化します。
 ``Amazon GuardDuty`` は、**MEDIUM以上の検出結果を検出時に通知を送信** します。
+ **デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
+ 委任されたアカウントで、 **ナビゲーションペインの [設定] から [アカウント] を選択し、[自動有効化] をオンにします**。
 
 ### AWS CloudTrail
 
@@ -72,6 +76,7 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 ### Amazon Macie
 
 このテンプレートは、 ``AWS Macie`` を構成します。 
+**デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
 
 ### Amazon EventBridge
 

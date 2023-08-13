@@ -26,6 +26,7 @@ Metadata:
           default: 'Stack Configuration'
         Parameters: 
           - CloudOps
+          - DefaultSecuritySettings
           - SharedServices
           - StaticWebsiteHosting
           - Notification
@@ -51,7 +52,7 @@ Parameters:
     Description: The S3 artifact bucket name in N.Verginia region
   CodeBuildImageName:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:3.0
+    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
     AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
     Description: The Docker image name for CodeBuild [required]
   GitHubOAuthToken:
@@ -90,6 +91,13 @@ Parameters:
       - INCIDENT_MANAGER_DISABLED
       - DISABLED
     Description: Enable or disable deployment of CloudOps template [required]
+  DefaultSecuritySettings:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of DefaultSecuritySettings template [required]
   GlobalSettings:
     Type: String
     Default: DISABLED
@@ -162,6 +170,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
   DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
+  DeployDefaultSecuritySettings: !Equals [ !Ref DefaultSecuritySettings, ENABLED] 
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployNetwork: !Equals [ !Ref Network, ENABLED]
@@ -744,40 +753,43 @@ Resources:
                 RunOrder: 2
               - !Ref AWS::NoValue
             # Deploy DefaultSecuritySettings
-            - ActionTypeId: 
-                Category: Deploy
-                Owner: AWS
-                Provider: CloudFormation
-                Version: '1'
-              Configuration:
-                ActionMode: CREATE_UPDATE
-                StackName: DefaultSecuritySettings
-                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                TemplatePath: Source-CloudFormationTemplatesArtifact::security/templates/template.yaml
-                ParameterOverrides: !Join
-                  - ''
-                  - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
-                    - !If
-                      - Development
-                      - development
-                      - production
-                    - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
-                TemplateConfiguration: !If
-                  - CreateCloudFormationConfigurationArtifact
-                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings.json
-                  - !Ref AWS::NoValue
-              InputArtifacts:
-                - Name: Source-CloudFormationTemplatesArtifact
-                - !If
-                  - CreateCloudFormationConfigurationArtifact
-                  - Name: Source-CloudFormationConfigurationArtifact
-                  - !Ref AWS::NoValue
-                - Name: DeployArtifact-CICD
-              Name: DefaultSecuritySettings
-              OutputArtifacts: 
-                - Name: DeployArtifact-DefaultSecuritySettings
-              RunOrder: 2
+            - !If
+              - DeployDefaultSecuritySettings
+              - ActionTypeId: 
+                  Category: Deploy
+                  Owner: AWS
+                  Provider: CloudFormation
+                  Version: '1'
+                Configuration:
+                  ActionMode: CREATE_UPDATE
+                  StackName: DefaultSecuritySettings
+                  Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                  RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                  TemplatePath: Source-CloudFormationTemplatesArtifact::security/templates/template.yaml
+                  ParameterOverrides: !Join
+                    - ''
+                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - !If
+                        - Development
+                        - development
+                        - production
+                      - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                  TemplateConfiguration: !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings.json
+                    - !Ref AWS::NoValue
+                InputArtifacts:
+                  - Name: Source-CloudFormationTemplatesArtifact
+                  - !If
+                    - CreateCloudFormationConfigurationArtifact
+                    - Name: Source-CloudFormationConfigurationArtifact
+                    - !Ref AWS::NoValue
+                  - Name: DeployArtifact-CICD
+                Name: DefaultSecuritySettings
+                OutputArtifacts: 
+                  - Name: DeployArtifact-DefaultSecuritySettings
+                RunOrder: 2
+              - !Ref AWS::NoValue
             # Deploy Notification
             - !If
               - DeployNotification

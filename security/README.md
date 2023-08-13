@@ -32,15 +32,20 @@ The following sections describe the individual components of the architecture.
 
 ### IAM AccessAnalyzer
 
-This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results to ``Amazon SNS`` via ``Amazon EventBridge``.
+This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results to ``Amazon SNS`` via ``Amazon EventBridge``. 
+**After deploying it, you can designate the delegated IAM AccessAnalyzer administrator account for your organization**.
 
 ### AWS Security Hub
 
-This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure. 
+This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure.
+**After deploying it, you can designate the delegated AWS Security Hub administrator account for your organization**.
 
 ### Amazon GuardDuty
 
 This template enables ``Amazon GuardDuty``. ``Amazon GuardDuty`` only sends notifications when it detects findings of **MEDIUM or higher level**.
+**After deploying it, you can designate the delegated Amazon GuardDuty administrator account for your organization**.
+Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
+This action automatically turns on the Auto-enable GuardDuty configuration so that GuardDuty gets enabled for any new account that joins the organization.
 
 ### AWS CloudTrail
 
@@ -68,7 +73,10 @@ When ``AWS Config`` detects noncompliant resources, it sends a notification to `
 
 ### Amazon Macie
 
-This templates configures ``Amazon Macie``. 
+This templates configures ``Amazon Macie``.
+**After deploying it, you can designate the delegated Amazon Macie administrator account for your organization**.
+Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
+This action automatically turns on the Auto-enable Macie configuration so that Macie gets enabled for any new account that joins the organization.
 
 ### Amazon EventBridge
 
