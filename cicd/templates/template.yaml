@@ -806,7 +806,7 @@ Resources:
                   TemplatePath: BuildArtifact-Notification::packaged.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "CloudTrailLogGroup": "/aws/cloudtrail/DefaultSecuritySettings", "Environment": "'
+                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
