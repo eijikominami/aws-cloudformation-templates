@@ -33,8 +33,8 @@ Resources:
   CURReport:
     Type: AWS::CUR::ReportDefinition
     Properties:
-      Compression: GZIP
-      Format: textORcsv
+      Compression: Parquet
+      Format: Parquet
       RefreshClosedReports: true
       ReportName: default
       ReportVersioning: OVERWRITE_REPORT
@@ -112,11 +112,11 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:387304072572:applications/aws-usage-queries
-        SemanticVersion: 0.1.1+10.571d25
+        SemanticVersion: 0.1.5+19.38c7b8
       Parameters:
         CurBucketName: !Ref S3ForCUR
         ReportName: default
-        ReportPathPrefix: source
+        ReportPathPrefix: source/default
       Tags:
         environment: Environment
         createdby: !Ref TagValue

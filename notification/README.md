@@ -130,7 +130,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AdditionalCloudWatchLogsMetricFilters | String | | Additional expression of CloudWatch Logs metric filters |
+| CloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
 | CloudTrailLogGroup | | | | If it is not empty, Slack sends details about ``Unauthorized API Calls`` logs |
 | Encrypt | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Slack hook urls are encrypted by an AWS KMS Custom key |
 | **HookUrlForDeployment** | String | | | Slack Hook Url for deployment information | 

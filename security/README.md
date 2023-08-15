@@ -19,8 +19,6 @@ If you want to deploy each service individually, click the button below.
 | --- | --- |
 | IAM | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IAM&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/iam.yaml) |
 | AWS Security Hub | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SecurityHub&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/securityhub.yaml) |
-| Amazon Detective | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Detective&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/detective.yaml) |
-| Amazon Inspector | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Inspector&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/inspector.yaml&param_LogicalNamePrefix=Inspector) |
 | Amazon GuardDuty | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=GuardDuty&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/guardduty.yaml) |
 | AWS CloudTrail | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalNamePrefix=CloudTrail) |
 | AWS Config | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalNamePrefix=Config) |
@@ -34,49 +32,25 @@ The following sections describe the individual components of the architecture.
 
 ### IAM AccessAnalyzer
 
-This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results to ``Amazon SNS`` via ``Amazon EventBridge``.
+This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results to ``Amazon SNS`` via ``Amazon EventBridge``. 
+**After deploying it, you can designate the delegated IAM AccessAnalyzer administrator account for your organization**.
 
 ### AWS Security Hub
 
-This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure. 
-
-### Amazon Detective
-
-This template creates an ``Amazon Detective`` behavior graph.
+This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure.
+**After deploying it, you can designate the delegated AWS Security Hub administrator account for your organization**.
 
 ### Amazon GuardDuty
 
 This template enables ``Amazon GuardDuty``. ``Amazon GuardDuty`` only sends notifications when it detects findings of **MEDIUM or higher level**.
+**After deploying it, you can designate the delegated Amazon GuardDuty administrator account for your organization**.
+Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
+This action automatically turns on the Auto-enable GuardDuty configuration so that GuardDuty gets enabled for any new account that joins the organization.
 
 ### AWS CloudTrail
 
 This template enables ``AWS CloudTrail`` and creates an ``S3 Bucket`` when its logs are stored.
 CloudTrail Logs stored in an S3 bucket are encrypted using ``AWS KMS CMKs``.
-
-### Amazon Inspector
-
-This template creates an Amazon Inspector ``assessment target`` and some ``assessment templates``, as follows.
-
-+ [Network Reachability](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_network-reachability.html)
-+ [Common Vulnerabilities and Exposures](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_cves.html)
-+ [Center for Internet Security (CIS) Benchmarks](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_cis.html)
-+ [Security Best Practices for Amazon Inspector](https://docs.aws.amazon.com/inspector/latest/userguide/inspector_security-best-practices.html)
-
-They run **every Monday at 9am**, kicked by ``Amazon EventBridge``.
-
-This template supports some specific regions.
-
-+ US East (N. Virginia)
-+ US East (Ohio)
-+ US West (N. California)
-+ US West (Oregon)
-+ Asia Pacific (Tokyo)
-+ Asia Pacific (Seoul)
-+ Asia Pacific (Sydney)
-+ EU (Frankfurt)
-+ EU (Ireland)
-+ EU (London)
-+ EU (Stockholm)
 
 ### AWS Config
 
@@ -99,7 +73,10 @@ When ``AWS Config`` detects noncompliant resources, it sends a notification to `
 
 ### Amazon Macie
 
-This templates configures ``Amazon Macie``. 
+This templates configures ``Amazon Macie``.
+**After deploying it, you can designate the delegated Amazon Macie administrator account for your organization**.
+Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
+This action automatically turns on the Auto-enable Macie configuration so that Macie gets enabled for any new account that joins the organization.
 
 ### Amazon EventBridge
 
@@ -122,15 +99,16 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AmazonDetective | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Amazon Detective is enabled | 
 | AmazonGuadDuty | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon GuardDuty is enabled |
 | AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled |
-| AutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AutoRemediation** by SSM Automation and Lambda are enabled |
+| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Security Hub enabled |
-| AdditionalCloudWatchLogsMetricFilters | String | | Additional expression of CloudWatch Logs metric filters |
+| AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | The standard that you want to enable |
+| CloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
+| MasterAccount | Boolean | false | ○ | Whether this account is the master account |
 | NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | Notification filter about Security Hub Security Checks | 
 
 ### Designating a GuardDuty and a Security Hub administrator account

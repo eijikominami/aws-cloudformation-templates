@@ -240,9 +240,3 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # Service-linked Role
-  ServiceLinkedRoleForCodeGuruProfiler:
-    Type: AWS::IAM::ServiceLinkedRole
-    Properties: 
-      AWSServiceName: codeguru-profiler.amazonaws.com
-      Description: The Service Linked Role is used by Amazon CodeGuru Profiler.

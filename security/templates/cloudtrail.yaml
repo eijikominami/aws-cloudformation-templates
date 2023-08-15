@@ -7,7 +7,7 @@ Metadata:
       - Label: 
           default: 'CloudTrail Configuration'
         Parameters: 
-          - AdditionalCloudWatchLogsMetricFilters
+          - CloudTrailAdditionalFilters
           - AuditOtherRegions
           - LogBucketName
       - Label: 
@@ -23,7 +23,7 @@ Metadata:
           - TagValue
 
 Parameters:
-  AdditionalCloudWatchLogsMetricFilters:
+  CloudTrailAdditionalFilters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
@@ -63,7 +63,7 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
-  CreateAdditionalFilters: !Not [ !Equals [ !Ref AdditionalCloudWatchLogsMetricFilters, '' ] ]
+  CreateAdditionalFilters: !Not [ !Equals [ !Ref CloudTrailAdditionalFilters, '' ] ]
   CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
 
 Resources:
@@ -264,7 +264,7 @@ Resources:
     Properties:
       FilterPattern: !If
         - CreateAdditionalFilters
-        - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ${AdditionalCloudWatchLogsMetricFilters}}'
+        - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ${CloudTrailAdditionalFilters}}'
         - '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
       LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
@@ -521,7 +521,7 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
-  # CIS 3.9 a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
+  # CIS 3.11 a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
   CloudWatchLogsMetricFilterCloudTrailNACLChanges:
     Type: AWS::Logs::MetricFilter
     Properties: 

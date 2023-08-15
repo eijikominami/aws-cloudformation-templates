@@ -9,7 +9,7 @@ Metadata:
           default: 'Config Configuration'
         Parameters: 
           - AuditOtherRegions
-          - AutoRemediation
+          - AWSConfigAutoRemediation
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -31,7 +31,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]
-  AutoRemediation:
+  AWSConfigAutoRemediation:
     Type: String
     Default: ENABLED
     AllowedValues:
@@ -68,7 +68,7 @@ Parameters:
  
 Conditions:
   CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
-  CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
+  CreateRemediationResources: !Equals [ !Ref AWSConfigAutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
