@@ -40,6 +40,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment
           - LogicalNamePrefix
           - TagKey
           - TagValue
@@ -120,11 +121,11 @@ Parameters:
     Default: ''
     Description: Route53 hosted zone id
   SubnetId1ForELB:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
     Description: The subnet id 1 for Network LoadBalancer
   SubnetId2ForELB:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
     Description: The subnet id 2 for Network LoadBalancer
   SNSForAlertArn:
@@ -134,7 +135,7 @@ Parameters:
     Type: String
     Default: ''
   VPCId:
-    Type: String
+    Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
     Description: VPC Id [required]
   Environment:

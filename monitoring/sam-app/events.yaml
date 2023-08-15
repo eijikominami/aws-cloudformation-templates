@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for Amazon EventBridge
 
@@ -29,7 +29,7 @@ Resources:
       AlarmDescription: !Sub '*${EventsRuleName}* の *呼び出しが失敗* しました。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Notice-${SNSTopicArn}-Events-${EventsRuleName}-FailedInvocations
+        - !Sub Notice-${CustomAlarmName}-Events-${EventsRuleName}-FailedInvocations
         - !Sub Notice-Events-${EventsRuleName}-FailedInvocations
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:

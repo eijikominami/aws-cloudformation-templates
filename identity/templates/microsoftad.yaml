@@ -313,9 +313,7 @@ Resources:
   ManagementInstance:
     Metadata:
       AWS::CloudFormation::Init:
-        configSets:
-          config:
-            - configInstance
+        config:
           commands:
             '01-install-packages':
               command: 'powershell.exe -Command "Install-WindowsFeature -Name GPMC,RSAT-AD-PowerShell,RSAT-AD-AdminCenter,RSAT-ADDS-Tools,RSAT-DNS-Server"'
@@ -353,6 +351,17 @@ Resources:
         - CreateAz1
         - !GetAtt Az1.Outputs.PrivateSubnetId
         - !Ref SubnetPrivateIdForAz1
+      UserData: !Base64
+        Fn::Join:
+          - ''
+          - - "<script>\n"
+            - 'cfn-init.exe --configsets config -v --stack '
+            - !Ref 'AWS::StackName'
+            - ' --resource ManagementInstance'
+            - ' --region '
+            - !Ref 'AWS::Region'
+            - "\n"
+            - "</script>\n"
       Tags: 
         - Key: Name
           Value: !Sub ec2-${AWS::StackName}-${AWS::Region}

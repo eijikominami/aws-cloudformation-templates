@@ -374,7 +374,7 @@ Resources:
             Action: sts:AssumeRole
       Description: A role required for KinesisFirehose to access Glue, S3, Lambda, CloudWatch Logs, Kinesis and KMS.
       Policies:
-        - PolicyName: CustomPolicy
+        - PolicyName: KinesisFirehose
           PolicyDocument:
             Version: '2012-10-17'
             Statement:

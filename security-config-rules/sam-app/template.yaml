@@ -134,7 +134,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
-        - PolicyName: CustomPolicy
+        - PolicyName: Lambda
           PolicyDocument:
             Version: 2012-10-17
             Statement:

@@ -1,6 +1,6 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description:  AWSCloudFormationTemplates/cicd creates CodeBuild projects.
+Description:  AWSCloudFormationTemplates/cicd/codebuild creates CodeBuild projects.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -170,7 +170,7 @@ Resources:
             Action: sts:AssumeRole
       Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
       Policies:
-        - PolicyName: CustomPolicy
+        - PolicyName: CodeBuild
           PolicyDocument:
             Version: '2012-10-17'
             Statement:

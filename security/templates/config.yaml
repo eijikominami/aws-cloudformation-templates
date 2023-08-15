@@ -232,7 +232,7 @@ Resources:
             Action: sts:AssumeRole
       Description: A role required for SSM to access IAM.
       Policies:
-        - PolicyName: CustomPolicy
+        - PolicyName: SSM
           PolicyDocument:
             Version: 2012-10-17
             Statement:

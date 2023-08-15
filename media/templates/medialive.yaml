@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/media/medialive sets Elemental MediaLive.
 
@@ -175,7 +175,9 @@ Parameters:
     Default: RTMP
     AllowedValues:
       - RTMP
+      - RTMP_S3
       - ELEMENTAL_LINK
+      - ELEMENTAL_LINK_S3
       - S3
     Description: The input type [required]
   InputStreamKey:
@@ -265,14 +267,14 @@ Conditions:
   CreateDestinationForRTP: !Or [ !Equals [ !Ref OutputType, RTP], !Not [ !Equals [ !Ref OutputRtmpRtpUrl1, ''] ] ]
   CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref OutputHlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
-  CreateElementalLinkLIVEWorkflow: !And [ !Equals [ !Ref InputType, ELEMENTAL_LINK ], !Not [ !Equals [ !Ref ElementalLinkId1, ''] ] ]
-  CreateElementalLinkLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref InputType, ELEMENTAL_LINK ] , !Equals [ !Ref AutoInputFailover, ENABLED], !Not [ !Equals [ !Ref ElementalLinkId1, ''] ], !Not [ !Equals [ !Ref ElementalLinkId2, ''] ] ]
+  CreateElementalLinkLIVEWorkflow: !And [ !Or [ !Equals [ !Ref InputType, ELEMENTAL_LINK ], !Equals [ !Ref InputType, ELEMENTAL_LINK_S3 ] ], !Not [ !Equals [ !Ref ElementalLinkId1, ''] ] ]
+  CreateElementalLinkLIVEWorkflowAndTwoInput: !And [ !Or [ !Equals [ !Ref InputType, ELEMENTAL_LINK ], !Equals [ !Ref InputType, ELEMENTAL_LINK_S3 ] ], !Equals [ !Ref AutoInputFailover, ENABLED], !Not [ !Equals [ !Ref ElementalLinkId1, ''] ], !Not [ !Equals [ !Ref ElementalLinkId2, ''] ] ]
   CreateTwoPipelines: !Equals [ !Ref ChannelClass, STANDARD]
   CreateTwoInput: !Equals [ !Ref AutoInputFailover, ENABLED]
   CreateTwoPipelinesAndTwoInput: !And [ !Equals [ !Ref ChannelClass, STANDARD], !Equals [ !Ref AutoInputFailover, ENABLED] ]
-  CreateRTMPLIVEWorkflow: !Equals [ !Ref InputType, RTMP ]
-  CreateRTMPLIVEWorkflowAndTwoInput: !And [ !Equals [ !Ref InputType, RTMP ] , !Equals [ !Ref AutoInputFailover, ENABLED] ]
-  CreateVODWorkflow: !And [ !Equals [ !Ref InputType, S3 ], !Not [ !Equals [ !Ref VodSourceBucket, '' ] ] ]
+  CreateRTMPLIVEWorkflow: !Or [ !Equals [ !Ref InputType, RTMP ], !Equals [ !Ref InputType, RTMP_S3 ] ]
+  CreateRTMPLIVEWorkflowAndTwoInput: !And [ !Or [ !Equals [ !Ref InputType, RTMP ], !Equals [ !Ref InputType, RTMP_S3 ] ], !Equals [ !Ref AutoInputFailover, ENABLED] ]
+  CreateVODWorkflow: !And [ !Or [ !Equals [ !Ref InputType, S3 ], !Equals [ !Ref InputType, RTMP_S3 ], !Equals [ !Ref InputType, ELEMENTAL_LINK_S3 ] ], !Not [ !Equals [ !Ref VodSourceBucket, '' ] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -320,7 +322,7 @@ Resources:
             Action: sts:AssumeRole
       Description: A role required for MediaLive to access S3.
       Policies:
-        - PolicyName: CustomPolicy
+        - PolicyName: MediaLive
           PolicyDocument:
             Version: '2012-10-17'
             Statement:

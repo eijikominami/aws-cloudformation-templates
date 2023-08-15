@@ -179,7 +179,7 @@ Resources:
     Properties:
       Parameters:
         NotificationThreshold: !Ref NotificationThreshold
-        SNSForAlertArn: !Ref SNSForAlertArn
+        SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
       TemplateURL: !If
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/global/costexplorer.yaml

@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/cloudops/resourceexplorer sets AWS Resource Explorer.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - TagKey
+          - TagValue
+
+Parameters:
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  ResourceExplorerIndex:
+    Type: AWS::ResourceExplorer2::Index
+    Properties:
+      Tags: 
+        cratedby: !Ref TagValue
+      Type: AGGREGATOR
+  ResourceExplorerView:
+    DependsOn: 
+      - ResourceExplorerIndex
+    Type: AWS::ResourceExplorer2::View
+    Properties:
+      IncludedProperties:
+        - Name: tags
+      Tags: 
+        cratedby: !Ref TagValue
+      ViewName: !Sub ${TagKey}-${TagValue}
+  ResourceExplorerDefaultViewAssociation:
+    Type: AWS::ResourceExplorer2::DefaultViewAssociation
+    Properties:
+      ViewArn: !GetAtt ResourceExplorerView.ViewArn

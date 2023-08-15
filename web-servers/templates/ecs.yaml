@@ -1,0 +1,168 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/web-servers/ecs creates Amazon Elastic Container Service.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'ECS Configuration'
+        Parameters: 
+          - Cpu
+          - DesiredCount
+          - ImageUri
+          - Memory
+          - SecurityGroupId
+          - PublicSubnetId1
+          - PublicSubnetId2
+          - VolumeSize
+          - VPCId
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - LogicalNamePrefix
+          - TagKey
+          - TagValue
+
+Parameters:
+  Cpu:
+    Type: Number
+    Default: 1024
+    Description: The number of cpu units reserved for the container [required]
+  DesiredCount:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Desired Capacity [required]
+  ImageUri:
+    Type: String
+    AllowedPattern: .+
+    Description: The image used to start a container
+  Memory:
+    Type: String
+    Default: 3072
+    Description: The amount (in MiB) of memory to present to the container [required]
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The Security Group id to attach the containers [required]
+  PublicSubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 1 for Network LoadBalancer
+  PublicSubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 2 for Network LoadBalancer
+  VolumeSize:
+    Type: Number
+    Default: 21
+    MinValue: 21
+    Description: ECS Volume Size [required]
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC Id [required]
+  LogicalNamePrefix:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  # IAM
+  IAMRoleForECSTask:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for ECS.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      RoleName: !Sub '${AWS::StackName}-ECSTaskExecutionRole-${AWS::Region}'
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # ELB
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub elb-${LogicalNamePrefix}
+      Scheme: internet-facing
+      SecurityGroups:
+       - !Ref SecurityGroupId
+      # For Application Load Balaner
+      Subnets:
+        - !Ref PublicSubnetId1
+        - !Ref PublicSubnetId2
+      Tags:
+        - Key: Name
+          Value: !Sub elb-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: application
+  LoadBalancerTargetGroupHttp:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      Name: !Sub target-${LogicalNamePrefix}
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub target-${LogicalNamePrefix}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TargetType: ip
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref VPCId
+  LoadBalancerListenerHttp:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      DefaultActions:
+        - TargetGroupArn: !Ref LoadBalancerTargetGroupHttp
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+  # ECS
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref LogicalNamePrefix     
+      ClusterSettings: 
+        - Name: containerInsights
+          Value: enabled
+      Configuration: 
+        ExecuteCommandConfiguration:
+          Logging: DEFAULT
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

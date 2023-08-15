@@ -12,15 +12,17 @@ Metadata:
           - BucketNameForAnalysis
           - LogGroupNameTransferredToS3
       - Label: 
-          default: 'AutoScaling Configuration'
-        Parameters: 
+          default: 'Server Configuration'
+        Parameters:
           - AutoScalingDesiredCapacity
           - AutoScalingMaxSize
           - AutoScalingLoadBalancerType
+          - ComputeType
           - EC2ImageId
           - EC2InstanceType
           - EC2KeyName
           - EC2VolumeSize
+          - ECSImageUri
       - Label: 
           default: 'Distribution Configuration'
         Parameters: 
@@ -104,6 +106,13 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to CloudFront
+  ComputeType:
+    Type: String
+    Default: INSTANCE
+    AllowedValues:
+      - INSTANCE
+      - CONTAINER
+    Description: The category of computing platform [recuired] 
   AutoScalingDesiredCapacity:
     Type: Number
     Default: 1
@@ -203,6 +212,10 @@ Parameters:
     Default: 8
     MinValue: 8
     Description: EC2 Volume Size [required]
+  ECSImageUri:
+    Type: String
+    Default: ''
+    Description: The image arn used to start a container [conditional]
   GlobalInfrastructure:
     Type: String
     Default: NONE
@@ -293,11 +306,12 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  AutoScalingEnabled: !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ] 
-  AutoScalingDisabled: !Equals [ !Ref AutoScalingLoadBalancerType, None ]
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
+  CreateAutoScaling: !And [ !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ], !Equals [ !Ref ComputeType, INSTANCE ] ]
   CreateCloudFront: !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ]
   CreateDataLifecycleManager: !Not [ !Equals [ !Ref EC2DailySnapshotScheduledAt, '' ] ]
+  CreateEC2: !Or [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref ComputeType, INSTANCE ] ] ]
+  CreateECS: !And [ !Equals [ !Ref ComputeType, CONTAINER ], !Not [ !Equals [ !Ref ECSImageUri ,''] ] ]
   CreateGlobalAccelerator: !Equals [ !Ref GlobalInfrastructure, GLOBAL_ACCELERATOR ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreateRoute53: !And [ !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
@@ -306,7 +320,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateWAFForCloudFront: !And [!Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref WebACL, ENABLED ] ]
-  CreateWAFForALB: !And [!Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref WebACL, ENABLED ] ]
+  CreateWAFForALB: !And [!Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref ComputeType, INSTANCE ], !Equals [ !Ref WebACL, ENABLED ] ]
   CreateKinesisFirehose: !Not [ !Equals [ !Ref LogGroupNameTransferredToS3, '' ] ]
   Development: !Equals [ !Ref Environment, development]
 
@@ -395,7 +409,7 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   AutoScaling:
-    Condition: AutoScalingEnabled
+    Condition: CreateAutoScaling
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -452,6 +466,36 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/autoscaling.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
+  ECS:
+    Condition: CreateECS
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        DesiredCount: !Ref AutoScalingDesiredCapacity
+        ImageUri: !Ref ECSImageUri
+        SecurityGroupId: !Ref SecurityGroupWeb
+        PublicSubnetId1: !GetAtt Az1.Outputs.PublicSubnetId
+        PublicSubnetId2: !GetAtt Az2.Outputs.PublicSubnetId
+        VolumeSize: !Ref EC2VolumeSize
+        VPCId: !Ref VPC
+        LogicalNamePrefix: !Ref AWS::StackName
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/ecs.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ecs.yaml  
   DataLifecycleManager:
     Condition: CreateDataLifecycleManager
     Type: AWS::CloudFormation::Stack
@@ -468,6 +512,8 @@ Resources:
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
       Tags:
+        - Key: Name
+          Value: !Sub policy-${AWS::StackName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -524,9 +570,9 @@ Resources:
         CloudFront404ErrorResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
         CloudFront500ErrorResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
         CloudFrontOriginDomainName: !If
-          - AutoScalingEnabled
+          - CreateAutoScaling
           - !Sub origin-${DomainName}
-          - !Ref EIPForEC2Instance
+          - !GetAtt EC2.PublicDnsName
         CloudFrontOriginType: NOT_S3
         Route53HostedZoneId: !Ref Route53HostedZoneId
         Logging: !Ref Logging
@@ -560,7 +606,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         EndpointId: !If
-          - AutoScalingEnabled
+          - CreateAutoScaling
           - !GetAtt AutoScaling.Outputs.LoadBalancerArn
           - !Ref EIPForEC2Instance
         EndpointGroupRegion: !Ref AWS::Region
@@ -862,7 +908,7 @@ Resources:
       VpcId: !Ref VPC
   # Elastic IP
   EIPForEC2Instance:
-    Condition: AutoScalingDisabled
+    Condition: CreateEC2
     Type: AWS::EC2::EIP
     Properties:
       Domain: !Ref VPC
@@ -874,7 +920,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   EIPAssociation:
-    Condition: AutoScalingDisabled
+    Condition: CreateEC2
     Type: AWS::EC2::EIPAssociation
     Properties: 
       AllocationId: !GetAtt EIPForEC2Instance.AllocationId
@@ -893,7 +939,7 @@ Resources:
       Type: A
   # EC2
   EC2:
-    Condition: AutoScalingDisabled
+    Condition: CreateEC2
     Type: AWS::EC2::Instance
     Properties:
       BlockDeviceMappings: 
@@ -993,7 +1039,7 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   CloudWatchAlarmEC2CWAgent:
-    Condition: AutoScalingDisabled
+    Condition: CreateEC2
     Type: AWS::Serverless::Application
     Properties:
       Location:
@@ -1152,14 +1198,14 @@ Outputs:
     Description: CloudFront URL
     Value: !GetAtt CloudFront.Outputs.CloudFrontURL
   LoadBalancerDNSName:
-    Condition: AutoScalingEnabled
+    Condition: CreateAutoScaling
     Description: LoadBalancer DNS Name
     Value: !GetAtt AutoScaling.Outputs.LoadBalancerDNSName
   VPCCidrBlock:
     Description: VPC CIDR Block
     Value: !GetAtt VPC.CidrBlock   
   EC2IP:
-    Condition: AutoScalingDisabled
+    Condition: CreateEC2
     Description: EC2 IP address
     Value: !Ref EIPForEC2Instance
   IAMRoleForS3Replication:

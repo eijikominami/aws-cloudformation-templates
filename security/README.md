@@ -5,7 +5,7 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates) 
 
-``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` , ``Amazon Detective`` , ``Amazon Macie`` , ``AWS Audit Manager`` , and related resources.
+``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` , ``Amazon Macie`` , and related resources.
 
 ## TL;DR
 
@@ -33,17 +33,18 @@ The following sections describe the individual components of the architecture.
 ### IAM AccessAnalyzer
 
 This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results to ``Amazon SNS`` via ``Amazon EventBridge``. 
-**After deploying it, you can designate the delegated IAM AccessAnalyzer administrator account for your organization**.
+After deploying it, [**you can designate the delegated IAM AccessAnalyzer administrator account**](https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html) for your organization.
 
 ### AWS Security Hub
 
 This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure.
-**After deploying it, you can designate the delegated AWS Security Hub administrator account for your organization**.
+After deploying it, [**you can designate the delegated AWS Security Hub administrator account**](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-securityhub.html) for your organization.
+You can enable Security Hub automatically [for new accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-auto-enable.html) or [existing accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/orgs-accounts-enable.html). 
 
 ### Amazon GuardDuty
 
 This template enables ``Amazon GuardDuty``. ``Amazon GuardDuty`` only sends notifications when it detects findings of **MEDIUM or higher level**.
-**After deploying it, you can designate the delegated Amazon GuardDuty administrator account for your organization**.
+*fter deploying it, [**you can designate the delegated Amazon GuardDuty administrator account**](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html) for your organization.
 Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
 This action automatically turns on the Auto-enable GuardDuty configuration so that GuardDuty gets enabled for any new account that joins the organization.
 
@@ -51,6 +52,7 @@ This action automatically turns on the Auto-enable GuardDuty configuration so th
 
 This template enables ``AWS CloudTrail`` and creates an ``S3 Bucket`` when its logs are stored.
 CloudTrail Logs stored in an S3 bucket are encrypted using ``AWS KMS CMKs``.
+If you have already enabled ``AWS Control Tower``, ``AWS CloudTrail`` is enabled at all account in your organizations regardless of deploying the template.
 
 ### AWS Config
 
@@ -71,16 +73,18 @@ The following rules enable ``Automatic Remediation`` feature and attached ``SSM 
 ``AWS Security Hub`` creates some related config rules for security checks automatically.
 When ``AWS Config`` detects noncompliant resources, it sends a notification to ``Amazon SNS``.
 
+If you have already enabled ``AWS Control Tower``, ``AWS Config`` is enabled at all account in your organizations regardless of deploying the template.
+
 ### Amazon Macie
 
 This templates configures ``Amazon Macie``.
-**After deploying it, you can designate the delegated Amazon Macie administrator account for your organization**.
+After deploying it, [**you can designate the delegated Amazon Macie administrator account**](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-macie.html) for your organization.
 Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
 This action automatically turns on the Auto-enable Macie configuration so that Macie gets enabled for any new account that joins the organization.
 
 ### Amazon EventBridge
 
-This template creates ``Amazon EventBridge`` for ``AWS Health``.
+This template creates ``Amazon EventBridge`` for ``AWS Health`` and ``AWS Trusted Advisor``.
 EventBridge transfer its events to ``Amazon SNS``.
 
 ### Other Resources
@@ -102,8 +106,8 @@ You can provide optional parameters as follows:
 | AmazonGuadDuty | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon GuardDuty is enabled |
 | AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled |
-| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
+| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Security Hub enabled |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | The standard that you want to enable |
 | CloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
