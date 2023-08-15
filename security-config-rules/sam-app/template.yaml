@@ -16,7 +16,7 @@ Metadata:
       - Label: 
           default: 'Lambda Configuration'
         Parameters:
-          - AutoRemediation
+          - AWSConfigAutoRemediation
           - RequiredTagKey
           - RequiredTagValue
       - Label: 
@@ -32,7 +32,7 @@ Metadata:
           - TagValue
 
 Parameters:
-  AutoRemediation:
+  AWSConfigAutoRemediation:
     Type: String
     Default: DISABLED
     AllowedValues:
@@ -73,7 +73,7 @@ Parameters:
     
 Conditions:
   CreateConfigRules: !Or [ !Not [ !Equals [ !Ref RequiredTagKey, '' ] ], !Not [ !Equals [ !Ref RequiredTagValue, '' ] ] ]
-  CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
+  CreateRemediationResources: !Equals [ !Ref AWSConfigAutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]

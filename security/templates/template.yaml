@@ -8,13 +8,16 @@ Metadata:
       - Label: 
           default: 'CloudTrail and Config Configuration'
         Parameters: 
-          - AdditionalCloudWatchLogsMetricFilters
           - AuditOtherRegions
-          - AutoRemediation
+      - Label: 
+          default: 'CloudTrail Configuration'
+        Parameters: 
+          - CloudTrailAdditionalFilters
       - Label: 
           default: 'Config Configuration'
         Parameters: 
           - AWSConfig
+          - AWSConfigAutoRemediation
       - Label: 
           default: 'GuardDuty Configuration'
         Parameters: 
@@ -47,7 +50,7 @@ Metadata:
           - TagValue
 
 Parameters:
-  AdditionalCloudWatchLogsMetricFilters:
+  CloudTrailAdditionalFilters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
@@ -65,7 +68,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]
-  AutoRemediation:
+  AWSConfigAutoRemediation:
     Type: String
     Default: ENABLED
     AllowedValues:
@@ -77,6 +80,7 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
+      - EVENTBRIDGE_ONLY
       - DISABLED
     Description: Enable or disable Amazon GuardDuty [required]
   AmazonMacie:
@@ -108,6 +112,7 @@ Parameters:
     AllowedValues:
       - ACCOUNT
       - ORGANIZATION
+      - EVENTBRIDGE_ONLY
       - DISABLED
     Description: Enable or disable IAM Access Analyzer [required]
   IAMUserArnToAssumeAWSSupportRole:
@@ -146,7 +151,8 @@ Parameters:
 
 Conditions:
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED]
-  CreateGuardDuty: !Equals [ !Ref AmazonGuardDuty, ENABLED]
+  CreateGuardDuty: !Or [ !Equals [ !Ref AmazonGuardDuty, ENABLED], !Equals [ !Ref AmazonGuardDuty, EVENTBRIDGE_ONLY] ]
+  CreateGuardDutyEventBridgeOnly: !Equals [ !Ref AmazonGuardDuty, EVENTBRIDGE_ONLY]
   CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref IAMAccessAnalyzer, DISABLED] ]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [ !Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !Equals [ !Ref AmazonMacie, ENABLED]
@@ -232,6 +238,10 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        Detector: !If
+          - CreateGuardDutyEventBridgeOnly
+          - DISABLED
+          - ENABLED
         LogicalNamePrefix: !Ref AWS::StackName
         SNSForAlertArn: !If
           - CreateSNSForDeployment
@@ -263,7 +273,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         AuditOtherRegions: !Ref AuditOtherRegions
-        AdditionalCloudWatchLogsMetricFilters: !Ref AdditionalCloudWatchLogsMetricFilters
+        CloudTrailAdditionalFilters: !Ref CloudTrailAdditionalFilters
         LogBucketName: !Ref S3ForAccessLog
         LogicalNamePrefix: !Ref AWS::StackName
         SnsTopicARN: !If
@@ -293,7 +303,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         AuditOtherRegions: !Ref AuditOtherRegions
-        AutoRemediation: !Ref AutoRemediation
+        AWSConfigAutoRemediation: !Ref AWSConfigAutoRemediation
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

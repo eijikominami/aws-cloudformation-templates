@@ -9,7 +9,7 @@ Metadata:
           default: 'Config Configuration'
         Parameters: 
           - AuditOtherRegions
-          - AutoRemediation
+          - AWSConfigAutoRemediation
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -31,7 +31,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable cross region audit [required]
-  AutoRemediation:
+  AWSConfigAutoRemediation:
     Type: String
     Default: ENABLED
     AllowedValues:
@@ -68,7 +68,7 @@ Parameters:
  
 Conditions:
   CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
-  CreateRemediationResources: !Equals [ !Ref AutoRemediation, ENABLED ]
+  CreateRemediationResources: !Equals [ !Ref AWSConfigAutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -518,11 +518,11 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:11
+          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:2
         - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.9
+      Runtime: python3.11
       Tags:
         - Key: environment
           Value: !Ref Environment

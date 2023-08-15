@@ -29,6 +29,7 @@ Parameters:
     AllowedValues:
       - ACCOUNT
       - ORGANIZATION
+      - EVENTBRIDGE_ONLY
     Description: The type represents the zone of trust for the analyzer [required]
   LogicalNamePrefix:
     Type: String
@@ -59,6 +60,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref AnalyzerType, EVENTBRIDGE_ONLY] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -95,12 +97,14 @@ Resources:
         createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForAccessAnalyzer:
+    Condition: CreateIAMAccessAnalyzer
     Type: AWS::IAM::ServiceLinkedRole
     Properties: 
       AWSServiceName: access-analyzer.amazonaws.com 
       Description: A service-linked role required for Access Analyzer to access your resources.
   # AccessAnalyzer
   AccessAnalyzer:
+    Condition: CreateIAMAccessAnalyzer
     DependsOn:
       - ServiceLinkedRoleForAccessAnalyzer
     Type: AWS::AccessAnalyzer::Analyzer

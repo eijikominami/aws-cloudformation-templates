@@ -6,6 +6,10 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'GuardDuty Configuration'
+        Parameters: 
+          - Detector
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -19,6 +23,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  Detector:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: The GuardDuty detector [required]
   LogicalNamePrefix:
     Type: String
     Default: DefaultSecuritySettings
@@ -48,6 +59,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateDetector: !Equals [ !Ref Detector, ENABLED]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -84,17 +96,19 @@ Resources:
         createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForGuardDuty:
+    Condition: CreateDetector
     Type: AWS::IAM::ServiceLinkedRole
     Properties: 
       AWSServiceName: guardduty.amazonaws.com
       Description: A service-linked role required for Amazon GuardDuty to access your resources.
   # GuardDuty
   GuardDutyDetector:
+    Condition: CreateDetector
     DependsOn:
       - ServiceLinkedRoleForGuardDuty
     Type: AWS::GuardDuty::Detector
     Properties:
-      DataSources: 
+      DataSources:
         MalwareProtection: 
           ScanEc2InstanceWithFindings: 
             EbsVolumes: true

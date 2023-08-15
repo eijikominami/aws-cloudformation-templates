@@ -311,6 +311,15 @@ Resources:
       VpcId: !Ref VPCId
   # EC2
   ManagementInstance:
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          config:
+            - configInstance
+          commands:
+            '01-install-packages':
+              command: 'powershell.exe -Command "Install-WindowsFeature -Name GPMC,RSAT-AD-PowerShell,RSAT-AD-AdminCenter,RSAT-ADDS-Tools,RSAT-DNS-Server"'
+              waitAfterCompletion: '0'
     Type: AWS::EC2::Instance
     Properties:
       BlockDeviceMappings: 

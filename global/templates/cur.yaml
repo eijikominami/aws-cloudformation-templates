@@ -105,3 +105,18 @@ Resources:
               StringEquals:
                 aws:SourceArn: !Sub 'arn:aws:cur:${AWS::Region}:${AWS::AccountId}:definition/*'
                 aws:SourceAccount: !Ref AWS::AccountId
+  AWSUsageQueries:
+    DependsOn:
+      - CURReport
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:387304072572:applications/aws-usage-queries
+        SemanticVersion: 0.1.5+19.38c7b8
+      Parameters:
+        CurBucketName: !Ref S3ForCUR
+        ReportName: default
+        ReportPathPrefix: source/default
+      Tags:
+        environment: Environment
+        createdby: !Ref TagValue
