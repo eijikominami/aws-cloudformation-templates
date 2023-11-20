@@ -59,7 +59,7 @@ Resources:
             Action: sts:AssumeRole
       Description: A role required for CloudTrail to access CloudWatch Logs.
       Policies:
-        - PolicyName: CustomPolicy
+        - PolicyName: Macie
           PolicyDocument:
             Version: '2012-10-17'
             Statement:

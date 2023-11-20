@@ -40,6 +40,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - Environment
           - LogicalNamePrefix
           - TagKey
           - TagValue
@@ -120,11 +121,11 @@ Parameters:
     Default: ''
     Description: Route53 hosted zone id
   SubnetId1ForELB:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
     Description: The subnet id 1 for Network LoadBalancer
   SubnetId2ForELB:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
     Description: The subnet id 2 for Network LoadBalancer
   SNSForAlertArn:
@@ -134,7 +135,7 @@ Parameters:
     Type: String
     Default: ''
   VPCId:
-    Type: String
+    Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
     Description: VPC Id [required]
   Environment:
@@ -169,7 +170,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -186,7 +187,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -385,7 +386,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-application-elb
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

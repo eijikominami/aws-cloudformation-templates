@@ -5,7 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
 
-``AWSCloudFormationTemplates/security`` は、 ``Amazon Inspector``, ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub``, ``Amazon Detective`` , ``Amazon Macie`` , ``AWS Audit Manager`` などの **セキュリティ** に関連するAWSサービスを設定します。
+``AWSCloudFormationTemplates/security`` は、 ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub``, ``Amazon Macie`` などの **セキュリティ** に関連するAWSサービスを設定します。
 
 ## TL;DR
 
@@ -34,25 +34,27 @@
 
 このテンプレートは、 ``IAM Access Analyzer`` を有効化します。
 IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に結果を通知します。 
-**デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
+デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/what-is-access-analyzer.html) することが可能です。
 
 ### AWS Security Hub
 
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
 また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon EventBridge`` 経由でメッセージを受け取ります。
- **デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
+デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/organizations/latest/userguide/services-that-can-integrate-securityhub.html) することが可能です。
+[新しいアカウント](https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/accounts-orgs-auto-enable.html) もしくは [既存のアカウント](https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/orgs-accounts-enable.html) に対して自動的に Security Hub を有効化することが可能です。
 
 ### Amazon GuardDuty
 
 このテンプレートは、 ``Amazon GuardDuty`` を有効化します。
 ``Amazon GuardDuty`` は、**MEDIUM以上の検出結果を検出時に通知を送信** します。
- **デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
+ デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_organizations.html) することが可能です。
  委任されたアカウントで、 **ナビゲーションペインの [設定] から [アカウント] を選択し、[自動有効化] をオンにします**。
 
 ### AWS CloudTrail
 
 このテンプレートは、 ``AWS CloudTrail`` を有効化し、ログを蓄積する ``S3バケット`` を生成します。
 S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``CMK`` によって暗号化されます。
+``AWS Control Tower`` を使用している場合は、このテンプレートをデプロイしたかどうかに関わらず組織内の全ての AWS アカウントで、 ``AWS CloudTrail`` が有効化されます。
 
 ### AWS Config
 
@@ -73,14 +75,17 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 ``AWS Security Hub`` もセキュリティチェックに関連する Config ルールを自動的に作成します。
 ``AWS Config`` が非準拠のリソースを検知した場合は、 ``Amazon SNS`` に通知が送信されます。
 
+``AWS Control Tower`` を使用している場合は、このテンプレートをデプロイしたかどうかに関わらず組織内の全ての AWS アカウントで、 ``AWS Config`` が有効化されます。
+
 ### Amazon Macie
 
 このテンプレートは、 ``AWS Macie`` を構成します。 
-**デプロイ完了後、Organizations 内の管理アカウントに権限を委任することが可能です。**
+デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/organizations/latest/userguide/services-that-can-integrate-macie.html) することが可能です。
+また、[Auto-enable] (自動有効化) 設定をオンにすることで、アカウントが AWS Organizations 内で組織に追加されると、Macie は新しいアカウントに対して自動的に有効化することが可能です。
 
 ### Amazon EventBridge
 
-このテンプレートは、 ``AWS Health`` に関する  ``CloudWatchイベント`` を作成します。
+このテンプレートは、 ``AWS Health`` と　``AWS Trusted Advisor`` に関する  ``CloudWatchイベント`` を作成します。
 CloudWatchイベントは、Amazon SNS にこれらのイベントを転送します。
 
 ### その他
@@ -102,8 +107,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | AmazonGuardDuty | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon GuardDuty が有効化されます。|
 | AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。|
 | AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
-| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
+| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
 | CloudTrailAdditionalFilters | String | | 追加の CloudWatch Logs メトリクスフィルター |

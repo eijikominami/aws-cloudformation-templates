@@ -86,7 +86,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -103,7 +103,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -134,7 +134,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:log-group:/aws/lambda-insights:*
-        - PolicyName: CustomPolicy
+        - PolicyName: Lambda
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -268,7 +268,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

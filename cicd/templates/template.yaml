@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description:  AWSCloudFormationTemplates/cicd/codepipeline creates a CodePipeline pipeline building AWSCloudFormationTemplates.
 
@@ -15,9 +15,15 @@ Metadata:
           - ArtifactBucketInVirginia
           - GlobalSettings
       - Label: 
+          default: 'Web Servers Configuration'
+        Parameters: 
+          - GitHubOwnerNameForContainer
+          - GitHubRepoNameForContainer
+          - DockerFilePath
+          - WebServers
+      - Label: 
           default: 'Source Configuration'
         Parameters:
-          - GitHubOAuthToken
           - GitHubOwnerNameForTemplateConfiguration
           - GitHubRepoNameForTemplateConfiguration
           - GitHubBranchName
@@ -31,7 +37,6 @@ Metadata:
           - StaticWebsiteHosting
           - Notification
           - Network
-          - WebServers
           - UploadArtifacts
       - Label: 
           default: 'Notification Configuration'
@@ -55,18 +60,27 @@ Parameters:
     Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
     AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
     Description: The Docker image name for CodeBuild [required]
-  GitHubOAuthToken:
+  DockerFilePath:
     Type: String
-    Default: ''
-    Description: The OAuth token to access GitHub [deprecated]
+    Default: Dockerfile
+    AllowedPattern: .+
+    Description: The path of Dockerfile
   GitHubOwnerNameForTemplateConfiguration:
     Type: String
     Default: ''
     Description: The GitHub owner name for CloudFormation Template Configuration files
+  GitHubOwnerNameForContainer:
+    Type: String
+    Default: ''
+    Description: The GitHub owner name of a container image
   GitHubRepoNameForTemplateConfiguration:
     Type: String
     Default: ''
     Description: The GitHub repository name for CloudFormation Template Configuration files
+  GitHubRepoNameForContainer:
+    Type: String
+    Default: ''
+    Description: The GitHub repository name of a container image
   GitHubBranchName:
     Type: String
     Default: master
@@ -130,7 +144,8 @@ Parameters:
     Type: String
     Default: DISABLED
     AllowedValues:
-      - ENABLED
+      - INSTANCE
+      - CONTAINER
       - DISABLED
     Description: Enable or disable deployment of WebServers template [required]
   UploadArtifacts:
@@ -162,7 +177,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateCodeStarConnection: !Equals [ !Ref GitHubOAuthToken, '']
+  BuildContainers: !Equals [ !Ref WebServers, CONTAINER]
   CreateIncidentManager: !Equals [ !Ref CloudOps, ENABLED]
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -175,7 +190,7 @@ Conditions:
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployNetwork: !Equals [ !Ref Network, ENABLED]
   DeploySharedServices: !Equals [ !Ref SharedServices, ENABLED]
-  DeployWebServers: !Equals [ !Ref WebServers, ENABLED]
+  DeployWebServers: !Not [ !Equals [ !Ref WebServers, DISABLED] ]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]
 
@@ -187,7 +202,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -207,7 +222,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -222,7 +237,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -255,7 +270,7 @@ Resources:
             Action: sts:AssumeRole
       Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
       Policies:
-        - PolicyName: CustomPolicy
+        - PolicyName: CodeBuild
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -300,7 +315,51 @@ Resources:
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
                 Effect: Allow
+              - Action:
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+                Effect: Allow
+              - !If 
+                  - BuildContainers
+                  - Action:
+                      - ecr:ListImages
+                      - ecr:BatchCheckLayerAvailability
+                      - ecr:GetDownloadUrlForLayer
+                      - ecr:GetRepositoryPolicy
+                      - ecr:DescribeRepositories
+                      - ecr:ListImages
+                      - ecr:DescribeImages
+                      - ecr:BatchGetImage
+                      - ecr:InitiateLayerUpload
+                      - ecr:UploadLayerPart
+                      - ecr:CompleteLayerUpload
+                      - ecr:PutImage
+                    Resource: !GetAtt ECR.Arn
+                    Effect: Allow
+                  - !Ref AWS::NoValue
       RoleName: !Sub CICD-CodeBuild-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCodeDeploy:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com 
+            Action: sts:AssumeRole
+      Description: A role required for CodeDeploy to access related resources.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
+      RoleName: !Sub CICD-CodeDeploy-${AWS::Region}
       Tags:
         - Key: environment
           Value: !If
@@ -351,7 +410,7 @@ Resources:
             Action: sts:AssumeRole
       Description: A role required for CodePipeline to access related resources.
       Policies:
-        - PolicyName: CustomPolicy
+        - PolicyName: CodePipeline
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -507,9 +566,20 @@ Resources:
             - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # Container
+  ECR:
+    Condition: BuildContainers
+    Type: AWS::ECR::Repository
+    Properties: 
+      EmptyOnDelete: false
+      ImageScanningConfiguration: 
+        ScanOnPush: true
+      RepositoryName: web-servers
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CodeStar Connection
   CodeStarConnection:
-    Condition: CreateCodeStarConnection
     Type: AWS::CodeStarConnections::Connection
     Properties: 
       ConnectionName: GitHub
@@ -564,6 +634,31 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
+  CodeBuildForContainer:
+    Condition: BuildContainers
+    Type: AWS::CodeBuild::Project
+    Properties: 
+      Artifacts:
+        Type: CODEPIPELINE
+      Description: !Sub Builds a container image of ${GitHubOwnerNameForContainer}/${GitHubRepoNameForContainer}
+      Environment: 
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref CodeBuildImageName
+        PrivilegedMode: true
+        Type: ARM_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-Container
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: buildspec-container.yml
+        Type: CODEPIPELINE
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
   # CodePipeline
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -586,58 +681,92 @@ Resources:
       Stages: 
         # Source
         - Actions:
-            - ActionTypeId: !If
-                - CreateCodeStarConnection
-                - Category: Source
-                  Owner: AWS
-                  Provider: CodeStarSourceConnection
-                  Version: '1'                 
-                - Category: Source
-                  Owner: ThirdParty
-                  Provider: GitHub
-                  Version: '1'
-              Configuration: !If 
-                - CreateCodeStarConnection
-                - ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
-                  FullRepositoryId: eijikominami/aws-cloudformation-templates
-                  BranchName: !Ref GitHubBranchName
-                - Owner: eijikominami
-                  Repo: aws-cloudformation-templates
-                  Branch: !Ref GitHubBranchName
-                  OAuthToken: !Ref GitHubOAuthToken
-                  PollForSourceChanges: true
+            - ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeStarSourceConnection
+                Version: '1'                 
+              Configuration:
+                ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
+                FullRepositoryId: eijikominami/aws-cloudformation-templates
+                BranchName: !Ref GitHubBranchName
               Name: AWSCloudFormationTemplates
               OutputArtifacts: 
-                - Name: Source-CloudFormationTemplatesArtifact
+                - Name: Source_CloudFormationTemplatesArtifact
               RunOrder: 1
             - !If
               - CreateCloudFormationConfigurationArtifact
-              - ActionTypeId: !If
-                  - CreateCodeStarConnection
-                  - Category: Source
-                    Owner: AWS
-                    Provider: CodeStarSourceConnection
-                    Version: '1'
-                  - Category: Source
-                    Owner: ThirdParty
-                    Provider: GitHub
-                    Version: '1'
-                Configuration: !If 
-                  - CreateCodeStarConnection
-                  - ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
-                    FullRepositoryId: !Sub ${GitHubOwnerNameForTemplateConfiguration}/${GitHubRepoNameForTemplateConfiguration}
-                    BranchName: master
-                  - Owner: !Ref GitHubOwnerNameForTemplateConfiguration
-                    Repo: !Ref GitHubRepoNameForTemplateConfiguration
-                    Branch: master
-                    OAuthToken: !Ref GitHubOAuthToken
-                    PollForSourceChanges: true
+              - ActionTypeId:
+                  Category: Source
+                  Owner: AWS
+                  Provider: CodeStarSourceConnection
+                  Version: '1'
+                Configuration:
+                  ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
+                  FullRepositoryId: !Sub ${GitHubOwnerNameForTemplateConfiguration}/${GitHubRepoNameForTemplateConfiguration}
+                  BranchName: master
                 Name: AWSCloudFormationConfiguration
                 OutputArtifacts: 
-                  - Name: Source-CloudFormationConfigurationArtifact
+                  - Name: Source_CloudFormationConfigurationArtifact
+                RunOrder: 1
+              - !Ref AWS::NoValue
+            - !If
+              - BuildContainers
+              - ActionTypeId:
+                  Category: Source
+                  Owner: AWS
+                  Provider: CodeStarSourceConnection
+                  Version: '1'
+                Configuration:
+                  ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
+                  FullRepositoryId: !Sub ${GitHubOwnerNameForContainer}/${GitHubRepoNameForContainer}
+                  BranchName: master
+                Name: Container
+                OutputArtifacts: 
+                  - Name: Source_Container
                 RunOrder: 1
               - !Ref AWS::NoValue
           Name: Source
+        # Deploy CICD
+        - Actions:
+            - ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: !Ref AWS::StackName
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                TemplatePath: Source_CloudFormationTemplatesArtifact::cicd/templates/template.yaml
+                ParameterOverrides: !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - !Ref AWS::NoValue
+                  - !Join
+                    - ''
+                    - - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}", "GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GitHubOwnerNameForContainer": "${GitHubOwnerNameForContainer}","GitHubRepoNameForContainer": "${GitHubRepoNameForContainer}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
+                      - !If
+                        - Development
+                        - development
+                        - production
+                      - !Sub '","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                TemplateConfiguration: !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CICD.json  
+                  - !Ref AWS::NoValue   
+                OutputFileName: Output.json    
+              InputArtifacts:
+                - Name: Source_CloudFormationTemplatesArtifact
+                - !If
+                  - CreateCloudFormationConfigurationArtifact
+                  - Name: Source_CloudFormationConfigurationArtifact
+                  - !Ref AWS::NoValue
+              Name: !Ref AWS::StackName
+              OutputArtifacts: 
+                - Name: DeployArtifact_CICD
+              RunOrder: 1
+          Name: DeployCICD
         # Build
         - Actions:
             - ActionTypeId: 
@@ -649,10 +778,10 @@ Resources:
                 EnvironmentVariables: !Sub '[{"name": "TEMPLATE_FILE_PATH", "value": "security-config-rules/sam-app/", "type": "PLAINTEXT"},{"name": "PACKAGE_BUCKET", "value": "${S3ForArtifact}", "type": "PLAINTEXT"}]'
                 ProjectName: !Ref CodeBuildForSAM
               InputArtifacts:
-                - Name: Source-CloudFormationTemplatesArtifact
+                - Name: Source_CloudFormationTemplatesArtifact
               Name: DefaultSecuritySettings-ConfigRules
               OutputArtifacts: 
-                - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
+                - Name: BuildArtifact_DefaultSecuritySettings-ConfigRules
               RunOrder: 1
             - !If
               - DeployNotification
@@ -665,53 +794,38 @@ Resources:
                   EnvironmentVariables: !Sub '[{"name": "TEMPLATE_FILE_PATH", "value": "notification/sam-app/", "type": "PLAINTEXT"},{"name": "PACKAGE_BUCKET", "value": "${S3ForArtifact}", "type": "PLAINTEXT"}]'
                   ProjectName: !Ref CodeBuildForSAM
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                 Name: Notification
                 OutputArtifacts: 
-                  - Name: BuildArtifact-Notification
+                  - Name: BuildArtifact_Notification
+                RunOrder: 1
+              - !Ref AWS::NoValue
+            - !If
+              - BuildContainers
+              - ActionTypeId: 
+                  Category: Build
+                  Owner: AWS
+                  Provider: CodeBuild
+                  Version: '1'
+                Configuration:
+                  EnvironmentVariables: !Join
+                    - ''
+                    - - !Sub '[{"name": "REPOSITORY_URI", "value": "'
+                      - !GetAtt ECR.RepositoryUri
+                      - !Sub '"}, {"name": "DOCKER_FILE", "value": "${DockerFilePath}", "type": "PLAINTEXT"}]'
+                  PrimarySource: Source_CloudFormationTemplatesArtifact
+                  ProjectName: !Ref CodeBuildForContainer
+                InputArtifacts:
+                  - Name: Source_CloudFormationTemplatesArtifact
+                  - Name: Source_Container
+                Name: Container
+                OutputArtifacts: 
+                  - Name: BuildArtifact_Container
                 RunOrder: 1
               - !Ref AWS::NoValue
           Name: Build
         # Deploy
         - Actions:
-            # Deploy CICD
-            - ActionTypeId: 
-                Category: Deploy
-                Owner: AWS
-                Provider: CloudFormation
-                Version: '1'
-              Configuration:
-                ActionMode: CREATE_UPDATE
-                StackName: !Ref AWS::StackName
-                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                TemplatePath: Source-CloudFormationTemplatesArtifact::cicd/templates/template.yaml
-                ParameterOverrides: !If
-                  - CreateCloudFormationConfigurationArtifact
-                  - !Ref AWS::NoValue
-                  - !Join
-                    - ''
-                    - - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}","GitHubOAuthToken": "${GitHubOAuthToken}","GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
-                      - !If
-                        - Development
-                        - development
-                        - production
-                      - !Sub '","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
-                TemplateConfiguration: !If
-                  - CreateCloudFormationConfigurationArtifact
-                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CICD.json  
-                  - !Ref AWS::NoValue   
-                OutputFileName: Output.json    
-              InputArtifacts:
-                - Name: Source-CloudFormationTemplatesArtifact
-                - !If
-                  - CreateCloudFormationConfigurationArtifact
-                  - Name: Source-CloudFormationConfigurationArtifact
-                  - !Ref AWS::NoValue
-              Name: !Ref AWS::StackName
-              OutputArtifacts: 
-                - Name: DeployArtifact-CICD
-              RunOrder: 1
             # Deploy GlobalSettings
             - !If
               - DeployGlobalSettings
@@ -725,10 +839,10 @@ Resources:
                   StackName: GlobalSettings
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::global/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::global/templates/template.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
+                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
                       - !If
                         - Development
                         - development
@@ -736,21 +850,21 @@ Resources:
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
                     - !Ref AWS::NoValue
                   OutputFileName: Output.json
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                 Name: GlobalSettings
                 OutputArtifacts: 
                   - Name: GlobalSettings
                 Region: us-east-1
-                RunOrder: 2
+                RunOrder: 1
               - !Ref AWS::NoValue
             # Deploy DefaultSecuritySettings
             - !If
@@ -765,10 +879,10 @@ Resources:
                   StackName: DefaultSecuritySettings
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::security/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::security/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -776,19 +890,19 @@ Resources:
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                 Name: DefaultSecuritySettings
                 OutputArtifacts: 
-                  - Name: DeployArtifact-DefaultSecuritySettings
-                RunOrder: 2
+                  - Name: DeployArtifact_DefaultSecuritySettings
+                RunOrder: 1
               - !Ref AWS::NoValue
             # Deploy Notification
             - !If
@@ -803,10 +917,10 @@ Resources:
                   StackName: Notification
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: BuildArtifact-Notification::packaged.yaml
+                  TemplatePath: BuildArtifact_Notification::packaged.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -814,20 +928,20 @@ Resources:
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Notification.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Notification.json
                     - !Ref AWS::NoValue
                   OutputFileName: Output.json
                 InputArtifacts:
-                  - Name: BuildArtifact-Notification
+                  - Name: BuildArtifact_Notification
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                 Name: Notification
                 OutputArtifacts:
-                  - Name: DeployArtifact-Notification
-                RunOrder: 2
+                  - Name: DeployArtifact_Notification
+                RunOrder: 1
               - !Ref AWS::NoValue
             # Deploy Network
             - !If
@@ -842,10 +956,10 @@ Resources:
                   StackName: Network
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::network/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::network/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -853,20 +967,20 @@ Resources:
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Network.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}Network.json
                     - !Ref AWS::NoValue
                   OutputFileName: Output.json
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                 Name: Network
                 OutputArtifacts:
-                  - Name: DeployArtifact-Network
-                RunOrder: 2
+                  - Name: DeployArtifact_Network
+                RunOrder: 1
               - !Ref AWS::NoValue
             # Deploy CloudOps
             - !If
@@ -881,13 +995,13 @@ Resources:
                   StackName: CloudOps
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
                     - - !If
                         - DeployNotification
-                        - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact-Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
-                        - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                        - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact_Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                        - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -900,20 +1014,20 @@ Resources:
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CloudOps.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CloudOps.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
-                  - Name: DeployArtifact-Notification
+                  - Name: DeployArtifact_CICD
+                  - Name: DeployArtifact_Notification
                 Name: CloudOps
                 OutputArtifacts: 
-                  - Name: DeployArtifact-CloudOps
-                RunOrder: 3
+                  - Name: DeployArtifact_CloudOps
+                RunOrder: 2
               - !Ref AWS::NoValue
             # Deploy Shared Services
             - !If
@@ -928,10 +1042,10 @@ Resources:
                   StackName: SharedServices
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::shared/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::shared/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -939,19 +1053,19 @@ Resources:
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SharedServices.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}SharedServices.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                 Name: SharedServices
                 OutputArtifacts: 
-                  - Name: DeployArtifact-SharedServices
-                RunOrder: 3
+                  - Name: DeployArtifact_SharedServices
+                RunOrder: 2
               - !Ref AWS::NoValue
             # Deploy DefaultSecuritySettings-ConfigRules
             - ActionTypeId: 
@@ -964,10 +1078,10 @@ Resources:
                 StackName: DefaultSecuritySettings-ConfigRules
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                 RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                TemplatePath: BuildArtifact-DefaultSecuritySettings-ConfigRules::packaged.yaml
+                TemplatePath: BuildArtifact_DefaultSecuritySettings-ConfigRules::packaged.yaml
                 ParameterOverrides: !Join
                   - ''
-                  - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                  - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                     - !If
                       - Development
                       - development
@@ -975,19 +1089,19 @@ Resources:
                     - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
-                  - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
+                  - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}DefaultSecuritySettings-ConfigRules.json
                   - !Ref AWS::NoValue
               InputArtifacts:
-                - Name: DeployArtifact-CICD
-                - Name: BuildArtifact-DefaultSecuritySettings-ConfigRules
+                - Name: DeployArtifact_CICD
+                - Name: BuildArtifact_DefaultSecuritySettings-ConfigRules
                 - !If
                   - CreateCloudFormationConfigurationArtifact
-                  - Name: Source-CloudFormationConfigurationArtifact
+                  - Name: Source_CloudFormationConfigurationArtifact
                   - !Ref AWS::NoValue
               Name: DefaultSecuritySettings-ConfigRules
               OutputArtifacts: 
-                - Name: DeployArtifact-DefaultSecuritySettings-ConfigRules
-              RunOrder: 3
+                - Name: DeployArtifact_DefaultSecuritySettings-ConfigRules
+              RunOrder: 2
             # Deploy StaticWebsiteHosting
             - !If
               - DeployStaticWebsiteHosting
@@ -1001,12 +1115,12 @@ Resources:
                   StackName: StaticWebsiteHosting
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
                   ParameterOverrides: !If
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1014,7 +1128,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
+                      - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
                         - !If
                           - Development
                           - development
@@ -1022,23 +1136,23 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}StaticWebsiteHosting.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}StaticWebsiteHosting.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
                   - !If
                     - DeployGlobalSettings
                     - Name: GlobalSettings
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                 Name: StaticWebsiteHosting
                 OutputArtifacts: 
-                  - Name: DeployArtifact-StaticWebsiteHosting
-                RunOrder: 3
+                  - Name: DeployArtifact_StaticWebsiteHosting
+                RunOrder: 2
               - !Ref AWS::NoValue
             # Deploy WebServers
             - !If
@@ -1053,12 +1167,17 @@ Resources:
                   StackName: WebServers
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::web-servers/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::web-servers/templates/template.yaml
                   ParameterOverrides: !If
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "ECSImageUri": "'
+                        - !If 
+                          - BuildContainers
+                          - !GetAtt ECR.RepositoryUri
+                          - ''
+                        - !Sub '", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                         - !If
                           - Development
                           - development
@@ -1066,39 +1185,39 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                         - !If
                           - Development
                           - development
                           - production
                         - !If
                           - DeployNetwork
-                          - '", "TransitGatewayId": { "Fn::GetParam": ["DeployArtifact-Network", "Output.json", "TransitGatewayId"]}, '
+                          - '", "TransitGatewayId": { "Fn::GetParam": ["DeployArtifact_Network", "Output.json", "TransitGatewayId"]}, '
                           - '", '
                         - !Sub '"TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}WebServers.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}WebServers.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
                   - !If
                     - DeployGlobalSettings
                     - Name: GlobalSettings
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                   - !If
                     - DeployNetwork
-                    - Name: DeployArtifact-Network
+                    - Name: DeployArtifact_Network
                     - !Ref AWS::NoValue
                 Name: WebServers
                 OutputArtifacts: 
-                  - Name: DeployArtifact-WebServers
-                RunOrder: 3
+                  - Name: DeployArtifact_WebServers
+                RunOrder: 2
               - !Ref AWS::NoValue
             # Deploy UploadArtifacts
             - !If
@@ -1113,10 +1232,10 @@ Resources:
                   StackName: UploadArtifacts
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source-CloudFormationTemplatesArtifact::cicd/templates/codebuild.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::cicd/templates/codebuild.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact-CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                       - !If
                         - Development
                         - development
@@ -1124,21 +1243,21 @@ Resources:
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
-                    - !Sub Source-CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}UploadArtifacts.json
+                    - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}UploadArtifacts.json
                     - !Ref AWS::NoValue
                 InputArtifacts:
-                  - Name: Source-CloudFormationTemplatesArtifact
+                  - Name: Source_CloudFormationTemplatesArtifact
                   - !If
                     - CreateCloudFormationConfigurationArtifact
-                    - Name: Source-CloudFormationConfigurationArtifact
+                    - Name: Source_CloudFormationConfigurationArtifact
                     - !Ref AWS::NoValue
-                  - Name: DeployArtifact-CICD
+                  - Name: DeployArtifact_CICD
                 Name: UploadArtifacts
                 OutputArtifacts: 
-                  - Name: DeployArtifact-UploadArtifacts
-                RunOrder: 3
+                  - Name: DeployArtifact_UploadArtifacts
+                RunOrder: 2
               - !Ref AWS::NoValue
-          Name: Deploy
+          Name: DeployInfrastructure
       Tags:
         - Key: environment
           Value: !If
@@ -1153,7 +1272,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1177,7 +1296,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1201,7 +1320,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.11
+        SemanticVersion: 2.1.12
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1326,24 +1445,14 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # Resource Group
-  ResourceGroup:
-    Type: AWS::ResourceGroups::Group
-    Properties: 
-      Description: !Sub Group by ${TagKey} ${TagValue}
-      Name: !Sub ${TagKey}-${TagValue}
-      ResourceQuery: 
-        Query: 
-          TagFilters: 
-            - Key: !Ref TagKey
-              Values: 
-                - !Ref TagValue
-        Type: TAG_FILTERS_1_0
-      Tags: 
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
 
 Outputs:
+  RepositoryUri:
+    Description: Repository URI for WebServers
+    Value: !If
+      - BuildContainers
+      - !GetAtt ECR.RepositoryUri
+      - '' 
   SNSForAlertArn:
     Description: SNS ARN for Alert
     Value: !If

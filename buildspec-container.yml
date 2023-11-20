@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - IMAGE_TAG=$(echo $CODEBUILD_SOURCE_VERSION |cut -d/ -f4 |cut -d'.' -f1)
+      - TIMESTAMP=$(date +%Y%m%d%H%M)
+      - echo $IMAGE_TAG
+  build:
+    commands:
+      - echo Building the Docker image...
+      - cd $CODEBUILD_SRC_DIR_Source_Container
+      - docker build -f $DOCKER_FILE --tag $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:${IMAGE_TAG}
+      - IMAGE_URI=$REPOSITORY_URI:${IMAGE_TAG}
+      - echo IMAGE_URI
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - printf '{"build.Image_Tag":"%s", "build.Image_Uri":"%s", "timestamp":"%s"}' "$(echo ${IMAGE_TAG})" "$(echo ${IMAGE_URI})" "$(echo ${TIMESTAMP})" > /tmp/build.json
+      - printf '{"name":"%s", "imageUri":"%s"}' "$(echo WebServers)" "$(echo ${IMAGE_URI})" > imagedefinitions.json
+      - printf '{"ImageURI":"%s"}' "$(echo ${IMAGE_URI})" > imageDetail.json
+artifacts:
+  files:
+    - /tmp/build.json
+    - imageDetail.json
+  discard-paths: yes
