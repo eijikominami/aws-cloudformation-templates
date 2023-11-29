@@ -24,6 +24,10 @@ Metadata:
           - IncidentPhoneNumber
           - IncidentManagerWorkloadName
       - Label: 
+          default: 'CloudWatch Application Insight Configuration'
+        Parameters: 
+          - ApplicationInsight 
+      - Label: 
           default: 'Notofication Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -36,6 +40,12 @@ Metadata:
           - TagValue
 
 Parameters:
+  ApplicationInsight:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
   IncidentManager:
     Type: String
     Default: DISABLED
@@ -119,6 +129,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateApplicationInsight: !Equals [ !Ref ApplicationInsight, ENABLED ]
   CreateIncidentManager: !Equals [ !Ref IncidentManager, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -252,7 +263,8 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue          
-  ApplicationInsights:
+  CloudWatchApplicationInsights:
+    Condition: CreateApplicationInsight
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
