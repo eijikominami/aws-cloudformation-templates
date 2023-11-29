@@ -302,6 +302,26 @@ Resources:
         HttpTokens: required
       SecurityGroups: 
         - !Ref EC2SecurityGroupId
+      UserData: !Base64
+        Fn::Join:
+          - ''
+          - - |
+              #!/bin/sh
+            - >
+              AWS_AVAIL_ZONE=$(curl
+              http://169.254.169.254/latest/meta-data/placement/availability-zone)
+            - |
+              AWS_REGION=${AWS_AVAIL_ZONE::-1}
+            - >
+              AWS_INSTANCE_ID=$(curl
+              http://169.254.169.254/latest/meta-data/instance-id)
+            - >
+              ROOT_VOLUME_IDS=$(aws ec2 describe-instances --region $AWS_REGION
+              --instance-id $AWS_INSTANCE_ID --output text --query
+              Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId)
+            - >
+              aws ec2 create-tags --resources $ROOT_VOLUME_IDS --region
+              $AWS_REGION --tags Key=MyRootTag,Value=MyRootVolumesValue
   # AWSServiceRoleForAutoScaling will be created automatically.
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
