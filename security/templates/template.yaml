@@ -96,13 +96,8 @@ Parameters:
       - DISABLED
     Description: Enable or disable AWS SecurityHub [required]
   AWSSecurityHubStandards:
-    Type: CommaDelimitedList
-    Default: FSBP, CIS
-    AllowedValues:
-      - FSBP
-      - CIS
-      - NIST
-      - PCIDSS
+    Type: String
+    Default: "FSBP, CIS"
     Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
   IAMAccessAnalyzer:
     Type: String

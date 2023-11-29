@@ -850,6 +850,18 @@ Resources:
             Condition:
               Bool: 
                 aws:SecureTransport: false
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForConfig.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForConfig.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
           - Effect: Allow
             Principal:
               Service: config.amazonaws.com

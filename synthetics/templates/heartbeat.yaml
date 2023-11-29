@@ -181,7 +181,6 @@ Resources:
           Value: !Ref TagValue
   S3ForSynthetics:
     Type: AWS::S3::Bucket
-    
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
