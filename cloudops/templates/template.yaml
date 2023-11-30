@@ -26,7 +26,7 @@ Metadata:
       - Label: 
           default: 'CloudWatch Application Insight Configuration'
         Parameters: 
-          - ApplicationInsight 
+          - ApplicationInsights
       - Label: 
           default: 'Notofication Configuration'
         Parameters: 
@@ -40,12 +40,13 @@ Metadata:
           - TagValue
 
 Parameters:
-  ApplicationInsight:
+  ApplicationInsights:
     Type: String
     Default: ENABLED
     AllowedValues:
       - ENABLED
       - DISABLED
+    Description: Enable or disable Amazon CloudWatch Application Insights [required]
   IncidentManager:
     Type: String
     Default: DISABLED
@@ -129,7 +130,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateApplicationInsight: !Equals [ !Ref ApplicationInsight, ENABLED ]
+  CreateApplicationInsights: !Equals [ !Ref ApplicationInsights, ENABLED ]
   CreateIncidentManager: !Equals [ !Ref IncidentManager, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -264,7 +265,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue          
   CloudWatchApplicationInsights:
-    Condition: CreateApplicationInsight
+    Condition: CreateApplicationInsights
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:

@@ -57,60 +57,6 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
-  AlarmLambdaClientError:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions: 
-        - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でクライアントエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
-      AlarmName: !If
-        - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-ClientError
-        - !Sub Warning-Lambda-${FunctionResouceName}-ClientError
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref FunctionResouceName
-        - Name: Resource
-          Value: !Ref FunctionResouceName
-      EvaluationPeriods: 1
-      MetricName: ClientError
-      Namespace: AWS/Lambda
-      OKActions: 
-        - !Ref SNSTopicArn
-      # Alert when Sum is over 1 count in 60 seconds.
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
-  AlarmLambdaTypeError:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions: 
-        - !Ref SNSTopicArn
-      AlarmDescription: !Sub 'Lambda *${FunctionResouceName}()* でタイプエラーが発生しています。CloudWatch Logs から詳細を確認してください。'
-      AlarmName: !If
-        - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-Lambda-${FunctionResouceName}-TypeError
-        - !Sub Warning-Lambda-${FunctionResouceName}-TypeError
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref FunctionResouceName
-        - Name: Resource
-          Value: !Ref FunctionResouceName
-      EvaluationPeriods: 1
-      MetricName: TypeError
-      Namespace: AWS/Lambda
-      OKActions: 
-        - !Ref SNSTopicArn
-      # Alert when Sum is over 1 count in 60 seconds.
-      Period: 60
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
   MetricFilterErrorLog:
     Condition: CreateMetricFilter
     Type: AWS::Logs::MetricFilter

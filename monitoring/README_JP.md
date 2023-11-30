@@ -707,8 +707,6 @@ Properties:
 | ネームスペース | メトリクス | Resource | FunctionName | 閾値 |
 | --- | --- | --- | --- | --- |
 | AWS/Lambda | **Errors** | `FunctionResouceName` | `FunctionResouceName` | 1分間に1回以上 |
-| AWS/Lambda | **ClientError** | `FunctionResouceName` | `FunctionResouceName` | 1分間に1回以上 |  
-| AWS/Lambda | **TypeError** | `FunctionResouceName` | `FunctionResouceName` | 1分間に1回以上 |  
 | AWS/Lambda | **Duration** | `FunctionResouceName` | `FunctionResouceName` | `TimeoutMilliseconds` | 
 | AWS/Lambda | **Throttles** | `FunctionResouceName` | `FunctionResouceName` | 1分間に1回以上 |  
 

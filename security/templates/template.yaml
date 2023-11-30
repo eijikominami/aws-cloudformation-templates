@@ -12,6 +12,7 @@ Metadata:
           default: CloudTrail Configuration
         Parameters:
           - CloudTrailAdditionalFilters
+          - CloudTrailS3Trail
       - Label:
           default: Config Configuration
         Parameters:
@@ -52,6 +53,13 @@ Parameters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
+  CloudTrailS3Trail:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudTrail trail [required]
   AWSConfig:
     Type: String
     Default: ENABLED
@@ -295,6 +303,7 @@ Resources:
       Parameters:
         AuditOtherRegions: !Ref AuditOtherRegions
         CloudTrailAdditionalFilters: !Ref CloudTrailAdditionalFilters
+        CloudTrailS3Trail: !Ref CloudTrailS3Trail
         LogBucketName: !Ref S3ForAccessLog
         LogicalNamePrefix: !Ref AWS::StackName
         SnsTopicARN: !If

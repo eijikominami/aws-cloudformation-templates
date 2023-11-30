@@ -705,8 +705,6 @@ The template creates the following alarms.
 | Namespace | MetricName | Resource | FunctionName | Threshold |
 | --- | --- | --- | --- | --- |
 | AWS/Lambda | **Errors** | `FunctionResouceName` | `FunctionResouceName` | At least once a minute |
-| AWS/Lambda | **ClientError** | `FunctionResouceName` | `FunctionResouceName` | At least once a minute |  
-| AWS/Lambda | **TypeError** | `FunctionResouceName` | `FunctionResouceName` | At least once a minute |  
 | AWS/Lambda | **Duration** | `FunctionResouceName` | `FunctionResouceName` | `TimeoutMilliseconds` | 
 | AWS/Lambda | **Throttles** | `FunctionResouceName` | `FunctionResouceName` | At least once a minute |  
 
