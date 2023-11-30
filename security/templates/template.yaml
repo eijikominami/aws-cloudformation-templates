@@ -48,6 +48,7 @@ Metadata:
           - Environment
           - TagKey
           - TagValue
+
 Parameters:
   CloudTrailAdditionalFilters:
     Type: String
@@ -191,6 +192,7 @@ Conditions:
   Development: !Equals
     - !Ref Environment
     - development
+
 Resources:
   IAM:
     Condition: CreateIAMAccessAnalyzer
@@ -554,6 +556,7 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+        
 Outputs:
   SNSForAlertArn:
     Description: SNS ARN for Alert
