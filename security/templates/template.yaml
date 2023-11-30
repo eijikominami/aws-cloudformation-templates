@@ -12,6 +12,7 @@ Metadata:
           default: CloudTrail Configuration
         Parameters:
           - CloudTrailAdditionalFilters
+          - CloudTrailS3Trail
       - Label:
           default: Config Configuration
         Parameters:
@@ -47,11 +48,19 @@ Metadata:
           - Environment
           - TagKey
           - TagValue
+
 Parameters:
   CloudTrailAdditionalFilters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
+  CloudTrailS3Trail:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudTrail trail [required]
   AWSConfig:
     Type: String
     Default: ENABLED
@@ -183,6 +192,7 @@ Conditions:
   Development: !Equals
     - !Ref Environment
     - development
+
 Resources:
   IAM:
     Condition: CreateIAMAccessAnalyzer
@@ -295,6 +305,7 @@ Resources:
       Parameters:
         AuditOtherRegions: !Ref AuditOtherRegions
         CloudTrailAdditionalFilters: !Ref CloudTrailAdditionalFilters
+        CloudTrailS3Trail: !Ref CloudTrailS3Trail
         LogBucketName: !Ref S3ForAccessLog
         LogicalNamePrefix: !Ref AWS::StackName
         SnsTopicARN: !If
@@ -375,7 +386,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -392,7 +403,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -487,7 +498,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -529,7 +540,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -545,6 +556,7 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+        
 Outputs:
   SNSForAlertArn:
     Description: SNS ARN for Alert

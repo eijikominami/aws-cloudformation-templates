@@ -181,7 +181,6 @@ Resources:
           Value: !Ref TagValue
   S3ForSynthetics:
     Type: AWS::S3::Bucket
-    
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
@@ -293,7 +292,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -310,7 +309,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

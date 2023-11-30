@@ -6,8 +6,10 @@ Metadata:
     ParameterGroups: 
       - Label: 
           default: 'CloudTrail Configuration'
-        Parameters: 
+        Parameters:
           - CloudTrailAdditionalFilters
+          - CloudTrailInsights
+          - CloudTrailS3Trail
           - AuditOtherRegions
           - LogBucketName
       - Label: 
@@ -27,6 +29,20 @@ Parameters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
+  CloudTrailInsights:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudTrail Insights [required]
+  CloudTrailS3Trail:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudTrail trail [required]
   AuditOtherRegions:
     Type: String
     Default: ENABLED
@@ -65,6 +81,8 @@ Parameters:
 Conditions:
   CreateAdditionalFilters: !Not [ !Equals [ !Ref CloudTrailAdditionalFilters, '' ] ]
   CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
+  CreateCloudTrailInsights: !Equals [ !Ref CloudTrailInsights, ENABLED ]
+  EnableLogging: !Equals [ !Ref CloudTrailS3Trail, ENABLED ]
 
 Resources:
   # IAM Role
@@ -107,9 +125,11 @@ Resources:
       CloudWatchLogsLogGroupArn: !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
       CloudWatchLogsRoleArn: !GetAtt IAMRoleForCloudTrail.Arn
       EnableLogFileValidation: true
-      InsightSelectors: 
-        - InsightType: ApiCallRateInsight
-        - InsightType: ApiErrorRateInsight
+      InsightSelectors: !If
+        - CreateCloudTrailInsights
+        - - InsightType: ApiCallRateInsight
+          - InsightType: ApiErrorRateInsight
+        - !Ref AWS::NoValue
       EventSelectors:
         - DataResources: 
             # All S3 buckets
@@ -121,7 +141,10 @@ Resources:
               Values: 
                 - arn:aws:lambda
       IncludeGlobalServiceEvents: true
-      IsLogging: true
+      IsLogging: !If
+        - EnableLogging
+        - true
+        - false
       IsMultiRegionTrail: true
       KMSKeyId: !GetAtt KMSKey.Arn
       S3BucketName: !Ref S3ForCloudTrail

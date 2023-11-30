@@ -24,6 +24,10 @@ Metadata:
           - IncidentPhoneNumber
           - IncidentManagerWorkloadName
       - Label: 
+          default: 'CloudWatch Application Insight Configuration'
+        Parameters: 
+          - ApplicationInsights
+      - Label: 
           default: 'Notofication Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -36,6 +40,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  ApplicationInsights:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable Amazon CloudWatch Application Insights [required]
   IncidentManager:
     Type: String
     Default: DISABLED
@@ -119,6 +130,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateApplicationInsights: !Equals [ !Ref ApplicationInsights, ENABLED ]
   CreateIncidentManager: !Equals [ !Ref IncidentManager, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -252,7 +264,8 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue          
-  ApplicationInsights:
+  CloudWatchApplicationInsights:
+    Condition: CreateApplicationInsights
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -283,7 +296,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -300,7 +313,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.12
+        SemanticVersion: 2.1.13
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
