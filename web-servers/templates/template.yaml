@@ -679,6 +679,16 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Policies: 
+        - PolicyName: Tags
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: 
+                  - ec2:DescribeInstances
+                  - ec2:CreateTags
+                Resource: '*'
       RoleName: !Sub '${AWS::StackName}-AWSEC2Role-${AWS::Region}'
       Tags:
         - Key: environment
