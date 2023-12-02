@@ -109,7 +109,7 @@ You can provide optional parameters as follows:
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Security Hub enabled |
-| AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | The standard that you want to enable |
+| AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | | The standard that you want to enable |
 | CloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
 | CloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |

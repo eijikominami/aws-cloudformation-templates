@@ -1266,6 +1266,7 @@ Resources:
             - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
+      PipelineType: V2
   # CloudWatch Alarm
   AlarmCodeBuildForSAM:
     Type: AWS::Serverless::Application
