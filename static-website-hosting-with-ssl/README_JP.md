@@ -22,7 +22,7 @@
 
 | 作成されるAWSサービス | 個別のCloudFormationテンプレート |
 | --- | --- |
-| Synthetics | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) |
+| Synthetics | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml) |
 | Realtime Dashboard | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=RealtimeDashboard&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/edge/realtime-dashboard.yaml) |
 | WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
 
@@ -61,7 +61,7 @@ CloudFrontは、``Custom Domain Name with ACM``、 ``Aliases``、 ``Origin Acces
 ### Synthetics Stack
 
 このテンプレートは、外形監視に関するネストされたスタックを生成します。
-このスタックの詳細は、 [こちら](../synthetics/README_JP.md) をご覧ください。
+このスタックの詳細は、 [こちら](../application-signals/README_JP.md) をご覧ください。
 
 ### Real-time Dashboard Stack
 

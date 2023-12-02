@@ -39,8 +39,8 @@ env:
     SHARED_DIST_DIR: aws-cloudformation-templates/shared
     STORAGE_SRC_DIR: storage/templates
     STORAGE_DIST_DIR: aws-cloudformation-templates/storage
-    SYNTHETICS_SRC_DIR: synthetics/templates
-    SYNTHETICS_DIST_DIR: aws-cloudformation-templates/synthetics
+    APPSIGNALS_SRC_DIR: application-signals/templates
+    APPSIGNALS_DIST_DIR: aws-cloudformation-templates/application-signals
 
 phases:
   install:
@@ -75,7 +75,7 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SHARED_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${STORAGE_DIST_DIR}/ --recursive
-      - aws s3 rm s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${APPSIGNALS_DIST_DIR}/ --recursive
   build:
     commands:
       - sam validate --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml
@@ -112,4 +112,4 @@ phases:
        - aws s3 cp ${SECURITY_CONFIG_RULES_SRC_DIR}/ s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${SHARED_SRC_DIR}/ s3://${BUCKET_NAME}/${SHARED_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${STORAGE_SRC_DIR}/ s3://${BUCKET_NAME}/${STORAGE_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
-       - aws s3 cp ${SYNTHETICS_SRC_DIR}/ s3://${BUCKET_NAME}/${SYNTHETICS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${APPSIGNALS_SRC_DIR}/ s3://${BUCKET_NAME}/${APPSIGNALS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'

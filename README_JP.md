@@ -28,7 +28,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | [Slackへの通知](/notification/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
 | [共通サービス](/shared/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
 | [**Webサイトのホスティング**](/static-website-hosting-with-ssl/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=StaticWebsiteHosting&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/static-website-hosting-with-ssl/template.yaml)  |
-| [**外形監視の設定**](/synthetics/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) |
+| [**アプリケーションの監視**](/application-signals/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml) |
 
 ## 環境
 
@@ -36,7 +36,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 | サービス | リソース | バージョン |
 | --- | --- | --- |
-| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-5.0 |
+| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-6.0 |
 | AWS CodeBuild | Image | aws/codebuild/amazonlinux2-aarch64-standard:2.0 (Python 3.9) |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
@@ -81,7 +81,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 ### 外形監視の設定
 
-![](images/architecture-synthetics.png)
+![](images/architecture-application-signals.png)
 
 ### CloudOps
 

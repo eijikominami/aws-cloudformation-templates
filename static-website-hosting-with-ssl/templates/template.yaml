@@ -46,8 +46,9 @@ Metadata:
           - RealtimeDashboardKinesisShardCount
           - RealtimeKinesisNumberOfPutRecordThreshold
       - Label: 
-          default: 'Synthetics Configuration'
+          default: 'Application Signals Configuration'
         Parameters: 
+          - CloudWatchAppicationSignals
           - SyntheticsCanaryName
       - Label: 
           default: 'Route53 Configuration'
@@ -82,6 +83,13 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to CloudFront
+  CloudWatchAppicationSignals:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudFront additional metrics [required]
   DomainName:
     Type: String
     AllowedPattern: .+
@@ -368,7 +376,7 @@ Conditions:
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateSynthetics: !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ]
+  ApplicationSignals: !And [ !Not [ !Equals [ !Ref SyntheticsCanaryName, ''] ], !Equals [ !Ref CloudWatchAppicationSignals, ENABLED ] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -435,7 +443,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/cloudfront.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
   Synthetics:
-    Condition: CreateSynthetics
+    Condition: ApplicationSignals
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -464,8 +472,34 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/synthetics/heartbeat.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/synthetics/heartbeat.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml
+  InternetMonitor:
+    Condition: ApplicationSignals
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        ResourceNames: !Join
+          - ''
+          - - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/
+            - !GetAtt CloudFront.Outputs.Id
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/application-signals/internetmonitor.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/application-signals/internetmonitor.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

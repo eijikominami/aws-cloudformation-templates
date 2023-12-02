@@ -1,23 +1,23 @@
 [**English**](README.md) / 日本語
 
-# AWSCloudFormationTemplates/synthetics
+# AWSCloudFormationTemplates/application-signals
 ![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiT1o3djE0RFpweWErRDl6SkpwTGsySVJKbWk0ajhreUlEaXAvTHh3ZzdaS2wzNVR5V1hpZkZRRVRtcFIvNncydWdad2w4TG9MRVMzVGFvMlZKY2RNYUowPSIsIml2UGFyYW1ldGVyU3BlYyI6Ik0vOGVWdGFEWTlyYVdDZUwiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
 
-``AWSCloudFormationTemplates/synthetics`` は、 ``Amazon CloudWatch Synthetics`` を作成します。
+``AWSCloudFormationTemplates/application-signals`` は、 ``Amazon CloudWatch Synthetics`` を作成します。
 
 ## TL;DR
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
 
-[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) 
+[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml) 
 
 ## アーキテクチャ
 
 このテンプレートが作成するAWSリソースのアーキテクチャ図は、以下の通りです。
 
-![](../images/architecture-synthetics.png)
+![](../images/architecture-application-signals.png)
 
 ### Amazon CloudWatch Synthetics
 
@@ -41,7 +41,7 @@ S3バケットは、ハートビートスクリプトが取得したスクリー
 ``CanaryName``, ``DomainName``, ``WatchedPagePath`` パラメータとともに以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
+aws cloudformation deploy --template-file synthetics-heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。

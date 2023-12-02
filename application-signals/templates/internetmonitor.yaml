@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/application-signals/internetmonitor creates Amazon CloudWatch Internet Monitor.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Internet Monitor Configuration'
+        Parameters: 
+          - ResourceNames
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  ResourceNames:
+    Type: CommaDelimitedList
+    AllowedPattern: .+
+    Description: The resources that have been added for the monitor
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  InternetMonitor:
+    Type: AWS::InternetMonitor::Monitor
+    Properties:
+      HealthEventsConfig: 
+        AvailabilityLocalHealthEventsConfig: 
+          HealthScoreThreshold: 60
+          MinTrafficImpact: 0.01
+          Status: ENABLED
+        AvailabilityScoreThreshold: 95
+        PerformanceLocalHealthEventsConfig: 
+          HealthScoreThreshold: 60
+          MinTrafficImpact: 0.01
+          Status: ENABLED
+        PerformanceScoreThreshold: 95
+      MonitorName: !Ref AWS::StackName
+      Resources: !Ref ResourceNames
+      Status: ACTIVE
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TrafficPercentageToMonitor: 100

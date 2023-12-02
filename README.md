@@ -28,7 +28,7 @@ This project contains **Cloudformation templates** as follows.
 | [Send Notification to Slack](/notification/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
 | [Shared Servivces](/shared/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
 | [**Static Website Hosting**](/static-website-hosting-with-ssl/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=StaticWebsiteHosting&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/static-website-hosting-with-ssl/template.yaml)  |
-| [**Synthetics Monitoring**](/synthetics/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) |
+| [**Application Signals**](/application-signals/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml) |
 
 ## Environment
 
@@ -36,7 +36,7 @@ This project uses the following modules.
 
 | Service | Resource | Version |
 | --- | --- | --- |
-| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-5.0 |
+| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-6.0 |
 | AWS CodeBuild | Image | aws/codebuild/amazonlinux2-aarch64-standard:2.0 (Python 3.9) |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
@@ -81,7 +81,7 @@ The following section describes the individual components of the architecture.
 
 ### Synthetics Monitoring Template
 
-![](images/architecture-synthetics.png)
+![](images/architecture-application-signals.png)
 
 ### Shared Services
 

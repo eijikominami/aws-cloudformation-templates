@@ -1,23 +1,23 @@
 English / [**日本語**](README_JP.md)
 
-# AWSCloudFormationTemplates/synthetics
+# AWSCloudFormationTemplates/application-signals
 ![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiT1o3djE0RFpweWErRDl6SkpwTGsySVJKbWk0ajhreUlEaXAvTHh3ZzdaS2wzNVR5V1hpZkZRRVRtcFIvNncydWdad2w4TG9MRVMzVGFvMlZKY2RNYUowPSIsIml2UGFyYW1ldGVyU3BlYyI6Ik0vOGVWdGFEWTlyYVdDZUwiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
 
-``AWSCloudFormationTemplates/synthetics`` builds ``Amazon CloudWatch Synthetics``.
+``AWSCloudFormationTemplates/application-signals`` builds ``Amazon CloudWatch Synthetics``.
 
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
 
-[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/synthetics/heartbeat.yaml) 
+[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml) 
 
 ## Architecture
 
 The following sections describe the individual components of the architecture.
 
-![](../images/architecture-synthetics.png)
+![](../images/architecture-application-signals.png)
 
 ### Amazon CloudWatch Synthetics
 
@@ -41,7 +41,7 @@ These alarms are trigged when the success rate is less than **90%**.
 Execute the command to deploy with ``CanaryName``, ``DomainName`` and ``WatchedPagePath``.
 
 ```bash
-aws cloudformation deploy --template-file heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
+aws cloudformation deploy --template-file synthetics-heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
 ```
 
 You can provide optional parameters as follows.
