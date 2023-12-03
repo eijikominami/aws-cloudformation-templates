@@ -153,53 +153,62 @@ Resources:
       Code: 
         Handler: apiCanaryBlueprint.handler
         Script: !Sub >
-          var cloudops = require('Synthetics');
+          const synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
-          const https = require('https');
-          const http = require('http');
+          const syntheticsConfiguration = synthetics.getConfiguration();
+
 
           const apiCanaryBlueprint = async function () {
-              const postData = "${Data}";
 
-              const verifyRequest = async function (requestOption) {
-                return new Promise((resolve, reject) => {
-                  log.info("Making request with options: " + JSON.stringify(requestOption));
-                  let req
-                  if (requestOption.port === 443) {
-                    req = https.request(requestOption);
-                  } else {
-                    req = http.request(requestOption);
-                  }
-                  req.on('response', (res) => {
-                    log.info(`Status Code: %s`, res.statusCode)
-                    log.info(`Response Headers: %s`, JSON.stringify(res.headers))
-                    if (res.statusCode !== 200) {
-                      reject("Failed: " + requestOption.path);
-                    }
-                    res.on('data', (d) => {
-                      log.info("Response: " + d);
-                    });
-                    res.on('end', () => {
-                      resolve();
-                    })
+              syntheticsConfiguration.setConfig({
+                  restrictedHeaders: [], // Value of these headers will be redacted from logs and reports
+                  restrictedUrlParameters: [] // Values of these url parameters will be redacted from logs and reports
+              });
+
+              // Handle validation for positive scenario
+              const validateSuccessful = async function(res) {
+                  return new Promise((resolve, reject) => {
+                      if (res.statusCode < 200 || res.statusCode > 299) {
+                          throw new Error(res.statusCode + ' ' + res.statusMessage);
+                      }
+
+                      let responseBody = '';
+                      res.on('data', (d) => {
+                          responseBody += d;
+                      });
+
+                      res.on('end', () => {
+                          // Add validation on 'responseBody' here if required.
+                          resolve();
+                      });
                   });
+              };
 
-                  req.on('error', (error) => {
-                    reject(error);
-                  });
 
-                  if (postData) {
-                    req.write(postData);
-                  }
-                  req.end();
-                });
-              }
+              // Set request option for Verify ${EndpointHostName}
+              let requestOptionsStep1 = {
+                  hostname: '${EndpointHostName}',
+                  method: '${Method}',
+                  path: '${EndpointPath}',
+                  port: '443',
+                  protocol: 'https:',
+                  body: "${Data}",
+                  headers: {}
+              };
+              requestOptionsStep1['headers']['User-Agent'] = [synthetics.getCanaryUserAgentString(), requestOptionsStep1['headers']['User-Agent']].join(' ');
 
-              const headers = {}
-              headers['User-Agent'] = [cloudops.getCanaryUserAgentString(), headers['User-Agent']].join(' ');
-              const requestOptions = {"hostname":"${EndpointHostName}","method":"${Method}","path":"${EndpointPath}","port":443}
-              requestOptions['headers'] = headers;
-              await verifyRequest(requestOptions);
+              // Set step config option for Verify ${EndpointHostName}
+            let stepConfig1 = {
+                  includeRequestHeaders: false,
+                  includeResponseHeaders: false,
+                  includeRequestBody: false,
+                  includeResponseBody: false,
+                  continueOnHttpStepFailure: true
+              };
+
+              await synthetics.executeHttpStep('Verify ${EndpointHostName}', requestOptionsStep1, validateSuccessful, stepConfig1);
+
+
           };
 
           exports.handler = async () => {
