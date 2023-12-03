@@ -332,6 +332,12 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  CertificateManagerAccount:
+    Condition: CreateACMCertificate
+    Type: AWS::CertificateManager::Account
+    Properties:
+      ExpiryEventsConfiguration: 
+        DaysBeforeExpiry: 45         
   # CloudWatch Alarm for ACM
   CloudWatchAlarmACM:
     Condition: CreateACMCertificate
