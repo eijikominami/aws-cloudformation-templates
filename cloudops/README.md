@@ -18,6 +18,7 @@ If you want to deploy each service individually, click the button below.
 | Services | Launchers |
 | --- | --- |
 | CloudWatch Application Insights | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) |
+| CloudWatch Synthetics | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml)  |
 | CodeGuru Profiler | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuruProfiler&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml) |
 | DevOps Guru | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) |
 | ResillienceHub | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResillienceHub&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resilliencehub.yaml) |
@@ -30,8 +31,10 @@ If you want to deploy each service individually, click the button below.
 The following sections describe the individual components of the architecture.
 
 ![](../images/architecture-cloudops.png)
+![](../images/architecture-synthetics.png)
 
 ## Deployment
+### CloudOps
 
 Execute the command to deploy.
 
@@ -57,7 +60,7 @@ You can provide optional parameters as follows.
 | SSMOrganizationID | String | | | AWS Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
 
-### CodeGuru Profiler
+#### CodeGuru Profiler
 
 This template creates a profiling group of ``AWS CodeGuru Profiler``.
 
@@ -67,7 +70,7 @@ This template creates a profiling group of ``AWS CodeGuru Profiler``.
 | ProfilingGroupName | String | Default | ○ | The name of the profiling group |
 | **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
 
-### DevOps Guru
+#### DevOps Guru
 
 This template sets a notification channel of ``AWS DevOps Guru``.
 
@@ -75,7 +78,7 @@ This template sets a notification channel of ``AWS DevOps Guru``.
 | --- | --- | --- | --- | --- |
 | **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
 
-### Systems Manager
+#### Systems Manager
 
 This template sets ``AWS Systems Manager``.
 
@@ -86,11 +89,9 @@ This template sets ``AWS Systems Manager``.
 | **OrganizationID** | String | | | AWS Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
-#### Multi account
-
 If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.
 
-### Systems Manager Incident Manager
+#### Systems Manager Incident Manager
 
 This template sets a notification channel of ``AWS Systems Manager Incident Manager``.
 
@@ -103,3 +104,35 @@ This template sets a notification channel of ``AWS Systems Manager Incident Mana
 | Email | String | | | The email address |
 | PhoneNumber | String | | | The Phone Number |
 | WorkloadName | String | Workload | ○ | The workload name |
+
+### Amazon CloudWatch Synthetics
+
+CloudWatch Synthetics creates canaries, configurable scripts that run on a schedule, and monitors your endpoints. Execute the command to deploy with ``CanaryName``, ``DomainName`` and ``WatchedPagePath``.
+
+```bash
+aws cloudformation deploy --template-file synthetics-heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
+```
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| IncidentManagerArn | String | | | Systems Manager Incident Manager response plan ARN |
+| IncidentDurationInSeconds | Number | 600 | ○ | The time to wait until starting an incident |
+| IncidentSuccessPercentThreshold | Number | 50 | ○ | The threshold of success percent starting an incident |
+| **CanaryName** | String | | ○ | The name for this canary |
+| **DomainName** | String | | ○ | The domain name that hearbeat scripts watches |
+| WatchedPagePath | String | /index.html | ○ | The page path that hearbeat scripts watches |
+
+#### AWS Lambda
+
+This template creates ``hearbeat scripts`` using AWS Lambda function that load the specified URL and store a screenshot of the page and an HTTP archive file (HAR file). They also store logs of accessed URLs. 
+
+#### Amazon S3
+
+The S3 bucket stores screenshots, HAR files, and logs from the hearbeat scripts.
+
+#### Amazon CloudWatch Alarm
+
+This template creates Amazon CloudWatch custom metrics and alarms.
+These alarms are trigged when the success rate is less than **90%**.

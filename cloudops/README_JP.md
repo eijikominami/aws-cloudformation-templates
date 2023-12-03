@@ -18,6 +18,7 @@
 | 作成されるAWSサービス | 個別のCloudFormationテンプレート |
 | --- | --- |
 | CloudWatch Application Insights | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) |
+| CloudWatch Synthetics | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml)  |
 | CodeGuru Profiler | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuruProfiler&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml) |
 | DevOps Guru | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) |
 | ResillienceHub | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResillienceHub&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resilliencehub.yaml) |
@@ -30,8 +31,10 @@
 このテンプレートが作成するAWSリソースのアーキテクチャ図は、以下の通りです。
 
 ![](../images/architecture-cloudops.png)
+![](../images/architecture-synthetics.png)
 
 ## デプロイ
+### CloudOps
 
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
@@ -57,7 +60,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | SSMOrganizationID | String | | | AWS Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
 
-### CodeGuru Profiler
+#### CodeGuru Profiler
 
 このテンプレートは、``AWS CodeGuru Profiler`` のプロファイリンググループを作成します。
 
@@ -67,7 +70,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | ProfilingGroupName | String | Default | ○ | プロファイリンググループの名前 |
 | **SNSForAlertArn** | String | | ○ | SNSトピックのARN |
 
-### DevOps Guru
+#### DevOps Guru
 
 このテンプレートは、``AWS DevOps Guru`` の通知チャンネルを作成します。
 
@@ -75,7 +78,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | --- | --- | --- | --- | --- |
 | **SNSForAlertArn** | String | | ○ | SNSトピックのARN |
 
-### Systems Manager
+#### Systems Manager
 
 このテンプレートは、``AWS Systems Manager`` を作成します。
 
@@ -86,11 +89,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | **OrganizationID** | String | | | AWS Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
 
-#### マルチアカウント対応
-
 AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて  **Systems Manager** と **AWS Trusted Advisor** の `アクセス有効化` を設定してください。
 
-### Systems Manager Incident Manager
+#### Systems Manager Incident Manager
 
 このテンプレートは、``AWS Systems Manager Incident Manager`` を作成します。
 
@@ -103,3 +104,35 @@ AWS Systems Manager Explorer を `Shared Services` アカウントで使用す�
 | Email | String | | | Eメールアドレス |
 | PhoneNumber | String | | | 電話番号 |
 | WorkloadName | String | Workload | ○ | ワークロード名 |
+
+### Amazon CloudWatch Synthetics
+
+CloudWatch Synthetics は、カナリアおよび設定可能なスクリプトを作成し、指定されたエンドポイントを監視します。 ``CanaryName``, ``DomainName``, ``WatchedPagePath`` パラメータとともに以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
+
+```bash
+aws cloudformation deploy --template-file synthetics-heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
+```
+
+デプロイ時に、以下のパラメータを指定することができます。
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| IncidentManagerArn | String | | | カナリア名 |
+| IncidentDurationInSeconds | Number | 600 | ○ | インシデントの基準となる時間 |
+| IncidentSuccessPercentThreshold | Number | 50 | ○ | インシデントの基準となるアクセス成功率（％） |
+| **CanaryName** | String | | ○ | カナリア名 |
+| **DomainName** | String | | ○ | スクリプトが監視するドメイン名 |
+| WatchedPagePath | String | /index.html | ○ | スクリプトが監視するページのパス |
+
+#### AWS Lambda
+
+このテンプレートは、 Lambda を用いて ``ハートビートスクリプト`` を作成します。この関数は特定のURLを読み込んで、そのスクリーンショットとファイル、およびログを保存します。
+
+#### Amazon S3
+
+S3バケットは、ハートビートスクリプトが取得したスクリーンショットとファイル、ログを保存します。
+
+#### Amazon CloudWatch Alarm
+
+このテンプレートは、CloudWatch のカスタムメトリクスとアラームを作成します。
+これらのアラームは、成功率が90%を下回ったときにトリガされます。

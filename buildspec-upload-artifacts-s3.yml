@@ -39,8 +39,6 @@ env:
     SHARED_DIST_DIR: aws-cloudformation-templates/shared
     STORAGE_SRC_DIR: storage/templates
     STORAGE_DIST_DIR: aws-cloudformation-templates/storage
-    APPSIGNALS_SRC_DIR: application-signals/templates
-    APPSIGNALS_DIST_DIR: aws-cloudformation-templates/application-signals
 
 phases:
   install:

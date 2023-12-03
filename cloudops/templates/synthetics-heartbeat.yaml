@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/application-signals/synthetics-heartbeat creates an AWS CloudWatch Synthetics canary.
+Description: AWSCloudFormationTemplates/cloudops/synthetics-heartbeat creates an AWS CloudWatch Synthetics canary.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -141,7 +141,7 @@ Resources:
       Code: 
         Handler: pageLoadBlueprint.handler
         Script: !Sub >
-          var application-signals = require('Synthetics');
+          var cloudops = require('Synthetics');
           const log = require('SyntheticsLogger');
 
           const pageLoadBlueprint = async function () {
@@ -149,12 +149,12 @@ Resources:
               // INSERT URL here
               const URL = "https://${DomainName}${WatchedPagePath}";
 
-              let page = await application-signals.getPage();
+              let page = await cloudops.getPage();
               const response = await page.goto(URL, {waitUntil: 'domcontentloaded', timeout: 30000});
               //Wait for page to render.
               //Increase or decrease wait time based on endpoint being monitored.
               await page.waitFor(15000);
-              await application-signals.takeScreenshot('loaded', 'loaded');
+              await cloudops.takeScreenshot('loaded', 'loaded');
               let pageTitle = await page.title();
               log.info('Page title: ' + pageTitle);
               if (response.status() !== 200) {
@@ -188,7 +188,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub application-signals-${CanaryName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cloudops-${CanaryName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays

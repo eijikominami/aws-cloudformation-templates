@@ -472,8 +472,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/application-signals/synthetics-heartbeat.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml
   InternetMonitor:
     Condition: ApplicationSignals
     Type: AWS::CloudFormation::Stack
@@ -498,8 +498,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/application-signals/internetmonitor.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/application-signals/internetmonitor.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/internetmonitor.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/internetmonitor.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

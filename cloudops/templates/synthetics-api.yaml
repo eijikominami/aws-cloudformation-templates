@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/application-signals/synthetics-api creates an AWS CloudWatch Synthetics canary.
+Description: AWSCloudFormationTemplates/cloudops/synthetics-api creates an AWS CloudWatch Synthetics canary.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -153,7 +153,7 @@ Resources:
       Code: 
         Handler: apiCanaryBlueprint.handler
         Script: !Sub >
-          var application-signals = require('Synthetics');
+          var cloudops = require('Synthetics');
           const log = require('SyntheticsLogger');
           const https = require('https');
           const http = require('http');
@@ -196,7 +196,7 @@ Resources:
               }
 
               const headers = {}
-              headers['User-Agent'] = [application-signals.getCanaryUserAgentString(), headers['User-Agent']].join(' ');
+              headers['User-Agent'] = [cloudops.getCanaryUserAgentString(), headers['User-Agent']].join(' ');
               const requestOptions = {"hostname":"${EndpointHostName}","method":"${Method}","path":"${EndpointPath}","port":443}
               requestOptions['headers'] = headers;
               await verifyRequest(requestOptions);
@@ -228,7 +228,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub application-signals-${CanaryName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cloudops-${CanaryName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
