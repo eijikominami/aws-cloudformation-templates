@@ -152,7 +152,7 @@ Resources:
       ArtifactS3Location: !Sub s3://${S3ForSynthetics}
       Code: 
         Handler: apiCanaryBlueprint.handler
-        Script: !Sub >
+        Script: !Sub |
           const synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
           const syntheticsConfiguration = synthetics.getConfiguration();
