@@ -73,6 +73,7 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${SECURITY_CONFIG_RULES_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${SHARED_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${STORAGE_DIST_DIR}/ --recursive
+  build:
     commands:
       - sam validate --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml
       - sam build --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml --build-dir ${ANALYTICS_SRC_DIR}/.aws-sam/build
