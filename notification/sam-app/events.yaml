@@ -9,6 +9,7 @@ Metadata:
           default: 'EventBridge Configuration'
         Parameters:
           - AutoScalingEventsRule
+          - CertificateManager
           - EBSEventsRule
           - EC2EventsRule
           - KMSEventsRule
@@ -45,6 +46,14 @@ Parameters:
       - ERROR_ONLY
       - DISABLED
     Description: Enable or disable the events rule about AutoScaling [required]
+  CertificateManager:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - ERROR_ONLY
+      - DISABLED
+    Description: Enable or disable the events rule about Certificate Manager [required]
   EBSEventsRule:
     Type: String
     Default: ENABLED
@@ -144,6 +153,47 @@ Conditions:
   SubscribeEBSErrorEventOnly: !Equals [ !Ref EBSEventsRule, ERROR_ONLY]
 
 Resources:
+  EventBridgeForAutoScaling:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for AutoScaling created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.autoscaling
+        detail-type: 
+          - EC2 Instance-launch Lifecycle Action
+          - EC2 Instance Launch Successful
+          - EC2 Instance Launch Unsuccessful
+          - EC2 Instance-terminate Lifecycle Action
+          - EC2 Instance Terminate Successful
+          - EC2 Instance Terminate Unsuccessful
+        detail: !If 
+          - SubscribeAutoScalingErrorEventOnly
+          - StatusCode:
+              - Failed
+          - !Ref AWS::NoValue
+      Name: !Sub ${LogicalNamePrefix}-AutoScaling
+      State: !If
+        - SubscribeAutoScalingErrorEventOnly
+        - ENABLED
+        - !Ref AutoScalingEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForCertificateManager:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for Certificate Manager created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.acm
+        detail-type: 
+          - ACM Certificate Approaching Expiration
+      Name: !Sub ${LogicalNamePrefix}-CertificateManager
+      State: !Ref CertificateManager
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
   EventBridgeForCloudFormation:
     Type: AWS::Events::Rule
     Properties: 
@@ -190,33 +240,6 @@ Resources:
         - SubscribeEBSErrorEventOnly
         - ENABLED
         - !Ref EBSEventsRule
-      Targets:
-        - Arn: !Ref SNSForAlertArn
-          Id: SNSForAlert
-  EventBridgeForAutoScaling:
-    Type: AWS::Events::Rule
-    Properties: 
-      Description: !Sub Rule for AutoScaling created by ${AWS::StackName}.
-      EventPattern:
-        source:
-          - aws.autoscaling
-        detail-type: 
-          - EC2 Instance-launch Lifecycle Action
-          - EC2 Instance Launch Successful
-          - EC2 Instance Launch Unsuccessful
-          - EC2 Instance-terminate Lifecycle Action
-          - EC2 Instance Terminate Successful
-          - EC2 Instance Terminate Unsuccessful
-        detail: !If 
-          - SubscribeAutoScalingErrorEventOnly
-          - StatusCode:
-              - Failed
-          - !Ref AWS::NoValue
-      Name: !Sub ${LogicalNamePrefix}-AutoScaling
-      State: !If
-        - SubscribeAutoScalingErrorEventOnly
-        - ENABLED
-        - !Ref AutoScalingEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert

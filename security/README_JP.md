@@ -34,7 +34,7 @@
 
 このテンプレートは、 ``IAM Access Analyzer`` を有効化します。
 IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に結果を通知します。 
-デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/what-is-access-analyzer.html) することが可能です。
+デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/access-analyzer-settings.html) することが可能です。
 
 ### AWS Security Hub
 
@@ -47,8 +47,9 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 
 このテンプレートは、 ``Amazon GuardDuty`` を有効化します。
 ``Amazon GuardDuty`` は、**MEDIUM以上の検出結果を検出時に通知を送信** します。
- デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_organizations.html) することが可能です。
- 委任されたアカウントで、 **ナビゲーションペインの [設定] から [アカウント] を選択し、[自動有効化] をオンにします**。
+デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_organizations.html) することが可能です。
+委任されたアカウントで、 **ナビゲーションペインの [設定] から [アカウント] を選択し、[自動有効化] をオンにします**。
+その後、必要に応じて、 **保護プランをメンバーアカウントに適用** してください。
 
 ### AWS CloudTrail
 
@@ -111,7 +112,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
-| CloudTrailAdditionalFilters | String | | 追加の CloudWatch Logs メトリクスフィルター |
+| CloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | CloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | MasterAccount | Boolean | false | ○ | マスターアカウントであるかどうか |

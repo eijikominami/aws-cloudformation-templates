@@ -7,7 +7,7 @@
  
 ``AWSCloudFormationTemplates/cloudops`` は、``Systems Manager`` や ``DevOps Guru`` などの運用の可用性に関するサービスを構築します。
 
-## TL;DR
+## CloudOps
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
 
@@ -24,14 +24,6 @@
 | Resource Explorer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) |
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
 | Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) |
-
-## アーキテクチャ
-
-このテンプレートが作成するAWSリソースのアーキテクチャ図は、以下の通りです。
-
-![](../images/architecture-cloudops.png)
-
-## デプロイ
 
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
@@ -56,6 +48,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
 | SSMOrganizationID | String | | | AWS Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
+
+![](../images/architecture-cloudops.png)
 
 ### CodeGuru Profiler
 
@@ -86,8 +80,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | **OrganizationID** | String | | | AWS Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
 
-#### マルチアカウント対応
-
 AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて  **Systems Manager** と **AWS Trusted Advisor** の `アクセス有効化` を設定してください。
 
 ### Systems Manager Incident Manager
@@ -103,3 +95,41 @@ AWS Systems Manager Explorer を `Shared Services` アカウントで使用す�
 | Email | String | | | Eメールアドレス |
 | PhoneNumber | String | | | 電話番号 |
 | WorkloadName | String | Workload | ○ | ワークロード名 |
+
+## Amazon CloudWatch Synthetics
+
+CloudWatch Synthetics は、カナリアおよび設定可能なスクリプトを作成し、指定されたエンドポイントを監視します。 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
+
+[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml)
+
+``CanaryName``, ``DomainName``, ``WatchedPagePath`` パラメータとともに以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
+
+```bash
+aws cloudformation deploy --template-file synthetics-heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
+```
+
+デプロイ時に、以下のパラメータを指定することができます。
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| IncidentManagerArn | String | | | カナリア名 |
+| IncidentDurationInSeconds | Number | 600 | ○ | インシデントの基準となる時間 |
+| IncidentSuccessPercentThreshold | Number | 50 | ○ | インシデントの基準となるアクセス成功率（％） |
+| **CanaryName** | String | | ○ | カナリア名 |
+| **DomainName** | String | | ○ | スクリプトが監視するドメイン名 |
+| WatchedPagePath | String | /index.html | ○ | スクリプトが監視するページのパス |
+
+![](../images/architecture-synthetics.png)
+
+### AWS Lambda
+
+このテンプレートは、 Lambda を用いて ``ハートビートスクリプト`` を作成します。この関数は特定のURLを読み込んで、そのスクリーンショットとファイル、およびログを保存します。
+
+### Amazon S3
+
+S3バケットは、ハートビートスクリプトが取得したスクリーンショットとファイル、ログを保存します。
+
+### Amazon CloudWatch Alarm
+
+このテンプレートは、CloudWatch のカスタムメトリクスとアラームを作成します。
+これらのアラームは、成功率が90%を下回ったときにトリガされます。

@@ -181,7 +181,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -214,7 +214,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -272,7 +272,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -289,7 +289,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -445,7 +445,7 @@ Resources:
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
+      LogGroupName: !Sub /aws/vpc/${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -458,7 +458,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

@@ -72,7 +72,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -89,24 +89,15 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # Service-linked Role
-  ServiceLinkedRoleForAccessAnalyzer:
-    Condition: CreateIAMAccessAnalyzer
-    Type: AWS::IAM::ServiceLinkedRole
-    Properties: 
-      AWSServiceName: access-analyzer.amazonaws.com 
-      Description: A service-linked role required for Access Analyzer to access your resources.
   # AccessAnalyzer
   AccessAnalyzer:
     Condition: CreateIAMAccessAnalyzer
-    DependsOn:
-      - ServiceLinkedRoleForAccessAnalyzer
     Type: AWS::AccessAnalyzer::Analyzer
     Properties: 
       Tags:
@@ -115,6 +106,19 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Type: !Ref AnalyzerType
+  UnusedAccessAnalyzer:
+    Condition: CreateIAMAccessAnalyzer
+    Type: AWS::AccessAnalyzer::Analyzer
+    Properties: 
+      AnalyzerConfiguration: 
+        UnusedAccessConfiguration: 
+          UnusedAccessAge: 90
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: !Sub ${AnalyzerType}_UNUSED_ACCESS
   EventBridgeForAccessAnalyzer:    
     Type: AWS::Events::Rule
     Properties: 
@@ -137,7 +141,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

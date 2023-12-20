@@ -1,10 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/synthetics creates an AWS CloudWatch Synthetics canary.
+Description: AWSCloudFormationTemplates/cloudops/synthetics-api creates an AWS CloudWatch Synthetics canary.
 
 Metadata: 
   AWS::CloudFormation::Interface:
-    ParameterGroups:
+    ParameterGroups: 
       - Label: 
           default: 'Incident Manager Configuration'
         Parameters: 
@@ -15,8 +15,10 @@ Metadata:
           default: 'Synthetics Configuration'
         Parameters: 
           - CanaryName
-          - DomainName
-          - WatchedPagePath
+          - EndpointHostName
+          - EndpointPath
+          - Data
+          - Method
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -47,17 +49,27 @@ Parameters:
     Description: The threshold of success percent starting an incident [required]
   CanaryName:
     Type: String
-    AllowedPattern: .+
+    AllowedPattern: ^[0-9a-z_\-]{1,21}$
     Description: CloudWatch Synthetics Canary Name [required]
-  DomainName:
+  EndpointHostName:
     Type: String
     AllowedPattern: .+
-    Description: The watched domain name [required]
-  WatchedPagePath:
+    Description: The endpoint host name [required]
+  EndpointPath:
     Type: String
-    Default: /index.html
     AllowedPattern: .+
-    Description: The watched page path [required]
+    Default: /
+    Description: The endpoint path [required]
+  Data:
+    Type: String
+    Default: ''
+    Description: The POST data [required]
+  Method:
+    Type: String
+    AllowedValues:
+      - GET
+      - POST
+    Description: The HTTP method the canary will be testing [required]  
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -139,36 +151,74 @@ Resources:
     Properties: 
       ArtifactS3Location: !Sub s3://${S3ForSynthetics}
       Code: 
-        Handler: pageLoadBlueprint.handler
-        Script: !Sub >
-          var synthetics = require('Synthetics');
+        Handler: apiCanaryBlueprint.handler
+        Script: !Sub |
+          const synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
+          const syntheticsConfiguration = synthetics.getConfiguration();
 
-          const pageLoadBlueprint = async function () {
 
-              // INSERT URL here
-              const URL = "https://${DomainName}${WatchedPagePath}";
+          const apiCanaryBlueprint = async function () {
 
-              let page = await synthetics.getPage();
-              const response = await page.goto(URL, {waitUntil: 'domcontentloaded', timeout: 30000});
-              //Wait for page to render.
-              //Increase or decrease wait time based on endpoint being monitored.
-              await page.waitFor(15000);
-              await synthetics.takeScreenshot('loaded', 'loaded');
-              let pageTitle = await page.title();
-              log.info('Page title: ' + pageTitle);
-              if (response.status() !== 200) {
-                  throw "Failed to load page!";
-              }
+              syntheticsConfiguration.setConfig({
+                  restrictedHeaders: [], // Value of these headers will be redacted from logs and reports
+                  restrictedUrlParameters: [] // Values of these url parameters will be redacted from logs and reports
+              });
+
+              // Handle validation for positive scenario
+              const validateSuccessful = async function(res) {
+                  return new Promise((resolve, reject) => {
+                      if (res.statusCode < 200 || res.statusCode > 299) {
+                          throw new Error(res.statusCode + ' ' + res.statusMessage);
+                      }
+
+                      let responseBody = '';
+                      res.on('data', (d) => {
+                          responseBody += d;
+                      });
+
+                      res.on('end', () => {
+                          // Add validation on 'responseBody' here if required.
+                          resolve();
+                      });
+                  });
+              };
+
+
+              // Set request option for Verify ${EndpointHostName}
+              let requestOptionsStep1 = {
+                  hostname: '${EndpointHostName}',
+                  method: '${Method}',
+                  path: '${EndpointPath}',
+                  port: '443',
+                  protocol: 'https:',
+                  body: "${Data}",
+                  headers: {}
+              };
+              requestOptionsStep1['headers']['User-Agent'] = [synthetics.getCanaryUserAgentString(), requestOptionsStep1['headers']['User-Agent']].join(' ');
+
+              // Set step config option for Verify ${EndpointHostName}
+            let stepConfig1 = {
+                  includeRequestHeaders: false,
+                  includeResponseHeaders: false,
+                  includeRequestBody: false,
+                  includeResponseBody: false,
+                  continueOnHttpStepFailure: true
+              };
+
+              await synthetics.executeHttpStep('Verify ${EndpointHostName}', requestOptionsStep1, validateSuccessful, stepConfig1);
+
+
           };
-          
+
           exports.handler = async () => {
-            return await pageLoadBlueprint();
+              return await apiCanaryBlueprint();
           };
+      DeleteLambdaResourcesOnCanaryDeletion: true
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-5.0
+      RuntimeVersion: syn-nodejs-puppeteer-6.1
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 
@@ -188,7 +238,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub synthetics-${CanaryName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cloudops-${CanaryName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
@@ -238,7 +288,7 @@ Resources:
           - CreateIncident
           - !Ref IncidentManagerArn
           - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${EndpointHostName}${EndpointPath} に対する ${Method} の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
       AlarmName: !Sub Incident-${CanaryName}-Synthetics-AccessError
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
@@ -266,7 +316,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${EndpointHostName}${EndpointPath} に対する ${Method} の *失敗率が上昇* しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
       AlarmName: !Sub Notice-${CanaryName}-Synthetics-AccessError
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
@@ -292,7 +342,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -309,7 +359,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

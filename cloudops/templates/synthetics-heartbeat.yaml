@@ -1,10 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/synthetics creates an AWS CloudWatch Synthetics canary.
+Description: AWSCloudFormationTemplates/cloudops/synthetics-heartbeat creates an AWS CloudWatch Synthetics canary.
 
 Metadata: 
   AWS::CloudFormation::Interface:
-    ParameterGroups: 
+    ParameterGroups:
       - Label: 
           default: 'Incident Manager Configuration'
         Parameters: 
@@ -15,10 +15,8 @@ Metadata:
           default: 'Synthetics Configuration'
         Parameters: 
           - CanaryName
-          - EndpointHostName
-          - EndpointPath
-          - Data
-          - Method
+          - DomainName
+          - WatchedPagePath
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -49,27 +47,17 @@ Parameters:
     Description: The threshold of success percent starting an incident [required]
   CanaryName:
     Type: String
-    AllowedPattern: .+
+    AllowedPattern: ^[0-9a-z_\-]{1,21}$
     Description: CloudWatch Synthetics Canary Name [required]
-  EndpointHostName:
+  DomainName:
     Type: String
     AllowedPattern: .+
-    Description: The endpoint host name [required]
-  EndpointPath:
+    Description: The watched domain name [required]
+  WatchedPagePath:
     Type: String
+    Default: /index.html
     AllowedPattern: .+
-    Default: /
-    Description: The endpoint path [required]
-  Data:
-    Type: String
-    Default: ''
-    Description: The POST data [required]
-  Method:
-    Type: String
-    AllowedValues:
-      - GET
-      - POST
-    Description: The HTTP method the canary will be testing [required]  
+    Description: The watched page path [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -151,64 +139,115 @@ Resources:
     Properties: 
       ArtifactS3Location: !Sub s3://${S3ForSynthetics}
       Code: 
-        Handler: apiCanaryBlueprint.handler
-        Script: !Sub >
-          var synthetics = require('Synthetics');
+        Handler: pageLoadBlueprint.handler
+        Script: !Sub |
+          const { URL } = require('url');
+          const synthetics = require('Synthetics');
           const log = require('SyntheticsLogger');
-          const https = require('https');
-          const http = require('http');
+          const syntheticsConfiguration = synthetics.getConfiguration();
+          const syntheticsLogHelper = require('SyntheticsLogHelper');
 
-          const apiCanaryBlueprint = async function () {
-              const postData = "${Data}";
+          const loadBlueprint = async function () {
 
-              const verifyRequest = async function (requestOption) {
-                return new Promise((resolve, reject) => {
-                  log.info("Making request with options: " + JSON.stringify(requestOption));
-                  let req
-                  if (requestOption.port === 443) {
-                    req = https.request(requestOption);
-                  } else {
-                    req = http.request(requestOption);
-                  }
-                  req.on('response', (res) => {
-                    log.info(`Status Code: %s`, res.statusCode)
-                    log.info(`Response Headers: %s`, JSON.stringify(res.headers))
-                    if (res.statusCode !== 200) {
-                      reject("Failed: " + requestOption.path);
-                    }
-                    res.on('data', (d) => {
-                      log.info("Response: " + d);
-                    });
-                    res.on('end', () => {
-                      resolve();
-                    })
-                  });
+              const urls = ['https://${DomainName}${WatchedPagePath}'];
 
-                  req.on('error', (error) => {
-                    reject(error);
-                  });
+              // Set screenshot option
+              const takeScreenshot = true;
 
-                  if (postData) {
-                    req.write(postData);
-                  }
-                  req.end();
-                });
+              /* Disabling default step screen shots taken during Synthetics.executeStep() calls
+              * Step will be used to publish metrics on time taken to load dom content but
+              * Screenshots will be taken outside the executeStep to allow for page to completely load with domcontentloaded
+              * You can change it to load, networkidle0, networkidle2 depending on what works best for you.
+              */
+              syntheticsConfiguration.disableStepScreenshots();
+              syntheticsConfiguration.setConfig({
+                continueOnStepFailure: true,
+                includeRequestHeaders: true, // Enable if headers should be displayed in HAR
+                includeResponseHeaders: true, // Enable if headers should be displayed in HAR
+                restrictedHeaders: [], // Value of these headers will be redacted from logs and reports
+                restrictedUrlParameters: [] // Values of these url parameters will be redacted from logs and reports
+
+              });
+
+              let page = await synthetics.getPage();
+
+              for (const url of urls) {
+                  await loadUrl(page, url, takeScreenshot);
+              }
+          };
+
+          // Reset the page in-between
+          const resetPage = async function(page) {
+              try {
+                  await page.goto('about:blank',{waitUntil: ['load', 'networkidle0'], timeout: 30000} );
+              } catch (e) {
+                  synthetics.addExecutionError('Unable to open a blank page. ', e);
+              }
+          }
+
+          const loadUrl = async function (page, url, takeScreenshot) {
+              let stepName = null;
+              let domcontentloaded = false;
+
+              try {
+                  stepName = new URL(url).hostname;
+              } catch (e) {
+                  const errorString = 'Error parsing url: ' + url + '.' + e;
+                  log.error(errorString);
+                  /* If we fail to parse the URL, don't emit a metric with a stepName based on it.
+                    It may not be a legal CloudWatch metric dimension name and we may not have an alarms
+                    setup on the malformed URL stepName.  Instead, fail this step which will
+                    show up in the logs and will fail the overall canary and alarm on the overall canary
+                    success rate.
+                  */
+                  throw e;
               }
 
-              const headers = {}
-              headers['User-Agent'] = [synthetics.getCanaryUserAgentString(), headers['User-Agent']].join(' ');
-              const requestOptions = {"hostname":"${EndpointHostName}","method":"${Method}","path":"${EndpointPath}","port":443}
-              requestOptions['headers'] = headers;
-              await verifyRequest(requestOptions);
+              await synthetics.executeStep(stepName, async function () {
+                  const sanitizedUrl = syntheticsLogHelper.getSanitizedUrl(url);
+
+                  /* You can customize the wait condition here. For instance, using 'networkidle2' or 'networkidle0' to load page completely.
+                    networkidle0: Navigation is successful when the page has had no network requests for half a second. This might never happen if page is constantly loading multiple resources.
+                    networkidle2: Navigation is successful when the page has no more then 2 network requests for half a second.
+                    domcontentloaded: It's fired as soon as the page DOM has been loaded, without waiting for resources to finish loading. If needed add explicit wait with await new Promise(r => setTimeout(r, milliseconds))
+                  */
+                  const response = await page.goto(url, { waitUntil: ['domcontentloaded'], timeout: 30000});
+                  if (response) {
+                      domcontentloaded = true;
+                      const status = response.status();
+                      const statusText = response.statusText();
+
+                      logResponseString = 'Response from url: ' + sanitizedUrl + ' Status: ' + status + ' Status Text: ' + statusText;
+
+                      //If the response status code is not a 2xx success code
+                      if (response.status() < 200 || response.status() > 299) {
+                          throw new Error('Failed to load url: ' + sanitizedUrl + ' ' + response.status() + ' ' + response.statusText());
+                      }
+                  } else {
+                      const logNoResponseString = 'No response returned for url: ' + sanitizedUrl;
+                      log.error(logNoResponseString);
+                      throw new Error(logNoResponseString);
+                  }
+              });
+
+              // Wait for 15 seconds to let page load fully before taking screenshot.
+              if (domcontentloaded && takeScreenshot) {
+                  await new Promise(r => setTimeout(r, 15000));
+                  await synthetics.takeScreenshot(stepName, 'loaded');
+              }
+              
+              // Reset page
+              await resetPage(page);
           };
 
           exports.handler = async () => {
-              return await apiCanaryBlueprint();
+              return await loadBlueprint();
           };
+      DeleteLambdaResourcesOnCanaryDeletion: true
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-5.0
+      RuntimeVersion: syn-nodejs-puppeteer-6.1
       Schedule: 
         DurationInSeconds: '0'
         Expression: rate(5 minutes) 
@@ -228,7 +267,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub synthetics-${CanaryName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cloudops-${CanaryName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
@@ -278,7 +317,7 @@ Resources:
           - CreateIncident
           - !Ref IncidentManagerArn
           - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${EndpointHostName}${EndpointPath} に対する ${Method} の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
       AlarmName: !Sub Incident-${CanaryName}-Synthetics-AccessError
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
@@ -306,7 +345,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${EndpointHostName}${EndpointPath} に対する ${Method} の *失敗率が上昇* しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。このエラーが継続する場合は、 *トラフィックの増大* もしくは *内部処理に異常が発生* している可能性があります。'
       AlarmName: !Sub Notice-${CanaryName}-Synthetics-AccessError
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
@@ -332,7 +371,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -349,7 +388,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

@@ -111,7 +111,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -128,7 +128,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -145,7 +145,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -288,7 +288,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-master
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
@@ -337,7 +337,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-${GitHubBranchName}
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
@@ -381,7 +381,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-Tags
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
@@ -412,10 +412,11 @@ Resources:
       ServerType: GITHUB
       Token: !Ref GitHubOAuthToken
   # CloudWatch Logs
-  CodeBuildLogGroup:
+  CodeBuildLogGroupV2:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
+      LogGroupClass: INFREQUENT_ACCESS
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}_V2
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -428,7 +429,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -449,7 +450,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -470,7 +471,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.1.13
+        SemanticVersion: 2.1.16
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

@@ -7,7 +7,7 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/cloudops`` builds services for operational capabilities, such as ``Systems Manager`` and  ``DevOps Guru``.
 
-## TL;DR
+## CloudOps
 
 If you just want to deploy the stack, click the button below.
 
@@ -24,14 +24,6 @@ If you want to deploy each service individually, click the button below.
 | Resource Explorer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) |
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
 | Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) |
-
-## Architecture
-
-The following sections describe the individual components of the architecture.
-
-![](../images/architecture-cloudops.png)
-
-## Deployment
 
 Execute the command to deploy.
 
@@ -56,6 +48,8 @@ You can provide optional parameters as follows.
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created |
 | SSMOrganizationID | String | | | AWS Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
+
+![](../images/architecture-cloudops.png)
 
 ### CodeGuru Profiler
 
@@ -86,8 +80,6 @@ This template sets ``AWS Systems Manager``.
 | **OrganizationID** | String | | | AWS Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
-#### Multi account
-
 If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.
 
 ### Systems Manager Incident Manager
@@ -103,3 +95,41 @@ This template sets a notification channel of ``AWS Systems Manager Incident Mana
 | Email | String | | | The email address |
 | PhoneNumber | String | | | The Phone Number |
 | WorkloadName | String | Workload | ○ | The workload name |
+
+## Amazon CloudWatch Synthetics
+
+CloudWatch Synthetics creates canaries, configurable scripts that run on a schedule, and monitors your endpoints. If you just want to deploy the stack, click the button below.
+
+[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml) 
+
+Execute the command to deploy with ``CanaryName``, ``DomainName`` and ``WatchedPagePath``.
+
+```bash
+aws cloudformation deploy --template-file synthetics-heartbeat.yaml --stack-name Synthetics --parameter-overrides CanaryName=XXXXX DomainName=XXXXX WatchedPagePath=XXXXX
+```
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| IncidentManagerArn | String | | | Systems Manager Incident Manager response plan ARN |
+| IncidentDurationInSeconds | Number | 600 | ○ | The time to wait until starting an incident |
+| IncidentSuccessPercentThreshold | Number | 50 | ○ | The threshold of success percent starting an incident |
+| **CanaryName** | String | | ○ | The name for this canary |
+| **DomainName** | String | | ○ | The domain name that hearbeat scripts watches |
+| WatchedPagePath | String | /index.html | ○ | The page path that hearbeat scripts watches |
+
+![](../images/architecture-synthetics.png)
+
+### AWS Lambda
+
+This template creates ``hearbeat scripts`` using AWS Lambda function that load the specified URL and store a screenshot of the page and an HTTP archive file (HAR file). They also store logs of accessed URLs. 
+
+### Amazon S3
+
+The S3 bucket stores screenshots, HAR files, and logs from the hearbeat scripts.
+
+### Amazon CloudWatch Alarm
+
+This template creates Amazon CloudWatch custom metrics and alarms.
+These alarms are trigged when the success rate is less than **90%**.
