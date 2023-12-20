@@ -142,7 +142,6 @@ Resources:
   MacieLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupClass: INFREQUENT_ACCESS
       LogGroupName: /aws/macie/classificationjobs
       RetentionInDays: 60
       Tags: 

@@ -600,7 +600,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupInfrequentAccess
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-SAM
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
@@ -623,7 +623,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-CFn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
@@ -648,7 +648,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-Container
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
@@ -1438,11 +1438,11 @@ Resources:
             - !Ref SNSForCICDArn
           Id: CloudWatchEventsForCodePipeline
   # CloudWatch Logs
-  CodeBuildLogGroup:
+  CodeBuildLogGroupV2:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupClass: INFREQUENT_ACCESS
-      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}_V2
       RetentionInDays: 60
       Tags: 
         - Key: !Ref TagKey

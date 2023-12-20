@@ -288,7 +288,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-master
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
@@ -337,7 +337,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-${GitHubBranchName}
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
@@ -381,7 +381,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroup
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-Tags
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
@@ -412,11 +412,11 @@ Resources:
       ServerType: GITHUB
       Token: !Ref GitHubOAuthToken
   # CloudWatch Logs
-  CodeBuildLogGroup:
+  CodeBuildLogGroupV2:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupClass: INFREQUENT_ACCESS
-      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}_V2
       RetentionInDays: 60
       Tags: 
         - Key: environment
