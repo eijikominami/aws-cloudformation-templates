@@ -33,7 +33,7 @@ The following sections describe the individual components of the architecture.
 ### IAM AccessAnalyzer
 
 This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results to ``Amazon SNS`` via ``Amazon EventBridge``. 
-After deploying it, [**you can designate the delegated IAM AccessAnalyzer administrator account**](https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html) for your organization.
+After deploying it, [**you can designate the delegated IAM AccessAnalyzer administrator account**](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-settings.html) for your organization.
 
 ### AWS Security Hub
 
@@ -47,6 +47,7 @@ This template enables ``Amazon GuardDuty``. ``Amazon GuardDuty`` only sends noti
 *fter deploying it, [**you can designate the delegated Amazon GuardDuty administrator account**](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html) for your organization.
 Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
 This action automatically turns on the Auto-enable GuardDuty configuration so that GuardDuty gets enabled for any new account that joins the organization.
+Then **enable data sources in any member account** if you need.
 
 ### AWS CloudTrail
 

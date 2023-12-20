@@ -415,6 +415,7 @@ Resources:
   CodeBuildLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
+      LogGroupClass: INFREQUENT_ACCESS
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
       Tags: 

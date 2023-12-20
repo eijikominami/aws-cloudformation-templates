@@ -47,6 +47,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | AWS Systems Manager | SSM Document Schema (Automation) | 0.3 |
 | AWS Systems Manager | SSM Document Schema (Command) | 2.2 |
 | Amazon OpenSearch Service | OpenSearch | OpenSearch_1.3 |
+| Elastic Load Balancer | SSL Policy | ELBSecurityPolicy-TLS13-1-2-2021-06 |
 
 ## アーキテクチャ
 

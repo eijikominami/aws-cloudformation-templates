@@ -274,7 +274,7 @@ Resources:
   CloudWatchLogsGroupForCloudTrail:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/cloudtrail/${LogicalNamePrefix}'
+      LogGroupName: !Sub /aws/cloudtrail/${LogicalNamePrefix}
       RetentionInDays: 365
       Tags: 
         - Key: environment

@@ -95,18 +95,9 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # Service-linked Role
-  ServiceLinkedRoleForAccessAnalyzer:
-    Condition: CreateIAMAccessAnalyzer
-    Type: AWS::IAM::ServiceLinkedRole
-    Properties: 
-      AWSServiceName: access-analyzer.amazonaws.com 
-      Description: A service-linked role required for Access Analyzer to access your resources.
   # AccessAnalyzer
   AccessAnalyzer:
     Condition: CreateIAMAccessAnalyzer
-    DependsOn:
-      - ServiceLinkedRoleForAccessAnalyzer
     Type: AWS::AccessAnalyzer::Analyzer
     Properties: 
       Tags:
@@ -115,6 +106,19 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Type: !Ref AnalyzerType
+  UnusedAccessAnalyzer:
+    Condition: CreateIAMAccessAnalyzer
+    Type: AWS::AccessAnalyzer::Analyzer
+    Properties: 
+      AnalyzerConfiguration: 
+        UnusedAccessConfiguration: 
+          UnusedAccessAge: 90
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: !Sub ${AnalyzerType}_UNUSED_ACCESS
   EventBridgeForAccessAnalyzer:    
     Type: AWS::Events::Rule
     Properties: 

@@ -273,7 +273,7 @@ Resources:
         - TLS
         - HTTPS
       # Default
-      SslPolicy: ELBSecurityPolicy-2016-08
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
   # Auto Scaling Group
   AutoScalingLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration

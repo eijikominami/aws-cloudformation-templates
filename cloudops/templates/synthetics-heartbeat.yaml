@@ -243,6 +243,7 @@ Resources:
           exports.handler = async () => {
               return await loadBlueprint();
           };
+      DeleteLambdaResourcesOnCanaryDeletion: true
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName

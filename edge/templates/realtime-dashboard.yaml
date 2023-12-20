@@ -763,7 +763,8 @@ Resources:
   CloudWatchLogsGroupForFirehose:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/kinesisfirehose/${LogicalNamePrefix}'
+      LogGroupClass: INFREQUENT_ACCESS
+      LogGroupName: !Sub /aws/kinesisfirehose/${LogicalNamePrefix}
       RetentionInDays: 60
       Tags:
         - Key: environment

@@ -1040,7 +1040,7 @@ Resources:
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
+      LogGroupName: !Sub /aws/vpc/${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
