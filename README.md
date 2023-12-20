@@ -35,7 +35,7 @@ This project uses the following modules.
 
 | Service | Resource | Version |
 | --- | --- | --- |
-| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-6.0 |
+| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-6.1 |
 | AWS CodeBuild | Image | aws/codebuild/amazonlinux2-aarch64-standard:2.0 (Python 3.9) |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
