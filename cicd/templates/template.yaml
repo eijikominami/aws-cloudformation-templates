@@ -600,7 +600,7 @@ Resources:
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroupInfrequentAccess
+          GroupName: !Ref CodeBuildLogGroupV2
           Status: ENABLED
       Name: !Sub ${AWS::StackName}-SAM
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
