@@ -1,26 +1,24 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/cloudops/applicationinsights creates a group of Amazon CloudWatch Application Insights.
-
-Metadata: 
+Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      - Label: 
-          default: 'Notification Configuration'
+      - Label:
+          default: Notification Configuration
         Parameters:
           - SNSForAlertArn
-      - Label: 
-          default: 'Tag Configuration'
+      - Label:
+          default: Tag Configuration
         Parameters:
           - Environment
           - TagKey
           - TagValue
-
 Parameters:
   SNSForAlertArn:
     Type: String
     AllowedPattern: .+
-    Description: The ARN of an Amazon SNS topic [required] 
+    Description: The ARN of an Amazon SNS topic [required]
   Environment:
     Type: String
     Default: production
@@ -36,7 +34,6 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
-
 Resources:
   ApplicationInsights:
     Type: AWS::ApplicationInsights::Application
@@ -46,8 +43,8 @@ Resources:
       OpsCenterEnabled: true
       OpsItemSNSTopicArn: !Ref SNSForAlertArn
       ResourceGroupName: !Sub ${TagKey}-${TagValue}
-      Tags: 
+      Tags:
         - Key: environment
-          Value: !Ref Environment       
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue

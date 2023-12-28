@@ -1,20 +1,19 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/cloudops sets basic configurations for CloudOps.
-
-Metadata: 
+Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      - Label: 
-          default: 'Systems ManagerConfiguration'
-        Parameters: 
+      - Label:
+          default: Systems ManagerConfiguration
+        Parameters:
           - SSMAdminAccountId
           - SSMIgnoreResourceConflicts
           - SSMOrganizationID
           - SSMPatchingAt
-      - Label: 
-          default: 'Systems Manager Incident Manager Configuration'
-        Parameters: 
+      - Label:
+          default: Systems Manager Incident Manager Configuration
+        Parameters:
           - IncidentManager
           - IncidentManagerAlias
           - IncidentManagerChatbotSnsArn
@@ -23,22 +22,21 @@ Metadata:
           - IncidentManagerEmail
           - IncidentPhoneNumber
           - IncidentManagerWorkloadName
-      - Label: 
-          default: 'CloudWatch Application Insight Configuration'
-        Parameters: 
+      - Label:
+          default: CloudWatch Application Insight Configuration
+        Parameters:
           - ApplicationInsights
-      - Label: 
-          default: 'Notofication Configuration'
-        Parameters: 
+      - Label:
+          default: Notofication Configuration
+        Parameters:
           - SNSForAlertArn
           - SNSForDeploymentArn
-      - Label: 
-          default: 'Tag Configuration'
+      - Label:
+          default: Tag Configuration
         Parameters:
           - Environment
           - TagKey
           - TagValue
-
 Parameters:
   ApplicationInsights:
     Type: String
@@ -61,7 +59,7 @@ Parameters:
     Description: The unique and identifiable alias of the contact or escalation plan [required]
   IncidentManagerChatbotSnsArn:
     Type: String
-    Default: ''      
+    Default: ''
     Description: The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident
   IncidentManagerDisplayName:
     Type: String
@@ -90,7 +88,7 @@ Parameters:
   SSMAdminAccountId:
     Type: String
     Default: ''
-    Description: AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated)  
+    Description: AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated)
   SSMIgnoreResourceConflicts:
     Type: String
     Default: DISABLED
@@ -109,7 +107,7 @@ Parameters:
     Description: Daily patching time (H) [required]
   SNSForAlertArn:
     Type: String
-    Default: '' 
+    Default: ''
   SNSForDeploymentArn:
     Type: String
     Default: ''
@@ -130,14 +128,23 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateApplicationInsights: !Equals [ !Ref ApplicationInsights, ENABLED ]
-  CreateIncidentManager: !Equals [ !Ref IncidentManager, ENABLED ]
-  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
-  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  Development: !Equals [ !Ref Environment, development]
+  CreateApplicationInsights: !Equals
+    - !Ref ApplicationInsights
+    - ENABLED
+  CreateIncidentManager: !Equals
+    - !Ref IncidentManager
+    - ENABLED
+  CreateSNSForAlert: !Equals
+    - !Ref SNSForAlertArn
+    - ''
+  CreateSNSForDeployment: !Equals
+    - !Ref SNSForDeploymentArn
+    - ''
+  Development: !Equals
+    - !Ref Environment
+    - development
 
 Resources:
-  # Nested Stack
   DevOpsGuru:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -146,7 +153,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
+      Parameters:
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -184,7 +191,7 @@ Resources:
           - !Ref SNSForDeploymentArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
+        TagValue: !Ref TagValue
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -203,7 +210,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
+      Parameters:
         Alias: !Ref IncidentManagerAlias
         ChatbotSnsArn: !Ref IncidentManagerChatbotSnsArn
         DisplayName: !Ref IncidentManagerDisplayName
@@ -263,7 +270,7 @@ Resources:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
-          Value: !Ref TagValue          
+          Value: !Ref TagValue
   CloudWatchApplicationInsights:
     Condition: CreateApplicationInsights
     Type: AWS::CloudFormation::Stack
@@ -289,7 +296,7 @@ Resources:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
-          Value: !Ref TagValue  
+          Value: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -319,19 +326,201 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # Resource Group
   ResourceGroup:
     Type: AWS::ResourceGroups::Group
-    Properties: 
+    Properties:
       Description: !Sub Group by ${TagKey} ${TagValue}
       Name: !Sub ${TagKey}-${TagValue}
-      ResourceQuery: 
-        Query: 
-          TagFilters: 
+      ResourceQuery:
+        Query:
+          TagFilters:
             - Key: !Ref TagKey
-              Values: 
+              Values:
                 - !Ref TagValue
         Type: TAG_FILTERS_1_0
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # OIDC for GitHub
+  GitHub:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      ClientIdList: 
+        - sts.amazonaws.com
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
+      ThumbprintList: 
+        - aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      Url: token.actions.githubusercontent.com
+  IAMRoleForGitHubActions:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !GetAtt GitHub.Arn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: repo:eijikominami/aws-cloudformation-templates:*
+      Description: A role required for GitHub Actions to access CodeGuru.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonCodeGuruReviewerFullAccess
+      Policies:  
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:CreateBucket
+                  - s3:GetBucket*
+                  - s3:List*
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3ForCodeGuruReviewer}'
+                  - !Sub 'arn:aws:s3:::${S3ForCodeGuruReviewer}/*'
+      RoleName: !Sub ${AWS::StackName}-GitHubActions-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3ForCodeGuruReviewer:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub codeguru-reviewer-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 7
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForS3ForCodeGuruReviewer:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForCodeGuruReviewer
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForCodeGuruReviewer
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForCodeGuruReviewer.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForCodeGuruReviewer.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
+          - Sid: DenyPublicReadACL
+            Effect: Deny
+            Principal:
+              AWS: '*'
+            Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+            Resource:
+              - !Sub ${S3ForCodeGuruReviewer.Arn}
+              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
+            Condition:
+              StringEquals:
+                s3:x-amz-acl:
+                  - public-read
+                  - public-read-write
+                  - authenticated-read
+          - Sid: DenyPublicReadGrant
+            Effect: Deny
+            Principal:
+              AWS: '*'
+            Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+            Resource:
+              - !Sub ${S3ForCodeGuruReviewer.Arn}
+              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
+            Condition:
+              StringEquals:
+                s3:x-amz-grant-read:
+                  - "*http://acs.amazonaws.com/groups/global/AllUsers*"
+                  - "*http://acs.amazonaws.com/groups/global/AuthenticatedUsers*"
+          - Sid: DenyPublicListACL
+            Effect: Deny
+            Principal:
+              AWS: '*'
+            Action: s3:PutBucketAcl
+            Resource:
+              - !Sub ${S3ForCodeGuruReviewer.Arn}
+              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
+            Condition:
+              StringEquals:
+                s3:x-amz-acl:
+                  - public-read
+                  - public-read-write
+                  - authenticated-read
+          - Sid: DenyPublicListGrant
+            Effect: Deny
+            Principal:
+              AWS: '*'
+            Action: s3:PutBucketAcl
+            Resource:
+              - !Sub ${S3ForCodeGuruReviewer.Arn}
+              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
+            Condition:
+              StringEquals:
+                s3:x-amz-grant-read:
+                  - "*http://acs.amazonaws.com/groups/global/AllUsers*"
+                  - "*http://acs.amazonaws.com/groups/global/AuthenticatedUsers*"
+          - Sid: DenyInSecureRequest
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !Sub ${S3ForCodeGuruReviewer.Arn}
+              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+          - Sid: AllowS3WriteAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: s3:PutObject
+            Resource:
+              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
+          - Sid: DenyS3ReadAccess
+            Effect: Deny
+            Principal: '*'
+            Action: s3:GetObject
+            Resource:
+              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
+            Condition:
+              StringNotLike:
+                aws:PrincipalArn: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/codeguru-reviewer.amazonaws.com/AWSServiceRoleForAmazonCodeGuruReviewer
