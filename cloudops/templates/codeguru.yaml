@@ -47,7 +47,7 @@ Resources:
           Value: !Ref TagValue
       ThumbprintList: 
         - aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-      Url: token.actions.githubusercontent.com
+      Url: https://token.actions.githubusercontent.com
   IAMRoleForGitHubActions:
     Type: AWS::IAM::Role
     Properties:
