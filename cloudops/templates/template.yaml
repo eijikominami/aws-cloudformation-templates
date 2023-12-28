@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/cloudops sets basic configurations for CloudOps.
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -41,6 +42,7 @@ Metadata:
           - Environment
           - TagKey
           - TagValue
+
 Parameters:
   ApplicationInsights:
     Type: String
@@ -153,6 +155,54 @@ Conditions:
     - development
 
 Resources:
+  CloudWatchApplicationInsights:
+    Condition: CreateApplicationInsights
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/applicationinsights.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/applicationinsights.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CodeGuru:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CodeGuruTargetRepository: !Ref CodeGuruTargetRepository
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguru.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/codeguru.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   DevOpsGuru:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -170,6 +220,47 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsguru.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsguru.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ResilienceHub:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        Environment: !Ref Environment
+        LogicalNamePrefix: !Ref AWS::StackName
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resiliencehub.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resiliencehub.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ResourceExplorer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -238,73 +329,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  ResourceExplorer:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  ResilienceHub:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        Environment: !Ref Environment
-        LogicalNamePrefix: !Ref AWS::StackName
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resiliencehub.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resiliencehub.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  CloudWatchApplicationInsights:
-    Condition: CreateApplicationInsights
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/applicationinsights.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/applicationinsights.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -334,6 +358,7 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # Resource Group
   ResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
@@ -351,184 +376,3 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # OIDC for GitHub
-  GitHub:
-    Type: AWS::IAM::OIDCProvider
-    Properties:
-      ClientIdList: 
-        - sts.amazonaws.com
-      Tags: 
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      ThumbprintList: 
-        - aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-      Url: token.actions.githubusercontent.com
-  IAMRoleForGitHubActions:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Federated: !GetAtt GitHub.Arn
-            Action: sts:AssumeRoleWithWebIdentity
-            Condition:
-              StringEquals:
-                token.actions.githubusercontent.com:aud: sts.amazonaws.com
-              StringLike:
-                token.actions.githubusercontent.com:sub: !Sub repo:${CodeGuruTargetRepository}:*
-      Description: A role required for GitHub Actions to access CodeGuru.
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonCodeGuruReviewerFullAccess
-      Policies:  
-        - PolicyName: S3
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:CreateBucket
-                  - s3:GetBucket*
-                  - s3:List*
-                  - s3:GetObject
-                  - s3:PutObject
-                  - s3:DeleteObject
-                Resource:
-                  - !Sub arn:aws:s3:::${S3ForCodeGuruReviewer}
-                  - !Sub arn:aws:s3:::${S3ForCodeGuruReviewer}/*
-      RoleName: !Sub ${AWS::StackName}-GitHubActions-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  S3ForCodeGuruReviewer:
-    Type: AWS::S3::Bucket
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      BucketEncryption:
-        ServerSideEncryptionConfiguration: 
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      BucketName: !Sub codeguru-reviewer-${AWS::Region}-${AWS::AccountId}
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpirationInDays
-            ExpirationInDays: 7
-            Status: Enabled
-      PublicAccessBlockConfiguration: 
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  S3BucketPolicyForS3ForCodeGuruReviewer:
-    Type: AWS::S3::BucketPolicy
-    Properties: 
-      Bucket: !Ref S3ForCodeGuruReviewer
-      PolicyDocument:
-        Version: 2012-10-17
-        Id: !Ref S3ForCodeGuruReviewer
-        Statement:
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForCodeGuruReviewer.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForCodeGuruReviewer.Arn
-                  - /*
-            Condition:
-              Bool: 
-                aws:SecureTransport: false
-          - Sid: DenyPublicReadACL
-            Effect: Deny
-            Principal:
-              AWS: '*'
-            Action:
-              - s3:PutObject
-              - s3:PutObjectAcl
-            Resource:
-              - !Sub ${S3ForCodeGuruReviewer.Arn}
-              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
-            Condition:
-              StringEquals:
-                s3:x-amz-acl:
-                  - public-read
-                  - public-read-write
-                  - authenticated-read
-          - Sid: DenyPublicReadGrant
-            Effect: Deny
-            Principal:
-              AWS: '*'
-            Action:
-              - s3:PutObject
-              - s3:PutObjectAcl
-            Resource:
-              - !Sub ${S3ForCodeGuruReviewer.Arn}
-              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
-            Condition:
-              StringEquals:
-                s3:x-amz-grant-read:
-                  - "*http://acs.amazonaws.com/groups/global/AllUsers*"
-                  - "*http://acs.amazonaws.com/groups/global/AuthenticatedUsers*"
-          - Sid: DenyPublicListACL
-            Effect: Deny
-            Principal:
-              AWS: '*'
-            Action: s3:PutBucketAcl
-            Resource:
-              - !Sub ${S3ForCodeGuruReviewer.Arn}
-              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
-            Condition:
-              StringEquals:
-                s3:x-amz-acl:
-                  - public-read
-                  - public-read-write
-                  - authenticated-read
-          - Sid: DenyPublicListGrant
-            Effect: Deny
-            Principal:
-              AWS: '*'
-            Action: s3:PutBucketAcl
-            Resource:
-              - !Sub ${S3ForCodeGuruReviewer.Arn}
-              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
-            Condition:
-              StringEquals:
-                s3:x-amz-grant-read:
-                  - "*http://acs.amazonaws.com/groups/global/AllUsers*"
-                  - "*http://acs.amazonaws.com/groups/global/AuthenticatedUsers*"
-          - Sid: DenyInSecureRequest
-            Effect: Deny
-            Principal: '*'
-            Action: s3:*
-            Resource:
-              - !Sub ${S3ForCodeGuruReviewer.Arn}
-              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
-            Condition:
-              Bool:
-                aws:SecureTransport: 'false'
-          - Sid: AllowS3WriteAccess
-            Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: s3:PutObject
-            Resource:
-              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
-          - Sid: DenyS3ReadAccess
-            Effect: Deny
-            Principal: '*'
-            Action: s3:GetObject
-            Resource:
-              - !Sub ${S3ForCodeGuruReviewer.Arn}/*
-            Condition:
-              StringNotLike:
-                aws:PrincipalArn: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/codeguru-reviewer.amazonaws.com/AWSServiceRoleForAmazonCodeGuruReviewer
