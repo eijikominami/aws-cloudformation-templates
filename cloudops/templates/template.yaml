@@ -52,7 +52,7 @@ Parameters:
   CodeGuruTargetRepository:
     Type: String
     Default: eijikominami/aws-cloudformation-templates
-    Description: The GitHub owner name and repository name for AWS CodeGuru Reviewer
+    Description: The GitHub owner name and repository name for AWS CodeGuru Reviewer [required]
   IncidentManager:
     Type: String
     Default: DISABLED

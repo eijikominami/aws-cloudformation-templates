@@ -36,6 +36,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | ApplicationInsights | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`ApplicationInsights` スタックがデプロイされます。 |
+| CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | CodeGuru で使用する GitHub オーナー名とリポジトリ名 |
 | IncidentManager | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`IncidentManager` スタックがデプロイされます。 |
 | IncidentManagerAlias | String | admimistrator | ○ | 連絡先のエイリアス |
 | IncidentManagerChatbotSnsArn | String | | | AWS Chatbot の ARN |
