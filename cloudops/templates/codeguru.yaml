@@ -1,6 +1,41 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/cloudops/codeguru creates AWS CodeGuru Reviewer.
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: CodeGuru Configuration
+        Parameters:
+          - CodeGuruTargetRepository
+      - Label:
+          default: Tag Configuration
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  CodeGuruTargetRepository:
+    Type: String
+    Default: eijikominami/aws-cloudformation-templates
+    Description: The GitHub owner name and repository name for AWS CodeGuru Reviewer [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
 Resources:
   GitHub:
     Type: AWS::IAM::OIDCProvider
