@@ -5,7 +5,11 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: Systems ManagerConfiguration
+          default: CodeGuru Configuration
+        Parameters:
+          - CodeGuruTargetRepository
+      - Label:
+          default: Systems Manager Configuration
         Parameters:
           - SSMAdminAccountId
           - SSMIgnoreResourceConflicts
@@ -45,6 +49,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon CloudWatch Application Insights [required]
+  CodeGuruTargetRepository:
+    Type: String
+    Default: eijikominami/aws-cloudformation-templates
+    Description: The GitHub owner name and repository name for AWS CodeGuru Reviewer
   IncidentManager:
     Type: String
     Default: DISABLED
@@ -369,7 +377,7 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                token.actions.githubusercontent.com:sub: repo:eijikominami/aws-cloudformation-templates:*
+                token.actions.githubusercontent.com:sub: !Sub repo:${CodeGuruTargetRepository}:*
       Description: A role required for GitHub Actions to access CodeGuru.
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonCodeGuruReviewerFullAccess
@@ -387,8 +395,8 @@ Resources:
                   - s3:PutObject
                   - s3:DeleteObject
                 Resource:
-                  - !Sub 'arn:aws:s3:::${S3ForCodeGuruReviewer}'
-                  - !Sub 'arn:aws:s3:::${S3ForCodeGuruReviewer}/*'
+                  - !Sub arn:aws:s3:::${S3ForCodeGuruReviewer}
+                  - !Sub arn:aws:s3:::${S3ForCodeGuruReviewer}/*
       RoleName: !Sub ${AWS::StackName}-GitHubActions-${AWS::Region}
       Tags:
         - Key: environment
