@@ -121,18 +121,6 @@ Resources:
         Version: 2012-10-17
         Id: !Ref S3ForCodeGuruReviewer
         Statement:
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForCodeGuruReviewer.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForCodeGuruReviewer.Arn
-                  - /*
-            Condition:
-              Bool: 
-                aws:SecureTransport: false
           - Sid: DenyPublicReadACL
             Effect: Deny
             Principal:
@@ -200,7 +188,7 @@ Resources:
               - !Sub ${S3ForCodeGuruReviewer.Arn}/*
             Condition:
               Bool:
-                aws:SecureTransport: 'false'
+                aws:SecureTransport: false
           - Sid: AllowS3WriteAccess
             Effect: Allow
             Principal:
@@ -216,4 +204,6 @@ Resources:
               - !Sub ${S3ForCodeGuruReviewer.Arn}/*
             Condition:
               StringNotLike:
-                aws:PrincipalArn: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/codeguru-reviewer.amazonaws.com/AWSServiceRoleForAmazonCodeGuruReviewer
+                aws:PrincipalArn:
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/codeguru-reviewer.amazonaws.com/AWSServiceRoleForAmazonCodeGuruReviewer
+                  - !GetAtt IAMRoleForGitHubActions.Arn
