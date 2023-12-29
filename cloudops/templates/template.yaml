@@ -2,19 +2,23 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/cloudops sets basic configurations for CloudOps.
 
-Metadata: 
+Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      - Label: 
-          default: 'Systems ManagerConfiguration'
-        Parameters: 
+      - Label:
+          default: CodeGuru Configuration
+        Parameters:
+          - CodeGuruTargetRepository
+      - Label:
+          default: Systems Manager Configuration
+        Parameters:
           - SSMAdminAccountId
           - SSMIgnoreResourceConflicts
           - SSMOrganizationID
           - SSMPatchingAt
-      - Label: 
-          default: 'Systems Manager Incident Manager Configuration'
-        Parameters: 
+      - Label:
+          default: Systems Manager Incident Manager Configuration
+        Parameters:
           - IncidentManager
           - IncidentManagerAlias
           - IncidentManagerChatbotSnsArn
@@ -23,17 +27,17 @@ Metadata:
           - IncidentManagerEmail
           - IncidentPhoneNumber
           - IncidentManagerWorkloadName
-      - Label: 
-          default: 'CloudWatch Application Insight Configuration'
-        Parameters: 
+      - Label:
+          default: CloudWatch Application Insight Configuration
+        Parameters:
           - ApplicationInsights
-      - Label: 
-          default: 'Notofication Configuration'
-        Parameters: 
+      - Label:
+          default: Notofication Configuration
+        Parameters:
           - SNSForAlertArn
           - SNSForDeploymentArn
-      - Label: 
-          default: 'Tag Configuration'
+      - Label:
+          default: Tag Configuration
         Parameters:
           - Environment
           - TagKey
@@ -47,6 +51,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon CloudWatch Application Insights [required]
+  CodeGuruTargetRepository:
+    Type: String
+    Default: eijikominami/aws-cloudformation-templates
+    Description: The GitHub owner name and repository name for AWS CodeGuru Reviewer [required]
   IncidentManager:
     Type: String
     Default: DISABLED
@@ -61,7 +69,7 @@ Parameters:
     Description: The unique and identifiable alias of the contact or escalation plan [required]
   IncidentManagerChatbotSnsArn:
     Type: String
-    Default: ''      
+    Default: ''
     Description: The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident
   IncidentManagerDisplayName:
     Type: String
@@ -90,7 +98,7 @@ Parameters:
   SSMAdminAccountId:
     Type: String
     Default: ''
-    Description: AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated)  
+    Description: AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated)
   SSMIgnoreResourceConflicts:
     Type: String
     Default: DISABLED
@@ -109,7 +117,7 @@ Parameters:
     Description: Daily patching time (H) [required]
   SNSForAlertArn:
     Type: String
-    Default: '' 
+    Default: ''
   SNSForDeploymentArn:
     Type: String
     Default: ''
@@ -130,14 +138,71 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateApplicationInsights: !Equals [ !Ref ApplicationInsights, ENABLED ]
-  CreateIncidentManager: !Equals [ !Ref IncidentManager, ENABLED ]
-  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
-  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  Development: !Equals [ !Ref Environment, development]
+  CreateApplicationInsights: !Equals
+    - !Ref ApplicationInsights
+    - ENABLED
+  CreateIncidentManager: !Equals
+    - !Ref IncidentManager
+    - ENABLED
+  CreateSNSForAlert: !Equals
+    - !Ref SNSForAlertArn
+    - ''
+  CreateSNSForDeployment: !Equals
+    - !Ref SNSForDeploymentArn
+    - ''
+  Development: !Equals
+    - !Ref Environment
+    - development
 
 Resources:
-  # Nested Stack
+  CloudWatchApplicationInsights:
+    Condition: CreateApplicationInsights
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/applicationinsights.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/applicationinsights.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CodeGuru:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CodeGuruTargetRepository: !Ref CodeGuruTargetRepository
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguru.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/codeguru.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   DevOpsGuru:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -146,7 +211,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
+      Parameters:
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -155,6 +220,47 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsguru.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsguru.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ResilienceHub:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        Environment: !Ref Environment
+        LogicalNamePrefix: !Ref AWS::StackName
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resiliencehub.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resiliencehub.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ResourceExplorer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -184,7 +290,7 @@ Resources:
           - !Ref SNSForDeploymentArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
+        TagValue: !Ref TagValue
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -203,7 +309,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
+      Parameters:
         Alias: !Ref IncidentManagerAlias
         ChatbotSnsArn: !Ref IncidentManagerChatbotSnsArn
         DisplayName: !Ref IncidentManagerDisplayName
@@ -223,73 +329,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  ResourceExplorer:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  ResilienceHub:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        Environment: !Ref Environment
-        LogicalNamePrefix: !Ref AWS::StackName
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resiliencehub.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resiliencehub.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue          
-  CloudWatchApplicationInsights:
-    Condition: CreateApplicationInsights
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/applicationinsights.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/applicationinsights.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue  
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -322,16 +361,18 @@ Resources:
   # Resource Group
   ResourceGroup:
     Type: AWS::ResourceGroups::Group
-    Properties: 
+    Properties:
       Description: !Sub Group by ${TagKey} ${TagValue}
       Name: !Sub ${TagKey}-${TagValue}
-      ResourceQuery: 
-        Query: 
-          TagFilters: 
+      ResourceQuery:
+        Query:
+          TagFilters:
             - Key: !Ref TagKey
-              Values: 
+              Values:
                 - !Ref TagValue
         Type: TAG_FILTERS_1_0
-      Tags: 
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue

@@ -133,7 +133,6 @@ Conditions:
   CreateCloudWatchAlarmCloudFrontBytesDownloaded: !And [ !Not [ !Equals [ !Ref CloudFrontBytesDownloadedPerMinuteThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
   CreateRoute53: !Not [ !Equals [ !Ref DomainName, '' ] ]
   CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
-  CreateCodeGuruCodeProfiler: !And [ !Not [ !Equals [ !Ref SNSForAlertArn, ''] ], !Equals [ !Ref Environment, development] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -157,23 +156,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
-  CodeGuruCodeProfiler:
-    Condition: CreateCodeGuruCodeProfiler
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        AgentPermission: !GetAtt IAMRoleForLambda.Arn
-        ProfilingGroupName: !Ref AWS::StackName
-        SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml
   CostExplorer:
     Type: AWS::CloudFormation::Stack
     Properties:

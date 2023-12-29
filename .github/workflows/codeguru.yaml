@@ -1,0 +1,51 @@
+name: CodeGuru Reviewer
+
+on:
+  pull_request:
+    types: opened
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  review:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: CodeGuru Reviewer
+        uses: aws-actions/codeguru-reviewer@v1.1
+        with:
+          s3_bucket: ${{ secrets.S3_ARTIFACT_BUCKET }}
+
+      - name: Store SARIF file
+        if: steps.iam-role.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SARIF_recommendations
+          path: ./codeguru-results.sarif.json
+
+      - name: Upload review result
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: codeguru-results.sarif.json
+
+      - run: |     
+          echo "Check for critical volnurability"
+          count=$(cat codeguru-results.sarif.json | jq '.runs[].results[] | select(.level == "error") | .level' | wc -l)
+          if (( $count > 0 )); then
+            echo "There are $count critical findings, hence stopping the pipeline."
+            exit ``1
+          fi
