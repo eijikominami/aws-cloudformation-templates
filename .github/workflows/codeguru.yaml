@@ -9,13 +9,13 @@ permissions:
   contents: read
 
 jobs:
-  Deploy:
+  review:
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -32,7 +32,7 @@ jobs:
 
       - name: Store SARIF file
         if: steps.iam-role.outcome == 'success'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: SARIF_recommendations
           path: ./codeguru-results.sarif.json
