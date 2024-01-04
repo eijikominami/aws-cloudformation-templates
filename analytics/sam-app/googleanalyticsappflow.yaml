@@ -7,6 +7,8 @@ Metadata:
       - Label: 
           default: 'AppFlow Configuration'
         Parameters: 
+          - AppFlowConnectorClientId
+          - AppFlowConnectorClientSecret
           - AppFlowConnectorProfileName
           - AppFlowGoogleAnalyticsObject
           - AppFlowScheduleRate
@@ -19,10 +21,20 @@ Metadata:
           - TagValue
 
 Parameters:
+  AppFlowConnectorClientId:
+    Type: String
+    AllowedPattern: .+
+    NoEcho: true
+    Description: The identifier for OAuth2 [required]  
   AppFlowConnectorProfileName:
     Type: String
     AllowedPattern: .+
     Description: The profile name of AppFlow Connector for Google Analytics [required]
+  AppFlowConnectorClientSecret:
+    Type: String
+    AllowedPattern: .+
+    NoEcho: true
+    Description: The client secret used by the OAuth client to authenticate [required]
   AppFlowGoogleAnalyticsObject:
     Type: String
     AllowedPattern: .+
@@ -38,7 +50,7 @@ Parameters:
     Description: The bucket name data are stored [required]
   Environment:
     Type: String
-    Default: development
+    Default: production
     AllowedValues:
       - production
       - test
@@ -64,8 +76,8 @@ Resources:
               BucketName: !Ref S3BucketName
       FlowName: !Sub ${AppFlowConnectorProfileName}-${AppFlowGoogleAnalyticsObject}
       SourceFlowConfig: 
-        ConnectorProfileName: !Ref AppFlowConnectorProfileName
-        ConnectorType: Googleanalytics
+        ConnectorProfileName: !Ref AppFlowConnectorProfile
+        ConnectorType: CustomConnector
         SourceConnectorProperties: 
           GoogleAnalytics: 
             Object: !Ref AppFlowGoogleAnalyticsObject
@@ -87,3 +99,23 @@ Resources:
           DataPullMode: Incremental
           ScheduleExpression: !Sub rate(${AppFlowScheduleRate}hours)
         TriggerType: Scheduled
+  AppFlowConnectorProfile:
+    Type: AWS::AppFlow::ConnectorProfile
+    Properties:
+      ConnectionMode: Public
+      ConnectorProfileConfig: 
+        ConnectorProfileCredentials: 
+          CustomConnector: 
+            AuthenticationType: OAUTH2
+            Oauth2:
+              ClientId: !Ref AppFlowConnectorClientId
+              ClientSecret: !Ref AppFlowConnectorClientSecret
+        ConnectorProfileProperties: 
+          CustomConnector: 
+            OAuth2Properties: 
+              OAuth2GrantType: AUTHORIZATION_CODE
+              TokenUrl: https://oauth2.googleapis.com/token
+              TokenUrlCustomProperties: 
+                usePrivateLinkForMetadataAndAuthorization: false
+      ConnectorProfileName: GoogleAnalyticsV4
+      ConnectorType: CustomConnector

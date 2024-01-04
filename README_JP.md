@@ -46,7 +46,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | AWS Serverless Repository | aws-usage-queries | 0.1.5+19.38c7b8 |
 | AWS Systems Manager | SSM Document Schema (Automation) | 0.3 |
 | AWS Systems Manager | SSM Document Schema (Command) | 2.2 |
-| Amazon OpenSearch Service | OpenSearch | OpenSearch_1.3 |
+| Amazon OpenSearch Service | OpenSearch | OpenSearch_2.11 |
 | Elastic Load Balancer | SSL Policy | ELBSecurityPolicy-TLS13-1-2-2021-06 |
 
 ## アーキテクチャ

@@ -53,12 +53,12 @@ This template creates ``CloudFront`` distribution.
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
-| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
-| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of Elasticsearch Service |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
-| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
-| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
-| RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
+| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
+| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
+| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.11 | ○ | The version of OpenSearch Service |
 | RealtimeDashboardKinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
@@ -81,12 +81,12 @@ This template creates an environment about CloudFront realtime dashboard.
 | --- | --- | --- | --- | --- |
 | ElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | The domain name of ElasticSearch Service |
-| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
-| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of Elasticsearch Service |
+| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
+| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
 | ElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
-| ElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
-| ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
-| ElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
+| ElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
+| ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
+| ElasticsearchVersion | String | 7.8 | ○ | The version of OpenSearch Service |
 | SamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | KinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
 | KinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |

@@ -2,7 +2,7 @@ Please scroll down for the Japanese version. / **日本語の説明は下にあ�
 
 # cloudwatch-alarm-about-elasticsearch(en)
 
-cloudwatch-alarm-about-elasticsearch creates Amazon CloudWatch Alarm about Amazon Elasticsearch Service.
+cloudwatch-alarm-about-elasticsearch creates Amazon CloudWatch Alarm about Amazon OpenSearch Service.
 
 ## CloudWatch Alarm
 
@@ -37,7 +37,7 @@ You can provide optional parameters as follows.
 
 # cloudwatch-alarm-about-elasticsearch(ja)
 
-cloudwatch-alarm-about-elasticsearch は、 Amazon Elasticsearch Service に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-elasticsearch は、 Amazon OpenSearch Service に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 

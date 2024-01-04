@@ -31,6 +31,7 @@ Metadata:
       - Label: 
           default: 'Stack Configuration'
         Parameters: 
+          - Analytics
           - CloudOps
           - DefaultSecuritySettings
           - SharedServices
@@ -90,13 +91,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The base path of template configuration files.
-  StaticWebsiteHosting:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable deployment of StaticWebsiteHosting template [required]
   CloudOps:
     Type: String
     Default: DISABLED
@@ -140,6 +134,13 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of CloudOps template [required]
+  StaticWebsiteHosting:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of StaticWebsiteHosting template [required]
   WebServers:
     Type: String
     Default: DISABLED
@@ -183,13 +184,13 @@ Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForCICD: !Equals [ !Ref SNSForCICDArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
   DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
   DeployDefaultSecuritySettings: !Equals [ !Ref DefaultSecuritySettings, ENABLED] 
   DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployNetwork: !Equals [ !Ref Network, ENABLED]
   DeploySharedServices: !Equals [ !Ref SharedServices, ENABLED]
+  DeployStaticWebsiteHosting: !Equals [ !Ref StaticWebsiteHosting, ENABLED]
   DeployWebServers: !Not [ !Equals [ !Ref WebServers, DISABLED] ]
   DeployUploadArtifacts: !Equals [ !Ref UploadArtifacts, ENABLED]
   Development: !Equals [ !Ref GitHubBranchName, develop]
@@ -558,6 +559,56 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
       RoleName: !Sub CICD-CloudFormation-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCloudFormationGitSync:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.sync.codeconnections.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for CloudFormation to access related resources.
+      Policies:
+        - PolicyName: CloudFormation
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStacks
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:GetTemplate
+                  - cloudformation:ListChangeSets
+                  - cloudformation:ListStacks
+                  - cloudformation:ValidateTemplate
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - events:PutRule
+                  - events:PutTargets
+                Resource: '*'
+                Effect: Allow
+                Condition:
+                  StringEquals:
+                    events:ManagedBy: cloudformation.sync.codeconnections.amazonaws.com
+              - Action:
+                  - events:DescribeRule
+                Resource: '*'
+                Effect: Allow
+      RoleName: !Sub CICD-CloudFormationGitSync-${AWS::Region}
       Tags:
         - Key: environment
           Value: !If

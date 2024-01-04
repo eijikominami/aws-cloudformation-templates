@@ -6,7 +6,7 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 
-          default: 'AppFlow Configuration for Gogole Analytics'
+          default: 'AppFlow Configuration for Google Analytics'
         Parameters: 
           - AppFlowConnectorProfileName
           - AppFlowGoogleAnalyticsObject
@@ -63,7 +63,7 @@ Parameters:
     Description: The role arn of account id source bucket is contained
   GlueDatabaseName: 
     Type: String
-    Default: 'datalake'
+    Default: datalake
     AllowedPattern: '[a-z0-9\_]+'
     MinLength: 1
     MaxLength: 20
@@ -80,7 +80,7 @@ Parameters:
     Default: ''
   Environment:
     Type: String
-    Default: development
+    Default: production
     AllowedValues:
       - production
       - test
