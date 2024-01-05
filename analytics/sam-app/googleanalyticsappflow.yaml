@@ -6,12 +6,12 @@ Metadata:
     ParameterGroups:
       - Label: 
           default: 'AppFlow Configuration'
-        Parameters: 
-          - AppFlowConnectorClientId
-          - AppFlowConnectorClientSecret
-          - AppFlowConnectorProfileName
-          - AppFlowGoogleAnalyticsObject
-          - AppFlowScheduleRate
+        Parameters:
+          - AuthCode 
+          - ClientId
+          - ClientSecret
+          - EntityName
+          - ScheduleRate
           - S3BucketName
       - Label: 
           default: 'Tag Configuration'
@@ -21,25 +21,25 @@ Metadata:
           - TagValue
 
 Parameters:
-  AppFlowConnectorClientId:
+  AuthCode:
     Type: String
     AllowedPattern: .+
     NoEcho: true
-    Description: The identifier for OAuth2 [required]  
-  AppFlowConnectorProfileName:
+    Description: The code provided by the connector when it has been authenticated [required]
+  ClientId:
     Type: String
     AllowedPattern: .+
-    Description: The profile name of AppFlow Connector for Google Analytics [required]
-  AppFlowConnectorClientSecret:
+    Description: The identifier for OAuth2 [required]
+  ClientSecret:
     Type: String
     AllowedPattern: .+
     NoEcho: true
     Description: The client secret used by the OAuth client to authenticate [required]
-  AppFlowGoogleAnalyticsObject:
+  EntityName:
     Type: String
     AllowedPattern: .+
-    Description: The object of Google Analytics [required]
-  AppFlowScheduleRate:
+    Description: The entity name (path) of Google Analytics [required]
+  ScheduleRate:
     Type: Number
     Default: 24
     MinValue: 24
@@ -74,48 +74,285 @@ Resources:
           DestinationConnectorProperties: 
             S3: 
               BucketName: !Ref S3BucketName
-      FlowName: !Sub ${AppFlowConnectorProfileName}-${AppFlowGoogleAnalyticsObject}
-      SourceFlowConfig: 
+      FlowName: !Join
+        - ''
+        - - !Sub ${AppFlowConnectorProfile}-
+          - !Join
+            - '-'
+            - !Split ['/', !Ref EntityName]
+      FlowStatus: Active
+      SourceFlowConfig:
+        ApiVersion: v1beta
         ConnectorProfileName: !Ref AppFlowConnectorProfile
         ConnectorType: CustomConnector
         SourceConnectorProperties: 
-          GoogleAnalytics: 
-            Object: !Ref AppFlowGoogleAnalyticsObject
+          CustomConnector: 
+            EntityName: !Ref EntityName
       Tags:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+      # PROJECTION or Map_all only
       Tasks: 
         - ConnectorOperator:
-            GoogleAnalytics: PROJECTION
-          SourceFields: 
-            - 'ga:dateHour|DIMENSION'  
-            - 'ga:deviceCategory|DIMENSION'
-            - 'ga:users|METRIC'  
+            CustomConnector: NO_OP
+          DestinationField: browser
+          SourceFields:
+            - browser
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: city
+          SourceFields:
+            - city
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: deviceCategory
+          SourceFields:
+            - deviceCategory
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: eventName
+          SourceFields:
+            - eventName
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: landingPagePlusQueryString
+          SourceFields:
+            - landingPagePlusQueryString
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: operatingSystem
+          SourceFields:
+            - operatingSystem
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: unifiedScreenClass
+          SourceFields:
+            - unifiedScreenClass
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: userAgeBracket
+          SourceFields:
+            - userAgeBracket
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: userGender
+          SourceFields:
+            - userGender
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: active1DayUsers
+          SourceFields:
+            - active1DayUsers
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: active7DayUsers
+          SourceFields:
+            - active7DayUsers
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: active28DayUsers
+          SourceFields:
+            - active28DayUsers
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: activeUsers
+          SourceFields:
+            - activeUsers
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: eventCount
+          SourceFields:
+            - eventCount
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: newUsers
+          SourceFields:
+            - newUsers
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: screenPageViews
+          SourceFields:
+            - screenPageViews
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: sessions
+          SourceFields:
+            - sessions
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: sessionsPerUser
+          SourceFields:
+            - sessionsPerUser
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: NO_OP
+          DestinationField: userEngagementDuration
+          SourceFields:
+            - userEngagementDuration
+          TaskProperties:
+            - Key: DESTINATION_DATA_TYPE
+              Value: String
+            - Key: SOURCE_DATA_TYPE
+              Value: String
+          TaskType: Map
+        - ConnectorOperator:
+            CustomConnector: PROJECTION
+          SourceFields:
+            # 9 dimensions
+            - browser
+            - city
+            - deviceCategory
+            - eventName
+            - landingPagePlusQueryString
+            - operatingSystem
+            - unifiedScreenClass
+            - userAgeBracket
+            - userGender
+            # 10 metrics
+            - active1DayUsers
+            - active7DayUsers
+            - active28DayUsers
+            - activeUsers
+            - eventCount
+            - newUsers
+            - screenPageViews
+            - sessions
+            - sessionsPerUser
+            - userEngagementDuration
           TaskType: Filter
       TriggerConfig:
         TriggerProperties:
           DataPullMode: Incremental
-          ScheduleExpression: !Sub rate(${AppFlowScheduleRate}hours)
+          ScheduleExpression: !Sub rate(${ScheduleRate}hours)
         TriggerType: Scheduled
   AppFlowConnectorProfile:
     Type: AWS::AppFlow::ConnectorProfile
     Properties:
       ConnectionMode: Public
+      ConnectorLabel: GoogleAnalytics4
       ConnectorProfileConfig: 
         ConnectorProfileCredentials: 
           CustomConnector: 
             AuthenticationType: OAUTH2
             Oauth2:
-              ClientId: !Ref AppFlowConnectorClientId
-              ClientSecret: !Ref AppFlowConnectorClientSecret
+              ClientId: !Ref ClientId
+              ClientSecret: !Ref ClientSecret
+              OAuthRequest: 
+                AuthCode: !Ref AuthCode
+                RedirectUri: https://ap-northeast-1.console.aws.amazon.com/appflow/oauth
         ConnectorProfileProperties: 
           CustomConnector: 
             OAuth2Properties: 
               OAuth2GrantType: AUTHORIZATION_CODE
               TokenUrl: https://oauth2.googleapis.com/token
-              TokenUrlCustomProperties: 
-                usePrivateLinkForMetadataAndAuthorization: false
-      ConnectorProfileName: GoogleAnalyticsV4
+      ConnectorProfileName: !Sub GoogleAnalyticsV4-${AWS::StackName}
       ConnectorType: CustomConnector

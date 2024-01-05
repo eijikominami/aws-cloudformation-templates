@@ -18,9 +18,9 @@ If you want to deploy each service individually, click the button below.
 | Services | Launchers |
 | --- | --- |
 | CloudWatch Application Insights | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) |
-| CodeGuru Profiler | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuruProfiler&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml) |
+| CloudWatch Internet Monitor | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=InternetMonitor&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/internetmonitor.yaml) |
+| CodeGuru Reviewer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguru.yaml) |
 | DevOps Guru | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) |
-| ResillienceHub | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResillienceHub&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resilliencehub.yaml) |
 | Resource Explorer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) |
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
 | Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) |
@@ -35,9 +35,9 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| ApplicationInsight | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `ApplicationInsights` stack is deployed |
+| **ApplicationInsight** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `ApplicationInsights` stack is deployed |
 | CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
-| IncidentManager | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `IncidentManager` stack is deployed |
+| **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `IncidentManager` stack is deployed |
 | IncidentManagerAlias | String | admimistrator | ○ | The unique and identifiable alias of the contact or escalation plan |
 | IncidentManagerChatbotSnsArn | String | | | The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident |
 | IncidentManagerDisplayName | String | Administrator | ○ | The full name of the contact or escalation plan |
@@ -52,15 +52,21 @@ You can provide optional parameters as follows.
 
 ![](../images/architecture-cloudops.png)
 
-### CodeGuru Profiler
+### Application Insight
 
-This template creates a profiling group of ``AWS CodeGuru Profiler``.
+This template sets ``Amazon CloudWatch Application Insight``.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| **AgentPermission** | String | | ○ | The agent permissions attached to this profiling group |
-| ProfilingGroupName | String | Default | ○ | The name of the profiling group |
 | **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
+
+### CodeGuru Reviewer
+
+This template sets ``Amazon CodeGuru Reviewer``.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| **CodeGuruTargetRepository** | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
 
 ### DevOps Guru
 

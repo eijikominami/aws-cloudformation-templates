@@ -49,7 +49,7 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 Execute the command to deploy with `ArtifactBucketInVirginia` and `GitHubOAuthToken` parameter.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=xxxxx GitHubOAuthToken=XXXXX
 ```
 
 You can provide optional parameters as follows.
@@ -120,7 +120,7 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 `ArtifactBucketInVirginia` パラメータと `GitHubOAuthToken` パラメータを指定して、デプロイを実行してください。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=xxxxx GitHubOAuthToken=XXXXX
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。

@@ -5,7 +5,7 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/network`` sets AWS Identity Services to manage identities, resources, and permissions securely and at scale.
+``AWSCloudFormationTemplates/identity`` sets AWS Identity Services to manage identities, resources, and permissions securely at scale.
 
 ## TL;DR
 
@@ -13,9 +13,31 @@ If you just want to deploy the stack, click the button below.
 
 | Services | Launchers |
 | --- | --- |
+| AWS IAM Identity Center | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IdentityCenter&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/identity/identitycenter.yaml) |
 | AWS Managed Microsoft AD | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MicrosoftAD&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/identity/microsoftad.yaml) |
 
-## Deployment
+## AWS IAM Identity Center
+
+This template configures ``AWS IAM Identity Center``.
+
+### Deployment
+
+Execute the command to deploy.
+
+```bash
+aws cloudformation deploy --template-file identitycenter.yaml --stack-name IdentityCenter --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+```
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| DefaultSessionDuration | String | PT12H | ○ | The length of time that the application user sessions are valid for in the ISO-8601 standard |
+| InstanceArn | String |  |  | The ARN of the IAM Identity Center instance under which the operation will be executed |
+
+## AWS Managed Microsoft AD
+
+This template configures ``AWS Managed Microsoft AD``.
+
+### Deployment
 
 Execute the command to deploy.
 
@@ -24,14 +46,6 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 ```
 
 You can provide optional parameters as follows.
-
-### Installing the Active Directory administration tools
-
-After deploying this template, [install the Active Directory Administration Tools on Windows Server](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html#install_ad_tools_winserver). Next, switch the user to '*DOMAIN*\Admin' and [create users and groups](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html) with the 'Active Directory Users and Computers tool'.
-
-### AWS Managed Microsoft AD
-
-This template configures ``AWS Managed Microsoft AD``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
@@ -45,4 +59,8 @@ This template configures ``AWS Managed Microsoft AD``.
 | SubnetPrivateCidrBlockForAz2 | String | 10.0.1.0/24 | conditional | The private subnet CIDR block at AZ2 |
 | SubnetPrivateIdForAz1 | String | | conditional | The private subnet id at AZ2 |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
-| VPCCidrBlock | String | String | 10.0.0.0/21 | The VPC CIDR block |
+| VPCCidrBlock | String | 10.0.0.0/21 | ○ | The VPC CIDR block |
+
+### Installing the Active Directory administration tools
+
+After deploying this template, [install the Active Directory Administration Tools on Windows Server](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html#install_ad_tools_winserver). Next, switch the user to '*DOMAIN*\Admin' and [create users and groups](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html) with the 'Active Directory Users and Computers tool'.

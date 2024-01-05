@@ -31,7 +31,6 @@ Metadata:
       - Label: 
           default: 'Stack Configuration'
         Parameters: 
-          - Analytics
           - CloudOps
           - DefaultSecuritySettings
           - SharedServices

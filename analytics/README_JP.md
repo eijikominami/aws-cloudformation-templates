@@ -1,0 +1,46 @@
+English / [**日本語**](README_JP.md)
+
+# AWSCloudFormationTemplates/analytics
+![Build Status](https://codebuild.ap-northeast-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiT1o3djE0RFpweWErRDl6SkpwTGsySVJKbWk0ajhreUlEaXAvTHh3ZzdaS2wzNVR5V1hpZkZRRVRtcFIvNncydWdad2w4TG9MRVMzVGFvMlZKY2RNYUowPSIsIml2UGFyYW1ldGVyU3BlYyI6Ik0vOGVWdGFEWTlyYVdDZUwiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates) 
+
+``AWSCloudFormationTemplates/analytics`` は ``Amazon AppFlow``, ``AWS Glue`` などを用いてデータ分析環境を構築します。
+
+## TL;DR
+
+以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
+
+[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) 
+
+## アーキテクチャ
+
+このテンプレートが作成するAWSリソースのアーキテクチャ図は、以下の通りです。
+
+![](../images/architecture-analytics.png)
+
+## デプロイ
+
+Google Analytics と接続する場合、[新しい OAuth クライアントをセットアップ](https://aws.amazon.com/jp/blogs/news/analyzing-google-analytics-data-with-amazon-appflow-and-amazon-athena/)し、Google API 経由で authorization code を取得します。
+
+```bash
+https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=GOOGLE_ANALYTICS_CLIENT_ID&redirect_uri=https://AWS_REGION.console.aws.amazon.com/appflow/oauth&scope=https://www.googleapis.com/auth/analytics.readonly&access_type=offline
+```
+
+次に以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
+
+```bash
+aws cloudformation deploy --template-file template.yaml --stack-name Analytics --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+```
+
+デプロイ時に、以下のパラメータを指定することができます。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| AppFlowConnectorProfileName | String |  |  | The profile name of AppFlow Connector for Google Analytics |
+| AppFlowGoogleAnalyticsObject | String |  |  | The object of Google Analytics |
+| AppFlowScheduleRate | Number | 24 | ◯ | The rate at which the scheduled flow will run |
+| CloudFrontLogPrefix | String |  |  | The S3 prefix that is used in the configuration of your Amazon CloudFront distribution for log storage |
+| SourceAccountIAMRoleArn | String |  |  | The role arn of account id source bucket is contained |
+| GlueDatabaseName | String | datalake | ◯ | Prefix that is used for the created resources (20 chars, a-z, 0-9 and _ only) |
+| S3AccessLogPrefix | String |  |  | The S3 prefix that is used in the configuration of your Amazon S3 distribution for log storage |

@@ -92,6 +92,59 @@ This template creates an environment about CloudFront realtime dashboard.
 | KinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
 
+Follow the steps below to create a real-time dashboard using Kibana.
+
+1. Under **Security**, choose **Roles**.
+
+![](../images/kibana_setting_0.png)
+
+2. Click the ``+`` icon to add new role.
+3. Name your role; for example, ``firehose``.
+
+![](../images/kibana_setting_1.png)
+
+4. In the **Cluster Permissions** tab, for **Cluster-wide permissions**, add as Action Groups: ``cluster_composite_ops`` and ``cluster_monitor``.
+
+![](../images/kibana_setting_2.png)
+
+5. In the **Index Permissions** tab, click **Add index permissions**. Then choose **Index Patterns** and enter ``realtime*``. Under **Permissions: Action Groups**, add three action groups: ``crud``, ``create_index``, and ``manage``.
+
+![](../images/kibana_setting_3.png)
+
+6. Click **Save Role Definition**.
+7. Under **Security**, choose **Role Mappings**.
+
+![](../images/kibana_setting_4.png)
+
+8. Click **Add Backend Role**.
+9. Choose the ``firehose`` you just created.
+10. For Backend roles, enter the IAM ARN of the role Kinesis Data Firehose uses to write to Amazon ES and S3 ``arn:aws:iam::<aws_account_id>:role/service-role/<KinesisFirehoseServiceRole>``.
+
+![](../images/kibana_setting_5.png)
+
+11. Click **Submit**.
+12. Choose **Dev Tools**.
+13. Enter the following command to register the ``timestamp`` field as a ``date`` type and execute it.
+
+```json
+PUT _template/custom_template
+{
+    "template": "realtime*",
+    "mappings": {
+        "properties": {
+            "timestamp": {
+                "type": "date",
+                "format": "epoch_second"
+            }
+        }
+    }
+}
+```
+
+![](../images/kibana_setting_6.png)
+
+14. Import [visualizes and a dashboard](export.ndjson) to your Kibana.
+
 ### WAF
 
 This template sets ``AWS WAF``.

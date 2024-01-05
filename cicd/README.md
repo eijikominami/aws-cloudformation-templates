@@ -27,12 +27,6 @@ This template creates the following diagram.
 
 ## Preparation
 
-### Generate a GitHub personal access token
-
-Generate a GitHub [personal access token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) and copy it.
-
-![](../images/generate_your_access_token.png)
-
 ### Create S3 artifact bucket in us-east-1 (Optional)
 
 If you deploy ``Global Settings Template``, create an ``S3 artifact bucket`` in N.Verginia (`us-east-1`) region.
@@ -42,25 +36,27 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 ```
 ### Set up template configuration files (Optional)
 
-If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab1c13c17c13), upload your configuration files to your GitHub repository with the following file names and specify `GitHubOwnerNameForTemplateConfiguration` and `GitHubRepoNameForTemplateConfiguration` in your deployment.
+If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab1c13c17c13), upload your configuration files to your GitHub repository with the following file names and specify `GitHubOwnerNameForTemplateConfiguration`, `GitHubOwnerNameForTemplateConfiguration` and `GitHubRepoNameForTemplateConfiguration` in your deployment.
 
 | Stack Name | Template Configuration File Name | 
 | --- | --- |
 | CICD Template | CICD.json |
+| [CloudOps Template](../cloudops/README_JP.md) | CloudOps.json |
 | [Global Settings Template](../global/README.md) | GlobalSettings.json |
+| [Network Template](../network/README.md) | Network.json |
 | [Notification Template](../notification/README.md) | Notification.json |
+| [Shared Service Template](../shared/README_JP.md) | SharedServices.json |
 | [Security Template](../security/README.md) | DefaultSecuritySettings.json |
 | [Security Template with Config Rule](../security-config-rules/README.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](../static-website-hosting-with-ssl/README.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](../web-servers/README.md) | WebServers.json |
-| [Systems Manager Template](../web-servers/README_JP.md) | SystemsManager.json |
 
 ## Deployment
 
-Execute the command to deploy with `ArtifactBucketInVirginia` and `GitHubOAuthToken` parameter.
+Execute the command to deploy with `ArtifactBucketInVirginia`, `GitHubOwnerNameForTemplateConfiguration` and `GitHubRepoNameForTemplateConfiguration` parameter.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=xxxxx GitHubOwnerNameForTemplateConfiguration=xxxxx GitHubRepoNameForTemplateConfiguration=xxxxx
 ```
 
 You can provide optional parameters as follows.
@@ -69,7 +65,6 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | ArtifactBucketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | The Docker image name for CodeBuild |
-| GitHubOAuthToken | String | | | The **OAuth token** to access GitHub |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | The **GitHub owner name** for CloudFormation Template Configuration files |
 | **GitHubRepoNameForTemplateConfiguration** | String | | | The **GitHub repository name** for CloudFormation Template Configuration files |
 | TemplateConfigurationBasePath | String | | | The base path of template configration files |

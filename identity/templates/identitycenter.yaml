@@ -1,7 +1,22 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/security/microsoftad sets AWS IAM Identity Center.
-
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'Identity Center Configuration'
+        Parameters:
+          - DefaultSessionDuration 
+          - InstanceArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - Environment
+          - TagKey
+          - TagValue
+          
 Parameters:
   DefaultSessionDuration:
     Type: String
@@ -9,11 +24,11 @@ Parameters:
     MinLength: 1
     MaxLength: 100
     AllowedPattern: ^(-?)P(?=\d|T\d)(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)([DW]))?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$
-    Description: The length of time that the application user sessions are valid for in the ISO-8601 standard.
+    Description: The length of time that the application user sessions are valid for in the ISO-8601 standard [required]
   InstanceArn:
     Type: String
     Default: ''
-    Description: The ARN of the IAM Identity Center instance under which the operation will be executed.
+    Description: The ARN of the IAM Identity Center instance under which the operation will be executed
   LogicalNamePrefix:
     Type: String
     Default: IdentityCenter

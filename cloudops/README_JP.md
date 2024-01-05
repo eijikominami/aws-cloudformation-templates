@@ -18,9 +18,9 @@
 | 作成されるAWSサービス | 個別のCloudFormationテンプレート |
 | --- | --- |
 | CloudWatch Application Insights | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) |
-| CodeGuru Profiler | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuruProfiler&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguruprofiler.yaml) |
+| CloudWatch Internet Monitor | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=InternetMonitor&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/internetmonitor.yaml) |
+| CodeGuru Reviewer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguru.yaml) |
 | DevOps Guru | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) |
-| ResillienceHub | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResillienceHub&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resilliencehub.yaml) |
 | Resource Explorer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) |
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
 | Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) |
@@ -35,9 +35,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| ApplicationInsights | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`ApplicationInsights` スタックがデプロイされます。 |
+| **ApplicationInsights** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`ApplicationInsights` スタックがデプロイされます。 |
 | CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | CodeGuru で使用する GitHub オーナー名とリポジトリ名 |
-| IncidentManager | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`IncidentManager` スタックがデプロイされます。 |
+| **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`IncidentManager` スタックがデプロイされます。 |
 | IncidentManagerAlias | String | admimistrator | ○ | 連絡先のエイリアス |
 | IncidentManagerChatbotSnsArn | String | | | AWS Chatbot の ARN |
 | IncidentManagerDisplayName | String | Administrator | ○ | 連絡先のエイリアス |
@@ -52,15 +52,21 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 ![](../images/architecture-cloudops.png)
 
-### CodeGuru Profiler
+### Application Insight
 
-このテンプレートは、``AWS CodeGuru Profiler`` のプロファイリンググループを作成します。
+このテンプレートは、``CloudWatch Application Insight`` を作成します。
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **AgentPermission** | String | | ○ | プロファイリンググループに付与するエージェントの権限 |
-| ProfilingGroupName | String | Default | ○ | プロファイリンググループの名前 |
-| **SNSForAlertArn** | String | | ○ | SNSトピックのARN |
+| **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
+
+### CodeGuru Reviewer
+
+このテンプレートは、``Amazon CodeGuru Reviewer`` を作成します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| **CodeGuruTargetRepository** | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
 
 ### DevOps Guru
 

@@ -21,10 +21,10 @@ The following sections describe the individual components of the architecture.
 
 ## Deployment
 
-Execute the command to deploy.
+Execute the command to deploy with `DomainName` and `RepositoryName` parameter.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name Amplify --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file template.yaml --stack-name Amplify --parameter-overrides DomainName=xxxxx RepositoryName=xxxxx --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows:
