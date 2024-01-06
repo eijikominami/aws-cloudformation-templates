@@ -1,35 +1,100 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/analytics/googleanalytics creates a data lake for Google Analytics.
+Description: AWSCloudFormationTemplates/analytics/googleanalytics creates a data analytics flow for Google Analytics.
 
 Metadata: 
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 
+          default: 'AppFlow Configuration'
+        Parameters: 
+          - AuthCode
+          - ClientId
+          - ClientSecret
+          - EntityName
+          - S3BucketNameForSource
+          - ScheduleRate
+      - Label: 
           default: 'Glue Configuration'
         Parameters: 
-          - LogicalNamePrefix
-      - Label: 
-          default: 'S3 Configuration'
-        Parameters: 
-          - S3BucketName
+          - GlueDatabaseName
+          - GlueJobNumberOfWorkers
+          - GlueJobWorkerType
+          - GlueRegistoryArn
+          - S3BucketNameForGlue
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - LogicalNamePrefix
           - Environment 
           - TagKey
           - TagValue
 
 Parameters:
+  AuthCode:
+    Type: String
+    AllowedPattern: .+
+    NoEcho: true
+    Description: The code provided by the connector when it has been authenticated [required]
+  ClientId:
+    Type: String
+    AllowedPattern: .+
+    Description: The identifier for OAuth2 [required]
+  ClientSecret:
+    Type: String
+    AllowedPattern: .+
+    NoEcho: true
+    Description: The client secret used by the OAuth client to authenticate [required]
+  EntityName:
+    Type: String
+    AllowedPattern: .+
+    Description: The entity name (path) of Google Analytics [required]
+  GlueDatabaseName: 
+    Type: String
+    Default: datalake
+    AllowedPattern: '[a-z0-9\_]+'
+    MinLength: 1
+    MaxLength: 20
+    Description: Prefix that is used for the created resources (20 chars, a-z, 0-9 and _ only) [required]
+  GlueJobNumberOfWorkers:
+    Type: Number
+    Default: 2
+    MinValue: 2
+    Description: The number of workers of a defined workerType that are allocated when a job runs [required] 
+  GlueJobWorkerType:
+    Type: String
+    Default: G.1X
+    AllowedValues:
+      - G.025X
+      - G.1X
+      - G.2X
+      - G.4X
+      - G.8X
+      - Z.2X
+    Description: The type of predefined worker that is allocated when a job runs [required] 
+  GlueRegistoryArn:
+    Type: String
+    AllowedPattern: arn:aws(-(cn|us-gov|iso(-[bef])?))?:glue:.*
+    Description: The Amazon Resource Name (ARN) of the registry [required]
   LogicalNamePrefix: 
     Type: String
-    Default: 'GoogleAnalytics'
+    Default: GoogleAnalytics
     Description: The custom prefix name [required]
-  S3BucketName:
+  ScheduleRate:
+    Type: Number
+    Default: 24
+    MinValue: 24
+    Description: The rate at which the scheduled flow will run [required]
+  S3BucketNameForGlue:
+    Type: String
+    AllowedPattern: .+
+    Description: The bucket name Glue uses [required]
+  S3BucketNameForSource:
     Type: String
     AllowedPattern: .+
     Description: The bucket name data are stored [required]
@@ -91,154 +156,68 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  IAMRoleForLambda:
-    Type: AWS::IAM::Role
+  # AppFlow
+  AppFlow:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Description: A role required for Lambda to access S3 and CloudWatch Logs.
-      ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
-          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
-      Policies:
-        - PolicyName: CloudWatchLogs
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - logs:PutLogEvents
-                Resource: '*'
-        - PolicyName: S3
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:PutObject
-                Resource: 
-                  - !Sub arn:aws:s3:::datalake-source-${AWS::Region}-${AWS::AccountId}
-                  - !Sub arn:aws:s3:::datalake-source-${AWS::Region}-${AWS::AccountId}/*
-      RoleName: !Sub ${LogicalNamePrefix}-Lambda-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  LambdaGaConverter:
-    DependsOn:
-      - LogGroupForLambdaGaConverter
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: gaConverter/
-      Description: Google Analytics のデータを変換します。
-      Environment:
-        Variables:
-          AWS_LAMBDA_EXEC_WRAPPER:  !If
-            - Development
-            - /opt/codeguru_profiler_lambda_exec
-            - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
-            - Development
-            - !Ref AWS::Region
-            - !Ref AWS::NoValue
-      FunctionName: !Sub gaConverter-createdby-${LogicalNamePrefix}
-      Layers: !If
-        - Development
-        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:11
-        - !Ref AWS::NoValue
-      Handler: lambda_function.lambda_handler
-      MemorySize: 512
-      Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.9
-      Timeout: 30
-      Tracing: Active
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
-  LambdaGaConverterPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt LambdaGaConverter.Arn
-      Principal: s3.amazonaws.com
-      SourceAccount: !Ref AWS::AccountId
-      SourceArn: !Sub arn:aws:s3:::${S3BucketName}
-  LogGroupForLambdaGaConverter:
-    Type: AWS::Logs::LogGroup
-    Properties: 
-      LogGroupName: !Sub /aws/lambda/gaConverter-createdby-${LogicalNamePrefix}
-      RetentionInDays: 60
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  AlarmLambdaGaConverter:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.16
-      NotificationARNs: 
+      NotificationARNs:
         - !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
-        SNSTopicArn: !If
+        AuthCode: !Ref AuthCode
+        ClientId: !Ref ClientId
+        ClientSecret: !Ref ClientSecret
+        EntityName: !Ref EntityName
+        ScheduleRate: !Ref ScheduleRate
+        S3BucketName: !Ref S3BucketNameForSource
+        SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-        MetricFilterPattern: ''
-        FunctionResouceName: !Ref LambdaGaConverter
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-appflow.yaml
+        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-appflow.yaml
       Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
-  GlueTable:
-    Type: AWS::Glue::Table
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Glue
+  Glue:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      CatalogId: !Ref AWS::AccountId
-      DatabaseName: !Ref LogicalNamePrefix
-      TableInput:
-        Name: google_analytics_parquet
-        Description: Parquet format Google Analytics logs
-        TableType: EXTERNAL_TABLE
-        Parameters: { 'has_encrypted_data': 'false', 'parquet.compression': 'SNAPPY' }
-        StorageDescriptor:
-          Columns:
-            - Name: year
-              Type: int
-            - Name: month
-              Type: int
-            - Name: day
-              Type: int
-            - Name: hour
-              Type: int
-            - Name: device
-              Type: string
-            - Name: user_count
-              Type: int
-          InputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat
-          Location: !Sub s3://${S3BucketName}/GoogleAnalytics-parquet/
-          OutputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat
-          SerdeInfo:
-            SerializationLibrary: org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe
-
-Outputs:
-  LambdaArn:
-    Description: The ARN of LambdaGaConverter
-    Value: !GetAtt LambdaGaConverter.Arn
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        DatabaseName: !Ref GlueDatabaseName
+        GlueBucketName: !Ref S3BucketNameForGlue
+        GlueJobNumberOfWorkers: !Ref GlueJobNumberOfWorkers
+        GlueJobWorkerType: !Ref GlueJobWorkerType
+        GlueRegistoryArn: !Ref GlueRegistoryArn
+        SourceBucketName: !GetAtt AppFlow.Outputs.DistinationBucket
+        LogicalNamePrefix: !Ref LogicalNamePrefix
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-glue.yaml
+        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-glue.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

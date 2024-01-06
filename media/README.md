@@ -7,6 +7,9 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/media`` builds AWS Elemental Media Services.
 
+> [!NOTE]
+> You can also get useful sample templates at [**eijikominami/aws-cloudformation-samples/media**](https://github.com/eijikominami/aws-cloudformation-samples/tree/master/media).
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.

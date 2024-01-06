@@ -1,0 +1,353 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/analytics/googleanalytics-glue creates an AppFlow flow for Google Analytics.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'Glue Configuration for Google Analytics'
+        Parameters:
+          - DatabaseName
+          - GlueBucketName
+          - GlueRegistoryArn
+          - GlueJobNumberOfWorkers
+          - GlueJobWorkerType
+          - SourceBucketName
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalNamePrefix
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  DatabaseName:
+    Type: String
+    AllowedPattern: .+
+    Description: The name of the database in which the crawler's output is stored [required]
+  GlueBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: The bucket name Glue uses [required]
+  GlueJobNumberOfWorkers:
+    Type: Number
+    Default: 2
+    MinValue: 2
+    Description: The number of workers of a defined workerType that are allocated when a job runs [required] 
+  GlueJobWorkerType:
+    Type: String
+    Default: G.1X
+    AllowedValues:
+      - G.025X
+      - G.1X
+      - G.2X
+      - G.4X
+      - G.8X
+      - Z.2X
+    Description: The type of predefined worker that is allocated when a job runs [required] 
+  GlueRegistoryArn:
+    Type: String
+    AllowedPattern: arn:aws(-(cn|us-gov|iso(-[bef])?))?:glue:.*
+    Description: The Amazon Resource Name (ARN) of the registry [required] 
+  SourceBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: The path to the Amazon S3 target [required]
+  LogicalNamePrefix: 
+    Type: String
+    Default: GoogleAnalytics
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-samples
+    AllowedPattern: .+
+
+Resources:
+  # IAM
+  IAMRoleForGlueCrawler:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Glue to access S3.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub arn:aws:s3:::${SourceBucketName}/*
+      RoleName: !Sub ${LogicalNamePrefix}-GlueClawler-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForGlueJobToParquet:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Glue to access S3.
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                Resource:
+                  - !Sub arn:aws:s3:::${SourceBucketName}
+                  - !Sub arn:aws:s3:::${SourceBucketName}/*
+                  - !Sub arn:aws:s3:::${GlueBucketName}
+                  - !Sub arn:aws:s3:::${GlueBucketName}/*
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub arn:aws:s3:::${SourceBucketName}
+                  - !Sub arn:aws:s3:::${SourceBucketName}/*
+                  - !Sub arn:aws:s3:::${GlueBucketName}
+                  - !Sub arn:aws:s3:::${GlueBucketName}/*
+        - PolicyName: Glue
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:BatchDeleteJob
+                Resource: '*'
+        - PolicyName: KMS
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:ReEncrypt
+                  - kms:GenerateDataKey
+                  - kms:DescribeKey
+                  - kms:Decrypt
+                Resource: '*'
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                Resource: '*'
+      RoleName: !Sub ${LogicalNamePrefix}-GlueJob-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  GlueCrawler: 
+    Type: AWS::Glue::Crawler
+    Properties:
+      DatabaseName: !Ref DatabaseName
+      Description: !Sub Crawler for Google Analytics created by ${AWS::StackName}
+      Name: !Ref LogicalNamePrefix
+      RecrawlPolicy: 
+        RecrawlBehavior: CRAWL_EVERYTHING
+      Role: !GetAtt IAMRoleForGlueCrawler.Arn
+      SchemaChangePolicy: 
+        DeleteBehavior: LOG
+        UpdateBehavior: UPDATE_IN_DATABASE
+      Tags: 
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Targets: 
+        S3Targets:
+          - Path: !Sub ${SourceBucketName}/
+  # Schema
+  GlueSchema:
+    Type: AWS::Glue::Schema
+    Properties:
+      CheckpointVersion: 
+        IsLatest: true
+      Compatibility: BACKWARD
+      DataFormat: JSON
+      Description: !Sub The schema for Google Analytics ${LogicalNamePrefix}
+      Name: !Ref LogicalNamePrefix
+      Registry: 
+        Arn: !Ref GlueRegistoryArn
+      SchemaDefinition: >
+        {
+          "$id": "https://example.com/person.schema.json",
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "Google Analytics",
+          "type": "object",
+          "properties": {
+            "browser": {
+              "type": "string",
+              "description": "The browsers used to view your website."
+            },
+            "city": {
+              "type": "string",
+              "description": "The city from which the user activity originated."
+            },
+            "deviceCategory": {
+              "type": "string",
+              "description": "The type of device: Desktop, Tablet, or Mobile."
+            },
+            "eventName": {
+              "type": "string",
+              "description": "The name of the event."
+            },
+            "landingPagePlusQueryString": {
+              "type": "string",
+              "description": "The page path + query string associated with the first pageview in a session."
+            },
+            "operatingSystem": {
+              "type": "string",
+              "description": "The operating systems used by visitors to your app or website. Includes desktop and mobile operating systems such as Windows and Android."
+            },
+            "unifiedScreenClass": {
+              "type": "string",
+              "description": "The page title (web) or screen class (app) on which the event was logged."
+            },
+            "userAgeBracket": {
+              "type": "string",
+              "description": "User age brackets."
+            },
+            "userGender": {
+              "type": "string",
+              "description": "User gender."
+            },
+            "active1DayUsers": {
+              "type": "integer",
+              "description": "The number of distinct active users on your site or app within a 1 day period."
+            },
+            "active7DayUsers": {
+              "type": "integer",
+              "description": "The number of distinct active users on your site or app within a 7 day period."
+            },
+            "active28DayUsers": {
+              "type": "integer",
+              "description": "The number of distinct active users on your site or app within a 28 day period."
+            },
+            "activeUsers": {
+              "type": "integer",
+              "description": "The number of distinct users who visited your site or app."
+            },
+            "eventCount": {
+              "type": "integer",
+              "description": "The count of events."
+            },
+            "newUsers": {
+              "type": "integer",
+              "description": "The number of users who interacted with your site or launched your app for the first time (event triggered: first_open or first_visit)."
+            },
+            "screenPageViews": {
+              "type": "integer",
+              "description": "The number of app screens or web pages your users viewed."
+            },
+            "sessions": {
+              "type": "integer",
+              "description": "The number of sessions that began on your site or app (event triggered: session_start)."
+            },
+            "sessionsPerUser": {
+              "type": "integer",
+              "description": "The average number of sessions per user (Sessions divided by Active Users)."
+            },
+            "userEngagementDuration": {
+              "type": "integer",
+              "description": "The total amount of time (in seconds) your website or app was in the foreground of users' devices."
+            }
+          }
+        }        
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Table
+  GlueTable:
+    Type: AWS::Glue::Table
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref DatabaseName
+      TableInput: 
+        Description: !Sub JSON format Google Analytics ${LogicalNamePrefix} logs
+        Name: !Sub ${DatabaseName}_ga
+        Parameters:
+          classification: json
+        Retention: 0
+        StorageDescriptor: 
+          Compressed: false
+          InputFormat: org.apache.hadoop.mapred.TextInputFormat
+          Location: !Sub s3://${SourceBucketName}/
+          NumberOfBuckets: 0
+          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          SchemaReference: 
+            SchemaVersionId: !GetAtt GlueSchema.InitialSchemaVersionId
+          SerdeInfo:
+            SerializationLibrary: org.openx.data.jsonserde.JsonSerDe
+          StoredAsSubDirectories: false
+        TableType: EXTERNAL_TABLE
+  # Job
+  GlueJobToParquet:
+    Type: AWS::Glue::Job
+    Properties:
+      Command: 
+        Name: glueetl
+        PythonVersion: 3
+        ScriptLocation: !Sub s3://${GlueBucketName}/scripts/a.py
+      DefaultArguments:
+        --enable-metrics: true
+        --enable-spark-ui: true
+        --spark-event-logs-path: !Sub s3://${GlueBucketName}/sparkHistoryLogs/
+        --enable-job-insights: true
+        --enable-observability-metrics: true
+        --enable-glue-datacatalog: true
+        --enable-continuous-cloudwatch-log: true
+        --job-bookmark-option: job-bookmark-disable
+        --job-language: python
+        --TempDir: !Sub s3://${GlueBucketName}/temporary/
+        --enable-auto-scaling: true
+      Description: !Sub The job to convert JSON logs of Google Analytics to Parquet created by ${AWS::StackName}
+      ExecutionClass: FLEX
+      ExecutionProperty:  
+        MaxConcurrentRuns: 1
+      GlueVersion: 4.0
+      MaxRetries: 0
+      NumberOfWorkers: !Ref GlueJobNumberOfWorkers
+      Role: !GetAtt IAMRoleForGlueJobToParquet.Arn
+      Tags: 
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Timeout: 2880
+      WorkerType: !Ref GlueJobWorkerType

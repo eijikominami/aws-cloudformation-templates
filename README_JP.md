@@ -8,6 +8,9 @@
  
 AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセキュリティ設定** や **Webサイトのホスティング設定** など、AWSを利用する上で有用なCloudformationテンプレートを複数提供します。
 
+> [!NOTE]
+> [**eijikominami/aws-cloudformation-samples**](https://github.com/eijikominami/aws-cloudformation-samples/blob/master/README_JP.md) にサンプルテンプレート集があります。
+
 ## テンプレート
 
 本プロジェクトには、以下の **Cloudformationテンプレート** が存在します。
@@ -23,7 +26,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | [EC2ベースのWebサイトホスティング](/web-servers/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WebServers&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/template.yaml) |
 | [支払いやCloudFrontの監視に関する設定](/global/README_JP.md) | バージニア北部 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=GlobalSettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/global/template.yaml) |
 | [認証](/identity/README.md) | | |
-| [メディア](/media/README_JP.md) | | |
+| [メディア](/media/README_JP.md) | | [サンプルテンプレート](https://github.com/eijikominami/aws-cloudformation-samples/blob/master/media/README_JP.md) |
 | [**ネットワーク**](/network/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml)  |
 | [**セキュリティ設定**](/security/README_JP.md) | 東京| [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DefaultSecuritySettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/template.yaml) |
 | [Slackへの通知](/notification/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
@@ -41,6 +44,8 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
 | Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-0659e3a420d8a74ea |
+| AWS Glue | GlueVersion | 4.0 |
+| AWS Glue | PythonVersion | 3 |
 | AWS Lambda | CodeGuru Profiler | [AWSCodeGuruProfilerPythonAgentLambdaLayer:11 (Python 3.9)](https://docs.aws.amazon.com/codeguru/latest/profiler-ug/python-lambda-layers.html) |
 | AWS Lambda | Lambda Insights | [LambdaInsightsExtension-Arm64:11](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Lambda-Insights-extension-versionsARM.html) |
 | AWS Lambda | Python | 3.9 |

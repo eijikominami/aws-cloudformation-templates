@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/analytics/googleanalytics creates an AppFlow flow for Google Analytics.
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/analytics/googleanalytics-appflow creates an AppFlow flow for Google Analytics.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -13,6 +14,11 @@ Metadata:
           - EntityName
           - ScheduleRate
           - S3BucketName
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -48,6 +54,12 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The bucket name data are stored [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
   Environment:
     Type: String
     Default: production
@@ -64,7 +76,42 @@ Parameters:
     Default: aws-cloudformation-samples
     AllowedPattern: .+
 
-Resources:  
+Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.16
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.16
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # AppFlow
   AppFlow:
     Type: AWS::AppFlow::Flow
     Properties: 
@@ -93,7 +140,8 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-      # PROJECTION or Map_all only
+      # 9 dimensions and 10 metrics per flow run
+      # https://docs.aws.amazon.com/appflow/latest/userguide/service-quotas.html
       Tasks: 
         - ConnectorOperator:
             CustomConnector: NO_OP
@@ -307,7 +355,7 @@ Resources:
         - ConnectorOperator:
             CustomConnector: PROJECTION
           SourceFields:
-            # 9 dimensions
+            # Dimensions
             - browser
             - city
             - deviceCategory
@@ -317,7 +365,7 @@ Resources:
             - unifiedScreenClass
             - userAgeBracket
             - userGender
-            # 10 metrics
+            # Metrics
             - active1DayUsers
             - active7DayUsers
             - active28DayUsers
@@ -356,3 +404,39 @@ Resources:
               TokenUrl: https://oauth2.googleapis.com/token
       ConnectorProfileName: !Sub GoogleAnalyticsV4-${AWS::StackName}
       ConnectorType: CustomConnector
+  # CloudWatch Alarm
+  AlarmCodeBuildForAppFlow:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appflow
+        SemanticVersion: 2.1.16
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        FlowName: !Ref AppFlow
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+Outputs:
+  DistinationBucket:
+    Description: The distination bucket that the data are stored
+    Value: !Join
+      - ''
+      - - !Ref S3BucketName
+        - /
+        - !Join
+          - ''
+          - - !Sub ${AppFlowConnectorProfile}-
+            - !Join
+              - '-'
+              - !Split ['/', !Ref EntityName]

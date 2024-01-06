@@ -63,4 +63,4 @@ You can provide optional parameters as follows.
 
 ### Installing the Active Directory administration tools
 
-After deploying this template, [install the Active Directory Administration Tools on Windows Server](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html#install_ad_tools_winserver). Next, switch the user to '*DOMAIN*\Admin' and [create users and groups](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html) with the 'Active Directory Users and Computers tool'.
+After deploying this template, [install the Active Directory Administration Tools on Windows Server](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html#install_ad_tools_winserver). Next, switch the user to `DOMAIN\Admin` and [create users and groups](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html) with the **Active Directory Users and Computers tool**.

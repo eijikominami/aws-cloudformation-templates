@@ -7,6 +7,9 @@
  
 ``AWSCloudFormationTemplates/media`` は、 ``AWS Elemental Media Services`` を構築します。
 
+> [!NOTE]
+> [**eijikominami/aws-cloudformation-samples/media**](hhttps://github.com/eijikominami/aws-cloudformation-samples/blob/master/media/README_JP.md) にサンプルテンプレート集があります。
+
 ## TL;DR
 
 以下のボタンをクリックすることで、**CloudFormationをデプロイ** することが可能です。

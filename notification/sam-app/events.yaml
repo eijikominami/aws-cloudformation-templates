@@ -9,6 +9,7 @@ Metadata:
           default: 'EventBridge Configuration'
         Parameters:
           - AutoScalingEventsRule
+          - AppFlow
           - CertificateManager
           - EBSEventsRule
           - EC2EventsRule
@@ -38,6 +39,13 @@ Parameters:
     Default: Notification-
     AllowedPattern: .+
     Description: Custom prefix name [required]
+  AppFlow:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about AppFlow [required]
   AutoScalingEventsRule:
     Type: String
     Default: ENABLED
@@ -51,7 +59,6 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
-      - ERROR_ONLY
       - DISABLED
     Description: Enable or disable the events rule about Certificate Manager [required]
   EBSEventsRule:
@@ -177,6 +184,23 @@ Resources:
         - SubscribeAutoScalingErrorEventOnly
         - ENABLED
         - !Ref AutoScalingEventsRule
+      Targets:
+        - Arn: !Ref SNSForAlertArn
+          Id: SNSForAlert
+  EventBridgeForAppFlow:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for AppFlow created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.appflow
+        detail-type: 
+          - AppFlow End Flow Run Report
+        detail:
+          - status:
+              - Execution Failed
+      Name: !Sub ${LogicalNamePrefix}-AppFlow
+      State: !Ref AppFlow
       Targets:
         - Arn: !Ref SNSForAlertArn
           Id: SNSForAlert

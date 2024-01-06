@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/analytics/datalake creates a data lake.
+Description: AWSCloudFormationTemplates/analytics creates a data analytics platform.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -14,17 +14,11 @@ Metadata:
           - GoogleAnalyticsEntityName
           - GoogleAnalyticsScheduleRate
       - Label: 
-          default: 'CloudFront Configuration'
-        Parameters: 
-          - CloudFrontLogPrefix
-      - Label: 
           default: 'Glue Configuration'
         Parameters: 
           - GlueDatabaseName
-      - Label: 
-          default: 'S3 Access Log Configuration'
-        Parameters: 
-          - S3AccessLogPrefix
+          - GlueJobNumberOfWorkers
+          - GlueJobWorkerType
       - Label: 
           default: 'S3 Replication Configuration'
         Parameters: 
@@ -65,10 +59,6 @@ Parameters:
     Default: 24
     MinValue: 24
     Description: The rate at which the scheduled flow will run [required]
-  CloudFrontLogPrefix:
-    Type: String
-    Default: ''
-    Description: The S3 prefix that is used in the configuration of your Amazon CloudFront distribution for log storage
   SourceAccountIAMRoleArn:
     Type: String
     Default: ''
@@ -80,10 +70,22 @@ Parameters:
     MinLength: 1
     MaxLength: 20
     Description: Prefix that is used for the created resources (20 chars, a-z, 0-9 and _ only) [required]
-  S3AccessLogPrefix:
+  GlueJobNumberOfWorkers:
+    Type: Number
+    Default: 2
+    MinValue: 2
+    Description: The number of workers of a defined workerType that are allocated when a job runs [required] 
+  GlueJobWorkerType:
     Type: String
-    Default: ''
-    Description: The S3 prefix that is used in the configuration of your Amazon S3 distribution for log storage
+    Default: G.1X
+    AllowedValues:
+      - G.025X
+      - G.1X
+      - G.2X
+      - G.4X
+      - G.8X
+      - Z.2X
+    Description: The type of predefined worker that is allocated when a job runs [required] 
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -107,9 +109,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateTableForCloudFront: !Not [ !Equals [ !Ref CloudFrontLogPrefix, ''] ] 
   CreateTableForGoogleAnalytics: !And [ !Not [ !Equals [ !Ref GoogleAnalyticsAuthCode, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsClientId, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsClientSecret, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsEntityName, ''] ] ]
-  CreateTableForS3: !Not [ !Equals [ !Ref S3AccessLogPrefix, ''] ]
   CreateBucketPolicy: !Not [ !Equals [ !Ref SourceAccountIAMRoleArn, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -146,6 +146,7 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # S3
   S3ForSource:
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
@@ -160,42 +161,11 @@ Resources:
         - - datasource-
           - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
           - !Sub -${AWS::Region}-${AWS::AccountId}
-      LifecycleConfiguration:
-        Rules:
-          - Id: NoncurrentVersionExpirationInDays
-            NoncurrentVersionExpiration: 
-              NewerNoncurrentVersions: 1
-              NoncurrentDays: 1
-            Status: Enabled
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - !If
-            - CreateTableForCloudFront
-            - Event: s3:ObjectCreated:*
-              Filter: 
-                S3Key:
-                  Rules:
-                    - Name: prefix
-                      Value: !Ref CloudFrontLogPrefix
-              Function: !GetAtt AmazonCloudfrontAccessLogsQueries.Outputs.MoveNewAccessLogsFnArn
-            - !Ref AWS::NoValue
-          - !If
-            - CreateTableForGoogleAnalytics
-            - Event: s3:ObjectCreated:*
-              Filter: 
-                S3Key:
-                  Rules:
-                    - Name: prefix
-                      Value: GoogleAnalytics
-              Function: !GetAtt GoogleAnalyticsLogsQueries.Outputs.LambdaArn
-            - !Ref AWS::NoValue
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      VersioningConfiguration:
-        Status: Enabled
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -265,6 +235,31 @@ Resources:
                   - - !GetAtt S3ForSource.Arn
                     - /*
             - !Ref AWS::NoValue
+  S3ForGlue:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Join
+        - ''
+        - - glue-
+          - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
+          - !Sub -${AWS::Region}-${AWS::AccountId}
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Glue
   GlueDatabase:
     Type: AWS::Glue::Database
     Properties:
@@ -272,166 +267,12 @@ Resources:
       DatabaseInput:
         Description: !Sub Database for ${GlueDatabaseName} created by ${AWS::StackName}
         Name: !Ref GlueDatabaseName
-  # CloudFront
-  AmazonCloudfrontAccessLogsQueries:
-    Condition: CreateTableForCloudFront
-    Type: AWS::Serverless::Application
+  GlueRegistry:
+    Type: AWS::Glue::Registry
     Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/amazon-cloudfront-access-logs-queries
-        SemanticVersion: 1.0.0
-      Parameters:
-        GlueDatabase: !Ref GlueDatabase
-        GzKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-gz/
-        NewKeyPrefix: !Sub ${CloudFrontLogPrefix}/
-        ParquetKeyPrefix: !Sub ${CloudFrontLogPrefix}-partitioned-parquet/
-        ResourcePrefix: !Ref AWS::StackName
-        S3BucketName: !Join
-        - ''
-        - - datasource-
-          - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
-          - !Sub -${AWS::Region}-${AWS::AccountId}
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagValue
-        TagValue: !Ref TagValue
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
-  # S3
-  TableForS3:
-    Condition: CreateTableForS3
-    Type: AWS::Glue::Table
-    Properties:
-      CatalogId: !Ref AWS::AccountId
-      DatabaseName: !Ref GlueDatabase
-      TableInput:
-        Name: s3_access_log
-        Description: Parquet format Amazon S3 access logs
-        TableType: EXTERNAL_TABLE
-        StorageDescriptor:
-          Columns:
-            - Name: bucketowner
-              Type: string
-            - Name: bucket_name
-              Type: string
-            - Name: requestdatetime
-              Type: string
-            - Name: remoteip
-              Type: string
-            - Name: requester
-              Type: string
-            - Name: requestid
-              Type: string
-            - Name: operation
-              Type: string
-            - Name: key
-              Type: string
-            - Name: request_uri
-              Type: string
-            - Name: httpstatus
-              Type: string
-            - Name: errorcode
-              Type: string
-            - Name: bytessent
-              Type: bigint
-            - Name: objectsize
-              Type: bigint
-            - Name: totaltime
-              Type: string
-            - Name: turnaroundtime
-              Type: string
-            - Name: referrer
-              Type: string
-            - Name: useragent
-              Type: string
-            - Name: versionid
-              Type: string
-            - Name: hostid
-              Type: string
-            - Name: sigv
-              Type: string
-            - Name: ciphersuite
-              Type: string
-            - Name: authtype
-              Type: string
-            - Name: endpoint
-              Type: string
-            - Name: tlsversion
-              Type: string
-          InputFormat: org.apache.hadoop.mapred.TextInputFormat
-          Location: !Sub s3://${S3ForSource}/${S3AccessLogPrefix}/
-          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
-          SerdeInfo:
-            Parameters:
-              input.regex: '([^ ]*) ([^ ]*) \[(.*?)\] ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ("[^"]*"|-) (-|[0-9]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ("[^"]*"|-) ([^ ]*)(?: ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*))?.*$'
-            SerializationLibrary: org.apache.hadoop.hive.serde2.RegexSerDe
-  # Google Analytics
-  GoogleAnalyticsLogsQueries:
-    Condition: CreateTableForGoogleAnalytics
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters: 
-        LogicalNamePrefix: !Ref GlueDatabaseName
-        S3BucketName: !Join
-          - ''
-          - - datasource-
-            - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
-            - !Sub -${AWS::Region}-${AWS::AccountId}
-        SNSForAlertArn: !If 
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-packaged.yaml
-        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics-packaged.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  GoogleAnalyticsAppFlow:
-    DependsOn:
-      - S3ForSourceBucketPolicy
-    Condition: CreateTableForGoogleAnalytics
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        AuthCode: !Ref GoogleAnalyticsAuthCode
-        ClientId: !Ref GoogleAnalyticsClientId
-        ClientSecret: !Ref GoogleAnalyticsClientSecret
-        EntityName: !Ref GoogleAnalyticsEntityName
-        ScheduleRate: !Ref GoogleAnalyticsScheduleRate
-        S3BucketName: !Ref S3ForSource
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalyticsappflow.yaml
-        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalyticsappflow.yaml
-      Tags:
+      Description: !Sub The resistory for ${AWS::StackName}
+      Name: !Ref AWS::StackName
+      Tags: 
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -455,8 +296,48 @@ Resources:
         RequesterPaysEnabled: false
         ResultConfiguration: 
           OutputLocation: !Sub s3://${S3ForSource}/athena-query-results/
-
-Outputs:
-  S3BucketNameArn:
-    Description: S3 bucket ARN for source files
-    Value: !GetAtt S3ForSource.Arn
+  # Analytics for Google Analytics
+  GoogleAnalytics:
+    DependsOn:
+      - S3ForSourceBucketPolicy
+    Condition: CreateTableForGoogleAnalytics
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AuthCode: !Ref GoogleAnalyticsAuthCode
+        ClientId: !Ref GoogleAnalyticsClientId
+        ClientSecret: !Ref GoogleAnalyticsClientSecret
+        EntityName: !Ref GoogleAnalyticsEntityName
+        GlueDatabaseName: !Ref GlueDatabase
+        GlueJobNumberOfWorkers: !Ref GlueJobNumberOfWorkers
+        GlueJobWorkerType: !Ref GlueJobWorkerType
+        GlueRegistoryArn: !GetAtt GlueRegistry.Arn
+        ScheduleRate: !Ref GoogleAnalyticsScheduleRate
+        S3BucketNameForGlue: !Ref S3ForGlue
+        S3BucketNameForSource: !Ref S3ForSource
+        LogicalNamePrefix: !Sub ${AWS::StackName}-ga
+        Environment: !Ref Environment
+        SNSForAlertArn: !If 
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn 
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If 
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn        
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics.yaml
+        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

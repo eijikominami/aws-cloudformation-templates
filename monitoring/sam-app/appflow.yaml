@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Amazon AppFlow
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  FlowName:
+    Type: String
+    AllowedPattern: .+
+    Description: The AppFlow flow name [required]    
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  AppFlowExecutionsFailed:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*AppFlow* (${FlowName}) でフローの実行が失敗しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-AppFlow-FlowExecutionsFailed
+        - Warning-AppFlow-FlowExecutionsFailed
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Dimensions:
+        - Name: FlowName
+          Value: !Ref FlowName
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: FlowExecutionsFailed
+      Namespace: AWS/AppFlow
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
