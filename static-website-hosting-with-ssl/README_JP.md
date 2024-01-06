@@ -74,13 +74,13 @@ Amazon CloudFrontで生成されたリアルタイムログは、 ``Amazon Kines
 
 #### Amazon Kinesis Firehose とこれに関連したリソース
 
-``Amazon Kinesis Data Firehose`` は、ログを ``Amazon S3`` や ``Amazon Elasticsearch Service`` に配信します。
+``Amazon Kinesis Data Firehose`` は、ログを ``Amazon S3`` や ``Amazon OpenSearch Service`` に配信します。
 Kinesis Firehose は、 ``AWS Lambda`` を用いて、ログの処理やログのフォーマットの変換を行います。
 Elasticsearch にログを送信できない場合、Kinesis Firehose は ``Amazon S3`` バケットにログを送信します。
 
-#### Amazon Elasticsearch Service
+#### Amazon OpenSearch Service
 
-``Amazon Elasticsearch Service`` を用いて、リアルタイムダッシュボードやアラートの作成、異常の調査、運用イベントに迅速に対応できます。
+``Amazon OpenSearch Service`` を用いて、リアルタイムダッシュボードやアラートの作成、異常の調査、運用イベントに迅速に対応できます。
 追跡できる一般的なデータポイントには、さまざまな地域から発信されたユーザのリクエストの数や、待ち時間が長くなったユニークユーザの数が含まれます。
 
 ## デプロイ
@@ -111,13 +111,13 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
-| RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | Elasticsearch Service のボリュームサイズ（GB） |
-| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のインスタンスタイプ |
-| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | Elasticsearch Service のマスタータイプ |
-| RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | Elasticsearch Service の生存時間 |
-| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | Elasticsearch Service のユーザ名 |
-| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | Elasticsearch Service のパスワード |
-| RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | Elasticsearch Service のバージョン |
+| RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | OpenSearch Service のインスタンスタイプ |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | OpenSearch Service のマスタータイプ |
+| RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | OpenSearch Service の生存時間 |
+| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | OpenSearch Service のユーザ名 |
+| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | OpenSearch Service のパスワード |
+| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.11 | ○ | OpenSearch Service のバージョン |
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
@@ -137,58 +137,3 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 
 1. ``Origins`` と ``Failover criteria`` を含んだ ``Origin Group`` を作成します。
 2. ``Default Cache Behavior Settings`` の ``Origin or Origin Group`` に 1. で作成した ``Origin Group`` を指定します。
-
-#### Kibana
-
-Kibana を使ってリアルタイムダッシュボードを作成するためには、以下の手順を行ってください。
-
-1. **Security** の **Roles** を選択します。
-
-![](../images/kibana_setting_0.png)
-
-2. ``+`` アイコンをクリックして新しいロールを追加します。
-3. 作成したロールに ``firehose`` という名前をつけます。
-
-![](../images/kibana_setting_1.png)
-
-4. **Cluster Permissions** タブの **Cluster-wide permissions** で ``cluster_composite_ops`` ``cluster_monitor`` グループを追加します。
-
-![](../images/kibana_setting_2.png)
-
-5. **Index Permissions** タブの **Add index permissions** から **Index Patterns** を選んで ``realtime*`` を入力します。**Permissions: Action Groups** で ``crud`` ``create_index`` ``manage`` アクショングループを追加します。
-
-![](../images/kibana_setting_3.png)
-
-6. **Save Role Definition** をクリックします。
-7. **Security** の **Role Mappings** を選択します。
-
-![](../images/kibana_setting_4.png)
-
-8. **Add Backend Role** をクリックします。
-9. 先ほど作成した ``firehose``を選択します。
-10. Backend roles に Kinesis Data Firehose が Amazon ES および S3 に書き込むために使用する IAM ロールの ARN を入力します。
-
-![](../images/kibana_setting_5.png)
-
-11. **Submit** をクリックします。
-12. **Dev Tools** を選択します。
-13. ``timestamp`` フィールドを ``date`` タイプと認識させるために、以下のコマンドを入力して実行します。
-
-```json
-PUT _template/custom_template
-{
-    "template": "realtime*",
-    "mappings": {
-        "properties": {
-            "timestamp": {
-                "type": "date",
-                "format": "epoch_second"
-            }
-        }
-    }
-}
-```
-
-![](../images/kibana_setting_6.png)
-
-14. [visualizes と dashboard の設定ファイル](export.ndjson) をインポートします。

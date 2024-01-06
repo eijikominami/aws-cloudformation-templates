@@ -16,6 +16,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | --- | --- | --- |
 | [一括設定パイプライン](/cicd/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CICD&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cicd/template.yaml) |
 | [Amplifyを用いたCI/CD環境を構築](/amplify/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Amplify&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/amplify/template.yaml) |
+| [データ分析](/analytics/README_JP.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Anlytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) |
 | [**運用に関する設定**](/cloudops/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/template.yaml) |
 | [CloudWatch アラーム](/monitoring/README_JP.md) | | |
 | [必須タグが付与されていないリソースの削除](/security-config-rules/README_JP.md) | 東京 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DefaultSecuritySettings-ConfigRules&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security-config-rules/packaged.yaml) |
@@ -46,7 +47,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | AWS Serverless Repository | aws-usage-queries | 0.1.5+19.38c7b8 |
 | AWS Systems Manager | SSM Document Schema (Automation) | 0.3 |
 | AWS Systems Manager | SSM Document Schema (Command) | 2.2 |
-| Amazon OpenSearch Service | OpenSearch | OpenSearch_1.3 |
+| Amazon OpenSearch Service | OpenSearch | OpenSearch_2.11 |
 | Elastic Load Balancer | SSL Policy | ELBSecurityPolicy-TLS13-1-2-2021-06 |
 
 ## アーキテクチャ

@@ -225,27 +225,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  ResilienceHub:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        Environment: !Ref Environment
-        LogicalNamePrefix: !Ref AWS::StackName
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resiliencehub.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resiliencehub.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   ResourceExplorer:
     Type: AWS::CloudFormation::Stack
     Properties:

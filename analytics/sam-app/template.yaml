@@ -6,11 +6,13 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 
-          default: 'AppFlow Configuration for Gogole Analytics'
+          default: 'AppFlow Configuration for Google Analytics'
         Parameters: 
-          - AppFlowConnectorProfileName
-          - AppFlowGoogleAnalyticsObject
-          - AppFlowScheduleRate
+          - GoogleAnalyticsAuthCode
+          - GoogleAnalyticsClientId
+          - GoogleAnalyticsClientSecret
+          - GoogleAnalyticsEntityName
+          - GoogleAnalyticsScheduleRate
       - Label: 
           default: 'CloudFront Configuration'
         Parameters: 
@@ -40,15 +42,25 @@ Metadata:
           - TagValue
 
 Parameters:
-  AppFlowConnectorProfileName:
+  GoogleAnalyticsAuthCode:
     Type: String
     Default: ''
-    Description: The profile name of AppFlow Connector for Google Analytics
-  AppFlowGoogleAnalyticsObject:
+    NoEcho: true
+    Description: The code provided by the connector when it has been authenticated
+  GoogleAnalyticsClientId:
     Type: String
     Default: ''
-    Description: The object of Google Analytics
-  AppFlowScheduleRate:
+    Description: The identifier for OAuth2
+  GoogleAnalyticsClientSecret:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: The client secret used by the OAuth client to authenticate
+  GoogleAnalyticsEntityName:
+    Type: String
+    Default: ''
+    Description: The entity name (path) of Google Analytics [required]
+  GoogleAnalyticsScheduleRate:
     Type: Number
     Default: 24
     MinValue: 24
@@ -56,14 +68,14 @@ Parameters:
   CloudFrontLogPrefix:
     Type: String
     Default: ''
-    Description: The S3 prefix that is used in the configuration of your Amazon CloudFront distribution for log storage. 
+    Description: The S3 prefix that is used in the configuration of your Amazon CloudFront distribution for log storage
   SourceAccountIAMRoleArn:
     Type: String
     Default: ''
     Description: The role arn of account id source bucket is contained
   GlueDatabaseName: 
     Type: String
-    Default: 'datalake'
+    Default: datalake
     AllowedPattern: '[a-z0-9\_]+'
     MinLength: 1
     MaxLength: 20
@@ -71,7 +83,7 @@ Parameters:
   S3AccessLogPrefix:
     Type: String
     Default: ''
-    Description: The S3 prefix that is used in the configuration of your Amazon S3 distribution for log storage. 
+    Description: The S3 prefix that is used in the configuration of your Amazon S3 distribution for log storage
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -80,7 +92,7 @@ Parameters:
     Default: ''
   Environment:
     Type: String
-    Default: development
+    Default: production
     AllowedValues:
       - production
       - test
@@ -96,7 +108,7 @@ Parameters:
 
 Conditions:
   CreateTableForCloudFront: !Not [ !Equals [ !Ref CloudFrontLogPrefix, ''] ] 
-  CreateTableForGoogleAnalytics: !And [ !Not [ !Equals [ !Ref AppFlowConnectorProfileName, ''] ], !Not [ !Equals [ !Ref AppFlowGoogleAnalyticsObject, ''] ] ]
+  CreateTableForGoogleAnalytics: !And [ !Not [ !Equals [ !Ref GoogleAnalyticsAuthCode, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsClientId, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsClientSecret, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsEntityName, ''] ] ]
   CreateTableForS3: !Not [ !Equals [ !Ref S3AccessLogPrefix, ''] ]
   CreateBucketPolicy: !Not [ !Equals [ !Ref SourceAccountIAMRoleArn, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -405,10 +417,12 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
-        AppFlowConnectorProfileName: !Ref AppFlowConnectorProfileName
-        AppFlowGoogleAnalyticsObject: !Ref AppFlowGoogleAnalyticsObject
-        AppFlowScheduleRate: !Ref AppFlowScheduleRate
+      Parameters:
+        AuthCode: !Ref GoogleAnalyticsAuthCode
+        ClientId: !Ref GoogleAnalyticsClientId
+        ClientSecret: !Ref GoogleAnalyticsClientSecret
+        EntityName: !Ref GoogleAnalyticsEntityName
+        ScheduleRate: !Ref GoogleAnalyticsScheduleRate
         S3BucketName: !Ref S3ForSource
         Environment: !Ref Environment
         TagKey: !Ref TagKey

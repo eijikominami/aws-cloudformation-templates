@@ -41,7 +41,7 @@ Parameters:
     Default: ''
   Environment:
     Type: String
-    Default: development
+    Default: production
     AllowedValues:
       - production
       - test

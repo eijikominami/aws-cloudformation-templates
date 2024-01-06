@@ -21,10 +21,10 @@
 
 ## デプロイ
 
-以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
+`DomainName` パラメータと `RepositoryName` パラメータを指定して、デプロイを実行してください。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name Amplify --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file template.yaml --stack-name Amplify  --parameter-overrides DomainName=xxxxx RepositoryName=xxxxx --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。

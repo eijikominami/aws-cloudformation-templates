@@ -27,12 +27,6 @@
 
 ### 準備
 
-### GitHub パーソナルアクセストークンの作成
-
-GitHub [パーソナルアクセストークン](https://help.github.com/ja/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) を作成し、その値をコピーします。
-
-![](../images/generate_your_access_token.png)
-
 ### S3 アーティファクトバケットの作成 (オプション)
 
 ``Global Settings Template`` を実行する際には、バージニアリージョン（`us-east-1`）に Amazon S3 アーティファクトバケットを作成してください。
@@ -43,25 +37,27 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 
 ### テンプレート設定ファイルの作成 (オプション)
 
-[テンプレート設定ファイル](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab1c13c17c13) を使用する場合は、GitHubリポジトリに以下に示す命名規則で Configuration File をアップロードした上で、CloudFormationを実行する際には、`GitHubOwnerNameForTemplateConfiguration` パラメータと `GitHubRepoNameForTemplateConfiguration` パラメータを指定してください。
+[テンプレート設定ファイル](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab1c13c17c13) を使用する場合は、GitHubリポジトリに以下に示す命名規則で Configuration File をアップロードした上で、CloudFormationを実行する際に `GitHubOwnerNameForTemplateConfiguration` パラメータ、`GitHubOwnerNameForTemplateConfiguration` パラメータと `GitHubRepoNameForTemplateConfiguration` パラメータを指定してください。
 
 | スタック名 | Template Configuration File 名 | 
 | --- | --- |
 | CICD Template | CICD.json |
+| [CloudOps Template](../cloudops/README_JP.md) | CloudOps.json |
 | [Global Settings Template](../global/README_JP.md) | GlobalSettings.json |
+| [Network Template](../network/README.md) | Network.json |
 | [Notification Template](../notification/README_JP.md) | Notification.json |
+| [Shared Service Template](../shared/README_JP.md) | SharedServices.json |
 | [Security Template](../security/README_JP.md) | DefaultSecuritySettings.json |
 | [Security Template with Config Rule](../security-config-rules/README_JP.md) | DefaultSecuritySettings-ConfigRules.json |
 | [Static Website Hosting Template](../static-website-hosting-with-ssl/README_JP.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](../web-servers/README_JP.md) | WebServers.json |
-| [Systems Manager Template](../web-servers/README_JP.md) | SystemsManager.json |
 
 ## デプロイ
 
-`ArtifactBucketInVirginia` パラメータと `GitHubOAuthToken` パラメータを指定して、デプロイを実行してください。
+`ArtifactBucketInVirginia` パラメータ、`GitHubOwnerNameForTemplateConfiguration` パラメータと `GitHubRepoNameForTemplateConfiguration` パラメータを指定して、デプロイを実行してください。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=my0bucket GitHubOAuthToken=XXXXX
+aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsiteHosting --parameter-overrides ArtifactBucketInVirginia=xxxxx GitHubOwnerNameForTemplateConfiguration=xxxxx GitHubRepoNameForTemplateConfiguration=xxxxx
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -70,7 +66,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | --- | --- | --- | --- | --- |
 | ArtifactBucketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
-| GitHubOAuthToken | String | | | GitHubからコードを取得する際に用いる **OAuthトークン** |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリの所有者名** |
 | **GitHubRepoNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリ名** |
 | GitHubStage | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |

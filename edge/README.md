@@ -53,12 +53,12 @@ This template creates ``CloudFront`` distribution.
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
-| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
-| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of Elasticsearch Service |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
-| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
-| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
-| RealtimeDashboardElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
+| RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
+| RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
+| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.11 | ○ | The version of OpenSearch Service |
 | RealtimeDashboardKinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
@@ -81,16 +81,69 @@ This template creates an environment about CloudFront realtime dashboard.
 | --- | --- | --- | --- | --- |
 | ElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | The domain name of ElasticSearch Service |
-| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of Elasticsearch Service |
-| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of Elasticsearch Service |
+| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
+| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
 | ElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
-| ElasticSearchMasterUserName | String | root | ○ | The user name of Elasticsearch Service |
-| ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of Elasticsearch Service |
-| ElasticsearchVersion | String | 7.8 | ○ | The version of Elasticsearch Service |
+| ElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
+| ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
+| ElasticsearchVersion | String | 7.8 | ○ | The version of OpenSearch Service |
 | SamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | KinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
 | KinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | KinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
+
+Follow the steps below to create a real-time dashboard using Kibana.
+
+1. Under **Security**, choose **Roles**.
+
+![](../images/kibana_setting_0.png)
+
+2. Click the ``+`` icon to add new role.
+3. Name your role; for example, ``firehose``.
+
+![](../images/kibana_setting_1.png)
+
+4. In the **Cluster Permissions** tab, for **Cluster-wide permissions**, add as Action Groups: ``cluster_composite_ops`` and ``cluster_monitor``.
+
+![](../images/kibana_setting_2.png)
+
+5. In the **Index Permissions** tab, click **Add index permissions**. Then choose **Index Patterns** and enter ``realtime*``. Under **Permissions: Action Groups**, add three action groups: ``crud``, ``create_index``, and ``manage``.
+
+![](../images/kibana_setting_3.png)
+
+6. Click **Save Role Definition**.
+7. Under **Security**, choose **Role Mappings**.
+
+![](../images/kibana_setting_4.png)
+
+8. Click **Add Backend Role**.
+9. Choose the ``firehose`` you just created.
+10. For Backend roles, enter the IAM ARN of the role Kinesis Data Firehose uses to write to Amazon ES and S3 ``arn:aws:iam::<aws_account_id>:role/service-role/<KinesisFirehoseServiceRole>``.
+
+![](../images/kibana_setting_5.png)
+
+11. Click **Submit**.
+12. Choose **Dev Tools**.
+13. Enter the following command to register the ``timestamp`` field as a ``date`` type and execute it.
+
+```json
+PUT _template/custom_template
+{
+    "template": "realtime*",
+    "mappings": {
+        "properties": {
+            "timestamp": {
+                "type": "date",
+                "format": "epoch_second"
+            }
+        }
+    }
+}
+```
+
+![](../images/kibana_setting_6.png)
+
+14. Import [visualizes and a dashboard](export.ndjson) to your Kibana.
 
 ### WAF
 
