@@ -15,13 +15,6 @@ Metadata:
           - ArtifactBucketInVirginia
           - GlobalSettings
       - Label: 
-          default: 'Web Servers Configuration'
-        Parameters: 
-          - GitHubOwnerNameForContainer
-          - GitHubRepoNameForContainer
-          - DockerFilePath
-          - WebServers
-      - Label: 
           default: 'Source Configuration'
         Parameters:
           - GitHubOwnerNameForTemplateConfiguration
@@ -38,6 +31,7 @@ Metadata:
           - Notification
           - Network
           - UploadArtifacts
+          - WebServers
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -60,27 +54,14 @@ Parameters:
     Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
     AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
     Description: The Docker image name for CodeBuild [required]
-  DockerFilePath:
-    Type: String
-    Default: Dockerfile
-    AllowedPattern: .+
-    Description: The path of Dockerfile
   GitHubOwnerNameForTemplateConfiguration:
     Type: String
     Default: ''
     Description: The GitHub owner name for CloudFormation Template Configuration files
-  GitHubOwnerNameForContainer:
-    Type: String
-    Default: ''
-    Description: The GitHub owner name of a container image
   GitHubRepoNameForTemplateConfiguration:
     Type: String
     Default: ''
     Description: The GitHub repository name for CloudFormation Template Configuration files
-  GitHubRepoNameForContainer:
-    Type: String
-    Default: ''
-    Description: The GitHub repository name of a container image
   GitHubBranchName:
     Type: String
     Default: master
@@ -319,24 +300,6 @@ Resources:
                   - ecr:GetAuthorizationToken
                 Resource: '*'
                 Effect: Allow
-              - !If 
-                  - BuildContainers
-                  - Action:
-                      - ecr:ListImages
-                      - ecr:BatchCheckLayerAvailability
-                      - ecr:GetDownloadUrlForLayer
-                      - ecr:GetRepositoryPolicy
-                      - ecr:DescribeRepositories
-                      - ecr:ListImages
-                      - ecr:DescribeImages
-                      - ecr:BatchGetImage
-                      - ecr:InitiateLayerUpload
-                      - ecr:UploadLayerPart
-                      - ecr:CompleteLayerUpload
-                      - ecr:PutImage
-                    Resource: !GetAtt ECR.Arn
-                    Effect: Allow
-                  - !Ref AWS::NoValue
       RoleName: !Sub CICD-CodeBuild-${AWS::Region}
       Tags:
         - Key: environment
@@ -616,18 +579,6 @@ Resources:
             - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # Container
-  ECR:
-    Condition: BuildContainers
-    Type: AWS::ECR::Repository
-    Properties: 
-      EmptyOnDelete: false
-      ImageScanningConfiguration: 
-        ScanOnPush: true
-      RepositoryName: web-servers
-      Tags:
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   # CodeStar Connection
   CodeStarConnection:
     Type: AWS::CodeStarConnections::Connection
@@ -684,31 +635,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
-  CodeBuildForContainer:
-    Condition: BuildContainers
-    Type: AWS::CodeBuild::Project
-    Properties: 
-      Artifacts:
-        Type: CODEPIPELINE
-      Description: !Sub Builds a container image of ${GitHubOwnerNameForContainer}/${GitHubRepoNameForContainer}
-      Environment: 
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: !Ref CodeBuildImageName
-        PrivilegedMode: true
-        Type: ARM_CONTAINER
-      LogsConfig: 
-        CloudWatchLogs: 
-          GroupName: !Ref CodeBuildLogGroupV2
-          Status: ENABLED
-      Name: !Sub ${AWS::StackName}-Container
-      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
-      Source:
-        BuildSpec: buildspec-container.yml
-        Type: CODEPIPELINE
-      Tags: 
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TimeoutInMinutes: 60
   # CodePipeline
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -760,22 +686,6 @@ Resources:
                   - Name: Source_CloudFormationConfigurationArtifact
                 RunOrder: 1
               - !Ref AWS::NoValue
-            - !If
-              - BuildContainers
-              - ActionTypeId:
-                  Category: Source
-                  Owner: AWS
-                  Provider: CodeStarSourceConnection
-                  Version: '1'
-                Configuration:
-                  ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
-                  FullRepositoryId: !Sub ${GitHubOwnerNameForContainer}/${GitHubRepoNameForContainer}
-                  BranchName: master
-                Name: Container
-                OutputArtifacts: 
-                  - Name: Source_Container
-                RunOrder: 1
-              - !Ref AWS::NoValue
           Name: Source
         # Deploy CICD
         - Actions:
@@ -795,7 +705,7 @@ Resources:
                   - !Ref AWS::NoValue
                   - !Join
                     - ''
-                    - - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}", "GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GitHubOwnerNameForContainer": "${GitHubOwnerNameForContainer}","GitHubRepoNameForContainer": "${GitHubRepoNameForContainer}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
+                    - - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}", "GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
                       - !If
                         - Development
                         - development
@@ -848,29 +758,6 @@ Resources:
                 Name: Notification
                 OutputArtifacts: 
                   - Name: BuildArtifact_Notification
-                RunOrder: 1
-              - !Ref AWS::NoValue
-            - !If
-              - BuildContainers
-              - ActionTypeId: 
-                  Category: Build
-                  Owner: AWS
-                  Provider: CodeBuild
-                  Version: '1'
-                Configuration:
-                  EnvironmentVariables: !Join
-                    - ''
-                    - - !Sub '[{"name": "REPOSITORY_URI", "value": "'
-                      - !GetAtt ECR.RepositoryUri
-                      - !Sub '"}, {"name": "DOCKER_FILE", "value": "${DockerFilePath}", "type": "PLAINTEXT"}]'
-                  PrimarySource: Source_CloudFormationTemplatesArtifact
-                  ProjectName: !Ref CodeBuildForContainer
-                InputArtifacts:
-                  - Name: Source_CloudFormationTemplatesArtifact
-                  - Name: Source_Container
-                Name: Container
-                OutputArtifacts: 
-                  - Name: BuildArtifact_Container
                 RunOrder: 1
               - !Ref AWS::NoValue
           Name: Build
@@ -1170,7 +1057,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1178,7 +1065,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
+                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
                         - !If
                           - Development
                           - development
@@ -1222,12 +1109,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "ECSImageUri": "'
-                        - !If 
-                          - BuildContainers
-                          - !GetAtt ECR.RepositoryUri
-                          - ''
-                        - !Sub '", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                         - !If
                           - Development
                           - development
@@ -1235,7 +1117,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1499,12 +1381,9 @@ Resources:
           Value: !Ref TagValue
 
 Outputs:
-  RepositoryUri:
-    Description: Repository URI for WebServers
-    Value: !If
-      - BuildContainers
-      - !GetAtt ECR.RepositoryUri
-      - '' 
+  CodeStarConnectionArn:
+   Description: The Amazon Resource Name (ARN) of the CodeStar connection
+   Value: !GetAtt CodeStarConnection.ConnectionArn
   SNSForAlertArn:
     Description: SNS ARN for Alert
     Value: !If
