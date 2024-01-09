@@ -59,6 +59,10 @@ Metadata:
         Parameters: 
           - WebACLArn
       - Label: 
+          default: 'CI/CD Pipeline Configuration'
+        Parameters: 
+          - WebsiteGitHubBranchName
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -250,6 +254,11 @@ Parameters:
     Type: String
     Default: '' 
     Description: Web ACL ARN
+  WebsiteGitHubBranchName:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -404,6 +413,29 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/internetmonitor.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/internetmonitor.yaml
+  # CI/CD Pipeline
+  Pipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        GitHubBranchName: !Ref WebsiteGitHubBranchName
+        S3BucketName: !Ref S3ForWebHosting
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/static-website-hosting-with-ssl/cicd.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/static-website-hosting-with-ssl/cicd.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

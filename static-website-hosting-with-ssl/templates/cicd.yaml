@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description:  AWSCloudFormationTemplates/static-website-hosting-with-ssl/cicd creates a CodePipeline pipeline to deploy static website to Amazon S3.
+
+Parameters:
+  GitHubBranchName:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub [required]
+  S3BucketName:
+    Type: String
+    Default: ''
+    Description: The Amazon S3 bucket name for website hosting
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  Development: !Equals [ !Ref GitHubBranchName, develop]
+
+Resources:
+  # IAM
+  IAMRoleForCodeBuild:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
+      Policies:
+        - PolicyName: CodeBuild
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Required for `sam build`
+              - Action:
+                  - iam:ListPolicies
+                Resource: '*'
+                Effect: Allow
+              # Default Policy
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource: 
+                  - !Sub arn:aws:s3:::${S3ForArtifact}
+                  - !Sub arn:aws:s3:::${S3ForArtifact}/*
+                Effect: Allow
+              - Action:
+                  - serverlessrepo:SearchApplications
+                  - serverlessrepo:GetApplication
+                  - serverlessrepo:GetCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationChangeSet
+                  - serverlessrepo:ListApplicationVersions
+                  - serverlessrepo:ListApplicationDependencies
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - codebuild:CreateReportGroup
+                  - codebuild:CreateReport
+                  - codebuild:UpdateReport
+                  - codebuild:BatchPutTestCases
+                Resource:
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
+                Effect: Allow
+              - Action:
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+                Effect: Allow
+      RoleName: !Sub CICD-CodeBuild-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3ForArtifact:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub cicd-artifact-${S3BucketName}-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 7
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForArtifact:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForArtifact
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForArtifact
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForArtifact.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForArtifact.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
