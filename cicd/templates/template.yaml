@@ -1109,12 +1109,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "ECSImageUri": "'
-                        - !If 
-                          - BuildContainers
-                          - !GetAtt ECR.RepositoryUri
-                          - ''
-                        - !Sub '", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                         - !If
                           - Development
                           - development
@@ -1389,12 +1384,6 @@ Outputs:
   CodeStarConnectionArn:
    Description: The Amazon Resource Name (ARN) of the CodeStar connection
    Value: !GetAtt CodeStarConnection.ConnectionArn
-  RepositoryUri:
-    Description: Repository URI for WebServers
-    Value: !If
-      - BuildContainers
-      - !GetAtt ECR.RepositoryUri
-      - '' 
   SNSForAlertArn:
     Description: SNS ARN for Alert
     Value: !If
