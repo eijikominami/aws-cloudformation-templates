@@ -62,7 +62,9 @@ Metadata:
           default: 'CI/CD Pipeline Configuration'
         Parameters: 
           - CodeStarConnectionArn
-          - WebsiteGitHubBranchName
+          - GitHubOwnerNameForWebsite
+          - GitHubRepoNameForWebsite
+          - GitHubBranchNameForWebsite
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -103,6 +105,18 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The CNAME attached to CloudFront [required]
+  GitHubOwnerNameForWebsite:
+    Type: String
+    Default: '' 
+    Description: The GitHub owner name
+  GitHubRepoNameForWebsite:
+    Type: String
+    Default: '' 
+    Description: The GitHub repository name
+  GitHubBranchNameForWebsite:
+    Type: String
+    Default: '' 
+    Description: The Branch name of GitHub
   CloudFrontAdditionalMetrics:
     Type: String
     Default: DISABLED
@@ -259,11 +273,6 @@ Parameters:
     Type: String
     Default: '' 
     Description: Web ACL ARN
-  WebsiteGitHubBranchName:
-    Type: String
-    Default: master
-    AllowedPattern: .+
-    Description: The Branch name of GitHub [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -290,6 +299,7 @@ Conditions:
   CertificateExists: !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ]
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
+  CreatePipeline: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForWebsite, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForWebsite, '' ] ] ]
   CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardState, ENABLED ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -420,6 +430,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/internetmonitor.yaml
   # CI/CD Pipeline
   Pipeline:
+    Condition: CreatePipeline
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -429,7 +440,9 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         CodeStarConnectionArn: !Ref CodeStarConnectionArn
-        GitHubBranchName: !Ref WebsiteGitHubBranchName
+        GitHubOwnerName: !Ref GitHubOwnerNameForWebsite
+        GitHubRepoName: !Ref GitHubRepoNameForWebsite
+        GitHubBranchName: !Ref GitHubBranchNameForWebsite
         S3BucketName: !Ref S3ForWebHosting
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

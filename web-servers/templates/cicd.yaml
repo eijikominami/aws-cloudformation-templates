@@ -1,12 +1,21 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description:  AWSCloudFormationTemplates/static-website-hosting-with-ssl/cicd creates a CodePipeline pipeline to deploy static website to Amazon S3.
+Description:  AWSCloudFormationTemplates/web-servers/cicd creates a CodePipeline pipeline to deploy artifacts to Amazon EC2.
 
 Parameters:
+  CodeBuildImageName:
+    Type: String
+    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+    AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
+    Description: The Docker image name for CodeBuild [required]
   CodeStarConnectionArn:
     Type: String
     Default: ''
     Description: The Amazon Resource Name (ARN) of the CodeStar connection
+  DockerFilePath:
+    Type: String
+    AllowedPattern: .+
+    Description: The path of Dockerfile
   GitHubOwnerName:
     Type: String
     AllowedPattern: .+
@@ -20,10 +29,6 @@ Parameters:
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
-  S3BucketName:
-    Type: String
-    Default: ''
-    Description: The Amazon S3 bucket name for website hosting
   TagKey:
     Type: String
     Default: createdby
@@ -39,6 +44,91 @@ Conditions:
 
 Resources:
   # IAM
+  IAMRoleForCodeBuild:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for CodeBuild to access CodeBuild, S3 and CloudWatch Logs.
+      Policies:
+        - PolicyName: CodeBuild
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Required for `sam build`
+              - Action:
+                  - iam:ListPolicies
+                Resource: '*'
+                Effect: Allow
+              # Default Policy
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource: 
+                  - !Sub arn:aws:s3:::${S3ForArtifact}
+                  - !Sub arn:aws:s3:::${S3ForArtifact}/*
+                Effect: Allow
+              - Action:
+                  - serverlessrepo:SearchApplications
+                  - serverlessrepo:GetApplication
+                  - serverlessrepo:GetCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationChangeSet
+                  - serverlessrepo:ListApplicationVersions
+                  - serverlessrepo:ListApplicationDependencies
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - codebuild:CreateReportGroup
+                  - codebuild:CreateReport
+                  - codebuild:UpdateReport
+                  - codebuild:BatchPutTestCases
+                Resource:
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
+                Effect: Allow
+              - Action:
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - ecr:ListImages
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:GetRepositoryPolicy
+                  - ecr:DescribeRepositories
+                  - ecr:ListImages
+                  - ecr:DescribeImages
+                  - ecr:BatchGetImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                  - ecr:PutImage
+                Resource: !GetAtt ECR.Arn
+                Effect: Allow
+      RoleName: !Sub CICD-CodeBuild-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   IAMRoleForCodePipeline:
     Type: AWS::IAM::Role
     Properties:
@@ -180,6 +270,17 @@ Resources:
             - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # Container
+  ECR:
+    Type: AWS::ECR::Repository
+    Properties: 
+      EmptyOnDelete: false
+      ImageScanningConfiguration: 
+        ScanOnPush: true
+      RepositoryName: web-servers
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CodeStar Connection
   CodeStarConnection:
     Condition: CreateCodeStarConnection
@@ -190,6 +291,31 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # CodeBuild
+  CodeBuildForContainer:
+    Type: AWS::CodeBuild::Project
+    Properties: 
+      Artifacts:
+        Type: CODEPIPELINE
+      Description: !Sub Builds a container image of ${GitHubOwnerName}/${GitHubRepoName}
+      Environment: 
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref CodeBuildImageName
+        PrivilegedMode: true
+        Type: ARM_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroupV2
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-Container
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: buildspec-container.yml
+        Type: CODEPIPELINE
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
   # CodePipeline
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -199,7 +325,7 @@ Resources:
             Location: !Ref S3ForArtifact
             Type: S3
           Region: !Ref AWS::Region
-      Name: !Sub StaticWebsite-${AWS::StackName}
+      Name: !Sub Container-${AWS::StackName}
       RestartExecutionOnUpdate: true
       RoleArn: !GetAtt IAMRoleForCodePipeline.Arn
       Stages: 
@@ -209,7 +335,7 @@ Resources:
                 Category: Source
                 Owner: AWS
                 Provider: CodeStarSourceConnection
-                Version: '1'                 
+                Version: '1'
               Configuration:
                 ConnectionArn: !If
                   - CreateCodeStarConnection
@@ -217,26 +343,33 @@ Resources:
                   - !Ref CodeStarConnectionArn
                 FullRepositoryId: !Sub ${GitHubOwnerName}/${GitHubRepoName}
                 BranchName: !Ref GitHubBranchName
-              Name: Website
+              Name: Container
               OutputArtifacts: 
-                - Name: Source_Website
+                - Name: Source_Container
               RunOrder: 1
           Name: Source
-        # Deploy
+        # Build
         - Actions:
             - ActionTypeId: 
-                Category: Deploy
+                Category: Build
                 Owner: AWS
-                Provider: S3
+                Provider: CodeBuild
                 Version: '1'
               Configuration:
-                BucketName: !Ref S3BucketName
-                Extract: true
+                EnvironmentVariables: !Join
+                  - ''
+                  - - !Sub '[{"name": "REPOSITORY_URI", "value": "'
+                    - !GetAtt ECR.RepositoryUri
+                    - !Sub '"}, {"name": "DOCKER_FILE", "value": "${DockerFilePath}", "type": "PLAINTEXT"}]'
+                PrimarySource: Source_CloudFormationTemplatesArtifact
+                ProjectName: !Ref CodeBuildForContainer
               InputArtifacts:
-                - Name: Source_Website
-              Name: Website
+                - Name: Source_Container
+              Name: Container
+              OutputArtifacts: 
+                - Name: BuildArtifact_Container
               RunOrder: 1
-          Name: Deploy
+          Name: Build
       Tags:
         - Key: environment
           Value: !If
@@ -255,7 +388,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub cicd-artifact-${S3BucketName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cicd-artifact-${ProjectName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
@@ -294,3 +427,13 @@ Resources:
             Condition:
               Bool: 
                 aws:SecureTransport: false
+  # CloudWatch Logs
+  CodeBuildLogGroupV2:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupClass: INFREQUENT_ACCESS
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}_V2
+      RetentionInDays: 60
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
