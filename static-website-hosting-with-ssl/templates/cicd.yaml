@@ -2,6 +2,29 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description:  AWSCloudFormationTemplates/static-website-hosting-with-ssl/cicd creates a CodePipeline pipeline to deploy static website to Amazon S3.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Source Configuration'
+        Parameters:
+          - GitHubOwnerName
+          - GitHubRepoName
+          - GitHubBranchName
+      - Label: 
+          default: 'Deploy Configuration'
+        Parameters:
+          - S3BucketName
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - CodeStarConnectionArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - TagKey
+          - TagValue
+
 Parameters:
   CodeStarConnectionArn:
     Type: String

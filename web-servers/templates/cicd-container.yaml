@@ -2,6 +2,30 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description:  AWSCloudFormationTemplates/web-servers/cicd creates a CodePipeline pipeline to deploy artifacts to Amazon EC2.
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Source Configuration'
+        Parameters:
+          - DockerFilePath
+          - GitHubOwnerName
+          - GitHubRepoName
+          - GitHubBranchName
+      - Label: 
+          default: 'Build Configuration'
+        Parameters:
+          - CodeBuildImageName
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - CodeStarConnectionArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - TagKey
+          - TagValue
+
 Parameters:
   CodeBuildImageName:
     Type: String
