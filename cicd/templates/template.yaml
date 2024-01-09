@@ -1170,7 +1170,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1178,7 +1178,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
+                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
                         - !If
                           - Development
                           - development
@@ -1499,6 +1499,9 @@ Resources:
           Value: !Ref TagValue
 
 Outputs:
+  CodeStarConnectionArn:
+   Description: The Amazon Resource Name (ARN) of the CodeStar connection
+   Value: !GetAtt CodeStarConnection.ConnectionArn
   RepositoryUri:
     Description: Repository URI for WebServers
     Value: !If

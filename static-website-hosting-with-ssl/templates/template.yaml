@@ -61,6 +61,7 @@ Metadata:
       - Label: 
           default: 'CI/CD Pipeline Configuration'
         Parameters: 
+          - CodeStarConnectionArn
           - WebsiteGitHubBranchName
       - Label: 
           default: 'Notification Configuration'
@@ -94,6 +95,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable CloudFront additional metrics [required]
+  CodeStarConnectionArn:
+    Type: String
+    Default: ''
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
   DomainName:
     Type: String
     AllowedPattern: .+
@@ -423,6 +428,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        CodeStarConnectionArn: !Ref CodeStarConnectionArn
         GitHubBranchName: !Ref WebsiteGitHubBranchName
         S3BucketName: !Ref S3ForWebHosting
         TagKey: !Ref TagKey
