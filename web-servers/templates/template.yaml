@@ -342,7 +342,7 @@ Conditions:
   CreateECS: !And [ !Equals [ !Ref ComputeType, CONTAINER ], !Not [ !Equals [ !Ref ECSImageUri ,''] ] ]
   CreateGlobalAccelerator: !Equals [ !Ref GlobalInfrastructure, GLOBAL_ACCELERATOR ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
-  CreatePipeline: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]
+  CreateContainerPipeline: !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]
   CreateRoute53: !And [ !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -652,6 +652,32 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/globalaccelerator.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/network/globalaccelerator.yaml
+  ContainerPipeline:
+    Condition: CreateContainerPipeline
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CodeStarConnectionArn: !Ref CodeStarConnectionArn
+        DockerFilePath: !Ref DockerFilePath
+        GitHubOwnerName: !Ref GitHubOwnerNameForArtifact
+        GitHubRepoName: !Ref GitHubRepoNameForArtifact
+        GitHubBranchName: !Ref GitHubBranchNameForArtifact
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/cicd-container.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/cicd-container.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -868,33 +894,6 @@ Resources:
       InstanceProfileName: !Ref IAMRoleForEC2
       Roles: 
         - !Ref IAMRoleForEC2
-  # CI/CD Pipeline
-  Pipeline:
-    Condition: CreatePipeline
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        CodeStarConnectionArn: !Ref CodeStarConnectionArn
-        DockerFilePath: !Ref DockerFilePath
-        GitHubOwnerName: !Ref GitHubOwnerNameForArtifact
-        GitHubRepoName: !Ref GitHubRepoNameForArtifact
-        GitHubBranchName: !Ref GitHubBranchNameForArtifact
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/cicd.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/cicd.yaml
   # VPC
   VPC:
     Type: AWS::EC2::VPC

@@ -437,3 +437,8 @@ Resources:
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
+
+Outputs:
+  RepositoryUri:
+    Description: Repository URI for WebServers
+    Value: !GetAtt ECR.RepositoryUri
