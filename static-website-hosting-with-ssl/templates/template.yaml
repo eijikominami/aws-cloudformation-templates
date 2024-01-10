@@ -115,7 +115,8 @@ Parameters:
     Description: The GitHub repository name
   GitHubBranchNameForWebsite:
     Type: String
-    Default: '' 
+    Default: master
+    AllowedPattern: .+
     Description: The Branch name of GitHub
   CloudFrontAdditionalMetrics:
     Type: String

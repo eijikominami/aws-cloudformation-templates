@@ -139,7 +139,8 @@ Parameters:
     Description: The GitHub repository name
   GitHubBranchNameForArtifact:
     Type: String
-    Default: '' 
+    Default: master
+    AllowedPattern: .+
     Description: The Branch name of GitHub
   AutoScalingDesiredCapacity:
     Type: Number
