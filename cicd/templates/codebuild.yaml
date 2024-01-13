@@ -416,7 +416,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupClass: STANDARD
-      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}_V2
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
