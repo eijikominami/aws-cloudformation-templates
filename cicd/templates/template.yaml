@@ -1373,7 +1373,7 @@ Resources:
   CodeBuildLogGroupV2:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupClass: INFREQUENT_ACCESS
+      LogGroupClass: STANDARD
       LogGroupName: !Sub /aws/codebuild/${AWS::StackName}_V2
       RetentionInDays: 60
       Tags: 
