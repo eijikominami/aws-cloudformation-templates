@@ -18,7 +18,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - Environment
-          - LogicalNamePrefix
+          - LogicalName
           - TagKey
           - TagValue
 
@@ -34,7 +34,7 @@ Parameters:
       - production
       - test
       - development
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: TransitGateway
     AllowedPattern: .+
@@ -104,7 +104,7 @@ Resources:
       MulticastSupport: enable
       Tags:
         - Key: Name
-          Value: !Sub tgw-${LogicalNamePrefix}-${AWS::Region}
+          Value: !Sub tgw-${LogicalName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey

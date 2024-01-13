@@ -16,7 +16,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment 
           - TagKey
           - TagValue
@@ -54,7 +54,7 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The path to the Amazon S3 target [required]
-  LogicalNamePrefix: 
+  LogicalName: 
     Type: String
     Default: GoogleAnalytics
     Description: The custom prefix name [required]
@@ -99,7 +99,7 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                 Resource: !Sub arn:aws:s3:::${SourceBucketName}/*
-      RoleName: !Sub ${LogicalNamePrefix}-GlueClawler-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-GlueClawler-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -168,7 +168,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                 Resource: '*'
-      RoleName: !Sub ${LogicalNamePrefix}-GlueJob-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-GlueJob-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -179,7 +179,7 @@ Resources:
     Properties:
       DatabaseName: !Ref DatabaseName
       Description: !Sub Crawler for Google Analytics created by ${AWS::StackName}
-      Name: !Ref LogicalNamePrefix
+      Name: !Ref LogicalName
       RecrawlPolicy: 
         RecrawlBehavior: CRAWL_EVERYTHING
       Role: !GetAtt IAMRoleForGlueCrawler.Arn
@@ -200,8 +200,8 @@ Resources:
         IsLatest: true
       Compatibility: BACKWARD
       DataFormat: JSON
-      Description: !Sub The schema for Google Analytics ${LogicalNamePrefix}
-      Name: !Ref LogicalNamePrefix
+      Description: !Sub The schema for Google Analytics ${LogicalName}
+      Name: !Ref LogicalName
       Registry: 
         Arn: !Ref GlueRegistoryArn
       SchemaDefinition: >
@@ -301,7 +301,7 @@ Resources:
       CatalogId: !Ref AWS::AccountId
       DatabaseName: !Ref DatabaseName
       TableInput: 
-        Description: !Sub JSON format Google Analytics ${LogicalNamePrefix} logs
+        Description: !Sub JSON format Google Analytics ${LogicalName} logs
         Name: !Sub ${DatabaseName}_ga
         Parameters:
           classification: json

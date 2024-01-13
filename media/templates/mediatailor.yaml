@@ -17,7 +17,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -31,7 +31,7 @@ Parameters:
     Type: String
     Default: ''
     Description: "A content delivery network (CDN) to cache content segments, so that content requests don’t always have to go to the origin server."   
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: MediaTailor
     AllowedPattern: .+
@@ -91,7 +91,7 @@ Resources:
       ManifestProcessingRules: 
         AdMarkerPassthrough:
           Enabled: false
-      Name: !Ref LogicalNamePrefix
+      Name: !Ref LogicalName
       PersonalizationThresholdSeconds: !Ref PersonalizationThresholdSeconds
       SlateAdUrl: !Ref SlateAdUrl
       Tags: 

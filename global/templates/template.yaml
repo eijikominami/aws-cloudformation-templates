@@ -142,7 +142,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Scope: CLOUDFRONT
         Environment: !Ref Environment
         TagKey: !Ref TagKey

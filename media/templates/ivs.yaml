@@ -14,7 +14,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -41,7 +41,7 @@ Parameters:
       - BASIC
     Default: STANDARD
     Description: The channel type [required] 
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: IVS
     AllowedPattern: ^[a-zA-Z0-9-_]*$
@@ -68,7 +68,7 @@ Resources:
     Properties: 
       Authorized: !Ref Authorized
       LatencyMode: !Ref LatencyMode
-      Name: !Ref LogicalNamePrefix
+      Name: !Ref LogicalName
       Tags: 
         - Key: environment
           Value: !Ref Environment

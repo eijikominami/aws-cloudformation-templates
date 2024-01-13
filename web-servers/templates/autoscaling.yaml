@@ -41,7 +41,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - Environment
-          - LogicalNamePrefix
+          - LogicalName
           - TagKey
           - TagValue
 
@@ -104,7 +104,7 @@ Parameters:
     Type: String 
     Default: ''
     Description: The Elastic Ip Allocation Id2 for Network LoadBalancer
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: WebServers
     AllowedPattern: .+
@@ -197,7 +197,7 @@ Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub elb-${LogicalNamePrefix}
+      Name: !Sub elb-${LogicalName}
       Scheme: internet-facing
       SecurityGroups:
        - !Ref EC2SecurityGroupId
@@ -217,7 +217,7 @@ Resources:
           - !Ref SubnetId2ForELB
       Tags:
         - Key: Name
-          Value: !Sub elb-${LogicalNamePrefix}-${AWS::Region}
+          Value: !Sub elb-${LogicalName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -229,7 +229,7 @@ Resources:
       HealthCheckIntervalSeconds: 30
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
-      Name: !Sub target-${LogicalNamePrefix}
+      Name: !Sub target-${LogicalName}
       Port: 80
       Protocol: !If
         - CreateNetworkLoadBalancer
@@ -237,7 +237,7 @@ Resources:
         - HTTP
       Tags:
         - Key: Name
-          Value: !Sub target-${LogicalNamePrefix}-${AWS::Region}
+          Value: !Sub target-${LogicalName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -295,7 +295,7 @@ Resources:
         - KeyExists
         - !Ref EC2KeyName
         - !Ref AWS::NoValue
-      LaunchConfigurationName: !Sub autoscalinglaunchconfiguration-${LogicalNamePrefix}
+      LaunchConfigurationName: !Sub autoscalinglaunchconfiguration-${LogicalName}
       MetadataOptions: 
         HttpEndpoint: enabled
         HttpPutResponseHopLimit: 1
@@ -326,7 +326,7 @@ Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties: 
-      AutoScalingGroupName: !Sub autoscalinggroup-${LogicalNamePrefix}
+      AutoScalingGroupName: !Sub autoscalinggroup-${LogicalName}
       Cooldown: '300'
       DesiredCapacity: !Ref AutoScalingDesiredCapacity
       HealthCheckGracePeriod: 300

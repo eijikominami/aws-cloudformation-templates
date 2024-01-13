@@ -21,14 +21,14 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
 
 Parameters:
   IAMRoleForChatbotArn:
     Type: String
     AllowedPattern: .+
     Description: The IAM Role ARN for Chatbot [required]
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: Default
     AllowedPattern: .+
@@ -50,7 +50,7 @@ Resources:
   Chatbot:
     Type: AWS::Chatbot::SlackChannelConfiguration
     Properties: 
-      ConfigurationName: !Sub ${LogicalNamePrefix}-${AWS::StackName}-${AWS::Region}
+      ConfigurationName: !Sub ${LogicalName}-${AWS::StackName}-${AWS::Region}
       IamRoleArn: !Ref IAMRoleForChatbotArn
       LoggingLevel: NONE
       SlackChannelId: !Ref SlackChannelId

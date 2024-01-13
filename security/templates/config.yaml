@@ -18,7 +18,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -38,7 +38,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable auto remediation [required]
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: DefaultSecuritySettings
     Description: The custom prefix name [required]
@@ -88,7 +88,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        TopicName: !Sub Alert-createdby-${LogicalNamePrefix}
+        TopicName: !Sub Alert-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -100,7 +100,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
         SemanticVersion: 2.1.16
       Parameters:
-        TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
+        TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -144,7 +144,7 @@ Resources:
                   - cloudformation:DetectStackResourceDrift
                 Resource:
                   - '*'
-      RoleName: !Sub ${LogicalNamePrefix}-ConfigRules-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-ConfigRules-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -189,7 +189,7 @@ Resources:
                 Action:
                   - logs:PutLogEvents
                 Resource: '*' 
-      RoleName: !Sub ${LogicalNamePrefix}-LambdaForConfig-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-LambdaForConfig-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -229,7 +229,7 @@ Resources:
                   - iam:PassRole
                 Resource:
                   - !GetAtt IAMRoleForVPCFlowLog.Arn
-      RoleName: !Sub ${LogicalNamePrefix}-SSM-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-SSM-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -259,7 +259,7 @@ Resources:
                   - logs:DescribeLogGroups
                   - logs:DescribeLogStreams
                 Resource: '*'
-      RoleName: !Sub ${LogicalNamePrefix}-VPCFlowLog-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-VPCFlowLog-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

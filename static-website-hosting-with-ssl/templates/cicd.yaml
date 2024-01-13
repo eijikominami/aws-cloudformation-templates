@@ -12,16 +12,13 @@ Metadata:
           - GitHubRepoName
           - GitHubBranchName
       - Label: 
-          default: 'Deploy Configuration'
-        Parameters:
-          - S3BucketName
-      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - CodeStarConnectionArn
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
+          - LogicalName
           - TagKey
           - TagValue
 
@@ -43,10 +40,10 @@ Parameters:
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
-  S3BucketName:
+  LogicalName:
     Type: String
-    Default: ''
-    Description: The Amazon S3 bucket name for website hosting
+    Default: static-website-hosting
+    AllowedPattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
   TagKey:
     Type: String
     Default: createdby
@@ -253,7 +250,7 @@ Resources:
                 Provider: S3
                 Version: '1'
               Configuration:
-                BucketName: !Ref S3BucketName
+                BucketName: !Ref LogicalName
                 Extract: true
               InputArtifacts:
                 - Name: Source_Website
@@ -278,7 +275,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub cicd-artifact-${S3BucketName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cicd-artifact-${LogicalName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays

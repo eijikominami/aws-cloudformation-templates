@@ -30,7 +30,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment 
           - TagKey
           - TagValue
@@ -81,7 +81,7 @@ Parameters:
     Type: String
     AllowedPattern: arn:aws(-(cn|us-gov|iso(-[bef])?))?:glue:.*
     Description: The Amazon Resource Name (ARN) of the registry [required]
-  LogicalNamePrefix: 
+  LogicalName: 
     Type: String
     Default: GoogleAnalytics
     Description: The custom prefix name [required]
@@ -208,7 +208,7 @@ Resources:
         GlueJobWorkerType: !Ref GlueJobWorkerType
         GlueRegistoryArn: !Ref GlueRegistoryArn
         SourceBucketName: !GetAtt AppFlow.Outputs.DistinationBucket
-        LogicalNamePrefix: !Ref LogicalNamePrefix
+        LogicalName: !Ref LogicalName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

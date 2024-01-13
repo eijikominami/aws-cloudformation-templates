@@ -31,10 +31,10 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
 
 Parameters:
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: Notification-
     AllowedPattern: .+
@@ -179,7 +179,7 @@ Resources:
           - StatusCode:
               - Failed
           - !Ref AWS::NoValue
-      Name: !Sub ${LogicalNamePrefix}-AutoScaling
+      Name: !Sub ${LogicalName}-AutoScaling
       State: !If
         - SubscribeAutoScalingErrorEventOnly
         - ENABLED
@@ -199,7 +199,7 @@ Resources:
         detail:
           - status:
               - Execution Failed
-      Name: !Sub ${LogicalNamePrefix}-AppFlow
+      Name: !Sub ${LogicalName}-AppFlow
       State: !Ref AppFlow
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -213,7 +213,7 @@ Resources:
           - aws.acm
         detail-type: 
           - ACM Certificate Approaching Expiration
-      Name: !Sub ${LogicalNamePrefix}-CertificateManager
+      Name: !Sub ${LogicalName}-CertificateManager
       State: !Ref CertificateManager
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -237,7 +237,7 @@ Resources:
               - UPDATE_FAILED
               - UPDATE_ROLLBACK_COMPLETE
               - UPDATE_ROLLBACK_FAILED
-      Name: !Sub ${LogicalNamePrefix}-CloudFormation
+      Name: !Sub ${LogicalName}-CloudFormation
       State: ENABLED
       Targets:
         - Arn: !Ref SNSForDeploymentArn
@@ -259,7 +259,7 @@ Resources:
           - result:
               - failed
           - !Ref AWS::NoValue
-      Name: !Sub ${LogicalNamePrefix}-EBS
+      Name: !Sub ${LogicalName}-EBS
       State: !If
         - SubscribeEBSErrorEventOnly
         - ENABLED
@@ -276,7 +276,7 @@ Resources:
           - aws.ec2
         detail-type: 
           - EC2 Instance State-change Notification
-      Name: !Sub ${LogicalNamePrefix}-EC2
+      Name: !Sub ${LogicalName}-EC2
       State: !Ref EC2EventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -292,7 +292,7 @@ Resources:
           - KMS CMK Rotations
           - KMS Imported Key Material Expiration
           - KMS CMK Deletion
-      Name: !Sub ${LogicalNamePrefix}-KMS
+      Name: !Sub ${LogicalName}-KMS
       State: !Ref KMSEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -306,7 +306,7 @@ Resources:
           - aws.signin
         detail-type: 
           - AWS Console Sign In via CloudTrail
-      Name: !Sub ${LogicalNamePrefix}-ManagementConsole
+      Name: !Sub ${LogicalName}-ManagementConsole
       State: !Ref ManagementConsoleEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -320,7 +320,7 @@ Resources:
           - aws.medialive
         detail-type: 
           - MediaLive Channel State Change
-      Name: !Sub ${LogicalNamePrefix}-MediaLive
+      Name: !Sub ${LogicalName}-MediaLive
       State: !Ref MediaLiveEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -336,7 +336,7 @@ Resources:
           - MGN Source Server Launch Result
           - MGN Source Server Lifecycle State Change
           - MGN Source Server Data Replication Stalled Change
-      Name: !Sub ${LogicalNamePrefix}-MGN
+      Name: !Sub ${LogicalName}-MGN
       State: !Ref MGNEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -352,7 +352,7 @@ Resources:
           - Network Manager Topology Change
           - Network Manager Routing Update
           - Network Manager Status Update
-      Name: !Sub ${LogicalNamePrefix}-NetworkManager
+      Name: !Sub ${LogicalName}-NetworkManager
       State: !Ref NetworkManagerEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -367,7 +367,7 @@ Resources:
         detail-type: 
           - Savings Plans State Change
           - Savings Plans State Change Alert
-      Name: !Sub ${LogicalNamePrefix}-SavingsPlans
+      Name: !Sub ${LogicalName}-SavingsPlans
       State: !Ref SavingsPlansEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -381,7 +381,7 @@ Resources:
           - aws.events
         detail-type: 
           - Scheduled Event
-      Name: !Sub ${LogicalNamePrefix}-ScheduledEvents
+      Name: !Sub ${LogicalName}-ScheduledEvents
       State: !Ref ScheduledEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -395,7 +395,7 @@ Resources:
           - aws.support
         detail-type: 
           - Support Case Update
-      Name: !Sub ${LogicalNamePrefix}-Support
+      Name: !Sub ${LogicalName}-Support
       State: !Ref SupportEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -409,7 +409,7 @@ Resources:
           - aws.tag
         detail-type: 
           - Tag Change on Resource
-      Name: !Sub ${LogicalNamePrefix}-Tag
+      Name: !Sub ${LogicalName}-Tag
       State: !Ref TagEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
@@ -423,7 +423,7 @@ Resources:
           - aws.trustedadvisor
         detail-type: 
           - Trusted Advisor Check Item Refresh Notification
-      Name: !Sub ${LogicalNamePrefix}-TrustedAdvisor
+      Name: !Sub ${LogicalName}-TrustedAdvisor
       State: !Ref TrustedAdvisorEventsRule
       Targets:
         - Arn: !Ref SNSForAlertArn
