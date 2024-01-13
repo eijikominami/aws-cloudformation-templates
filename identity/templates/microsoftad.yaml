@@ -134,7 +134,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -167,7 +167,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -200,7 +200,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -217,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -540,7 +540,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -562,7 +562,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -584,7 +584,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -608,7 +608,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -632,7 +632,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -656,7 +656,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.23
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

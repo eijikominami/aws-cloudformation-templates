@@ -460,8 +460,8 @@ Resources:
   CodeBuildLogGroupV2:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupClass: INFREQUENT_ACCESS
-      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}_V2
+      LogGroupClass: STANDARD
+      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
       RetentionInDays: 60
       Tags: 
         - Key: !Ref TagKey
