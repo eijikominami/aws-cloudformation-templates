@@ -214,7 +214,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
         Environment: !Ref Environment
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
@@ -248,7 +248,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
@@ -273,7 +273,7 @@ Resources:
           - CreateGuardDutyEventBridgeOnly
           - DISABLED
           - ENABLED
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SNSForAlertArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
@@ -307,7 +307,7 @@ Resources:
         CloudTrailAdditionalFilters: !Ref CloudTrailAdditionalFilters
         CloudTrailS3Trail: !Ref CloudTrailS3Trail
         LogBucketName: !Ref S3ForAccessLog
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SnsTopicARN: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -344,7 +344,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
@@ -367,7 +367,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

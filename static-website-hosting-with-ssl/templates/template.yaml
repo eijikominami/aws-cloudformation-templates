@@ -340,7 +340,7 @@ Resources:
         CloudFront403ErrorResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
         CloudFront404ErrorResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
         CloudFront500ErrorResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         RealtimeDashboardElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
         RealtimeDashboardElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
         RealtimeDashboardElasticSearchMasterType: !Ref RealtimeDashboardElasticSearchMasterType
@@ -444,7 +444,6 @@ Resources:
         GitHubOwnerName: !Ref GitHubOwnerNameForWebsite
         GitHubRepoName: !Ref GitHubRepoNameForWebsite
         GitHubBranchName: !Ref GitHubBranchNameForWebsite
-        S3BucketName: !Ref S3ForWebHosting
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:

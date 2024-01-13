@@ -17,7 +17,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -30,7 +30,7 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: The GuardDuty detector [required]
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: DefaultSecuritySettings
     Description: The custom prefix name [required]
@@ -78,7 +78,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        TopicName: !Sub Alert-createdby-${LogicalNamePrefix}
+        TopicName: !Sub Alert-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -90,7 +90,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
         SemanticVersion: 2.1.16
       Parameters:
-        TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
+        TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

@@ -258,7 +258,7 @@ Resources:
         IgnoreResourceConflicts: !Ref SSMIgnoreResourceConflicts
         OrganizationID: !Ref SSMOrganizationID
         PatchingAt: !Ref SSMPatchingAt
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

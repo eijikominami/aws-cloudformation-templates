@@ -31,7 +31,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -99,7 +99,7 @@ Parameters:
     Default: 12000000
     MinValue: 0  
     Description: The threshold of PutRecord API calls [required]
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: RealtimeDashboard
     AllowedPattern: .+
@@ -147,7 +147,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        TopicName: !Sub Alert-createdby-${LogicalNamePrefix}
+        TopicName: !Sub Alert-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -159,7 +159,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
         SemanticVersion: 2.1.16
       Parameters:
-        TopicName: !Sub Deployment-createdby-${LogicalNamePrefix}
+        TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -192,7 +192,7 @@ Resources:
                   - kms:GenerateDataKey
                 Resource:
                   - !GetAtt KMSKey.Arn
-      RoleName: !Sub ${LogicalNamePrefix}-CloudFrontRealtimeLog-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-CloudFrontRealtimeLog-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -235,7 +235,7 @@ Resources:
                   - cloudformation:DescribeStacks
                   - cloudformation:UpdateStack
                 Resource: '*'
-      RoleName: !Sub ${LogicalNamePrefix}-LambdaForRealtimeDashboard-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-LambdaForRealtimeDashboard-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -330,7 +330,7 @@ Resources:
                     'kms:ViaService': kinesis.ap-northeast-1.amazonaws.com
                   StringLike:
                     'kms:EncryptionContext:aws:kinesis:arn': !GetAtt Kinesis.Arn
-      RoleName: !Sub ${LogicalNamePrefix}-Firehose-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-Firehose-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -392,7 +392,7 @@ Resources:
   Kinesis:
     Type: AWS::Kinesis::Stream
     Properties:
-      Name: !Ref LogicalNamePrefix
+      Name: !Ref LogicalName
       RetentionPeriodHours: 24
       # Server-Side Encryption
       StreamEncryption:
@@ -411,12 +411,12 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
         SemanticVersion: 2.1.16
       Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-        KinesisStreamName: !Ref LogicalNamePrefix
+        KinesisStreamName: !Ref LogicalName
         IteratorAgeMillisecondsThreshold: 30000
         # Number of Input Records (200000rps * 60sec)
         NumberOfPutRecordThreshold: !Ref KinesisNumberOfPutRecordThreshold
@@ -588,7 +588,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
         SemanticVersion: 2.1.16
       Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -602,7 +602,7 @@ Resources:
   KinesisFirehose:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
-      DeliveryStreamName: !Sub ${LogicalNamePrefix}-${KinesisFirehoseStreamNameSuffix}
+      DeliveryStreamName: !Sub ${LogicalName}-${KinesisFirehoseStreamNameSuffix}
       DeliveryStreamType: KinesisStreamAsSource
       KinesisStreamSourceConfiguration:
         KinesisStreamARN: !GetAtt Kinesis.Arn
@@ -643,7 +643,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupClass: INFREQUENT_ACCESS
-      LogGroupName: !Sub /aws/kinesisfirehose/${LogicalNamePrefix}
+      LogGroupName: !Sub /aws/kinesisfirehose/${LogicalName}
       RetentionInDays: 60
       Tags:
         - Key: environment
@@ -667,7 +667,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
         SemanticVersion: 2.1.16
       Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -828,7 +828,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elasticsearch
         SemanticVersion: 2.1.16
       Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -901,7 +901,7 @@ Resources:
 
           def lambda_handler(event, context):
             response = cloudformation.describe_stacks(
-                StackName='${LogicalNamePrefix}'
+                StackName='${LogicalName}'
             )
             last_updated_time = response['Stacks'][0]['LastUpdatedTime'].timestamp()
             parameters = response['Stacks'][0]['Parameters']
@@ -974,7 +974,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
         SemanticVersion: 2.1.16
       Parameters:
-        CustomAlarmName: !Ref LogicalNamePrefix
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -989,7 +989,7 @@ Resources:
     Type: AWS::CloudWatch::Dashboard
     Properties:
       DashboardName: !Ref AWS::StackName
-      DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "\n# CloudFront Real-time Dashboard\nCloudFrontのリアルタイムログを可視化するダッシュボードのパフォーマンスを確認できます。\n"}},{"type": "metric","x": 0,"y": 2,"width": 12,"height": 6,"properties": {"metrics": [[ "AWS/Kinesis", "PutRecords.Records", "StreamName", "${Kinesis}", { "label": "Kinesis PutRecords" } ],[ ".", "GetRecords.Records", ".", ".", { "label": "Kinesis GetRecords" } ],[ "AWS/Firehose", "DataReadFromKinesisStream.Records", "DeliveryStreamName", "${KinesisFirehose}", { "label": "Firehose DataReadFromKinesisStream" } ],[ ".", "DeliveryToElasticsearch.Records", ".", ".", { "label": "Firehose DeliveryToElasticsearch" } ],[ ".", "SucceedProcessing.Records", ".", ".", { "label": "Firehose SucceedProcessing" } ]],"view": "timeSeries","stacked": false,"region": "${AWS::Region}","stat": "Sum","period": 60,"title": "Records"}},{"type": "metric","x": 12,"y": 2,"width": 12,"height": 6,"properties": {"metrics": [[ "AWS/Kinesis", "PutRecords.Latency", "StreamName", "${Kinesis}", { "label": "Kinesis PutRecords" } ],[ ".", "GetRecords.Latency", ".", ".", { "label": "Kinesis GetRecords" } ],[ "AWS/Firehose", "DescribeDeliveryStream.Latency", "DeliveryStreamName", "${KinesisFirehose}", { "label": "Firehose DescribeDeliveryStream" } ],[ "AWS/ES", "WriteLatency", "DomainName", "${ElasticSearchDomain}", "ClientId", "${AWS::AccountId}", { "label": "Elasticsearch Write" } ],[ ".", "IndexingLatency", ".", ".", ".", ".", { "label": "Elasticsearch Indexing" } ]],"view": "timeSeries","stacked": true,"region": "${AWS::Region}","stat": "Average","period": 60,"title": "Latency"}},{"type": "text","x": 0,"y": 8,"width": 12,"height": 1,"properties": {"markdown": "\n# Kinesis Data Streams\n"}},{"type": "metric","x": 0,"y": 9,"width": 12,"height": 3,"properties": {"title": "WriteProvisionedThroughputExceeded","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Kinesis-${Kinesis}-WriteProvisionedThroughputExceeded"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 12,"width": 12,"height": 3,"properties": {"title": "PutRecordSuccess","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Kinesis-${Kinesis}-PutRecord-Success-is-Too-High"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 15,"width": 12,"height": 3,"properties": {"title": "IteratorAgeMilliseconds","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Kinesis-${Kinesis}-IteratorAgeMilliseconds-is-Too-Long"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "text","x": 12,"y": 8,"width": 12,"height": 1,"properties": {"markdown": "\n# Kinesis Data Firehose\n"}},{"type": "metric","x": 12,"y": 9,"width": 12,"height": 3,"properties": {"title": "ThrottledGetShardIterator","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Firehose-${KinesisFirehose}-Throttled-Get-Shard-Iterator"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 18,"width": 12,"height": 3,"properties": {"title": "DeliveryToS3Success","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Firehose-${KinesisFirehose}-Delivery-To-S3-Failed"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 15,"width": 12,"height": 3,"properties": {"title": "DeliveryToElasticsearchDataFreshness","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Firehose-${KinesisFirehose}-Delivery-To-Elasticsearch-Data-Freshness"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 12,"width": 12,"height": 3,"properties": {"title": "ThrottledGetRecords","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Firehose-${KinesisFirehose}-Throttled-Get-Records"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 18,"width": 12,"height": 3,"properties": {"title": "DeliveryToElasticsearchSuccess","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Firehose-${KinesisFirehose}-Delivery-To-Elasticsearch-Failed"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "text","x": 0,"y": 21,"width": 24,"height": 1,"properties": {"markdown": "\n# Lambda\n"}},{"type": "metric","x": 0,"y": 22,"width": 6,"height": 3,"properties": {"title": "TypeError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Lambda-${Lambda}-TypeError"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 25,"width": 12,"height": 3,"properties": {"title": "Duration","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Lambda-${Lambda}-Timeout-Will-Occur"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 6,"y": 22,"width": 6,"height": 3,"properties": {"title": "ClientError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Lambda-${Lambda}-ClientError"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 22,"width": 6,"height": 3,"properties": {"title": "Errors","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Lambda-${Lambda}-Errors"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 25,"width": 12,"height": 3,"properties": {"title": "Throttles","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Lambda-${Lambda}-Throttles"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 18,"y": 22,"width": 6,"height": 3,"properties": {"title": "ErrorLog","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Lambda-${Lambda}-ErrorLog"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "text","x": 0,"y": 28,"width": 24,"height": 1,"properties": {"markdown": "\n# OpenSearch Service\n"}},{"type": "metric","x": 0,"y": 32,"width": 12,"height": 3,"properties": {"title": "MasterReachableFromNode","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Master-Reachable-From-Node"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 32,"width": 12,"height": 3,"properties": {"title": "AutomatedSnapshotFailure","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Automated-Snapshot-Failure"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 35,"width": 12,"height": 3,"properties": {"title": "MasterJVMMemoryPressure","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Master-JVM-Memory-Pressure"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 29,"width": 12,"height": 3,"properties": {"title": "ClusterStatus","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Cluster-Status"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 38,"width": 12,"height": 3,"properties": {"title": "KibanaHealthyNodes","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Kibana-Healthy-Nodes"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 29,"width": 12,"height": 3,"properties": {"title": "ClusterIndexWritesBlocked","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Cluster-Index-Writes-Blocked"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 35,"width": 12,"height": 3,"properties": {"title": "MasterCPUUtilization","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Master-CPU-Utilization"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 38,"width": 12,"height": 3,"properties": {"title": "FreeStorageSpace","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Free-Storage-Space"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 41,"width": 12,"height": 3,"properties": {"title": "DataCPUUtilization","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Data-CPU-Utilization"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 41,"width": 12,"height": 3,"properties": {"title": "DataJVMMemoryPressure","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Data-JVM-Memory-Pressure"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 44,"width": 12,"height": 3,"properties": {"title": "DataSysMemoryUtilization","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalNamePrefix}-Elasticsearch-${ElasticSearchDomain}-Data-Sys-Memory-Utilization"]},"view": "timeSeries","stacked": false,"type": "chart"}}]}'
+      DashboardBody: !Sub '{"widgets": [{"type": "text","x": 0,"y": 0,"width": 24,"height": 2,"properties": {"markdown": "\n# CloudFront Real-time Dashboard\nCloudFrontのリアルタイムログを可視化するダッシュボードのパフォーマンスを確認できます。\n"}},{"type": "metric","x": 0,"y": 2,"width": 12,"height": 6,"properties": {"metrics": [[ "AWS/Kinesis", "PutRecords.Records", "StreamName", "${Kinesis}", { "label": "Kinesis PutRecords" } ],[ ".", "GetRecords.Records", ".", ".", { "label": "Kinesis GetRecords" } ],[ "AWS/Firehose", "DataReadFromKinesisStream.Records", "DeliveryStreamName", "${KinesisFirehose}", { "label": "Firehose DataReadFromKinesisStream" } ],[ ".", "DeliveryToElasticsearch.Records", ".", ".", { "label": "Firehose DeliveryToElasticsearch" } ],[ ".", "SucceedProcessing.Records", ".", ".", { "label": "Firehose SucceedProcessing" } ]],"view": "timeSeries","stacked": false,"region": "${AWS::Region}","stat": "Sum","period": 60,"title": "Records"}},{"type": "metric","x": 12,"y": 2,"width": 12,"height": 6,"properties": {"metrics": [[ "AWS/Kinesis", "PutRecords.Latency", "StreamName", "${Kinesis}", { "label": "Kinesis PutRecords" } ],[ ".", "GetRecords.Latency", ".", ".", { "label": "Kinesis GetRecords" } ],[ "AWS/Firehose", "DescribeDeliveryStream.Latency", "DeliveryStreamName", "${KinesisFirehose}", { "label": "Firehose DescribeDeliveryStream" } ],[ "AWS/ES", "WriteLatency", "DomainName", "${ElasticSearchDomain}", "ClientId", "${AWS::AccountId}", { "label": "Elasticsearch Write" } ],[ ".", "IndexingLatency", ".", ".", ".", ".", { "label": "Elasticsearch Indexing" } ]],"view": "timeSeries","stacked": true,"region": "${AWS::Region}","stat": "Average","period": 60,"title": "Latency"}},{"type": "text","x": 0,"y": 8,"width": 12,"height": 1,"properties": {"markdown": "\n# Kinesis Data Streams\n"}},{"type": "metric","x": 0,"y": 9,"width": 12,"height": 3,"properties": {"title": "WriteProvisionedThroughputExceeded","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Kinesis-${Kinesis}-WriteProvisionedThroughputExceeded"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 12,"width": 12,"height": 3,"properties": {"title": "PutRecordSuccess","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Kinesis-${Kinesis}-PutRecord-Success-is-Too-High"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 15,"width": 12,"height": 3,"properties": {"title": "IteratorAgeMilliseconds","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Kinesis-${Kinesis}-IteratorAgeMilliseconds-is-Too-Long"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "text","x": 12,"y": 8,"width": 12,"height": 1,"properties": {"markdown": "\n# Kinesis Data Firehose\n"}},{"type": "metric","x": 12,"y": 9,"width": 12,"height": 3,"properties": {"title": "ThrottledGetShardIterator","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Firehose-${KinesisFirehose}-Throttled-Get-Shard-Iterator"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 18,"width": 12,"height": 3,"properties": {"title": "DeliveryToS3Success","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Firehose-${KinesisFirehose}-Delivery-To-S3-Failed"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 15,"width": 12,"height": 3,"properties": {"title": "DeliveryToElasticsearchDataFreshness","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Firehose-${KinesisFirehose}-Delivery-To-Elasticsearch-Data-Freshness"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 12,"width": 12,"height": 3,"properties": {"title": "ThrottledGetRecords","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Firehose-${KinesisFirehose}-Throttled-Get-Records"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 18,"width": 12,"height": 3,"properties": {"title": "DeliveryToElasticsearchSuccess","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Firehose-${KinesisFirehose}-Delivery-To-Elasticsearch-Failed"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "text","x": 0,"y": 21,"width": 24,"height": 1,"properties": {"markdown": "\n# Lambda\n"}},{"type": "metric","x": 0,"y": 22,"width": 6,"height": 3,"properties": {"title": "TypeError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Lambda-${Lambda}-TypeError"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 25,"width": 12,"height": 3,"properties": {"title": "Duration","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Lambda-${Lambda}-Timeout-Will-Occur"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 6,"y": 22,"width": 6,"height": 3,"properties": {"title": "ClientError","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Lambda-${Lambda}-ClientError"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 22,"width": 6,"height": 3,"properties": {"title": "Errors","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Lambda-${Lambda}-Errors"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 25,"width": 12,"height": 3,"properties": {"title": "Throttles","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Lambda-${Lambda}-Throttles"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 18,"y": 22,"width": 6,"height": 3,"properties": {"title": "ErrorLog","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Lambda-${Lambda}-ErrorLog"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "text","x": 0,"y": 28,"width": 24,"height": 1,"properties": {"markdown": "\n# OpenSearch Service\n"}},{"type": "metric","x": 0,"y": 32,"width": 12,"height": 3,"properties": {"title": "MasterReachableFromNode","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Master-Reachable-From-Node"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 32,"width": 12,"height": 3,"properties": {"title": "AutomatedSnapshotFailure","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Automated-Snapshot-Failure"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 35,"width": 12,"height": 3,"properties": {"title": "MasterJVMMemoryPressure","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Master-JVM-Memory-Pressure"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 29,"width": 12,"height": 3,"properties": {"title": "ClusterStatus","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Cluster-Status"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 38,"width": 12,"height": 3,"properties": {"title": "KibanaHealthyNodes","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Kibana-Healthy-Nodes"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 29,"width": 12,"height": 3,"properties": {"title": "ClusterIndexWritesBlocked","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Cluster-Index-Writes-Blocked"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 35,"width": 12,"height": 3,"properties": {"title": "MasterCPUUtilization","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Master-CPU-Utilization"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 38,"width": 12,"height": 3,"properties": {"title": "FreeStorageSpace","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Warning-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Free-Storage-Space"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 41,"width": 12,"height": 3,"properties": {"title": "DataCPUUtilization","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Data-CPU-Utilization"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 12,"y": 41,"width": 12,"height": 3,"properties": {"title": "DataJVMMemoryPressure","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Data-JVM-Memory-Pressure"]},"view": "timeSeries","stacked": false,"type": "chart"}},{"type": "metric","x": 0,"y": 44,"width": 12,"height": 3,"properties": {"title": "DataSysMemoryUtilization","annotations": {"alarms": ["arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:Notice-${LogicalName}-Elasticsearch-${ElasticSearchDomain}-Data-Sys-Memory-Utilization"]},"view": "timeSeries","stacked": false,"type": "chart"}}]}'
 
 Outputs:
   IAMRoleForKinesisFirehoseArn:

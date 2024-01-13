@@ -11,7 +11,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -25,7 +25,7 @@ Parameters:
       - ONE_HOUR
       - SIX_HOURS
     Description: The frequency with which Amazon Macie publishes updates to policy findings for an account [required]
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: DefaultSecuritySettings
     AllowedPattern: .+
@@ -128,7 +128,7 @@ Resources:
                   - logs:DescribeLogStreams
                 Resource:
                   - arn:aws:logs:*:*:log-group:/aws/macie/*:log-stream:*
-      RoleName: !Sub '${LogicalNamePrefix}-Macie-${AWS::Region}'
+      RoleName: !Sub '${LogicalName}-Macie-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment

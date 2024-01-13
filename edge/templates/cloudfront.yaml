@@ -60,7 +60,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment 
           - TagKey
           - TagValue
@@ -245,7 +245,7 @@ Parameters:
     Type: String
     Default: '' 
     Description: Web ACL ARN
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: ''
     Description: The custom prefix name
@@ -276,7 +276,7 @@ Conditions:
   BundleSSLCertification: !And [ !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ], !Not [ !Equals [ !Ref DomainName, '' ] ] ]
   DefaultRootObjectExists: !Not [ !Equals [ !Ref CloudFrontDefaultRootObject, '' ] ]
   DomainNameExists: !Not [ !Equals [ !Ref DomainName, '' ] ]
-  LogicalNamePrefixIsEmpty: !Equals [ !Ref LogicalNamePrefix, '' ]
+  LogicalNameIsEmpty: !Equals [ !Ref LogicalName, '' ]
   SingleOrigin: !Equals [ !Ref CloudFrontSecondaryOriginId, '' ]
   S3Origin: !Equals [ !Ref CloudFrontOriginType, S3 ]
   CreateAdditionalMetrics: !Equals [ !Ref CloudFrontAdditionalMetrics, ENABLED ]
@@ -312,10 +312,10 @@ Resources:
         KinesisFirehoseStreamNameSuffix: !Ref RealtimeDashboardKinesisFirehoseStreamNameSuffix
         KinesisShardCount: !Ref RealtimeDashboardKinesisShardCount
         KinesisNumberOfPutRecordThreshold: !Ref RealtimeKinesisNumberOfPutRecordThreshold
-        LogicalNamePrefix: !If
-          - LogicalNamePrefixIsEmpty
+        LogicalName: !If
+          - LogicalNameIsEmpty
           - !Ref AWS::StackName
-          - !Ref LogicalNamePrefix
+          - !Ref LogicalName
         SamplingRate: !Ref RealtimeDashboardSamplingRate
         SNSForAlertArn: !If
           - CreateSNSForAlert

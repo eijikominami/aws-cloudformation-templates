@@ -15,7 +15,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -56,7 +56,7 @@ Parameters:
       - 480
       - 540
       - 600
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: MediaConvert
     AllowedPattern: .+
@@ -91,7 +91,7 @@ Resources:
       Description: A role required for MediaConvert to access S3.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AmazonS3FullAccess
-      RoleName: !Sub ${LogicalNamePrefix}-MediaConvert-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-MediaConvert-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

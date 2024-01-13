@@ -144,7 +144,7 @@ Resources:
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
         InternetGatewayId: !Ref InternetGateway
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         NetworkAddressTranslation: ENABLED
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
@@ -183,7 +183,7 @@ Resources:
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
         InternetGatewayId: !Ref InternetGateway
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         NetworkAddressTranslation: ENABLED
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
@@ -213,7 +213,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         PrincipalsToAssociateWithTransitGateway: !Ref PrincipalsToAssociateWithTransitGateway
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

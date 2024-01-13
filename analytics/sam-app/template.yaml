@@ -320,7 +320,7 @@ Resources:
         ScheduleRate: !Ref GoogleAnalyticsScheduleRate
         S3BucketNameForGlue: !Ref S3ForGlue
         S3BucketNameForSource: !Ref S3ForSource
-        LogicalNamePrefix: !Sub ${AWS::StackName}-ga
+        LogicalName: !Sub ${AWS::StackName}-ga
         Environment: !Ref Environment
         SNSForAlertArn: !If 
           - CreateSNSForAlert

@@ -53,6 +53,11 @@ Parameters:
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
+  LogicalName:
+    Type: String
+    Default: web-servers
+    AllowedPattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
+    Description: The custom prefix name [required]
   TagKey:
     Type: String
     Default: createdby
@@ -412,7 +417,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub cicd-artifact-${ProjectName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cicd-artifact-${LogicalName}-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays

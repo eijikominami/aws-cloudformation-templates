@@ -15,7 +15,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - Environment 
-          - LogicalNamePrefix
+          - LogicalName
           - TagKey
           - TagValue
 
@@ -42,7 +42,7 @@ Parameters:
       - production
       - test
       - development
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: TransitGateway
     AllowedPattern: .+
@@ -64,7 +64,7 @@ Resources:
       IpAddress: !Ref CustomerGatewayOutsideIpAddress
       Tags: 
         - Key: Name
-          Value: !Sub cgw-${LogicalNamePrefix}-${AWS::Region}
+          Value: !Sub cgw-${LogicalName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -77,7 +77,7 @@ Resources:
       StaticRoutesOnly: !Ref StaticRoutesOnly
       Tags: 
         - Key: Name
-          Value: !Sub vpn-${LogicalNamePrefix}-${AWS::Region}
+          Value: !Sub vpn-${LogicalName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
