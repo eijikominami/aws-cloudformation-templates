@@ -6,7 +6,6 @@ phases:
        python: 3.9
     commands:
       - pip install -U pip
-      - pip install -U cfn-lint
       # Use the latest version
       - pip install -U awscli
       # for Lambda
@@ -14,9 +13,11 @@ phases:
       - pip install -U boto3
       # for Lambda Powertools
       - pip install -U aws-lambda-powertools
+      # CFn Lint
+      - pip install -U cfn-lint
   pre_build:
     commands:
-      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS
+      - find ./ -type f -name "*.yaml" | xargs -r cfn-lint --regions ALL_REGIONS
   build:
     commands:
        - sam validate --template ${TEMPLATE_FILE_PATH}template.yaml
