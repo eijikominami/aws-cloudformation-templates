@@ -197,8 +197,8 @@ Resources:
         detail-type: 
           - AppFlow End Flow Run Report
         detail:
-          - status:
-              - Execution Failed
+          status:
+            - Execution Failed
       Name: !Sub ${LogicalName}-AppFlow
       State: !Ref AppFlow
       Targets:
