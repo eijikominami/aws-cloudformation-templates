@@ -191,7 +191,7 @@ Resources:
                   - ecr:DescribeImages
                 Resource: '*'
                 Effect: Allow
-      RoleName: !Sub ${AWS::StackName}-CodePipeline-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-CodePipeline-${AWS::Region}
       Tags:
         - Key: environment
           Value: !If

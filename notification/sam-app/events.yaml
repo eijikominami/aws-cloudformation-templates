@@ -196,6 +196,9 @@ Resources:
           - aws.appflow
         detail-type: 
           - AppFlow End Flow Run Report
+        detail:
+          status:
+            - Execution Failed
       Name: !Sub ${LogicalName}-AppFlow
       State: !Ref AppFlow
       Targets:
