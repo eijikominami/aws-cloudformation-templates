@@ -45,13 +45,15 @@ phases:
     runtime-versions:
        python: 3.9
     commands:
-      - pip install -U pip
-      - pip install -U aws-sam-cli
-      - pip install -U cfn-lint
-      - pip install -U requests
-      - pip install -U aws_xray_sdk
       # Use the latest version
+      - pip install -U pip
       - pip install -U awscli
+      # for Lambda
+      - pip install aws-sam-cli
+      - pip install requests
+      - pip install aws_xray_sdk
+      # CloudFormation Linter
+      - pip install cfn-lint
   pre_build:
     commands:
       - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS
