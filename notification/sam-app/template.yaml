@@ -196,7 +196,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -212,7 +212,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -229,7 +229,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -246,7 +246,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -257,14 +257,14 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         AutoScalingEventsRule: !Ref AutoScalingEventsRule
         EBSEventsRule: !Ref EBSEventsRule
         EC2EventsRule: !Ref EC2EventsRule
@@ -516,7 +516,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -593,7 +593,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -681,7 +681,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -710,7 +710,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
-        LogicalNamePrefix: Alert
+        LogicalName: Alert
         SlackWorkspaceId: !Ref SlackWorkspaceId
         SlackChannelId: !Ref SlackChannelIdForAlert
         SNSArn: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
@@ -734,7 +734,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         IAMRoleForChatbotArn: !GetAtt IAMRoleForChatbot.Arn
-        LogicalNamePrefix: CICD
+        LogicalName: CICD
         SlackWorkspaceId: !Ref SlackWorkspaceId
         SlackChannelId: !Ref SlackChannelIdForDeployment
         SNSArn: !If

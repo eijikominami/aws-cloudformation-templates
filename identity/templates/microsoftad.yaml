@@ -30,7 +30,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment 
           - TagKey
           - TagValue
@@ -54,7 +54,7 @@ Parameters:
       - true
       - false
     Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [required]
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: MicrosoftAD
     AllowedPattern: .+
@@ -134,7 +134,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -144,7 +144,7 @@ Resources:
         AvailabilityZone: !Select 
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -167,7 +167,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -177,7 +177,7 @@ Resources:
         AvailabilityZone: !Select
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -200,7 +200,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -217,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -258,7 +258,7 @@ Resources:
                   - !Sub 'arn:aws:s3:::aws-ssm-distributor-file-${AWS::Region}/*'
                   - !Sub 'arn:aws:s3:::aws-ssm-document-attachments-${AWS::Region}/*'
                   - !Sub 'arn:aws:s3:::patch-baseline-snapshot-${AWS::Region}/*'
-      RoleName: !Sub '${LogicalNamePrefix}-AWSEC2Role-${AWS::Region}'
+      RoleName: !Sub '${LogicalName}-AWSEC2Role-${AWS::Region}'
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -409,7 +409,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         DailySnapshotScheduledAt: '17:00'
-        LogicalNamePrefix: !Ref LogicalNamePrefix
+        LogicalName: !Ref LogicalName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
@@ -540,7 +540,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -562,7 +562,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -584,7 +584,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -608,7 +608,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -632,7 +632,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -656,7 +656,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

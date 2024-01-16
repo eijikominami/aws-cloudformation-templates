@@ -59,6 +59,13 @@ Metadata:
         Parameters: 
           - WebACLArn
       - Label: 
+          default: 'CI/CD Pipeline Configuration'
+        Parameters: 
+          - CodeStarConnectionArn
+          - GitHubOwnerNameForWebsite
+          - GitHubRepoNameForWebsite
+          - GitHubBranchNameForWebsite
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -90,10 +97,27 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable CloudFront additional metrics [required]
+  CodeStarConnectionArn:
+    Type: String
+    Default: ''
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
   DomainName:
     Type: String
     AllowedPattern: .+
     Description: The CNAME attached to CloudFront [required]
+  GitHubOwnerNameForWebsite:
+    Type: String
+    Default: '' 
+    Description: The GitHub owner name
+  GitHubRepoNameForWebsite:
+    Type: String
+    Default: '' 
+    Description: The GitHub repository name
+  GitHubBranchNameForWebsite:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub
   CloudFrontAdditionalMetrics:
     Type: String
     Default: DISABLED
@@ -276,6 +300,7 @@ Conditions:
   CertificateExists: !Not [ !Equals [ !Ref CertificateManagerARN, '' ] ]
   CrossRegionReplication: !Not [ !Equals [ !Ref S3DestinationBucketArnOfCrossRegionReplication, '' ]]
   CreateLog: !Equals [ !Ref Logging, ENABLED ]
+  CreatePipeline: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForWebsite, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForWebsite, '' ] ] ]
   CreateRealtimeDashboard: !Equals [ !Ref RealtimeDashboardState, ENABLED ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -315,7 +340,7 @@ Resources:
         CloudFront403ErrorResponsePagePath: !Ref CloudFront403ErrorResponsePagePath
         CloudFront404ErrorResponsePagePath: !Ref CloudFront404ErrorResponsePagePath
         CloudFront500ErrorResponsePagePath: !Ref CloudFront500ErrorResponsePagePath
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         RealtimeDashboardElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
         RealtimeDashboardElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
         RealtimeDashboardElasticSearchMasterType: !Ref RealtimeDashboardElasticSearchMasterType
@@ -404,13 +429,39 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/internetmonitor.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/internetmonitor.yaml
+  # CI/CD Pipeline
+  Pipeline:
+    Condition: CreatePipeline
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CodeStarConnectionArn: !Ref CodeStarConnectionArn
+        GitHubOwnerName: !Ref GitHubOwnerNameForWebsite
+        GitHubRepoName: !Ref GitHubRepoNameForWebsite
+        GitHubBranchName: !Ref GitHubBranchNameForWebsite
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/static-website-hosting-with-ssl/cicd.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/static-website-hosting-with-ssl/cicd.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -427,7 +478,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

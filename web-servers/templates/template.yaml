@@ -71,6 +71,14 @@ Metadata:
           - WebACL
           - WebACLArnForCloudFront
       - Label: 
+          default: 'CI/CD Pipeline Configuration'
+        Parameters: 
+          - CodeStarConnectionArn
+          - DockerFilePath
+          - GitHubOwnerNameForArtifact
+          - GitHubRepoNameForArtifact
+          - GitHubBranchNameForArtifact
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -106,6 +114,10 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to CloudFront
+  CodeStarConnectionArn:
+    Type: String
+    Default: ''
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
   ComputeType:
     Type: String
     Default: INSTANCE
@@ -113,6 +125,23 @@ Parameters:
       - INSTANCE
       - CONTAINER
     Description: The category of computing platform [recuired] 
+  DockerFilePath:
+    Type: String
+    Default: ''
+    Description: The path of Dockerfile
+  GitHubOwnerNameForArtifact:
+    Type: String
+    Default: '' 
+    Description: The GitHub owner name
+  GitHubRepoNameForArtifact:
+    Type: String
+    Default: '' 
+    Description: The GitHub repository name
+  GitHubBranchNameForArtifact:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub
   AutoScalingDesiredCapacity:
     Type: Number
     Default: 1
@@ -314,6 +343,7 @@ Conditions:
   CreateECS: !And [ !Equals [ !Ref ComputeType, CONTAINER ], !Not [ !Equals [ !Ref ECSImageUri ,''] ] ]
   CreateGlobalAccelerator: !Equals [ !Ref GlobalInfrastructure, GLOBAL_ACCELERATOR ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
+  CreateContainerPipeline: !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]
   CreateRoute53: !And [ !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -334,7 +364,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -349,7 +379,7 @@ Resources:
          - CreateNetworkLoadBalancer
          - ENABLED
          - DISABLED
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SNSForAlertArn: !If
@@ -375,7 +405,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -390,7 +420,7 @@ Resources:
          - CreateNetworkLoadBalancer
          - ENABLED
          - DISABLED
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SNSForAlertArn: !If
@@ -441,7 +471,7 @@ Resources:
           - !GetAtt Az2.Outputs.NetworkLoadBalancerIPAllocationId
           - ''
         LoadBalancerType: !Ref AutoScalingLoadBalancerType
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Route53HostedZoneId: !Ref Route53HostedZoneId
         SubnetId1ForELB: !GetAtt Az1.Outputs.PublicSubnetId
         SubnetId2ForELB: !GetAtt Az2.Outputs.PublicSubnetId
@@ -483,7 +513,7 @@ Resources:
         PublicSubnetId2: !GetAtt Az2.Outputs.PublicSubnetId
         VolumeSize: !Ref EC2VolumeSize
         VPCId: !Ref VPC
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
@@ -507,7 +537,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         DailySnapshotScheduledAt: !Ref EC2DailySnapshotScheduledAt
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue 
@@ -532,7 +562,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         TargetResourceArn: !GetAtt AutoScaling.Outputs.LoadBalancerArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -623,13 +653,39 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/globalaccelerator.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/network/globalaccelerator.yaml
+  ContainerPipeline:
+    Condition: CreateContainerPipeline
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CodeStarConnectionArn: !Ref CodeStarConnectionArn
+        DockerFilePath: !Ref DockerFilePath
+        GitHubOwnerName: !Ref GitHubOwnerNameForArtifact
+        GitHubRepoName: !Ref GitHubRepoNameForArtifact
+        GitHubBranchName: !Ref GitHubBranchNameForArtifact
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/cicd-container.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/cicd-container.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -646,7 +702,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -1052,7 +1108,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1074,7 +1130,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1100,7 +1156,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

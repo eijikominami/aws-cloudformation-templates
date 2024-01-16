@@ -1,0 +1,316 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description:  AWSCloudFormationTemplates/static-website-hosting-with-ssl/cicd creates a CodePipeline pipeline to deploy static website to Amazon S3.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Source Configuration'
+        Parameters:
+          - GitHubOwnerName
+          - GitHubRepoName
+          - GitHubBranchName
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - CodeStarConnectionArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - LogicalName
+          - TagKey
+          - TagValue
+
+Parameters:
+  CodeStarConnectionArn:
+    Type: String
+    Default: ''
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
+  GitHubOwnerName:
+    Type: String
+    AllowedPattern: .+
+    Description: The GitHub owner name
+  GitHubRepoName:
+    Type: String
+    AllowedPattern: .+
+    Description: The GitHub repository name
+  GitHubBranchName:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub [required]
+  LogicalName:
+    Type: String
+    Default: static-website-hosting
+    AllowedPattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateCodeStarConnection: !Equals [ !Ref CodeStarConnectionArn, '']
+  Development: !Equals [ !Ref GitHubBranchName, develop]
+
+Resources:
+  # IAM
+  IAMRoleForCodePipeline:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com 
+            Action: sts:AssumeRole
+      Description: A role required for CodePipeline to access related resources.
+      Policies:
+        - PolicyName: CodePipeline
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:           
+              # Default Policy
+              - Action:
+                  - iam:PassRole
+                Resource: '*'
+                Effect: Allow
+                Condition:
+                  StringEqualsIfExists:
+                    iam:PassedToService:
+                      - cloudformation.amazonaws.com
+                      - elasticbeanstalk.amazonaws.com
+                      - ec2.amazonaws.com
+                      - ecs-tasks.amazonaws.com
+              - Action:
+                  - codecommit:CancelUploadArchive
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:GetUploadArchiveStatus
+                  - codecommit:UploadArchive
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - codedeploy:CreateDeployment
+                  - codedeploy:GetApplication
+                  - codedeploy:GetApplicationRevision
+                  - codedeploy:GetDeployment
+                  - codedeploy:GetDeploymentConfig
+                  - codedeploy:RegisterApplicationRevision
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - codestar-connections:UseConnection
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - elasticbeanstalk:*
+                  - ec2:*
+                  - elasticloadbalancing:*
+                  - autoscaling:*
+                  - cloudwatch:*
+                  - s3:*
+                  - sns:*
+                  - cloudformation:*
+                  - rds:*
+                  - sqs:*
+                  - ecs:*
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - lambda:InvokeFunction
+                  - lambda:ListFunctions
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - opsworks:CreateDeployment
+                  - opsworks:DescribeApps
+                  - opsworks:DescribeCommands
+                  - opsworks:DescribeDeployments
+                  - opsworks:DescribeInstances
+                  - opsworks:DescribeStacks
+                  - opsworks:UpdateApp
+                  - opsworks:UpdateStack
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:SetStackPolicy
+                  - cloudformation:ValidateTemplate
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - serverlessrepo:SearchApplications
+                  - serverlessrepo:GetApplication
+                  - serverlessrepo:GetCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:CreateCloudFormationChangeSet
+                  - serverlessrepo:ListApplicationVersions
+                  - serverlessrepo:ListApplicationDependencies
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - devicefarm:ListProjects
+                  - devicefarm:ListDevicePools
+                  - devicefarm:GetRun
+                  - devicefarm:GetUpload
+                  - devicefarm:CreateUpload
+                  - devicefarm:ScheduleRun
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - servicecatalog:ListProvisioningArtifacts
+                  - servicecatalog:CreateProvisioningArtifact
+                  - servicecatalog:DescribeProvisioningArtifact
+                  - servicecatalog:DeleteProvisioningArtifact
+                  - servicecatalog:UpdateProduct
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - cloudformation:ValidateTemplate
+                Resource: '*'
+                Effect: Allow
+              - Action:
+                  - ecr:DescribeImages
+                Resource: '*'
+                Effect: Allow
+      RoleName: !Sub ${LogicalName}-CodePipeline-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CodeStar Connection
+  CodeStarConnection:
+    Condition: CreateCodeStarConnection
+    Type: AWS::CodeStarConnections::Connection
+    Properties: 
+      ConnectionName: !Sub GitHub-${AWS::StackName}
+      ProviderType: GitHub
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CodePipeline
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties: 
+      ArtifactStores:
+        - ArtifactStore: 
+            Location: !Ref S3ForArtifact
+            Type: S3
+          Region: !Ref AWS::Region
+      Name: !Sub StaticWebsite-${AWS::StackName}
+      RestartExecutionOnUpdate: true
+      RoleArn: !GetAtt IAMRoleForCodePipeline.Arn
+      Stages: 
+        # Source
+        - Actions:
+            - ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeStarSourceConnection
+                Version: '1'                 
+              Configuration:
+                ConnectionArn: !If
+                  - CreateCodeStarConnection
+                  - !GetAtt CodeStarConnection.ConnectionArn
+                  - !Ref CodeStarConnectionArn
+                FullRepositoryId: !Sub ${GitHubOwnerName}/${GitHubRepoName}
+                BranchName: !Ref GitHubBranchName
+              Name: Website
+              OutputArtifacts: 
+                - Name: Source_Website
+              RunOrder: 1
+          Name: Source
+        # Deploy
+        - Actions:
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: S3
+                Version: '1'
+              Configuration:
+                BucketName: !Ref LogicalName
+                Extract: true
+              InputArtifacts:
+                - Name: Source_Website
+              Name: Website
+              RunOrder: 1
+          Name: Deploy
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      PipelineType: V2
+  S3ForArtifact:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub cicd-artifact-${LogicalName}-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 7
+            Status: Enabled
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForArtifact:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForArtifact
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForArtifact
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForArtifact.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForArtifact.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false

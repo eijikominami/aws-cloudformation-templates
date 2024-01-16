@@ -20,7 +20,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -47,7 +47,7 @@ Parameters:
     MinValue: 0
     MaxValue: 23
     Description: Daily patching time (H) [required]
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: SystemsManager
     Description: The custom prefix name [required]
@@ -90,7 +90,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -107,7 +107,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -142,7 +142,7 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
       # for CloudWatch Logs
         - arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy
-      RoleName: !Sub ${LogicalNamePrefix}-EC2SSM-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-EC2SSM-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -193,7 +193,7 @@ Resources:
                 Action: 
                   - iam:PassRole
                 Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/AWS-SystemsManager-AutomationExecutionRole   
-      RoleName: !Sub ${LogicalNamePrefix}-SystemsManager-AutomationExecutionRole-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-SystemsManager-AutomationExecutionRole-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -254,7 +254,7 @@ Resources:
                   - compute-optimizer:GetEnrollmentStatus
                   - iam:ListRoles
                 Resource: '*'
-      RoleName: !Sub ${LogicalNamePrefix}-SystemsManager-EnableExplorerRole-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-SystemsManager-EnableExplorerRole-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -649,7 +649,7 @@ Resources:
     Properties: 
       AllowUnassociatedTargets: false
       Cutoff: 1
-      Description: !Sub Patching to ${LogicalNamePrefix} EC2 instances at ${PatchingAt}:00 every day.
+      Description: !Sub Patching to ${LogicalName} EC2 instances at ${PatchingAt}:00 every day.
       Duration: 2
       Name: DailyMaintenance
       Schedule: !Sub cron(0 ${PatchingAt} * * ? *)
@@ -662,8 +662,8 @@ Resources:
   MaintenanceWindowTarget:
     Type: AWS::SSM::MaintenanceWindowTarget
     Properties: 
-      Description: !Sub EC2 instances createdby ${LogicalNamePrefix}.
-      Name: !Ref LogicalNamePrefix
+      Description: !Sub EC2 instances createdby ${LogicalName}.
+      Name: !Ref LogicalName
       ResourceType: INSTANCE
       Targets:
         - Key: !Join
@@ -678,10 +678,10 @@ Resources:
       - ServiceLinkedRoleForSSM
     Type: AWS::SSM::MaintenanceWindowTask
     Properties: 
-      Description: !Sub Patching for ${LogicalNamePrefix} EC2 instances.
+      Description: !Sub Patching for ${LogicalName} EC2 instances.
       MaxConcurrency: '50'
       MaxErrors: '0'
-      Name: !Sub PatchingTaskFor${LogicalNamePrefix}
+      Name: !Sub PatchingTaskFor${LogicalName}
       Priority: 0
       ServiceRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM
       Targets:  
@@ -733,7 +733,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -775,7 +775,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -820,7 +820,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -858,7 +858,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -880,7 +880,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ssm-command
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

@@ -16,7 +16,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -51,7 +51,7 @@ Parameters:
     Type: String
     Default: ''
     Description: The S3 bucket Name VOD contents exist.
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: MediaPackage
     AllowedPattern: .+
@@ -146,7 +146,7 @@ Resources:
                   - iam:PassRole
                 Resource:
                   - '*'
-      RoleName: !Sub ${LogicalNamePrefix}-MediaPackage-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-MediaPackage-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -156,8 +156,8 @@ Resources:
   MediaPackageChannel:
     Type: AWS::MediaPackage::Channel
     Properties: 
-      Description: !Sub Media Package Channel for ${LogicalNamePrefix}
-      Id: !Ref LogicalNamePrefix
+      Description: !Sub Media Package Channel for ${LogicalName}
+      Id: !Ref LogicalName
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -168,12 +168,12 @@ Resources:
     Type: AWS::MediaPackage::OriginEndpoint
     Properties: 
       ChannelId: !Ref MediaPackageChannel
-      Description: !Sub Media Package OriginEndpoint for ${LogicalNamePrefix}
+      Description: !Sub Media Package OriginEndpoint for ${LogicalName}
       HlsPackage:
         AdMarkers: NONE
         IncludeIframeOnlyStream: false
         SegmentDurationSeconds: !Ref SegmentDurationSeconds
-      Id: !Sub ${LogicalNamePrefix}-Hls
+      Id: !Sub ${LogicalName}-Hls
       ManifestName: !Ref ManifestName
       Origination: !If 
         - CreateLiveToVODWorkflow
@@ -200,8 +200,8 @@ Resources:
         SegmentDurationSeconds: 2
         SegmentTemplateFormat: NUMBER_WITH_TIMELINE
         SuggestedPresentationDelaySeconds: 20     
-      Description: !Sub Media Package OriginEndpoint for ${LogicalNamePrefix}
-      Id: !Sub ${LogicalNamePrefix}-Dash
+      Description: !Sub Media Package OriginEndpoint for ${LogicalName}
+      Id: !Sub ${LogicalName}-Dash
       ManifestName: !Ref ManifestName
       Origination: !If 
         - CreateLiveToVODWorkflow
@@ -218,7 +218,7 @@ Resources:
     Condition: CreateHlsVODWorkflow    
     Type: AWS::MediaPackage::Asset
     Properties: 
-      Id: !Sub ${LogicalNamePrefix}-Hls
+      Id: !Sub ${LogicalName}-Hls
       PackagingGroupId: !Ref MediaPackagePackagingGroup
       SourceArn: !Sub 'arn:aws:s3:::${VodSourceBucket}'
       SourceRoleArn: !GetAtt IAMRoleForMediaPackage.Arn
@@ -231,7 +231,7 @@ Resources:
     Condition: CreateDashVODWorkflow  
     Type: AWS::MediaPackage::Asset
     Properties: 
-      Id: !Sub ${LogicalNamePrefix}-Dash
+      Id: !Sub ${LogicalName}-Dash
       PackagingGroupId: !Ref MediaPackagePackagingGroup
       SourceArn: !Sub 'arn:aws:s3:::${VodSourceBucket}'
       SourceRoleArn: !GetAtt IAMRoleForMediaPackage.Arn
@@ -244,7 +244,7 @@ Resources:
     Condition: CreateVODWorkflow
     Type: AWS::MediaPackage::PackagingGroup
     Properties: 
-      Id: !Ref LogicalNamePrefix
+      Id: !Ref LogicalName
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -261,7 +261,7 @@ Resources:
             RepeatExtXKey: false
         SegmentDurationSeconds: !Ref SegmentDurationSeconds
         UseAudioRenditionGroup: false
-      Id: !Sub ${LogicalNamePrefix}-Hls
+      Id: !Sub ${LogicalName}-Hls
       PackagingGroupId: !Ref MediaPackagePackagingGroup
       Tags: 
         - Key: environment
@@ -280,7 +280,7 @@ Resources:
             Profile: NONE
         SegmentDurationSeconds: !Ref SegmentDurationSeconds
         SegmentTemplateFormat: NUMBER_WITH_TIMELINE
-      Id: !Sub ${LogicalNamePrefix}-Dash
+      Id: !Sub ${LogicalName}-Dash
       PackagingGroupId: !Ref MediaPackagePackagingGroup
       Tags: 
         - Key: environment

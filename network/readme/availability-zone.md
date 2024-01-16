@@ -14,7 +14,7 @@ You can provide optional parameters as follows.
 | `InternetGatewayId` | String | | ○ | The Internet Gateway Id |
 | `NetworkAddressTranslation` | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable NetworkAddressTranslation (NAT) |
 | `NetworkLoadBalancer` | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable Network LoadBalaner |
-| `LogicalNamePrefix` | String | WebServers | ○ | The custom prefix name |
+| `LogicalName` | String | WebServers | ○ | The custom prefix name |
 | `SNSForAlertArn` | String | | ○ | The ARN of SNS for alert |
 | `SNSForDeploymentArn` | String | | ○ | The ARN of SNS for development |
 | `SubnetPrivateCidrBlock` | String | 10.0.0.0/24 | ○ | The Private subnet CIDR block |
@@ -39,7 +39,7 @@ availability-zone は、VPC 上に Availability Zone を設定します。
 | `InternetGatewayId` | String | | ○ | Internet Gateway ID |
 | `NetworkAddressTranslation` | ENABLED / DISABLED | DISABLED　| ○ | NAT Gateway を有効化するかどうか |
 | `NetworkLoadBalancer` | ENABLED / DISABLED | DISABLED　| ○ | NLB を有効化するかどうか |
-| `LogicalNamePrefix` | String | WebServers | ○ | カスタムプリフィックス名 |
+| `LogicalName` | String | WebServers | ○ | カスタムプリフィックス名 |
 | `SNSForAlertArn` | String | | ○ | アラート用SNSのARN |
 | `SNSForDeploymentArn` | String | | ○ | デプロイメント用SNSのARN |
 | `SubnetPrivateCidrBlock` | String | | | パブリックサブネットのCIDRブロック |

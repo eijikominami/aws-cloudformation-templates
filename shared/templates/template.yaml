@@ -158,7 +158,7 @@ Resources:
       Parameters: 
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Name: !Ref ActiveDirectoryName
         Password: !Ref ActiveDirectoryPassword
         ShortName: !Ref ActiveDirectoryShortName
@@ -181,7 +181,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -191,7 +191,7 @@ Resources:
         AvailabilityZone: !Select 
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockAz1
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
         SNSForAlertArn: !If
@@ -214,7 +214,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -224,7 +224,7 @@ Resources:
         AvailabilityZone: !Select
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
         SNSForAlertArn: !If
@@ -253,7 +253,7 @@ Resources:
       Parameters: 
         DefaultSessionDuration: PT12H
         InstanceArn: !Ref IdentityCenterArn
-        LogicalNamePrefix: !Ref AWS::StackName
+        LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
@@ -272,7 +272,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -289,7 +289,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -458,7 +458,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

@@ -19,7 +19,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -39,7 +39,7 @@ Parameters:
     Type: String
     Default: ''
     Description: The secret key that 'User-Agent' header contains
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: MediaStore
     AllowedPattern: .+
@@ -79,7 +79,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -96,7 +96,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -106,7 +106,7 @@ Resources:
     Type: AWS::MediaStore::Container
     Properties: 
       AccessLoggingEnabled: true
-      ContainerName: !Ref LogicalNamePrefix
+      ContainerName: !Ref LogicalName
       CorsPolicy: 
         - AllowedHeaders: 
             - '*'
@@ -147,7 +147,7 @@ Resources:
                   "Principal":{
                       "AWS" : "arn:aws:iam::${AWS::AccountId}:root"},
                   "Effect": "Allow",
-                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",
+                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalName}/*",
                   "Condition": {
                     "Bool": { "aws:SecureTransport": "true" }
                   }
@@ -160,7 +160,7 @@ Resources:
                     "mediastore:GetObject",
                     "mediastore:DescribeObject"
                   ],
-                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalNamePrefix}/*",
+                  "Resource": "arn:aws:mediastore:${AWS::Region}:${AWS::AccountId}:container/${LogicalName}/*",
                   "Condition": {'
           - !If
             - UserAgentExists
@@ -187,7 +187,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediastore
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         ContainerName: !Ref MediaStore

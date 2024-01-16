@@ -18,7 +18,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - Environment
-          - LogicalNamePrefix
+          - LogicalName
           - TagKey
           - TagValue
 
@@ -34,7 +34,7 @@ Parameters:
       - production
       - test
       - development
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: TransitGateway
     AllowedPattern: .+
@@ -67,7 +67,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -84,7 +84,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -104,7 +104,7 @@ Resources:
       MulticastSupport: enable
       Tags:
         - Key: Name
-          Value: !Sub tgw-${LogicalNamePrefix}-${AWS::Region}
+          Value: !Sub tgw-${LogicalName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -144,7 +144,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

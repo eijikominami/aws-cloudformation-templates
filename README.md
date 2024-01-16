@@ -8,6 +8,9 @@ English / [**日本語**](README_JP.md)
 
 ``AWSCloudFormationTemplates`` contains basic Cloudformation templates.
 
+> [!NOTE]
+> You can also get useful sample templates at [**eijikominami/aws-cloudformation-samples**](https://github.com/eijikominami/aws-cloudformation-samples).
+
 ## Templates
 
 This project contains **Cloudformation templates** as follows.
@@ -23,7 +26,7 @@ This project contains **Cloudformation templates** as follows.
 | [EC2-based Web Servers](/web-servers/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WebServers&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/template.yaml)  |
 | [Global Settings](/global/README.md) | us-east-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=GlobalSettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/global/template.yaml) |
 | [Identity](/identity/README.md) | | |
-| [Media](/media/README.md) | | |
+| [Media](/media/README.md) | | [Sample templates](https://github.com/eijikominami/aws-cloudformation-samples/tree/master/media) |
 | [**Network**](/network/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml) |
 | [**Security**](/security/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DefaultSecuritySettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/template.yaml) |
 | [Send Notification to Slack](/notification/README.md) | ap-northeast-1 | [![cloudformation-launch-stack](images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Notification&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/notification/packaged.yaml) |
@@ -41,6 +44,8 @@ This project uses the following modules.
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
 | Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-0659e3a420d8a74ea |
+| AWS Glue | GlueVersion | 4.0 |
+| AWS Glue | PythonVersion | 3 |
 | AWS Lambda | CodeGuru Profiler | [AWSCodeGuruProfilerPythonAgentLambdaLayer:11 (Python 3.9)](https://docs.aws.amazon.com/codeguru/latest/profiler-ug/python-lambda-layers.html) |
 | AWS Lambda | Lambda Insights | [LambdaInsightsExtension-Arm64:11](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Lambda-Insights-extension-versionsARM.html) |
 | AWS Lambda | Python | 3.9 |

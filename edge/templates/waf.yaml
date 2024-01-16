@@ -12,7 +12,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -29,7 +29,7 @@ Parameters:
     Type: String
     Default: ''
     Description: The ARN of the resource to associate with the web ACL [required] 
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: WebServers
     AllowedPattern: .+
@@ -59,8 +59,8 @@ Resources:
     Properties: 
       DefaultAction: 
         Allow: {}
-      Description: !Sub ACL for ${LogicalNamePrefix}
-      Name: !Ref LogicalNamePrefix
+      Description: !Sub ACL for ${LogicalName}
+      Name: !Ref LogicalName
       Rules: 
         - Name: AWSManagedRulesCommonRuleSet
           OverrideAction:
@@ -118,7 +118,7 @@ Resources:
           Value: !Ref TagValue
       VisibilityConfig: 
         CloudWatchMetricsEnabled: true
-        MetricName: !Ref LogicalNamePrefix
+        MetricName: !Ref LogicalName
         SampledRequestsEnabled: false
   WebACLAssociation:
     Condition: CreateWebACLAssociation

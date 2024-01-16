@@ -52,7 +52,7 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
-          - LogicalNamePrefix
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
@@ -237,7 +237,7 @@ Parameters:
   SNSForDeploymentArn:
     Type: String
     Default: ''
-  LogicalNamePrefix:
+  LogicalName:
     Type: String
     Default: MediaLive
     AllowedPattern: .+
@@ -286,7 +286,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -303,7 +303,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -369,7 +369,7 @@ Resources:
                 Action:
                   - mediapackage:DescribeChannel
                 Resource: '*'
-      RoleName: !Sub ${LogicalNamePrefix}-MediaLive-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-MediaLive-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -383,13 +383,13 @@ Resources:
       Destinations: 
         - !If
           - CreateDestinationForMediaPackage
-          - Id: !Sub ${LogicalNamePrefix}-for-MediaPackage
+          - Id: !Sub ${LogicalName}-for-MediaPackage
             MediaPackageSettings: 
               - ChannelId: !Ref MediaPackageChannelId
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForMediaStore
-          - Id: !Sub ${LogicalNamePrefix}-for-HLS
+          - Id: !Sub ${LogicalName}-for-HLS
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
@@ -401,7 +401,7 @@ Resources:
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForRTMP
-          - Id: !Sub ${LogicalNamePrefix}-for-RTMP
+          - Id: !Sub ${LogicalName}-for-RTMP
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: !Ref OutputRtmpStreamKey1
@@ -413,7 +413,7 @@ Resources:
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForRTP
-          - Id: !Sub ${LogicalNamePrefix}-for-RTP
+          - Id: !Sub ${LogicalName}-for-RTP
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
@@ -425,7 +425,7 @@ Resources:
           - !Ref AWS::NoValue
         - !If 
           - CreateDestinationForS3
-          - Id: !Sub ${LogicalNamePrefix}-for-HLS
+          - Id: !Sub ${LogicalName}-for-HLS
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
@@ -437,7 +437,7 @@ Resources:
           - !Ref AWS::NoValue
         - !If
           - CreateDestinationForArchive
-          - Id: !Sub ${LogicalNamePrefix}-for-Archive
+          - Id: !Sub ${LogicalName}-for-Archive
             Settings: !If
               - CreateTwoPipelines
               - - StreamName: ''
@@ -469,7 +469,7 @@ Resources:
               OutputGroupSettings: 
                 MediaPackageGroupSettings: 
                   Destination:
-                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-MediaPackage
+                    DestinationRefId: !Sub ${LogicalName}-for-MediaPackage
               Outputs: 
                 - AudioDescriptionNames: 
                     - !Sub audio_2_aac${AudioBitrate}
@@ -498,7 +498,7 @@ Resources:
                       CertificateMode: VERIFY_AUTHENTICITY
                       ConnectionRetryInterval: 2
                       Destination: 
-                        DestinationRefId: !Sub ${LogicalNamePrefix}-for-RTMP
+                        DestinationRefId: !Sub ${LogicalName}-for-RTMP
                       NumRetries: 10
                   VideoDescriptionName: !Sub video_${Width}_${Height}
             - !Ref AWS::NoValue
@@ -537,7 +537,7 @@ Resources:
                           TransportStreamId: 0
                           VideoPid: 1011           
                       Destination: 
-                        DestinationRefId: !Sub ${LogicalNamePrefix}-for-RTP
+                        DestinationRefId: !Sub ${LogicalName}-for-RTP
                       FecOutputSettings: 
                         ColumnDepth: 10
                         IncludeFec: COLUMN_AND_ROW
@@ -556,7 +556,7 @@ Resources:
                   CaptionLanguageSetting: OMIT
                   CodecSpecification: RFC_4281
                   Destination: 
-                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-HLS
+                    DestinationRefId: !Sub ${LogicalName}-for-HLS
                   DirectoryStructure: SINGLE_DIRECTORY
                   DiscontinuityTags: INSERT
                   HlsCdnSettings: !If 
@@ -627,7 +627,7 @@ Resources:
               OutputGroupSettings: 
                 ArchiveGroupSettings: 
                   Destination: 
-                    DestinationRefId: !Sub ${LogicalNamePrefix}-for-Archive
+                    DestinationRefId: !Sub ${LogicalName}-for-Archive
                   RolloverInterval: 30
               Outputs: 
                 - AudioDescriptionNames: 
@@ -735,7 +735,7 @@ Resources:
                 InputPreference: EQUAL_INPUT_PREFERENCE
                 SecondaryInputId: !Ref MediaLiveInputRempPush1
               - !Ref AWS::NoValue
-            InputAttachmentName: !Sub ${LogicalNamePrefix}-Rtmp0
+            InputAttachmentName: !Sub ${LogicalName}-Rtmp0
             InputId: !Ref MediaLiveInputRempPush0
             InputSettings: 
               DeblockFilter: DISABLED
@@ -749,7 +749,7 @@ Resources:
           - CreateRTMPLIVEWorkflow
           - !If
               - CreateTwoInput
-              - InputAttachmentName: !Sub ${LogicalNamePrefix}-Rtmp1
+              - InputAttachmentName: !Sub ${LogicalName}-Rtmp1
                 InputId: !Ref MediaLiveInputRempPush1
                 InputSettings: 
                   DeblockFilter: DISABLED
@@ -777,7 +777,7 @@ Resources:
                         BlackDetectThreshold: 0.1
                         VideoBlackThresholdMsec: 15000
               - !Ref AWS::NoValue
-            InputAttachmentName: !Sub ${LogicalNamePrefix}-ElementalLink
+            InputAttachmentName: !Sub ${LogicalName}-ElementalLink
             InputId: !Ref MediaLiveInputElementalLink
             InputSettings: 
               DeblockFilter: DISABLED
@@ -789,7 +789,7 @@ Resources:
           - !Ref AWS::NoValue
         - !If 
           - CreateVODWorkflow
-          - InputAttachmentName: !Sub ${LogicalNamePrefix}-Vod
+          - InputAttachmentName: !Sub ${LogicalName}-Vod
             InputId: !Ref MediaLiveInputVod
             InputSettings: 
               DeblockFilter: DISABLED
@@ -804,7 +804,7 @@ Resources:
         MaximumBitrate: MAX_20_MBPS
         Resolution: HD
       LogLevel: ERROR
-      Name: !Ref LogicalNamePrefix
+      Name: !Ref LogicalName
       RoleArn: !GetAtt IAMRoleForMediaLive.Arn
       Tags: 
         createdby: !Ref TagValue
@@ -817,7 +817,7 @@ Resources:
         - - Id: !Ref ElementalLinkId1
           - Id: !Ref ElementalLinkId2
         - - Id: !Ref ElementalLinkId1
-      Name: !Sub ${LogicalNamePrefix}-ElementalLink
+      Name: !Sub ${LogicalName}-ElementalLink
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -827,14 +827,14 @@ Resources:
     Type: AWS::MediaLive::Input
     Properties:
       Destinations:
-        - StreamName: !Sub ${LogicalNamePrefix}-0/${InputStreamKey}-a
+        - StreamName: !Sub ${LogicalName}-0/${InputStreamKey}-a
         - !If
           - CreateTwoPipelines
-          - StreamName: !Sub ${LogicalNamePrefix}-0/${InputStreamKey}-b
+          - StreamName: !Sub ${LogicalName}-0/${InputStreamKey}-b
           - !Ref AWS::NoValue
       InputSecurityGroups: 
         - !Ref MediaLiveInputSecurityGroup
-      Name: !Sub ${LogicalNamePrefix}-RtmpPush0
+      Name: !Sub ${LogicalName}-RtmpPush0
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -844,14 +844,14 @@ Resources:
     Type: AWS::MediaLive::Input
     Properties: 
       Destinations:
-        - StreamName: !Sub ${LogicalNamePrefix}-1/${InputStreamKey}-a
+        - StreamName: !Sub ${LogicalName}-1/${InputStreamKey}-a
         - !If
           - CreateTwoPipelines
-          - StreamName: !Sub ${LogicalNamePrefix}-1/${InputStreamKey}-b
+          - StreamName: !Sub ${LogicalName}-1/${InputStreamKey}-b
           - !Ref AWS::NoValue
       InputSecurityGroups: 
         - !Ref MediaLiveInputSecurityGroup
-      Name: !Sub ${LogicalNamePrefix}-RtmpPush1
+      Name: !Sub ${LogicalName}-RtmpPush1
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -860,7 +860,7 @@ Resources:
     Condition: CreateVODWorkflow
     Type: AWS::MediaLive::Input
     Properties: 
-      Name: !Sub ${LogicalNamePrefix}-Vod0
+      Name: !Sub ${LogicalName}-Vod0
       Sources: !If
         - CreateTwoPipelines
         - - Url: !Sub s3ssl://${VodSourceBucket}
@@ -883,7 +883,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -907,7 +907,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -931,7 +931,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -954,7 +954,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.1.16
+        SemanticVersion: 2.1.24
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
