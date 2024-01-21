@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Amazon AppStream
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  Fleet:
+    Type: String
+    AllowedPattern: .+
+    Description: The name of the AppStream Fleet [required]    
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  Unhealthy:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Workspaces* (${Fleet}) で容量不足により拒否されたセッションリクエストがあります。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-Workspaces-Unhealthy-${Fleet}
+        - !Sub Warning-Workspaces-Unhealthy-${Fleet}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Fleet
+          Value: !Ref Fleet
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: InsufficientConcurrencyLimitError
+      Namespace: AWS/AppStream
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

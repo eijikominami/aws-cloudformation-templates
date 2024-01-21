@@ -76,6 +76,60 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+
+## AppStream
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | Fleet 名 | 閾値 |
+| --- | --- | --- |
+| AWS/AppStream | **InsufficientConcurrencyLimitError** | `Fleet` | 1分間に1回以上 |
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `Fleet` | String | | ○ | AppSream Fleet 名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    Fleet : String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appstream
+    SemanticVersion: 2.1.24
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    Fleet : String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## CodeBuild
 
 このテンプレートは、以下のアラームを作成します。
@@ -394,6 +448,66 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## ECS
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | 閾値 |
+| --- | --- | --- |
+| AWS/ECS | **CPUUtilization** | `UtilizationThreshold` | 
+| AWS/ECS | **MemoryUtilization** | `UtilizationThreshold` | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `ClusterName` | String | | ○ | The ECS クラスター名 |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `ServiceName` | String | | ○ | The ECS サービス名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `UtilizationThreshold` | Number | 100 | ○ | 使用率の閾値 |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters:
+    ClusterName: String
+    CustomAlarmName : String
+    ServiceName: String
+    SNSTopicArn : String
+    UtilizationThreshold: Integer
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
+    SemanticVersion: 2.1.24
+  NotificationARNs: 
+    - String
+  Parameters: 
+    ClusterName: String
+    CustomAlarmName : String
+    ServiceName: String
+    SNSTopicArn : String
+    UtilizationThreshold: Integer
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1225,7 +1339,7 @@ Properties:
 
 | ネームスペース | メトリクス | ディレクトリ ID | 閾値 |
 | --- | --- | --- |
-| AWS/WorkSpaces | **PacketDropCountNoRoute** | `DirectoryId` | 1分間に1回以上 |
+| AWS/WorkSpaces | **Unhealthy** | `DirectoryId` | 1分間に1回以上 |
 
 ## パラメータ
 

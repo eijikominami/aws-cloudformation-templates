@@ -52,17 +52,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Network LoadBalaner [required]
-  LogicalName:
-    Type: String
-    Default: WebServers
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
-  SNSForAlertArn:
-    Type: String
-    Default: ''
-  SNSForDeploymentArn:
-    Type: String
-    Default: ''
   SubnetPublicCidrBlock:
     Type: String
     Default: ''
@@ -83,6 +72,17 @@ Parameters:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
     Description: The VPC id [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  LogicalName:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

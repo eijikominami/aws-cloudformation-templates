@@ -27,7 +27,7 @@ Parameters:
     Description: Specifies a list of one or more principals to associate with IPAM
   ProvisionedCidrs:
     Type: String
-    Default: 10.0.0.0/8
+    Default: 10.0.0.0/9
     AllowedPattern: ^[0-9./]*$
     Description: The CIDR provisioned to the IPAM pool [required]
   Environment:

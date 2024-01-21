@@ -34,7 +34,7 @@ Parameters:
   TransitGatewayId:
     Type: String
     AllowedPattern: .+
-    Description: The ID of the transit gateway associated with the VPN connection [required]
+    Description: The ID of the transit gateway associated with the VPN connection [required] 
   Environment:
     Type: String
     Default: production
@@ -44,7 +44,7 @@ Parameters:
       - development
   LogicalName:
     Type: String
-    Default: TransitGateway
+    Default: VPN
     AllowedPattern: .+
     Description: The custom prefix name [required]
   TagKey:

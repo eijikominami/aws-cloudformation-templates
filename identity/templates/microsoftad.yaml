@@ -699,4 +699,4 @@ Outputs:
       - ''
   WindowsServerKeyPair:
     Description: The key pair for Windows Server
-    Value: The key is stored in AWS Systems Manager Parameter Store.
+    Value: The key is stored in AWS Systems Manager Parameter Store

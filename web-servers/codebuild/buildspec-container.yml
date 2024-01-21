@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  exported-variables:
+    - IMAGE_URI
+
 phases:
   pre_build:
     commands:
@@ -12,7 +16,7 @@ phases:
     commands:
       - echo Building the Docker image...
       - cd $CODEBUILD_SRC_DIR_Source_Container
-      - docker build -f $DOCKER_FILE --tag $REPOSITORY_URI:latest .
+      - docker build -f $DOCKER_FILE --platform linux/${CPU_ARCHITECTURE} --tag $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:${IMAGE_TAG}
       - IMAGE_URI=$REPOSITORY_URI:${IMAGE_TAG}
       - echo IMAGE_URI
@@ -21,6 +25,7 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - cd $CODEBUILD_SRC_DIR
       - printf '{"build.Image_Tag":"%s", "build.Image_Uri":"%s", "timestamp":"%s"}' "$(echo ${IMAGE_TAG})" "$(echo ${IMAGE_URI})" "$(echo ${TIMESTAMP})" > /tmp/build.json
       - printf '{"name":"%s", "imageUri":"%s"}' "$(echo WebServers)" "$(echo ${IMAGE_URI})" > imagedefinitions.json
       - printf '{"ImageURI":"%s"}' "$(echo ${IMAGE_URI})" > imageDetail.json

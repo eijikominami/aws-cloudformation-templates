@@ -60,7 +60,8 @@ Metadata:
           - WebACLArn
       - Label: 
           default: 'CI/CD Pipeline Configuration'
-        Parameters: 
+        Parameters:
+          - BucketNameForArtifact
           - CodeStarConnectionArn
           - GitHubOwnerNameForWebsite
           - GitHubRepoNameForWebsite
@@ -86,6 +87,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The Amazon S3 bucket name for log analysis
+  BucketNameForArtifact:
+    Type: String
+    Default: ''
+    Description: The bucket name artifact art stored
   CertificateManagerARN:
     Default: ''
     Type: String
@@ -430,7 +435,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/internetmonitor.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/internetmonitor.yaml
   # CI/CD Pipeline
-  Pipeline:
+  CodePipeline:
     Condition: CreatePipeline
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -444,6 +449,9 @@ Resources:
         GitHubOwnerName: !Ref GitHubOwnerNameForWebsite
         GitHubRepoName: !Ref GitHubRepoNameForWebsite
         GitHubBranchName: !Ref GitHubBranchNameForWebsite
+        S3BucketNameForArtifact: !Ref BucketNameForArtifact
+        S3BucketNameForWebHosting: !Ref S3ForWebHosting
+        LogicalName: !Ref AWS::StackName
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:

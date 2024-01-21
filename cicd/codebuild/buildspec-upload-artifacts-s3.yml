@@ -14,6 +14,8 @@ env:
     EC2_DIST_DIR: aws-cloudformation-templates/web-servers
     EDGE_SRC_DIR: edge/templates
     EDGE_DIST_DIR: aws-cloudformation-templates/edge
+    EUC_SRC_DIR: euc/templates
+    EUC_DIST_DIR: aws-cloudformation-templates/euc
     GLOBAL_SRC_DIR: global/templates
     GLOBAL_DIST_DIR: aws-cloudformation-templates/global
     HOSTING_SRC_DIR: static-website-hosting-with-ssl/templates
@@ -63,6 +65,7 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${CLOUDOPS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${EDGE_DIST_DIR}/ --recursive
+      - aws s3 rm s3://${BUCKET_NAME}/${EUC_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${IDENTITY_DIST_DIR}/ --recursive
@@ -98,6 +101,7 @@ phases:
        - aws s3 cp ${CLOUDOPS_SRC_DIR}/ s3://${BUCKET_NAME}/${CLOUDOPS_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${EC2_SRC_DIR}/ s3://${BUCKET_NAME}/${EC2_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${EDGE_SRC_DIR}/ s3://${BUCKET_NAME}/${EDGE_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
+       - aws s3 cp ${EUC_SRC_DIR}/ s3://${BUCKET_NAME}/${EUC_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${GLOBAL_SRC_DIR}/ s3://${BUCKET_NAME}/${GLOBAL_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${HOSTING_SRC_DIR}/ s3://${BUCKET_NAME}/${HOSTING_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'
        - aws s3 cp ${IDENTITY_SRC_DIR}/ s3://${BUCKET_NAME}/${IDENTITY_DIST_DIR}/ --recursive --include '*.yaml' --exclude '.aws-sam/*'

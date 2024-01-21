@@ -1,0 +1,773 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/euc/workspaces builds an environment for end user computing.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Workspaces and Appstream Configuration'
+        Parameters:
+          - Service
+          - ComputeTypeName
+          - FSxDeploymentMode
+      - Label: 
+          default: 'Workspaces Configuration'
+        Parameters:
+          - ActiveDirectoryIdForWorkspaces
+          - WorkspacesBundleId
+          - WorkspacesRootVolumeSizeGib
+          - WorkspacesRunningMode
+          - WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes
+          - WorkspacesUserNames
+          - WorkspacesUserVolumeSizeGib
+      - Label: 
+          default: 'AppStream Configuration'
+        Parameters: 
+          - AppStreamImageBuilderImageName
+          - AppStreamImageName
+          - SamlMetadataDocument
+      - Label: 
+          default: 'VPC Configuration'
+        Parameters: 
+          - VPCCidrBlock
+          - SubnetPrivateCidrBlockForAz1
+          - SubnetPrivateCidrBlockForAz2
+          - SubnetPublicCidrBlockForAz1
+          - SubnetPublicCidrBlockForAz2
+          - SubnetTransitCidrBlockAz1
+          - SubnetTransitCidrBlockAz2
+          - TransitGatewayId
+          - TransitGatewayDestinationCidrBlock
+      - Label: 
+          default: 'FSx Configuration'
+        Parameters: 
+          - ActiveDirectoryIdForFSx
+          - FSxIngressCidrIp
+          - FSxStorageSize
+          - FSxThroughput
+      - Label: 
+          default: 'Microsoft Active Directory Configuration'
+        Parameters: 
+          - ActiveDirectoryAccountNameForAppStream
+          - ActiveDirectorAddresses
+          - ActiveDirectoryEdition
+          - ActiveDirectoryEnableSso
+          - ActiveDirectoryName
+          - ActiveDirectoryPassword
+          - ActiveDirectoryShortName
+          - OrganizationalUnitDistinguishedNamesForAppStream
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  ActiveDirectoryAccountNameForAppStream:
+    Type: String
+    Default: AppStreamAdmin
+    Description: The user name of the account [APPSTREAM]
+  ActiveDirectorAddresses:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: The IPv4 addresses of Active Directory [APPSTREAM] 
+  ActiveDirectoryEdition:
+    Type: String
+    Default: Standard
+    AllowedValues:
+      - Enterprise
+      - Standard
+    Description: The edition of AWS Directory Service for Microsoft Active Directory [conditional]
+  ActiveDirectoryEnableSso:
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+    Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [conditional]
+  ActiveDirectoryName:
+    Type: String
+    Default: corp.example.com
+    Description: The fully qualified domain name for the AWS Managed Microsoft AD directory [APPSTREAM]
+  ActiveDirectoryPassword:
+    Type: String
+    Default: Password1+
+    NoEcho: true
+    Description: The password for the default administrative user named Admin [APPSTREAM]
+  ActiveDirectoryShortName:
+    Type: String
+    Default: CORP
+    Description: The NetBIOS name for your domain [APPSTREAM]
+  ActiveDirectoryIdForFSx:
+    Type: String
+    Default: ''
+    Description: The identifier of the AWS Directory Service directory for FSx [conditional]
+  ActiveDirectoryIdForWorkspaces:
+    Type: String
+    Default: ''
+    Description: The identifier of the AWS Directory Service directory for Workspaces
+  AppStreamImageBuilderImageName:
+    Type: String
+    Default: ''
+    Description: The name of the image used to create the fleet
+  AppStreamImageName:
+    Type: String
+    Default: AppStream-WinServer2019-01-26-2024
+    Description: The name of the image used to create the fleet [APPSTREAM]
+  FSxDeploymentMode:
+    Type: String
+    Default: SINGLE_AZ_2
+    AllowedValues:
+      - NONE
+      - SINGLE_AZ_2
+      - MULTI_AZ_1
+    Description: Specifies the file system deployment type [required]
+  FSxIngressCidrIp:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: The IPv4 address range, in CIDR format [FSX]
+  FSxStorageSize:
+    Type: Number
+    Default: 1024
+    MinValue: 32
+    MaxValue: 65536
+    Description: The storage capacity of the file system being created. 32 GiB - 65,536 GiB (64 TiB) [required]
+  FSxThroughput:
+    Type: Number
+    AllowedValues:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+      - 256
+      - 512
+      - 1024
+      - 2048
+    Default: 16
+    Description: >
+      The throughput capacity of an Amazon FSx file system, measured in megabytes per second 
+      in powers of 2 (8, 16, 32, ... , 1024), with the recommended value based on the file 
+      system size: 8 for <800 GiB, 16 for <1600 GiB, ... 512 for <51200 GiB, 1024 for >=51200 GiB [required]
+  OrganizationalUnitDistinguishedNamesForAppStream:
+    Type: CommaDelimitedList
+    Default: OU=EXAMPLE,DC=example,DC=com
+    Description: The distinguished names of the organizational units for computer accounts [APPSTREAM]
+  SamlMetadataDocument:
+    Type: String
+    Default: ''
+    Description: An XML document generated by an identity provider (IdP) that supports SAML 2.0
+  Service:
+    Type: String
+    Default: WORKSPACES
+    AllowedValues:
+      - WORKSPACES
+      - APPSTREAM
+      - VPC_ONLY
+    Description: The based AWS Services which the workload runs [required]
+  SubnetPrivateCidrBlockForAz1:
+    Type: String
+    Default: 10.2.8.0/23
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ1 [required]
+  SubnetPrivateCidrBlockForAz2:
+    Type: String
+    Default: 10.2.12.0/23
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ2 [required]
+  SubnetPublicCidrBlockForAz1:
+    Type: String
+    Default: 10.2.10.0/24
+    Description: The public subnet CIDR block at AZ1
+  SubnetPublicCidrBlockForAz2:
+    Type: String
+    Default: 10.2.14.0/24
+    Description: The public subnet CIDR block at AZ2
+  SubnetTransitCidrBlockAz1:
+    Type: String
+    Default: 10.2.11.0/24
+    Description: The transit subnet CIDR block at AZ1
+  SubnetTransitCidrBlockAz2:
+    Type: String
+    Default: 10.2.15.0/24
+    Description: The transit subnet CIDR block at AZ2
+  TransitGatewayId:
+    Type: String
+    Default: ''
+    Description: The ID of a transit gateway
+  TransitGatewayDestinationCidrBlock:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: The IPv4 CIDR block forward to TransitGateway
+  ComputeTypeName:
+    Type: String
+    Default: PERFORMANCE
+    AllowedValues:
+      - GRAPHICS
+      - GRAPHICSPRO
+      - PERFORMANCE
+      - POWER
+      - POWERPRO
+      - STANDARD
+      - VALUE 
+    Description: The compute type [required]
+  VPCCidrBlock:
+    Type: String
+    Default: 10.2.8.0/21
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block [required]
+  WorkspacesBundleId:
+    Type: String
+    Default: wsb-7jspy3qyc
+    Description: The identifier of the bundle for the WorkSpace [WORKSPACES]
+  WorkspacesRootVolumeSizeGib:
+    Type: Number
+    Default: 80
+    Description: The size of the root volume [required]  
+  WorkspacesRunningMode:
+    Type: String
+    Default: AUTO_STOP
+    AllowedValues:
+      - ALWAYS_ON
+      - AUTO_STOP
+      - MANUAL
+    Description: The identifier of the bundle for the WorkSpace [WORKSPACES]
+  WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes:
+    Type: Number
+    Default: 60
+    Description: The time after a user logs off when WorkSpaces are automatically stopped [required]
+  WorkspacesUserNames:
+    Type: CommaDelimitedList
+    Default: unknown
+    AllowedPattern: .+
+    Description: The user name of the user for the WorkSpace [required]
+  WorkspacesUserVolumeSizeGib:
+    Type: Number
+    Default: 100
+    Description: The size of the user storage [required] 
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CrerateAppstream: !Equals [ !Ref Service, APPSTREAM]
+  CreateDirectory: !Or [ !And [ !Not [ !Equals [ !Ref FSxDeploymentMode, NONE ] ] , !Equals [ !Ref ActiveDirectoryIdForFSx, ''] ], !And [ !Equals [ !Ref Service, WORKSPACES], !Equals [ !Ref ActiveDirectoryIdForWorkspaces, ''] ] ]
+  CreateFSx: !Not [ !Equals [ !Ref FSxDeploymentMode, NONE ] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreatePublicSubnet: !Or [ !Not [ !Equals [ !Ref SubnetPublicCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetPublicCidrBlockForAz2, ''] ] ]
+  CreateRouteTransit: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
+  CrerateWorkspaces: !Equals [ !Ref Service, WORKSPACES]
+  Development: !Equals [ !Ref Environment, development]
+  FSxMultiAz: !Equals [ !Ref Environment, MULTI_AZ_1]
+
+Mappings:
+  InstanceType:
+    AppStream:
+      GRAPHICS: stream.graphics.g4dn.xlarge
+      GRAPHICSPRO: stream.graphics.g4dn.4xlarge
+      PERFORMANCE: stream.standard.large
+      POWER: stream.standard.xlarge
+      POWERPRO: stream.standard.2xlarge
+      STANDARD: stream.standard.medium
+      VALUE: stream.standard.small      
+    Workspaces:
+      GRAPHICS: GRAPHICS_G4DN
+      GRAPHICSPRO: GRAPHICSPRO_G4DN
+      PERFORMANCE: PERFORMANCE
+      POWER: POWER
+      POWERPRO: POWERPRO
+      STANDARD: STANDARD
+      VALUE: VALUE    
+
+Resources:
+  # Nested Stack
+  Az1:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.1.24
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select 
+          - 0
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !If
+          - CreatePublicSubnet
+          - !Ref InternetGateway
+          - ''
+        LogicalName: !Ref AWS::StackName
+        NetworkAddressTranslation: !If
+          - CreatePublicSubnet
+          - ENABLED
+          - DISABLED
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn   
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  Az2:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.1.24
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 1
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !If
+          - CreatePublicSubnet
+          - !Ref InternetGateway
+          - ''
+        LogicalName: !Ref AWS::StackName
+        NetworkAddressTranslation: !If
+          - CreatePublicSubnet
+          - ENABLED
+          - DISABLED
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  MicrosoftAD:
+    Condition: CreateDirectory
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        Edition: !Ref ActiveDirectoryEdition
+        EnableSso: !Ref ActiveDirectoryEnableSso
+        LogicalName: !Ref AWS::StackName
+        Name: !Ref ActiveDirectoryName
+        Password: !Ref ActiveDirectoryPassword
+        ShortName: !Ref ActiveDirectoryShortName
+        SubnetPrivateIdForAz1: !GetAtt Az1.Outputs.PrivateSubnetId
+        SubnetPrivateIdForAz2: !GetAtt Az2.Outputs.PrivateSubnetId
+        VPCId: !Ref VPC
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/microsoftad.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/microsoftad.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  FSxForWindows:
+    Condition: CreateFSx
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        ActiveDirectoryId: !If
+          - CreateDirectory
+          - !GetAtt MicrosoftAD.Outputs.MicrosoftAdId
+          - !Ref ActiveDirectoryIdForFSx
+        AZDeploymentMode: !Ref FSxDeploymentMode
+        FSxThroughput: !Ref FSxThroughput
+        IngressCidrIp: !Ref FSxIngressCidrIp
+        PrimarySubnetAccess: !GetAtt Az1.Outputs.PrivateSubnetId
+        StorageCapacity: !Ref FSxStorageSize
+        SubnetIds: !If
+          - FSxMultiAz
+          - !Join
+            - ','
+            - - !GetAtt Az1.Outputs.PrivateSubnetId
+              - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/storage/fsx.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/storage/fsx.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Workspaces:
+    Condition: CrerateWorkspaces
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        ActiveDirectoryIdForWorkspaces: !Ref ActiveDirectoryIdForWorkspaces
+        WorkspacesDeploy: !Ref Service
+        WorkspacesBundleId: !Ref WorkspacesBundleId 
+        WorkspacesComputeTypeName: !FindInMap [InstanceType, Workspaces, !Ref ComputeTypeName]
+        WorkspacesRootVolumeSizeGib: !Ref WorkspacesRootVolumeSizeGib
+        WorkspacesRunningMode: !Ref WorkspacesRunningMode
+        WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes: !Ref WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes
+        WorkspacesUserNames: !Join [ ',', !Ref WorkspacesUserNames ]
+        WorkspacesUserVolumeSizeGib: !Ref WorkspacesUserVolumeSizeGib
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue   
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/euc/workspaces.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/euc/workspaces.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AppStream:
+    Condition: CrerateAppstream
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        DirectoryAccountName: !Sub ${ActiveDirectoryShortName}\${ActiveDirectoryAccountNameForAppStream}
+        DirectoryAccountPassword: !Ref ActiveDirectoryPassword
+        DirectoryAddresses: !If
+          - CreateDirectory
+          - !GetAtt MicrosoftAD.Outputs.MicrosoftAdDnsIpAddresses
+          - !Join [ ',', !Ref ActiveDirectorAddresses ]
+        DirectoryName: !Ref ActiveDirectoryName
+        OrganizationalUnitDistinguishedNames: !Join [ ',', !Ref OrganizationalUnitDistinguishedNamesForAppStream ]
+        ImageBuilderImageName: !Ref AppStreamImageBuilderImageName
+        ImageName: !Ref AppStreamImageName
+        InstanceType: !FindInMap [InstanceType, AppStream, !Ref ComputeTypeName]
+        LogicalName: !Ref AWS::StackName
+        PrivateSubnetId1: !GetAtt Az1.Outputs.PrivateSubnetId
+        PrivateSubnetId2: !GetAtt Az2.Outputs.PrivateSubnetId
+        SamlMetadataDocument: !Ref SamlMetadataDocument
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        VpcId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/euc/appstream.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/euc/appstream.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.24
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.24
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # IAM
+  IAMRoleForVPCFlowLog:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for VPC FlowLog.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: '*'
+      RoleName: !Sub ${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # VPC
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref VPCCidrBlock
+      # VPC endpoint uses a private DNS.
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Route
+  RoutePrivateToNATGatewayAz1:
+    Condition: CreatePublicSubnet
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !GetAtt Az1.Outputs.NatGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPrivate
+  RoutePrivateToNATGatewayAz2:
+    Condition: CreatePublicSubnet
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !GetAtt Az2.Outputs.NatGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPrivate
+  RoutePrivateToTransitGatewayAz1:
+    Condition: CreateRouteTransit
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !If
+        - CreateDirectory
+        - !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz1
+        - !GetAtt Az1.Outputs.RouteTableIdPrivate
+  RoutePrivateToTransitGatewayAz2:
+    Condition: CreateRouteTransit
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !If
+        - CreateDirectory
+        - !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz2
+        - !GetAtt Az2.Outputs.RouteTableIdPrivate
+  # Internet GW
+  InternetGateway:
+    Condition: CreatePublicSubnet
+    Type: AWS::EC2::InternetGateway
+    Properties: 
+      Tags:
+        - Key: Name
+          Value: !Sub igw-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  InternetGatewayAttachment:
+    Condition: CreatePublicSubnet
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  # Peering connections with Transit Gateway and VPC for outbound traffic
+  TransitGatewayAttachment:
+    Condition: CreateRouteTransit
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties: 
+      SubnetIds:
+        - !GetAtt Az1.Outputs.TransitSubnetId
+        - !GetAtt Az2.Outputs.TransitSubnetId
+      Tags:
+        - Key: Name
+          Value: !Sub tgw-attach-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGatewayId
+      VpcId: !Ref VPC
+  RouteTransitToTransitGatewayAz1:
+    Condition: CreateRouteTransit
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
+  RouteTransitToTransitGatewayAz2:
+    Condition: CreateRouteTransit
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
+  # CloudWatch
+  CloudWatchLogsGroupForVPCFlowLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/vpc/${AWS::StackName}'
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchAlarmTransitGatewayAttachment:
+    Condition: CreateRouteTransit
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
+        SemanticVersion: 2.1.24
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If 
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        TransitGatewayId: !Ref TransitGatewayId
+        TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+Outputs:
+  DirectoryId:
+    Description: The logical id of the Active Directory
+    Value: !If 
+      - CreateDirectory
+      - !GetAtt MicrosoftAD.Outputs.MicrosoftAdId
+      - ''
+  VpcId:
+    Description: The logical id of the VPC
+    Value: !Ref VPC

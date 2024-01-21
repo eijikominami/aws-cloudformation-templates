@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/network/route53 creates a Route53 Resolver.
 
 Metadata: 
@@ -7,33 +8,90 @@ Metadata:
       - Label: 
           default: 'Route53 Configuration'
         Parameters:
-          - SecurityGroupId
-          - SubnetId1
-          - SubnetId2
-          - SubnetId3
+          - DnsIpAz1
+          - DnsIpAz2
+          - DomainName
+          - VPCCidrBlock
+          - SubnetPrivateCidrBlockForAz1
+          - SubnetPrivateCidrBlockForAz2
+          - SubnetTransitCidrBlockForAz1
+          - SubnetTransitCidrBlockForAz1
+          - TransitGatewayId
+          - OnpremDnsIp
+          - PrincipalsToAssociateWithRoute53ResolverRule
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters:
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
 
 Parameters:
-  SecurityGroupId:
-    Type: AWS::EC2::SecurityGroup::Id
+  DnsIpAz1:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Description: The IPv4 address that you want to use for DNS queries
+  DnsIpAz2:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Description: The IPv4 address that you want to use for DNS queries
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The private domain name which this VPC has
+  OnpremDnsIp:
+    Type: String
+    Default: ''
+    Description: One IPv4 address that you want to forward DNS queries to 
+  PrincipalsToAssociateWithRoute53ResolverRule:
+    Type: String
+    Default: ''
+    Description: Specifies a list of one or more principals to associate with Route 53 Resolver Rule
+  SubnetPrivateCidrBlockForAz1:
+    Type: String
+    Default: 10.0.8.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ1 [required]
+  SubnetPrivateCidrBlockForAz2:
+    Type: String
+    Default: 10.0.12.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ2 [required]
+  SubnetTransitCidrBlockForAz1:
+    Type: String
+    Default: 10.0.11.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block at AZ1 [required]
+  SubnetTransitCidrBlockForAz2:
+    Type: String
+    Default: 10.0.15.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block at AZ2 [required]
+  TransitGatewayId:
+    Type: String
     AllowedPattern: .+
-    Description: The ID of one or more security groups that control access to this VPC [required]
-  SubnetId1:
-    Type: AWS::EC2::Subnet::Id
-    Description: The ID of the subnet that DNS queries originate from [required]
-  SubnetId2:
+    Description: The ID of the transit gateway [required]
+  VPCCidrBlock:
+    Type: String
+    Default: 10.0.8.0/21
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block [required]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
+  SNSForDeploymentArn:
     Type: String
     Default: ''
-    Description: The ID of the subnet that DNS queries originate from
-  SubnetId3:
+  LogicalName: 
     Type: String
-    Default: ''
-    Description: The ID of the subnet that DNS queries originate from
+    Default: Route53Resolver
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production
@@ -51,29 +109,405 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  SubnetId2Exists: !Not [ !Equals [ !Ref SubnetId2, '' ] ]
-  SubnetId3Exists: !Not [ !Equals [ !Ref SubnetId3, '' ] ]
+  CreateRoute53HostedZone: !Not [ !Equals [ !Ref DomainName, ''] ]
+  CreateRoute53ResolverInboundRule: !And [ !Not [ !Equals [ !Ref DnsIpAz1, ''] ], !Not [ !Equals [ !Ref DnsIpAz2, ''] ] ]
+  CreateRoute53ResolverOutboundRule: !Not [ !Equals [ !Ref OnpremDnsIp, ''] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
 Resources:
-  Route53Resolver:
-    Type: AWS::Route53Resolver::ResolverEndpoint
-    Properties: 
-      Direction: INBOUND
-      IpAddresses: 
-        - SubnetId: !Ref SubnetId1
+  # Nested Stack
+  Az1:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.1.24
+      NotificationARNs:
         - !If
-          - SubnetId2Exists
-          - SubnetId: !Ref SubnetId2
-          - !Ref AWS::NoValue
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select 
+          - 0
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        LogicalName: !Ref LogicalName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz1
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockForAz1 
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  Az2:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.1.24
+      NotificationARNs:
         - !If
-          - SubnetId3Exists
-          - SubnetId: !Ref SubnetId3
-          - !Ref AWS::NoValue
-      Name: !Sub rslvr-in-${AWS::StackName}-${AWS::Region}
-      SecurityGroupIds:
-        - !Ref SecurityGroupId
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 1
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        LogicalName: !Ref LogicalName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockForAz2
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.24
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.24
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # IAM
+  IAMRoleForVPCFlowLog:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for VPC FlowLog.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: '*'
+      RoleName: !Sub ${LogicalName}-AWSVPCFlowLogRole-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # VPC
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref VPCCidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${LogicalName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchLogsGroupForVPCFlowLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/vpc/${LogicalName}
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Route
+  RoutePrivateToTransitGatewayAz1:
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPrivate
+  RoutePrivateToTransitGatewayAz2:
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPrivate
+  # Peering connections with Transit Gateway and VPC for outbound traffic
+  TransitGatewayAttachment:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties: 
+      SubnetIds:
+        - !GetAtt Az1.Outputs.TransitSubnetId
+        - !GetAtt Az2.Outputs.TransitSubnetId
+      Tags:
+        - Key: Name
+          Value: !Sub tgw-attach-${LogicalName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TransitGatewayId: !Ref TransitGatewayId
+      VpcId: !Ref VPC
+  RouteTransitToTransitGatewayAz1:
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
+  RouteTransitToTransitGatewayAz2:
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
+  # Route 53 Resolover Endpoint
+  Route53ResolverInbound:
+    Type: AWS::Route53Resolver::ResolverEndpoint
+    Properties: 
+      Direction: INBOUND
+      IpAddresses: 
+        - Ip: !Ref DnsIpAz1
+          SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
+        - Ip: !Ref DnsIpAz2
+          SubnetId: !GetAtt Az2.Outputs.PrivateSubnetId 
+      Name: !Sub rslvr-in-${LogicalName}-${AWS::Region}
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Route53ResolverOutbound:
+    Type: AWS::Route53Resolver::ResolverEndpoint
+    Properties: 
+      Direction: OUTBOUND
+      IpAddresses: 
+        - SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
+        - SubnetId: !GetAtt Az2.Outputs.PrivateSubnetId 
+      Name: !Sub rslvr-out-${LogicalName}-${AWS::Region}
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${LogicalName}-${AWS::Region}
+      GroupDescription: Security Group for Route 53 Resolver endpoint
+      SecurityGroupEgress:
+        - IpProtocol: udp
+          Description: All UDP Traffic
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          Description: All TCP Traffic
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: udp
+          Description: DNS
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          Description: DNS
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${LogicalName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPC
+  # Route 53 Resolver Rule
+  Route53ResolverInboundRule:
+    Condition: CreateRoute53ResolverInboundRule
+    DependsOn:
+      - Route53ResolverOutbound
+    Type: AWS::Route53Resolver::ResolverRule
+    Properties:
+      DomainName: !Sub network.aws.${DomainName}
+      Name: AWS
+      # Resolver rules can only be associated to OUTBOUND resolver endpoints.
+      ResolverEndpointId: !Ref Route53ResolverOutbound
+      RuleType: FORWARD
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TargetIps: 
+        - Ip: !Ref DnsIpAz1
+          Port: 53
+        - Ip: !Ref DnsIpAz2
+          Port: 53
+  Route53ResolverInboundRuleAssociation:
+    Condition: CreateRoute53ResolverInboundRule
+    Type: AWS::Route53Resolver::ResolverRuleAssociation
+    Properties:
+      Name: AWS
+      ResolverRuleId: !Ref Route53ResolverInboundRule
+      VPCId: !Ref VPC
+  RAMForRoute53ResolverInboundRule:
+    Condition: CreateRoute53ResolverInboundRule
+    Type: AWS::RAM::ResourceShare
+    Properties: 
+      AllowExternalPrincipals: false
+      Name: Route53ResolverRule
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionResolverRule
+      Principals: 
+        - !Ref PrincipalsToAssociateWithRoute53ResolverRule
+      ResourceArns: 
+        - !GetAtt Route53ResolverInboundRule.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Route53ResolverOutboundRule:
+    Type: AWS::Route53Resolver::ResolverRule
+    Properties:
+      DomainName: !Sub onprem.${DomainName}
+      Name: Onprem
+      ResolverEndpointId: !Ref Route53ResolverOutbound
+      RuleType: FORWARD
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TargetIps: 
+        - Ip: !Ref OnpremDnsIp
+          Port: 53
+  Route53ResolverOutboundRuleAssociation:
+    Condition: CreateRoute53ResolverOutboundRule
+    Type: AWS::Route53Resolver::ResolverRuleAssociation
+    Properties:
+      Name: Onprem
+      ResolverRuleId: !Ref Route53ResolverOutboundRule
+      VPCId: !Ref VPC
+  RAMForRoute53ResolverOutboundRule:
+    Condition: CreateRoute53ResolverOutboundRule
+    Type: AWS::RAM::ResourceShare
+    Properties: 
+      AllowExternalPrincipals: false
+      Name: Route53ResolverRule
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionResolverRule
+      Principals: 
+        - !Ref PrincipalsToAssociateWithRoute53ResolverRule
+      ResourceArns: 
+        - !GetAtt Route53ResolverOutboundRule.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Route 53 Hosted Zone
+  Route53HostedZone:
+    Condition: CreateRoute53HostedZone
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig: 
+        Comment: !Sub aws.${DomainName} created by ${AWS::StackName}
+      HostedZoneTags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Name: !Sub aws.${DomainName}
+      VPCs: 
+        - VPCId: !Ref VPC
+          VPCRegion: !Ref AWS::Region
+
+Outputs:
+  ResolverOutboundRuleId:
+    Description: Route 53 Resolver Rule ID
+    Value: !If
+      - CreateRoute53ResolverOutboundRule
+      - !Ref Route53ResolverOutboundRule
+      - ''
+  ResolverInboundRuleId:
+    Description: Route 53 Resolver Rule ID
+    Value: !If
+      - CreateRoute53ResolverInboundRule
+      - !Ref Route53ResolverInboundRule
+      - ''

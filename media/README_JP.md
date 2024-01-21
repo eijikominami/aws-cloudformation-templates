@@ -89,8 +89,8 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | AudioBitrate | Number | 96000 | ○ | 音声ビットレート（bps） |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
-| ElementalLinkId1 | String | | ○ | The unique ID for the Elemental Link device | 
-| ElementalLinkId2 | String | | ○ | The unique ID for the Elemental Link device |
+| ElementalLinkId1 | String | | | The unique ID for the Elemental Link device | 
+| ElementalLinkId2 | String | | | The unique ID for the Elemental Link device |
 | FramerateDenominator | Number | 1001 | ○ | Framerate denominator |
 | FramerateNumerator | Number | 30000 | ○ | Framerate numerator |
 | GopNumBFrames | Number | 3 | ○ | リファレンスフレームあたりのBフレームの数 |
@@ -137,7 +137,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
 | **AdDecisionServerUrl** | String | | ○ | ADS の URL |
-| CdnContentSegmentUrlPrefix | String | | ○ | コンテンツをキャッシュしている CDN のURL |
+| **CdnContentSegmentUrlPrefix** | String | | ○ | コンテンツをキャッシュしている CDN のURL |
 | MaxDurationSeconds | Number | 120 | ○ | プリロールの最大秒 |
 | PersonalizationThresholdSeconds | Number | 8 | ○ | 埋められなかった広告時間の最大秒 |
 | **SlateAdUrl** | String | | ○ | 広告で使用されなかった時間に挿入されるスレートのURL |

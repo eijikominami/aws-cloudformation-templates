@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description:  AWSCloudFormationTemplates/web-servers/cicd creates a CodePipeline pipeline to deploy artifacts to Amazon EC2.
+Description:  AWSCloudFormationTemplates/web-servers/codepipeline-container creates a CodePipeline pipeline to deploy artifacts to Amazon ECS.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -8,18 +8,48 @@ Metadata:
       - Label: 
           default: 'Source Configuration'
         Parameters:
-          - DockerFilePath
           - GitHubOwnerName
           - GitHubRepoName
           - GitHubBranchName
+          - DockerFilePath
+          - GitHubBranchNameForBuildSpec
       - Label: 
           default: 'Build Configuration'
         Parameters:
           - CodeBuildImageName
+          - S3BucketNameForArtifact
+      - Label: 
+          default: 'ECS Configuration'
+        Parameters:
+          - AppPort
+          - AutoScalingMaxSize
+          - Cpu
+          - CpuArchitecture
+          - DesiredCapacity
+          - DomainName
+          - Memory
+          - SecurityGroupId
+          - PublicSubnetId1
+          - PublicSubnetId2
+          - PrivateSubnetId1
+          - PrivateSubnetId2
+          - VPCId
+      - Label: 
+          default: 'Domain Configuration'
+        Parameters:
+          - ACMValidationMethod
+          - ACMDomainName
+          - DomainName
+          - Route53HostedZoneId
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - CodeStarConnectionArn
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters: 
@@ -28,6 +58,26 @@ Metadata:
           - TagValue
 
 Parameters:
+  ACMValidationMethod:
+    Type: String
+    Default: DNS
+    AllowedValues:
+      - DNS
+      - EMAIL
+    Description: The validation method that you own or control the domain [required]
+  ACMDomainName:
+    Type: String
+    Default: ''
+    Description: The domain name created by Certification Manager
+  AppPort:
+    Type: Number
+    Default: 80
+    Description: The port on which the container is listening [required]
+  AutoScalingMaxSize:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Max Size [required]
   CodeBuildImageName:
     Type: String
     Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
@@ -37,28 +87,98 @@ Parameters:
     Type: String
     Default: ''
     Description: The Amazon Resource Name (ARN) of the CodeStar connection
+  Cpu:
+    Type: Number
+    Default: 1024
+    Description: The number of cpu units reserved for the container [required]
+  CpuArchitecture:
+    Type: String
+    Default: ARM64
+    AllowedValues:
+      - X86_64
+      - ARM64
+    Description: The CPU architecture [required]
+  DesiredCapacity:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: The number of instantiations [required]  
   DockerFilePath:
     Type: String
     AllowedPattern: .+
-    Description: The path of Dockerfile
+    Description: The path of Dockerfile [required]
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The CNAME attached to Elastic Load Balancer
   GitHubOwnerName:
     Type: String
     AllowedPattern: .+
-    Description: The GitHub owner name
+    Description: The GitHub owner name [required]
   GitHubRepoName:
     Type: String
     AllowedPattern: .+
-    Description: The GitHub repository name
+    Description: The GitHub repository name [required]
+  GitHubBranchNameForBuildSpec:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub For BuildSpec [required]
   GitHubBranchName:
     Type: String
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
+  Memory:
+    Type: String
+    Default: 3072
+    Description: The amount (in MiB) of memory to present to the container [required]
+  PublicSubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 1 for Elastic Load Balancer [required]
+  PublicSubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 2 for Elastic Load Balancer [required]
+  PrivateSubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 1 for Container [required]
+  PrivateSubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 2 for Container [required]
+  Route53HostedZoneId:
+    Type: String
+    Default: ''
+    Description: Route53 hosted zone id
+  S3BucketNameForArtifact:
+    Type: String
+    Default: ''
+    Description: The bucket name artifact art stored
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The Security Group id to attach the containers [required]
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC Id [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
   LogicalName:
     Type: String
-    Default: web-servers
-    AllowedPattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
+    Default: WebServers-Container
+    AllowedPattern: .+
     Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -69,10 +189,50 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  ArmArchitecture: !Equals [ !Ref CpuArchitecture, ARM64]
   CreateCodeStarConnection: !Equals [ !Ref CodeStarConnectionArn, '']
+  CreateS3Bucket: !Equals [ !Ref S3BucketNameForArtifact, '']
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref GitHubBranchName, develop]
 
 Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.24
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !If
+          - Development
+          - development
+          - production
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.1.24
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !If
+          - Development
+          - development
+          - production
+        createdby: !Ref TagValue
   # IAM
   IAMRoleForCodeBuild:
     Type: AWS::IAM::Role
@@ -109,9 +269,12 @@ Resources:
                   - s3:GetObjectVersion
                   - s3:GetBucketAcl
                   - s3:GetBucketLocation
-                Resource: 
-                  - !Sub arn:aws:s3:::${S3ForArtifact}
-                  - !Sub arn:aws:s3:::${S3ForArtifact}/*
+                Resource: !If
+                  - CreateS3Bucket
+                  - - !Sub arn:aws:s3:::${S3ForArtifact}
+                    - !Sub arn:aws:s3:::${S3ForArtifact}/*
+                  - - !Sub arn:aws:s3:::${S3BucketNameForArtifact}
+                    - !Sub arn:aws:s3:::${S3BucketNameForArtifact}/*
                 Effect: Allow
               - Action:
                   - serverlessrepo:SearchApplications
@@ -129,7 +292,11 @@ Resources:
                   - codebuild:UpdateReport
                   - codebuild:BatchPutTestCases
                 Resource:
-                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${LogicalName}-*
+                Effect: Allow
+              - Action:
+                  - ecs:DescribeTaskDefinition
+                Resource: '*'
                 Effect: Allow
               - Action:
                   - ecr:GetAuthorizationToken
@@ -300,6 +467,28 @@ Resources:
             - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForCloudFormation:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for CloudFormation to access related resources.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AdministratorAccess
+      RoleName: !Sub ${LogicalName}-CloudFormation-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # Container
   ECR:
     Type: AWS::ECR::Repository
@@ -316,7 +505,7 @@ Resources:
     Condition: CreateCodeStarConnection
     Type: AWS::CodeStarConnections::Connection
     Properties: 
-      ConnectionName: !Sub GitHub-${AWS::StackName}
+      ConnectionName: !Sub GitHub-${LogicalName}
       ProviderType: GitHub
       Tags: 
         - Key: !Ref TagKey
@@ -333,34 +522,112 @@ Resources:
         Image: !Ref CodeBuildImageName
         PrivilegedMode: true
         Type: ARM_CONTAINER
+        EnvironmentVariables:
+          - Name: CPU_ARCHITECTURE
+            Type: PLAINTEXT
+            Value: !If
+              - ArmArchitecture
+              - arm64
+              - amd64
       LogsConfig: 
         CloudWatchLogs: 
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
-      Name: !Sub ${AWS::StackName}-Container
+      Name: !Sub ${LogicalName}-Container
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
-        BuildSpec: buildspec-container.yml
+        BuildSpec: web-servers/codebuild/buildspec-container.yml
         Type: CODEPIPELINE
       Tags: 
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TimeoutInMinutes: 60
+  CodeBuildForSAM:
+    Type: AWS::CodeBuild::Project
+    Properties: 
+      Artifacts:
+        Type: CODEPIPELINE
+      Description: !Sub Builds SAM teplate of ${AWS::StackName}
+      Environment: 
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref CodeBuildImageName
+        Type: ARM_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-SAM
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: web-servers/codebuild/buildspec-sam.yml
+        Type: CODEPIPELINE
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
+  CodeBuildForAppSpec:
+    Type: AWS::CodeBuild::Project
+    Properties: 
+      Artifacts:
+        Type: CODEPIPELINE
+      Description: Project to build appspec and taskdef needed for CodeDeploy deployment
+      Environment: 
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref CodeBuildImageName
+        PrivilegedMode: true
+        Type: ARM_CONTAINER
+        EnvironmentVariables:
+          - Name: TASKDEF_ARN
+            Value: ''
+          - Name: HOOKS_LAMBDA_ARN
+            Value: ''        
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${LogicalName}-AppSpec
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: web-servers/codebuild/buildspec-appsec.yml
+        Type: CODEPIPELINE
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60  
   # CodePipeline
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties: 
       ArtifactStores:
         - ArtifactStore: 
-            Location: !Ref S3ForArtifact
+            Location: !If
+              - CreateS3Bucket
+              - !Ref S3ForArtifact
+              - !Ref S3BucketNameForArtifact
             Type: S3
           Region: !Ref AWS::Region
-      Name: !Sub Container-${AWS::StackName}
+      Name: !Ref LogicalName
       RestartExecutionOnUpdate: true
       RoleArn: !GetAtt IAMRoleForCodePipeline.Arn
       Stages: 
         # Source
         - Actions:
+            - ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeStarSourceConnection
+                Version: '1'                 
+              Configuration:
+                ConnectionArn: !If
+                  - CreateCodeStarConnection
+                  - !GetAtt CodeStarConnection.ConnectionArn
+                  - !Ref CodeStarConnectionArn
+                FullRepositoryId: eijikominami/aws-cloudformation-templates
+                BranchName: !Ref GitHubBranchNameForBuildSpec
+              Name: AWSCloudFormationTemplates
+              OutputArtifacts: 
+                - Name: Source_CloudFormationTemplatesArtifact
+              RunOrder: 1
             - ActionTypeId:
                 Category: Source
                 Owner: AWS
@@ -388,18 +655,118 @@ Resources:
               Configuration:
                 EnvironmentVariables: !Join
                   - ''
-                  - - !Sub '[{"name": "REPOSITORY_URI", "value": "'
+                  - - '[{"name": "REPOSITORY_URI", "value": "'
                     - !GetAtt ECR.RepositoryUri
                     - !Sub '"}, {"name": "DOCKER_FILE", "value": "${DockerFilePath}", "type": "PLAINTEXT"}]'
                 PrimarySource: Source_CloudFormationTemplatesArtifact
                 ProjectName: !Ref CodeBuildForContainer
               InputArtifacts:
+                - Name: Source_CloudFormationTemplatesArtifact
                 - Name: Source_Container
               Name: Container
+              Namespace: BuildContainerVariables
               OutputArtifacts: 
                 - Name: BuildArtifact_Container
               RunOrder: 1
+            - ActionTypeId: 
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                EnvironmentVariables: !Join
+                  - ''
+                  - - !Sub '[{"name": "PACKAGE_BUCKET", "value": "'
+                    - !If
+                      - CreateS3Bucket
+                      - !Ref S3ForArtifact
+                      - !Ref S3BucketNameForArtifact
+                    - '", "type": "PLAINTEXT"}]'
+                ProjectName: !Ref CodeBuildForSAM
+              InputArtifacts:
+                - Name: Source_CloudFormationTemplatesArtifact
+              Name: SAM
+              OutputArtifacts: 
+                - Name: BuildArtifact_SAM
+              RunOrder: 1
           Name: Build
+        # Deploy Infrastructure
+        - Actions:
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                StackName: !Ref LogicalName
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
+                TemplatePath: BuildArtifact_SAM::packaged.yaml
+                ParameterOverrides: !Join
+                  - ''
+                  - - !Sub '{"ACMValidationMethod": "${ACMValidationMethod}", "ACMDomainName": "${ACMDomainName}", "AppPort": "${AppPort}", "AutoScalingMaxSize": "${AutoScalingMaxSize}", "Cpu": "${Cpu}", "CpuArchitecture": "${CpuArchitecture}", "DesiredCapacity": "${DesiredCapacity}", "DomainName": "${DomainName}", "ImageUri": "#{BuildContainerVariables.IMAGE_URI}", "Memory": "${Memory}", "SecurityGroupId": "${SecurityGroupId}", "PublicSubnetId1": "${PublicSubnetId1}", "PublicSubnetId2": "${PublicSubnetId2}", "PrivateSubnetId1": "${PrivateSubnetId1}", "PrivateSubnetId2": "${PrivateSubnetId2}", "VPCId": "${VPCId}", "Environment": "${Environment}", "Route53HostedZoneId": "${Route53HostedZoneId}", "LogicalName": "${LogicalName}", "TagKey": "${TagKey}", "TagValue": "${TagValue}", "SNSForAlertArn": "'
+                    - !If
+                      - CreateSNSForAlert
+                      - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+                      - !Ref SNSForAlertArn
+                    - '", "SNSForDeploymentArn": "'
+                    - !If
+                      - CreateSNSForDeployment
+                      - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+                      - !Ref SNSForDeploymentArn
+                    - '"}'
+              InputArtifacts:
+                  - Name: Source_CloudFormationTemplatesArtifact
+                  - Name: BuildArtifact_SAM
+              Name: CreateOrUpdateInfrastructure
+              Namespace: DeployInfrastructureVariables
+              OutputArtifacts: 
+                - Name: DeployArtifact_CreateOrUpdateInfrastructure
+              RunOrder: 1
+          Name: DeployInfrastructure
+        # Build CodeDeploy Artifact
+        - Actions:
+            - ActionTypeId: 
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                EnvironmentVariables: !Sub '[{"name": "AWS_REGION", "value": "${AWS::Region}", "type": "PLAINTEXT"}, {"name": "TASKDEF_ARN", "value": "#{DeployInfrastructureVariables.TaskDefinitionArn}", "type": "PLAINTEXT"}, {"name": "HOOKS_LAMBDA_ARN", "value": "#{DeployInfrastructureVariables.AfterInstallHookLambdaArn}", "type": "PLAINTEXT"}]'
+                PrimarySource: Source_CloudFormationTemplatesArtifact
+                ProjectName: !Ref CodeBuildForAppSpec
+              InputArtifacts:
+                - Name: Source_CloudFormationTemplatesArtifact
+                - Name: Source_Container
+              Name: BuildCodeDeployArtifacts
+              OutputArtifacts: 
+                - Name: BuildArtifact_AppSpec
+              RunOrder: 1
+          Name: BuildCodeDeployArtifacts
+        # Start　Application　Deploy
+        - Actions:
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: CodeDeployToECS
+                Version: '1'
+              Configuration:
+                ApplicationName: "#{DeployInfrastructureVariables.CodeDeployAppName}"
+                DeploymentGroupName: "#{DeployInfrastructureVariables.DeploymentGroupName}"
+                Image1ArtifactName: BuildArtifact_Container
+                Image1ContainerName: IMAGE1_NAME
+                TaskDefinitionTemplateArtifact: BuildArtifact_AppSpec
+                TaskDefinitionTemplatePath: taskdef.json
+                AppSpecTemplateArtifact: BuildArtifact_AppSpec
+                AppSpecTemplatePath: appspec.yml
+              InputArtifacts:
+                - Name: BuildArtifact_Container
+                - Name: BuildArtifact_AppSpec
+              Name: StartApplicationDeploy
+              OutputArtifacts: []
+              RunOrder: 1
+          Name: StartApplicationDeploy
       Tags:
         - Key: environment
           Value: !If
@@ -409,7 +776,9 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       PipelineType: V2
+  # S3
   S3ForArtifact:
+    Condition: CreateS3Bucket
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -418,7 +787,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub cicd-artifact-${LogicalName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Ref S3BucketNameForArtifact
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
@@ -438,6 +807,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForArtifact:
+    Condition: CreateS3Bucket
     Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForArtifact
@@ -461,7 +831,7 @@ Resources:
   CodeBuildLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
+      LogGroupName: !Sub /aws/codebuild/${LogicalName}
       RetentionInDays: 60
       Tags: 
         - Key: !Ref TagKey

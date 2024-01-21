@@ -78,6 +78,59 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## AppStream
+
+The template creates the following alarms.
+
+| Namespace | MetricName | Fleet | Threshold |
+| --- | --- | --- |
+| AWS/AppStream | **InsufficientConcurrencyLimitError** | `Fleet` | At least once a minute |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `Fleet` | String | | ○ | The name of the AppStream Fleet |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    Fleet : String
+    SNSTopicArn : String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appstream
+    SemanticVersion: 2.1.24
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    Fleet : String
+    SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## CodeBuild
 
 The template creates the following alarms.
@@ -396,6 +449,66 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## ECS
+
+The template creates the following alarms.
+
+| Namespace | MetricName | Threshold |
+| --- | --- | --- |
+| AWS/ECS | **CPUUtilization** | `UtilizationThreshold` | 
+| AWS/ECS | **MemoryUtilization** | `UtilizationThreshold` | 
+
+You can give optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `ClusterName` | String | | ○ | The ECS Cluster name |
+| `CustomAlarmName` | String | | | The custom alram name |
+| `ServiceName` | String | | ○ | The ECS Service name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `UtilizationThreshold` | Number | 100 | ○ | The threshold of utilization |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters:
+    ClusterName: String
+    CustomAlarmName : String
+    ServiceName: String
+    SNSTopicArn : String
+    UtilizationThreshold: Integer
+  Tags: 
+    - Tag
+  TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
+    SemanticVersion: 2.1.24
+  NotificationARNs: 
+    - String
+  Parameters: 
+    ClusterName: String
+    CustomAlarmName : String
+    ServiceName: String
+    SNSTopicArn : String
+    UtilizationThreshold: Integer
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1223,7 +1336,7 @@ The template creates the following alarms.
 
 | Namespace | MetricName | DirectoryId | Threshold |
 | --- | --- | --- |
-| AWS/WorkSpaces | **PacketDropCountNoRoute** | `DirectoryId` | At least once a minute |
+| AWS/WorkSpaces | **Unhealthy** | `DirectoryId` | At least once a minute |
 
 ## Parameters
 

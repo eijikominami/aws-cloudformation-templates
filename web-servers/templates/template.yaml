@@ -14,15 +14,18 @@ Metadata:
       - Label: 
           default: 'Server Configuration'
         Parameters:
-          - AutoScalingDesiredCapacity
-          - AutoScalingMaxSize
-          - AutoScalingLoadBalancerType
           - ComputeType
+          - AutoScalingLoadBalancerType
+          - AutoScalingMaxSize
+          - DesiredCapacity
+      - Label: 
+          default: 'EC2 Configuration'
+        Parameters:
           - EC2ImageId
           - EC2InstanceType
           - EC2KeyName
           - EC2VolumeSize
-          - ECSImageUri
+          - EC2DailySnapshotScheduledAt
       - Label: 
           default: 'Distribution Configuration'
         Parameters: 
@@ -44,19 +47,17 @@ Metadata:
           default: 'AvailabilityZone Configuration'
         Parameters: 
           - SubnetPublicCidrBlockForAz1
+          - SubnetPrivateCidrBlockForAz1
           - SubnetTransitCidrBlockAz1
           - SubnetPublicCidrBlockForAz2
+          - SubnetPrivateCidrBlockForAz2
           - SubnetTransitCidrBlockAz2
           - VPCCidrBlock     
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
           - TransitGatewayId
-          - TransitGatewayDestinationCidrBlock    
-      - Label: 
-          default: 'Data Lifecycle Manager Configuration'
-        Parameters: 
-          - EC2DailySnapshotScheduledAt
+          - TransitGatewayDestinationCidrBlock
       - Label: 
           default: 'Domain Configuration'
         Parameters: 
@@ -73,11 +74,13 @@ Metadata:
       - Label: 
           default: 'CI/CD Pipeline Configuration'
         Parameters: 
+          - BucketNameForArtifact
           - CodeStarConnectionArn
-          - DockerFilePath
           - GitHubOwnerNameForArtifact
           - GitHubRepoNameForArtifact
           - GitHubBranchNameForArtifact
+          - DockerFilePath
+          - GitHubBranchNameForBuildSpec
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -110,6 +113,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The Amazon S3 bucket name for log analysis
+  BucketNameForArtifact:
+    Type: String
+    Default: ''
+    Description: The bucket name artifact art stored
   CertificateManagerARN:
     Default: ''
     Type: String
@@ -124,7 +131,13 @@ Parameters:
     AllowedValues:
       - INSTANCE
       - CONTAINER
-    Description: The category of computing platform [recuired] 
+      - APPRUNNER
+    Description: The category of computing platform [recuired]
+  DesiredCapacity:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Desired Capacity [conditional]
   DockerFilePath:
     Type: String
     Default: ''
@@ -142,16 +155,16 @@ Parameters:
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub
-  AutoScalingDesiredCapacity:
-    Type: Number
-    Default: 1
-    MinValue: 0
-    Description: AutoScaling Desired Capacity [required]
+  GitHubBranchNameForBuildSpec:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub For BuildSpec
   AutoScalingMaxSize:
     Type: Number
     Default: 1
     MinValue: 0
-    Description: AutoScaling Max Size [required]
+    Description: AutoScaling Max Size [conditional]
   AutoScalingLoadBalancerType:
     Type: String
     Default: None
@@ -159,7 +172,7 @@ Parameters:
       - None
       - application
       - network  
-    Description: The autoScaling LoadBalancer Type [required]
+    Description: The autoScaling LoadBalancer Type [conditional]
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -227,11 +240,11 @@ Parameters:
     Type: AWS::EC2::Image::Id
     Default: ami-03dceaabddff8067e
     AllowedPattern: ^ami-.+$
-    Description: The EC2 Image Id [required]
+    Description: The EC2 Image Id [conditional]
   EC2InstanceType:
     Type: String
     Default: t3.micro
-    Description: The EC2 Instance Type [required]
+    Description: The EC2 Instance Type [conditional]
   EC2KeyName:
     Type: String
     Default: ''
@@ -240,11 +253,7 @@ Parameters:
     Type: Number
     Default: 8
     MinValue: 8
-    Description: EC2 Volume Size [required]
-  ECSImageUri:
-    Type: String
-    Default: ''
-    Description: The image arn used to start a container [conditional]
+    Description: EC2 Volume Size [conditional]
   GlobalInfrastructure:
     Type: String
     Default: NONE
@@ -273,21 +282,31 @@ Parameters:
     Default: 10.1.0.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
+  SubnetPrivateCidrBlockForAz1:
+    Type: String
+    Default: 10.1.1.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ1
   SubnetTransitCidrBlockAz1:
     Type: String
     Default: 10.1.3.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block
+    Description: The transit subnet CIDR block at AZ1
   SubnetPublicCidrBlockForAz2:
     Type: String
     Default: 10.1.4.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
+  SubnetPrivateCidrBlockForAz2:
+    Type: String
+    Default: 10.1.5.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ1
   SubnetTransitCidrBlockAz2:
     Type: String
     Default: 10.1.7.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block
+    Description: The transit subnet CIDR block at AZ2
   TransitGatewayId:
     Type: String
     Default: ''
@@ -338,12 +357,12 @@ Conditions:
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateAutoScaling: !And [ !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ], !Equals [ !Ref ComputeType, INSTANCE ] ]
   CreateCloudFront: !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ]
+  CreateContainerPipeline: !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]
   CreateDataLifecycleManager: !Not [ !Equals [ !Ref EC2DailySnapshotScheduledAt, '' ] ]
-  CreateEC2: !Or [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref ComputeType, INSTANCE ] ] ]
-  CreateECS: !And [ !Equals [ !Ref ComputeType, CONTAINER ], !Not [ !Equals [ !Ref ECSImageUri ,''] ] ]
+  CreateEC2: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Equals [ !Ref ComputeType, INSTANCE ] ]
   CreateGlobalAccelerator: !Equals [ !Ref GlobalInfrastructure, GLOBAL_ACCELERATOR ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
-  CreateContainerPipeline: !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]
+  CreatePrivateSubnets: !Or [ !And [ !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ], !Equals [ !Ref ComputeType, INSTANCE ] ], !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]]
   CreateRoute53: !And [ !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -381,7 +400,14 @@ Resources:
          - DISABLED
         LogicalName: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz1
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz1
+        SubnetPrivateCidrBlock: !If
+          - CreatePrivateSubnets
+          - !Ref SubnetPrivateCidrBlockForAz1
+          - !Ref AWS::NoValue
+        SubnetTransitCidrBlock: !If
+          - CreateTransitGateway
+          - !Ref SubnetTransitCidrBlockAz1
+          - !Ref AWS::NoValue
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -422,7 +448,14 @@ Resources:
          - DISABLED
         LogicalName: !Ref AWS::StackName
         SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz2
-        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockAz2
+        SubnetPrivateCidrBlock: !If
+          - CreatePrivateSubnets
+          - !Ref SubnetPrivateCidrBlockForAz2
+          - !Ref AWS::NoValue
+        SubnetTransitCidrBlock: !If
+          - CreateTransitGateway
+          - !Ref SubnetTransitCidrBlockAz2
+          - !Ref AWS::NoValue
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -450,7 +483,7 @@ Resources:
       Parameters:
         ACMValidationMethod: !Ref ACMValidationMethod
         ACMDomainName: !Ref ACMDomainName
-        AutoScalingDesiredCapacity: !Ref AutoScalingDesiredCapacity
+        AutoScalingDesiredCapacity: !Ref DesiredCapacity
         AutoScalingMaxSize: !Ref AutoScalingMaxSize
         DomainName: !If
           - CreateCloudFront
@@ -473,8 +506,10 @@ Resources:
         LoadBalancerType: !Ref AutoScalingLoadBalancerType
         LogicalName: !Ref AWS::StackName
         Route53HostedZoneId: !Ref Route53HostedZoneId
-        SubnetId1ForELB: !GetAtt Az1.Outputs.PublicSubnetId
-        SubnetId2ForELB: !GetAtt Az2.Outputs.PublicSubnetId
+        SubnetId1ForAutoScaling: !GetAtt Az1.Outputs.PrivateSubnetId
+        SubnetId2ForAutoScaling: !GetAtt Az2.Outputs.PrivateSubnetId
+        SubnetId1ForNLB: !GetAtt Az1.Outputs.PublicSubnetId
+        SubnetId2ForNLB: !GetAtt Az2.Outputs.PublicSubnetId
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -496,36 +531,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/autoscaling.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
-  ECS:
-    Condition: CreateECS
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        DesiredCount: !Ref AutoScalingDesiredCapacity
-        ImageUri: !Ref ECSImageUri
-        SecurityGroupId: !Ref SecurityGroupWeb
-        PublicSubnetId1: !GetAtt Az1.Outputs.PublicSubnetId
-        PublicSubnetId2: !GetAtt Az2.Outputs.PublicSubnetId
-        VolumeSize: !Ref EC2VolumeSize
-        VPCId: !Ref VPC
-        LogicalName: !Ref AWS::StackName
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue 
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/ecs.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/ecs.yaml  
   DataLifecycleManager:
     Condition: CreateDataLifecycleManager
     Type: AWS::CloudFormation::Stack
@@ -611,8 +616,14 @@ Resources:
           - CreateWAFForCloudFront
           - !Ref WebACLArnForCloudFront
           - ''
-        SNSForAlertArn: !Ref SNSForAlertArn
-        SNSForDeploymentArn: !Ref SNSForDeploymentArn
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
@@ -663,11 +674,39 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AutoScalingMaxSize: !Ref AutoScalingMaxSize
+        ACMValidationMethod: !Ref ACMValidationMethod
+        ACMDomainName: !Ref ACMDomainName
+        AppPort: 80
+        Cpu: 1024
+        CpuArchitecture: ARM64
         CodeStarConnectionArn: !Ref CodeStarConnectionArn
+        DesiredCapacity: !Ref DesiredCapacity
         DockerFilePath: !Ref DockerFilePath
+        DomainName: !Ref DomainName
         GitHubOwnerName: !Ref GitHubOwnerNameForArtifact
         GitHubRepoName: !Ref GitHubRepoNameForArtifact
         GitHubBranchName: !Ref GitHubBranchNameForArtifact
+        GitHubBranchNameForBuildSpec: !Ref GitHubBranchNameForBuildSpec
+        Memory: 3072
+        PublicSubnetId1: !GetAtt Az1.Outputs.PublicSubnetId
+        PublicSubnetId2: !GetAtt Az2.Outputs.PublicSubnetId
+        PrivateSubnetId1: !GetAtt Az1.Outputs.PrivateSubnetId
+        PrivateSubnetId2: !GetAtt Az2.Outputs.PrivateSubnetId
+        Route53HostedZoneId: !Ref Route53HostedZoneId
+        S3BucketNameForArtifact: !Ref BucketNameForArtifact
+        SecurityGroupId: !Ref SecurityGroupWeb
+        VPCId: !Ref VPC
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
+        LogicalName: !Sub ${AWS::StackName}-Container
+        Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
@@ -677,8 +716,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/cicd-container.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/cicd-container.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/codepipeline-container.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/codepipeline-container.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
@@ -921,6 +960,56 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # VPC Endpoint for ECR
+  EcrDkrEndpoint:
+    Condition: CreateContainerPipeline
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  EcrApiEndpoint:
+    Condition: CreateContainerPipeline
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  S3Endpoint:
+    Condition: CreateContainerPipeline
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      RouteTableIds:
+        - !GetAtt Az1.Outputs.RouteTableIdPrivate
+        - !GetAtt Az2.Outputs.RouteTableIdPrivate
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      VpcId: !Ref VPC
+  LogsEndpoint:
+    Condition: CreateContainerPipeline
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+      SubnetIds: 
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Condition: CreateTransitGateway
@@ -1087,6 +1176,40 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-web
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPC
+  SecurityGroupForEndpoint:
+    Condition: CreateContainerPipeline
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce-20221129
+      GroupDescription: Security Group for VPC Endpoints
+      SecurityGroupEgress:
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz2
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SubnetPrivateCidrBlockForAz2
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -1318,12 +1441,30 @@ Outputs:
   PublicSubnetId2:
     Description: Public Subnet Id
     Value: !GetAtt Az2.Outputs.PublicSubnetId
+  PrivateSubnetId1:
+    Description: Private Subnet Id
+    Value: !If
+      - CreatePrivateSubnets
+      - !GetAtt Az1.Outputs.PrivateSubnetId
+      - ''
+  PrivateSubnetId2:
+    Description: Private Subnet Id
+    Value: !If
+      - CreatePrivateSubnets
+      - !GetAtt Az2.Outputs.PrivateSubnetId
+      - ''
   TransitSubnetId1:
-    Description: Public Subnet Id
-    Value: !GetAtt Az1.Outputs.TransitSubnetId
+    Description: Transit Subnet Id
+    Value: !If
+      - CreateTransitGateway
+      - !GetAtt Az1.Outputs.TransitSubnetId
+      - ''
   TransitSubnetId2:
-    Description: Public Subnet Id
-    Value: !GetAtt Az2.Outputs.TransitSubnetId
+    Description: Transit Subnet Id
+    Value: !If
+      - CreateTransitGateway
+      - !GetAtt Az1.Outputs.TransitSubnetId
+      - ''
   SNSForAlertArn:
     Description: SNS ARN for Alert
     Value: !If

@@ -562,6 +562,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: /aws/lambda/transferSNSTopic
+      RetentionInDays: 60
       Tags: 
         - Key: environment
           Value: !Ref Environment

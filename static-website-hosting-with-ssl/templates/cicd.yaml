@@ -12,12 +12,20 @@ Metadata:
           - GitHubRepoName
           - GitHubBranchName
       - Label: 
+          default: 'Build Configuration'
+        Parameters:
+          - S3BucketNameForArtifact
+      - Label: 
+          default: 'Deploy Configuration'
+        Parameters:
+          - S3BucketNameForWebHosting
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - CodeStarConnectionArn
       - Label: 
           default: 'Tag Configuration'
-        Parameters: 
+        Parameters:
           - LogicalName
           - TagKey
           - TagValue
@@ -40,10 +48,19 @@ Parameters:
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
+  S3BucketNameForArtifact:
+    Type: String
+    Default: ''
+    Description: The bucket name artifact are stored
+  S3BucketNameForWebHosting:
+    Type: String
+    Default: ''
+    Description: The bucket name web contents are stored
   LogicalName:
     Type: String
-    Default: static-website-hosting
-    AllowedPattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
+    Default: StaticWebHosting-CodePipeline
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   TagKey:
     Type: String
     Default: createdby
@@ -55,6 +72,7 @@ Parameters:
 
 Conditions:
   CreateCodeStarConnection: !Equals [ !Ref CodeStarConnectionArn, '']
+  CreateS3Bucket: !Equals [ !Ref S3BucketNameForArtifact, '']
   Development: !Equals [ !Ref GitHubBranchName, develop]
 
 Resources:
@@ -205,7 +223,7 @@ Resources:
     Condition: CreateCodeStarConnection
     Type: AWS::CodeStarConnections::Connection
     Properties: 
-      ConnectionName: !Sub GitHub-${AWS::StackName}
+      ConnectionName: !Sub GitHub-${LogicalName}
       ProviderType: GitHub
       Tags: 
         - Key: !Ref TagKey
@@ -216,10 +234,13 @@ Resources:
     Properties: 
       ArtifactStores:
         - ArtifactStore: 
-            Location: !Ref S3ForArtifact
+            Location: !If
+              - CreateS3Bucket
+              - !Ref S3ForArtifact
+              - !Ref S3BucketNameForArtifact
             Type: S3
           Region: !Ref AWS::Region
-      Name: !Sub StaticWebsite-${AWS::StackName}
+      Name: !Ref LogicalName
       RestartExecutionOnUpdate: true
       RoleArn: !GetAtt IAMRoleForCodePipeline.Arn
       Stages: 
@@ -250,7 +271,7 @@ Resources:
                 Provider: S3
                 Version: '1'
               Configuration:
-                BucketName: !Ref LogicalName
+                BucketName: !Ref S3BucketNameForWebHosting
                 Extract: true
               InputArtifacts:
                 - Name: Source_Website
@@ -267,6 +288,7 @@ Resources:
           Value: !Ref TagValue
       PipelineType: V2
   S3ForArtifact:
+    Condition: CreateS3Bucket
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
@@ -275,7 +297,7 @@ Resources:
         ServerSideEncryptionConfiguration: 
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      BucketName: !Sub cicd-artifact-${LogicalName}-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub cicd-artifact-${AWS::Region}-${AWS::AccountId}
       LifecycleConfiguration:
         Rules:
           - Id: ExpirationInDays
@@ -295,6 +317,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   S3BucketPolicyForArtifact:
+    Condition: CreateS3Bucket
     Type: AWS::S3::BucketPolicy
     Properties: 
       Bucket: !Ref S3ForArtifact
