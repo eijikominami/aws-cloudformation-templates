@@ -11,7 +11,9 @@ English / [**日本語**](README_JP.md)
 
 If you just want to deploy the stack, click the button below.
 
-[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml)
+| US East (Virginia) | Asia Pacific (Tokyo) |
+| --- | --- |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml) | 
 
 If you want to deploy each service individually, click the button below.
 
@@ -38,6 +40,7 @@ Execute the command to deploy.
 
 ```bash
 aws cloudformation deploy --template-file az.yaml --stack-name AvailabilityZone --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file egress.yaml --stack-name EgressVPC --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file globalaccelerator.yaml --stack-name GlobalAccelerator
 aws cloudformation deploy --template-file ipam.yaml --stack-name IPAM --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file networkaccessanalyzer.yaml --stack-name NetworkAccessAnalyzer --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
@@ -51,18 +54,28 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
+| CustomerGatewayOutsideIpAddress | String | | |  The Internet-routable IP address for the customer gateway's outside interface |
+| DomainName | String | | | The name of the domain |
+| FirewallCidrBlockForEgressAz1 | String | 10.0.0.128/26 | | The firewall subnet CIDR block for Egress at AZ1 |
+| FirewallCidrBlockForEgressAz2 | String | 10.0.4.128/26 | | The firewall subnet CIDR block for Egress at AZ2 | 
 | IPAMProvisionedCidrs | String | 10.0.0.0/8 | ○ | The CIDR provisioned to the IPAM pool | 
+| OnpremDnsIp | String | | | One IPv4 address that you want to forward DNS queries to |
 | PrincipalsToAssociateWithIPAM | String | | | Specifies a list of one or more principals to associate with IPAM | 
+| PrincipalsToAssociateWithRoute53ResolverRule | String | | | Specifies a list of one or more principals to associate with Route 53 Resolver Rule | 
 | PrincipalsToAssociateWithTransitGateway | String | | | Specifies a list of one or more principals to associate with Transit Gateway | 
-| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block at AZ1 | 
-| SubnetTransitCidrBlockAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block at AZ1 | 
-| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | | The firewall subnet CIDR block at AZ1 | 
-| SubnetPublicCidrBlockForAz2 | String | 10.0.64.0/26 | ○ | The public subnet CIDR block at AZ2 | 
-| SubnetTransitCidrBlockAz2 | String | 10.0.64.64/26 | ○ | The transit subnet CIDR block at AZ2 | 
-| SubnetFirewallCidrBlockForAz2 | String | 10.0.64.128/26 | | The firewall subnet CIDR block at AZ2 | 
+| PrivateCidrBlockForDNSAz1 | String | 10.0.8.0/24 | ○ | The private subnet CIDR block for DNS at AZ1 |
+| PrivateCidrBlockForDNSAz2 | String | 10.0.12.0/24 | ○ | The private subnet CIDR block for DNS at AZ2 |
+| PublicCidrBlockForEgressAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block for Egress at AZ1 | 
+| PublicCidrBlockForEgressAz2 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block for Egress at AZ2 | 
+| Route53ResolverDirection | BOTH / INBOUND_ONLY / OUTBOUND_ONLY / DISABLED | DISABLED | ○ | Indicates whether the Route 53 Resolver endpoint allows inbound or outbound DNS queries |
+| TransitCidrBlockForEgressAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block for Egress at AZ1 | 
+| TransitCidrBlockForEgressAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block for Egress at AZ2 | 
+| TransitCidrBlockForDNSAz1 | String | 10.0.11.0/24 | ○ | The transit subnet CIDR block for DNS at AZ1 | 
+| TransitCidrBlockForDNSAz2 | String | 10.0.15.0/24 | ○ | The transit subnet CIDR block for DNS at AZ2 | 
 | TransitGatewayDefaultRouteTableId | String | | | The id of the default Transit Gateway Route Table | 
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
-| VPCCidrBlock | String | 10.0.0.0/16 | ○ | The VPC CIDR block | 
+| VPCCidrBlockForEgress | String | 10.0.0.0/21 | ○ | The Egress VPC CIDR block | 
+| VPCCidrBlockForDNS | String | 10.0.0.0/21 | ○ | The DNS VPC CIDR block | 
 
 ### Integrate Amazon Transit Gateway, IPAM, and VPC Reachability Analyzer with AWS Organizations
 
@@ -74,7 +87,7 @@ This template configures ``Availability Zone``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AvailabilityZone | AWS::EC2::AvailabilityZone::Name | | ○ | The Availability Zone name |
+| **AvailabilityZone** | AWS::EC2::AvailabilityZone::Name | | ○ | The Availability Zone name |
 | InternetGatewayId | String | | | The Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable NetworkAddressTranslation (NAT) |
 | NetworkLoadBalancer | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable Network LoadBalaner |
@@ -82,7 +95,23 @@ This template configures ``Availability Zone``.
 | SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | The Public subnet CIDR block |
 | SubnetTransitCidrBlock | String | | | The transit subnet CIDR block |
 | SubnetFirewallCidrBlock | String | | | The firewall subnet CIDR block |
-| VPCId | AWS::EC2::VPC::Id | | ○ | The VPC id  |
+| **VPCId** | AWS::EC2::VPC::Id | | ○ | The VPC id  |
+
+### Egress/Ingress VPC
+
+This template configures ``Egress/Ingress Central VPC``.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26| ○ | The firewall subnet CIDR block at AZ1 | 
+| SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26| ○ | The firewall subnet CIDR block at AZ2 | 
+| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block at AZ1 |
+| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block at AZ2 |
+| SubnetTransitCidrBlockForAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block at AZ1 |
+| SubnetTransitCidrBlockForAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block at AZ2 |
+| TransitGatewayDefaultRouteTableId | String | | | The id of the default Transit Gateway Route Table | 
+| TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
+| VPCCidrBlock | String | 10.0.0.0/21 | ○ | The VPC CIDR block | 
 
 ### Global Accelerator
 
@@ -90,18 +119,18 @@ This template configures ``Global Accelerator``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| EndpointId | String | ○ | | The Amazon Resource Name (ARN) of the ELB, the Elastic IP address or  the EC2 instance ID |
-| EndpointGroupRegion | String | ○ | | The AWS Regions where the endpoint group is located |
-| FromPort | Number | | 80 |  The first port in the range of ports, inclusive |
-| HealthCheckIntervalSeconds | 10 / 30 | | 30 | The time—10 seconds or 30 seconds—between health checks for each endpoint |
-| HealthCheckPath | String | | / | If the protocol is HTTP/S, then this value provides the ping path that Global Accelerator uses for the destination on the endpoints for health checks |
-| HealthCheckPort | Number | | 80 | The port that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
-| HealthCheckProtocol | TCP / HTTP / HTTPS | | TCP | The protocol that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
-| IpAddressType | IPV6 / IPV4 | | IPV4 | The IP address type that an accelerator supports |
-| Name | String | | Default | The name of the accelerator |
-| Protocol | TCP / UDP | | TCP | The protocol for the connections from clients to the accelerator |
-| ThresholdCount | Number | | 3 | The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy |
-| ToPort | Number | | 80 | The last port in the range of ports, inclusive |
+| **EndpointId** | String | | ○ | The Amazon Resource Name (ARN) of the ELB, the Elastic IP address or  the EC2 instance ID |
+| **EndpointGroupRegion** | String | | ○ | The AWS Regions where the endpoint group is located |
+| FromPort | Number | 80 | |  The first port in the range of ports, inclusive |
+| HealthCheckIntervalSeconds | 10 / 30 | 30 | | The time—10 seconds or 30 seconds—between health checks for each endpoint |
+| HealthCheckPath | String | / | | If the protocol is HTTP/S, then this value provides the ping path that Global Accelerator uses for the destination on the endpoints for health checks |
+| HealthCheckPort | Number | 80 | | The port that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
+| HealthCheckProtocol | TCP / HTTP / HTTPS | TCP | | The protocol that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
+| IpAddressType | IPV6 / IPV4 | IPV4 | | The IP address type that an accelerator supports |
+| Name | String | Default | | The name of the accelerator |
+| Protocol | TCP / UDP | TCP | | The protocol for the connections from clients to the accelerator |
+| ThresholdCount | Number | 3 | | The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy |
+| ToPort | Number | 80 | | The last port in the range of ports, inclusive |
 
 ### IP Address Manager (IPAM)
 
@@ -121,17 +150,32 @@ This template configures ``Network Firewall``.
 | SubnetIdAz1 | String | | | The firewall subnet id in AZ1 |
 | SubnetIdAz2 | String | | | The firewall subnet id in AZ2 |
 | SubnetIdAz3 | String | | | The firewall subnet id in AZ3 |
+| **VPCId** | AWS::EC2::VPC::Id | | ○ | The VPC id  |
 
 ### Route 53
 
-This template configures ``Route 53``.
+This template configures ``Route 53 Resolver``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| SecurityGroupId | AWS::EC2::SecurityGroup::Id | | ○ | The ID of one or more security groups that control access to this VPC. |
-| SubnetId1 | String | | ○ | The ID of the subnet that DNS queries originate from |
-| SubnetId2 | String | | | The ID of the subnet that DNS queries originate from |
-| SubnetId3 | String | | | The ID of the subnet that DNS queries originate from |
+| Direction | BOTH / INBOUND_ONLY / OUTBOUND_ONLY / DISABLED | DISABLED | ○ | Indicates whether the Route 53 Resolver endpoint allows inbound or outbound DNS queries |
+| DomainName | String | | | The name of the domain |
+| OnpremDnsIp | String | | | One IPv4 address that you want to forward DNS queries to |
+| PrincipalsToAssociateWithRoute53ResolverRule | String | | | Specifies a list of one or more principals to associate with Route 53 Resolver Rule |
+| SubnetPrivateCidrBlockForAz1 | String | 10.0.8.0/24 | ○ | The private subnet CIDR block at AZ1 |
+| SubnetPrivateCidrBlockForAz2 | String | 10.0.12.0/24 | ○ | The private subnet CIDR block at AZ2 |
+| TransitCidrBlockForDNSAz1 | String | 10.0.11.0/24 | ○ | The transit subnet CIDR block at AZ1 | 
+| TransitCidrBlockForDNSAz2 | String | 10.0.15.0/24 | ○ | The transit subnet CIDR block at AZ2 | 
+| **TransitGatewayId** | String | | ○ | The ID of the transit gateway | 
+| VPCCidrBlock | String | 10.0.8.0/21 | ○ | The VPC CIDR block | 
+
+In each participating account, create the authorization using the private hosted zone ID, the region, and the VPC ID that you want to associate (DNS-VPC)
+
+> aws route53 create-vpc-association-authorization --hosted-zone-id HOSTED_ZONE_ID --vpc VPCRegion=REGION,VPCId=VPC_ID
+
+In the Network account, associate the DNS-VPC with the hosted zone in each participating account.
+
+> aws route53 associate-vpc-with-hosted-zone --hosted-zone-id HOSTED_ZONE_ID --vpc VPCRegion=REGION,VPCId=VPC_ID   
 
 ### Transit Gateway
 
@@ -150,3 +194,5 @@ This template configures ``Site-to-Site VPN``.
 | **CustomerGatewayOutsideIpAddress** | String | | ○ | The Internet-routable IP address for the customer gateway's outside interface |
 | StaticRoutesOnly | true or false | false | ○ | Indicates whether the VPN connection uses static routes only |
 | TransitGatewayId | String | | ○ | The ID of the transit gateway associated with the VPN connection | 
+
+After creating a Transit Gateway attachment, **add Transit Gateway route to a customer network manually**.

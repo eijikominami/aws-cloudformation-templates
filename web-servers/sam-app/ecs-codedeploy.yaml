@@ -1,0 +1,331 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description:  AWSCloudFormationTemplates/web-servers/ecs-codedeploy creates a CodeDeploy pipeline to deploy artifacts to Amazon ECS.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'ECS Configuration'
+        Parameters: 
+          - ECSClusterName
+          - ECSServiceName
+      - Label: 
+          default: 'CodeDeploy Configuration'
+        Parameters: 
+          - DeploymentConfig
+          - TerminationTimeInMinutes
+          - PageExpectedString
+          - SiteUrl
+      - Label: 
+          default: 'Load Balancer Configuration'
+        Parameters: 
+          - LoadBalancerBlueListenerArn
+          - LoadBalancerBlueTargetGroup
+          - LoadBalancerGreenListenerArn
+          - LoadBalancerGreenTargetGroup
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - LogicalName
+          - TagKey
+          - TagValue
+
+Parameters:
+  ECSClusterName:
+    Type: String
+    AllowedPattern: .+
+    Description: the logical ID of the Amazon ECS cluster [required] 
+  ECSServiceName:
+    Type: String
+    AllowedPattern: .+
+    Description: The name of the Amazon ECS service [required]    
+  DeploymentConfig:
+    Type: String
+    Default: CodeDeployDefault.ECSAllAtOnce
+    AllowedValues: 
+      - CodeDeployDefault.ECSAllAtOnce
+      - CodeDeployDefault.ECSCanary10Percent5Minutes
+      - CodeDeployDefault.ECSCanary10Percent15Minutes
+      - CodeDeployDefault.ECSLinear10PercentEvery1Minutes
+      - CodeDeployDefault.ECSLinear10PercentEvery3Minutes
+    Description: Specifies how CodeDeploy routes production traffic
+  LoadBalancerBlueListenerArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The ARN of Load Balancer listener for Blue [required]
+  LoadBalancerBlueTargetGroup:
+    Type: String
+    AllowedPattern: .+
+    Description: The Load Balancer target group name for Blue [required]
+  LoadBalancerGreenListenerArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The ARN of Load Balancer listener for Green [required]
+  LoadBalancerGreenTargetGroup:
+    Type: String
+    AllowedPattern: .+
+    Description: The Load Balancer target group name for Green [required]
+  TerminationTimeInMinutes:
+    Type: Number
+    Default: 10
+    MaxValue: 2880
+    Description: The number of minutes before deleting the original (blue) task set. During an Amazon ECS deployment, CodeDeploy shifts traffic from the original (blue) task set to a replacement (green) task set.
+  PageExpectedString:
+    Type: String
+    Default: Welcome to the Hello World App
+    Description: The expected string to check for to validate application functionality
+  SiteUrl:
+    Type: String
+    AllowedPattern: .+
+    Description: URL of the application Site to be tested after deployment
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: WebServers-Container
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  # IAM
+  IAMRoleForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Lambda to access CloudFormation and CloudWatch Logs.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+        - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
+        - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
+      Policies:
+        - PolicyName: CodeDeploy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource: '*' 
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                  - iam:GetRole
+                Resource: !GetAtt IAMRoleForCodeDeploy.Arn
+              - Effect: Allow
+                Action:
+                  - codedeploy:PutLifecycleEventHookExecutionStatus
+                Resource: '*'
+      RoleName: !Sub ${LogicalName}-LambdaForCustomResource-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCodeDeploy:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com 
+            Action: sts:AssumeRole
+      Description: A role required for CodeDeploy to access related resources.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
+      RoleName: !Sub ${LogicalName}-CodeDeploy-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CodeDeploy
+  CodeDeployApplication:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: !Ref LogicalName
+      ComputePlatform: ECS
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CodeDeployDeploymentGroupCustomResourceBlueGreen:
+    DeletionPolicy: Retain
+    Type: Custom::CodeDeployDeploymentGroup
+    Properties:
+      applicationName: !Ref CodeDeployApplication
+      deploymentGroupName: !Sub ${LogicalName}-deployment-group
+      deploymentConfigName: !Ref DeploymentConfig
+      serviceRoleArn: !GetAtt IAMRoleForCodeDeploy.Arn
+      CDtriggerName: !Sub ${LogicalName}-bg-codedeploy-trigger
+      CDtriggerTargetArn: !Ref SNSForDeploymentArn
+      ECSalbTargetGroupBlue: !Ref LoadBalancerBlueTargetGroup
+      ECSalbTargetGroupGreen: !Ref LoadBalancerGreenTargetGroup
+      ECSprodTrafficRoute: !Ref LoadBalancerBlueListenerArn
+      ECStestTrafficRoute: !Ref LoadBalancerGreenListenerArn
+      ECSFargateBGService: !Ref ECSServiceName
+      ECSFargateBGCluster: !Ref ECSClusterName
+      ServiceToken: !GetAtt LambdaCodeDeployDeploymentGroup.Arn
+      TerminationTimeInMinutes: !Ref TerminationTimeInMinutes 
+  # Lambda
+  LambdaCodeDeployDeploymentGroup:
+    DependsOn:
+      - LambdaCodeDeployDeploymentGroupLogGroup
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: deploymentgroup/
+      Description: CodeDeploy DeploymentGroup 用のカスタムリソース Lambda です。
+      FunctionName: codeDeployDeploymentGroupLambdaBG
+      Handler: lambda_function.lambda_handler
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Runtime: python3.9
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Timeout: 30
+  LambdaCodeDeployDeploymentGroupLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: /aws/lambda/codeDeployDeploymentGroupLambdaBG
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  LambdaAfterInstallHook:
+    DependsOn:
+      - LambdaAfterInstallHookLogGroup
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import os
+          from datetime import datetime
+          from urllib.request import Request, urlopen
+          import json
+          import ssl
+          import boto3
+
+          SITE = os.environ['SITE_URL']  # URL of the site to check, stored in the site environment variable
+          EXPECTED = os.environ['PAGE_EXPECTED_STRING']  # String expected to be on the page, stored in the expected environment variable
+
+          ctx = ssl.create_default_context()
+          ctx.check_hostname = False
+          ctx.verify_mode = ssl.CERT_NONE
+
+          codedeploy = boto3.client('codedeploy')
+
+          def send_status(deploymentId, hooksExecutionId, status):
+              response = codedeploy.put_lifecycle_event_hook_execution_status(
+                              deploymentId=deploymentId,
+                              lifecycleEventHookExecutionId=hooksExecutionId,
+                              status=status
+                          )
+
+          def validate(res):
+              '''Return False to trigger the canary
+
+              Currently this simply checks whether the EXPECTED string is present.
+              However, you could modify this to perform any number of arbitrary
+              checks on the contents of SITE.
+              '''
+              return EXPECTED in res
+
+          def lambda_handler(event, context):
+              print(json.dumps(event))
+              status = 'Succeeded'
+              deploymentId = event['DeploymentId']
+              hooksExecutionId = event['LifecycleEventHookExecutionId']
+              #print('Checking {} at {}...'.format(SITE, event['time']))
+              try:
+                  req = Request(SITE, headers={'User-Agent': 'AWS Lambda'})
+                  if not validate(str(urlopen(req, context=ctx).read())):
+                      status = 'Failed'
+              except:
+                  print('Check failed!')
+                  status = 'Failed'
+              else:
+                  print('Check passed!')
+                  return str(datetime.now())
+              finally:
+                  send_status(deploymentId, hooksExecutionId, status)
+                  print('Check complete at {}'.format(str(datetime.now())))        
+      Description: デプロイされたアプリケーションを AfterInstall Hook としてテストします。
+      Environment:
+        Variables:
+          SITE_URL: !Ref SiteUrl
+          PAGE_EXPECTED_STRING: !Ref PageExpectedString
+      FunctionName: afterInstallHook
+      Handler: index.lambda_handler
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+      MemorySize: 512
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Runtime: python3.9
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Timeout: 30
+  LambdaAfterInstallHookLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: /aws/lambda/afterInstallHook
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  AfterInstallHookLambdaArn:
+    Description: CodeDeploy after install hook lambda arn
+    Value: !GetAtt LambdaAfterInstallHook.Arn
+  CodeDeployAppName:
+    Description: The logical ID of the CodeDeploy
+    Value: !Ref CodeDeployApplication
+  DeploymentGroupName:
+    Description: CodeDeploy Deployment Group Name Return Value of Lambda Function 
+    Value: !GetAtt CodeDeployDeploymentGroupCustomResourceBlueGreen.CodeDeployDeploymentGroupName

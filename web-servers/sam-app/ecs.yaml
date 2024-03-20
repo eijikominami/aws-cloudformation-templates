@@ -1,0 +1,646 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/web-servers/ecs creates Amazon Elastic Container Service.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'ECS Configuration'
+        Parameters: 
+          - AppPort
+          - AutoScalingMaxSize
+          - Cpu
+          - CpuArchitecture
+          - DesiredCapacity
+          - ImageUri
+          - Memory
+          - SecurityGroupId
+          - PageExpectedString
+          - PublicSubnetId1
+          - PublicSubnetId2
+          - PrivateSubnetId1
+          - PrivateSubnetId2
+          - VPCId
+      - Label: 
+          default: 'Domain Configuration'
+        Parameters:
+          - ACMValidationMethod
+          - ACMDomainName
+          - DomainName
+          - Route53HostedZoneId
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - LogicalName
+          - TagKey
+          - TagValue
+
+Parameters:
+  ACMValidationMethod:
+    Type: String
+    Default: DNS
+    AllowedValues:
+      - DNS
+      - EMAIL
+    Description: The validation method that you own or control the domain [required]
+  ACMDomainName:
+    Type: String
+    Default: ''
+    Description: The domain name created by Certification Manager
+  AppPort:
+    Type: Number
+    Default: 80
+    Description: The port on which the container is listening [required]
+  AutoScalingMaxSize:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Max Size [required]
+  Cpu:
+    Type: Number
+    Default: 1024
+    Description: The number of cpu units reserved for the container [required]
+  CpuArchitecture:
+    Type: String
+    Default: ARM64
+    AllowedValues:
+      - X86_64
+      - ARM64
+    Description: The CPU architecture [required]
+  DesiredCapacity:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: The number of instantiations [required]  
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The CNAME attached to Elastic Load Balancer
+  ImageUri:
+    Type: String
+    AllowedPattern: .+
+    Description: The image used to start a container [required]
+  Memory:
+    Type: String
+    Default: 3072
+    Description: The amount (in MiB) of memory to present to the container [required]
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The Security Group id to attach the containers [required]
+  PageExpectedString:
+    Type: String
+    Default: Welcome to the Hello World App
+    Description: The expected string to check for to validate application functionality
+  PublicSubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 1 for Elastic Load Balancer [required]
+  PublicSubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 2 for Elastic Load Balancer [required]
+  PrivateSubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 1 for Container [required]
+  PrivateSubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 2 for Container [required]
+  Route53HostedZoneId:
+    Type: String
+    Default: ''
+    Description: Route53 hosted zone id
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC Id [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateCertificateManager: !Not [ !Equals [ !Ref ACMDomainName, ''] ]
+  CreateRoute53: !And [ !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.0
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !If
+          - Development
+          - development
+          - production
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.0
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !If
+          - Development
+          - development
+          - production
+        createdby: !Ref TagValue
+  # IAM
+  IAMRoleForECSTask:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for ECS.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      RoleName: !Sub ${AWS::StackName}-ECSTaskExecutionRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Lambda to access CloudFormation and CloudWatch Logs.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
+          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource: '*' 
+        - PolicyName: CodeDeploy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codedeploy:PutLifecycleEventHookExecutionStatus
+                Resource: '*'
+      RoleName: !Sub ${LogicalName}-LambdaForCodeDeploy-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForAutoScaling:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for ECS.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole
+      RoleName: !Sub ${AWS::StackName}-AutoScaling-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # ELB
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      LoadBalancerAttributes:
+        - Key: deletion_protection.enabled
+          Value: false
+        - Key: idle_timeout.timeout_seconds
+          Value: 180
+      Name: !Sub elb-${LogicalName}
+      Scheme: internet-facing
+      SecurityGroups:
+       - !Ref SecurityGroupId
+      # For Application Load Balaner
+      Subnets:
+        - !Ref PublicSubnetId1
+        - !Ref PublicSubnetId2
+      Tags:
+        - Key: Name
+          Value: !Sub elb-${LogicalName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: application
+  LoadBalancerBlueListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates: !If 
+        - CreateCertificateManager
+        - - CertificateArn: !Ref CertificateManager
+        - !Ref AWS::NoValue
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 200
+            ContentType: text/plain
+            MessageBody: Https Hello world from LoadBalancer
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+  LoadBalancerHttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      DefaultActions:
+        - RedirectConfig:
+            Protocol: HTTPS
+            Port: 443
+            Host: '#{host}'
+            Path: '/#{path}'
+            Query: '#{query}'
+            StatusCode: HTTP_302
+          Type: redirect
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+  LoadBalancerBlueTargetGroup:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./ecs-targetgroup.yaml
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AppPort: !Ref AppPort
+        LoadBalancerFullName: !GetAtt LoadBalancer.LoadBalancerFullName
+        LoadBalancerListenerArn: !GetAtt LoadBalancerBlueListener.ListenerArn
+        VPCId: !Ref VPCId
+        SNSForAlertArn: !Ref SNSForAlertArn
+        SNSForDeploymentArn: !Ref SNSForDeploymentArn
+        LogicalName: !Sub ${LogicalName}Blue
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  LoadBalancerGreenListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates: !If 
+        - CreateCertificateManager
+        - - CertificateArn: !Ref CertificateManager
+        - !Ref AWS::NoValue
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 200
+            ContentType: text/plain
+            MessageBody: Https Hello world from LoadBalancer
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 8443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+  LoadBalancerGreenTargetGroup:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./ecs-targetgroup.yaml
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AppPort: !Ref AppPort
+        LoadBalancerFullName: !GetAtt LoadBalancer.LoadBalancerFullName
+        LoadBalancerListenerArn: !GetAtt LoadBalancerGreenListener.ListenerArn
+        VPCId: !Ref VPCId
+        SNSForAlertArn: !Ref SNSForAlertArn
+        SNSForDeploymentArn: !Ref SNSForDeploymentArn
+        LogicalName: !Sub ${LogicalName}Green
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # ECS Cluster
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref LogicalName     
+      ClusterSettings: 
+        - Name: containerInsights
+          Value: enabled
+      Configuration: 
+        ExecuteCommandConfiguration:
+          Logging: DEFAULT
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # ECS Service
+  ECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ECSCluster
+      DeploymentController: 
+        Type: CODE_DEPLOY
+      DesiredCount: !Ref DesiredCapacity
+      EnableECSManagedTags: true
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers: 
+        - ContainerName: !Ref LogicalName
+          ContainerPort: !Ref AppPort
+          TargetGroupArn: !GetAtt LoadBalancerBlueTargetGroup.Outputs.TargetGroupArn
+      NetworkConfiguration: 
+        AwsvpcConfiguration: 
+          AssignPublicIp: DISABLED
+          SecurityGroups: 
+            - !Ref SecurityGroupId
+          Subnets: 
+            - !Ref PrivateSubnetId1
+            - !Ref PrivateSubnetId2        
+      SchedulingStrategy: REPLICA
+      ServiceName: !Sub ${LogicalName}-FargateService
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TaskDefinition: !GetAtt ECSTaskDefinitionResource.TaskDefinition
+  LambdaECSTaskDefinition:
+    DependsOn:
+         - LambdaECSTaskDefinitionLogGroup
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: taskdef/
+      Description: ECS Service の初期のタスク定義を返却するカスタムリソース Lambda です。
+      FunctionName: taskDefinition
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Runtime: python3.9
+      Timeout: 30
+  LambdaECSTaskDefinitionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: /aws/lambda/taskDefinition
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ECSTaskDefinitionResource:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: Custom::ECSTaskDefinitionResource
+    Properties:
+      ServiceToken: !GetAtt LambdaECSTaskDefinition.Arn
+      TaskDefinition: !GetAtt ECSTaskDefinition.TaskDefinitionArn
+  # ECS Service Task
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions: 
+        - Cpu: !Ref Cpu
+          Essential: true
+          Image: !Ref ImageUri
+          LogConfiguration:
+            LogDriver: awslogs
+            Options: 
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-stream-prefix: !Sub /${LogicalName}/ecs
+          Memory: 512
+          Name: !Ref LogicalName
+          PortMappings:
+            - Protocol: tcp
+              ContainerPort: !Ref AppPort
+              HostPort: !Ref AppPort
+      Cpu: !Ref Cpu
+      ExecutionRoleArn: !GetAtt IAMRoleForECSTask.Arn
+      Family: !Ref LogicalName
+      Memory: !Ref Memory
+      NetworkMode: awsvpc
+      RequiresCompatibilities: 
+        - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: !Ref CpuArchitecture
+        OperatingSystemFamily: LINUX
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # AutoScaling
+  AutoScalingScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MinCapacity: !Ref DesiredCapacity
+      MaxCapacity: !Ref AutoScalingMaxSize
+      ResourceId: !Join
+        - ''
+        - - !Sub service/${ECSCluster}/
+          - !GetAtt ECSService.Name
+      RoleARN: !GetAtt IAMRoleForAutoScaling.Arn
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+  AutoScalingPolicyCPU:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub ${LogicalName}-CPU
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref AutoScalingScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        TargetValue: 75
+  AutoScalingPolicyMemory:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub ${LogicalName}-Memory
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref AutoScalingScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageMemoryUtilization
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        TargetValue: 75
+  # CodeDeploy
+  CodeDeploy:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./ecs-codedeploy.yaml
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        DeploymentConfig: CodeDeployDefault.ECSAllAtOnce
+        ECSClusterName: !Ref ECSCluster
+        ECSServiceName: !GetAtt ECSService.Name
+        LoadBalancerBlueListenerArn: !GetAtt LoadBalancerBlueListener.ListenerArn
+        LoadBalancerBlueTargetGroup: !GetAtt LoadBalancerBlueTargetGroup.Outputs.TargetGroupName
+        LoadBalancerGreenListenerArn: !GetAtt LoadBalancerGreenListener.ListenerArn
+        LoadBalancerGreenTargetGroup: !GetAtt LoadBalancerGreenTargetGroup.Outputs.TargetGroupName
+        TerminationTimeInMinutes: 10
+        PageExpectedString: !Ref PageExpectedString
+        SiteUrl: !Sub https://${DomainName}:8443
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        LogicalName: !Ref LogicalName
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # CertificateManager
+  CertificateManager:
+    Condition: CreateCertificateManager
+    Type: AWS::CertificateManager::Certificate
+    Properties: 
+      DomainName: !Ref ACMDomainName
+      ValidationMethod: !Ref ACMValidationMethod
+      DomainValidationOptions: !If
+        - CreateRoute53
+        - - DomainName: !Ref ACMDomainName
+            HostedZoneId: !Ref Route53HostedZoneId
+        - !Ref AWS::NoValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Route53
+  Route53RecordSet:
+    Condition: CreateRoute53
+    Type: AWS::Route53::RecordSet
+    Properties: 
+      AliasTarget: 
+        DNSName: !GetAtt LoadBalancer.DNSName
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
+      Comment: !Ref DomainName
+      HostedZoneId: !Ref Route53HostedZoneId
+      Name: !Ref DomainName
+      # Alias record
+      Type: A
+  # CloudWatch
+  CloudWatchAlarmECS:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
+        SemanticVersion: 2.2.0
+      NotificationARNs: 
+        - !Ref SNSForDeploymentArn
+      Parameters:
+        ClusterName: !Ref LogicalName  
+        CustomAlarmName: !Ref AWS::StackName
+        ServiceName: !Sub ${LogicalName}-FargateService
+        SNSTopicArn: !Ref SNSForAlertArn
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /${LogicalName}/ecs
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  AfterInstallHookLambdaArn:
+    Description: CodeDeploy after install hook lambda arn
+    Value: !GetAtt CodeDeploy.Outputs.AfterInstallHookLambdaArn
+  CodeDeployAppName:
+    Description: The logical ID of the CodeDeploy
+    Value: !GetAtt CodeDeploy.Outputs.CodeDeployAppName
+  DeploymentGroupName:
+    Description: CodeDeploy Deployment Group Name Return Value of Lambda Function 
+    Value: !GetAtt CodeDeploy.Outputs.DeploymentGroupName
+  TaskDefinitionArn:
+    Description: The ARN of TaskDefinition
+    Value: !GetAtt ECSTaskDefinition.TaskDefinitionArn

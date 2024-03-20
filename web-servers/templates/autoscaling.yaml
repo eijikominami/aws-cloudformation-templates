@@ -23,8 +23,10 @@ Metadata:
           - EipAllocationId1ForNLB
           - EipAllocationId2ForNLB
           - LoadBalancerType
-          - SubnetId1ForELB
-          - SubnetId2ForELB
+          - SubnetId1ForAutoScaling
+          - SubnetId2ForAutoScaling
+          - SubnetId1ForNLB
+          - SubnetId2ForNLB
       - Label: 
           default: 'Domain Configuration'
         Parameters:
@@ -120,14 +122,22 @@ Parameters:
     Type: String
     Default: ''
     Description: Route53 hosted zone id
-  SubnetId1ForELB:
+  SubnetId1ForAutoScaling:
     Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
-    Description: The subnet id 1 for Network LoadBalancer
-  SubnetId2ForELB:
+    Description: The subnet id 1 for AutoScaling
+  SubnetId2ForAutoScaling:
     Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
-    Description: The subnet id 2 for Network LoadBalancer
+    Description: The subnet id 2 for AutoScaling
+  SubnetId1ForNLB:
+    Type: AWS::EC2::Subnet::Id
+    Default: ''
+    Description: The subnet id 1 for Elastic Load Balancer
+  SubnetId2ForNLB:
+    Type: AWS::EC2::Subnet::Id
+    Default: ''
+    Description: The subnet id 2 for Elastic Load Balancer
   SNSForAlertArn:
     Type: String
     Default: ''   
@@ -170,7 +180,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -187,34 +197,49 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # Service-linked Role
+  ServiceLinkedRoleForAutoScaling:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties: 
+      AWSServiceName: autoscaling.amazonaws.com
+      CustomSuffix: !Ref LogicalName
+      Description: Default Service-Linked Role enables access to AWS Services and Resources used or managed by Auto Scaling
   # ELB
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
+      LoadBalancerAttributes:
+        - Key: deletion_protection.enabled
+          Value: false
+        - Key: idle_timeout.timeout_seconds
+          Value: 180
       Name: !Sub elb-${LogicalName}
-      Scheme: internet-facing
+      Scheme: !If 
+        - CreateRoute53
+        - internet-facing
+        - internal
       SecurityGroups:
        - !Ref EC2SecurityGroupId
       # For Network Load Balaner
       SubnetMappings: !If
         - CreateNetworkLoadBalancer
-        - - SubnetId: !Ref SubnetId1ForELB
+        - - SubnetId: !Ref SubnetId1ForNLB
             AllocationId: !Ref EipAllocationId1ForNLB
-          - SubnetId: !Ref SubnetId2ForELB
+          - SubnetId: !Ref SubnetId2ForNLB
             AllocationId: !Ref EipAllocationId2ForNLB
         - !Ref AWS::NoValue
       # For Application Load Balaner
       Subnets: !If
         - CreateNetworkLoadBalancer
         - !Ref AWS::NoValue
-        - - !Ref SubnetId1ForELB
-          - !Ref SubnetId2ForELB
+        - - !Ref SubnetId1ForNLB
+          - !Ref SubnetId2ForNLB
       Tags:
         - Key: Name
           Value: !Sub elb-${LogicalName}-${AWS::Region}
@@ -229,6 +254,8 @@ Resources:
       HealthCheckIntervalSeconds: 30
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
+      Matcher:
+        HttpCode: 200-302
       Name: !Sub target-${LogicalName}
       Port: 80
       Protocol: !If
@@ -243,6 +270,9 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       TargetType: instance
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
       UnhealthyThresholdCount: 3
       VpcId: !Ref VPCId
   LoadBalancerListenerHttp:
@@ -322,8 +352,9 @@ Resources:
             - >
               aws ec2 create-tags --resources $ROOT_VOLUME_IDS --region
               $AWS_REGION --tags Key=MyRootTag,Value=MyRootVolumesValue
-  # AWSServiceRoleForAutoScaling will be created automatically.
   AutoScalingGroup:
+    DependsOn:
+         - ServiceLinkedRoleForAutoScaling
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties: 
       AutoScalingGroupName: !Sub autoscalinggroup-${LogicalName}
@@ -353,7 +384,7 @@ Resources:
             - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
             - autoscaling:TEST_NOTIFICATION
           TopicARN: !Ref SNSForAlertArn
-      ServiceLinkedRoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling
+      ServiceLinkedRoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling_${LogicalName}
       Tags:
         - Key: environment
           PropagateAtLaunch: true
@@ -369,8 +400,8 @@ Resources:
       TerminationPolicies: 
         - Default
       VPCZoneIdentifier: 
-        - !Ref SubnetId1ForELB
-        - !Ref SubnetId2ForELB
+        - !Ref SubnetId1ForAutoScaling
+        - !Ref SubnetId2ForAutoScaling
   # CertificateManager
   CertificateManager:
     Condition: CreateCertificateManager
@@ -406,7 +437,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-application-elb
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

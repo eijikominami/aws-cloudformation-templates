@@ -123,4 +123,11 @@ Resources:
             Value: !Ref Environment
           - Key: !Ref TagKey
             Value: !Ref TagValue
+      Tags:
+        - Key: Name
+          Value: !Sub policy-${LogicalName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
       State: ENABLED

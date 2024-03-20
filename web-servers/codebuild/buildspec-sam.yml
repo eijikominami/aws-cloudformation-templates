@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+       python: 3.9
+    commands:
+      # Use the latest version
+      - pip install -U pip
+      - pip install -U awscli
+      # for Lambda
+      - pip install aws-sam-cli
+      - pip install boto3
+      - pip install aws-lambda-powertools
+      # CloudFormation Linter
+      - pip install cfn-lint
+  pre_build:
+    commands:
+      - find ./web-servers/sam-app/ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS
+      - sam validate --template web-servers/sam-app/ecs.yaml
+  build:
+    commands:
+      - sam build --template web-servers/sam-app/ecs.yaml
+      - sam package --template-file .aws-sam/build/template.yaml --s3-bucket ${PACKAGE_BUCKET} --output-template-file packaged.yaml
+artifacts:
+  files:
+    - packaged.yaml

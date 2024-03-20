@@ -158,7 +158,6 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  BuildContainers: !Equals [ !Ref WebServers, CONTAINER]
   CreateIncidentManager: !Equals [ !Ref CloudOps, ENABLED]
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -183,7 +182,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -203,7 +202,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -218,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -301,28 +300,6 @@ Resources:
                 Resource: '*'
                 Effect: Allow
       RoleName: !Sub CICD-CodeBuild-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !If
-            - Development
-            - development
-            - production
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  IAMRoleForCodeDeploy:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codedeploy.amazonaws.com 
-            Action: sts:AssumeRole
-      Description: A role required for CodeDeploy to access related resources.
-      ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
-      RoleName: !Sub CICD-CodeDeploy-${AWS::Region}
       Tags:
         - Key: environment
           Value: !If
@@ -606,7 +583,7 @@ Resources:
       Name: !Sub ${AWS::StackName}-SAM
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
-        BuildSpec: buildspec-sam.yml
+        BuildSpec: cicd/codebuild/buildspec-sam.yml
         Type: CODEPIPELINE
       Tags: 
         - Key: !Ref TagKey
@@ -629,7 +606,7 @@ Resources:
       Name: !Sub ${AWS::StackName}-CFn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
-        BuildSpec: buildspec-cfn.yml
+        BuildSpec: cicd/codebuild/buildspec-cfn.yml
         Type: CODEPIPELINE
       Tags: 
         - Key: !Ref TagKey
@@ -760,7 +737,7 @@ Resources:
                   - Name: BuildArtifact_Notification
                 RunOrder: 1
               - !Ref AWS::NoValue
-          Name: Build
+          Name: BuildInfrastructure
         # Deploy
         - Actions:
             # Deploy GlobalSettings
@@ -1057,7 +1034,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1065,7 +1042,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
+                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
                         - !If
                           - Development
                           - development
@@ -1109,7 +1086,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}","SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                         - !If
                           - Development
                           - development
@@ -1117,7 +1094,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1205,7 +1182,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1229,7 +1206,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1253,7 +1230,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

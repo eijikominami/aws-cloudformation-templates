@@ -99,6 +99,7 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | AccountIdForAnalysis | String | | | The AWS account id for log analysis |
 | BucketNameForAnalysis | String | | | The Amazon S3 bucket name for log analysis |
+| BucketNameForArtifact | String | | | The bucket name artifact art stored |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, additional metrics is enabled |

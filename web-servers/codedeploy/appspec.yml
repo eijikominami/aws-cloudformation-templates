@@ -1,0 +1,11 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: " " ## Should match to App parameter value
+          ContainerPort: " " ## Should match to AppPort parameter
+Hooks:
+  - AfterAllowTestTraffic: " "

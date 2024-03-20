@@ -10,7 +10,7 @@ The template creates the following alarms.
 
 | Namespace | MetricName | DirectoryId | Threshold |
 | --- | --- | --- |
-| AWS/WorkSpaces | **PacketDropCountNoRoute** | `DirectoryId` | At least once a minute |
+| AWS/WorkSpaces | **Unhealthy** | `DirectoryId` | At least once a minute |
 
 ## Parameters
 
@@ -34,7 +34,7 @@ cloudwatch-alarm-about-workspaces は、Amazon Workspaces アタッチメント�
 
 | ネームスペース | メトリクス | ディレクトリ ID | 閾値 |
 | --- | --- | --- |
-| AWS/WorkSpaces | **PacketDropCountNoRoute** | `DirectoryId` | 1分間に1回以上 |
+| AWS/WorkSpaces | **Unhealthy** | `DirectoryId` | 1分間に1回以上 |
 
 ## パラメータ
 
@@ -43,5 +43,5 @@ cloudwatch-alarm-about-workspaces は、Amazon Workspaces アタッチメント�
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `DirectoryId` | String | | ○ | The id of the Workspaces directory |
+| `DirectoryId` | String | | ○ | Workspaces ディレクトリ ID |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |

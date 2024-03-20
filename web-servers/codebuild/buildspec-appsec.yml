@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:          
+    commands:
+      - ls
+      - pip install pyyaml
+  pre_build:
+    commands:
+      - python --version
+  build:
+    commands:
+      # Create appspec.yml for CodeDeploy deployment
+      - python web-servers/scripts/update-appspec.py --taskArn ${TASKDEF_ARN} --hooksLambdaArn ${HOOKS_LAMBDA_ARN} --inputAppSpecFile 'web-servers/codedeploy/appspec.yml' --outputAppSpecFile '/tmp/appspec.yml'
+      # Create taskdefinition for CodeDeploy deployment
+      - aws ecs describe-task-definition --task-definition ${TASKDEF_ARN} --region ${AWS_REGION} >> taskdef.json
+      - jq --arg IMAGE1_NAME "<IMAGE1_NAME>" '.taskDefinition | .containerDefinitions[0].image = $IMAGE1_NAME' taskdef.json > tmp.json && mv tmp.json /tmp/taskdef.json
+artifacts:
+  files:
+    - /tmp/appspec.yml
+    - /tmp/taskdef.json
+  discard-paths: yes

@@ -59,10 +59,6 @@ Parameters:
     Default: 24
     MinValue: 24
     Description: The rate at which the scheduled flow will run [required]
-  SourceAccountIAMRoleArn:
-    Type: String
-    Default: ''
-    Description: The role arn of account id source bucket is contained
   GlueDatabaseName: 
     Type: String
     Default: datalake
@@ -86,6 +82,10 @@ Parameters:
       - G.8X
       - Z.2X
     Description: The type of predefined worker that is allocated when a job runs [required] 
+  SourceAccountIAMRoleArn:
+    Type: String
+    Default: ''
+    Description: The role arn of account id source bucket is contained
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -123,7 +123,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -140,7 +140,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

@@ -39,10 +39,12 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AppFlowConnectorProfileName | String |  |  | The profile name of AppFlow Connector for Google Analytics |
-| AppFlowGoogleAnalyticsObject | String |  |  | The object of Google Analytics |
-| AppFlowScheduleRate | Number | 24 | ◯ | The rate at which the scheduled flow will run |
-| CloudFrontLogPrefix | String |  |  | The S3 prefix that is used in the configuration of your Amazon CloudFront distribution for log storage |
-| SourceAccountIAMRoleArn | String |  |  | The role arn of account id source bucket is contained |
+| GoogleAnalyticsAuthCode | String | | | The code provided by the connector when it has been authenticated |
+| GoogleAnalyticsClientId | String | | | The identifier for OAuth2 |
+| GoogleAnalyticsClientSecret | String | | | The client secret used by the OAuth client to authenticate |
+| **GoogleAnalyticsEntityName** | String | | ◯ | The entity name (path) of Google Analytics |
+| GoogleAnalyticsScheduleRate | Number | 24 | ◯ | The rate at which the scheduled flow will run |
 | GlueDatabaseName | String | datalake | ◯ | Prefix that is used for the created resources (20 chars, a-z, 0-9 and _ only) |
-| S3AccessLogPrefix | String |  |  | The S3 prefix that is used in the configuration of your Amazon S3 distribution for log storage |
+| GlueJobNumberOfWorkers | Number | 2 | ◯ | The number of workers of a defined workerType that are allocated when a job runs |
+| GlueJobWorkerType | String | G.1X | ◯ | The type of predefined worker that is allocated when a job runs |
+| SourceAccountIAMRoleArn | String | | | The role arn of account id source bucket is contained |

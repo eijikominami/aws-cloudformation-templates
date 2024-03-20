@@ -18,11 +18,16 @@ Metadata:
       - Label: 
           default: 'VPC Configuration'
         Parameters: 
+          - ResolverRuleId
           - SubnetTransitCidrBlockAz1
           - SubnetTransitCidrBlockAz2
           - TransitGatewayId
           - TransitGatewayDestinationCidrBlock
           - VPCCidrBlock
+      - Label: 
+          default: 'Route 53 Configuration'
+        Parameters: 
+          - DomainName
       - Label: 
           default: 'Identity Center Configuration'
         Parameters: 
@@ -80,6 +85,10 @@ Parameters:
     Default: 10.3.64.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The private domain name which this VPC has
   IdentityCenterArn:
     Type: String
     Default: ''
@@ -104,6 +113,10 @@ Parameters:
     Default: 10.3.64.128/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2
+  ResolverRuleId:
+    Type: String
+    Default: ''
+    Description: The ID of the Resolver rule that you associated with the VPC that is specified by VPCId
   TransitGatewayId:
     Type: String
     Default: ''
@@ -140,6 +153,8 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateRoute53HostedZone: !Not [ !Equals [ !Ref DomainName, ''] ]
+  CreateRoute53ResolverResolverRuleAssociation: !Not [ !Equals [ !Ref ResolverRuleId, '' ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -181,7 +196,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -214,7 +229,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -272,7 +287,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -289,7 +304,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -388,7 +403,14 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  RoutePrivateToTransitGatewayAz1:
+  Route53ResolverRuleAssociation:
+    Condition: CreateRoute53ResolverResolverRuleAssociation
+    Type: AWS::Route53Resolver::ResolverRuleAssociation
+    Properties:
+      Name: Onprem
+      ResolverRuleId: !Ref ResolverRuleId
+      VPCId: !Ref VPC
+  RouteMicrosoftADPrivateToTransitGatewayAz1:
     Condition: CreateTransitGateway
     DependsOn:
       - TransitGatewayAttachment
@@ -397,7 +419,7 @@ Resources:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz1
-  RoutePrivateToTransitGatewayAz2:
+  RouteMicrosoftADPrivateToTransitGatewayAz2:
     Condition: CreateTransitGateway
     DependsOn:
       - TransitGatewayAttachment
@@ -406,6 +428,24 @@ Resources:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !GetAtt MicrosoftAD.Outputs.RouteTableIdPrivateAz2
+  RoutePrivateToTransitGatewayAz1:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPrivate
+  RoutePrivateToTransitGatewayAz2:
+    Condition: CreateTransitGateway
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPrivate
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Condition: CreateTransitGateway
@@ -441,6 +481,19 @@ Resources:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
+  # Route 53 Hosted Zone
+  Route53HostedZone:
+    Condition: CreateRoute53HostedZone
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig: 
+        Comment: !Sub ${DomainName} created by ${AWS::StackName}
+      HostedZoneTags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Name: !Ref DomainName
   # CloudWatch
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
@@ -458,7 +511,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.1.24
+        SemanticVersion: 2.2.0
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -475,3 +528,20 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+
+Outputs:
+  ActiveDirectoryName:
+    Description: The fully qualified domain name for the AWS Managed Microsoft AD directory
+    Value: !Ref ActiveDirectoryName
+  ActiveDirectoryShortName:
+    Description: The NetBIOS name for your domain
+    Value: !Ref ActiveDirectoryShortName
+  ActiveDirectoryAdministrativeUserName:
+    Description: The default administrative user name
+    Value: Admin
+  ActiveDirectoryDnsIpAddresses:
+    Description: The IP addresses of the DNS servers for Active Directory
+    Value: !GetAtt MicrosoftAD.Outputs.MicrosoftAdDnsIpAddresses
+  ActiveDirectoryId:
+    Description: The Id of the Active Directory
+    Value: !GetAtt MicrosoftAD.Outputs.MicrosoftAdId

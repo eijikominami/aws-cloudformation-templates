@@ -96,7 +96,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AccountIdForAnalysis | String | | | 転送先の分析用AWSアカウント |
-| BucketNameForAnalysis | String | | | 転送先の分析用S3バケット |
+| BucketNameForAnalysis | String | | | 転送先の分析用 S3 バケット |
+| BucketNameForArtifact | String | | | アーティファクトを保存する S3 バケット名 |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** に **SSL証明書** が紐付けられます。 |
 | **DomainName** | String | | ○ | ドメイン名 |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 追加のメトリクスが有効化されます。 |

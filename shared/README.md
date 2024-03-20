@@ -38,11 +38,13 @@ You can provide optional parameters as follows.
 | ActiveDirectoryShortName | String | CORP | ○ | The NetBIOS name for your domain |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.64/26 | ○ | The public subnet CIDR block at AZ2 |
+| DomainName | String | | | The private domain name which this VPC has |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |
 | SubnetTransitCidrBlockAz1 | String | 10.3.0.128/26 | ○ | The transit subnet CIDR block at AZ1 |
 | SubnetTransitCidrBlockAz2 | String | 10.3.64.128/26 | ○ | The transit subnet CIDR block at AZ2 |
+| ResolverRuleId | String | | | The ID of the Resolver rule that you associated with the VPC that is specified by VPCId |
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | The VPC CIDR block |

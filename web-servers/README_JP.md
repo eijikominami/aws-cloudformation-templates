@@ -38,12 +38,14 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AutoScalingDesiredCapacity | Number | 1 | ○ | | 
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | 'None'を指定した場合、ELBは作成されません。 |
 | ACMValidationMethod | String | DNS | 条件付き | ドメインの検証方法 |
 | ACMDomainName | String | | | 証明書のドメイン名 |
+| BucketNameForAnalysis | String | | | 転送先の分析用 S3 バケット |
+| BucketNameForArtifact | String | | | アーティファクトを保存する S3 バケット名 |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** もしくは **Elastic Load Balancer** に **SSL証明書** が紐付けられます。 |
+| DesiredCapacity | Number | 1 | ○ | | 
 | **DomainName** | String | | ○ | |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | |
 | CloudFrontMinimumTTL | Number | 0 | ○ | |
