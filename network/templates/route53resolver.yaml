@@ -399,8 +399,6 @@ Resources:
   # Route 53 Resolver Rule
   Route53ResolverInboundRule:
     Condition: CreateRoute53ResolverInboundRule
-    DependsOn:
-      - Route53ResolverOutbound
     Type: AWS::Route53Resolver::ResolverRule
     Properties:
       DomainName: !Sub network.aws.${DomainName}

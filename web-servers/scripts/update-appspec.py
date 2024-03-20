@@ -21,19 +21,17 @@ if args.taskArn:
 if args.hooksLambdaArn:
   hooksLambdaArn = args.hooksLambdaArn
 
-outputFile = open(outputAppSpecFile, 'w')
+with open(outputAppSpecFile, 'w') as outputFile:
 
-with open(inputAppSpecFile, 'r') as file:
-  contents = yaml.safe_load(file)
-  print(contents)
-  response = ecs.describe_task_definition(taskDefinition=taskArn)
-  contents['Hooks'][0]['AfterAllowTestTraffic'] = hooksLambdaArn
-  contents['Resources'][0]['TargetService']['Properties']['LoadBalancerInfo']['ContainerName'] = response['taskDefinition']['containerDefinitions'][0]['name']
-  contents['Resources'][0]['TargetService']['Properties']['LoadBalancerInfo']['ContainerPort'] = response['taskDefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort']
+  with open(inputAppSpecFile, 'r') as file:
+    contents = yaml.safe_load(file)
+    print(contents)
+    response = ecs.describe_task_definition(taskDefinition=taskArn)
+    contents['Hooks'][0]['AfterAllowTestTraffic'] = hooksLambdaArn
+    contents['Resources'][0]['TargetService']['Properties']['LoadBalancerInfo']['ContainerName'] = response['taskDefinition']['containerDefinitions'][0]['name']
+    contents['Resources'][0]['TargetService']['Properties']['LoadBalancerInfo']['ContainerPort'] = response['taskDefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort']
 
-  print('Updated appspec.yaml')
-  print(contents)  
+    print('Updated appspec.yaml')
+    print(contents)  
 
-  yaml.dump(contents, outputFile)
-
-outputFile.close()
+    yaml.dump(contents, outputFile)

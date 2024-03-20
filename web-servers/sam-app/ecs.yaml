@@ -464,6 +464,7 @@ Resources:
           Value: !Ref TagValue
   ECSTaskDefinitionResource:
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Type: Custom::ECSTaskDefinitionResource
     Properties:
       ServiceToken: !GetAtt LambdaECSTaskDefinition.Arn
