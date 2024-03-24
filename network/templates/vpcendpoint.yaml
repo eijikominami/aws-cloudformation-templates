@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::LanguageExtensions
+Description: AWSCloudFormationTemplates/network/vpcendpoint creates VPC Endpoints.
+
+Parameters:
+  SecurityGroupId:
+    Type: String
+    Description: The IDs of the security groups to associate with the endpoint network interfaces [required]
+  Services:
+    Type: CommaDelimitedList
+    AllowedPattern: .+
+    Description: The names of the endpoint service [required]
+  SubnetIds:
+    Type: CommaDelimitedList
+    AllowedPattern: .+
+    Description: The IDs of the subnets in which to create endpoint network interfaces [required]    
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC Id [required]
+
+Resources:
+  'Fn::ForEach::VPCEndpoint':
+    - Service
+    - !Ref Services
+    - VPCEndpointFor${Service}:
+        Type: AWS::EC2::VPCEndpoint
+        Properties:
+          PrivateDnsEnabled: true
+          SecurityGroupIds: 
+            - !Ref SecurityGroupId
+          ServiceName: !Sub com.amazonaws.${AWS::Region}.${Service}
+          SubnetIds: !Ref SubnetIds
+          VpcEndpointType: Interface
+          VpcId: !Ref VPCId

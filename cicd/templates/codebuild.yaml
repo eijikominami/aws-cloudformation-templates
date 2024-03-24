@@ -13,6 +13,7 @@ Metadata:
       - Label: 
           default: 'Build Configuration'
         Parameters: 
+          - BuildSpecForContainers
           - BuildSpecForCommits
           - BuildSpecForTags
           - Image
@@ -35,6 +36,11 @@ Metadata:
           - TagValue
 
 Parameters:
+  BuildSpecForContainers:
+    Type: String
+    Default: buildspec.yml
+    AllowedPattern: .+
+    Description: The build specification file for containers [required]
   BuildSpecForCommits:
     Type: String
     Default: buildspec.yml
@@ -305,12 +311,10 @@ Resources:
               Pattern: PUSH
             - Type: HEAD_REF
               Pattern: ^refs/heads/master$
-              ExcludeMatchedPattern: false
           - - Type: EVENT
               Pattern: PULL_REQUEST_MERGED
             - Type: BASE_REF
               Pattern: ^refs/heads/master$
-              ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
       Tags: 
         - Key: environment
@@ -354,7 +358,6 @@ Resources:
               Pattern: PUSH
             - Type: HEAD_REF
               Pattern: !Sub ^refs/heads/${GitHubBranchName}$
-              ExcludeMatchedPattern: false
       Visibility: PUBLIC_READ
       Tags:
         - Key: environment
@@ -397,7 +400,58 @@ Resources:
               Pattern: PUSH
             - Type: HEAD_REF
               Pattern: ^refs/tags/.*-rc.*$
-              ExcludeMatchedPattern: false
+      Visibility: PUBLIC_READ
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeoutInMinutes: 60
+  CodeBuildForContainers:
+    DependsOn:
+      - CodeBuildSourceCredential
+    Type: AWS::CodeBuild::Project
+    Properties: 
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: true
+      Description: Upload container images to Amazon ECR public registries. 
+      Environment: 
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: REPOSITORY_URI
+            Type: PLAINTEXT
+            Value: public.ecr.aws/r7j6d5k5/aws-for-fluent-bit
+          - Name: BASE_DIR
+            Type: PLAINTEXT
+            Value: shared/aws-for-fluent-bit
+          - Name: CPU_ARCHITECTURE
+            Type: PLAINTEXT
+            Value: linux/arm64/v8,linux/amd64
+        Image: !Ref Image
+        Type: ARM_CONTAINER
+      LogsConfig: 
+        CloudWatchLogs: 
+          GroupName: !Ref CodeBuildLogGroup
+          Status: ENABLED
+      Name: !Sub ${AWS::StackName}-Containers
+      ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
+      ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
+      Source:
+        BuildSpec: !Ref BuildSpecForContainers
+        Location: !Ref GitHubCloneUrl
+        Type: GITHUB
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/master$
+          - - Type: EVENT
+              Pattern: PULL_REQUEST_MERGED
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/master$
       Visibility: PUBLIC_READ
       Tags:
         - Key: environment
