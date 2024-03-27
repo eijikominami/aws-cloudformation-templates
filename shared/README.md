@@ -11,7 +11,15 @@ English / [**日本語**](README_JP.md)
 
 If you just want to deploy the stack, click the button below.
 
-[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) 
+| US East (Virginia) | Asia Pacific (Tokyo) |
+| --- | --- |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
+
+If you want to deploy each service individually, click the button below.
+
+| Services | US East (Virginia) | Asia Pacific (Tokyo) |
+| --- | --- | --- |
+| FluentBit (Syslog) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml)  | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml) |
 
 ## Architecture
 
@@ -31,6 +39,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
+| AccountIdForArchive | String | | | The AWS account id for log archive |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
 | ActiveDirectoryName | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
@@ -38,6 +47,10 @@ You can provide optional parameters as follows.
 | ActiveDirectoryShortName | String | CORP | ○ | The NetBIOS name for your domain |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.64/26 | ○ | The public subnet CIDR block at AZ2 |
+| BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
+| FluentBitAddress1 | String | 10.3.0.14 | | The private IPv4 address for FluentBit |
+| FluentBitAddress2 | String | 10.3.64.14 | | The private IPv4 address for FluentBit |
+| FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Whether to enable FluentBit for collecting syslog format logs |
 | DomainName | String | | | The private domain name which this VPC has |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |

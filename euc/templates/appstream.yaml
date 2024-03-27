@@ -349,7 +349,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appstream
-        SemanticVersion: 2.2.0
+        SemanticVersion: 2.2.1
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

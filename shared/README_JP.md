@@ -11,7 +11,15 @@
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
 
-[![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) 
+| 米国東部 (バージニア北部) | アジアパシフィック (東京) |
+| --- | --- |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
+
+以下のボタンから、個別のAWSサービスを有効化することも可能です。
+
+| 作成されるAWSサービス | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
+| --- | --- | --- |
+| FluentBit (Syslog) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml)  | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml) |
 
 ## アーキテクチャ
 
@@ -31,6 +39,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AccountIdForArchive | String | | | ログアーカイブアカウント ID |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | Microsoft Active Directory を作成する AWS Directory Service のエディション |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Microsoft Active Directory を用いて SSO を有効化するかどうか |
 | ActiveDirectoryName | String | corp.example.com | ○ | AWS Managed Microsoft AD directory の　FQDN |
@@ -38,7 +47,11 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | ActiveDirectoryShortName | String | CORP | ○ | NetBIOS 名 |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.64.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
 | DomainName | String | | | ドメイン名 |
+| FluentBitAddress1 | String | 10.3.0.14 | | FluentBit のプライベートアドレス |
+| FluentBitAddress2 | String | 10.3.64.14 | | FluentBit のプライベートアドレス |
+| FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Syslog フォーマットのログ収集ののための FluentBit を作成するかどうか |
 | IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |

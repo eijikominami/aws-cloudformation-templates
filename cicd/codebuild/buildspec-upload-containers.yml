@@ -1,0 +1,26 @@
+version: 0.2
+
+env:
+  exported-variables:
+    - IMAGE_URI
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - IMAGE_TAG=$(echo $CODEBUILD_SOURCE_VERSION |cut -d/ -f4 |cut -d'.' -f1)
+      - TIMESTAMP=$(date +%Y%m%d%H%M)
+      - echo $IMAGE_TAG
+  build:
+    commands:
+      - echo Building the Docker image...
+      - cd $CODEBUILD_SRC_DIR/${BASE_DIR}
+      - docker buildx create --name builderx 
+      - docker buildx use builderx
+      - docker buildx build --push --platform ${CPU_ARCHITECTURE} --tag $REPOSITORY_URI:latest $REPOSITORY_URI:${IMAGE_TAG} .
+      - IMAGE_URI=$REPOSITORY_URI:${IMAGE_TAG}
+      - echo IMAGE_URI
+  post_build:
+    commands:
+      - echo Build completed on `date`

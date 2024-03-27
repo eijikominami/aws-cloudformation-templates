@@ -1,0 +1,559 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/shared/fluentbit creates log servers on Amazon Elastic Container Service.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'FluentBit Configuration'
+        Parameters: 
+          - AppPort
+          - Cpu
+          - CpuArchitecture
+          - DesiredCapacity
+          - ImageUri
+          - Memory
+          - VPCId
+      - Label: 
+          default: 'Network Configuration'
+        Parameters: 
+          - NlbIPv4Address1
+          - NlbIPv4Address2
+          - SubnetId1
+          - SubnetId2
+      - Label: 
+          default: 'S3 Configuration'
+        Parameters: 
+          - AccountIdForArchive
+          - BucketNameForArchive
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  AccountIdForArchive:
+    Type: String
+    Default: ''
+    Description: The AWS account id for log archive
+  AppPort:
+    Type: Number
+    Default: 514
+    Description: The port on which the container is listening [required]
+  BucketNameForArchive:
+    Type: String
+    Default: ''
+    Description: The Amazon S3 bucket name for log archive
+  Cpu:
+    Type: Number
+    Default: 1024
+    Description: The number of cpu units reserved for the container [required]
+  CpuArchitecture:
+    Type: String
+    Default: ARM64
+    AllowedValues:
+      - X86_64
+      - ARM64
+    Description: The CPU architecture [required]
+  DesiredCapacity:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: The number of instantiations [required] 
+  ImageUri:
+    Type: String
+    AllowedPattern: .+
+    Description: The image used to start a container [required]
+  NlbIPv4Address1:
+    Type: String
+    Default: 10.3.0.114
+    Description: The private IPv4 address for an internal load balancer
+  NlbIPv4Address2:
+    Type: String
+    Default: 10.3.64.114
+    Description: The private IPv4 address for an internal load balancer  
+  SubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 1 for Container [required]
+  SubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 2 for Container [required]
+  Memory:
+    Type: String
+    Default: 3072
+    Description: The amount (in MiB) of memory to present to the container [required]
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC Id [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: FluentBit
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateS3ReplicationForArchive: !And [ !Not [ !Equals [ !Ref AccountIdForArchive, ''] ], !Not [ !Equals [ !Ref BucketNameForArchive, ''] ] ]
+  CreateNlbSubnetMapping1: !Not [ !Equals [ !Ref NlbIPv4Address1, ''] ]
+  CreateNlbSubnetMapping2: !Not [ !Equals [ !Ref NlbIPv4Address2, ''] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  Development: !Equals [ !Ref Environment, development]
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.1
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !If
+          - Development
+          - development
+          - production
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.1
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !If
+          - Development
+          - development
+          - production
+        createdby: !Ref TagValue
+  # IAM
+  IAMRoleForECSTask:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for ECS tasks.
+      Policies:
+        - PolicyName: Firehose
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:PutRecordBatch
+                Resource: !Sub arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/FluentBit
+              - Effect: Allow
+                Action:
+                  - ssmmessages:CreateControlChannel
+                  - ssmmessages:CreateDataChannel
+                  - ssmmessages:OpenControlChannel
+                  - ssmmessages:OpenDataChannel
+                Resource: '*'  
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:DescribeLogStreams
+                  - logs:PutLogEvents
+                Resource: !GetAtt CloudWatchLogsGroup.Arn
+      RoleName: !Sub ${LogicalName}-ECSTask-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForECSTaskExecution:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for an ECS task execution with Data Firehose.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      RoleName: !Sub ${LogicalName}-ECSTaskExecution-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForFirehose:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Kinesis Firehose.
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                Resource: '*'
+      RoleName: !Sub ${LogicalName}-Firehose-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # ELB
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      LoadBalancerAttributes:
+        - Key: deletion_protection.enabled
+          Value: false
+      Name: !Sub elb-${LogicalName}
+      Scheme: internal
+      SecurityGroups:
+        - !Ref SecurityGroupSyslog
+      SubnetMappings:
+        - PrivateIPv4Address: !If
+            - CreateNlbSubnetMapping1
+            - !Ref NlbIPv4Address1
+            - !Ref AWS::NoValue
+          SubnetId: !Ref SubnetId1
+        - PrivateIPv4Address: !If
+            - CreateNlbSubnetMapping2
+            - !Ref NlbIPv4Address2
+            - !Ref AWS::NoValue
+          SubnetId: !Ref SubnetId2
+      Tags:
+        - Key: Name
+          Value: !Sub elb-${LogicalName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Type: network
+  LoadBalancerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPort: 2020
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      Name: !Sub target-${LogicalName}
+      Port: !Ref AppPort
+      Protocol: UDP
+      Tags:
+        - Key: Name
+          Value: !Sub target-${LogicalName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TargetType: ip
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref VPCId
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      DefaultActions:
+        - TargetGroupArn: !Ref LoadBalancerTargetGroup
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: !Ref AppPort
+      Protocol: UDP
+  # ECS
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref LogicalName     
+      ClusterSettings: 
+        - Name: containerInsights
+          Value: enabled
+      Configuration: 
+        ExecuteCommandConfiguration:
+          Logging: DEFAULT
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ECSService:
+    DependsOn:
+         - LoadBalancerListener
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ECSCluster
+      DesiredCount: !Ref DesiredCapacity
+      EnableECSManagedTags: true
+      EnableExecuteCommand: true
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers: 
+        - ContainerName: !Ref LogicalName
+          ContainerPort: !Ref AppPort
+          TargetGroupArn: !Ref LoadBalancerTargetGroup
+      NetworkConfiguration: 
+        AwsvpcConfiguration: 
+          AssignPublicIp: DISABLED
+          SecurityGroups: 
+            - !Ref SecurityGroupSyslog
+          Subnets: 
+            - !Ref SubnetId1
+            - !Ref SubnetId2        
+      SchedulingStrategy: REPLICA
+      ServiceName: !Sub ${LogicalName}-FargateService
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TaskDefinition: !Ref ECSTaskDefinition
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions: 
+        - Cpu: !Ref Cpu
+          Essential: true
+          Image: !Sub ${ImageUri}:latest
+          LinuxParameters:
+            InitProcessEnabled: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options: 
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-stream-prefix: !Ref ImageUri
+          Memory: 512
+          Name: !Ref LogicalName
+          PortMappings:
+            - Protocol: udp
+              ContainerPort: !Ref AppPort
+              HostPort: !Ref AppPort
+      Cpu: !Ref Cpu
+      ExecutionRoleArn: !GetAtt IAMRoleForECSTaskExecution.Arn
+      Family: !Ref LogicalName
+      Memory: !Ref Memory
+      NetworkMode: awsvpc
+      RequiresCompatibilities: 
+        - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: !Ref CpuArchitecture
+        OperatingSystemFamily: LINUX
+      TaskRoleArn: !GetAtt IAMRoleForECSTask.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Security Group
+  SecurityGroupSyslog:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${LogicalName}-${AWS::Region}-syslog
+      GroupDescription: Security Group for Web Server
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: syslog
+          FromPort: !Ref AppPort
+          ToPort: !Ref AppPort
+          IpProtocol: UDP
+        - CidrIp: 0.0.0.0/0
+          Description: healthcheck
+          FromPort: 2020
+          ToPort: 2020
+          IpProtocol: TCP
+        - CidrIp: 0.0.0.0/0
+          Description: icmp
+          FromPort: -1
+          ToPort: -1
+          IpProtocol: ICMP
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${LogicalName}-${AWS::Region}-syslog
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  # Firehose
+  Firehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamName: FluentBit
+      DeliveryStreamType: DirectPut
+      S3DestinationConfiguration: 
+        BucketARN: !GetAtt S3ForAccessLog.Arn
+        BufferingHints: 
+          IntervalInSeconds: 300
+          SizeInMBs: 5
+        RoleARN: !GetAtt IAMRoleForFirehose.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Log
+  S3ForAccessLog:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: AES256
+      BucketName: !Sub fluentbit-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+          - !If 
+            - CreateS3ReplicationForArchive
+            - Id: NoncurrentVersionExpirationInDays
+              NoncurrentVersionExpiration: 
+                NewerNoncurrentVersions: 1
+                NoncurrentDays: 1
+              Status: Enabled
+            - !Ref AWS::NoValue
+      OwnershipControls:
+        Rules: 
+          - ObjectOwnership: ObjectWriter
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      ReplicationConfiguration: !If
+        - CreateS3ReplicationForArchive
+        - Role: !Sub arn:aws:iam::${AWS::AccountId}:role/${LogicalName}-S3Replication-${AWS::Region}
+          Rules: 
+            - Destination: 
+                AccessControlTranslation:
+                  Owner: Destination
+                Account: !Ref AccountIdForArchive
+                Bucket: !Sub arn:aws:s3:::${BucketNameForArchive}
+              Id: Analysis
+              Status: Enabled
+        - !Ref AWS::NoValue
+      VersioningConfiguration: !If 
+        - CreateS3ReplicationForArchive
+        - Status: Enabled
+        - !Ref AWS::NoValue
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForAccessLog:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForAccessLog
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForAccessLog
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForAccessLog.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForAccessLog.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
+  # CloudWatch
+  CloudWatchAlarmECS:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
+        SemanticVersion: 2.2.1
+      NotificationARNs: 
+        - !Ref SNSForDeploymentArn
+      Parameters:
+        ClusterName: !Ref LogicalName  
+        CustomAlarmName: !Ref AWS::StackName
+        ServiceName: !Sub ${LogicalName}-FargateService
+        SNSTopicArn: !Ref SNSForAlertArn
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /${LogicalName}/ecs
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
