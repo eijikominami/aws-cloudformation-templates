@@ -241,6 +241,15 @@ Resources:
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
                 Effect: Allow
+              - Action:
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetAuthorizationToken
+                  - ecr-public:GetAuthorizationToken
+                Resource: 
+                  - '*'
+                Effect: Allow
       RoleName: !Sub ${AWS::StackName}-CodeBuild-${AWS::Region}
       Tags:
         - Key: environment

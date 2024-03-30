@@ -70,7 +70,7 @@ Parameters:
     Description: The number of instantiations [required] 
   ImageUri:
     Type: String
-    AllowedPattern: .+
+    Default: public.ecr.aws/r7j6d5k5/aws-for-fluent-bit
     Description: The image used to start a container [required]
   NlbIPv4Address1:
     Type: String
