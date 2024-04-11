@@ -106,14 +106,16 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AmazonGuadDuty | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon GuardDuty is enabled |
-| AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
+| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | Enable or disable AWS CloudTrail |
+| AWSCloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
+| AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
-| AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Security Hub enabled |
+| AmazonGuadDuty | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon GuardDuty is enabled |
+| AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
+| AWSSecurityHub | String | STANDARDS_ONLY | ○ | If it is ENABLED, AWS Security Hub enabled |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | | The standard that you want to enable |
-| AWSCloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
-| AWSCloudTrailS3Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
+| IAMAccessAnalyzer | String | ACCOUNT | ○ | If it is ENABLED, IAM Access Analyzer is enabled |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | MasterAccount | Boolean | false | ○ | Whether this account is the master account |
 

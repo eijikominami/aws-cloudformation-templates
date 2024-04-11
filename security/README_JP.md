@@ -107,14 +107,16 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AmazonGuardDuty | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon GuardDuty が有効化されます。|
-| AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。|
+| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | ENABLEDを指定した場合、AWS CloudTrail が有効化されます。 |
+| AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
+| AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
-| AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
+| AmazonGuardDuty | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon GuardDuty が有効化されます。|
+| AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。|
+| AWSSecurityHub | String | STANDARDS_ONLY | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
-| AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
-| AWSCloudTrailS3Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
+| IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、 IAM Access Analyzer が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | MasterAccount | Boolean | false | ○ | マスターアカウントであるかどうか |
 

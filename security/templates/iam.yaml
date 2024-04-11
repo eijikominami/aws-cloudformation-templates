@@ -29,7 +29,7 @@ Parameters:
     AllowedValues:
       - ACCOUNT
       - ORGANIZATION
-      - EVENTBRIDGE_ONLY
+      - NOTIFICATION_ONLY
     Description: The type represents the zone of trust for the analyzer [required]
   LogicalName:
     Type: String
@@ -60,7 +60,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref AnalyzerType, EVENTBRIDGE_ONLY] ]
+  CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref AnalyzerType, NOTIFICATION_ONLY] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 

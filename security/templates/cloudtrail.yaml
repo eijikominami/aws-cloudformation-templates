@@ -7,10 +7,10 @@ Metadata:
       - Label: 
           default: 'CloudTrail Configuration'
         Parameters:
+          - AccessLogBucketName
           - AdditionalFilters
           - CloudTrailInsights
           - IsAlreadyCreatedByControlTower
-          - LogBucketName
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -42,10 +42,17 @@ Parameters:
       - true
       - false
     Description: Already created by Control Tower [required]
-  LogBucketName:
+  AccessLogBucketName:
     Type: String
     Default: ''
     Description: The S3 log bucket Name [required]
+  S3Trail:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudTrail S3 trail [required]
   LogicalName:
     Type: String
     Default: DefaultSecuritySettings
@@ -73,7 +80,7 @@ Parameters:
 Conditions:
   CreateAdditionalFilters: !Not [ !Equals [ !Ref AdditionalFilters, '' ] ]
   CreateCloudTrailInsights: !Equals [ !Ref CloudTrailInsights, ENABLED ]
-  EnableLogging: !Not [ !Equals [ !Ref LogBucketName, '' ] ]
+  CreateS3Trail: !Equals [ !Ref S3Trail, ENABLED ]
   IsCreatedByControlTower: !Equals [ !Ref IsAlreadyCreatedByControlTower, true ]
 
 Resources:
@@ -133,7 +140,7 @@ Resources:
                 - arn:aws:lambda
       IncludeGlobalServiceEvents: true
       IsLogging: !If
-        - EnableLogging
+        - CreateS3Trail
         - true
         - false
       IsMultiRegionTrail: true
@@ -189,7 +196,6 @@ Resources:
           Value: !Ref TagValue
   # S3
   S3ForCloudTrail:
-    Condition: EnableLogging
     Type: AWS::S3::Bucket
     # Retain this bucket when a stack is deleted.
     UpdateReplacePolicy: Retain
@@ -206,7 +212,7 @@ Resources:
             ExpirationInDays: 60
             Status: Enabled
       LoggingConfiguration:
-        DestinationBucketName: !Ref LogBucketName
+        DestinationBucketName: !Ref AccessLogBucketName
         LogFilePrefix: CloudTrail/
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true

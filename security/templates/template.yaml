@@ -9,7 +9,7 @@ Metadata:
         Parameters:
           - AWSCloudTrail
           - AWSCloudTrailAdditionalFilters
-          - AWSCloudTrailS3Logging
+          - AWSCloudTrailS3Trail
       - Label:
           default: Config Configuration
         Parameters:
@@ -48,7 +48,7 @@ Metadata:
 Parameters:
   AWSCloudTrail:
     Type: String
-    Default: DISABLED
+    Default: ENABLED
     AllowedValues:
       - ENABLED
       - CREATED_BY_CONTROL_TOWER
@@ -58,7 +58,7 @@ Parameters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
-  AWSCloudTrailS3Logging:
+  AWSCloudTrailS3Trail:
     Type: String
     Default: ENABLED
     AllowedValues:
@@ -84,7 +84,7 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
-      - EVENTBRIDGE_ONLY
+      - NOTIFICATION_ONLY
       - DISABLED
     Description: Enable or disable Amazon GuardDuty [required]
   AmazonMacie:
@@ -92,7 +92,7 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
-      - EVENTBRIDGE_ONLY
+      - NOTIFICATION_ONLY
       - DISABLED
     Description: Enable or disable Amazon Macie [required]
   AWSSecurityHub:
@@ -121,7 +121,7 @@ Parameters:
     AllowedValues:
       - ACCOUNT
       - ORGANIZATION
-      - EVENTBRIDGE_ONLY
+      - NOTIFICATION_ONLY
       - DISABLED
     Description: Enable or disable IAM Access Analyzer [required]
   IAMUserArnToAssumeAWSSupportRole:
@@ -153,12 +153,12 @@ Parameters:
 Conditions:
   CreateCloudTrail: !Or [ !Equals [ !Ref AWSCloudTrail, ENABLED ], !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ] ]
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED ]
-  CreateGuardDuty: !Or [ !Equals [ !Ref AmazonGuardDuty, ENABLED], !Equals [!Ref AmazonGuardDuty, EVENTBRIDGE_ONLY ] ]
-  CreateGuardDutyEventBridgeOnly: !Equals [ !Ref AmazonGuardDuty, EVENTBRIDGE_ONLY ]
+  CreateGuardDuty: !Or [ !Equals [ !Ref AmazonGuardDuty, ENABLED], !Equals [!Ref AmazonGuardDuty, NOTIFICATION_ONLY ] ]
+  CreateGuardDutyEventBridgeOnly: !Equals [ !Ref AmazonGuardDuty, NOTIFICATION_ONLY ]
   CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref IAMAccessAnalyzer, DISABLED ] ]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [!Ref IAMUserArnToAssumeAWSSupportRole , ''] ]
-  CreateMacie: !And [ !Equals [ !Ref AmazonMacie, ENABLED ], !Equals [ !Ref AmazonMacie, EVENTBRIDGE_ONLY ] ]
-  CreateMacieEventBridgeOnly: !Equals [ !Ref AmazonMacie, EVENTBRIDGE_ONLY ]
+  CreateMacie: !And [ !Equals [ !Ref AmazonMacie, ENABLED ], !Equals [ !Ref AmazonMacie, NOTIFICATION_ONLY ] ]
+  CreateMacieEventBridgeOnly: !Equals [ !Ref AmazonMacie, NOTIFICATION_ONLY ]
   CreateSecurityHub: !Not [ !Equals [ !Ref AWSSecurityHub, DISABLED ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn ,'']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn,'']
@@ -276,15 +276,13 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AccessLogBucketName: !Ref S3ForAccessLog
         AdditionalFilters: !Ref AWSCloudTrailAdditionalFilters
         IsAlreadyCreatedByControlTower: !If 
           - CloudTrailIsCreatedByControlTower
           - true
           - false
-        LogBucketName: !If
-          - CloudTrailIsCreatedByControlTower
-          - ''
-          - !Ref S3ForAccessLog
+        S3Trail: !Ref AWSCloudTrailS3Trail
         LogicalName: !Ref AWS::StackName
         SnsTopicARN: !If
           - CreateSNSForAlert
