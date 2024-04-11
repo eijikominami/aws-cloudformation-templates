@@ -5,14 +5,11 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: CloudTrail and Config Configuration
-        Parameters:
-          - AuditOtherRegions
-      - Label:
           default: CloudTrail Configuration
         Parameters:
-          - CloudTrailAdditionalFilters
-          - CloudTrailS3Trail
+          - AWSCloudTrail
+          - AWSCloudTrailAdditionalFilters
+          - AWSCloudTrailS3Logging
       - Label:
           default: Config Configuration
         Parameters:
@@ -34,7 +31,6 @@ Metadata:
           default: SecurityHub Configuration
         Parameters:
           - IAMUserArnToAssumeAWSSupportRole
-          - NotificationFilterAboutSecurityChecks
           - AWSSecurityHub
           - AWSSecurityHubStandards
       - Label:
@@ -50,11 +46,19 @@ Metadata:
           - TagValue
 
 Parameters:
-  CloudTrailAdditionalFilters:
+  AWSCloudTrail:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - CREATED_BY_CONTROL_TOWER
+      - DISABLED
+    Description: Enable or disable AWS CloudTrail [required]
+  AWSCloudTrailAdditionalFilters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
-  CloudTrailS3Trail:
+  AWSCloudTrailS3Logging:
     Type: String
     Default: ENABLED
     AllowedValues:
@@ -68,13 +72,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable AWS Config [required]
-  AuditOtherRegions:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable cross region audit [required]
   AWSConfigAutoRemediation:
     Type: String
     Default: ENABLED
@@ -95,13 +92,18 @@ Parameters:
     Default: ENABLED
     AllowedValues:
       - ENABLED
+      - EVENTBRIDGE_ONLY
       - DISABLED
     Description: Enable or disable Amazon Macie [required]
   AWSSecurityHub:
     Type: String
-    Default: ENABLED
+    Default: STANDARDS_ONLY
     AllowedValues:
-      - ENABLED
+      - STANDARDS_ONLY
+      - STAMDARDS_ALERAM_MIDIUM
+      - STANDARDS_ALERAM_ALL
+      - ALERAM_MIDIUM
+      - ALERAM_ALL
       - DISABLED
     Description: Enable or disable AWS SecurityHub [required]
   AWSSecurityHubStandards:
@@ -126,14 +128,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The IAM User ARN to assume AWS Support role
-  NotificationFilterAboutSecurityChecks:
-    Type: String
-    Default: DENY_ALL
-    AllowedValues:
-      - DENY_ALL
-      - MEDIUM
-      - ALLOW_ALL
-    Description: The notification filter type about Security Hub Security Checks [required]
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -157,42 +151,19 @@ Parameters:
     AllowedPattern: .+
     
 Conditions:
-  CreateConfig: !Equals
-    - !Ref AWSConfig
-    - ENABLED
-  CreateGuardDuty: !Or
-    - !Equals
-      - !Ref AmazonGuardDuty
-      - ENABLED
-    - !Equals
-      - !Ref AmazonGuardDuty
-      - EVENTBRIDGE_ONLY
-  CreateGuardDutyEventBridgeOnly: !Equals
-    - !Ref AmazonGuardDuty
-    - EVENTBRIDGE_ONLY
-  CreateIAMAccessAnalyzer: !Not
-    - !Equals
-      - !Ref IAMAccessAnalyzer
-      - DISABLED
-  CreateIAMRoleForAWSSupport: !Not
-    - !Equals
-      - !Ref IAMUserArnToAssumeAWSSupportRole
-      - ''
-  CreateMacie: !Equals
-    - !Ref AmazonMacie
-    - ENABLED
-  CreateSecurityHub: !Equals
-    - !Ref AWSSecurityHub
-    - ENABLED
-  CreateSNSForAlert: !Equals
-    - !Ref SNSForAlertArn
-    - ''
-  CreateSNSForDeployment: !Equals
-    - !Ref SNSForDeploymentArn
-    - ''
-  Development: !Equals
-    - !Ref Environment
-    - development
+  CreateCloudTrail: !Or [ !Equals [ !Ref AWSCloudTrail, ENABLED ], !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ] ]
+  CreateConfig: !Equals [ !Ref AWSConfig, ENABLED ]
+  CreateGuardDuty: !Or [ !Equals [ !Ref AmazonGuardDuty, ENABLED], !Equals [!Ref AmazonGuardDuty, EVENTBRIDGE_ONLY ] ]
+  CreateGuardDutyEventBridgeOnly: !Equals [ !Ref AmazonGuardDuty, EVENTBRIDGE_ONLY ]
+  CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref IAMAccessAnalyzer, DISABLED ] ]
+  CreateIAMRoleForAWSSupport: !Not [ !Equals [!Ref IAMUserArnToAssumeAWSSupportRole , ''] ]
+  CreateMacie: !And [ !Equals [ !Ref AmazonMacie, ENABLED ], !Equals [ !Ref AmazonMacie, EVENTBRIDGE_ONLY ] ]
+  CreateMacieEventBridgeOnly: !Equals [ !Ref AmazonMacie, EVENTBRIDGE_ONLY ]
+  CreateSecurityHub: !Not [ !Equals [ !Ref AWSSecurityHub, DISABLED ] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn ,'']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn,'']
+  CloudTrailIsCreatedByControlTower: !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ]
+  Development: !Equals [ !Ref Environment, development ]
 
 Resources:
   IAM:
@@ -240,7 +211,7 @@ Resources:
         SecurityHubStandards: !Join
           - ','
           - !Ref AWSSecurityHubStandards
-        NotificationFilterAboutSecurityChecks: !Ref NotificationFilterAboutSecurityChecks
+        SecurityHubType: !Ref AWSSecurityHub
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -296,6 +267,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudTrail:
+    Condition: CreateCloudTrail
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -304,10 +276,15 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        AuditOtherRegions: !Ref AuditOtherRegions
-        CloudTrailAdditionalFilters: !Ref CloudTrailAdditionalFilters
-        CloudTrailS3Trail: !Ref CloudTrailS3Trail
-        LogBucketName: !Ref S3ForAccessLog
+        AdditionalFilters: !Ref AWSCloudTrailAdditionalFilters
+        IsAlreadyCreatedByControlTower: !If 
+          - CloudTrailIsCreatedByControlTower
+          - true
+          - false
+        LogBucketName: !If
+          - CloudTrailIsCreatedByControlTower
+          - ''
+          - !Ref S3ForAccessLog
         LogicalName: !Ref AWS::StackName
         SnsTopicARN: !If
           - CreateSNSForAlert
@@ -335,7 +312,6 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        AuditOtherRegions: !Ref AuditOtherRegions
         AWSConfigAutoRemediation: !Ref AWSConfigAutoRemediation
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -368,6 +344,18 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        Session: !If 
+          - CreateMacieEventBridgeOnly
+          - DISABLED
+          - ENABLED
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
         LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey

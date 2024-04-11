@@ -8,7 +8,6 @@ Metadata:
       - Label: 
           default: 'Config Configuration'
         Parameters: 
-          - AuditOtherRegions
           - AWSConfigAutoRemediation
       - Label: 
           default: 'Notification Configuration'
@@ -24,13 +23,6 @@ Metadata:
           - TagValue
 
 Parameters:
-  AuditOtherRegions:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable cross region audit [required]
   AWSConfigAutoRemediation:
     Type: String
     Default: ENABLED
@@ -67,7 +59,6 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
-  CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
   CreateRemediationResources: !Equals [ !Ref AWSConfigAutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -282,10 +273,7 @@ Resources:
       Name: default
       RecordingGroup:
         AllSupported: true
-        IncludeGlobalResourceTypes: !If
-          - CreateCentralizedResources
-          - true
-          - false
+        IncludeGlobalResourceTypes: true
       RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig
   ConfigCloudformationStackDriftDetectionCheck:
     # Must create a configuration recorder before you can create or update a Config rule.

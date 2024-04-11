@@ -10,11 +10,11 @@ Metadata:
       - Label: 
           default: 'Security Hub Configuration'
         Parameters:
+          - SecurityHubType
           - SecurityHubStandards
       - Label: 
           default: 'Notification Configuration'
         Parameters:
-          - NotificationFilterAboutSecurityChecks
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -25,14 +25,6 @@ Metadata:
           - TagValue
 
 Parameters:
-  NotificationFilterAboutSecurityChecks:
-    Type: String
-    Default: DENY_ALL
-    AllowedValues:
-      - DENY_ALL
-      - MEDIUM
-      - ALLOW_ALL
-    Description: The notification filter about Security Hub Security Checks [required]
   LogicalName:
     Type: String
     Default: DefaultSecuritySettings
@@ -46,6 +38,16 @@ Parameters:
       - NIST
       - PCIDSS
     Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
+  SecurityHubType:
+    Type: String
+    Default: STANDARDS_ONLY
+    AllowedValues:
+      - STANDARDS_ONLY
+      - STAMDARDS_ALERAM_MIDIUM
+      - STANDARDS_ALERAM_ALL
+      - ALERAM_MIDIUM
+      - ALERAM_ALL
+    Description: The type of Security Hub deployment [required]
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -69,8 +71,9 @@ Parameters:
 Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateCloudWatchEventsForSecurityHubFindings: !Not [ !Equals [ !Ref NotificationFilterAboutSecurityChecks, DENY_ALL ] ]
-  SendAllEvents: !Equals [ !Ref NotificationFilterAboutSecurityChecks, ALLOW_ALL ]
+  CreateSecurityHub: !Or [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ] ]
+  CreateCloudWatchEventsForSecurityHubFindings: !Not [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ] ]
+  SendAllEvents: !And [ !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ], !Equals [ !Ref SecurityHubType, ALERAM_ALL ] ]
 
 Mappings: 
   SecurityHubStandardsArn: 
@@ -114,6 +117,7 @@ Resources:
   # AWSServiceRoleForSecurityHub will be created automatically.
   # SecurityHub
   SecurityHub:
+    Condition: CreateSecurityHub
     Type: AWS::SecurityHub::Hub
     Properties: 
       EnableDefaultStandards: false
@@ -125,6 +129,8 @@ Resources:
     - !Ref SecurityHubStandards
     - SecurityHubStandards${StandardsArn}:
         Type: AWS::SecurityHub::Standard
+        # Conditions must be the second property listed, or later. Stack creation will fail if Conditions is the first property listed within the template fragment parameter of Fn::ForEach
+        Condition: CreateSecurityHub
         Properties:
           StandardsArn: !FindInMap [SecurityHubStandardsArn, !Ref "AWS::Region", !Ref StandardsArn]
   # EventBridge for SecurityHub

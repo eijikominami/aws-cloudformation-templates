@@ -109,16 +109,14 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | --- | --- | --- | --- | --- |
 | AmazonGuardDuty | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon GuardDuty が有効化されます。|
 | AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。|
-| AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudTrail** と Config の **Include Global Resource Types** オプションが有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
-| CloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
-| CloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
+| AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
+| AWSCloudTrailS3Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | MasterAccount | Boolean | false | ○ | マスターアカウントであるかどうか |
-| NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | セキュリティチェックに関する通知フィルタ | 
 
 ### マルチアカウント対応
 

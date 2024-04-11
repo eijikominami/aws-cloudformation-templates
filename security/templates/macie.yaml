@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
 Description: AWSCloudFormationTemplates/security/Inspector sets Amazon Macie.
 
 Metadata: 
@@ -8,6 +9,12 @@ Metadata:
           default: 'Macie Configuration'
         Parameters:
           - FindingPublishingFrequency
+          - Session
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -25,6 +32,21 @@ Parameters:
       - ONE_HOUR
       - SIX_HOURS
     Description: The frequency with which Amazon Macie publishes updates to policy findings for an account [required]
+  Session:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: The Macie session [required]
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
   LogicalName:
     Type: String
     Default: DefaultSecuritySettings
@@ -46,7 +68,43 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateSession: !Equals [ !Ref Session, ENABLED]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+
 Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.1
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.1
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # IAM
   IAMRoleForMacie:
     Type: AWS::IAM::Role
     Properties:
@@ -134,7 +192,9 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # Macie
   MacieSession:
+    Condition: CreateSession
     Type: AWS::Macie::Session
     Properties:
         FindingPublishingFrequency: !Ref FindingPublishingFrequency
@@ -149,3 +209,38 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  EventBridgeForMacie:    
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for Macie created by ${AWS::StackName}.
+      EventPattern:
+        source:
+           - aws.macie
+        detail-type:
+           - Macie Finding
+      Name: Macie
+      State: ENABLED
+      Targets: 
+        - Arn: !Ref SNSForAlertArn
+          Id: SNS
+  AlarmEventsForAccessAnalyzer:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
+        SemanticVersion: 2.2.1
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        EventsRuleName: !Ref EventBridgeForMacie
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue

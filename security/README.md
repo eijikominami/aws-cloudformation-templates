@@ -108,16 +108,14 @@ You can provide optional parameters as follows:
 | --- | --- | --- | --- | --- |
 | AmazonGuadDuty | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon GuardDuty is enabled |
 | AmazonMacie | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
-| AuditOtherRegions | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **CloudTrail** and **Include Global Resource Types** option in Config are enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
 | AWSSecurityHub | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Security Hub enabled |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | | The standard that you want to enable |
-| CloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
-| CloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
+| AWSCloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
+| AWSCloudTrailS3Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | MasterAccount | Boolean | false | ○ | Whether this account is the master account |
-| NotificationFilterAboutSecurityChecks | DENY_ALL / MEDIUM / ALLOW_ALL | DENY_ALL | ○ | Notification filter about Security Hub Security Checks | 
 
 ### Designating a GuardDuty and a Security Hub administrator account
 
