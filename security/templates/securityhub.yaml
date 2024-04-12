@@ -43,8 +43,10 @@ Parameters:
     Default: STANDARDS_ONLY
     AllowedValues:
       - STANDARDS_ONLY
+      - STAMDARDS_ALERAM_HIGH
       - STAMDARDS_ALERAM_MIDIUM
       - STANDARDS_ALERAM_ALL
+      - ALERAM_HIGH
       - ALERAM_MIDIUM
       - ALERAM_ALL
     Description: The type of Security Hub deployment [required]
@@ -74,6 +76,7 @@ Conditions:
   CreateSecurityHub: !Or [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ] ]
   CreateCloudWatchEventsForSecurityHubFindings: !Not [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ] ]
   SendAllEvents: !And [ !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ], !Equals [ !Ref SecurityHubType, ALERAM_ALL ] ]
+  SendMidiumEvents: !And [ !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, ALERAM_MIDIUM ] ]
 
 Mappings: 
   SecurityHubStandardsArn: 
@@ -156,7 +159,10 @@ Resources:
                 - !Ref AWS::NoValue
                 - - CRITICAL
                   - HIGH
-                  - MEDIUM
+                  - !If
+                    - SendMidiumEvents
+                    - MEDIUM
+                    - !Ref AWS::NoValue
       Name: SecurityHub-Findings
       State: ENABLED
       Targets:

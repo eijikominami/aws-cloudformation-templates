@@ -100,8 +100,10 @@ Parameters:
     Default: STANDARDS_ONLY
     AllowedValues:
       - STANDARDS_ONLY
+      - STAMDARDS_ALERAM_HIGH
       - STAMDARDS_ALERAM_MIDIUM
       - STANDARDS_ALERAM_ALL
+      - ALERAM_HIGH
       - ALERAM_MIDIUM
       - ALERAM_ALL
       - DISABLED
