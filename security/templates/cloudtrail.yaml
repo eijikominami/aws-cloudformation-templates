@@ -7,11 +7,10 @@ Metadata:
       - Label: 
           default: 'CloudTrail Configuration'
         Parameters:
-          - CloudTrailAdditionalFilters
+          - AccessLogBucketName
+          - AdditionalFilters
           - CloudTrailInsights
-          - CloudTrailS3Trail
-          - AuditOtherRegions
-          - LogBucketName
+          - IsAlreadyCreatedByControlTower
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -25,7 +24,7 @@ Metadata:
           - TagValue
 
 Parameters:
-  CloudTrailAdditionalFilters:
+  AdditionalFilters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
@@ -36,24 +35,24 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable CloudTrail Insights [required]
-  CloudTrailS3Trail:
+  IsAlreadyCreatedByControlTower:
     Type: String
-    Default: ENABLED
+    Default: false
     AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable CloudTrail trail [required]
-  AuditOtherRegions:
+      - true
+      - false
+    Description: Already created by Control Tower [required]
+  AccessLogBucketName:
     Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable cross region audit [required]
-  LogBucketName:
-    Type: String
-    AllowedPattern: .+
+    Default: ''
     Description: The S3 log bucket Name [required]
+  S3Trail:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudTrail S3 trail [required]
   LogicalName:
     Type: String
     Default: DefaultSecuritySettings
@@ -79,10 +78,10 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
-  CreateAdditionalFilters: !Not [ !Equals [ !Ref CloudTrailAdditionalFilters, '' ] ]
-  CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
+  CreateAdditionalFilters: !Not [ !Equals [ !Ref AdditionalFilters, '' ] ]
   CreateCloudTrailInsights: !Equals [ !Ref CloudTrailInsights, ENABLED ]
-  EnableLogging: !Equals [ !Ref CloudTrailS3Trail, ENABLED ]
+  CreateS3Trail: !Equals [ !Ref S3Trail, ENABLED ]
+  IsCreatedByControlTower: !Equals [ !Ref IsAlreadyCreatedByControlTower, true ]
 
 Resources:
   # IAM Role
@@ -119,7 +118,6 @@ Resources:
   CloudTrail:
     DependsOn:
       - S3BucketPolicyForCloudTrail
-    Condition: CreateCentralizedResources
     Type: AWS::CloudTrail::Trail
     Properties:
       CloudWatchLogsLogGroupArn: !GetAtt CloudWatchLogsGroupForCloudTrail.Arn
@@ -142,7 +140,7 @@ Resources:
                 - arn:aws:lambda
       IncludeGlobalServiceEvents: true
       IsLogging: !If
-        - EnableLogging
+        - CreateS3Trail
         - true
         - false
       IsMultiRegionTrail: true
@@ -156,7 +154,6 @@ Resources:
           Value: !Ref TagValue
   # KMS
   KMSKey:
-    Condition: CreateCentralizedResources
     Type: AWS::KMS::Key
     Properties: 
       Description: Encrypt CloudTrail Logs
@@ -215,7 +212,7 @@ Resources:
             ExpirationInDays: 60
             Status: Enabled
       LoggingConfiguration:
-        DestinationBucketName: !Ref LogBucketName
+        DestinationBucketName: !Ref AccessLogBucketName
         LogFilePrefix: CloudTrail/
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: true
@@ -287,9 +284,12 @@ Resources:
     Properties:
       FilterPattern: !If
         - CreateAdditionalFilters
-        - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ${CloudTrailAdditionalFilters}}'
+        - !Sub '{(($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")) && ${AdditionalFilters}}'
         - '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: UnauthorizedAPICalls 
           MetricNamespace: LogMetrics
@@ -315,7 +315,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName="ConsoleLogin") && ($.additionalEventData.MFAUsed !="Yes")}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: LoginWithoutMFA 
           MetricNamespace: LogMetrics
@@ -341,7 +344,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{$.userIdentity.type="Root" && $.userIdentity.invokedBy NOT EXISTS && $.eventType !="AwsServiceEvent"}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: ForRootAcount 
           MetricNamespace: LogMetrics
@@ -367,7 +373,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName=DeleteGroupPolicy) || ($.eventName=DeleteRolePolicy) || ($.eventName=DeleteUserPolicy) || ($.eventName=PutGroupPolicy) || ($.eventName=PutRolePolicy) || ($.eventName=PutUserPolicy) || ($.eventName=CreatePolicy) || ($.eventName=DeletePolicy) || ($.eventName=CreatePolicyVersion) || ($.eventName=DeletePolicyVersion) || ($.eventName=AttachRolePolicy) || ($.eventName=DetachRolePolicy) || ($.eventName=AttachUserPolicy) || ($.eventName=DetachUserPolicy) || ($.eventName=AttachGroupPolicy) || ($.eventName=DetachGroupPolicy)}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: IamPolicyChanges 
           MetricNamespace: LogMetrics
@@ -393,7 +402,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName=CreateTrail) || ($.eventName=UpdateTrail) || ($.eventName=DeleteTrail) || ($.eventName=StartLogging) || ($.eventName=StopLogging)}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: CloudTrailConfigurationChanges 
           MetricNamespace: LogMetrics
@@ -419,7 +431,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventName=ConsoleLogin) && ($.errorMessage="Failed authentication")}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: AuthenticationFailuresDetected 
           MetricNamespace: LogMetrics
@@ -445,7 +460,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventSource=kms.amazonaws.com) && (($.eventName=DisableKey) || ($.eventName=ScheduleKeyDeletion))}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: CustomerCreatedCMKsChanges 
           MetricNamespace: LogMetrics
@@ -471,7 +489,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties:
       FilterPattern: '{($.eventSource=s3.amazonaws.com) && (($.eventName=PutBucketAcl) || ($.eventName=PutBucketPolicy) || ($.eventName=PutBucketCors) || ($.eventName=PutBucketLifecycle) || ($.eventName=PutBucketReplication) || ($.eventName=DeleteBucketPolicy) || ($.eventName=DeleteBucketCors) || ($.eventName=DeleteBucketLifecycle) || ($.eventName=DeleteBucketReplication))}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: S3BucketPolicyChanges 
           MetricNamespace: LogMetrics
@@ -497,7 +518,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventSource=config.amazonaws.com) && (($.eventName=StopConfigurationRecorder) || ($.eventName=DeleteDeliveryChannel) || ($.eventName=PutDeliveryChannel) || ($.eventName=PutConfigurationRecorder))}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: ConfigConfigurationChanges 
           MetricNamespace: LogMetrics
@@ -523,7 +547,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=AuthorizeSecurityGroupIngress) || ($.eventName=AuthorizeSecurityGroupEgress) || ($.eventName=RevokeSecurityGroupIngress) || ($.eventName=RevokeSecurityGroupEgress) || ($.eventName=CreateSecurityGroup) || ($.eventName=DeleteSecurityGroup)}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: SecurityGroupChanges 
           MetricNamespace: LogMetrics
@@ -549,7 +576,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateNetworkAcl) || ($.eventName=CreateNetworkAclEntry) || ($.eventName=DeleteNetworkAcl) || ($.eventName=DeleteNetworkAclEntry) || ($.eventName=ReplaceNetworkAclEntry) || ($.eventName=ReplaceNetworkAclAssociation)}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: NACLChanges 
           MetricNamespace: LogMetrics
@@ -575,7 +605,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateCustomerGateway) || ($.eventName=DeleteCustomerGateway) || ($.eventName=AttachInternetGateway) || ($.eventName=CreateInternetGateway) || ($.eventName=DeleteInternetGateway) || ($.eventName=DetachInternetGateway)}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: NetworkGatewayChanges 
           MetricNamespace: LogMetrics
@@ -601,7 +634,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateRoute) || ($.eventName=CreateRouteTable) || ($.eventName=ReplaceRoute) || ($.eventName=ReplaceRouteTableAssociation) || ($.eventName=DeleteRouteTable) || ($.eventName=DeleteRoute) || ($.eventName=DisassociateRouteTable)}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: RouteTableChanges 
           MetricNamespace: LogMetrics
@@ -627,7 +663,10 @@ Resources:
     Type: AWS::Logs::MetricFilter
     Properties: 
       FilterPattern: '{($.eventName=CreateVpc) || ($.eventName=DeleteVpc) || ($.eventName=ModifyVpcAttribute) || ($.eventName=AcceptVpcPeeringConnection) || ($.eventName=CreateVpcPeeringConnection) || ($.eventName=DeleteVpcPeeringConnection) || ($.eventName=RejectVpcPeeringConnection) || ($.eventName=AttachClassicLinkVpc) || ($.eventName=DetachClassicLinkVpc) || ($.eventName=DisableVpcClassicLink) || ($.eventName=EnableVpcClassicLink)}'
-      LogGroupName: !Ref CloudWatchLogsGroupForCloudTrail
+      LogGroupName: !If
+        - IsCreatedByControlTower
+        - aws-controltower/CloudTrailLogs
+        - !Ref CloudWatchLogsGroupForCloudTrail
       MetricTransformations:
         - MetricName: VpcChanges 
           MetricNamespace: LogMetrics

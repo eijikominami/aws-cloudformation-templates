@@ -8,7 +8,6 @@ Metadata:
       - Label: 
           default: 'Config Configuration'
         Parameters: 
-          - AuditOtherRegions
           - AWSConfigAutoRemediation
       - Label: 
           default: 'Notification Configuration'
@@ -24,13 +23,6 @@ Metadata:
           - TagValue
 
 Parameters:
-  AuditOtherRegions:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable cross region audit [required]
   AWSConfigAutoRemediation:
     Type: String
     Default: ENABLED
@@ -67,7 +59,6 @@ Parameters:
     AllowedPattern: .+
  
 Conditions:
-  CreateCentralizedResources: !Equals [ !Ref AuditOtherRegions, ENABLED ]
   CreateRemediationResources: !Equals [ !Ref AWSConfigAutoRemediation, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -81,7 +72,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.1
+        SemanticVersion: 2.2.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -98,7 +89,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.1
+        SemanticVersion: 2.2.2
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -282,10 +273,7 @@ Resources:
       Name: default
       RecordingGroup:
         AllSupported: true
-        IncludeGlobalResourceTypes: !If
-          - CreateCentralizedResources
-          - true
-          - false
+        IncludeGlobalResourceTypes: true
       RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig
   ConfigCloudformationStackDriftDetectionCheck:
     # Must create a configuration recorder before you can create or update a Config rule.
@@ -425,7 +413,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.1
+        SemanticVersion: 2.2.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -530,7 +518,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.1
+        SemanticVersion: 2.2.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -893,7 +881,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.1
+        SemanticVersion: 2.2.2
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
