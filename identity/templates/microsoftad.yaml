@@ -17,6 +17,8 @@ Metadata:
           - SubnetPrivateIdForAz1
           - SubnetPrivateCidrBlockForAz2
           - SubnetPrivateIdForAz2
+          - SubnetPrivateCidrBlockForAz3
+          - SubnetPrivateIdForAz3
           - VPCId
       - Label: 
           default: 'Management Instance Configuration'
@@ -93,6 +95,15 @@ Parameters:
     Type: String
     Default: ''
     Description: The private subnet id at AZ2 [conditional]
+  SubnetPrivateCidrBlockForAz3:
+    Type: String
+    Default: 10.3.8.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ3 [conditional]
+  SubnetPrivateIdForAz3:
+    Type: String
+    Default: ''
+    Description: The private subnet id at AZ3 [conditional]
   VPCId:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
@@ -122,6 +133,7 @@ Parameters:
 Conditions:
   CreateAz1: !Equals [ !Ref SubnetPrivateIdForAz1, '']
   CreateAz2: !Equals [ !Ref SubnetPrivateIdForAz2, '']
+  CreateAz3: !Equals [ !Ref SubnetPrivateIdForAz3, '']
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -179,6 +191,39 @@ Resources:
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalName: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
+        VPCId: !Ref VPCId
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  Az3:
+    Condition: CreateAz3
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.2.2
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 2
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        LogicalName: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz3
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -501,6 +546,12 @@ Outputs:
       - CreateAz2
       - !GetAtt Az2.Outputs.PrivateSubnetId
       - !Ref SubnetPrivateIdForAz2
+  PrivateSubnetId3:
+    Description: The ID of the private subnet
+    Value: !If
+      - CreateAz3
+      - !GetAtt Az3.Outputs.PrivateSubnetId
+      - !Ref SubnetPrivateIdForAz3
   WindowsServerKeyPair:
     Description: The key pair for Windows Server
     Value: The key is stored in AWS Systems Manager Parameter Store
