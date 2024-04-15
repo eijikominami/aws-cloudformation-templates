@@ -335,10 +335,6 @@ Resources:
               - CreateAz2
               - !GetAtt Az2.Outputs.PrivateSubnetId
               - !Ref SubnetPrivateIdForAz2
-            - !If 
-              - CreateAz3
-              - !GetAtt Az3.Outputs.PrivateSubnetId
-              - !Ref SubnetPrivateIdForAz3
           VpcId: !Ref VPCId
   DHCPOptions:
     Type: AWS::EC2::DHCPOptions
