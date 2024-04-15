@@ -321,7 +321,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         AvailabilityZone: !Select
-          - 1
+          - 2
           - Fn::GetAZs: !Ref 'AWS::Region'
         LogicalName: !Ref AWS::StackName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockAz3
