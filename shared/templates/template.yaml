@@ -15,6 +15,7 @@ Metadata:
           - ActiveDirectoryShortName
           - ActiveDirectorySubnetCidrBlockForAz1
           - ActiveDirectorySubnetCidrBlockForAz2
+          - ActiveDirectorySubnetCidrBlockForAz3
       - Label: 
           default: 'VPC Configuration'
         Parameters:
@@ -102,6 +103,11 @@ Parameters:
     Default: 10.3.64.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
+  ActiveDirectorySubnetCidrBlockForAz3:
+    Type: String
+    Default: 10.3.128.0/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ3 [required]
   BucketNameForArchive:
     Type: String
     Default: ''
@@ -230,6 +236,7 @@ Resources:
         ShortName: !Ref ActiveDirectoryShortName
         SubnetPrivateCidrBlockForAz1: !Ref ActiveDirectorySubnetCidrBlockForAz1
         SubnetPrivateCidrBlockForAz2: !Ref ActiveDirectorySubnetCidrBlockForAz2
+        SubnetPrivateCidrBlockForAz3: !Ref ActiveDirectorySubnetCidrBlockForAz3
         VPCId: !Ref VPC
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
