@@ -426,6 +426,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForIamAccessKeysRotated
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -532,6 +535,9 @@ Resources:
           - !Ref SNSForDeploymentArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -894,6 +900,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForConfig
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

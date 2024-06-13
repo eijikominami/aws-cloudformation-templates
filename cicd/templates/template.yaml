@@ -1195,6 +1195,12 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
         ProjectName: !Ref CodeBuildForSAM
+        Environment: !If
+          - Development
+          - development
+          - production
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !If
           - Development
@@ -1219,6 +1225,12 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
         ProjectName: !Ref CodeBuildForNestedStack
+        Environment: !If
+          - Development
+          - development
+          - production
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !If
           - Development
@@ -1243,6 +1255,12 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
         EventsRuleName: !Ref CodePipelineEvents
+        Environment: !If
+          - Development
+          - development
+          - production
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !If
           - Development

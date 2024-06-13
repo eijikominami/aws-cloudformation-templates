@@ -420,6 +420,9 @@ Resources:
         IteratorAgeMillisecondsThreshold: 30000
         # Number of Input Records (200000rps * 60sec)
         NumberOfPutRecordThreshold: !Ref KinesisNumberOfPutRecordThreshold
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -595,6 +598,9 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref Lambda
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -673,6 +679,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         FirehoseStreamName: !Ref KinesisFirehose
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -835,6 +844,9 @@ Resources:
           - !Ref SNSForAlertArn
         DomainName: !Ref ElasticSearchDomain
         FreeStorageSpaceThreshold: !Ref ElasticSearchVolumeSize
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -875,6 +887,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForShutdownElasticSearchWorker
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -981,6 +996,9 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaShutdownElasticSearch
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

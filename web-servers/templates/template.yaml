@@ -1134,9 +1134,9 @@ Resources:
               ROOT_VOLUME_IDS=$(aws ec2 describe-instances --region $AWS_REGION
               --instance-id $AWS_INSTANCE_ID --output text --query
               Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId)
-            - >
+            - !Sub >
               aws ec2 create-tags --resources $ROOT_VOLUME_IDS --region
-              $AWS_REGION --tags Key=MyRootTag,Value=MyRootVolumesValue
+              $AWS_REGION --tags Key=${TagKey},Value=${TagValue}
       Tags: 
         - Key: Name
           Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
@@ -1244,6 +1244,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         CPUUtilizationThreshold: 70
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1270,6 +1273,9 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1293,6 +1299,9 @@ Resources:
           - !Ref SNSForAlertArn
         TransitGatewayId: !Ref TransitGatewayId
         TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

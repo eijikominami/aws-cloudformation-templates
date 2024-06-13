@@ -117,6 +117,9 @@ Resources:
         LoadBalancer: !Ref LoadBalancerFullName
         SNSTopicArn: !Ref SNSForAlertArn
         TargetGroup: !GetAtt LoadBalancerTargetGroup.TargetGroupFullName
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

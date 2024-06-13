@@ -14,7 +14,22 @@ Parameters:
   CertificateArn:
     Type: String
     AllowedPattern: .+
-    Description: The Certificate ARN [required]    
+    Description: The Certificate ARN [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
@@ -45,6 +60,11 @@ Resources:
       Statistic: Maximum
       Threshold: 30
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CertificateManagerDaysToExpiry7Days:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -70,6 +90,11 @@ Resources:
       Statistic: Maximum
       Threshold: 7
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CertificateManagerDaysToExpiry1Day:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -95,3 +120,8 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

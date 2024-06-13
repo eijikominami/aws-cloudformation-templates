@@ -19,6 +19,21 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS topic ARN [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
@@ -51,6 +66,11 @@ Resources:
       Statistic: Minimum
       Threshold: 0
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchClusterIndexWritesBlocked:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -78,6 +98,11 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchMasterReachableFromNode:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -105,6 +130,11 @@ Resources:
       Statistic: Minimum
       Threshold: 0
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchAutomatedSnapshotFailure:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -132,6 +162,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchKibanaHealthyNodes:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -159,6 +194,11 @@ Resources:
       Statistic: Minimum
       Threshold: 0
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchFreeStorageSpace:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -186,6 +226,11 @@ Resources:
       Statistic: Minimum
       Threshold: !Ref FreeStorageSpaceThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchMasterCPUUtilization:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -213,6 +258,11 @@ Resources:
       Statistic: Maximum
       Threshold: 50
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchMasterJVMMemoryPressure:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -240,6 +290,11 @@ Resources:
       Statistic: Maximum
       Threshold: 80
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchCPUUtilization:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -267,6 +322,11 @@ Resources:
       Statistic: Maximum
       Threshold: 50
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchJVMMemoryPressure:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -294,6 +354,11 @@ Resources:
       Statistic: Maximum
       Threshold: 80
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmElasticsearchSysMemoryUtilization:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -321,3 +386,8 @@ Resources:
       Statistic: Maximum
       Threshold: 80
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/aiml/bedrock sets Amazon Bedrock.
+
+Parameters: 
+  PineconeEndpointUrl:
+    Type: String
+    AllowedPattern: .+
+  PineconeApikey:
+    Type: String
+    AllowedPattern: .+   
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  # IAM
+  IAMRoleForBedrock:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*
+      Description: A role required for VPC FlowLog.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v1
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt S3Bucket.Arn
+                Condition:
+                  StringEquals:
+                    aws:ResourceAccount: !Ref AWS::AccountId
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Join
+                  - ''
+                  - - !GetAtt S3Bucket.Arn
+                    - '*'
+                Condition:
+                  StringEquals:
+                    aws:ResourceAccount: !Ref AWS::AccountId
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref SecretsManager
+      RoleName: !Sub ${AWS::StackName}-AWSBedrockKnowledgeBaseRole-${AWS::Region}
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Bedrock
+  KnowledgeBase:
+    Type: AWS::Bedrock::KnowledgeBase
+    Properties:
+      Description: !Sub KnowledgeBase created by ${AWS::StackName}
+      KnowledgeBaseConfiguration: 
+        Type: VECTOR
+        VectorKnowledgeBaseConfiguration: 
+          EmbeddingModelArn: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v1
+      Name: !Ref AWS::StackName
+      RoleArn: !GetAtt IAMRoleForBedrock.Arn
+      StorageConfiguration: 
+        PineconeConfiguration: 
+          ConnectionString: !Ref PineconeEndpointUrl
+          CredentialsSecretArn: !Ref SecretsManager
+          FieldMapping: 
+            MetadataField: metadata
+            TextField: text
+        Type: PINECONE
+      Tags: 
+        createdby: !Ref TagValue
+  DataSource:
+    Type: AWS::Bedrock::DataSource
+    Properties:
+      DataDeletionPolicy: RETAIN
+      DataSourceConfiguration: 
+        S3Configuration: 
+          BucketArn: !GetAtt S3Bucket.Arn
+          BucketOwnerAccountId: !Ref AWS::AccountId
+        Type: S3
+      Description: String
+      KnowledgeBaseId: !Ref KnowledgeBase
+      Name: !Sub knowledge-base-${S3Bucket}
+  # S3
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub bedrock-knowledgebase-${AWS::Region}-${AWS::AccountId}
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3Bucket
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3Bucket.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3Bucket.Arn
+                  - /*
+            Condition:
+              Bool: 
+                aws:SecureTransport: false
+  # Secret Manager
+  SecretsManager:
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: !Sub ${AWS::StackName}/PineconeApikey
+      SecretString: !Sub '{"apiKey":"${PineconeApikey}"}'
+      Tags: 
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

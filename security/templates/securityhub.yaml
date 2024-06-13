@@ -22,6 +22,7 @@ Metadata:
         Parameters:
           - LogicalName
           - Environment
+          - TagKey
           - TagValue
 
 Parameters:
@@ -65,6 +66,10 @@ Parameters:
       - production
       - test
       - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
   TagValue:
     Type: String
     Default: aws-cloudformation-templates
@@ -190,6 +195,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForSecurityHubFindings
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

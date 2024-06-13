@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/ml/medialive sets Amazon Kendra.
+Description: AWSCloudFormationTemplates/aiml/kendra sets Amazon Kendra.
 
 Metadata: 
   AWS::CloudFormation::Interface:
