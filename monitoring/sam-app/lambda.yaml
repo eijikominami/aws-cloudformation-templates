@@ -24,6 +24,21 @@ Parameters:
     Default: 24000
     MinValue: 0
     Description: The threshold of Duration [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
@@ -57,6 +72,11 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   MetricFilterErrorLog:
     Condition: CreateMetricFilter
     Type: AWS::Logs::MetricFilter
@@ -89,6 +109,11 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmLambdaTimeoutWillOccur:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -116,6 +141,11 @@ Resources:
       Statistic: Maximum
       Threshold: !Ref TimeoutMilliseconds
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmLambdaThrottles:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -143,3 +173,8 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

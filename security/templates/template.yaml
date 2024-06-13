@@ -223,6 +223,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
         LogicalName: !Ref AWS::StackName
+        TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
@@ -500,6 +501,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForHealth
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -542,6 +546,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForTrustedAdvisor
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

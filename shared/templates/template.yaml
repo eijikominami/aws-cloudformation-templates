@@ -799,6 +799,9 @@ Resources:
           - !Ref SNSForAlertArn
         TransitGatewayId: !Ref TransitGatewayId
         TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -823,6 +826,9 @@ Resources:
           - !Ref SNSForAlertArn
         VPCEndpointId: !Ref SSMEndpoint
         VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -847,6 +853,9 @@ Resources:
           - !Ref SNSForAlertArn
         VPCEndpointId: !Ref SSMMessagesEndpoint
         VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -871,6 +880,9 @@ Resources:
           - !Ref SNSForAlertArn
         VPCEndpointId: !Ref EC2MessagesEndpoint
         VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -895,6 +907,9 @@ Resources:
           - !Ref SNSForAlertArn
         VPCEndpointId: !Ref CloudWatchLogsEndpoint
         VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -919,6 +934,9 @@ Resources:
           - !Ref SNSForAlertArn
         VPCEndpointId: !Ref FirehoseEndpoint
         VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

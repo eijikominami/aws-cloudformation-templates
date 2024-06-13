@@ -25,6 +25,21 @@ Parameters:
     Default: 1000
     MinValue: 0
     Description: The threshold of PutRecord per minute [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
@@ -55,6 +70,11 @@ Resources:
       Statistic: Maximum
       Threshold: !Ref IteratorAgeMillisecondsThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmKinesisPutRecordSuccess:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -80,6 +100,11 @@ Resources:
       Statistic: Sum
       Threshold: !Ref NumberOfPutRecordThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmKinesisWriteProvisionedThroughputExceeded:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -104,3 +129,8 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

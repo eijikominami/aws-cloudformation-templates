@@ -310,6 +310,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.2 a log metric filter and alarm exist for AWS Management Console sign-in without MFA
   CloudWatchLogsMetricFilterCloudTrailLoginWithoutMFA:
     Type: AWS::Logs::MetricFilter
@@ -339,6 +344,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.3 a log metric filter and alarm exist for usage of "root" account 
   CloudWatchLogsMetricFilterCloudTrailForRootAcount:
     Type: AWS::Logs::MetricFilter
@@ -368,6 +378,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.4 a log metric filter and alarm exist for IAM policy changes 
   CloudWatchLogsMetricFilterCloudTrailIamPolicyChanges:
     Type: AWS::Logs::MetricFilter
@@ -397,6 +412,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.5 a log metric filter and alarm exist for CloudTrail configuration changes 
   CloudWatchLogsMetricFilterCloudTrailCloudTrailConfigurationChanges:
     Type: AWS::Logs::MetricFilter
@@ -426,6 +446,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.6 a log metric filter and alarm exist for AWS Management Console authentication failures
   CloudWatchLogsMetricFilterCloudTrailAuthenticationFailuresDetected:
     Type: AWS::Logs::MetricFilter
@@ -455,6 +480,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.7 a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs 
   CloudWatchLogsMetricFilterCloudTrailCustomerCreatedCMKsChanges:
     Type: AWS::Logs::MetricFilter
@@ -484,6 +514,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.8 a log metric filter and alarm exist for S3 bucket policy changes 
   CloudWatchLogsMetricFilterCloudTrailS3BucketPolicyChanges:
     Type: AWS::Logs::MetricFilter
@@ -513,6 +548,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.9 a log metric filter and alarm exist for AWS Config configuration changes 
   CloudWatchLogsMetricFilterCloudTrailConfigConfigurationChanges:
     Type: AWS::Logs::MetricFilter
@@ -542,6 +582,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.10 a log metric filter and alarm exist for changes to Security Group 
   CloudWatchLogsMetricFilterCloudTrailSecurityGroupChanges:
     Type: AWS::Logs::MetricFilter
@@ -571,6 +616,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.11 a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
   CloudWatchLogsMetricFilterCloudTrailNACLChanges:
     Type: AWS::Logs::MetricFilter
@@ -600,6 +650,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.12 a log metric filter and alarm exist for changes to network gateways
   CloudWatchLogsMetricFilterCloudTrailNetworkGatewayChanges:
     Type: AWS::Logs::MetricFilter
@@ -629,6 +684,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.13 a log metric filter and alarm exist for route table changes
   CloudWatchLogsMetricFilterCloudTrailRouteTableChanges:
     Type: AWS::Logs::MetricFilter
@@ -658,6 +718,11 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CIS 3.14 a log metric filter and alarm exist for VPC changes 
   CloudWatchLogsMetricFilterCloudTrailVpcChanges:
     Type: AWS::Logs::MetricFilter
@@ -687,3 +752,8 @@ Resources:
       Statistic: Maximum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

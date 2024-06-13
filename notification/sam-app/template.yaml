@@ -530,6 +530,9 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaSendNotificationToSlack
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -607,6 +610,9 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaTransferNotificationToSNS
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -695,6 +701,9 @@ Resources:
           - !Ref SNSForAlertArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaAnalyzeUnauthorizedApiCalls
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

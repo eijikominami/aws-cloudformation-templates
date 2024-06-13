@@ -29,6 +29,21 @@ Parameters:
     Default: 2000
     MinValue: 0
     Description: The threshold of Latency [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
@@ -56,6 +71,11 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmApi5XXError:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -83,6 +103,11 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmApiLatency:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -109,6 +134,11 @@ Resources:
       Statistic: Average
       Threshold: !Ref LatencyThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   AlarmApiCount:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -135,3 +165,8 @@ Resources:
       Statistic: Sum
       Threshold: !Ref ApiCount
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

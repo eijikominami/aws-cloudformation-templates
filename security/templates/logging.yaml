@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/logging is a solution for collecting multiple types of logs.
+
+Resources:
+  SIEMOnAmazonOpenSearchService:
+    DeletionPolicy: Retain
+    Type: AWS::CloudFormation::StackSet
+      Properties:
+        PermissionModel: SERVICE_MANAGED
+        StackSetName: SIEMOnAmazonOpenSearchService

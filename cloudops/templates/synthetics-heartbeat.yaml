@@ -336,6 +336,11 @@ Resources:
       Statistic: Average
       Threshold: !Ref IncidentSuccessPercentThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmSynthetics:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -364,6 +369,11 @@ Resources:
       Statistic: Average
       Threshold: 90
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # SNS
   SNSForAlert:
     Condition: CreateSNSForAlert
