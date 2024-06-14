@@ -723,6 +723,9 @@ Resources:
         SlackWorkspaceId: !Ref SlackWorkspaceId
         SlackChannelId: !Ref SlackChannelIdForAlert
         SNSArn: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -750,6 +753,9 @@ Resources:
           - CreateSNSForCICD
           - !GetAtt SNSForCICD.Outputs.SNSTopicArn
           - !Ref SNSForCICDArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         - Key: environment
           Value: !Ref Environment

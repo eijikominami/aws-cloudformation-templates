@@ -14,8 +14,10 @@ Metadata:
           - VPCCidrBlock
           - SubnetPrivateCidrBlockForAz1
           - SubnetPrivateCidrBlockForAz2
+          - SubnetPrivateCidrBlockForAz3
           - SubnetTransitCidrBlockForAz1
-          - SubnetTransitCidrBlockForAz1
+          - SubnetTransitCidrBlockForAz2
+          - SubnetTransitCidrBlockForAz3
           - TransitGatewayId
           - OnpremDnsIp
           - PrincipalsToAssociateWithRoute53ResolverRule
@@ -41,6 +43,10 @@ Parameters:
     Type: String
     AllowedPattern: ^[0-9./]*$
     Description: The IPv4 address that you want to use for DNS queries
+  DnsIpAz3:
+    Type: String
+    AllowedPattern: ^[0-9./]*$
+    Description: The IPv4 address that you want to use for DNS queries
   DomainName:
     Type: String
     Default: ''
@@ -60,9 +66,14 @@ Parameters:
     Description: The private subnet CIDR block at AZ1 [required]
   SubnetPrivateCidrBlockForAz2:
     Type: String
-    Default: 10.0.12.0/24
+    Default: 10.0.10.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The private subnet CIDR block at AZ2 [required]
+  SubnetPrivateCidrBlockForAz3:
+    Type: String
+    Default: 10.0.12.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ3 [required]
   SubnetTransitCidrBlockForAz1:
     Type: String
     Default: 10.0.11.0/24
@@ -70,9 +81,14 @@ Parameters:
     Description: The transit subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockForAz2:
     Type: String
-    Default: 10.0.15.0/24
+    Default: 10.0.13.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2 [required]
+  SubnetTransitCidrBlockForAz3:
+    Type: String
+    Default: 10.0.15.0/24
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block at AZ3 [required]
   TransitGatewayId:
     Type: String
     AllowedPattern: .+
@@ -168,6 +184,39 @@ Resources:
         LogicalName: !Ref LogicalName
         SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz2
         SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockForAz2
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  Az3:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.2.6
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 2
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        LogicalName: !Ref LogicalName
+        SubnetPrivateCidrBlock: !Ref SubnetPrivateCidrBlockForAz3
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockForAz3
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -296,6 +345,14 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPrivate
+  RoutePrivateToTransitGatewayAz3:
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az3.Outputs.RouteTableIdPrivate
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Type: AWS::EC2::TransitGatewayAttachment
@@ -303,6 +360,7 @@ Resources:
       SubnetIds:
         - !GetAtt Az1.Outputs.TransitSubnetId
         - !GetAtt Az2.Outputs.TransitSubnetId
+        - !GetAtt Az3.Outputs.TransitSubnetId
       Tags:
         - Key: Name
           Value: !Sub tgw-attach-${LogicalName}-${AWS::Region}
@@ -328,6 +386,14 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
+  RouteTransitToTransitGatewayAz3:
+    DependsOn:
+      - TransitGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az3.Outputs.RouteTableIdTransit
   # Route 53 Resolover Endpoint
   Route53ResolverInbound:
     Type: AWS::Route53Resolver::ResolverEndpoint
@@ -338,6 +404,8 @@ Resources:
           SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
         - Ip: !Ref DnsIpAz2
           SubnetId: !GetAtt Az2.Outputs.PrivateSubnetId 
+        - Ip: !Ref DnsIpAz3
+          SubnetId: !GetAtt Az3.Outputs.PrivateSubnetId 
       Name: !Sub rslvr-in-${LogicalName}-${AWS::Region}
       SecurityGroupIds:
         - !Ref SecurityGroup
@@ -352,7 +420,8 @@ Resources:
       Direction: OUTBOUND
       IpAddresses: 
         - SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
-        - SubnetId: !GetAtt Az2.Outputs.PrivateSubnetId 
+        - SubnetId: !GetAtt Az2.Outputs.PrivateSubnetId
+        - SubnetId: !GetAtt Az3.Outputs.PrivateSubnetId  
       Name: !Sub rslvr-out-${LogicalName}-${AWS::Region}
       SecurityGroupIds:
         - !Ref SecurityGroup
@@ -415,6 +484,8 @@ Resources:
         - Ip: !Ref DnsIpAz1
           Port: 53
         - Ip: !Ref DnsIpAz2
+          Port: 53
+        - Ip: !Ref DnsIpAz3
           Port: 53
   Route53ResolverInboundRuleAssociation:
     Condition: CreateRoute53ResolverInboundRule

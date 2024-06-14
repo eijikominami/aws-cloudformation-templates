@@ -282,47 +282,47 @@ Parameters:
     Description: Route53 hosted zone id
   SubnetPrivateCidrBlockForAz1:
     Type: String
-    Default: 10.1.0.0/24
+    Default: 10.2.0.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The private subnet CIDR block at AZ1
   SubnetPrivateCidrBlockForAz2:
     Type: String
-    Default: 10.1.2.0/24
+    Default: 10.2.2.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The private subnet CIDR block at AZ2
   SubnetPrivateCidrBlockForAz3:
     Type: String
-    Default: 10.1.4.0/24
+    Default: 10.2.4.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The private subnet CIDR block at AZ3
   SubnetPublicCidrBlockForAz1:
     Type: String
-    Default: 10.1.1.0/25
+    Default: 10.2.1.0/25
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ1 [required]
   SubnetPublicCidrBlockForAz2:
     Type: String
-    Default: 10.1.3.0/25
+    Default: 10.2.3.0/25
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
   SubnetPublicCidrBlockForAz3:
     Type: String
-    Default: 10.1.5.0/25
+    Default: 10.2.5.0/25
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ3 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
-    Default: 10.1.1.128/25
+    Default: 10.2.1.128/25
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ1
   SubnetTransitCidrBlockAz2:
     Type: String
-    Default: 10.1.3.128/25
+    Default: 10.2.3.128/25
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2
   SubnetTransitCidrBlockAz3:
     Type: String
-    Default: 10.1.5.128/25
+    Default: 10.2.5.128/25
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ3
   TransitGatewayId:
@@ -335,7 +335,7 @@ Parameters:
     Description: The IPv4 CIDR block forward to TransitGateway
   VPCCidrBlock:
     Type: String
-    Default: 10.1.0.0/21
+    Default: 10.2.0.0/21
     AllowedPattern: ^[0-9./]*$
     Description: The VPC CIDR block [required]
   WebACL:
@@ -505,7 +505,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         AvailabilityZone: !Select
-          - 1
+          - 2
           - Fn::GetAZs: !Ref 'AWS::Region'
         InternetGatewayId: !Ref InternetGateway
         NetworkLoadBalancer: !If 
@@ -1013,6 +1013,8 @@ Resources:
     Type: AWS::EC2::VPC
     Properties: 
       CidrBlock: !Ref VPCCidrBlock
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
       Tags:
         - Key: Name
           Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
