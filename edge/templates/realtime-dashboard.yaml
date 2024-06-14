@@ -140,7 +140,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -157,7 +157,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -409,7 +409,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-streams
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
@@ -589,7 +589,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
@@ -671,7 +671,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
@@ -835,7 +835,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elasticsearch
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
@@ -874,7 +874,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -987,7 +987,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
