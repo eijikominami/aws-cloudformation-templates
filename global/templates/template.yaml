@@ -193,7 +193,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -327,11 +327,14 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         CertificateArn: !Ref CertificateManager
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -371,6 +374,11 @@ Resources:
       Statistic: Maximum
       Threshold: !Ref BillingAlertThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmCloudFront4xxErrorRate:
     Condition: CreateCloudWatchAlarmCloudFrontErrorRate
     Type: AWS::CloudWatch::Alarm
@@ -395,6 +403,11 @@ Resources:
       Statistic: Average
       Threshold: !Ref CloudFrontErrorRateThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmCloudFront5xxErrorRate:
     Condition: CreateCloudWatchAlarmCloudFrontErrorRate
     Type: AWS::CloudWatch::Alarm
@@ -419,6 +432,11 @@ Resources:
       Statistic: Average
       Threshold: !Ref CloudFrontErrorRateThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmCloudFrontTotalErrorRate:
     Condition: CreateCloudWatchAlarmCloudFrontErrorRate
     Type: AWS::CloudWatch::Alarm
@@ -443,6 +461,11 @@ Resources:
       Statistic: Average
       Threshold: !Ref CloudFrontErrorRateThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmCloudFrontRequests:
     Condition: CreateCloudWatchAlarmCloudFrontRequests
     Type: AWS::CloudWatch::Alarm
@@ -467,6 +490,11 @@ Resources:
       Statistic: Maximum
       Threshold: !Ref CloudFrontErrorRequestPerMinuteThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmCloudFrontBytesDownloaded:
     Condition: CreateCloudWatchAlarmCloudFrontBytesDownloaded
     Type: AWS::CloudWatch::Alarm
@@ -491,6 +519,11 @@ Resources:
       Statistic: Maximum
       Threshold: !Ref CloudFrontBytesDownloadedPerMinuteThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # Lambda
   LambdaTransferSNSTopic:
     Condition: CreateSNSForAlertTransfer
@@ -609,12 +642,15 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaTransferSNSTopic
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

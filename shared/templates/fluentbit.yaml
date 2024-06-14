@@ -20,8 +20,10 @@ Metadata:
         Parameters: 
           - NlbIPv4Address1
           - NlbIPv4Address2
+          - NlbIPv4Address3
           - SubnetId1
           - SubnetId2
+          - SubnetId3
       - Label: 
           default: 'S3 Configuration'
         Parameters: 
@@ -80,12 +82,19 @@ Parameters:
     Type: String
     Default: 10.3.64.114
     Description: The private IPv4 address for an internal load balancer  
+  NlbIPv4Address3:
+    Type: String
+    Default: 10.3.128.114
+    Description: The private IPv4 address for an internal load balancer  
   SubnetId1:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id 1 for Container [required]
   SubnetId2:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id 2 for Container [required]
+  SubnetId3:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 3 for Container [required]
   Memory:
     Type: String
     Default: 3072
@@ -126,6 +135,7 @@ Conditions:
   CreateS3ReplicationForArchive: !And [ !Not [ !Equals [ !Ref AccountIdForArchive, ''] ], !Not [ !Equals [ !Ref BucketNameForArchive, ''] ] ]
   CreateNlbSubnetMapping1: !Not [ !Equals [ !Ref NlbIPv4Address1, ''] ]
   CreateNlbSubnetMapping2: !Not [ !Equals [ !Ref NlbIPv4Address2, ''] ]
+  CreateNlbSubnetMapping3: !Not [ !Equals [ !Ref NlbIPv4Address3, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -138,7 +148,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -158,7 +168,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -279,6 +289,11 @@ Resources:
             - !Ref NlbIPv4Address2
             - !Ref AWS::NoValue
           SubnetId: !Ref SubnetId2
+        - PrivateIPv4Address: !If
+            - CreateNlbSubnetMapping3
+            - !Ref NlbIPv4Address3
+            - !Ref AWS::NoValue
+          SubnetId: !Ref SubnetId3
       Tags:
         - Key: Name
           Value: !Sub elb-${LogicalName}-${AWS::Region}
@@ -358,7 +373,8 @@ Resources:
             - !Ref SecurityGroupSyslog
           Subnets: 
             - !Ref SubnetId1
-            - !Ref SubnetId2        
+            - !Ref SubnetId2
+            - !Ref SubnetId3     
       SchedulingStrategy: REPLICA
       ServiceName: !Sub ${LogicalName}-FargateService
       Tags: 
@@ -536,7 +552,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:
@@ -544,6 +560,9 @@ Resources:
         CustomAlarmName: !Ref AWS::StackName
         ServiceName: !Sub ${LogicalName}-FargateService
         SNSTopicArn: !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

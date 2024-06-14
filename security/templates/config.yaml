@@ -72,7 +72,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -89,7 +89,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -413,7 +413,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -426,6 +426,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForIamAccessKeysRotated
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -518,7 +521,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -532,6 +535,9 @@ Resources:
           - !Ref SNSForDeploymentArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaDeleteExpiredAccessKeys
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -881,7 +887,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -894,6 +900,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         EventsRuleName: !Ref CloudWatchEventsForConfig
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

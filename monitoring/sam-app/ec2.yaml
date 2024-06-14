@@ -17,6 +17,21 @@ Parameters:
     MinValue: 0
     MaxValue: 100
     Description: The threshold of CPU Utilization [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
@@ -44,6 +59,11 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   EC2CPUUtilization:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -66,3 +86,8 @@ Resources:
       Statistic: Average
       Threshold: !Ref CPUUtilizationThreshold
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

@@ -383,7 +383,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -431,7 +431,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -724,7 +724,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -741,7 +741,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -1134,9 +1134,9 @@ Resources:
               ROOT_VOLUME_IDS=$(aws ec2 describe-instances --region $AWS_REGION
               --instance-id $AWS_INSTANCE_ID --output text --query
               Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId)
-            - >
+            - !Sub >
               aws ec2 create-tags --resources $ROOT_VOLUME_IDS --region
-              $AWS_REGION --tags Key=MyRootTag,Value=MyRootVolumesValue
+              $AWS_REGION --tags Key=${TagKey},Value=${TagValue}
       Tags: 
         - Key: Name
           Value: !Sub ec2-${AWS::StackName}-${AWS::Region}
@@ -1231,7 +1231,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1244,6 +1244,9 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
         CPUUtilizationThreshold: 70
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1253,7 +1256,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1270,6 +1273,9 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -1279,7 +1285,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.2
+        SemanticVersion: 2.2.6
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1293,6 +1299,9 @@ Resources:
           - !Ref SNSForAlertArn
         TransitGatewayId: !Ref TransitGatewayId
         TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
