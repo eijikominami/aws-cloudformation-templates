@@ -68,13 +68,20 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2VolumeSize | Number | 8 | ○ | |
 | GlobalInfrastructure | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | | ○ | CloudFront や Global Accelerator を有効にするかどうか |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
-| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
-| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz1 | String | 10.1.0.0/24 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz2 | String | 10.1.2.0/24 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz3 | String | 10.1.4.0/24 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz1 | String | 10.1.1.0/25 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz2 | String | 10.1.3.0/25 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz3 | String | 10.1.5.0/25 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockForAz1 | String | 10.1.1.128/25 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockForAz2 | String | 10.1.3.128/25 | ○ | AZ2 の トランジットサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockForAz3 | String | 10.1.5.128/25 | ○ | AZ3 の トランジットサブネットの CIDR ブロック |
 | TransitGatewayId | String | | | Transit Gateway の Id |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGatewayに転送するアドレス範囲 |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
 | WebACLArnForCloudFront | String | | | CloudFrontにアタッチするWAFのARN |
-| VPCCidrBlock | String | 10.0.0.0/21 | ○ | VPC の CIDR ブロック |
+| VPCCidrBlock | String | 10.1.0.0/21 | ○ | VPC の CIDR ブロック |
 
 ## トラブルシューティング
 

@@ -26,6 +26,9 @@ You can provide optional parameters as follows.
 | `OutputGroupName` | String |  | ○ | The output group name |
 | `PipelineId` | String |  | ○ | The pipeline id |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -55,3 +58,6 @@ cloudwatch-alarm-about-medialive は、 AWS Elemental MediaLive に関する Ama
 | `OutputGroupName` | String |  | ○ | Output Group 名 |
 | `PipelineId` | String |  | ○ | パイプラインID |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

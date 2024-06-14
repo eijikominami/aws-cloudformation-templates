@@ -13,8 +13,7 @@ Metadata:
           - InputWhitelistRules
           - ElementalLinkId1
           - ElementalLinkId2
-          - ElementalLinkType1
-          - ElementalLinkType2
+          - ElementalLinkType
           - VodSourceBucket
       - Label:
           default: 'MediaLive Configuration'
@@ -95,20 +94,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The unique ID for the Elemental Link device [ELEMENTAL_LINK]
-  ElementalLinkType1:
+  ElementalLinkType:
     Type: String
     Default: HD
     AllowedValues:
       - HD
       - UHD
-    Description: The type for the Elemental Link device [ELEMENTAL_LINK]   
-  ElementalLinkType2:
-    Type: String
-    Default: HD
-    AllowedValues:
-      - HD
-      - UHD
-    Description: The type for the Elemental Link device [ELEMENTAL_LINK]           
+    Description: The type for the Elemental Link device [ELEMENTAL_LINK]            
   FramerateDenominator:
     Type: Number
     Default: 1001
@@ -263,8 +255,8 @@ Conditions:
   CreateDestinationForMediaPackage: !And [ !Not [ !Equals [ !Ref MediaPackageChannelId, ''] ], !Equals [ !Ref OutputType, MEDIA_PACKAGE] ]
   CreateDestinationForMediaStore: !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ]
   CreateDestinationForMediaStoreOrS3: !Or [ !And [ !Not [ !Equals [ !Ref MediaStoreEndpoint, ''] ], !Equals [ !Ref OutputType, MEDIA_STORE] ], !And [ !Not [ !Equals [ !Ref OutputHlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ] ]
-  CreateDestinationForRTMP: !Or [ !Equals [ !Ref OutputType, RTMP], !And [ !Not [ !Equals [ !Ref OutputRtmpRtpUrl1, ''] ], !Not [ !Equals [ !Ref OutputRtmpStreamKey1, ''] ] ] ]
-  CreateDestinationForRTP: !Or [ !Equals [ !Ref OutputType, RTP], !Not [ !Equals [ !Ref OutputRtmpRtpUrl1, ''] ] ]
+  CreateDestinationForRTMP: !And [ !Equals [ !Ref OutputType, RTMP], !Not [ !Equals [ !Ref OutputRtmpRtpUrl1, ''] ], !Not [ !Equals [ !Ref OutputRtmpStreamKey1, ''] ] ]
+  CreateDestinationForRTP: !And [ !Equals [ !Ref OutputType, RTP], !Not [ !Equals [ !Ref OutputRtmpRtpUrl1, ''] ] ]
   CreateDestinationForS3: !And [ !Not [ !Equals [ !Ref OutputHlsBucket, ''] ], !Equals [ !Ref OutputType, S3] ]
   CreateDestinationForArchive: !Not [ !Equals [ !Ref ArchiveBucket, ''] ]
   CreateElementalLinkLIVEWorkflow: !And [ !Or [ !Equals [ !Ref InputType, ELEMENTAL_LINK ], !Equals [ !Ref InputType, ELEMENTAL_LINK_S3 ] ], !Not [ !Equals [ !Ref ElementalLinkId1, ''] ] ]
@@ -286,7 +278,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -303,7 +295,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -733,10 +725,10 @@ Resources:
                         BlackDetectThreshold: 0.1
                         VideoBlackThresholdMsec: 15000
                 InputPreference: EQUAL_INPUT_PREFERENCE
-                SecondaryInputId: !Ref MediaLiveInputRempPush1
+                SecondaryInputId: !Ref MediaLiveInputRtmpPush1
               - !Ref AWS::NoValue
             InputAttachmentName: !Sub ${LogicalName}-Rtmp0
-            InputId: !Ref MediaLiveInputRempPush0
+            InputId: !Ref MediaLiveInputRtmpPush0
             InputSettings: 
               DeblockFilter: DISABLED
               DenoiseFilter: DISABLED
@@ -750,7 +742,7 @@ Resources:
           - !If
               - CreateTwoInput
               - InputAttachmentName: !Sub ${LogicalName}-Rtmp1
-                InputId: !Ref MediaLiveInputRempPush1
+                InputId: !Ref MediaLiveInputRtmpPush1
                 InputSettings: 
                   DeblockFilter: DISABLED
                   DenoiseFilter: DISABLED
@@ -822,7 +814,7 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
       Type: INPUT_DEVICE
-  MediaLiveInputRempPush0:
+  MediaLiveInputRtmpPush0:
     Condition: CreateRTMPLIVEWorkflow
     Type: AWS::MediaLive::Input
     Properties:
@@ -839,7 +831,7 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
       Type: RTMP_PUSH
-  MediaLiveInputRempPush1:
+  MediaLiveInputRtmpPush1:
     Condition: CreateRTMPLIVEWorkflowAndTwoInput
     Type: AWS::MediaLive::Input
     Properties: 
@@ -883,7 +875,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -910,7 +902,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -937,7 +929,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -945,7 +937,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-0
-        DeviceType: !Ref ElementalLinkType1
+        DeviceType: !Ref ElementalLinkType
         InputDeviceId: !Ref ElementalLinkId1
         SNSTopicArn: !If
           - CreateSNSForAlert
@@ -963,7 +955,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -971,7 +963,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Sub ${AWS::StackName}-1
-        DeviceType: !Ref ElementalLinkType2
+        DeviceType: !Ref ElementalLinkType
         InputDeviceId: !Ref ElementalLinkId1
         SNSTopicArn: !If
           - CreateSNSForAlert
@@ -995,25 +987,25 @@ Outputs:
   RtmpPrimary1:
     Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP primary address 1
-    Value: !Select [0, !GetAtt MediaLiveInputRempPush0.Destinations]
+    Value: !Select [0, !GetAtt MediaLiveInputRtmpPush0.Destinations]
   RtmpPrimary2:
     Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP primary address 2
     Value: !If
       - CreateTwoPipelines
-      - !Select [1, !GetAtt MediaLiveInputRempPush0.Destinations]
+      - !Select [1, !GetAtt MediaLiveInputRtmpPush0.Destinations]
       - ''
   RtmpSecondary1:
     Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP secondary address 1
     Value: !If
       - CreateTwoInput
-      - !Select [0, !GetAtt MediaLiveInputRempPush1.Destinations]
+      - !Select [0, !GetAtt MediaLiveInputRtmpPush1.Destinations]
       - ''
   RtmpSecondary2:
     Condition: CreateRTMPLIVEWorkflow
     Description: The RTMP secondary address 2
     Value: !If
       - CreateTwoPipelinesAndTwoInput
-      - !Select [1, !GetAtt MediaLiveInputRempPush1.Destinations]
+      - !Select [1, !GetAtt MediaLiveInputRtmpPush1.Destinations]
       - ''

@@ -22,6 +22,9 @@ You can give optional parameters as follows.
 | `CPUUtilizationThreshold` | Number | 100 | ○ | The threshold of CPU Utilization |
 | `CustomAlarmName` | String | | | The custom alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -47,3 +50,6 @@ cloudwatch-alarm-about-ec2 は、Amazon EC2 に関する Amazon CloudWatch ア�
 | `CPUUtilizationThreshold` | Number | 100 | ○ | CPU使用率の閾値 |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

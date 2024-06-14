@@ -31,8 +31,10 @@ Metadata:
           - SecurityGroupId
           - PublicSubnetId1
           - PublicSubnetId2
+          - PublicSubnetId3
           - PrivateSubnetId1
           - PrivateSubnetId2
+          - PrivateSubnetId3
           - VPCId
       - Label: 
           default: 'Domain Configuration'
@@ -139,12 +141,18 @@ Parameters:
   PublicSubnetId2:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id 2 for Elastic Load Balancer [required]
+  PublicSubnetId3:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 3 for Elastic Load Balancer [required]
   PrivateSubnetId1:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id 1 for Container [required]
   PrivateSubnetId2:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id 2 for Container [required]
+  PrivateSubnetId3:
+    Type: AWS::EC2::Subnet::Id
+    Description: The subnet id 3 for Container [required]
   Route53HostedZoneId:
     Type: String
     Default: ''
@@ -204,7 +212,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -224,7 +232,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -705,7 +713,7 @@ Resources:
                 TemplatePath: BuildArtifact_SAM::packaged.yaml
                 ParameterOverrides: !Join
                   - ''
-                  - - !Sub '{"ACMValidationMethod": "${ACMValidationMethod}", "ACMDomainName": "${ACMDomainName}", "AppPort": "${AppPort}", "AutoScalingMaxSize": "${AutoScalingMaxSize}", "Cpu": "${Cpu}", "CpuArchitecture": "${CpuArchitecture}", "DesiredCapacity": "${DesiredCapacity}", "DomainName": "${DomainName}", "ImageUri": "#{BuildContainerVariables.IMAGE_URI}", "Memory": "${Memory}", "SecurityGroupId": "${SecurityGroupId}", "PublicSubnetId1": "${PublicSubnetId1}", "PublicSubnetId2": "${PublicSubnetId2}", "PrivateSubnetId1": "${PrivateSubnetId1}", "PrivateSubnetId2": "${PrivateSubnetId2}", "VPCId": "${VPCId}", "Environment": "${Environment}", "Route53HostedZoneId": "${Route53HostedZoneId}", "LogicalName": "${LogicalName}", "TagKey": "${TagKey}", "TagValue": "${TagValue}", "SNSForAlertArn": "'
+                  - - !Sub '{"ACMValidationMethod": "${ACMValidationMethod}", "ACMDomainName": "${ACMDomainName}", "AppPort": "${AppPort}", "AutoScalingMaxSize": "${AutoScalingMaxSize}", "Cpu": "${Cpu}", "CpuArchitecture": "${CpuArchitecture}", "DesiredCapacity": "${DesiredCapacity}", "DomainName": "${DomainName}", "ImageUri": "#{BuildContainerVariables.IMAGE_URI}", "Memory": "${Memory}", "SecurityGroupId": "${SecurityGroupId}", "PublicSubnetId1": "${PublicSubnetId1}", "PublicSubnetId2": "${PublicSubnetId2}", "PublicSubnetId3": "${PublicSubnetId3}", "PrivateSubnetId1": "${PrivateSubnetId1}", "PrivateSubnetId2": "${PrivateSubnetId2}", "PrivateSubnetId3": "${PrivateSubnetId3}", "VPCId": "${VPCId}", "Environment": "${Environment}", "Route53HostedZoneId": "${Route53HostedZoneId}", "LogicalName": "${LogicalName}", "TagKey": "${TagKey}", "TagValue": "${TagValue}", "SNSForAlertArn": "'
                     - !If
                       - CreateSNSForAlert
                       - !GetAtt SNSForAlert.Outputs.SNSTopicArn

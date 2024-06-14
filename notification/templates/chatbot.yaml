@@ -22,6 +22,9 @@ Metadata:
           default: 'Tag Configuration'
         Parameters: 
           - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
 
 Parameters:
   IAMRoleForChatbotArn:
@@ -44,6 +47,21 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS Topic ARN [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
 
 Resources:
   # AWSServiceRoleForAWSChatbot Role will be created automatically.
@@ -57,6 +75,11 @@ Resources:
       SlackWorkspaceId: !Ref SlackWorkspaceId
       SnsTopicArns: 
         - !Ref SNSArn
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
 
 Outputs:
   ChatbotArn:

@@ -22,6 +22,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `TargetGroup` | String | | ○ | The target group id |
 | `LoadBalancer` | String | | ○ | The load balancer name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -47,3 +50,6 @@ cloudwatch-alarm-about-application-elb は、Application Load Balancer に関す
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `TargetGroup` | String | | ○ | ターゲットグループID |
 | `LoadBalancer` | String | | ○ | ロードバランサー名 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

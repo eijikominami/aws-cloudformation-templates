@@ -50,7 +50,7 @@ aws cloudformation deploy --template-file transitgateway.yaml --stack-name Trans
 aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
-デプロイ時に、以下のパラメータを指定することができます。
+デプロイ時に、以下のパラメータを指定することができます。 
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
@@ -76,6 +76,8 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabiliti
 | TransitGatewayDestinationCidrBlock | String | | | Transit Gateway に転送するサブネットの CIDR ブロック | 
 | VPCCidrBlockForEgress | String | 10.0.0.0/21 | ○ | Egress VPC の CIDR ブロック | 
 | VPCCidrBlockForDNS | String | 10.0.8.0/21 | ○ | DNS VPC の CIDR ブロック | 
+
+`TransitGatewayDefaultRouteTableId` は、 Transit Gateway 作成後に入力可能です。
 
 ### マルチアカウント対応
 

@@ -24,6 +24,9 @@ You can provide optional parameters as follows.
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `VPCEndpointId` | String | | ○ | The id of the endpoint | 
 | `VPCId` | String | | ○ | The VPC id | 
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -51,3 +54,6 @@ cloudwatch-alarm-about-privateendpoints は、VPC エンドポイントに関す
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `VPCEndpointId` | String | | ○ | エンドポイント ID | 
 | `VPCId` | String | | ○ | VPC ID | 
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

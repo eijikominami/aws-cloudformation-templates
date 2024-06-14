@@ -22,11 +22,14 @@ Metadata:
         Parameters: 
           - EipAllocationId1ForNLB
           - EipAllocationId2ForNLB
+          - EipAllocationId3ForNLB
           - LoadBalancerType
           - SubnetId1ForAutoScaling
           - SubnetId2ForAutoScaling
+          - SubnetId3ForAutoScaling
           - SubnetId1ForNLB
           - SubnetId2ForNLB
+          - SubnetId3ForNLB
       - Label: 
           default: 'Domain Configuration'
         Parameters:
@@ -106,6 +109,10 @@ Parameters:
     Type: String 
     Default: ''
     Description: The Elastic Ip Allocation Id2 for Network LoadBalancer
+  EipAllocationId3ForNLB:     
+    Type: String 
+    Default: ''
+    Description: The Elastic Ip Allocation Id3 for Network LoadBalancer
   LogicalName:
     Type: String
     Default: WebServers
@@ -130,6 +137,10 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
     AllowedPattern: .+
     Description: The subnet id 2 for AutoScaling
+  SubnetId3ForAutoScaling:
+    Type: AWS::EC2::Subnet::Id
+    AllowedPattern: .+
+    Description: The subnet id 3 for AutoScaling
   SubnetId1ForNLB:
     Type: AWS::EC2::Subnet::Id
     Default: ''
@@ -138,6 +149,10 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
     Default: ''
     Description: The subnet id 2 for Elastic Load Balancer
+  SubnetId3ForNLB:
+    Type: AWS::EC2::Subnet::Id
+    Default: ''
+    Description: The subnet id 3 for Elastic Load Balancer
   SNSForAlertArn:
     Type: String
     Default: ''   
@@ -180,7 +195,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -197,7 +212,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -233,6 +248,8 @@ Resources:
             AllocationId: !Ref EipAllocationId1ForNLB
           - SubnetId: !Ref SubnetId2ForNLB
             AllocationId: !Ref EipAllocationId2ForNLB
+          - SubnetId: !Ref SubnetId3ForNLB
+            AllocationId: !Ref EipAllocationId3ForNLB
         - !Ref AWS::NoValue
       # For Application Load Balaner
       Subnets: !If
@@ -240,6 +257,7 @@ Resources:
         - !Ref AWS::NoValue
         - - !Ref SubnetId1ForNLB
           - !Ref SubnetId2ForNLB
+          - !Ref SubnetId3ForNLB
       Tags:
         - Key: Name
           Value: !Sub elb-${LogicalName}-${AWS::Region}
@@ -402,6 +420,7 @@ Resources:
       VPCZoneIdentifier: 
         - !Ref SubnetId1ForAutoScaling
         - !Ref SubnetId2ForAutoScaling
+        - !Ref SubnetId3ForAutoScaling
   # CertificateManager
   CertificateManager:
     Condition: CreateCertificateManager
@@ -437,7 +456,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-application-elb
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

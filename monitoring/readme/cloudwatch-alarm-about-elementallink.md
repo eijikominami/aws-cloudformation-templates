@@ -23,6 +23,9 @@ You can provide optional parameters as follows.
 | `InputDeviceId` | String |  | ○ | Input device Id |
 | `DeviceType` | HD / UHD | | | The device type |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -49,3 +52,6 @@ cloudwatch-alarm-about-elementallink は、 AWS Elemental Link に関する Amaz
 | `InputDeviceId` | String |  | ○ | インプットデバイスID |
 | `DeviceType` | HD / UHD | | | デバイスID |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

@@ -196,7 +196,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -212,7 +212,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -229,7 +229,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -246,7 +246,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -257,7 +257,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -516,7 +516,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -596,7 +596,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -687,7 +687,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -723,6 +723,9 @@ Resources:
         SlackWorkspaceId: !Ref SlackWorkspaceId
         SlackChannelId: !Ref SlackChannelIdForAlert
         SNSArn: !GetAtt SNSForFormattedAlert.Outputs.SNSTopicArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -750,6 +753,9 @@ Resources:
           - CreateSNSForCICD
           - !GetAtt SNSForCICD.Outputs.SNSTopicArn
           - !Ref SNSForCICDArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         - Key: environment
           Value: !Ref Environment

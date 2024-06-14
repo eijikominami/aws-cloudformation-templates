@@ -20,6 +20,9 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `FlowName` | String | | ○ | The AppFlow flow name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -43,3 +46,6 @@ cloudwatch-alarm-about-appflow は、Amazon AppFlow に関する Amazon CloudWat
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `FlowName` | String | | ○ | フロー名 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
