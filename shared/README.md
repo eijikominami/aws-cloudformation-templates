@@ -48,15 +48,18 @@ You can provide optional parameters as follows.
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.64/26 | ○ | The public subnet CIDR block at AZ2 |
 | BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
-| FluentBitAddress1 | String | 10.3.0.14 | | The private IPv4 address for FluentBit |
-| FluentBitAddress2 | String | 10.3.64.14 | | The private IPv4 address for FluentBit |
+| FluentBitAddress1 | String | 10.3.0.114 | | The private IPv4 address for FluentBit |
+| FluentBitAddress2 | String | 10.3.64.114 | | The private IPv4 address for FluentBit |
+| FluentBitAddress3 | String | 10.3.128.114 | | The private IPv4 address for FluentBit |
 | FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Whether to enable FluentBit for collecting syslog format logs |
 | DomainName | String | | | The private domain name which this VPC has |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |
+| SubnetPrivateCidrBlockAz3 | String | 10.3.128.64/26 | ○ | The private subnet CIDR block at AZ3 |
 | SubnetTransitCidrBlockAz1 | String | 10.3.0.128/26 | ○ | The transit subnet CIDR block at AZ1 |
 | SubnetTransitCidrBlockAz2 | String | 10.3.64.128/26 | ○ | The transit subnet CIDR block at AZ2 |
+| SubnetTransitCidrBlockAz3 | String | 10.3.128.128/26 | ○ | The transit subnet CIDR block at AZ3 |
 | ResolverRuleId | String | | | The ID of the Resolver rule that you associated with the VPC that is specified by VPCId |
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |

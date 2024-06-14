@@ -67,13 +67,20 @@ You can provide optional parameters as follows.
 | EC2VolumeSize | Number | 8 | ○ | |
 | GlobalInfrastructure | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | | ○ | Enable or disable CloudFront, Global Accelerator |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
-| SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | Public subnet of AZ1 |
-| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/24 | ○ | Public subnet of AZ2 |
+| SubnetPrivateCidrBlockForAz1 | String | 10.1.0.0/24 | ○ | Private subnet of AZ1 |
+| SubnetPrivateCidrBlockForAz2 | String | 10.1.2.0/24 | ○ | Private subnet of AZ2 |
+| SubnetPrivateCidrBlockForAz3 | String | 10.1.4.0/24 | ○ | Private subnet of AZ3 |
+| SubnetPublicCidrBlockForAz1 | String | 10.1.1.0/25 | ○ | Public subnet of AZ1 |
+| SubnetPublicCidrBlockForAz2 | String | 10.1.3.0/25 | ○ | Public subnet of AZ2 |
+| SubnetPublicCidrBlockForAz3 | String | 10.1.5.0/25 | ○ | Public subnet of AZ3 |
+| SubnetTransitCidrBlockForAz1 | String | 10.1.1.128/25 | ○ | Transit subnet of AZ1 |
+| SubnetTransitCidrBlockForAz2 | String | 10.1.3.128/25 | ○ | Transit subnet of AZ2 |
+| SubnetTransitCidrBlockForAz3 | String | 10.1.5.128/25 | ○ | Transit subnet of AZ3 |
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
-| VPCCidrBlock | String | 10.0.0.0/21 | ○ | The VPC CIDR block |
+| VPCCidrBlock | String | 10.1.0.0/21 | ○ | The VPC CIDR block |
 
 ## Trouble Shooting
 
