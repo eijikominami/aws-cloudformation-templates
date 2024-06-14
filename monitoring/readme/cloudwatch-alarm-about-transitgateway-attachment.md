@@ -22,6 +22,9 @@ You can provide optional parameters as follows.
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TransitGatewayId` | String | | ○ | The id of the Transit Gateway |
 | `TransitGatewayAttachmentId` | String | | ○ | The id of the Transit Gateway attachment |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 

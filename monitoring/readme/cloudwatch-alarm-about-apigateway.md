@@ -28,6 +28,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom alram name |
 | `LatencyThreshold` | Number | 2000 | ○ | The threshold of Latency |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -59,3 +62,6 @@ cloudwatch-alarm-about-apigateway は、 Amazon API Gateway に関する Amazon 
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `LatencyThreshold` | Number | 2000 | ○ | Latency の閾値 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

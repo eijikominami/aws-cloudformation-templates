@@ -32,6 +32,9 @@ You can provide optional parameters as follows.
 | `DomainName` | String | | ○ | The domain name |
 | `FreeStorageSpaceThreshold` | Number | | ○ | The threshold of the free storage space (MB) |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -67,3 +70,6 @@ cloudwatch-alarm-about-elasticsearch は、 Amazon OpenSearch Service に関す�
 | `DomainName` | String | | ○ | ドメイン名 |
 | `FreeStorageSpaceThreshold` | Number | | ○ | ストレージの空き容量の閾値（MB） |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

@@ -24,6 +24,9 @@ You can give optional parameters as follows.
 | `ServiceName` | String | | ○ | The ECS Service name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `UtilizationThreshold` | Number | 100 | ○ | The threshold of utilization |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -51,3 +54,6 @@ cloudwatch-alarm-about-ecs は、Amazon ECS に関する Amazon CloudWatch ア�
 | `ServiceName` | String | | ○ | The ECS サービス名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `UtilizationThreshold` | Number | 100 | ○ | 使用率の閾値 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

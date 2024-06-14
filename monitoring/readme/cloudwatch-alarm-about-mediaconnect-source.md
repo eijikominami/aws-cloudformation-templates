@@ -32,6 +32,9 @@ You can provide optional parameters as follows.
 | `SourceName` | String |  | ○ | The source name |
 | `SourceARN` | String |  | ○ | The source ARN |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -67,3 +70,6 @@ cloudwatch-alarm-about-mediaconnect-source は、 AWS Elemental MediaConnect sou
 | `SourceName` | String |  | ○ | ソース名 |
 | `SourceARN` | String |  | ○ | ソース ARN |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

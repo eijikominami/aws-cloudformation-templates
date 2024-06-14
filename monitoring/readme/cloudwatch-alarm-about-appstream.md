@@ -21,6 +21,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `Fleet` | String | | ○ | The name of the AppStream Fleet |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -45,3 +48,6 @@ cloudwatch-alarm-about-appstream は、Amazon AppStream アタッチメントに
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `Fleet` | String | | ○ | AppSream Fleet 名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

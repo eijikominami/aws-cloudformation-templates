@@ -21,6 +21,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom alram name |
 | `ProjectName` | String |  | ○ | The CodeBuild project name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -45,3 +48,6 @@ cloudwatch-alarm-about-codebuild は、AWS CodeBuild に関する Amazon CloudWa
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `ProjectName` | String |  | ○ | プロジェクト名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

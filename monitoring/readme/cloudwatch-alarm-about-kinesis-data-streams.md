@@ -25,6 +25,9 @@ You can provide optional parameters as follows.
 | `KinesisStreamName` | String | | ○ | The Kinesis stream name |
 | `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | The threshold of PutRecord per minute |
 | `SNSTopicArn` | String | | ○ | The custom Alram name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -53,3 +56,6 @@ cloudwatch-alarm-about-kinesis-data-streams は、Amazon Kinesis Data Streams �
 | `KinesisStreamName` | String | | ○ | ストリーム名 |
 | `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | 分間の PutRecord 数の閾値 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

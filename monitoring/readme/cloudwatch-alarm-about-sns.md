@@ -21,6 +21,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `SNSTopicName` | String | | ○ | The SNS topic name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -45,3 +48,6 @@ cloudwatch-alarm-about-sns は、Amazon SNS に関する Amazon CloudWatch ア�
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `SNSTopicName` | String | | ○ | SNSトピック名 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

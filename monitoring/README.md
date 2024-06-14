@@ -23,13 +23,15 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | |
-| `ApiName` | String |  | ○ | |
-| `ApiResourcePath` | String | | ○ | |
-| `ApiStageName` | String | | ○ | |
+| `ApiName` | String |  | ○ | The API Gateway api name |
+| `ApiStageName` | String | | ○ | The API Gateway stage name |
 | `CustomAlarmName` | String | | | |
-| `ApiCount` | Number | 0 | ○ | |
-| `LatencyThreshold` | Number | 2000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ApiCount` | Number | 0 | ○ | The threshold of ApiCount per minute |
+| `LatencyThreshold` | Number | 2000 | ○ | The threshold of Latency |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -43,17 +45,19 @@ Properties:
   Parameters: 
     ApiMethodName : String
     ApiName : String
-    ApiResourcePath : String
     ApiStageName : String
     CustomAlarmName : String
     ApiCount : Integer
     LatencyThreshold : Integer
     ApiMethodName : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/apigateway.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/apigateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -74,6 +78,9 @@ Properties:
     ApiCount : Integer
     LatencyThreshold : Integer
     ApiMethodName : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -93,6 +100,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `Fleet` | String | | ○ | The name of the AppStream Fleet |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -107,11 +117,14 @@ Properties:
     CustomAlarmName : String
     Fleet : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -127,6 +140,9 @@ Properties:
     CustomAlarmName : String
     Fleet : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -144,8 +160,11 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
-| `ProjectName` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ProjectName` | String |  | ○ | The CodeBuild project name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -160,11 +179,14 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/codebuild.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/codebuild.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -180,6 +202,9 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -200,6 +225,9 @@ You can provide optional parameters as follows.
 | `DirectoryId` | String | | ○ | The id of the directory |
 | `DomainControllerIp` | String | | ○ | The IP of the domain controller |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -215,11 +243,14 @@ Properties:
     DirectoryId: String
     DomainControllerIp: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -236,6 +267,9 @@ Properties:
     DirectoryId: String
     DomainControllerIp: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -255,7 +289,10 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
-| `TableName` | String |  | ○ | |
+| `TableName` | String |  | ○ | The DynamoDB table name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -270,11 +307,14 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -290,6 +330,9 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -309,6 +352,9 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -322,11 +368,14 @@ Properties:
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -341,6 +390,9 @@ Properties:
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -358,9 +410,12 @@ You can give optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| `CPUUtilizationThreshold` | Number | 100 | ○ | |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CPUUtilizationThreshold` | Number | 100 | ○ | The threshold of CPU Utilization |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -375,11 +430,14 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -395,6 +453,9 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -415,6 +476,9 @@ You can give optional parameters as follows.
 | `CPUUtilizationThreshold` | Number | 100 | ○ | The threshold of CPU Utilization |
 | `CustomAlarmName` | String | | | The custom alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -429,11 +493,14 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -449,6 +516,9 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -471,6 +541,9 @@ You can give optional parameters as follows.
 | `ServiceName` | String | | ○ | The ECS Service name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `UtilizationThreshold` | Number | 100 | ○ | The threshold of utilization |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -487,11 +560,14 @@ Properties:
     ServiceName: String
     SNSTopicArn : String
     UtilizationThreshold: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -509,6 +585,9 @@ Properties:
     ServiceName: String
     SNSTopicArn : String
     UtilizationThreshold: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -539,6 +618,9 @@ You can provide optional parameters as follows.
 | `DomainName` | String | | ○ | The domain name |
 | `FreeStorageSpaceThreshold` | Number | | ○ | The threshold of the free storage space (MB) |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -554,11 +636,14 @@ Properties:
     DomainName: String
     FreeStorageSpaceThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elasticsearch.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elasticsearch.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -575,6 +660,9 @@ Properties:
     DomainName: String
     FreeStorageSpaceThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -596,6 +684,9 @@ You can provide optional parameters as follows.
 | `InputDeviceId` | String |  | ○ | Input device Id |
 | `DeviceType` | HD / UHD | | | The device type |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -611,11 +702,14 @@ Properties:
     DeviceType: String
     InputDeviceId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -632,6 +726,9 @@ Properties:
     DeviceType: String
     InputDeviceId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -649,8 +746,11 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
-| `EventsRuleName` | String | | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `EventsRuleName` | String | | ○ | The EventBridge rule name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -665,11 +765,14 @@ Properties:
     CustomAlarmName : String
     EventsRuleName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/events.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/events.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -685,6 +788,9 @@ Properties:
     CustomAlarmName : String
     EventsRuleName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -704,10 +810,13 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
-| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | |
-| `KinesisStreamName` | String | | ○ | |
-| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | The threshold of IteratorAgeMilliseconds |
+| `KinesisStreamName` | String | | ○ | The Kinesis stream name |
+| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | The threshold of PutRecord per minute |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -724,11 +833,14 @@ Properties:
     KinesisStreamName : String
     NumberOfPutRecordThreshold : Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -746,6 +858,9 @@ Properties:
     KinesisStreamName : String
     NumberOfPutRecordThreshold : Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -769,6 +884,9 @@ You can provide optional parameters as follows.
 | `KinesisStreamName` | String | | ○ | The Kinesis stream name |
 | `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | The threshold of PutRecord per minute |
 | `SNSTopicArn` | String | | ○ | The custom Alram name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -785,11 +903,14 @@ Properties:
     KinesisStreamName: String
     NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -807,6 +928,9 @@ Properties:
     KinesisStreamName: String
     NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -826,10 +950,13 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
-| `FunctionResouceName` | String | | ○ | |
+| `FunctionResouceName` | String | | ○ | The resource name of the Lambda function |
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | Metric filter pattern | 
-| `SNSTopicArn` | String | | ○ | |
-| `TimeoutMilliseconds` | Integer | 24000 | ○ | |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `TimeoutMilliseconds` | Integer | 24000 | ○ | The threshold of Duration |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -845,11 +972,14 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/lambda.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/lambda.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -866,6 +996,9 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -896,6 +1029,9 @@ You can provide optional parameters as follows.
 | `SourceName` | String |  | ○ | The source name |
 | `SourceARN` | String |  | ○ | The source ARN |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -911,11 +1047,14 @@ Properties:
     SourceName: String
     SourceARN: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -932,6 +1071,9 @@ Properties:
     SourceName: String
     SourceARN: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -956,6 +1098,9 @@ You can provide optional parameters as follows.
 | `OutputGroupName` | String |  | ○ | The output group name |
 | `PipelineId` | String |  | ○ | The pipeline id |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -972,11 +1117,14 @@ Properties:
     OutputGroupName: String
     PipelineId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/medialive.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/medialive.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -994,6 +1142,9 @@ Properties:
     OutputGroupName: String
     PipelineId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1017,6 +1168,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `ContainerName` | String |  | ○ | The container name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -1031,11 +1185,14 @@ Properties:
     CustomAlarmName : String
     ContainerName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediastore.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediastore.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1051,6 +1208,9 @@ Properties:
     CustomAlarmName : String
     ContainerName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1070,6 +1230,9 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -1083,11 +1246,14 @@ Properties:
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/natgateway.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/natgateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1102,6 +1268,9 @@ Properties:
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1121,6 +1290,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `SNSTopicName` | String | | ○ | |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -1135,11 +1307,14 @@ Properties:
     CustomAlarmName : String
     SNSTopicArn : String
     SNSTopicName: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/sns.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/sns.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1155,6 +1330,9 @@ Properties:
     CustomAlarmName : String
     SNSTopicArn : String
     SNSTopicName: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1174,6 +1352,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TransitGatewayId` | String | | ○ | The id of the Transit Gateway |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -1188,11 +1369,14 @@ Properties:
     CustomAlarmName : String
     SNSTopicArn : String
     TransitGatewayId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1208,6 +1392,9 @@ Properties:
     CustomAlarmName : String
     SNSTopicArn : String
     TransitGatewayId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1228,6 +1415,9 @@ You can provide optional parameters as follows.
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TransitGatewayId` | String | | ○ | The id of the Transit Gateway |
 | `TransitGatewayAttachmentId` | String | | ○ | The id of the Transit Gateway attachment |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -1243,11 +1433,14 @@ Properties:
     SNSTopicArn : String
     TransitGatewayId: String
     TransitGatewayAttachmentId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1264,6 +1457,9 @@ Properties:
     SNSTopicArn : String
     TransitGatewayId: String
     TransitGatewayAttachmentId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1286,6 +1482,9 @@ You can provide optional parameters as follows.
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `VPCEndpointId` | String | | ○ | The id of the endpoint | 
 | `VPCId` | String | | ○ | The VPC id | 
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -1303,11 +1502,14 @@ Properties:
     SNSTopicArn : String
     VPCEndpointId: String
     VPCId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1326,6 +1528,9 @@ Properties:
     SNSTopicArn : String
     VPCEndpointId: String
     VPCId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1347,6 +1552,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `DirectoryId` | String | | ○ | The id of the Workspaces directory |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 
@@ -1361,11 +1569,14 @@ Properties:
     CustomAlarmName : String
     DirectoryId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1381,6 +1592,9 @@ Properties:
     CustomAlarmName : String
     DirectoryId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```

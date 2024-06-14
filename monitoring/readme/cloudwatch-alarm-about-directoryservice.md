@@ -22,6 +22,9 @@ You can provide optional parameters as follows.
 | `DirectoryId` | String | | ○ | The id of the directory |
 | `DomainControllerIp` | String | | ○ | The IP of the domain controller |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -47,3 +50,6 @@ cloudwatch-alarm-about-directoryservice は、AWS Directory Service に関する
 | `DirectoryId` | String | | ○ | ディレクトリの ID |
 | `DomainControllerIp` | String | | ○ | ドメインコントローラの IP |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
