@@ -31,6 +31,7 @@ Metadata:
           default: SecurityHub Configuration
         Parameters:
           - IAMUserArnToAssumeAWSSupportRole
+          - DelegatedAdminAccountId
           - AWSSecurityHub
           - AWSSecurityHubStandards
       - Label:
@@ -126,6 +127,10 @@ Parameters:
       - NOTIFICATION_ONLY
       - DISABLED
     Description: Enable or disable IAM Access Analyzer [required]
+  DelegatedAdminAccountId:
+    Type: String
+    Default: ''
+    Description: The AWS account identifier of the account to designate as the security account
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
@@ -210,6 +215,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        DelegatedAdminAccountId: !Ref DelegatedAdminAccountId
         SecurityHubStandards: !Join
           - ','
           - !Ref AWSSecurityHubStandards

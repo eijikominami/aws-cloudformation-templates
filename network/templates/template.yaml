@@ -236,14 +236,8 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         LogicalName: Egress
-        ResolverInboundRuleId: !If
-          - CreateRoute53Resolver
-          - !GetAtt Route53Resolver.Outputs.ResolverInboundRuleId
-          - ''
-        ResolverOutboundRuleId: !If
-          - CreateRoute53Resolver
-          - !GetAtt Route53Resolver.Outputs.ResolverOutboundRuleId
-          - ''
+        ResolverInboundRuleId: ''
+        ResolverOutboundRuleId: ''
         SubnetPublicCidrBlockForAz1: !Ref PublicCidrBlockForEgressAz1
         SubnetTransitCidrBlockForAz1: !Ref TransitCidrBlockForEgressAz1
         SubnetFirewallCidrBlockForAz1: !Ref FirewallCidrBlockForEgressAz1
@@ -302,51 +296,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/transitgateway.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/transitgateway.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  Route53Resolver:
-    Condition: CreateRoute53Resolver
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        DnsIpAz1: !Ref DnsIpAz1
-        DnsIpAz2: !Ref DnsIpAz2
-        DnsIpAz3: !Ref DnsIpAz3
-        LogicalName: Route53Resolver
-        OnpremDnsIp: !Ref OnpremDnsIp
-        DomainName: !Ref DomainName
-        PrincipalsToAssociateWithRoute53ResolverRule: !Ref PrincipalsToAssociateWithRoute53ResolverRule
-        SubnetPrivateCidrBlockForAz1: !Ref PrivateCidrBlockForDNSAz1
-        SubnetPrivateCidrBlockForAz2: !Ref PrivateCidrBlockForDNSAz2
-        SubnetPrivateCidrBlockForAz3: !Ref PrivateCidrBlockForDNSAz3
-        SubnetTransitCidrBlockForAz1: !Ref TransitCidrBlockForDNSAz1
-        SubnetTransitCidrBlockForAz2: !Ref TransitCidrBlockForDNSAz2
-        SubnetTransitCidrBlockForAz3: !Ref TransitCidrBlockForDNSAz3
-        TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
-        VPCCidrBlock: !Ref VPCCidrBlockForDNS
-        SNSForAlertArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn 
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/route53resolver.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/route53resolver.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

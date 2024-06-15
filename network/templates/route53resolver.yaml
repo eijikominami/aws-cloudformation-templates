@@ -466,6 +466,51 @@ Resources:
           Value: !Ref TagValue
       VpcId: !Ref VPC
   # Route 53 Resolver Rule
+  Route53ResolverInboundRule:
+    Condition: CreateRoute53ResolverInboundRule
+    Type: AWS::Route53Resolver::ResolverRule
+    Properties:
+      DomainName: !Sub network.aws.${DomainName}
+      Name: AWS
+      # Resolver rules can only be associated to OUTBOUND resolver endpoints.
+      ResolverEndpointId: !Ref Route53ResolverOutbound
+      RuleType: FORWARD
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TargetIps: 
+        - Ip: !Ref DnsIpAz1
+          Port: 53
+        - Ip: !Ref DnsIpAz2
+          Port: 53
+        - Ip: !Ref DnsIpAz3
+          Port: 53
+  Route53ResolverInboundRuleAssociation:
+    Condition: CreateRoute53ResolverInboundRule
+    Type: AWS::Route53Resolver::ResolverRuleAssociation
+    Properties:
+      Name: AWS
+      ResolverRuleId: !Ref Route53ResolverInboundRule
+      VPCId: !Ref VPC
+  RAMForRoute53ResolverInboundRule:
+    Condition: CreateRoute53ResolverInboundRule
+    Type: AWS::RAM::ResourceShare
+    Properties: 
+      AllowExternalPrincipals: false
+      Name: Route53ResolverRule
+      PermissionArns: 
+        - arn:aws:ram::aws:permission/AWSRAMDefaultPermissionResolverRule
+      Principals: 
+        - !Ref PrincipalsToAssociateWithRoute53ResolverRule
+      ResourceArns: 
+        - !GetAtt Route53ResolverInboundRule.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   Route53ResolverOutboundRule:
     Type: AWS::Route53Resolver::ResolverRule
     Properties:
@@ -528,4 +573,10 @@ Outputs:
     Value: !If
       - CreateRoute53ResolverOutboundRule
       - !Ref Route53ResolverOutboundRule
+      - ''
+  ResolverInboundRuleId:
+    Description: Route 53 Resolver Rule ID
+    Value: !If
+      - CreateRoute53ResolverInboundRule
+      - !Ref Route53ResolverInboundRule
       - ''
