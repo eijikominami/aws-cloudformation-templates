@@ -51,7 +51,6 @@ Resources:
     Type: AWS::IAM::ServiceLinkedRole
     Properties: 
       AWSServiceName: ipam.amazonaws.com
-      CustomSuffix: !Ref AWS::StackName
       Description: The Service Linked Role used by AWS IPAM.
   IPAM:
     DependsOn:
