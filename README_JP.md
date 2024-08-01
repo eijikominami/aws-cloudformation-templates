@@ -38,7 +38,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 
 | サービス | リソース | バージョン |
 | --- | --- | --- |
-| Amazon CloudWatch Synthetics | [Runtime](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Library_nodejs_puppeteer.html) | syn-nodejs-puppeteer-6.2 |
+| Amazon CloudWatch Synthetics | [Runtime](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Library_nodejs_puppeteer.html) | syn-nodejs-puppeteer-9.0 |
 | AWS CodeBuild | [Image](https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-env-ref-available.html) | aws/codebuild/amazonlinux2-aarch64-standard:2.0 (Python 3.9) |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
