@@ -46,7 +46,7 @@ AWSCloudFormationTemplates は、**アカウント作成直後に行うべきセ
 | AWS Glue | [GlueVersion](https://docs.aws.amazon.com/ja_jp/glue/latest/dg/release-notes.html) | 4.0 |
 | AWS Glue | PythonVersion | 3 |
 | AWS Lambda | [CodeGuru Profiler](https://docs.aws.amazon.com/codeguru/latest/profiler-ug/python-lambda-layers.html) | AWSCodeGuruProfilerPythonAgentLambdaLayer:11 (Python 3.9) |
-| AWS Lambda | [Lambda Insights](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Lambda-Insights-extension-versionsARM.html) | LambdaInsightsExtension-Arm64:11 |
+| AWS Lambda | [Lambda Insights](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Lambda-Insights-extension-versionsARM.html) | LambdaInsightsExtension-Arm64:31 |
 | AWS Lambda | Python | 3.9 |
 | AWS Serverless Repository | aws-usage-queries | 0.1.5+19.38c7b8 |
 | AWS Systems Manager | [SSM Document Schema (Automation)](https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/documents-schemas-features.html) | 0.3 |
