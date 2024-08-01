@@ -58,7 +58,7 @@ This template creates ``CloudFront`` distribution.
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
-| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.11 | ○ | The version of OpenSearch Service |
+| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.13 | ○ | The version of OpenSearch Service |
 | RealtimeDashboardKinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |

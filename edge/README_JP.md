@@ -58,7 +58,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | OpenSearch Service の生存時間 |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | OpenSearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | OpenSearch Service のパスワード |
-| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.11 | ○ | OpenSearch Service のバージョン |
+| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.13 | ○ | OpenSearch Service のバージョン |
 | RealtimeDashboardKinesisFirehoseStreamNameSuffix | String | default | ○ | Kinesis Firehose ストリームの接頭語 |
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |

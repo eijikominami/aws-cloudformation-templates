@@ -191,7 +191,7 @@ Parameters:
     Description: The password of OpenSearch Service [required]
   RealtimeDashboardElasticsearchVersion:
     Type: String
-    Default: OpenSearch_2.11
+    Default: OpenSearch_2.13
     AllowedPattern: .+
     Description: The version of OpenSearch Service [required]
   RealtimeDashboardKinesisFirehoseStreamNameSuffix:
