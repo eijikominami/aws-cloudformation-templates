@@ -28,6 +28,9 @@ You can give optional parameters as follows.
 | `StorageDeviceName` | String | nvme0n1p1 | ○ | A volume device name of the target storage |
 | `StoragePath` | String | / | ○ | A volume device path of the target storage |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -59,3 +62,6 @@ cloudwatch-alarm-about-ec2-cwagent は、Amazon EC2 に関する Amazon CloudWat
 | `StorageDeviceName` | String | nvme0n1p1 | ○ | ボリュームデバイス名 |
 | `StoragePath` | String | / | ○ | パス名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

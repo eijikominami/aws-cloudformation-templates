@@ -22,13 +22,16 @@
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | |
-| `ApiName` | String |  | ○ | |
-| `ApiStageName` | String | | ○ | |
-| `CustomAlarmName` | String | | | |
-| `ApiCount` | Number | 0 | ○ | |
-| `LatencyThreshold` | Number | 2000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ApiCount` | Number | 0 | ○ | リクエストの合計数 |
+| `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | メソッド名 |
+| `ApiName` | String |  | ○ | API名 |
+| `ApiStageName` | String | | ○ | ステージ名 |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `LatencyThreshold` | Number | 2000 | ○ | Latency の閾値 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -47,11 +50,14 @@ Properties:
     ApiCount : Integer
     LatencyThreshold : Integer
     ApiMethodName : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/apigateway.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/apigateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -60,7 +66,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -72,6 +78,9 @@ Properties:
     ApiCount : Integer
     LatencyThreshold : Integer
     ApiMethodName : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -92,6 +101,9 @@ Properties:
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `Fleet` | String | | ○ | AppSream Fleet 名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -106,11 +118,14 @@ Properties:
     CustomAlarmName : String
     Fleet : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -119,13 +134,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appstream
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     Fleet : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -143,8 +161,11 @@ Properties:
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `ProjectName` | String |  | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `ProjectName` | String |  | ○ | プロジェクト名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -159,11 +180,14 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/codebuild.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/codebuild.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -172,13 +196,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -199,6 +226,9 @@ Properties:
 | `DirectoryId` | String | | ○ | ディレクトリの ID |
 | `DomainControllerIp` | String | | ○ | ドメインコントローラの IP |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -214,11 +244,14 @@ Properties:
     DirectoryId: String
     DomainControllerIp: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -227,7 +260,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -235,6 +268,9 @@ Properties:
     DirectoryId: String
     DomainControllerIp: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -254,8 +290,10 @@ Properties:
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
-| `TableName` | String |  | ○ | |
-
+| `TableName` | String |  | ○ | テーブル名 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 ### Syntax
 
 AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
@@ -269,11 +307,14 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -282,13 +323,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -308,6 +352,9 @@ Properties:
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -321,11 +368,14 @@ Properties:
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -334,12 +384,15 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -357,9 +410,12 @@ Properties:
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
-| `CPUUtilizationThreshold` | Number | 100 | ○ | |
-| `CustomAlarmName` | String | | | |
-| `SNSTopicArn` | String | | ○ | |
+| `CPUUtilizationThreshold` | Number | 100 | ○ | CPU使用率の閾値 |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -374,11 +430,14 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -387,13 +446,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -414,6 +476,9 @@ Properties:
 | `CPUUtilizationThreshold` | Number | 100 | ○ | CPU使用率の閾値 |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -428,11 +493,14 @@ Properties:
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -441,13 +509,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CPUUtilizationThreshold: Integer
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -470,6 +541,9 @@ Properties:
 | `ServiceName` | String | | ○ | The ECS サービス名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `UtilizationThreshold` | Number | 100 | ○ | 使用率の閾値 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -486,11 +560,14 @@ Properties:
     ServiceName: String
     SNSTopicArn : String
     UtilizationThreshold: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -499,7 +576,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -508,6 +585,9 @@ Properties:
     ServiceName: String
     SNSTopicArn : String
     UtilizationThreshold: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -540,6 +620,9 @@ Properties:
 | `DomainName` | String | | ○ | ドメイン名 |
 | `FreeStorageSpaceThreshold` | Number | | ○ | ストレージの空き容量の閾値（MB） |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -555,11 +638,14 @@ Properties:
     DomainName: String
     FreeStorageSpaceThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elasticsearch.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elasticsearch.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -568,7 +654,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-elasticsearch
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -576,6 +662,9 @@ Properties:
     DomainName: String
     FreeStorageSpaceThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -599,6 +688,9 @@ Properties:
 | `InputDeviceId` | String |  | ○ | インプットデバイスID |
 | `DeviceType` | HD / UHD | | | デバイスID |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -614,11 +706,14 @@ Properties:
     DeviceType: String
     InputDeviceId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -627,7 +722,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -635,6 +730,9 @@ Properties:
     DeviceType: String
     InputDeviceId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -652,8 +750,11 @@ Properties:
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `EventsRuleName` | String | | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `EventsRuleName` | String | | ○ | EventBridge のルール名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -668,11 +769,14 @@ Properties:
     CustomAlarmName : String
     EventsRuleName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/events.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/events.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -681,13 +785,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     EventsRuleName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -707,10 +814,13 @@ Properties:
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | |
-| `KinesisStreamName` | String | | ○ | |
-| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | |
-| `SNSTopicArn` | String | | ○ | |
+| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | IteratorAgeMilliseconds の閾値 |
+| `KinesisStreamName` | String | | ○ | ストリーム名 |
+| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | 分間の PutRecord 数の閾値 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -727,11 +837,14 @@ Properties:
     KinesisStreamName : String
     NumberOfPutRecordThreshold : Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -740,7 +853,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -749,6 +862,9 @@ Properties:
     KinesisStreamName : String
     NumberOfPutRecordThreshold : Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -768,10 +884,12 @@ Properties:
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | IteratorAgeMilliseconds の閾値 |
-| `KinesisStreamName` | String | | ○ | ストリーム名 |
-| `NumberOfPutRecordThreshold` | Integer | 1000 | ○ | 分間の PutRecord 数の閾値 |
+| `FirehoseStreamName` | String | | ○ | ストリーム名 |
+| `OldestRecordAge` | Number | 120 | ○ | 最も古いレコードの閾値 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -788,11 +906,14 @@ Properties:
     KinesisStreamName: String
     NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -801,7 +922,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -810,6 +931,9 @@ Properties:
     KinesisStreamName: String
     NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -829,10 +953,13 @@ Properties:
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `FunctionResouceName` | String | | ○ | |
+| `FunctionResouceName` | String | | ○ | Lambda のリソース名 |
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | メトリックフィルタパターン | 
-| `SNSTopicArn` | String | | ○ | |
-| `TimeoutMilliseconds` | Integer | 24000 | ○ | |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `TimeoutMilliseconds` | Integer | 24000 | ○ | 実行時間の閾値 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -848,11 +975,14 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/lambda.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/lambda.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -861,7 +991,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -869,6 +999,9 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -899,6 +1032,9 @@ Properties:
 | `SourceName` | String |  | ○ | ソース名 |
 | `SourceARN` | String |  | ○ | ソース ARN |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -914,11 +1050,14 @@ Properties:
     SourceName: String
     SourceARN: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -927,7 +1066,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconnect-source
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -935,6 +1074,9 @@ Properties:
     SourceName: String
     SourceARN: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -959,6 +1101,9 @@ Properties:
 | `OutputGroupName` | String |  | ○ | Output Group 名 |
 | `PipelineId` | String |  | ○ | パイプラインID |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -975,11 +1120,14 @@ Properties:
     OutputGroupName: String
     PipelineId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/medialive.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/medialive.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -988,7 +1136,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -997,6 +1145,9 @@ Properties:
     OutputGroupName: String
     PipelineId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1018,6 +1169,9 @@ Properties:
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `ContainerName` | String |  | ○ | コンテナ名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -1032,11 +1186,14 @@ Properties:
     CustomAlarmName : String
     ContainerName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediastore.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediastore.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1045,13 +1202,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediastore
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     ContainerName: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1071,6 +1231,9 @@ Properties:
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -1084,11 +1247,14 @@ Properties:
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/natgateway.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/natgateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1097,12 +1263,15 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1121,7 +1290,10 @@ Properties:
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
-| `SNSTopicName` | String | | ○ | |
+| `SNSTopicName` | String | | ○ | SNSトピック名 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -1136,11 +1308,14 @@ Properties:
     CustomAlarmName : String
     SNSTopicArn : String
     SNSTopicName: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/sns.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/sns.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1149,13 +1324,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
     SNSTopicName: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1175,6 +1353,9 @@ Properties:
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TransitGatewayId` | String | | ○ | Transit Gateway の ID |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -1189,11 +1370,14 @@ Properties:
     CustomAlarmName : String
     SNSTopicArn : String
     TransitGatewayId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1202,13 +1386,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     SNSTopicArn : String
     TransitGatewayId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1229,6 +1416,9 @@ Properties:
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TransitGatewayId` | String | | ○ | Transit Gateway の ID |
 | `TransitGatewayAttachmentId` | String | | ○ | Transit Gateway アタッチメントの ID |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -1244,11 +1434,14 @@ Properties:
     SNSTopicArn : String
     TransitGatewayId: String
     TransitGatewayAttachmentId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1257,7 +1450,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -1265,6 +1458,9 @@ Properties:
     SNSTopicArn : String
     TransitGatewayId: String
     TransitGatewayAttachmentId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1289,6 +1485,9 @@ Properties:
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `VPCEndpointId` | String | | ○ | エンドポイント ID | 
 | `VPCId` | String | | ○ | VPC ID | 
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -1306,11 +1505,14 @@ Properties:
     SNSTopicArn : String
     VPCEndpointId: String
     VPCId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1319,7 +1521,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoint
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
@@ -1329,6 +1531,9 @@ Properties:
     SNSTopicArn : String
     VPCEndpointId: String
     VPCId: String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```
@@ -1350,6 +1555,9 @@ Properties:
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `DirectoryId` | String | | ○ | The id of the Workspaces directory |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
 
 ### Syntax
 
@@ -1364,11 +1572,14 @@ Properties:
     CustomAlarmName : String
     DirectoryId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: 
     - Tag
   TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1377,13 +1588,16 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-workspaces
-    SemanticVersion: 2.2.6
+    SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
   Parameters: 
     CustomAlarmName : String
     DirectoryId: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
 ```

@@ -22,6 +22,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TableName` | String |  | ○ | |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -46,4 +49,7 @@ cloudwatch-alarm-about-dynamodb-throttole は、Amazon DynamoDB の スロット
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
-| `TableName` | String |  | ○ | |
+| `TableName` | String |  | ○ | テーブル名 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

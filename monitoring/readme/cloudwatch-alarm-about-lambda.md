@@ -25,6 +25,9 @@ You can provide optional parameters as follows.
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | Metric filter pattern | 
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | The threshold of Duration |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -53,3 +56,6 @@ cloudwatch-alarm-about-lambda は、AWS Lambda に関する Amazon CloudWatch �
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | メトリックフィルタパターン | 
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | 実行時間の閾値 |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

@@ -21,6 +21,9 @@ You can provide optional parameters as follows.
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `EventsRuleName` | String | | ○ | The EventBridge rule name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -45,3 +48,6 @@ cloudwatch-alarm-about-events は、Amazon EventBridge に関する Amazon Cloud
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `EventsRuleName` | String | | ○ | EventBridge のルール名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

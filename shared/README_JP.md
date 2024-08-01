@@ -49,14 +49,17 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.64.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
 | BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
 | DomainName | String | | | ドメイン名 |
-| FluentBitAddress1 | String | 10.3.0.14 | | FluentBit のプライベートアドレス |
-| FluentBitAddress2 | String | 10.3.64.14 | | FluentBit のプライベートアドレス |
+| FluentBitAddress1 | String | 10.3.0.114 | | FluentBit のプライベートアドレス |
+| FluentBitAddress2 | String | 10.3.64.114 | | FluentBit のプライベートアドレス |
+| FluentBitAddress3 | String | 10.3.128.114 | | FluentBit のプライベートアドレス |
 | FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Syslog フォーマットのログ収集ののための FluentBit を作成するかどうか |
 | IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockAz3 | String | 10.3.128.64/26 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |
 | SubnetTransitCidrBlockAz1 | String | 10.3.0.128/26 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
-| SubnetTransitCidrBlockAz2 | String | 10.3.64.128/26 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz2 | String | 10.3.64.128/26 | ○ | AZ2 の トランジットサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz3 | String | 10.3.128.128/26 | ○ | AZ3 の トランジットサブネットの CIDR ブロック |
 | ResolverRuleId | String | | | VPC に紐づけるリゾルバルールの ID |
 | TransitGatewayId | String | | | Transit Gateway の ID |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGateway に転送する CIDR ブロック |

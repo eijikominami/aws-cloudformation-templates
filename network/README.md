@@ -77,6 +77,8 @@ You can provide optional parameters as follows:
 | VPCCidrBlockForEgress | String | 10.0.0.0/21 | ○ | The Egress VPC CIDR block | 
 | VPCCidrBlockForDNS | String | 10.0.0.0/21 | ○ | The DNS VPC CIDR block | 
 
+`TransitGatewayDefaultRouteTableId` is enabled after creating  Transit Gateway.
+
 ### Integrate Amazon Transit Gateway, IPAM, and VPC Reachability Analyzer with AWS Organizations
 
 If you use Amazon Transit Gateway or Amazon VPC IP Address Manager (IPAM) in your `Network` account, enable `AWS Resource Access Manager` in `AWS Organizations`.　If you use VPC Reachability Analyzer in your `Network` account, turn on `Trusted Access` in Settings of VPC Reachability Analyzer.

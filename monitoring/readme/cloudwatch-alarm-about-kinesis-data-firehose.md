@@ -25,6 +25,9 @@ You can provide optional parameters as follows.
 | `FirehoseStreamName` | String | | ○ | The Firehose stream name |
 | `OldestRecordAge` | Number | 120 | ○ | The threshold of the age of the oldest record |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
@@ -53,3 +56,6 @@ cloudwatch-alarm-about-kinesis-data-firehose は、 Amazon Kinesis Data Firehose
 | `FirehoseStreamName` | String | | ○ | ストリーム名 |
 | `OldestRecordAge` | Number | 120 | ○ | 最も古いレコードの閾値 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

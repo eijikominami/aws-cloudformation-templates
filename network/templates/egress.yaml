@@ -16,6 +16,9 @@ Metadata:
           - SubnetPublicCidrBlockForAz2
           - SubnetTransitCidrBlockForAz2
           - SubnetFirewallCidrBlockForAz2
+          - SubnetPublicCidrBlockForAz3
+          - SubnetTransitCidrBlockForAz3
+          - SubnetFirewallCidrBlockForAz3
           - VPCCidrBlock
       - Label:
           default: 'Transit Gateway Configuration'
@@ -53,6 +56,10 @@ Parameters:
     Type: String
     Default: 10.0.4.128/26
     Description: The firewall subnet CIDR block at AZ2
+  SubnetFirewallCidrBlockForAz3:
+    Type: String
+    Default: 10.0.4.128/26
+    Description: The firewall subnet CIDR block at AZ3
   SubnetPublicCidrBlockForAz1:
     Type: String
     Default: 10.0.0.0/26
@@ -63,6 +70,11 @@ Parameters:
     Default: 10.0.4.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ2 [required]
+  SubnetPublicCidrBlockForAz3:
+    Type: String
+    Default: 10.0.4.0/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The public subnet CIDR block at AZ3 [required]
   SubnetTransitCidrBlockForAz1:
     Type: String
     Default: 10.0.0.64/26
@@ -73,6 +85,11 @@ Parameters:
     Default: 10.0.4.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ2 [required]
+  SubnetTransitCidrBlockForAz3:
+    Type: String
+    Default: 10.0.4.64/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The transit subnet CIDR block at AZ3 [required]
   TransitGatewayDestinationCidrBlock:
     Type: String
     Default: ''
@@ -117,8 +134,8 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateNetworkFirewall: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ] ]
-  CreateNetworkFirewallAndTransitGatewayRoute: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ], !Not [ !Equals [ !Ref TransitGatewayDefaultRouteTableId, ''] ] ]
+  CreateNetworkFirewall: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz3, ''] ] ]
+  CreateNetworkFirewallAndTransitGatewayRoute: !And [ !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz1, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz2, ''] ], !Not [ !Equals [ !Ref SubnetFirewallCidrBlockForAz3, ''] ], !Not [ !Equals [ !Ref TransitGatewayDefaultRouteTableId, ''] ] ]
   CreateRoute53ResolverResolverInboundRuleAssociation: !Not [ !Equals [ !Ref ResolverInboundRuleId, '' ] ]
   CreateRoute53ResolverResolverOutboundRuleAssociation: !Not [ !Equals [ !Ref ResolverOutboundRuleId, '' ] ]
   CreateTransitGatewayRoute: !Not [ !Equals [ !Ref TransitGatewayDefaultRouteTableId, ''] ]
@@ -136,7 +153,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -175,7 +192,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -206,6 +223,45 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  Az3:
+    DependsOn:
+      # NATGateway requires provisioned Internet Gateway.
+      - InternetGatewayAttachment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.2.7
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AvailabilityZone: !Select
+          - 2
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        InternetGatewayId: !Ref InternetGateway
+        LogicalName: !Ref LogicalName
+        NetworkAddressTranslation: ENABLED
+        SubnetPublicCidrBlock: !Ref SubnetPublicCidrBlockForAz3
+        SubnetTransitCidrBlock: !Ref SubnetTransitCidrBlockForAz3
+        SubnetFirewallCidrBlock: !Ref SubnetFirewallCidrBlockForAz3
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn 
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue 
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   NetworkFirewall:
     Condition: CreateNetworkFirewall
     Type: AWS::CloudFormation::Stack
@@ -218,6 +274,7 @@ Resources:
       Parameters: 
         SubnetIdAz1: !GetAtt Az1.Outputs.FirewallSubnetId
         SubnetIdAz2: !GetAtt Az2.Outputs.FirewallSubnetId
+        SubnetIdAz3: !GetAtt Az3.Outputs.FirewallSubnetId
         VPCId: !Ref VPC
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -258,12 +315,22 @@ Resources:
         - !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
         - !Ref AWS::NoValue  
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
+  RouteTransitAz3:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0 
+      NatGatewayId: !If
+        - CreateNetworkFirewall
+        - !Ref AWS::NoValue
+        - !GetAtt Az3.Outputs.NatGatewayId
+      VpcEndpointId: !If
+        - CreateNetworkFirewall
+        - !Select [ 1, !Split [ ':', !Select [ 2, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+        - !Ref AWS::NoValue  
+      RouteTableId: !GetAtt Az3.Outputs.RouteTableIdTransit
   # The route of the public subnet
   RoutePubliAz1:
     Condition: CreateTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
@@ -278,9 +345,6 @@ Resources:
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdPublic
   RoutePublicAz2:
     Condition: CreateTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
@@ -293,12 +357,23 @@ Resources:
         - !Select [ 1, !Split [ ':', !Select [ 1, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
         - !Ref AWS::NoValue
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdPublic
+  RoutePublicAz3:
+    Condition: CreateTransitGatewayRoute
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !If
+        - CreateNetworkFirewall
+        - !Ref AWS::NoValue
+        - !Ref TransitGatewayId
+      VpcEndpointId: !If
+        - CreateNetworkFirewall
+        - !Select [ 1, !Split [ ':', !Select [ 2, !Split [ ',', !GetAtt NetworkFirewall.Outputs.EndpointIds ] ] ] ]
+        - !Ref AWS::NoValue
+      RouteTableId: !GetAtt Az3.Outputs.RouteTableIdPublic
   # The route of the firewall subnet
   RouteFirewallToTransitGatewayAz1:
     Condition: CreateNetworkFirewallAndTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
@@ -306,21 +381,25 @@ Resources:
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdFirewall
   RouteFirewallToTransitGatewayAz2:
     Condition: CreateNetworkFirewallAndTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdFirewall
+  RouteFirewallToTransitGatewayAz3:
+    Condition: CreateNetworkFirewallAndTransitGatewayRoute
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az3.Outputs.RouteTableIdFirewall
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -337,7 +416,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -447,6 +526,7 @@ Resources:
       SubnetIds:
         - !GetAtt Az1.Outputs.TransitSubnetId
         - !GetAtt Az2.Outputs.TransitSubnetId
+        - !GetAtt Az3.Outputs.TransitSubnetId
       Tags:
         - Key: Name
           Value: !Sub tgw-attach-${LogicalName}-${AWS::Region}
@@ -464,27 +544,8 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
       TransitGatewayRouteTableId: !Ref TransitGatewayDefaultRouteTableId  
-  TransitGatewayRouteTableAssociation:
-    Condition: CreateTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteToInternet
-    Type: AWS::EC2::TransitGatewayRouteTableAssociation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayDefaultRouteTableId
-  TransitGatewayRouteTablePropagation:
-    Condition: CreateTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteToInternet
-    Type: AWS::EC2::TransitGatewayRouteTablePropagation
-    Properties: 
-      TransitGatewayAttachmentId: !Ref TransitGatewayAttachment
-      TransitGatewayRouteTableId: !Ref TransitGatewayDefaultRouteTableId
   RouteTransitToTransitGatewayAz1:
     Condition: CreateTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
@@ -492,21 +553,25 @@ Resources:
       RouteTableId: !GetAtt Az1.Outputs.RouteTableIdTransit
   RouteTransitToTransitGatewayAz2:
     Condition: CreateTransitGatewayRoute
-    DependsOn:
-      - TransitGatewayRouteTableAssociation
-      - TransitGatewayRouteTablePropagation
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
       TransitGatewayId: !Ref TransitGatewayId
       RouteTableId: !GetAtt Az2.Outputs.RouteTableIdTransit
+  RouteTransitToTransitGatewayAz3:
+    Condition: CreateTransitGatewayRoute
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: !Ref TransitGatewayDestinationCidrBlock
+      TransitGatewayId: !Ref TransitGatewayId
+      RouteTableId: !GetAtt Az3.Outputs.RouteTableIdTransit
   # CloudWatch
   CloudWatchAlarmTransitGatewayAttachment:
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.6
+        SemanticVersion: 2.2.7
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

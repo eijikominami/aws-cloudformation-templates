@@ -56,12 +56,13 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 | Name | String | corp.example.com | ○ | ドメイン名 |
 | Password | String | Password1+ | ○ | Admin ユーザのドメイン名 |
 | ShortName | String | CORP | ○ | The NetBIOS name for your domain |
-| SubnetPrivateCidrBlockForAz1 | String | 10.0.0.0/24 | ○ | AZ1 にあるプライベートサブネットのCIDRブロック |
+| SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/24 | ○ | AZ1 にあるプライベートサブネットのCIDRブロック |
 | SubnetPrivateIdForAz1 | String | | ○ | AZ1 のプライベートサブネット ID |
-| SubnetPrivateCidrBlockForAz2 | String | 10.0.1.0/24 | ○ | AZ2 にあるプライベートサブネットのCIDRブロック |
-| SubnetPrivateIdForAz1 | String | | ○ | AZ2 のプライベートサブネット ID |
-| TransitGatewayDestinationCidrBlock | String | | | TransitGateway のCIDRブロック |
-| VPCCidrBlock | String | 10.0.0.0/21 | ○ | VPC のCIDRブロック |
+| SubnetPrivateCidrBlockForAz2 | String | 10.3.4.0/24 | ○ | AZ2 にあるプライベートサブネットのCIDRブロック |
+| SubnetPrivateIdForAz2 | String | | ○ | AZ2 のプライベートサブネット ID |
+| SubnetPrivateCidrBlockForAz3 | String | 10.3.8.0/24 | conditional | AZ3 にあるプライベートサブネットのCIDRブロック |
+| SubnetPrivateIdForAz3 | String | | conditional | AZ3 のプライベートサブネット ID |
+| VPCId | String | | ○ | VPC ID |
 
 ### AWS Managed Microsoft AD を用いたユーザーとグループを管理
 
