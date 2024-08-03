@@ -62,10 +62,22 @@ Resources:
       Description: !Sub ACL for ${LogicalName}
       Name: !Ref LogicalName
       Rules: 
-        - Name: AWSManagedRulesCommonRuleSet
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
           OverrideAction:
             Count: {}
           Priority: 1
+          Statement: 
+            ManagedRuleGroupStatement: 
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+              VendorName: AWS
+          VisibilityConfig: 
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSet
+            SampledRequestsEnabled: false
+        - Name: AWSManagedRulesCommonRuleSet
+          OverrideAction:
+            Count: {}
+          Priority: 2
           Statement: 
             ManagedRuleGroupStatement: 
               Name: AWSManagedRulesCommonRuleSet
@@ -77,7 +89,7 @@ Resources:
         - Name: AWSManagedRulesAdminProtectionRuleSet
           OverrideAction:
             Count: {}
-          Priority: 2
+          Priority: 3
           Statement: 
             ManagedRuleGroupStatement: 
               Name: AWSManagedRulesAdminProtectionRuleSet
@@ -85,18 +97,6 @@ Resources:
           VisibilityConfig: 
             CloudWatchMetricsEnabled: true
             MetricName: AWSManagedRulesAdminProtectionRuleSet
-            SampledRequestsEnabled: false
-        - Name: AWSManagedRulesKnownBadInputsRuleSet
-          OverrideAction:
-            Count: {}
-          Priority: 3
-          Statement: 
-            ManagedRuleGroupStatement: 
-              Name: AWSManagedRulesKnownBadInputsRuleSet
-              VendorName: AWS
-          VisibilityConfig: 
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesKnownBadInputsRuleSet
             SampledRequestsEnabled: false
         - Name: AWSManagedRulesAmazonIpReputationList
           OverrideAction:

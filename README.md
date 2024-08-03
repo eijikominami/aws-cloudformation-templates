@@ -39,21 +39,21 @@ This project uses the following modules.
 
 | Service | Resource | Version |
 | --- | --- | --- |
-| Amazon CloudWatch Synthetics | Runtime | syn-nodejs-puppeteer-6.2 |
-| AWS CodeBuild | Image | aws/codebuild/amazonlinux2-aarch64-standard:2.0 (Python 3.9) |
+| Amazon CloudWatch Synthetics | [Runtime](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Library_nodejs_puppeteer.html) | syn-nodejs-puppeteer-9.0 |
+| AWS CodeBuild | [Image](https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html) | aws/codebuild/amazonlinux2-aarch64-standard:2.0 (Python 3.9) |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
 | Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-0659e3a420d8a74ea |
-| AWS Glue | GlueVersion | 4.0 |
+| AWS Glue | [GlueVersion](https://docs.aws.amazon.com/glue/latest/dg/release-notes.html) | 4.0 |
 | AWS Glue | PythonVersion | 3 |
-| AWS Lambda | CodeGuru Profiler | [AWSCodeGuruProfilerPythonAgentLambdaLayer:11 (Python 3.9)](https://docs.aws.amazon.com/codeguru/latest/profiler-ug/python-lambda-layers.html) |
-| AWS Lambda | Lambda Insights | [LambdaInsightsExtension-Arm64:11](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Lambda-Insights-extension-versionsARM.html) |
+| AWS Lambda | [CodeGuru Profiler](https://docs.aws.amazon.com/codeguru/latest/profiler-ug/python-lambda-layers.html) | AWSCodeGuruProfilerPythonAgentLambdaLayer:11 (Python 3.9) |
+| AWS Lambda | [Lambda Insights](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Lambda-Insights-extension-versionsARM.html) | LambdaInsightsExtension-Arm64:31 |
 | AWS Lambda | Python | 3.9 |
 | AWS Serverless Repository | aws-usage-queries | 0.1.5+19.38c7b8 |
-| AWS Systems Manager | SSM Document Schema (Automation) | 0.3 |
-| AWS Systems Manager | SSM Document Schema (Command) | 2.2 |
-| Amazon OpenSearch Service | OpenSearch | OpenSearch_2.11 |
-| Elastic Load Balancer | SSL Policy | ELBSecurityPolicy-TLS13-1-2-2021-06 |
+| AWS Systems Manager | [SSM Document Schema (Automation)](https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-schemas-features.html) | 0.3 |
+| AWS Systems Manager | [SSM Document Schema (Command)](https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-schemas-features.html) | 2.2 |
+| Amazon OpenSearch Service | [OpenSearch](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/release-notes.html) | OpenSearch_2.13 |
+| Elastic Load Balancer | [SSL Policy](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html) | ELBSecurityPolicy-TLS13-1-2-2021-06 |
 
 ## Architecture
 

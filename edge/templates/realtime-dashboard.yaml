@@ -75,7 +75,7 @@ Parameters:
     Description: The password of OpenSearch Service [required]
   ElasticsearchVersion:
     Type: String
-    Default: OpenSearch_2.11
+    Default: OpenSearch_2.13
     AllowedPattern: .+
     Description: The version of OpenSearch Service [required]
   SamplingRate:
@@ -177,7 +177,7 @@ Resources:
       Policies:
         - PolicyName: KinesisStreams
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: 2012-10-17
             Statement:
               - Effect: Allow
                 Action:
@@ -255,7 +255,7 @@ Resources:
       Policies:
         - PolicyName: KinesisFirehose
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: 2012-10-17
             Statement:
               - Effect: Allow
                 Action:
@@ -783,7 +783,7 @@ Resources:
     Type: AWS::OpenSearchService::Domain
     Properties: 
       AccessPolicies:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
           - Effect: Allow
             Principal:

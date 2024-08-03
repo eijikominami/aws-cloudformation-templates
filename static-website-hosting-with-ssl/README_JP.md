@@ -120,7 +120,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | OpenSearch Service の生存時間 |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | OpenSearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | OpenSearch Service のパスワード |
-| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.11 | ○ | OpenSearch Service のバージョン |
+| RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.13 | ○ | OpenSearch Service のバージョン |
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |

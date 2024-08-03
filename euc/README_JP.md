@@ -79,3 +79,5 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 | WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes | Number | 60 | ○ | Workspaces が自動的に停止するまでの時間 |
 | WorkspacesUserNames | CommaDelimitedList | | | ○ | Workspaces のプレイアウトイーザー名 |
 | WorkspacesUserVolumeSizeGib | Number | 100 | ○ | Workspaces のユーザボリュームのサイズ |
+
+AppStreams で Active Directory を使用する場合には、[**Active Directory 上で権限の設定を行う**](https://docs.aws.amazon.com/ja_jp/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions)必要があります。

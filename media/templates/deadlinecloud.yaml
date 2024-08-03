@@ -1,0 +1,327 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWSCloudFormationTemplates/media/deadlinecloud sets Deadline Cloud.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Deadline Cloud Configuration'
+        Parameters: 
+          - IdentityCenterInstanceArn
+          - MinWorkerCount
+          - MaxWorkerCount
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters: 
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  IdentityCenterInstanceArn:
+    Type: String
+    AllowedPattern: ^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}$
+    Description: The ARN of the IAM Identity Center instance responsible for authenticating monitor users [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  MaxWorkerCount:
+    Type: Number
+    Default: 10
+    MinValue: 0
+    MaxValue: 2147483647
+    Description: The maximum number of workers specified in the fleet [requierd]
+  MinWorkerCount:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 2147483647
+    Description: The minimum number of workers in the fleet [requierd]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates 
+    AllowedPattern: .+
+
+Resources:
+  # IAM Role
+  IAMRoleForDeadlineCloudMonitorUser:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: credentials.deadline.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+      Description: A role required for Deadline Cloud monitor user.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSDeadlineCloud-UserAccessFarms
+        - arn:aws:iam::aws:policy/AWSDeadlineCloud-UserAccessFleets
+        - arn:aws:iam::aws:policy/AWSDeadlineCloud-UserAccessJobs
+        - arn:aws:iam::aws:policy/AWSDeadlineCloud-UserAccessQueues
+      RoleName: !Sub ${AWS::StackName}-DeadlineCloudMonitorUser-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForDeadlineCloudQueue:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - credentials.deadline.amazonaws.com
+                - deadline.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnEquals:
+                aws:SourceArn: !GetAtt Farm.Arn
+      Description: A role required for Deadline Cloud queue.
+      Policies:
+        - PolicyName: AWSDeadlineCloudQueuePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                Resource:
+                  - !GetAtt S3ForDeadlineCloud.Arn
+                  - !Join
+                    - ''
+                    - - !GetAtt S3ForDeadlineCloud.Arn
+                      - /DeadlineCloud/*
+      RoleName: !Sub ${AWS::StackName}-DeadlineCloudQueue-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForDeadlineCloudFleet:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: credentials.deadline.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnEquals:
+                aws:SourceArn: !GetAtt Farm.Arn
+      Description: A role required for Deadline Cloud fleet.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSDeadlineCloud-FleetWorker
+      Policies:
+        - PolicyName: AWSDeadlineCloudFleetPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource: !Join
+                  - ''
+                  - - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/deadline/
+                    - !Ref Farm
+      RoleName: !Sub ${AWS::StackName}-DeadlineCloudFleet-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Deadline Cloud
+  Monitor:
+    Type: AWS::Deadline::Monitor
+    Properties:
+      DisplayName: !Ref AWS::AccountId
+      IdentityCenterInstanceArn: !Ref IdentityCenterInstanceArn
+      RoleArn: !GetAtt IAMRoleForDeadlineCloudMonitorUser.Arn
+      Subdomain: !Ref AWS::AccountId
+  Farm:
+    Type: AWS::Deadline::Farm
+    Properties:
+      Description: !Sub a farm created by ${AWS::StackName}
+      DisplayName: !Sub ${AWS::AccountId} farm
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
+  Queue:
+    Type: AWS::Deadline::Queue
+    Properties:
+      DefaultBudgetAction: STOP_SCHEDULING_AND_CANCEL_TASKS
+      Description: !Sub a queue created by ${AWS::StackName}
+      DisplayName: !Sub ${AWS::AccountId} queue
+      FarmId: !GetAtt Farm.FarmId
+      JobAttachmentSettings: 
+        RootPrefix: DeadlineCloud
+        S3BucketName: !Ref S3ForDeadlineCloud
+      RoleArn: !GetAtt IAMRoleForDeadlineCloudQueue.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  QueueEnvironment:
+    Type: AWS::Deadline::QueueEnvironment
+    Properties:
+      FarmId: !GetAtt Farm.FarmId
+      Priority: 0
+      QueueId: !GetAtt Queue.QueueId
+      Template: |-
+        specificationVersion: environment-2023-09
+        parameterDefinitions:
+          - name: CondaPackages
+            type: STRING
+            description: >
+              This is a space-separated list of Conda package match specifications to
+              install for the job. E.g. "blender=3.6" for a job that renders frames in
+              Blender 3.6.
+
+              See
+              https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/pkg-specs.html#package-match-specifications
+            default: ""
+            userInterface:
+              control: LINE_EDIT
+              label: Conda Packages
+          - name: CondaChannels
+            type: STRING
+            description: >
+              This is a space-separated list of Conda channels from which to install
+              packages. Deadline Cloud SMF packages are installed from the
+              "deadline-cloud" channel that is configured by Deadline Cloud.
+
+              Add "conda-forge" to get packages from the https://conda-forge.org/
+              community, and "defaults" to get packages from Anaconda Inc (make sure
+              your usage complies with https://www.anaconda.com/terms-of-use).
+            default: "deadline-cloud"
+            userInterface:
+              control: LINE_EDIT
+              label: Conda Channels
+        environment:
+          name: Conda
+          script:
+            actions:
+              onEnter:
+                command: "conda-queue-env-enter"
+                args:
+                  [
+                    "{{Session.WorkingDirectory}}/.env",
+                    "--packages",
+                    "{{Param.CondaPackages}}",
+                    "--channels",
+                    "{{Param.CondaChannels}}"
+                  ]
+              onExit:
+                command: "conda-queue-env-exit"        
+      TemplateType: YAML
+  QueueFleetAssociation:
+    Type: AWS::Deadline::QueueFleetAssociation
+    Properties:
+      FarmId: !GetAtt Farm.FarmId
+      FleetId: !GetAtt Fleet.FleetId
+      QueueId: !GetAtt Queue.QueueId
+  Fleet:
+    Type: AWS::Deadline::Fleet
+    Properties:
+      Configuration: 
+        ServiceManagedEc2:
+          InstanceCapabilities: 
+            CpuArchitectureType: x86_64
+            MemoryMiB: 
+              Max: 8192
+              Min: 8192
+            OsFamily: LINUX
+            RootEbsVolume:
+              Iops: 3000
+              SizeGiB: 250
+              ThroughputMiB: 125
+            VCpuCount: 
+              Max: 2
+              Min: 2
+          InstanceMarketOptions:
+            Type: spot
+      Description: !Sub a fleet created by ${AWS::StackName}
+      DisplayName: !Sub ${AWS::AccountId} fleet
+      FarmId: !GetAtt Farm.FarmId
+      MaxWorkerCount: !Ref MaxWorkerCount
+      MinWorkerCount: !Ref MinWorkerCount
+      RoleArn: !GetAtt IAMRoleForDeadlineCloudFleet.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # S3
+  S3ForDeadlineCloud:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: AES256
+      BucketName: !Sub deadlinecloud-${AWS::Region}-${AWS::AccountId}
+      PublicAccessBlockConfiguration: 
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForDeadlineCloud:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3ForDeadlineCloud
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForDeadlineCloud
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !GetAtt S3ForDeadlineCloud.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForDeadlineCloud.Arn
+                  - /*
+            Condition:
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
+
+Outputs:
+   MonitorUrl:
+    Description: The complete URL of the monitor
+    Value: !GetAtt Monitor.Url
