@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/euc/workspaces builds an environment for end user computing.
+Description: AWSCloudFormationTemplates/euc builds an environment for end user computing.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -72,7 +72,7 @@ Metadata:
 Parameters:
   ActiveDirectoryAccountNameForAppStream:
     Type: String
-    Default: AppStreamAdmin
+    Default: appstream
     Description: The user name of the account [APPSTREAM]
   ActiveDirectorAddresses:
     Type: CommaDelimitedList
@@ -157,7 +157,7 @@ Parameters:
       in powers of 2 (8, 16, 32, ... , 1024), with the recommended value based on the file 
       system size: 8 for <800 GiB, 16 for <1600 GiB, ... 512 for <51200 GiB, 1024 for >=51200 GiB [required]
   OrganizationalUnitDistinguishedNamesForAppStream:
-    Type: CommaDelimitedList
+    Type: String
     Default: OU=EXAMPLE,DC=example,DC=com
     Description: The distinguished names of the organizational units for computer accounts [APPSTREAM]
   SamlMetadataDocument:
@@ -516,7 +516,7 @@ Resources:
           - !GetAtt MicrosoftAD.Outputs.MicrosoftAdDnsIpAddresses
           - !Join [ ',', !Ref ActiveDirectorAddresses ]
         DirectoryName: !Ref ActiveDirectoryName
-        OrganizationalUnitDistinguishedNames: !Join [ ',', !Ref OrganizationalUnitDistinguishedNamesForAppStream ]
+        OrganizationalUnitDistinguishedNames: !Ref OrganizationalUnitDistinguishedNamesForAppStream
         ImageBuilderImageName: !Ref AppStreamImageBuilderImageName
         ImageName: !Ref AppStreamImageName
         InstanceType: !FindInMap [InstanceType, AppStream, !Ref ComputeTypeName]

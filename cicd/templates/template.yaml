@@ -252,7 +252,7 @@ Resources:
       Policies:
         - PolicyName: CodeBuild
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: 2012-10-17
             Statement:
               # Required for `sam build`
               - Action:
@@ -322,7 +322,7 @@ Resources:
       Policies:
         - PolicyName: CodePipeline
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: 2012-10-17
             Statement:
               - Action:
                   - codepipeline:StartPipelineExecution

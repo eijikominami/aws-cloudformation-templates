@@ -67,3 +67,5 @@ You can provide optional parameters as follows:
 | WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes | Number | 60 | ○ | The time after a user logs off when WorkSpaces are automatically stopped |
 | WorkspacesUserNames | CommaDelimitedList | | | ○ | The user name of the user for the WorkSpace |
 | WorkspacesUserVolumeSizeGib | Number | 100 | ○ | The size of the user storage |
+
+If you use your existing Active Directory on AppStreams, [**you need to set up permissions on it**](https://docs.aws.amazon.com/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions).
