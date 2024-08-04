@@ -1479,8 +1479,8 @@ Resources:
                 - - !GetAtt S3ForAccessLog.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
   # CloudWatch Logs to S3
   SubscriptionFilter:
     Condition: CreateKinesisFirehose

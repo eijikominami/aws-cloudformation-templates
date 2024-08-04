@@ -1340,8 +1340,8 @@ Resources:
                 - - !GetAtt S3ForArtifact.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
   # EventBridge
   CodePipelineEvents:
     Type: AWS::Events::Rule

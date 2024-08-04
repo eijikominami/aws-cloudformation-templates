@@ -189,8 +189,8 @@ Resources:
                 - - !GetAtt S3ForSource.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
           - !If
             - CreateBucketPolicy
             - Effect: Allow

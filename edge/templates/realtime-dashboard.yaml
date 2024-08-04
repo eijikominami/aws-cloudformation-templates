@@ -734,8 +734,8 @@ Resources:
                 - - !GetAtt S3ForKinesisFirehose.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
   # KMS
   KMSKey:
     Type: AWS::KMS::Key
