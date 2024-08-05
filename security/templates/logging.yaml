@@ -1,10 +1,83 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWSCloudFormationTemplates/security/logging is a solution for collecting multiple types of logs.
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Tag Configuration
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  LogArchiveAccountId:
+    Type: String
+    AllowedPattern: .+       
+    Description: The id of the log archive account
+  SecurityOUId:
+    Type: String
+    AllowedPattern: .+       
+    Description: The id of the security OU
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
 Resources:
-  SIEMOnAmazonOpenSearchService:
-    DeletionPolicy: Retain
+  SecurityLake:
     Type: AWS::CloudFormation::StackSet
-      Properties:
-        PermissionModel: SERVICE_MANAGED
-        StackSetName: SIEMOnAmazonOpenSearchService
+    Properties:
+      AdministrationRoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/stacksets.cloudformation.amazonaws.com/AWSServiceRoleForCloudFormationStackSetsOrgAdmin
+      AutoDeployment: 
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      CallAs: DELEGATED_ADMIN
+      Capabilities: 
+        - CAPABILITY_NAMED_IAM
+      Description: Amazon Security Lake
+      ManagedExecution: 
+        Active: false
+      OperationPreferences: 
+        ConcurrencyMode: STRICT_FAILURE_TOLERANCE
+        FailureToleranceCount: 0
+        MaxConcurrentCount: 1
+        RegionConcurrencyType: SEQUENTIAL
+      Parameters: 
+        - ParameterKey: Environment
+          ParameterValue: production
+        - ParameterKey: LogicalName
+          ParameterValue: SecurityLake
+        - ParameterKey: TagKey
+          ParameterValue: createdby
+        - ParameterKey: TagValue
+          ParameterValue: aws-cloudformation-templates
+      PermissionModel: SERVICE_MANAGED
+      StackInstancesGroup: 
+        - DeploymentTargets: 
+            AccountFilterType: INTERSECTION
+            Accounts: 
+              - !Ref LogArchiveAccountId
+            OrganizationalUnitIds: 
+              - !Ref SecurityOUId
+          Regions: 
+            - !Ref AWS::Region
+      StackSetName: String
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
+      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securitylake.yaml

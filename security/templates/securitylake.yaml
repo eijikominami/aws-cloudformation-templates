@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/securitylake sets Amazon Security Lake.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  LogicalName: 
+    Type: String
+    Default: SecurityLake
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  # IAM Role
+  IAMRoleForSecurityLake:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Security Lake to access logs.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSecurityLakeMetastoreManager
+      RoleName: !Sub ${LogicalName}-SecurityLake-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
+  # Security Lake
+  CloudTrailLog:
+    DependsOn:
+      - DataLake
+    Type: AWS::SecurityLake::AwsLogSource
+    Properties:
+      DataLakeArn: !GetAtt DataLake.Arn
+      SourceName: CLOUD_TRAIL_MGMT
+      SourceVersion: 2.0
+  LambdaExecutionLog:
+    DependsOn:
+      - DataLake
+      - CloudTrailLog
+    Type: AWS::SecurityLake::AwsLogSource
+    Properties:
+      DataLakeArn: !GetAtt DataLake.Arn
+      SourceName: LAMBDA_EXECUTION
+      SourceVersion: 2.0
+  EKSAuditLog:
+    DependsOn:
+      - DataLake
+      - CloudTrailLog
+      - LambdaExecutionLog
+    Type: AWS::SecurityLake::AwsLogSource
+    Properties:
+      DataLakeArn: !GetAtt DataLake.Arn
+      SourceName: EKS_AUDIT
+      SourceVersion: 2.0
+  Route53Log:
+    DependsOn:
+      - DataLake
+      - CloudTrailLog
+      - LambdaExecutionLog
+      - EKSAuditLog
+    Type: AWS::SecurityLake::AwsLogSource
+    Properties:
+      DataLakeArn: !GetAtt DataLake.Arn
+      SourceName: ROUTE53
+      SourceVersion: 2.0
+  SecurityHubLog:
+    DependsOn:
+      - DataLake
+      - CloudTrailLog
+      - LambdaExecutionLog
+      - EKSAuditLog
+      - Route53Log
+    Type: AWS::SecurityLake::AwsLogSource
+    Properties:
+      DataLakeArn: !GetAtt DataLake.Arn
+      SourceName: SH_FINDINGS
+      SourceVersion: 2.0
+  VPCFlowLog:
+    DependsOn:
+      - DataLake
+      - CloudTrailLog
+      - LambdaExecutionLog
+      - EKSAuditLog
+      - Route53Log
+      - SecurityHubLog
+    Type: AWS::SecurityLake::AwsLogSource
+    Properties:
+      DataLakeArn: !GetAtt DataLake.Arn
+      SourceName: VPC_FLOW
+      SourceVersion: 2.0
+  DataLake:
+    Type: AWS::SecurityLake::DataLake
+    Properties:
+      MetaStoreManagerRoleArn: !GetAtt IAMRoleForSecurityLake.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue 
