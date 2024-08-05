@@ -522,7 +522,10 @@ Resources:
   # Peering connections with Transit Gateway and VPC for outbound traffic
   TransitGatewayAttachment:
     Type: AWS::EC2::TransitGatewayAttachment
-    Properties: 
+    Properties:
+      Options:
+        # Enabling appliance mode ensures that the transit gateway continues to use the same Availability Zone for the VPC attachment over the lifetime of a flow of traffic between source and destination.
+        ApplianceModeSupport: enable
       SubnetIds:
         - !GetAtt Az1.Outputs.TransitSubnetId
         - !GetAtt Az2.Outputs.TransitSubnetId
