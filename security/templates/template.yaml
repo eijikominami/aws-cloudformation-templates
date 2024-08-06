@@ -5,6 +5,12 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
+          default: Organizations Configuration
+        Parameters:
+          - LogArchiveAccountId
+          - AuditAccountId
+          - SecurityOUId
+      - Label:
           default: CloudTrail Configuration
         Parameters:
           - AWSCloudTrail
@@ -24,6 +30,12 @@ Metadata:
         Parameters:
           - IAMAccessAnalyzer
       - Label:
+          default: Logging Configuration
+        Parameters:
+          - EsLoaderServiceRoleArn
+          - GeoLite2LicenseKeyForSIEM
+          - SnsEmailForSIEM
+      - Label:
           default: Macie Configuration
         Parameters:
           - AmazonMacie
@@ -31,7 +43,6 @@ Metadata:
           default: SecurityHub Configuration
         Parameters:
           - IAMUserArnToAssumeAWSSupportRole
-          - DelegatedAdminAccountId
           - AWSSecurityHub
           - AWSSecurityHubStandards
       - Label:
@@ -47,6 +58,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AuditAccountId:
+    Type: String
+    AllowedPattern: .+       
+    Description: The id of the audit account [required]
   AWSCloudTrail:
     Type: String
     Default: ENABLED
@@ -114,10 +129,19 @@ Parameters:
     Default: FSBP, CIS
     AllowedValues:
       - FSBP
+      - LOGGING
       - CIS
       - NIST
       - PCIDSS
     Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
+  EsLoaderServiceRoleArn:
+    Type: String
+    Default: ''
+    Description: The ARN of lambda function aes-siem-es-loader
+  GeoLite2LicenseKeyForSIEM:
+    Type: String
+    Default: ''
+    Description: The license key from MaxMind to enrich geoip location
   IAMAccessAnalyzer:
     Type: String
     Default: ACCOUNT
@@ -127,14 +151,22 @@ Parameters:
       - NOTIFICATION_ONLY
       - DISABLED
     Description: Enable or disable IAM Access Analyzer [required]
-  DelegatedAdminAccountId:
-    Type: String
-    Default: ''
-    Description: The AWS account identifier of the account to designate as the security account
   IAMUserArnToAssumeAWSSupportRole:
     Type: String
     Default: ''
     Description: The IAM User ARN to assume AWS Support role
+  LogArchiveAccountId:
+    Type: String
+    AllowedPattern: .+       
+    Description: The id of the log archive account [required]
+  SecurityOUId:
+    Type: String
+    AllowedPattern: .+       
+    Description: The id of the security OU [required]
+  SnsEmailForSIEM:
+    Type: String
+    AllowedPattern: .+  
+    Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to [required]
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -215,7 +247,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        DelegatedAdminAccountId: !Ref DelegatedAdminAccountId
+        DelegatedAdminAccountId: !Ref AuditAccountId
         SecurityHubStandards: !Join
           - ','
           - !Ref AWSSecurityHubStandards
@@ -371,6 +403,35 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/macie.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/macie.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Logging:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateMacie
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AuditAccountId: !Ref AuditAccountId
+        AllowedSourceIpAddressesForSIEM: 0.0.0.0/0
+        EsLoaderServiceRoleArn: !Ref EsLoaderServiceRoleArn
+        GeoLite2LicenseKeyForSIEM: !Ref GeoLite2LicenseKeyForSIEM
+        LogArchiveAccountId: !Ref LogArchiveAccountId
+        SecurityOUId: !Ref SecurityOUId
+        SnsEmailForSIEM: !Ref SnsEmailForSIEM
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/logging.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/logging.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
