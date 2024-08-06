@@ -10,6 +10,7 @@ Metadata:
         Parameters: 
           - ActiveDirectoryId
           - AZDeploymentMode
+          - CidrIp
           - FSxThroughput
           - PrimarySubnetAccess
           - IngressCidrIp
@@ -35,6 +36,11 @@ Parameters:
       - SINGLE_AZ_2
       - MULTI_AZ_1
     Description: Specifies the file system deployment type
+  CidrIp:
+    Type: String
+    Default: 0.0.0.0/0
+    AllowedPattern: ^[0-9./]*$
+    Description: The CIDR block [required]
   FSxThroughput:
     Type: Number
     AllowedValues:
@@ -99,12 +105,12 @@ Resources:
           Description: "All UDP Traffic"
           FromPort: 0
           ToPort: 65535
-          CidrIp: 0.0.0.0/0
+          CidrIp: !Ref CidrIp
         - IpProtocol: tcp
           Description: "All TCP Traffic"
           FromPort: 0
           ToPort: 65535
-          CidrIp: 0.0.0.0/0
+          CidrIp: !Ref CidrIp
       SecurityGroupIngress:
         - IpProtocol: tcp
           Description: "Directory Services SMB file sharing"

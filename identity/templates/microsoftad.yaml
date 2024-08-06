@@ -430,11 +430,6 @@ Resources:
           FromPort: 0
           ToPort: 0
           IpProtocol: '-1'
-      SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
       Tags:
         - Key: Name
           Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-mgmt
