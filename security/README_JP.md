@@ -43,8 +43,7 @@ IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に�
 
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
 また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon EventBridge`` 経由でメッセージを受け取ります。
-デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/organizations/latest/userguide/services-that-can-integrate-securityhub.html) することが可能です。
-[新しいアカウント](https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/accounts-orgs-auto-enable.html) もしくは [既存のアカウント](https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/orgs-accounts-enable.html) に対して自動的に Security Hub を有効化することが可能です。
+デプロイ完了後、**ポリシーを更新して Security Hub とセキュリティ基準を設定** します。
 
 ### Amazon GuardDuty
 

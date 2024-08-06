@@ -41,8 +41,7 @@ After deploying it, [**you can designate the delegated IAM AccessAnalyzer admini
 ### AWS Security Hub
 
 This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure.
-After deploying it, [**you can designate the delegated AWS Security Hub administrator account**](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-securityhub.html) for your organization.
-You can enable Security Hub automatically [for new accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-auto-enable.html) or [existing accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/orgs-accounts-enable.html). 
+After deploying it, **Update a configuration policy to enable Security Hub and Standards**.
 
 ### Amazon GuardDuty
 
