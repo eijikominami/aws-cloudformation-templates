@@ -10,6 +10,7 @@ Metadata:
           - LogArchiveAccountId
           - AuditAccountId
           - SecurityOUId
+          - OrganizationsRootId
       - Label:
           default: CloudTrail Configuration
         Parameters:
@@ -61,7 +62,7 @@ Metadata:
 Parameters:
   AuditAccountId:
     Type: String
-    AllowedPattern: ''    
+    Default: ''  
     Description: The id of the audit account
   AWSCloudTrail:
     Type: String
@@ -130,7 +131,7 @@ Parameters:
     Default: FSBP, CIS
     AllowedValues:
       - FSBP
-      - LOGGING
+      - TAGGING
       - CIS
       - NIST
       - PCIDSS
@@ -158,11 +159,15 @@ Parameters:
     Description: The IAM User ARN to assume AWS Support role
   LogArchiveAccountId:
     Type: String
-    AllowedPattern: ''      
+    Default: ''    
     Description: The id of the log archive account
+  OrganizationsRootId:
+    Type: String
+    Default: ''    
+    Description: The root id of AWS Organizations  
   SecurityOUId:
     Type: String
-    AllowedPattern: ''      
+    Default: ''    
     Description: The id of the security OU
   SIEM:
     Type: String
@@ -173,7 +178,7 @@ Parameters:
     Description: Enable or disable SIEM environment [required]
   SnsEmailForSIEM:
     Type: String
-    AllowedPattern: '' 
+    Default: '' 
     Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to
   SNSForAlertArn:
     Type: String
@@ -256,7 +261,8 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        DelegatedAdminAccountId: ''
+        DelegatedAdminAccountId: !Ref AuditAccountId
+        OrganizationsRootId: !Ref OrganizationsRootId
         SecurityHubStandards: !Join
           - ','
           - !Ref AWSSecurityHubStandards

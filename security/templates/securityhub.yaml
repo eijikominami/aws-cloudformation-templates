@@ -11,6 +11,7 @@ Metadata:
           default: 'Security Hub Configuration'
         Parameters:
           - DelegatedAdminAccountId
+          - OrganizationsRootId
           - SecurityHubType
           - SecurityHubStandards
       - Label: 
@@ -35,6 +36,10 @@ Parameters:
     Type: String
     Default: DefaultSecuritySettings
     Description: The custom prefix name [required]
+  OrganizationsRootId:
+    Type: String
+    Default: ''
+    Description: The root id of AWS Organizations
   SecurityHubStandards:
     Type: CommaDelimitedList
     Default: FSBP, TAGGING, CIS
@@ -83,6 +88,8 @@ Parameters:
 
 Conditions:
   CreateDelegatedAdmin: !Not [ !Equals [ !Ref DelegatedAdminAccountId, ''] ]
+  CreateCentraizedSettings: !Equals [ !Ref DelegatedAdminAccountId, '']
+  CreatePolicyAssociation: !And [ !Not [ !Equals [ !Ref OrganizationsRootId, ''] ], !Equals [ !Ref DelegatedAdminAccountId, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateSecurityHub: !Or [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_HIGH ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ] ]
@@ -165,7 +172,48 @@ Resources:
     Condition: CreateDelegatedAdmin
     Type: AWS::SecurityHub::DelegatedAdmin
     Properties:
-      AdminAccountId: !Ref DelegatedAdminAccountId
+      AdminAccountId: !Ref DelegatedAdminAccountId 
+  SecurityHubFindingAggregator:
+    Condition: CreateCentraizedSettings
+    Type: AWS::SecurityHub::FindingAggregator
+    Properties:
+      RegionLinkingMode: ALL_REGIONS
+  SecurityHubOrganizationConfiguration:
+    Condition: CreateCentraizedSettings
+    DependsOn:
+      - SecurityHubFindingAggregator
+    Type: AWS::SecurityHub::OrganizationConfiguration
+    Properties:
+      # Auto Enable and AutoEnableStandards can not be enabled for Central Configuration
+      AutoEnable: false
+      AutoEnableStandards: NONE
+      ConfigurationType: CENTRAL
+  SecurityHubConfigurationPolicy:
+    Condition: CreateCentraizedSettings
+    DependsOn:
+      - SecurityHubFindingAggregator
+      - SecurityHubOrganizationConfiguration
+    Type: AWS::SecurityHub::ConfigurationPolicy
+    Properties:
+      ConfigurationPolicy: 
+        SecurityHub: 
+          EnabledStandardIdentifiers: !Ref AWS::NoValue
+          ServiceEnabled: false
+      Description: !Sub created by ${AWS::StackName}
+      Name: configuration-policy-01
+      Tags: 
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SecurityHubPolicyAssociation:
+    Condition: CreatePolicyAssociation
+    DependsOn:
+      - SecurityHubFindingAggregator
+      - SecurityHubOrganizationConfiguration
+    Type: AWS::SecurityHub::PolicyAssociation
+    Properties:
+      ConfigurationPolicyId: !GetAtt SecurityHubConfigurationPolicy.Id
+      TargetId: !Ref OrganizationsRootId
+      TargetType: ROOT 
   # EventBridge for SecurityHub
   CloudWatchEventsForSecurityHubFindings:
     Condition: CreateCloudWatchEventsForSecurityHubFindings
