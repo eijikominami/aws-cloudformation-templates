@@ -111,6 +111,8 @@ Resources:
           RulesString: >-
             pass tcp 10.20.20.0/24 45400:45500 <> 10.10.10.0/24 5203
             (msg:"test";sid:1;rev:1;)
+        StatefulRuleOptions:
+          RuleOrder: STRICT_ORDER
       RuleGroupName: StatefullDefault
       Tags: 
         - Key: environment
@@ -132,15 +134,7 @@ Resources:
                     Sources:
                       - AddressDefinition: 0.0.0.0/0
                     Destinations:
-                      - AddressDefinition: 10.0.0.0/8
-                    SourcePorts:
-                      - FromPort: 15000
-                        ToPort: 30000
-                    DestinationPorts:
-                      - FromPort: 443
-                        ToPort: 443
-                    Protocols:
-                      - 6
+                      - AddressDefinition: 0.0.0.0/0
                   Actions:
                     - 'aws:pass'
                 Priority: 1

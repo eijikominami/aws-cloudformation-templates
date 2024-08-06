@@ -140,8 +140,8 @@ Resources:
                 - - !GetAtt S3Bucket.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
   # Secret Manager
   SecretsManager:
     Type: AWS::SecretsManager::Secret

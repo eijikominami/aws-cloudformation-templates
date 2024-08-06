@@ -25,6 +25,7 @@ If you want to deploy each service individually, click the button below.
 | AWS CloudTrail | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalName=CloudTrail) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudTrail&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/cloudtrail.yaml&param_LogicalName=CloudTrail) |
 | AWS Config | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalName=Config) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Config&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/config.yaml&param_LogicalName=Config) |
 | Amazon Macie | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalName=Macie) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalName=Macie) |
+| Logging | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Logging&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/logging.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Logging&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/logging.yaml) |
 
 ## Architecture
 
@@ -40,8 +41,7 @@ After deploying it, [**you can designate the delegated IAM AccessAnalyzer admini
 ### AWS Security Hub
 
 This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure.
-After deploying it, [**you can designate the delegated AWS Security Hub administrator account**](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-securityhub.html) for your organization.
-You can enable Security Hub automatically [for new accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-auto-enable.html) or [existing accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/orgs-accounts-enable.html). 
+After deploying it, **Update a configuration policy to enable Security Hub and Standards**.
 
 ### Amazon GuardDuty
 
@@ -80,10 +80,15 @@ If you have already enabled ``AWS Control Tower``, ``AWS Config`` is enabled at 
 
 ### Amazon Macie
 
-This templates configures ``Amazon Macie``.
+This template configures ``Amazon Macie``.
 After deploying it, [**you can designate the delegated Amazon Macie administrator account**](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-macie.html) for your organization.
 Choose Accounts in the navigation pane, and **Choose Enable in the banner at the top of the page**.
 This action automatically turns on the Auto-enable Macie configuration so that Macie gets enabled for any new account that joins the organization.
+
+### Logging
+
+This template builds ``Amazon Security Lake`` and [``SIEM on Open Search Service``](https://github.com/aws-samples/siem-on-amazon-opensearch-service/) using AWS CloudFormation StackSets.
+If you want to use Security Lake for an organization, you must use your Organizations management account to [designate a delegated Security Lake administrator](https://docs.aws.amazon.com/security-lake/latest/userguide/getting-started.html#initial-account-setup).
 
 ### Amazon EventBridge
 
@@ -106,6 +111,7 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
+| AuditAccountId | String | | | The id of the audit account |
 | AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | Enable or disable AWS CloudTrail |
 | AWSCloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
@@ -115,9 +121,14 @@ You can provide optional parameters as follows:
 | AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
 | AWSSecurityHub | String | STANDARDS_ONLY | ○ | If it is ENABLED, AWS Security Hub enabled |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | | The standard that you want to enable |
+| EsLoaderServiceRoleArn | String | | | The ARN of lambda function aes-siem-es-loader |
+| GeoLite2LicenseKeyForSIEM | String | | | The license key from MaxMind to enrich geoip location |
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | If it is ENABLED, IAM Access Analyzer is enabled |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
-| MasterAccount | Boolean | false | ○ | Whether this account is the master account |
+| LogArchiveAccountId | String | | | The id of the log archive account |
+| SecurityOUId | String | | | The id of the security OU |
+| SIEM | ENABLED / DISABLED | DISABLED | ○ | Enable or disable SIEM environment |
+| SnsEmailForSIEM | String | | | The email as SNS topic, where Amazon OpenSearch Service will send alerts to |
 
 ### Designating a GuardDuty and a Security Hub administrator account
 

@@ -817,8 +817,8 @@ Resources:
                 - - !GetAtt S3ForConfig.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
           - Effect: Deny
             Principal: '*'
             Action: 's3:*'
@@ -829,8 +829,8 @@ Resources:
                 - - !GetAtt S3ForConfig.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
           - Effect: Allow
             Principal:
               Service: config.amazonaws.com

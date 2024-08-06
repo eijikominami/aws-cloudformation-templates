@@ -667,8 +667,8 @@ Resources:
                 - - !GetAtt S3ForWebHosting.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
           - Effect: Allow
             Principal:
               Service: cloudfront.amazonaws.com
@@ -756,8 +756,8 @@ Resources:
                 - - !GetAtt S3ForAccessLog.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
 
 Outputs:
   CloudFrontURL:

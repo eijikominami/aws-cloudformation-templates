@@ -484,8 +484,8 @@ Resources:
               - !Sub arn:aws:s3:::${DestinationBucketNameForMasterBranch}
               - !Sub arn:aws:s3:::${DestinationBucketNameForMasterBranch}/*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
           - Effect: Allow
             Principal: '*'
             Action: 's3:GetObject'
@@ -513,8 +513,8 @@ Resources:
               - !Sub arn:aws:s3:::${DestinationBucketNameForTargetBranch}
               - !Sub arn:aws:s3:::${DestinationBucketNameForTargetBranch}/*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
           - Effect: Allow
             Principal: '*'
             Action: 's3:GetObject'

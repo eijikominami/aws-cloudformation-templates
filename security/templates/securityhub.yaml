@@ -11,6 +11,7 @@ Metadata:
           default: 'Security Hub Configuration'
         Parameters:
           - DelegatedAdminAccountId
+          - OrganizationsRootId
           - SecurityHubType
           - SecurityHubStandards
       - Label: 
@@ -35,11 +36,16 @@ Parameters:
     Type: String
     Default: DefaultSecuritySettings
     Description: The custom prefix name [required]
+  OrganizationsRootId:
+    Type: String
+    Default: ''
+    Description: The root id of AWS Organizations
   SecurityHubStandards:
     Type: CommaDelimitedList
-    Default: FSBP, CIS
+    Default: FSBP, TAGGING, CIS
     AllowedValues:
       - FSBP
+      - TAGGING
       - CIS
       - NIST
       - PCIDSS
@@ -82,20 +88,35 @@ Parameters:
 
 Conditions:
   CreateDelegatedAdmin: !Not [ !Equals [ !Ref DelegatedAdminAccountId, ''] ]
+  CreateCentraizedSettings: !Equals [ !Ref DelegatedAdminAccountId, '']
+  CreatePolicyAssociation: !And [ !Not [ !Equals [ !Ref OrganizationsRootId, ''] ], !Equals [ !Ref DelegatedAdminAccountId, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  CreateSecurityHub: !Or [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ] ]
+  CreateSecurityHub: !Or [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_HIGH ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ] ]
   CreateCloudWatchEventsForSecurityHubFindings: !Not [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ] ]
   SendAllEvents: !And [ !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ], !Equals [ !Ref SecurityHubType, ALERAM_ALL ] ]
   SendMidiumEvents: !And [ !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, ALERAM_MIDIUM ] ]
 
 Mappings: 
   SecurityHubStandardsArn: 
+    us-east-1:
+      FSBP: arn:aws:securityhub:us-east-1::standards/aws-foundational-security-best-practices/v/1.0.0
+      TAGGING: arn:aws:securityhub:us-east-1::standards/aws-resource-tagging-standard/v/1.0.0
+      CIS: arn:aws:securityhub:us-east-1::standards/cis-aws-foundations-benchmark/v/1.4.0
+      NIST: arn:aws:securityhub:us-east-1::standards/nist-800-53/v/5.0.0
+      PCIDSS: arn:aws:securityhub:us-east-1::standards/pci-dss/v/3.2.1
     ap-northeast-1:
       FSBP: arn:aws:securityhub:ap-northeast-1::standards/aws-foundational-security-best-practices/v/1.0.0
+      TAGGING: arn:aws:securityhub:ap-northeast-1::standards/aws-resource-tagging-standard/v/1.0.0
       CIS: arn:aws:securityhub:ap-northeast-1::standards/cis-aws-foundations-benchmark/v/1.4.0
       NIST: arn:aws:securityhub:ap-northeast-1::standards/nist-800-53/v/5.0.0
       PCIDSS: arn:aws:securityhub:ap-northeast-1::standards/pci-dss/v/3.2.1
+    ap-northeast-3:
+      FSBP: arn:aws:securityhub:ap-northeast-3::standards/aws-foundational-security-best-practices/v/1.0.0
+      TAGGING: arn:aws:securityhub:ap-northeast-3::standards/aws-resource-tagging-standard/v/1.0.0
+      CIS: arn:aws:securityhub:ap-northeast-3::standards/cis-aws-foundations-benchmark/v/1.4.0
+      NIST: arn:aws:securityhub:ap-northeast-3::standards/nist-800-53/v/5.0.0
+      PCIDSS: arn:aws:securityhub:ap-northeast-3::standards/pci-dss/v/3.2.1
 
 Resources:
   # Nested Stack
@@ -151,7 +172,48 @@ Resources:
     Condition: CreateDelegatedAdmin
     Type: AWS::SecurityHub::DelegatedAdmin
     Properties:
-      AdminAccountId: !Ref DelegatedAdminAccountId
+      AdminAccountId: !Ref DelegatedAdminAccountId 
+  SecurityHubFindingAggregator:
+    Condition: CreateCentraizedSettings
+    Type: AWS::SecurityHub::FindingAggregator
+    Properties:
+      RegionLinkingMode: ALL_REGIONS
+  SecurityHubOrganizationConfiguration:
+    Condition: CreateCentraizedSettings
+    DependsOn:
+      - SecurityHubFindingAggregator
+    Type: AWS::SecurityHub::OrganizationConfiguration
+    Properties:
+      # Auto Enable and AutoEnableStandards can not be enabled for Central Configuration
+      AutoEnable: false
+      AutoEnableStandards: NONE
+      ConfigurationType: CENTRAL
+  SecurityHubConfigurationPolicy:
+    Condition: CreateCentraizedSettings
+    DependsOn:
+      - SecurityHubFindingAggregator
+      - SecurityHubOrganizationConfiguration
+    Type: AWS::SecurityHub::ConfigurationPolicy
+    Properties:
+      ConfigurationPolicy: 
+        SecurityHub: 
+          EnabledStandardIdentifiers: !Ref AWS::NoValue
+          ServiceEnabled: false
+      Description: !Sub created by ${AWS::StackName}
+      Name: configuration-policy-01
+      Tags: 
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SecurityHubPolicyAssociation:
+    Condition: CreatePolicyAssociation
+    DependsOn:
+      - SecurityHubFindingAggregator
+      - SecurityHubOrganizationConfiguration
+    Type: AWS::SecurityHub::PolicyAssociation
+    Properties:
+      ConfigurationPolicyId: !GetAtt SecurityHubConfigurationPolicy.Id
+      TargetId: !Ref OrganizationsRootId
+      TargetType: ROOT 
   # EventBridge for SecurityHub
   CloudWatchEventsForSecurityHubFindings:
     Condition: CreateCloudWatchEventsForSecurityHubFindings

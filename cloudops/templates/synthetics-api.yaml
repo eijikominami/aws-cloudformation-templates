@@ -272,8 +272,8 @@ Resources:
                 - - !GetAtt S3ForSynthetics.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
   # CloudWatch Alarm
   CloudWatchIncidentSynthetics:
     Type: AWS::CloudWatch::Alarm

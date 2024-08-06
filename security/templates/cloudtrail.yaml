@@ -243,8 +243,8 @@ Resources:
                 - - !GetAtt S3ForCloudTrail.Arn
                   - /*
             Condition:
-              Bool: 
-                aws:SecureTransport: false
+              NumericLessThan: 
+                s3:TlsVersion: 1.2
           - Effect: Allow
             Principal:
               Service: cloudtrail.amazonaws.com
