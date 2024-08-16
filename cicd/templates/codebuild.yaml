@@ -241,6 +241,7 @@ Resources:
                   - ecr:BatchCheckLayerAvailability
                   - ecr:GetAuthorizationToken
                   - ecr-public:GetAuthorizationToken
+                  - sts:GetServiceBearerToken
                 Resource: 
                   - '*'
                 Effect: Allow
