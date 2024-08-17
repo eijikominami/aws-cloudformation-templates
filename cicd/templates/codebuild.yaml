@@ -16,7 +16,9 @@ Metadata:
           - BuildSpecForContainers
           - BuildSpecForCommits
           - BuildSpecForTags
-          - Image
+          - ImageForContainers
+          - ImageForCommits
+          - ImageForTags
       - Label: 
           default: 'Source Configuration'
         Parameters: 
@@ -59,7 +61,17 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The name of the bucket where Amazon S3 should store development artifacts [required]  
-  Image:
+  ImageForContainers:
+    Type: String
+    Default: aws/codebuild/amazonlinux2-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
+  ImageForCommits:
+    Type: String
+    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
+    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
+  ImageForTags:
     Type: String
     Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
     AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
@@ -294,7 +306,7 @@ Resources:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
             Value: !Ref DestinationBucketNameForMasterBranch
-        Image: !Ref Image
+        Image: !Ref ImageForCommits
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
@@ -341,7 +353,7 @@ Resources:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
             Value: !Ref DestinationBucketNameForTargetBranch
-        Image: !Ref Image
+        Image: !Ref ImageForCommits
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
@@ -384,7 +396,7 @@ Resources:
           - Name: BUCKET_NAME
             Type: PLAINTEXT
             Value: !Ref DestinationBucketNameForTargetBranch
-        Image: !Ref Image
+        Image: !Ref ImageForTags
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 
@@ -425,14 +437,14 @@ Resources:
         EnvironmentVariables:
           - Name: REPOSITORY_URI
             Type: PLAINTEXT
-            Value: public.ecr.aws/r7j6d5k5/aws-for-fluent-bit
+            Value: public.ecr.aws/eijikominami/aws-for-fluent-bit
           - Name: BASE_DIR
             Type: PLAINTEXT
             Value: shared/aws-for-fluent-bit
           - Name: CPU_ARCHITECTURE
             Type: PLAINTEXT
             Value: linux/arm64/v8,linux/amd64
-        Image: !Ref Image
+        Image: !Ref ImageForContainers
         Type: ARM_CONTAINER
       LogsConfig: 
         CloudWatchLogs: 

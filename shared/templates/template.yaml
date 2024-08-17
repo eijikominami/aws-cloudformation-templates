@@ -40,9 +40,9 @@ Metadata:
       - Label: 
           default: 'FluentBit Configuration'
         Parameters: 
+          - FluentBitForSyslog
           - AccountIdForArchive
           - BucketNameForArchive
-          - FluentBitForSyslog
           - FluentBitAddress1
           - FluentBitAddress2
           - FluentBitAddress3

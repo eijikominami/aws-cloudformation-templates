@@ -72,7 +72,7 @@ Parameters:
     Description: The number of instantiations [required] 
   ImageUri:
     Type: String
-    Default: public.ecr.aws/r7j6d5k5/aws-for-fluent-bit
+    Default: public.ecr.aws/eijikominami/aws-for-fluent-bit
     Description: The image used to start a container [required]
   NlbIPv4Address1:
     Type: String
@@ -306,7 +306,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckPort: 24224
+      HealthCheckPort: 2020
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
@@ -357,6 +357,12 @@ Resources:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ECSCluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker: 
+          Enable: true
+          Rollback: true
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100      
       DesiredCount: !Ref DesiredCapacity
       EnableECSManagedTags: true
       EnableExecuteCommand: true
@@ -439,8 +445,8 @@ Resources:
           IpProtocol: UDP
         - CidrIp: 0.0.0.0/0
           Description: healthcheck
-          FromPort: 24224
-          ToPort: 24224
+          FromPort: 2020
+          ToPort: 2020
           IpProtocol: TCP
         - CidrIp: 0.0.0.0/0
           Description: icmp
