@@ -14,16 +14,16 @@ Metadata:
           - DesiredCapacity
           - ImageUri
           - Memory
-          - VPCId
       - Label: 
           default: 'Network Configuration'
-        Parameters: 
-          - NlbIPv4Address1
-          - NlbIPv4Address2
-          - NlbIPv4Address3
+        Parameters:
+          - VPCId
           - SubnetId1
           - SubnetId2
           - SubnetId3
+          - NlbIPv4Address1
+          - NlbIPv4Address2
+          - NlbIPv4Address3
       - Label: 
           default: 'S3 Configuration'
         Parameters: 
@@ -306,7 +306,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckPort: 2020
+      HealthCheckPort: 24224
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
@@ -439,8 +439,8 @@ Resources:
           IpProtocol: UDP
         - CidrIp: 0.0.0.0/0
           Description: healthcheck
-          FromPort: 2020
-          ToPort: 2020
+          FromPort: 24224
+          ToPort: 24224
           IpProtocol: TCP
         - CidrIp: 0.0.0.0/0
           Description: icmp

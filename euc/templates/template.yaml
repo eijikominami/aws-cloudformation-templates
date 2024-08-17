@@ -436,6 +436,7 @@ Resources:
           - !GetAtt MicrosoftAD.Outputs.MicrosoftAdId
           - !Ref ActiveDirectoryIdForFSx
         AZDeploymentMode: !Ref FSxDeploymentMode
+        CidrIp: !Ref VPCCidrBlock
         FSxThroughput: !Ref FSxThroughput
         IngressCidrIp: !Ref FSxIngressCidrIp
         PrimarySubnetAccess: !GetAtt Az1.Outputs.PrivateSubnetId

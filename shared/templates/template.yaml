@@ -385,7 +385,6 @@ Resources:
         AccountIdForArchive: !Ref AccountIdForArchive
         BucketNameForArchive: !Ref BucketNameForArchive
         CpuArchitecture: ARM64
-        ImageUri: public.ecr.aws/r7j6d5k5/aws-for-fluent-bit
         NlbIPv4Address1: !Ref FluentBitAddress1
         NlbIPv4Address2: !Ref FluentBitAddress2
         NlbIPv4Address3: !Ref FluentBitAddress3
