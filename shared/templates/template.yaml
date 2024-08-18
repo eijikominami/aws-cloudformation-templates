@@ -385,12 +385,15 @@ Resources:
         AccountIdForArchive: !Ref AccountIdForArchive
         BucketNameForArchive: !Ref BucketNameForArchive
         CpuArchitecture: ARM64
-        NlbIPv4Address1: !Ref FluentBitAddress1
-        NlbIPv4Address2: !Ref FluentBitAddress2
-        NlbIPv4Address3: !Ref FluentBitAddress3
-        SubnetId1: !GetAtt Az1.Outputs.PrivateSubnetId
-        SubnetId2: !GetAtt Az2.Outputs.PrivateSubnetId
-        SubnetId3: !GetAtt Az3.Outputs.PrivateSubnetId
+        NlbIPv4AddressAz1: !Ref FluentBitAddress1
+        NlbIPv4AddressAz2: !Ref FluentBitAddress2
+        NlbIPv4AddressAz3: !Ref FluentBitAddress3
+        RouteTableIdAz1: !GetAtt Az1.Outputs.RouteTableIdPrivate
+        RouteTableIdAz2: !GetAtt Az2.Outputs.RouteTableIdPrivate
+        RouteTableIdAz3: !GetAtt Az3.Outputs.RouteTableIdPrivate
+        SubnetIdAz1: !GetAtt Az1.Outputs.PrivateSubnetId
+        SubnetIdAz2: !GetAtt Az2.Outputs.PrivateSubnetId
+        SubnetIdAz3: !GetAtt Az3.Outputs.PrivateSubnetId
         VPCId: !Ref VPC
         SNSForAlertArn: !If
           - CreateSNSForAlert
