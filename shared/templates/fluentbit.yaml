@@ -305,7 +305,7 @@ Resources:
       Name: !Sub elb-${LogicalName}
       Scheme: internal
       SecurityGroups:
-        - !Ref SecurityGroupSyslog
+        - !Ref SecurityGroupForFluentBit
       SubnetMappings:
         - PrivateIPv4Address: !If
             - CreateNlbSubnetMapping1
@@ -381,7 +381,7 @@ Resources:
           Value: !Ref TagValue
   ECSService:
     DependsOn:
-         - LoadBalancerListener
+      - LoadBalancerListener
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ECSCluster
@@ -404,7 +404,7 @@ Resources:
         AwsvpcConfiguration: 
           AssignPublicIp: DISABLED
           SecurityGroups: 
-            - !Ref SecurityGroupSyslog
+            - !Ref SecurityGroupForFluentBit
           Subnets: 
             - !Ref SubnetIdAz1
             - !Ref SubnetIdAz2
@@ -420,6 +420,10 @@ Resources:
   ECSTaskDefinition:
     DependsOn:
       - PullThroughCacheRule
+      - RegistryPolicy
+      - EcrDkrEndpoint
+      - EcrApiEndpoint
+      - S3Endpoint
     Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions: 
@@ -457,11 +461,11 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Security Group
-  SecurityGroupSyslog:
+  SecurityGroupForFluentBit:
     Type: AWS::EC2::SecurityGroup
     Properties: 
-      GroupName: !Sub sgp-${LogicalName}-${AWS::Region}-syslog
-      GroupDescription: Security Group for Web Server
+      GroupName: !Sub sgp-${LogicalName}-${AWS::Region}-fluentbit
+      GroupDescription: Security Group for FluentBit
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           FromPort: 0
@@ -486,6 +490,48 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub sgp-${LogicalName}-${AWS::Region}-syslog
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  SecurityGroupForEndpoint:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+      GroupDescription: Security Group for VPC Endpoints
+      SecurityGroupEgress:
+        - CidrIp: !Ref SubnetCidrBlockAz1
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetCidrBlockAz3
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetCidrBlockAz3
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: !Ref SubnetCidrBlockAz1
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SubnetCidrBlockAz2
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SubnetCidrBlockAz3
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -587,9 +633,22 @@ Resources:
     Type: AWS::ECR::PullThroughCacheRule
     Properties:
       EcrRepositoryPrefix: ecr-public/eijikominami
-      UpstreamRegistry: ECR Public
+      UpstreamRegistry: ecr-public
       UpstreamRegistryUrl: public.ecr.aws
-  # VPC Endpoint for ECR
+  RegistryPolicy:
+    Type: AWS::ECR::RegistryPolicy
+    Properties:
+      PolicyText:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PullThroughCacheRulePolicy
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt IAMRoleForECSTask.Arn
+            Action:
+              - ecr:CreateRepository
+              - ecr:BatchImportUpstreamImage
+            Resource: !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/ecr-public/eijikominami/*
   EcrDkrEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties: 
@@ -625,61 +684,6 @@ Resources:
         - !Ref RouteTableIdAz3
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcEndpointType: Gateway
-      VpcId: !Ref VPCId
-  LogsEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties: 
-      PrivateDnsEnabled: true
-      SecurityGroupIds: 
-        - !Ref SecurityGroupForEndpoint
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
-      SubnetIds: 
-        - !Ref SubnetIdAz1
-        - !Ref SubnetIdAz2
-        - !Ref SubnetIdAz3
-      VpcEndpointType: Interface
-      VpcId: !Ref VPCId
-  SecurityGroupForEndpoint:
-    Type: AWS::EC2::SecurityGroup
-    Properties: 
-      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce-20221129
-      GroupDescription: Security Group for VPC Endpoints
-      SecurityGroupEgress:
-        - CidrIp: !Ref SubnetCidrBlockAz1
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
-        - CidrIp: !Ref SubnetCidrBlockAz3
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
-        - CidrIp: !Ref SubnetCidrBlockAz3
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
-      SecurityGroupIngress:
-        - CidrIp: !Ref SubnetCidrBlockAz1
-          Description: https
-          FromPort: 443
-          ToPort: 443
-          IpProtocol: TCP
-        - CidrIp: !Ref SubnetCidrBlockAz2
-          Description: https
-          FromPort: 443
-          ToPort: 443
-          IpProtocol: TCP
-        - CidrIp: !Ref SubnetCidrBlockAz3
-          Description: https
-          FromPort: 443
-          ToPort: 443
-          IpProtocol: TCP
-      Tags:
-        - Key: Name
-          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
       VpcId: !Ref VPCId
   # CloudWatch
   CloudWatchAlarmECS:
