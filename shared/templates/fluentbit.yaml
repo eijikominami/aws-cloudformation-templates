@@ -429,7 +429,7 @@ Resources:
       ContainerDefinitions: 
         - Cpu: !Ref Cpu
           Essential: true
-          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ecr-public/eijikominami/aws-for-fluent-bit:latest
+          Image: public.ecr.aws/eijikominami/aws-for-fluent-bit:latest
           LinuxParameters:
             InitProcessEnabled: true
           LogConfiguration:
@@ -505,7 +505,7 @@ Resources:
           FromPort: 0
           ToPort: 0
           IpProtocol: '-1'
-        - CidrIp: !Ref SubnetCidrBlockAz3
+        - CidrIp: !Ref SubnetCidrBlockAz2
           FromPort: 0
           ToPort: 0
           IpProtocol: '-1'
