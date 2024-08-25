@@ -443,7 +443,7 @@ Resources:
             Value: shared/aws-for-fluent-bit
           - Name: CPU_ARCHITECTURE
             Type: PLAINTEXT
-            Value: linux/arm64/v8,linux/amd64
+            Value: linux/arm64,linux/amd64
         Image: !Ref ImageForContainers
         Type: ARM_CONTAINER
       LogsConfig: 
