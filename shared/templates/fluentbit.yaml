@@ -12,18 +12,23 @@ Metadata:
           - Cpu
           - CpuArchitecture
           - DesiredCapacity
-          - ImageUri
           - Memory
       - Label: 
           default: 'Network Configuration'
         Parameters:
           - VPCId
-          - SubnetId1
-          - SubnetId2
-          - SubnetId3
-          - NlbIPv4Address1
-          - NlbIPv4Address2
-          - NlbIPv4Address3
+          - SubnetIdAz1
+          - SubnetCidrBlockAz1
+          - NlbIPv4AddressAz1
+          - RouteTableIdAz1
+          - SubnetIdAz2
+          - SubnetCidrBlockAz2
+          - NlbIPv4AddressAz2
+          - RouteTableIdAz2
+          - SubnetIdAz3
+          - SubnetCidrBlockAz3
+          - NlbIPv4AddressAz3
+          - RouteTableIdAz3
       - Label: 
           default: 'S3 Configuration'
         Parameters: 
@@ -70,31 +75,54 @@ Parameters:
     Default: 1
     MinValue: 0
     Description: The number of instantiations [required] 
-  ImageUri:
-    Type: String
-    Default: public.ecr.aws/r7j6d5k5/aws-for-fluent-bit
-    Description: The image used to start a container [required]
-  NlbIPv4Address1:
+  NlbIPv4AddressAz1:
     Type: String
     Default: 10.3.0.114
     Description: The private IPv4 address for an internal load balancer
-  NlbIPv4Address2:
+  NlbIPv4AddressAz2:
     Type: String
     Default: 10.3.64.114
     Description: The private IPv4 address for an internal load balancer  
-  NlbIPv4Address3:
+  NlbIPv4AddressAz3:
     Type: String
     Default: 10.3.128.114
-    Description: The private IPv4 address for an internal load balancer  
-  SubnetId1:
+    Description: The private IPv4 address for an internal load balancer
+  RouteTableIdAz1:
+    Type: String
+    AllowedPattern: .+
+    Description: The route table id at AZ1 [required]
+  RouteTableIdAz2:
+    Type: String
+    AllowedPattern: .+
+    Description: The route table id at AZ2 [required]
+  RouteTableIdAz3:
+    Type: String
+    AllowedPattern: .+
+    Description: The route table id at AZ3 [required]
+  SubnetCidrBlockAz1:
+    Type: String
+    Default: 10.3.0.64/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ1
+  SubnetCidrBlockAz2:
+    Type: String
+    Default: 10.3.64.64/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ2
+  SubnetCidrBlockAz3:
+    Type: String
+    Default: 10.3.128.64/26
+    AllowedPattern: ^[0-9./]*$
+    Description: The private subnet CIDR block at AZ3
+  SubnetIdAz1:
     Type: AWS::EC2::Subnet::Id
-    Description: The subnet id 1 for Container [required]
-  SubnetId2:
+    Description: The subnet id at AZ1 [required]
+  SubnetIdAz2:
     Type: AWS::EC2::Subnet::Id
-    Description: The subnet id 2 for Container [required]
-  SubnetId3:
+    Description: The subnet id at AZ2 [required]
+  SubnetIdAz3:
     Type: AWS::EC2::Subnet::Id
-    Description: The subnet id 3 for Container [required]
+    Description: The subnet id at AZ3 [required]
   Memory:
     Type: String
     Default: 3072
@@ -133,9 +161,9 @@ Parameters:
 
 Conditions:
   CreateS3ReplicationForArchive: !And [ !Not [ !Equals [ !Ref AccountIdForArchive, ''] ], !Not [ !Equals [ !Ref BucketNameForArchive, ''] ] ]
-  CreateNlbSubnetMapping1: !Not [ !Equals [ !Ref NlbIPv4Address1, ''] ]
-  CreateNlbSubnetMapping2: !Not [ !Equals [ !Ref NlbIPv4Address2, ''] ]
-  CreateNlbSubnetMapping3: !Not [ !Equals [ !Ref NlbIPv4Address3, ''] ]
+  CreateNlbSubnetMapping1: !Not [ !Equals [ !Ref NlbIPv4AddressAz1, ''] ]
+  CreateNlbSubnetMapping2: !Not [ !Equals [ !Ref NlbIPv4AddressAz2, ''] ]
+  CreateNlbSubnetMapping3: !Not [ !Equals [ !Ref NlbIPv4AddressAz3, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -277,23 +305,23 @@ Resources:
       Name: !Sub elb-${LogicalName}
       Scheme: internal
       SecurityGroups:
-        - !Ref SecurityGroupSyslog
+        - !Ref SecurityGroupForFluentBit
       SubnetMappings:
         - PrivateIPv4Address: !If
             - CreateNlbSubnetMapping1
-            - !Ref NlbIPv4Address1
+            - !Ref NlbIPv4AddressAz1
             - !Ref AWS::NoValue
-          SubnetId: !Ref SubnetId1
+          SubnetId: !Ref SubnetIdAz1
         - PrivateIPv4Address: !If
             - CreateNlbSubnetMapping2
-            - !Ref NlbIPv4Address2
+            - !Ref NlbIPv4AddressAz2
             - !Ref AWS::NoValue
-          SubnetId: !Ref SubnetId2
+          SubnetId: !Ref SubnetIdAz2
         - PrivateIPv4Address: !If
             - CreateNlbSubnetMapping3
-            - !Ref NlbIPv4Address3
+            - !Ref NlbIPv4AddressAz3
             - !Ref AWS::NoValue
-          SubnetId: !Ref SubnetId3
+          SubnetId: !Ref SubnetIdAz3
       Tags:
         - Key: Name
           Value: !Sub elb-${LogicalName}-${AWS::Region}
@@ -306,7 +334,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckPort: 24224
+      HealthCheckPort: 2020
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
@@ -353,10 +381,16 @@ Resources:
           Value: !Ref TagValue
   ECSService:
     DependsOn:
-         - LoadBalancerListener
+      - LoadBalancerListener
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ECSCluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker: 
+          Enable: true
+          Rollback: true
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100      
       DesiredCount: !Ref DesiredCapacity
       EnableECSManagedTags: true
       EnableExecuteCommand: true
@@ -370,11 +404,11 @@ Resources:
         AwsvpcConfiguration: 
           AssignPublicIp: DISABLED
           SecurityGroups: 
-            - !Ref SecurityGroupSyslog
+            - !Ref SecurityGroupForFluentBit
           Subnets: 
-            - !Ref SubnetId1
-            - !Ref SubnetId2
-            - !Ref SubnetId3     
+            - !Ref SubnetIdAz1
+            - !Ref SubnetIdAz2
+            - !Ref SubnetIdAz3     
       SchedulingStrategy: REPLICA
       ServiceName: !Sub ${LogicalName}-FargateService
       Tags: 
@@ -384,12 +418,18 @@ Resources:
           Value: !Ref TagValue
       TaskDefinition: !Ref ECSTaskDefinition
   ECSTaskDefinition:
+    DependsOn:
+      - PullThroughCacheRule
+      - RegistryPolicy
+      - EcrDkrEndpoint
+      - EcrApiEndpoint
+      - S3Endpoint
     Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions: 
         - Cpu: !Ref Cpu
           Essential: true
-          Image: !Sub ${ImageUri}:latest
+          Image: public.ecr.aws/eijikominami/aws-for-fluent-bit:latest
           LinuxParameters:
             InitProcessEnabled: true
           LogConfiguration:
@@ -397,7 +437,7 @@ Resources:
             Options: 
               awslogs-region: !Ref AWS::Region
               awslogs-group: !Ref CloudWatchLogsGroup
-              awslogs-stream-prefix: !Ref ImageUri
+              awslogs-stream-prefix: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ecr-public/eijikominami/aws-for-fluent-bit
           Memory: 512
           Name: !Ref LogicalName
           PortMappings:
@@ -421,11 +461,11 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   # Security Group
-  SecurityGroupSyslog:
+  SecurityGroupForFluentBit:
     Type: AWS::EC2::SecurityGroup
     Properties: 
-      GroupName: !Sub sgp-${LogicalName}-${AWS::Region}-syslog
-      GroupDescription: Security Group for Web Server
+      GroupName: !Sub sgp-${LogicalName}-${AWS::Region}-fluentbit
+      GroupDescription: Security Group for FluentBit
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           FromPort: 0
@@ -439,8 +479,8 @@ Resources:
           IpProtocol: UDP
         - CidrIp: 0.0.0.0/0
           Description: healthcheck
-          FromPort: 24224
-          ToPort: 24224
+          FromPort: 2020
+          ToPort: 2020
           IpProtocol: TCP
         - CidrIp: 0.0.0.0/0
           Description: icmp
@@ -450,6 +490,48 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub sgp-${LogicalName}-${AWS::Region}-syslog
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VPCId
+  SecurityGroupForEndpoint:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+      GroupDescription: Security Group for VPC Endpoints
+      SecurityGroupEgress:
+        - CidrIp: !Ref SubnetCidrBlockAz1
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetCidrBlockAz2
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+        - CidrIp: !Ref SubnetCidrBlockAz3
+          FromPort: 0
+          ToPort: 0
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: !Ref SubnetCidrBlockAz1
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SubnetCidrBlockAz2
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SubnetCidrBlockAz3
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -546,6 +628,63 @@ Resources:
             Condition:
               NumericLessThan: 
                 s3:TlsVersion: 1.2
+  # ECR
+  PullThroughCacheRule:
+    Type: AWS::ECR::PullThroughCacheRule
+    Properties:
+      EcrRepositoryPrefix: ecr-public/eijikominami
+      UpstreamRegistry: ecr-public
+      UpstreamRegistryUrl: public.ecr.aws
+  RegistryPolicy:
+    Type: AWS::ECR::RegistryPolicy
+    Properties:
+      PolicyText:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PullThroughCacheRulePolicy
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt IAMRoleForECSTask.Arn
+            Action:
+              - ecr:CreateRepository
+              - ecr:BatchImportUpstreamImage
+            Resource: !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/ecr-public/eijikominami/*
+  EcrDkrEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
+      SubnetIds: 
+        - !Ref SubnetIdAz1
+        - !Ref SubnetIdAz2
+        - !Ref SubnetIdAz3
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  EcrApiEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
+      SubnetIds: 
+        - !Ref SubnetIdAz1
+        - !Ref SubnetIdAz2
+        - !Ref SubnetIdAz3
+      VpcEndpointType: Interface
+      VpcId: !Ref VPCId
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      RouteTableIds:
+        - !Ref RouteTableIdAz1
+        - !Ref RouteTableIdAz2
+        - !Ref RouteTableIdAz3
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      VpcId: !Ref VPCId
   # CloudWatch
   CloudWatchAlarmECS:
     Type: AWS::Serverless::Application

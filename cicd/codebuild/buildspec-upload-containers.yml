@@ -8,9 +8,11 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
-      - IMAGE_TAG=$(echo $CODEBUILD_SOURCE_VERSION |cut -d/ -f4 |cut -d'.' -f1)
-      - echo $IMAGE_TAG
+      - aws --version
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
+      - IMAGE_TAG=i$(date +%Y%m%d%H%M%S)-${COMMIT_HASH:=latest}
+      - echo IMAGE_TAG=$IMAGE_TAG
+      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/eijikominami
   build:
     commands:
       - echo Building the Docker image...

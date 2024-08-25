@@ -91,6 +91,8 @@ Resources:
         MaxConcurrentCount: 1
         RegionConcurrencyType: SEQUENTIAL
       Parameters: 
+        - ParameterKey: AuditAccountId
+          ParameterValue: !Ref AuditAccountId
         - ParameterKey: Environment
           ParameterValue: production
         - ParameterKey: LogicalName

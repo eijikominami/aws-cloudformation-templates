@@ -5,6 +5,10 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
+          default: 'Security Lake Configuration'
+        Parameters:
+          - AuditAccountId
+      - Label: 
           default: 'Tag Configuration'
         Parameters:
           - LogicalName
@@ -13,6 +17,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AuditAccountId:
+    Type: String
+    Default: ''  
+    Description: The id of the audit account [required]
   LogicalName: 
     Type: String
     Default: SecurityLake
@@ -32,6 +40,9 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
+
+Conditions:
+  CreateSubscriberForSIEM: !Not [ !Equals [!Ref AuditAccountId , ''] ]
 
 Resources:
   # IAM Role
@@ -122,6 +133,42 @@ Resources:
     Type: AWS::SecurityLake::DataLake
     Properties:
       MetaStoreManagerRoleArn: !GetAtt IAMRoleForSecurityLake.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SubscriberForSIEM:
+    Condition: CreateSubscriberForSIEM
+    Type: AWS::SecurityLake::Subscriber
+    Properties:
+      AccessTypes: 
+        - S3
+      DataLakeArn: !GetAtt DataLake.Arn
+      Sources: 
+        - AwsLogSource: 
+            SourceName: CLOUD_TRAIL_MGMT
+            SourceVersion: 2.0
+        - AwsLogSource: 
+            SourceName: LAMBDA_EXECUTION
+            SourceVersion: 2.0
+        - AwsLogSource: 
+            SourceName: EKS_AUDIT
+            SourceVersion: 2.0
+        - AwsLogSource: 
+            SourceName: ROUTE53
+            SourceVersion: 2.0
+        - AwsLogSource: 
+            SourceName: SH_FINDINGS
+            SourceVersion: 2.0
+        - AwsLogSource: 
+            SourceName: VPC_FLOW
+            SourceVersion: 2.0
+      SubscriberDescription: !Sub Created by ${AWS::StackName}
+      SubscriberIdentity: 
+        Principal: !Ref AuditAccountId
+        ExternalId: SIEM
+      SubscriberName: Audit
       Tags: 
         - Key: environment
           Value: !Ref Environment
