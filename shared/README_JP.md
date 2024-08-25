@@ -47,6 +47,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | ActiveDirectoryShortName | String | CORP | ○ | NetBIOS 名 |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.64.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| ActiveDirectorySubnetCidrBlockForAz3 | String | 10.1.64.128/26 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
 | BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
 | DomainName | String | | | ドメイン名 |
 | FluentBitAddress1 | String | 10.3.0.114 | | FluentBit のプライベートアドレス |
@@ -64,6 +65,33 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | TransitGatewayId | String | | | Transit Gateway の ID |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGateway に転送する CIDR ブロック |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | VPC の CIDR ブロック |
+
+### Fluentbit
+
+このテンプレートは、Syslog 転送用の `FluentBit` を構成します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| AccountIdForArchive | String | | | ログアーカイブアカウント ID |
+| AppPort | Number | 514 | ○ | コンテナの Listen ポート |
+| BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
+| Cpu | Number | 1024 | ○ | コンテナの CPU ユニット数 |
+| CpuArchitecture | String | ARM64 | CPU アーキテクチャ |
+| DesiredCapacity | String | 1 | ○ | 希望するインスタンスの数 |
+| NlbIPv4AddressAz1 | String | 10.3.0.114 | NLB に付与する IP アドレス（AZ1） |
+| NlbIPv4AddressAz2 | String | 10.3.64.114 | NLB に付与する IP アドレス（AZ2） |
+| NlbIPv4AddressAz3 | String | 10.3.128.114 | NLB に付与する IP アドレス（AZ3） |
+| RouteTableIdAz1 | String | | ○ | AZ1 のルートテーブル ID |
+| RouteTableIdAz2 | String | | ○ | AZ2 のルートテーブル ID | 
+| RouteTableIdAz3 | String | | ○ | AZ3 のルートテーブル ID | 
+| SubnetCidrBlockAz1 | String | 10.3.0.64/26 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
+| SubnetCidrBlockAz2 | String | 10.3.64.64/26 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
+| SubnetCidrBlockAz3 | String | 10.3.128.64/26 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |
+| SubnetIdAz1 | AWS::EC2::Subnet::Id | | ○ | AZ1 のサブネット ID |
+| SubnetIdAz2 | AWS::EC2::Subnet::Id | | ○ | AZ2 のサブネット ID |
+| SubnetIdAz3 | AWS::EC2::Subnet::Id | | ○ | AZ3 のサブネット ID |
+| Memory | String | 3072 | ○ | コンテナのメモリ(MiB) |
+| VPCId | AWS::EC2::VPC::Id | | ○ | VPC Id | 
 
 ### IAM Identity Center の信頼されたアクセス
 

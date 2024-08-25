@@ -226,19 +226,43 @@ Resources:
                 Action:
                   - firehose:PutRecordBatch
                 Resource: !Sub arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/FluentBit
+              # ECS Exec
               - Effect: Allow
                 Action:
                   - ssmmessages:CreateControlChannel
                   - ssmmessages:CreateDataChannel
                   - ssmmessages:OpenControlChannel
                   - ssmmessages:OpenDataChannel
-                Resource: '*'  
+                Resource: '*'
+              # CloudWatch
               - Effect: Allow
                 Action:
+                  - logs:PutLogEvents
                   - logs:CreateLogStream
                   - logs:DescribeLogStreams
-                  - logs:PutLogEvents
-                Resource: !GetAtt CloudWatchLogsGroup.Arn
+                Resource: '*'
+              # VPC Endpoint
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    aws:sourceVpce: !Ref EcrApiEndpoint
+                    aws:sourceVpc: !Ref VPCId
+              # ECS Lifecycle Event
+              - Effect: Allow
+                Action:
+                  - events:DescribeRule
+                  - events:PutRule
+                  - events:PutTargets
+                Resource: '*'
       RoleName: !Sub ${LogicalName}-ECSTask-${AWS::Region}
       Tags:
         - Key: environment
@@ -429,7 +453,7 @@ Resources:
       ContainerDefinitions: 
         - Cpu: !Ref Cpu
           Essential: true
-          Image: public.ecr.aws/eijikominami/aws-for-fluent-bit:latest
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ecr-public/eijikominami/aws-for-fluent-bit:latest
           LinuxParameters:
             InitProcessEnabled: true
           LogConfiguration:
@@ -632,7 +656,7 @@ Resources:
   PullThroughCacheRule:
     Type: AWS::ECR::PullThroughCacheRule
     Properties:
-      EcrRepositoryPrefix: ecr-public/eijikominami
+      EcrRepositoryPrefix: ecr-public
       UpstreamRegistry: ecr-public
       UpstreamRegistryUrl: public.ecr.aws
   RegistryPolicy:
