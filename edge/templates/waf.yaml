@@ -65,8 +65,10 @@ Resources:
         - Name: AWSManagedRulesKnownBadInputsRuleSet
           OverrideAction:
             Count: {}
-          Priority: 1
+          Priority: 0
           Statement: 
+            # Restrict log4j2 message lookup (CWE-117)
+            # Compliant: `ManagedRuleGroupStatement` is present.
             ManagedRuleGroupStatement: 
               Name: AWSManagedRulesKnownBadInputsRuleSet
               VendorName: AWS
@@ -77,7 +79,7 @@ Resources:
         - Name: AWSManagedRulesCommonRuleSet
           OverrideAction:
             Count: {}
-          Priority: 2
+          Priority: 1
           Statement: 
             ManagedRuleGroupStatement: 
               Name: AWSManagedRulesCommonRuleSet
@@ -89,7 +91,7 @@ Resources:
         - Name: AWSManagedRulesAdminProtectionRuleSet
           OverrideAction:
             Count: {}
-          Priority: 3
+          Priority: 2
           Statement: 
             ManagedRuleGroupStatement: 
               Name: AWSManagedRulesAdminProtectionRuleSet
@@ -101,7 +103,7 @@ Resources:
         - Name: AWSManagedRulesAmazonIpReputationList
           OverrideAction:
             Count: {}
-          Priority: 4
+          Priority: 3
           Statement: 
             ManagedRuleGroupStatement: 
               Name: AWSManagedRulesAmazonIpReputationList

@@ -47,12 +47,13 @@ You can provide optional parameters as follows.
 | ActiveDirectoryShortName | String | CORP | ○ | The NetBIOS name for your domain |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.64/26 | ○ | The public subnet CIDR block at AZ2 |
+| ActiveDirectorySubnetCidrBlockForAz3 | String | 10.3.128.64/26 | ○ | The public subnet CIDR block at AZ3 |
 | BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
+| DomainName | String | | | The private domain name which this VPC has |
 | FluentBitAddress1 | String | 10.3.0.114 | | The private IPv4 address for FluentBit |
 | FluentBitAddress2 | String | 10.3.64.114 | | The private IPv4 address for FluentBit |
 | FluentBitAddress3 | String | 10.3.128.114 | | The private IPv4 address for FluentBit |
 | FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Whether to enable FluentBit for collecting syslog format logs |
-| DomainName | String | | | The private domain name which this VPC has |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |
@@ -64,6 +65,33 @@ You can provide optional parameters as follows.
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | The VPC CIDR block |
+
+### Fluentbit
+
+This template configures FluentBit for Syslog.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| AccountIdForArchive | String | | | The AWS account id for log archive |
+| AppPort | Number | 514 | ○ | The port on which the container is listening |
+| BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
+| Cpu | Number | 1024 | ○ | The number of cpu units reserved for the container |
+| CpuArchitecture | String | ARM64 | The CPU architecture |
+| DesiredCapacity | String | 1 | ○ | The number of instantiations |
+| NlbIPv4AddressAz1 | String | 10.3.0.114 | The private IPv4 address for an internal load balancer |
+| NlbIPv4AddressAz2 | String | 10.3.64.114 | The private IPv4 address for an internal load balancer |
+| NlbIPv4AddressAz3 | String | 10.3.128.114 | The private IPv4 address for an internal load balancer |
+| RouteTableIdAz1 | String | | ○ | The route table id at AZ1 |
+| RouteTableIdAz2 | String | | ○ | The route table id at AZ2 | 
+| RouteTableIdAz3 | String | | ○ | The route table id at AZ3 | 
+| SubnetCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
+| SubnetCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |
+| SubnetCidrBlockAz3 | String | 10.3.128.64/26 | ○ | The private subnet CIDR block at AZ3 |
+| SubnetIdAz1 | AWS::EC2::Subnet::Id | | ○ | The subnet id at AZ1 |
+| SubnetIdAz2 | AWS::EC2::Subnet::Id | | ○ | The subnet id at AZ2 |
+| SubnetIdAz3 | AWS::EC2::Subnet::Id | | ○ | The subnet id at AZ3 |
+| Memory | String | 3072 | ○ | The amount (in MiB) of memory to present to the container |
+| VPCId | AWS::EC2::VPC::Id | | ○ | VPC Id | 
 
 ### Trusted access with IAM Identity Center
 
