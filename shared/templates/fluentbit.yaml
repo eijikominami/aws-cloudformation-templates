@@ -16,19 +16,11 @@ Metadata:
       - Label: 
           default: 'Network Configuration'
         Parameters:
+          - VPCCidrBlock
           - VPCId
           - SubnetIdAz1
-          - SubnetCidrBlockAz1
-          - NlbIPv4AddressAz1
-          - RouteTableIdAz1
           - SubnetIdAz2
-          - SubnetCidrBlockAz2
-          - NlbIPv4AddressAz2
-          - RouteTableIdAz2
           - SubnetIdAz3
-          - SubnetCidrBlockAz3
-          - NlbIPv4AddressAz3
-          - RouteTableIdAz3
       - Label: 
           default: 'S3 Configuration'
         Parameters: 
@@ -75,45 +67,6 @@ Parameters:
     Default: 1
     MinValue: 0
     Description: The number of instantiations [required] 
-  NlbIPv4AddressAz1:
-    Type: String
-    Default: 10.3.0.114
-    Description: The private IPv4 address for an internal load balancer
-  NlbIPv4AddressAz2:
-    Type: String
-    Default: 10.3.64.114
-    Description: The private IPv4 address for an internal load balancer  
-  NlbIPv4AddressAz3:
-    Type: String
-    Default: 10.3.128.114
-    Description: The private IPv4 address for an internal load balancer
-  RouteTableIdAz1:
-    Type: String
-    AllowedPattern: .+
-    Description: The route table id at AZ1 [required]
-  RouteTableIdAz2:
-    Type: String
-    AllowedPattern: .+
-    Description: The route table id at AZ2 [required]
-  RouteTableIdAz3:
-    Type: String
-    AllowedPattern: .+
-    Description: The route table id at AZ3 [required]
-  SubnetCidrBlockAz1:
-    Type: String
-    Default: 10.3.0.64/26
-    AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ1
-  SubnetCidrBlockAz2:
-    Type: String
-    Default: 10.3.64.64/26
-    AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ2
-  SubnetCidrBlockAz3:
-    Type: String
-    Default: 10.3.128.64/26
-    AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ3
   SubnetIdAz1:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id at AZ1 [required]
@@ -127,6 +80,11 @@ Parameters:
     Type: String
     Default: 3072
     Description: The amount (in MiB) of memory to present to the container [required]
+  VPCCidrBlock:
+    Type: String
+    Default: 10.3.0.0/16
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block [required]
   VPCId:
     Type: AWS::EC2::VPC::Id
     Description: VPC Id [required]
@@ -161,9 +119,6 @@ Parameters:
 
 Conditions:
   CreateS3ReplicationForArchive: !And [ !Not [ !Equals [ !Ref AccountIdForArchive, ''] ], !Not [ !Equals [ !Ref BucketNameForArchive, ''] ] ]
-  CreateNlbSubnetMapping1: !Not [ !Equals [ !Ref NlbIPv4AddressAz1, ''] ]
-  CreateNlbSubnetMapping2: !Not [ !Equals [ !Ref NlbIPv4AddressAz2, ''] ]
-  CreateNlbSubnetMapping3: !Not [ !Equals [ !Ref NlbIPv4AddressAz3, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -330,22 +285,10 @@ Resources:
       Scheme: internal
       SecurityGroups:
         - !Ref SecurityGroupForFluentBit
-      SubnetMappings:
-        - PrivateIPv4Address: !If
-            - CreateNlbSubnetMapping1
-            - !Ref NlbIPv4AddressAz1
-            - !Ref AWS::NoValue
-          SubnetId: !Ref SubnetIdAz1
-        - PrivateIPv4Address: !If
-            - CreateNlbSubnetMapping2
-            - !Ref NlbIPv4AddressAz2
-            - !Ref AWS::NoValue
-          SubnetId: !Ref SubnetIdAz2
-        - PrivateIPv4Address: !If
-            - CreateNlbSubnetMapping3
-            - !Ref NlbIPv4AddressAz3
-            - !Ref AWS::NoValue
-          SubnetId: !Ref SubnetIdAz3
+      Subnets:
+        - !Ref SubnetIdAz1
+        - !Ref SubnetIdAz2
+        - !Ref SubnetIdAz3
       Tags:
         - Key: Name
           Value: !Sub elb-${LogicalName}-${AWS::Region}
@@ -525,30 +468,12 @@ Resources:
       GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
       GroupDescription: Security Group for VPC Endpoints
       SecurityGroupEgress:
-        - CidrIp: !Ref SubnetCidrBlockAz1
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
-        - CidrIp: !Ref SubnetCidrBlockAz2
-          FromPort: 0
-          ToPort: 0
-          IpProtocol: '-1'
-        - CidrIp: !Ref SubnetCidrBlockAz3
+        - CidrIp: !Ref VPCCidrBlock
           FromPort: 0
           ToPort: 0
           IpProtocol: '-1'
       SecurityGroupIngress:
-        - CidrIp: !Ref SubnetCidrBlockAz1
-          Description: https
-          FromPort: 443
-          ToPort: 443
-          IpProtocol: TCP
-        - CidrIp: !Ref SubnetCidrBlockAz2
-          Description: https
-          FromPort: 443
-          ToPort: 443
-          IpProtocol: TCP
-        - CidrIp: !Ref SubnetCidrBlockAz3
+        - CidrIp: !Ref VPCCidrBlock
           Description: https
           FromPort: 443
           ToPort: 443
@@ -705,12 +630,21 @@ Resources:
     Type: AWS::EC2::VPCEndpoint
     Properties: 
       RouteTableIds:
-        - !Ref RouteTableIdAz1
-        - !Ref RouteTableIdAz2
-        - !Ref RouteTableIdAz3
+        - !Ref RouteTableForS3Endpoint
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcEndpointType: Gateway
       VpcId: !Ref VPCId
+  RouteTableForS3Endpoint:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub rtb-${LogicalName}-fluentbit
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # CloudWatch
   CloudWatchAlarmECS:
     Type: AWS::Serverless::Application

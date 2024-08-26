@@ -43,9 +43,6 @@ Metadata:
           - FluentBitForSyslog
           - AccountIdForArchive
           - BucketNameForArchive
-          - FluentBitAddress1
-          - FluentBitAddress2
-          - FluentBitAddress3
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -123,18 +120,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Whether to enable FluentBit for collecting syslog format logs
-  FluentBitAddress1:
-    Type: String
-    Default: 10.3.0.114
-    Description: The private IPv4 address for FluentBit
-  FluentBitAddress2:
-    Type: String
-    Default: 10.3.64.114
-    Description: The private IPv4 address for FluentBit
-  FluentBitAddress3:
-    Type: String
-    Default: 10.3.128.114
-    Description: The private IPv4 address for FluentBit
   IdentityCenterArn:
     Type: String
     Default: ''
@@ -385,18 +370,10 @@ Resources:
         AccountIdForArchive: !Ref AccountIdForArchive
         BucketNameForArchive: !Ref BucketNameForArchive
         CpuArchitecture: ARM64
-        NlbIPv4AddressAz1: !Ref FluentBitAddress1
-        NlbIPv4AddressAz2: !Ref FluentBitAddress2
-        NlbIPv4AddressAz3: !Ref FluentBitAddress3
-        RouteTableIdAz1: !GetAtt Az1.Outputs.RouteTableIdPrivate
-        RouteTableIdAz2: !GetAtt Az2.Outputs.RouteTableIdPrivate
-        RouteTableIdAz3: !GetAtt Az3.Outputs.RouteTableIdPrivate
-        SubnetCidrBlockAz1: !Ref SubnetPrivateCidrBlockAz1
-        SubnetCidrBlockAz2: !Ref SubnetPrivateCidrBlockAz2
-        SubnetCidrBlockAz3: !Ref SubnetPrivateCidrBlockAz3
         SubnetIdAz1: !GetAtt Az1.Outputs.PrivateSubnetId
         SubnetIdAz2: !GetAtt Az2.Outputs.PrivateSubnetId
         SubnetIdAz3: !GetAtt Az3.Outputs.PrivateSubnetId
+        VPCCidrBlock: !Ref VPCCidrBlock
         VPCId: !Ref VPC
         SNSForAlertArn: !If
           - CreateSNSForAlert
