@@ -819,6 +819,8 @@ Resources:
             Condition:
               NumericLessThan: 
                 s3:TlsVersion: 1.2
+              Bool:
+                aws:SecureTransport: true
           - Effect: Deny
             Principal: '*'
             Action: 's3:*'
@@ -831,6 +833,8 @@ Resources:
             Condition:
               NumericLessThan: 
                 s3:TlsVersion: 1.2
+              Bool:
+                aws:SecureTransport: true
           - Effect: Allow
             Principal:
               Service: config.amazonaws.com

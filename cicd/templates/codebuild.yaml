@@ -499,6 +499,8 @@ Resources:
             Condition:
               NumericLessThan: 
                 s3:TlsVersion: 1.2
+              Bool:
+                aws:SecureTransport: true
           - Effect: Allow
             Principal: '*'
             Action: 's3:GetObject'
@@ -528,6 +530,8 @@ Resources:
             Condition:
               NumericLessThan: 
                 s3:TlsVersion: 1.2
+              Bool:
+                aws:SecureTransport: true
           - Effect: Allow
             Principal: '*'
             Action: 's3:GetObject'

@@ -142,6 +142,8 @@ Resources:
             Condition:
               NumericLessThan: 
                 s3:TlsVersion: 1.2
+              Bool:
+                aws:SecureTransport: true
   # Secret Manager
   SecretsManager:
     Type: AWS::SecretsManager::Secret
