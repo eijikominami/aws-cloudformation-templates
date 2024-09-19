@@ -749,10 +749,7 @@ Resources:
         LogicalName: CICD
         SlackWorkspaceId: !Ref SlackWorkspaceId
         SlackChannelId: !Ref SlackChannelIdForDeployment
-        SNSArn: !If
-          - CreateSNSForCICD
-          - !GetAtt SNSForCICD.Outputs.SNSTopicArn
-          - !Ref SNSForCICDArn
+        SNSArn: !Ref SNSForCICDArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

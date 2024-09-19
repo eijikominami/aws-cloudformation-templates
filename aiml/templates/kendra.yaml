@@ -413,40 +413,6 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Type: S3
-  Slack:
-    Condition: CreateSlackDatasource
-    Type: AWS::Kendra::DataSource
-    Properties: 
-      DataSourceConfiguration: 
-        SlackConfiguration:
-          SecretArn: !Ref SecretsManagerForSlack
-          SinceCrawlDate: 2022-06-01
-          SlackEntityList: PUBLIC_CHANNEL
-          TeamId: !Ref SlackWorkspaceId
-          CrawlBotMessage: TRUE
-      Description: !Sub ${SlackWorkspaceId} in Slack
-      IndexId: !GetAtt KendraIndex.Id
-      Name: !Sub ${AWS::StackName}-Slack
-      RoleArn: !GetAtt IAMRoleForKendraSlack.Arn
-      Schedule: !If
-        - UpdateHourly
-        - cron(0 * * * ? *)
-        - !If
-          - UpdateDaily
-          - cron(0 0 * * ? *)
-          - !If
-            - UpdateWeekly
-            - cron(0 0 * * 1 *)
-            - !If
-              - UpdateMonthly
-              - cron(0 0 1 * ? *)
-              - !Ref AWS::NoValue
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      Type: SLACK
   Web:
     Condition: CreateWebCrawlerDatasource
     Type: AWS::Kendra::DataSource

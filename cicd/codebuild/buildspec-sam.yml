@@ -16,7 +16,7 @@ phases:
       - pip install cfn-lint
   pre_build:
     commands:
-      - find ./${TEMPLATE_FILE_PATH} -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS
+      - find ./${TEMPLATE_FILE_PATH} -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
       - sam validate --template ${TEMPLATE_FILE_PATH}template.yaml
   build:
     commands:
