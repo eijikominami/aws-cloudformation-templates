@@ -16,7 +16,7 @@ phases:
       - pip install cfn-lint
   pre_build:
     commands:
-      - find ./web-servers/sam-app/ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS
+      - find ./web-servers/sam-app/ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS --template
       - sam validate --template web-servers/sam-app/ecs.yaml
   build:
     commands:
