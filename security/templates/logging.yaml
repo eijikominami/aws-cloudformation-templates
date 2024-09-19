@@ -138,6 +138,12 @@ Resources:
       Parameters: 
         - ParameterKey: AllowedSourceIpAddresses
           ParameterValue: !Ref AllowedSourceIpAddressesForSIEM
+        - ParameterKey: ControlTowerLogBucketNameList
+          ParameterValue: !Sub aws-controltower-logs-${LogArchiveAccountId}-${AWS::Region}, aws-controltower-s3-access-logs-${LogArchiveAccountId}-${AWS::Region}
+        - ParameterKey: ControlTowerRoleArnForEsLoader
+          ParameterValue: !Sub arn:aws:iam::${LogArchiveAccountId}:role/ct-role-for-siem
+        - ParameterKey: ControlTowerSqsForLogBuckets
+          ParameterValue: !Sub arn:aws:sqs:${AWS::Region}:${LogArchiveAccountId}:aes-siem-ct
         - ParameterKey: GeoLite2LicenseKey
           ParameterValue: !Ref GeoLite2LicenseKeyForSIEM
         - ParameterKey: SnsEmail
