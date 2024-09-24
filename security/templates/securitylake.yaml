@@ -174,3 +174,10 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue 
+  SubscriberNotificationForSIEM:
+    Condition: CreateSubscriberForSIEM
+    Type: AWS::SecurityLake::SubscriberNotification
+    Properties:
+      NotificationConfiguration: 
+        SqsNotificationConfiguration: {}
+      SubscriberArn: !GetAtt SubscriberForSIEM.SubscriberArn
