@@ -45,6 +45,18 @@ Parameters:
     Type: String
     AllowedPattern: .+       
     Description: The id of the log archive account [required]
+  SecurityLakeRoleArn:
+    Type: String
+    Default: ''    
+    Description: Specify IAM Role ARN to be assumed by aes-siem-es-loader
+  SecurityLakeExternalId:
+    Type: String
+    Default: ''    
+    Description: Specify Security Lake external ID for cross account
+  SecurityLakeSubscriberSqs:
+    Type: String
+    Default: ''    
+    Description: Specify SQS ARN of Security Lake Subscriber
   SecurityOUId:
     Type: String
     AllowedPattern: .+       
@@ -150,6 +162,12 @@ Resources:
           ParameterValue: !Sub arn:aws:sqs:${AWS::Region}:${LogArchiveAccountId}:aes-siem-ct
         - ParameterKey: GeoLite2LicenseKey
           ParameterValue: !Ref GeoLite2LicenseKeyForSIEM
+        - ParameterKey: SecurityLakeSubscriberSqs
+          ParameterValue: !Ref SecurityLakeSubscriberSqs
+        - ParameterKey: SecurityLakeRoleArn
+          ParameterValue: !Ref SecurityLakeRoleArn
+        - ParameterKey: SecurityLakeExternalId
+          ParameterValue: !Ref SecurityLakeExternalId
         - ParameterKey: SnsEmail
           ParameterValue: !Ref SnsEmailForSIEM
       PermissionModel: SERVICE_MANAGED
