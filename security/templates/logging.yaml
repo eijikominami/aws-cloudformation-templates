@@ -71,6 +71,7 @@ Parameters:
 
 Conditions:
   CreateSIEMIntegrationWithControlTower: !Not [ !Equals [!Ref EsLoaderServiceRoleArn , ''] ]
+  Development: !Equals [ !Ref Environment, development ]
 
 Resources:
   SecurityLake:
@@ -117,7 +118,10 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue  
-      TemplateURL: https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securitylake.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securitylake.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securitylake.yaml
   SIEMOnAmazonOpenSearchService:
     Type: AWS::CloudFormation::StackSet
     Properties:
