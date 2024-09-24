@@ -90,6 +90,7 @@ This action automatically turns on the Auto-enable Macie configuration so that M
 
 This template builds ``Amazon Security Lake`` and [``SIEM on Open Search Service``](https://github.com/aws-samples/siem-on-amazon-opensearch-service/) using AWS CloudFormation StackSets.
 If you want to use Security Lake for an organization, you must use your Organizations management account to [designate a delegated Security Lake administrator](https://docs.aws.amazon.com/security-lake/latest/userguide/getting-started.html#initial-account-setup).
+If you integrates ``SIEM on Open Search Service`` with ``Security Lake``, [change visibility timeout of SQS from 5 minutes to 10 minutes](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake.md#enabling-and-configuring-security-lake).
 
 ### Amazon EventBridge
 
@@ -128,6 +129,9 @@ You can provide optional parameters as follows:
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | LogArchiveAccountId | String | | | The id of the log archive account |
 | SecurityOUId | String | | | The id of the security OU |
+| SecurityLakeRoleArn | String | | | Specify IAM Role ARN to be assumed by aes-siem-es-loader |
+| SecurityLakeExternalId | String | | | Specify Security Lake external ID for cross account |
+| SecurityLakeSubscriberSqs | String | | | Specify SQS ARN of Security Lake Subscriber |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | Enable or disable SIEM environment |
 | SnsEmailForSIEM | String | | | The email as SNS topic, where Amazon OpenSearch Service will send alerts to |
 

@@ -91,6 +91,7 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 
 このテンプレートは、 AWS CloudFormation スタックセットを用いて ``Amazon Security Lake`` と [``SIEM on Open Search Service``](https://github.com/aws-samples/siem-on-amazon-opensearch-service/) を構築します。
 もし、 Security Lake を Organizations 内で使用する場合は、Organizations の管理アカウントを使用して委任された [Security Lake 管理者を指定](https://docs.aws.amazon.com/ja_jp/security-lake/latest/userguide/getting-started.html#initial-account-setup) する必要があります。
+また、 ``SIEM on Open Search Service`` と連携させる場合には、[SQS の可視性タイムアウトを 5 分から 10 分に変更](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake_ja.md#security-lake-%E3%81%AE%E6%9C%89%E5%8A%B9%E5%8C%96%E3%81%A8%E8%A8%AD%E5%AE%9A)する必要があります。
 
 ### Amazon EventBridge
 
@@ -129,6 +130,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | LogArchiveAccountId | String | | | ログアーカイブアカウントの ID |
 | SecurityOUId | String | | | セキュリティ OU の ID |
+| SecurityLakeRoleArn | String | | | aes-siem-es-loader が使用する IAM ロール |
+| SecurityLakeExternalId | String | | | Security Lake の外部 ID |
+| SecurityLakeSubscriberSqs | String | | | Security Lake サブスクライバーの SQS ARN |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、SIEM が有効化されます。 |
 | SnsEmailForSIEM | String | | | SIEM に指定する E メールアドレス |
 
