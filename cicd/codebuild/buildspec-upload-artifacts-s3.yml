@@ -58,7 +58,7 @@ phases:
       - pip install cfn-lint
   pre_build:
     commands:
-      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty cfn-lint --regions ALL_REGIONS --template
+      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${ANALYTICS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive

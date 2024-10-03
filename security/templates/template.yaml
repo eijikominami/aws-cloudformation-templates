@@ -36,6 +36,9 @@ Metadata:
           - SIEM
           - EsLoaderServiceRoleArn
           - GeoLite2LicenseKeyForSIEM
+          - SecurityLakeRoleArn
+          - SecurityLakeExternalId
+          - SecurityLakeSubscriberSqs
           - SnsEmailForSIEM
       - Label:
           default: Macie Configuration
@@ -169,6 +172,18 @@ Parameters:
     Type: String
     Default: ''    
     Description: The id of the security OU
+  SecurityLakeRoleArn:
+    Type: String
+    Default: ''    
+    Description: Specify IAM Role ARN to be assumed by aes-siem-es-loader
+  SecurityLakeExternalId:
+    Type: String
+    Default: ''    
+    Description: Specify Security Lake external ID for cross account
+  SecurityLakeSubscriberSqs:
+    Type: String
+    Default: ''    
+    Description: Specify SQS ARN of Security Lake Subscriber
   SIEM:
     Type: String
     Default: DISABLED
@@ -439,6 +454,9 @@ Resources:
         GeoLite2LicenseKeyForSIEM: !Ref GeoLite2LicenseKeyForSIEM
         LogArchiveAccountId: !Ref LogArchiveAccountId
         SecurityOUId: !Ref SecurityOUId
+        SecurityLakeRoleArn: !Ref SecurityLakeRoleArn
+        SecurityLakeExternalId: !Ref SecurityLakeExternalId
+        SecurityLakeSubscriberSqs: !Ref SecurityLakeSubscriberSqs
         SnsEmailForSIEM: !Ref SnsEmailForSIEM
         Environment: !Ref Environment
         TagKey: !Ref TagKey
