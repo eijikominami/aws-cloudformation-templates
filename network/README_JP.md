@@ -58,7 +58,7 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabiliti
 | DomainName | String | | | ドメイン名 |
 | FirewallCidrBlockForEgressAz1 | String | 10.0.0.128/26 | | AZ1 の Egress VPC Firewall サブネットの CIDR ブロック | 
 | FirewallCidrBlockForEgressAz2 | String | 10.0.4.128/26 | | AZ2 の Egress VPC Firewall サブネットの CIDR ブロック | 
-| IPAMProvisionedCidrs | String | 10.0.0.0/8 | ○ | IPAM に指定する CIDR | 
+| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
 | OnpremDnsIp | String | | | DNS クエリを転送するオンプレミスのIPアドレス |
 | PrincipalsToAssociateWithIPAM | String | | | IPAM に関連付ける 1 つ以上のプリンシパルのリスト | 
 | PrincipalsToAssociateWithRoute53ResolverRule | String | | | Route 53 Resolver Rule に関連付ける 1 つ以上のプリンシパルのリスト | 

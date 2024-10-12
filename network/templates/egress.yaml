@@ -20,6 +20,10 @@ Metadata:
           - SubnetTransitCidrBlockForAz3
           - SubnetFirewallCidrBlockForAz3
           - VPCCidrBlock
+      - Label: 
+          default: 'Network Firewall Configuration'
+        Parameters: 
+          - HomeNetworkCidrs
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
@@ -40,6 +44,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  HomeNetworkCidr:
+    Type: String
+    Default: ''
+    Description: The CIDR of your home network 
   ResolverInboundRuleId:
     Type: String
     Default: ''
@@ -272,6 +280,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
+        HomeNetworkCidr: !Ref HomeNetworkCidr
         SubnetIdAz1: !GetAtt Az1.Outputs.FirewallSubnetId
         SubnetIdAz2: !GetAtt Az2.Outputs.FirewallSubnetId
         SubnetIdAz3: !GetAtt Az3.Outputs.FirewallSubnetId

@@ -35,7 +35,7 @@ Metadata:
       - Label: 
           default: 'IPAM Configuration'
         Parameters: 
-          - IPAMProvisionedCidrs
+          - HomeNetworkCidr
           - PrincipalsToAssociateWithIPAM
       - Label: 
           default: 'Route 53 Configuration'
@@ -97,11 +97,11 @@ Parameters:
     Type: String
     Default: 10.0.4.128/26
     Description: The firewall subnet CIDR block for Egress at AZ3
-  IPAMProvisionedCidrs:
+  HomeNetworkCidr:
     Type: String
     Default: 10.0.0.0/8
     AllowedPattern: ^[0-9./]*$
-    Description: The CIDR provisioned to the IPAM pool [required]
+    Description: The CIDR of your home network  [required]
   OnpremDnsIp:
     Type: String
     Default: ''
@@ -235,6 +235,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
+        HomeNetworkCidr: !Ref HomeNetworkCidr
         LogicalName: Egress
         ResolverInboundRuleId: ''
         ResolverOutboundRuleId: ''
@@ -383,7 +384,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         PrincipalsToAssociateWithIPAM: !Ref PrincipalsToAssociateWithIPAM
-        ProvisionedCidrs: !Ref IPAMProvisionedCidrs
+        ProvisionedCidrs: !Ref HomeNetworkCidr
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
