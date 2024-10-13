@@ -6,7 +6,8 @@ Metadata:
     ParameterGroups: 
       - Label: 
           default: 'WAF Configuration'
-        Parameters: 
+        Parameters:
+          - CentralizedLogBucketName
           - Scope
           - TargetResourceArn
       - Label: 
@@ -18,6 +19,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
   Scope:
     Type: String
     Default: REGIONAL
@@ -51,6 +56,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateLoggingConfiguration: !Not [ !Equals [ !Ref CentralizedLogBucketName, '']]
   CreateWebACLAssociation: !Not  [ !Equals [ !Ref TargetResourceArn, '']]
 
 Resources:
@@ -128,6 +134,13 @@ Resources:
     Properties: 
       ResourceArn: !Ref TargetResourceArn
       WebACLArn: !GetAtt WebACL.Arn
+  LoggingConfiguration:
+    Condition: CreateLoggingConfiguration
+    Type: AWS::WAFv2::LoggingConfiguration
+    Properties:
+      LogDestinationConfigs: 
+        - !Sub arn:aws:s3:::${CentralizedLogBucketName}
+      ResourceArn: !GetAtt WebACL.Arn
 
 Outputs:
   WebACLId:

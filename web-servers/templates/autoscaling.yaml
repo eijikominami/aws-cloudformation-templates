@@ -24,6 +24,8 @@ Metadata:
           - EipAllocationId2ForNLB
           - EipAllocationId3ForNLB
           - LoadBalancerType
+          - Logging
+          - LogBucketName
           - SubnetId1ForAutoScaling
           - SubnetId2ForAutoScaling
           - SubnetId3ForAutoScaling
@@ -118,6 +120,17 @@ Parameters:
     Default: WebServers
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  LogBucketName:
+    Type: String
+    Default: ''
+    Description: The custom S3 bucket name for access logging [conditional]
+  Logging:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable logging [required]
   LoadBalancerType:
     Type: String
     Default: application
@@ -182,6 +195,7 @@ Parameters:
 Conditions:
   KeyExists: !Not [ !Equals [ !Ref EC2KeyName, '' ] ]
   CreateCertificateManager: !Not [ !Equals [ !Ref ACMDomainName, ''] ]
+  CreateLog: !Equals [ !Ref Logging, ENABLED ]
   CreateNetworkLoadBalancer: !Equals [ !Ref LoadBalancerType, network ]
   CreateRoute53: !And [ !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -234,6 +248,16 @@ Resources:
           Value: false
         - Key: idle_timeout.timeout_seconds
           Value: 180
+        - !If
+          - CreateLog
+          - Key: access_logs.s3.enabled
+            Value: true
+          - !Ref AWS::NoValue
+        - !If
+          - CreateLog
+          - Key: access_logs.s3.bucket
+            Value: !Ref LogBucketName
+          - !Ref AWS::NoValue
       Name: !Sub elb-${LogicalName}
       Scheme: !If 
         - CreateRoute53

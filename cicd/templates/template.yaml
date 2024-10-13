@@ -33,6 +33,16 @@ Metadata:
           - UploadArtifacts
           - WebServers
       - Label: 
+          default: 'Organizations Configuration'
+        Parameters: 
+          - ManagementAccountId
+          - OrganizationId
+          - OrganizationsRootId
+      - Label: 
+          default: 'Logging Configuration'
+        Parameters: 
+          - CentralizedLogBucketName
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -49,11 +59,30 @@ Parameters:
     Type: String
     Default: ''  
     Description: The S3 artifact bucket name in N.Verginia region
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging
+  CloudOps:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - INCIDENT_MANAGER_DISABLED
+      - DISABLED
+    Description: Enable or disable deployment of CloudOps template [required]
   CodeBuildImageName:
     Type: String
     Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
     AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
     Description: The Docker image name for CodeBuild [required]
+  DefaultSecuritySettings:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of DefaultSecuritySettings template [required]
   GitHubOwnerNameForTemplateConfiguration:
     Type: String
     Default: ''
@@ -67,25 +96,6 @@ Parameters:
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
-  TemplateConfigurationBasePath:
-    Type: String
-    Default: ''
-    Description: The base path of template configuration files.
-  CloudOps:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - INCIDENT_MANAGER_DISABLED
-      - DISABLED
-    Description: Enable or disable deployment of CloudOps template [required]
-  DefaultSecuritySettings:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable deployment of DefaultSecuritySettings template [required]
   GlobalSettings:
     Type: String
     Default: DISABLED
@@ -93,6 +103,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of GlobalSettings template [required]
+  ManagementAccountId:
+    Type: String
+    Default: ''
+    Description: The management account ID
   Network:
     Type: String
     Default: DISABLED
@@ -107,6 +121,14 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of Notification template [required]
+  OrganizationId:
+    Type: String
+    Default: ''
+    Description: The Organizations ID
+  OrganizationsRootId:
+    Type: String
+    Default: ''    
+    Description: The root id of AWS Organizations
   SharedServices:
     Type: String
     Default: DISABLED
@@ -121,6 +143,17 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable deployment of StaticWebsiteHosting template [required]
+  TemplateConfigurationBasePath:
+    Type: String
+    Default: ''
+    Description: The base path of template configuration files
+  UploadArtifacts:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable deployment of UploadArtifacts template [required]
   WebServers:
     Type: String
     Default: DISABLED
@@ -129,13 +162,6 @@ Parameters:
       - CONTAINER
       - DISABLED
     Description: Enable or disable deployment of WebServers template [required]
-  UploadArtifacts:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable deployment of UploadArtifacts template [required]
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -756,12 +782,12 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::global/templates/template.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
+                    - - !Sub '{"CentralizedLogBucketName": "${CentralizedLogBucketName}", "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
                       - !If
                         - Development
                         - development
                         - production
-                      - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                      - !Sub '", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
@@ -796,7 +822,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::security/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"OrganizationId": "${OrganizationId}", "OrganizationsRootId": "${OrganizationsRootId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -873,7 +899,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::network/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"ManagementAccountId": "${ManagementAccountId}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "OrganizationId": "${OrganizationId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -914,8 +940,9 @@ Resources:
                     - ''
                     - - !If
                         - DeployNotification
-                        - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact_Notification", "Output.json", "SNSForFormattedAlert"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
-                        - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                        - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact_Notification", "Output.json", "SNSForFormattedAlert"]}, ' 
+                        - '{"'
+                      - !Sub '"SSMOrganizationId": "${OrganizationId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -1086,7 +1113,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}","SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                      - - !Sub '{"CentralizedLogBucketName": "${CentralizedLogBucketName}", "CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}","SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                         - !If
                           - Development
                           - development
@@ -1094,7 +1121,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - - !Sub '{"CentralizedLogBucketName": "${CentralizedLogBucketName}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                         - !If
                           - Development
                           - development

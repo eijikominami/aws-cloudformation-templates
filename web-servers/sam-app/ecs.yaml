@@ -32,6 +32,11 @@ Metadata:
           - DomainName
           - Route53HostedZoneId
       - Label: 
+          default: 'Logging Configuration'
+        Parameters: 
+          - Logging
+          - LogBucketName
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
@@ -89,6 +94,17 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The image used to start a container [required]
+  LogBucketName:
+    Type: String
+    Default: ''
+    Description: The custom S3 bucket name for access logging [conditional]
+  Logging:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable logging [required]
   Memory:
     Type: String
     Default: 3072
@@ -156,6 +172,7 @@ Parameters:
 
 Conditions:
   CreateCertificateManager: !Not [ !Equals [ !Ref ACMDomainName, ''] ]
+  CreateLog: !Equals [ !Ref Logging, ENABLED ]
   CreateRoute53: !And [ !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -289,6 +306,16 @@ Resources:
           Value: false
         - Key: idle_timeout.timeout_seconds
           Value: 180
+        - !If
+          - CreateLog
+          - Key: access_logs.s3.enabled
+            Value: true
+          - !Ref AWS::NoValue
+        - !If
+          - CreateLog
+          - Key: access_logs.s3.bucket
+            Value: !Ref LogBucketName
+          - !Ref AWS::NoValue
       Name: !Sub elb-${LogicalName}
       Scheme: internet-facing
       SecurityGroups:

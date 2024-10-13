@@ -6,12 +6,6 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: 'Log Analysis Configuration'
-        Parameters: 
-          - AccountIdForAnalysis
-          - BucketNameForAnalysis
-          - LogGroupNameTransferredToS3
-      - Label: 
           default: 'Server Configuration'
         Parameters:
           - ComputeType
@@ -42,7 +36,6 @@ Metadata:
           - CloudFront500ErrorResponsePagePath
           - DomainName
           - GlobalInfrastructure
-          - Logging
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
@@ -74,6 +67,14 @@ Metadata:
         Parameters: 
           - WebACL
           - WebACLArnForCloudFront
+      - Label: 
+          default: 'Logging Configuration'
+        Parameters: 
+          - Logging
+          - AccountIdForAnalysis
+          - BucketNameForAnalysis
+          - CentralizedLogBucketName
+          - LogGroupNameTransferredToS3
       - Label: 
           default: 'CI/CD Pipeline Configuration'
         Parameters: 
@@ -176,6 +177,10 @@ Parameters:
       - application
       - network  
     Description: The autoScaling LoadBalancer Type [conditional]
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -575,6 +580,8 @@ Resources:
           - ''
         LoadBalancerType: !Ref AutoScalingLoadBalancerType
         LogicalName: !Ref AWS::StackName
+        Logging: !Ref Logging
+        LogBucketName: !Ref S3ForAccessLog
         Route53HostedZoneId: !Ref Route53HostedZoneId
         SubnetId1ForAutoScaling: !GetAtt Az1.Outputs.PrivateSubnetId
         SubnetId2ForAutoScaling: !GetAtt Az2.Outputs.PrivateSubnetId
@@ -639,6 +646,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        CentralizedLogBucketName: !Ref CentralizedLogBucketName
         LogicalName: !Ref AWS::StackName
         TargetResourceArn: !GetAtt AutoScaling.Outputs.LoadBalancerArn
         Environment: !Ref Environment
@@ -760,6 +768,8 @@ Resources:
         GitHubRepoName: !Ref GitHubRepoNameForArtifact
         GitHubBranchName: !Ref GitHubBranchNameForArtifact
         GitHubBranchNameForBuildSpec: !Ref GitHubBranchNameForBuildSpec
+        Logging: !Ref Logging
+        LogBucketName: !REf LogBucketName
         Memory: 3072
         PublicSubnetId1: !GetAtt Az1.Outputs.PublicSubnetId
         PublicSubnetId2: !GetAtt Az2.Outputs.PublicSubnetId

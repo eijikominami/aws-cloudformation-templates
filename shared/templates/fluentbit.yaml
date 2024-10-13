@@ -67,6 +67,10 @@ Parameters:
     Default: 1
     MinValue: 0
     Description: The number of instantiations [required] 
+  Memory:
+    Type: String
+    Default: 3072
+    Description: The amount (in MiB) of memory to present to the container [required]
   SubnetIdAz1:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id at AZ1 [required]
@@ -76,10 +80,6 @@ Parameters:
   SubnetIdAz3:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id at AZ3 [required]
-  Memory:
-    Type: String
-    Default: 3072
-    Description: The amount (in MiB) of memory to present to the container [required]
   VPCCidrBlock:
     Type: String
     Default: 10.3.0.0/16

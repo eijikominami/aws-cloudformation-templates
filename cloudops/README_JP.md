@@ -49,7 +49,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | IncidentManagerWorkloadName | String | Workload | ○ | ワークロード名 |
 | SSMAdminAccountId | Strig | | | SSM の管理を行う AWS アカウントの ID |
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
-| SSMOrganizationID | String | | | AWS Organizations ID |
+| SSMOrganizationId | String | | | The Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | パッチ適用処理開始時刻 (現地時) |
 
 ![](../images/architecture-cloudops.png)
@@ -86,7 +86,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | --- | --- | --- | --- | --- |
 | **AdminAccountId** | String | | | AWS Systems Manager Automation を設定する AWS アカウント ID |
 | **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | AWS Systems Manager Incident Manager を有効化するかどうか |
-| **OrganizationID** | String | | | AWS Organizations ID |
+| **OrganizationId** | String | | | The Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
 
 AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて  **Systems Manager** と **AWS Trusted Advisor** の `アクセス有効化` を設定してください。

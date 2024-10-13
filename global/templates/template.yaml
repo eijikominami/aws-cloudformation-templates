@@ -26,13 +26,17 @@ Metadata:
           - CloudFrontBytesDownloadedPerMinuteThreshold
           - CloudFrontDistributionId
       - Label: 
+          default: 'Web ACL Configuration'
+        Parameters:
+          - WebACL
+      - Label: 
+          default: 'Logging Configuration'
+        Parameters: 
+          - CentralizedLogBucketName
+      - Label: 
           default: 'Notification Configuration'
         Parameters: 
           - SNSForAlertArn
-      - Label: 
-          default: 'Web ACL Configuration'
-        Parameters: 
-          - WebACL
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -62,6 +66,10 @@ Parameters:
     Default: Total
     AllowedPattern: .+  
     Description: The budget name [required]
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
   CostUsageReport:
     Type: String
     Default: DISABLED
@@ -142,6 +150,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
+        CentralizedLogBucketName: !Ref CentralizedLogBucketName
         LogicalName: !Ref AWS::StackName
         Scope: CLOUDFRONT
         Environment: !Ref Environment

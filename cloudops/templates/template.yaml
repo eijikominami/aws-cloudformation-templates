@@ -14,7 +14,7 @@ Metadata:
         Parameters:
           - SSMAdminAccountId
           - SSMIgnoreResourceConflicts
-          - SSMOrganizationID
+          - SSMOrganizationId
           - SSMPatchingAt
       - Label:
           default: Systems Manager Incident Manager Configuration
@@ -105,10 +105,10 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
-  SSMOrganizationID:
+  SSMOrganizationId:
     Type: String
     Default: ''
-    Description: AWS Organizations ID
+    Description: The Organizations ID
   SSMPatchingAt:
     Type: Number
     Default: 3
@@ -256,7 +256,7 @@ Resources:
       Parameters:
         AdminAccountId: !Ref SSMAdminAccountId
         IgnoreResourceConflicts: !Ref SSMIgnoreResourceConflicts
-        OrganizationID: !Ref SSMOrganizationID
+        OrganizationId: !Ref SSMOrganizationId
         PatchingAt: !Ref SSMPatchingAt
         LogicalName: !Ref AWS::StackName
         SNSForAlertArn: !If

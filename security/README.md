@@ -37,12 +37,12 @@ The following sections describe the individual components of the architecture.
 ### IAM AccessAnalyzer
 
 This template enables ``IAM Access Analyzer``. IAM Access Analyzer sends results to ``Amazon SNS`` via ``Amazon EventBridge``. 
-After deploying it, [**you can designate the delegated IAM AccessAnalyzer administrator account**](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-settings.html) for your organization.
+After deploying it, [**you can designate the delegated IAM AccessAnalyzer administrator account**](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-settings.html) for your organization manually.
 
 ### AWS Security Hub
 
 This template enables the ``AWS Security Hub`` and sets up ``Amazon SNS`` and ``Amazon EventBridge`` to receive a message when the result of a compliance check changes to Failure.
-After deploying it, **Update a configuration policy to enable Security Hub and Standards**.
+After deploying it, **Update a CloudFormation parameters to enable Security Hub and Standards**.
 
 ### Amazon GuardDuty
 
@@ -89,8 +89,11 @@ This action automatically turns on the Auto-enable Macie configuration so that M
 ### Logging
 
 This template builds ``Amazon Security Lake`` and [``SIEM on Open Search Service``](https://github.com/aws-samples/siem-on-amazon-opensearch-service/) using AWS CloudFormation StackSets.
+
 If you want to use Security Lake for an organization, you must use your Organizations management account to [designate a delegated Security Lake administrator](https://docs.aws.amazon.com/security-lake/latest/userguide/getting-started.html#initial-account-setup).
-If you integrates ``SIEM on Open Search Service`` with ``Security Lake``, [change visibility timeout of SQS from 5 minutes to 10 minutes](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake.md#enabling-and-configuring-security-lake).
+If you integrates ``SIEM on Open Search Service`` with ``Security Lake``, [**change visibility timeout of SQS from 5 minutes to 10 minutes**](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake.md#enabling-and-configuring-security-lake).
+
+After setting up the SIEM on OpenSearch Service, **add a notification configuration to the S3 bucket** by following [these steps](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/controltower.md#preparation-with-your-log-archive-account). Additionally, update the CloudFormation parameters as needed.
 
 ### Amazon EventBridge
 
@@ -114,8 +117,8 @@ You can provide optional parameters as follows:
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
 | AuditAccountId | String | | | The id of the audit account |
-| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | Enable or disable AWS CloudTrail |
-| AWSCloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
+| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | | Enable or disable AWS CloudTrail |
+| AWSCloudTrailAdditionalFilters | String | | | Additional expression of CloudWatch Logs metric filters |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
@@ -123,90 +126,56 @@ You can provide optional parameters as follows:
 | AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
 | AWSSecurityHub | String | STANDARDS_ONLY | ○ | If it is ENABLED, AWS Security Hub enabled |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | | The standard that you want to enable |
-| EsLoaderServiceRoleArn | String | | | The ARN of lambda function aes-siem-es-loader |
-| GeoLite2LicenseKeyForSIEM | String | | | The license key from MaxMind to enrich geoip location |
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | If it is ACCOUNT or ORGANIZATION, IAM Access Analyzer is enabled |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | LogArchiveAccountId | String | | | The id of the log archive account |
 | SecurityOUId | String | | | The id of the security OU |
-| SecurityLakeRoleArn | String | | | Specify IAM Role ARN to be assumed by aes-siem-es-loader |
-| SecurityLakeExternalId | String | | | Specify Security Lake external ID for cross account |
-| SecurityLakeSubscriberSqs | String | | | Specify SQS ARN of Security Lake Subscriber |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | Enable or disable SIEM environment |
-| SnsEmailForSIEM | String | | | The email as SNS topic, where Amazon OpenSearch Service will send alerts to |
+| SIEMControlTowerLogBucketNameList | String | | | The S3 log bucket names in the Log Archive account. **Specify after installing OpenSearch Service.** |
+| SIEMControlTowerRoleArnForEsLoader | String | | | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
+| SIEMControlTowerSqsForLogBuckets | String | | | The SQS ARN for S3 log buckets in Log Archive Account. **Specify after installing OpenSearch Service.** |
+| SIEMEsLoaderServiceRoleArn | String | | | The ARN of lambda function aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
+| SIEMGeoLite2LicenseKey | String | | | The license key from MaxMind to enrich geoip location |
+| SIEMSecurityLakeExternalId | String | | | The Security Lake external ID for cross account. **Specify after installing OpenSearch Service.** |
+| SIEMSecurityLakeRoleArn | String | | | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
+| SIEMSecurityLakeSubscriberSqs | String | | | The SQS ARN of Security Lake Subscriber. **Specify after installing OpenSearch Service.** |
+| SIEMEmail | String | | | The email as SNS topic, where Amazon OpenSearch Service will send alerts to |
 
 ### Designating a GuardDuty and a Security Hub administrator account
 
 If you use Amazon GuardDuty or AWS Security Hub in your `Security tooling` or `Security view-only (Audit)` account, [set these accounts](https://docs.aws.amazon.com/securityhub/latest/userguide/designate-orgs-admin-account.html) as the delegated administrator accounts in the management accounts.
 
-## Comply with the Center for Internet Security (CIS) Benchmarks
+## Comply with the Security Hub Standards
 
-This template helps you to comply with the Center for Internet Security (CIS) Benchmarks.
+This template helps you to comply with the following items.
 
-| No. | Rules | Remediation |
-| --- | --- | --- |
-| 1.3 | Ensure credentials unused for 90 days or greater are disabled  | **Config** checks it and **Lambda** removes it automatically |
-| 1.4 | Ensure access keys are rotated every 90 days or less  | **Config** checks it and **Lambda** removes it automatically |
-| 1.5 | Ensure IAM password policy requires at least one uppercase letter | **Config** checks it and **SSM Automation** remediates the policy automatically |
-| 1.6 | Ensure IAM password policy requires at least one lowercase letter | **Config** checks it and **SSM Automation** remediates the policy automatically |
-| 1.7 | Ensure IAM password policy requires at least one symbol | **Config** checks it and **SSM Automation** remediates the policy automatically |
-| 1.8 | Ensure IAM password policy requires at least one number | **Config** checks it and **SSM Automation** remediates the policy automatically |
-| 1.9 | Ensure IAM password policy requires a minimum length of 14 or greater | **Config** checks it and **SSM Automation** remediates the policy automatically |
-| 1.10 | Ensure IAM password policy prevents password reuse | **Config** checks it and **SSM Automation** remediates the policy automatically |
-| 1.20 | Ensure a support role has been created to manage incidents with AWS Support | This template creates IAM Role for AWS Support |
-| 2.1 | Ensure CloudTrail is enabled in all Regions | This template enables **CloudTrail** and related resources in all Regions |
-| 2.2 | Ensure CloudTrail log file validation is enabled | This template enables **CloudTrail** and related resources in all Regions |
-| 2.3 | Ensure the S3 bucket CloudTrail logs to is not publicly accessible | This template enables **CloudTrail** and related resources in all Regions |
-| 2.4 | Ensure CloudTrail trails are integrated with Amazon CloudWatch Logs | This template enables **CloudTrail** and related resources in all Regions |
-| 2.5 | Ensure CloudTrail trails are integrated with Amazon CloudWatch Logs | This template enables **Config** and related resources |
-| 2.6 | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket | This template enables **CloudTrail** and related resources in all Regions |
-| 2.7 | Ensure CloudTrail logs are encrypted at rest using AWS KMS CMKs | This template enables **CloudTrail** and related resources in all Regions |
-| 2.9 | Ensure VPC flow logging is enabled in all VPCs | **Config** checks it and **SSM Automation** enables VPC flow log automatically |
-| 3.1 | Ensure VPC flow logging is enabled in all VPCs | This template creates a log metric filter and alarm |
-| 3.2 | Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA | This template creates a log metric filter and alarm |
-| 3.3 | Ensure a log metric filter and alarm exist for usage of "root" account | This template creates a log metric filter and alarm |
-| 3.4 | Ensure a log metric filter and alarm exist for IAM policy changes | This template creates a log metric filter and alarm |
-| 3.5 | Ensure a log metric filter and alarm exist for CloudTrail configuration changes | This template creates a log metric filter and alarm |
-| 3.6 | Ensure a log metric filter and alarm exist for AWS Management Console authentication failures | This template creates a log metric filter and alarm |
-| 3.7 | Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs | This template creates a log metric filter and alarm |
-| 3.8 | Ensure a log metric filter and alarm exist for S3 bucket policy changes | This template creates a log metric filter and alarm |
-| 3.9 | Ensure a log metric filter and alarm exist for AWS Config configuration changes | This template creates a log metric filter and alarm |
-| 3.10 | Ensure a log metric filter and alarm exist for security group changes | This template creates a log metric filter and alarm |
-| 3.11 | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) | This template creates a log metric filter and alarm |
-| 3.12 | Ensure a log metric filter and alarm exist for changes to network gateways | This template creates a log metric filter and alarm |
-| 3.13 | Ensure a log metric filter and alarm exist for route table changes | This template creates a log metric filter and alarm |
-| 3.14 | Ensure a log metric filter and alarm exist for VPC changes | This template creates a log metric filter and alarm |
-| 4.1| Ensure no security groups allow ingress from 0.0.0.0/0 to port 22 | **Config** checks it and **SSM Automation** remediates the rules automatically |
-| 4.2| Ensure no security groups allow ingress from 0.0.0.0/0 to port 3389 | **Config** checks it and **SSM Automation** remediates the rules automatically |
-| 4.3| Ensure the default security group of every VPC restricts all traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically |
-
-## Comply with the PCI DSS controls
-
-This template helps you to comply with the PCI DSS controls.
-
-| No. | Rules | Remediation |
-| --- | --- | --- |
-| PCI.CloudTrail.1 | CloudTrail logs should be encrypted at rest using AWS KMS CMKs.  | This template enables **CloudTrail** and related resources in all Regions |
-| PCI.CloudTrail.2 | CloudTrail should be enabled | This template enables **CloudTrail** and related resources in all Regions |
-| PCI.CloudTrail.3 | CloudTrail log file validation should be enabled | This template enables **CloudTrail** and related resources in all Regions |
-| PCI.CloudTrail.4 | CloudTrail trails should be integrated with CloudWatch Logs | This template enables **CloudTrail** and related resources in all Regions |
-| PCI.Config.1 | AWS Config should be enabled | This template enables **Config** and related resources in all Regions.  |
-| PCI.CW.1 | A log metric filter and alarm should exist for usage of the "root" user | This template enables **CloudTrail** and related resources in all Regions |
-| PCI.EC2.2 | VPC default security group should prohibit inbound and outbound traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically |
-| PCI.IAM.1 | IAM root user access key should not exist | **Config** checks it and **SSM Automation** remediates the default security group automatically |
-| PCI.S3.4 | S3 buckets should have server-side encryption enabled | **Config** checks it and **SSM Automation** remediates the default security group automatically.s |
-
-## Comply with the AWS Foundational Security Best Practices standard 
-
-This template helps you to comply with the AWS Foundational Security Best Practices standard.
-
-| No. | Rules | Remediation |
-| --- | --- | --- |
-| CloudTrail.1 | CloudTrail should be enabled and configured with at least one multi-Region trail | This template enables **CloudTrail** and related resources in all Regions |
-| CloudTrail.2 | CloudTrail should have encryption at-rest enabled | This template enables **CloudTrail** and related resources in all Regions |
-| Config.1 | AWS Config should be enabled | This template enables **Config** and related resources in all Regions |
-| EC2.2 | The VPC default security group should not allow inbound and outbound traffic | **Config** checks it and **SSM Automation** remediates the default security group automatically |
-| GuardDuty.1 | GuardDuty should be enabled | This template enables **GuardDuty** and related resources in all Regions |
-| IAM.3 | IAM users' access keys should be rotated every 90 days or less | **Config** checks it and **SSM Automation** remediates the default security group automatically |
-| IAM.4 | IAM root user access key should not exist | **Config** checks it and **SSM Automation** remediates the default security group automatically |
-| S3.4 | S3 buckets should have server-side encryption enabled | **Config** checks it and **SSM Automation** remediates the default security group automatically |
+| Control Id | Rules | FSBP | CIS | Remediation |
+| --- | --- | --- | --- | --- |
+| CloudTrail.1 | Ensure CloudTrail is enabled in all Regions | ○ | ○ | This template enables **CloudTrail** and related resources in all Regions |
+| CloudTrail.4 | Ensure CloudTrail log file validation is enabled | ○ | ○ | This template enables **CloudTrail** and related resources in all Regions |
+| CloudTrail.5 | Ensure CloudTrail trails are integrated with Amazon CloudWatch Logs | ○ | ○ | This template enables **CloudTrail** and related resources in all Regions |
+| CloudTrail.6 | Ensure the S3 bucket CloudTrail logs to is not publicly accessible |  | ○ | This template enables **CloudTrail** and related resources in all Region |
+| CloudTrail.7 | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket |  | ○ | This template enables **CloudTrail** and related resources in all Region |
+| CloudWatch.1 | Ensure a log metric filter and alarm exist for usage of "root" account |  | ○ | This template creates a log metric filter and alarm  |
+| CloudWatch.2 | Ensure VPC flow logging is enabled in all VPCs |  | ○ | This template creates a log metric filter and alarm  |
+| CloudWatch.3 | Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.6 | Ensure a log metric filter and alarm exist for AWS Management Console authentication failures |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.7 | Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.8 | Ensure a log metric filter and alarm exist for S3 bucket policy changes |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.9 | Ensure a log metric filter and alarm exist for AWS Config configuration changes |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.10 | Ensure a log metric filter and alarm exist for security group changes |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.11 | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.12 | Ensure a log metric filter and alarm exist for changes to network gateways |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.13 | Ensure a log metric filter and alarm exist for route table changes |  | ○ | This template creates a log metric filter and alarm |
+| CloudWatch.14 | Ensure a log metric filter and alarm exist for VPC changes |  | ○ | This template creates a log metric filter and alarm |
+| Config.1 | AWS Config should be enabled | ○ | ○ | ed | This template enables **Config** and related resources in all Regions |
+| EC2.2 | Ensure the default security group of every VPC restricts all traffic | ○ | ○ | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| EC2.6 | Ensure VPC flow logging is enabled in all VPCs | ○ | ○ | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| EC2.13 | Ensure no security groups allow ingress from 0.0.0.0/0 to port 22 |  | ○ | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| EC2.14 | Ensure no security groups allow ingress from 0.0.0.0/0 to port 3389 |  | ○ | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| IAM.3 | Ensure access keys are rotated every 90 days or less | ○ | ○ | **Config** checks it and **Lambda** removes it automatically |
+| IAM.4 | IAM root user access key should not exist	| ○ | ○ | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| IAM.7 | Password policies for IAM users should have strong configurations | ○ | ○ | **Config** checks it and **SSM Automation** remediates the policy automatically |
+| IAM.18 | Ensure a support role has been created to manage incidents with AWS Support | ○ | ○ | This template creates IAM Role for AWS Support |
+| IAM.22 | Ensure credentials unused for 45 days or greater are disabled | ○ | ○ | **Config** checks it and **Lambda** removes it automatically |
+| S3.17 | S3 buckets should have server-side encryption enabled | | | **Config** checks it and **SSM Automation** remediates the policy automatically |

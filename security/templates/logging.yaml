@@ -14,9 +14,15 @@ Metadata:
           default: SIEM Configuration
         Parameters:
           - AllowedSourceIpAddressesForSIEM
-          - EsLoaderServiceRoleArn
-          - GeoLite2LicenseKeyForSIEM
-          - SnsEmailForSIEM
+          - SIEMControlTowerLogBucketNameList
+          - SIEMControlTowerRoleArnForEsLoader
+          - SIEMControlTowerSqsForLogBuckets
+          - SIEMEsLoaderServiceRoleArn
+          - SIEMGeoLite2LicenseKey
+          - SIEMSecurityLakeExternalId
+          - SIEMSecurityLakeRoleArn
+          - SIEMSecurityLakeSubscriberSqs
+          - SIEMEmail
       - Label:
           default: Tag Configuration
         Parameters:
@@ -33,35 +39,54 @@ Parameters:
     Type: String
     Default: 0.0.0.0/0
     Description: Space-delimited list of CIDR blocks [required]
-  EsLoaderServiceRoleArn:
-    Type: String
-    Default: ''
-    Description: The ARN of lambda function aes-siem-es-loader
-  GeoLite2LicenseKeyForSIEM:
-    Type: String
-    Default: ''
-    Description: The license key from MaxMind to enrich geoip location
   LogArchiveAccountId:
     Type: String
     AllowedPattern: .+       
     Description: The id of the log archive account [required]
-  SecurityLakeRoleArn:
+  OrganizationId:
     Type: String
-    Default: ''    
-    Description: Specify IAM Role ARN to be assumed by aes-siem-es-loader
-  SecurityLakeExternalId:
-    Type: String
-    Default: ''    
-    Description: Specify Security Lake external ID for cross account
-  SecurityLakeSubscriberSqs:
-    Type: String
-    Default: ''    
-    Description: Specify SQS ARN of Security Lake Subscriber
+    Default: .+   
+    Description: The root id of AWS Organizations [required]
   SecurityOUId:
     Type: String
     AllowedPattern: .+       
     Description: The id of the security OU [required]
-  SnsEmailForSIEM:
+  SIEMControlTowerLogBucketNameList:
+    Type: String
+    Default: ''
+    AllowedPattern: ^[-0-9a-z.\s,]*$
+    Description: The S3 log bucket names in the Log Archive account
+  SIEMControlTowerRoleArnForEsLoader:
+    Type: String
+    Default: ''
+    AllowedPattern: ^(arn:aws.*:iam::[0-9]{12}:role/.*|)$
+    Description: The IAM Role ARN to be assumed by aes-siem-es-loader
+  SIEMControlTowerSqsForLogBuckets:
+    Type: String
+    Default: ''
+    AllowedPattern: ^(arn:aws[0-9a-zA-Z:/_-]*|)$
+    Description: The SQS ARN for S3 log buckets in Log Archive Account
+  SIEMEsLoaderServiceRoleArn:
+    Type: String
+    Default: ''
+    Description: The ARN of lambda function aes-siem-es-loader
+  SIEMGeoLite2LicenseKey:
+    Type: String
+    Default: ''
+    Description: The license key from MaxMind to enrich geoip location
+  SIEMSecurityLakeExternalId:
+    Type: String
+    Default: ''    
+    Description: The Security Lake external ID for cross account
+  SIEMSecurityLakeRoleArn:
+    Type: String
+    Default: ''    
+    Description: The IAM Role ARN to be assumed by aes-siem-es-loader
+  SIEMSecurityLakeSubscriberSqs:
+    Type: String
+    Default: ''    
+    Description: The SQS ARN of Security Lake Subscriber
+  SIEMEmail:
     Type: String
     AllowedPattern: .+  
     Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to [required]
@@ -82,7 +107,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateSIEMIntegrationWithControlTower: !Not [ !Equals [!Ref EsLoaderServiceRoleArn , ''] ]
+  CreateSIEMIntegrationWithControlTower: !Not [ !Equals [!Ref SIEMEsLoaderServiceRoleArn , ''] ]
   Development: !Equals [ !Ref Environment, development ]
 
 Resources:
@@ -155,21 +180,23 @@ Resources:
         - ParameterKey: AllowedSourceIpAddresses
           ParameterValue: !Ref AllowedSourceIpAddressesForSIEM
         - ParameterKey: ControlTowerLogBucketNameList
-          ParameterValue: !Sub aws-controltower-logs-${LogArchiveAccountId}-${AWS::Region}, aws-controltower-s3-access-logs-${LogArchiveAccountId}-${AWS::Region}
+          ParameterValue: !Ref SIEMControlTowerLogBucketNameList
         - ParameterKey: ControlTowerRoleArnForEsLoader
-          ParameterValue: !Sub arn:aws:iam::${LogArchiveAccountId}:role/ct-role-for-siem
+          ParameterValue: !Ref SIEMControlTowerRoleArnForEsLoader
         - ParameterKey: ControlTowerSqsForLogBuckets
-          ParameterValue: !Sub arn:aws:sqs:${AWS::Region}:${LogArchiveAccountId}:aes-siem-ct
+          ParameterValue: !Ref SIEMControlTowerSqsForLogBuckets
+        - ParameterKey: DeploymentTarget
+          ParameterValue: opensearch_serverless
         - ParameterKey: GeoLite2LicenseKey
-          ParameterValue: !Ref GeoLite2LicenseKeyForSIEM
+          ParameterValue: !Ref SIEMGeoLite2LicenseKey
         - ParameterKey: SecurityLakeSubscriberSqs
-          ParameterValue: !Ref SecurityLakeSubscriberSqs
-        - ParameterKey: SecurityLakeRoleArn
-          ParameterValue: !Ref SecurityLakeRoleArn
+          ParameterValue: !Ref SIEMSecurityLakeSubscriberSqs
         - ParameterKey: SecurityLakeExternalId
-          ParameterValue: !Ref SecurityLakeExternalId
+          ParameterValue: !Ref SIEMSecurityLakeExternalId
+        - ParameterKey: SecurityLakeRoleArn
+          ParameterValue: !Ref SIEMSecurityLakeRoleArn
         - ParameterKey: SnsEmail
-          ParameterValue: !Ref SnsEmailForSIEM
+          ParameterValue: !Ref SIEMEmail
       PermissionModel: SERVICE_MANAGED
       StackInstancesGroup: 
         - DeploymentTargets: 
@@ -207,7 +234,7 @@ Resources:
         RegionConcurrencyType: SEQUENTIAL
       Parameters: 
         - ParameterKey: EsLoaderServiceRole
-          ParameterValue: !Ref EsLoaderServiceRoleArn
+          ParameterValue: !Ref SIEMEsLoaderServiceRoleArn
       PermissionModel: SERVICE_MANAGED
       StackInstancesGroup: 
         - DeploymentTargets: 
@@ -225,3 +252,52 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue  
       TemplateURL: https://aes-siem.s3.ap-northeast-1.amazonaws.com/log-exporter/siem-integration-with-control-tower.template
+  CentralizedLogging:
+    Condition: CreateSIEMIntegrationWithControlTower
+    DependsOn:
+      - SIEMIntegrationWithControlTower
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      AutoDeployment: 
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      CallAs: SELF
+      Capabilities: 
+        - CAPABILITY_NAMED_IAM
+      Description: Environment for centralized logging
+      ManagedExecution: 
+        Active: false
+      OperationPreferences: 
+        ConcurrencyMode: STRICT_FAILURE_TOLERANCE
+        FailureToleranceCount: 0
+        MaxConcurrentCount: 1
+        RegionConcurrencyType: SEQUENTIAL
+      Parameters: 
+        - ParameterKey: OrganizationId
+          ParameterValue: !Ref OrganizationId
+        - ParameterKey: Environment
+          ParameterValue: !Ref Environment
+        - ParameterKey: TagKey
+          ParameterValue: !Ref TagKey
+        - ParameterKey: TagValue
+          ParameterValue: !Ref TagValue
+      PermissionModel: SERVICE_MANAGED
+      StackInstancesGroup: 
+        - DeploymentTargets: 
+            AccountFilterType: INTERSECTION
+            Accounts: 
+              - !Ref LogArchiveAccountId
+            OrganizationalUnitIds: 
+              - !Ref SecurityOUId
+          Regions: 
+            - !Ref AWS::Region
+      StackSetName: CentralizedLogging
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/centralized-logging.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/centralized-logging.yaml

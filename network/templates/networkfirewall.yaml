@@ -16,6 +16,7 @@ Metadata:
           default: 'Network Firewall Configuration'
         Parameters: 
           - HomeNetworkCidr
+          - CentralizedLogBucketName
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -24,6 +25,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
   HomeNetworkCidr:
     Type: String
     Default: ''
@@ -60,6 +65,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateLoggingConfiguration: !Not [ !Equals [ !Ref CentralizedLogBucketName, '']]
   CreateSubnetAz2: !Not [ !Equals [ !Ref SubnetIdAz2, ''] ]
   CreateSubnetAz3: !Not [ !Equals [ !Ref SubnetIdAz3, ''] ]
   OverrideHomeNetworkCidr: !Not [ !Equals [ !Ref HomeNetworkCidr, ''] ]
@@ -128,6 +134,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   NetworkFirewallLoggingConfiguration:
+    Condition: CreateLoggingConfiguration
     Type: AWS::NetworkFirewall::LoggingConfiguration
     Properties:
       FirewallArn: !Ref NetworkFirewall
@@ -135,59 +142,9 @@ Resources:
       LoggingConfiguration: 
         LogDestinationConfigs: 
           - LogDestination: 
-              bucketName: !Ref S3ForNetworkFirewallLog
-              prefix: alert
+              bucketName: !Ref CentralizedLogBucketName
             LogDestinationType: S3
             LogType: ALERT
-  S3ForNetworkFirewallLog:
-    Type: AWS::S3::Bucket
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      AccessControl: LogDeliveryWrite
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      BucketName: !Sub networkfirewall-logs-${AWS::Region}-${AWS::AccountId}
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpirationInDays
-            ExpirationInDays: 60
-            Status: Enabled
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: ObjectWriter
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  S3BucketPolicyForAlertLog:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref S3ForNetworkFirewallLog
-      PolicyDocument:
-        Version: 2012-10-17
-        Id: !Ref S3ForNetworkFirewallLog
-        Statement:
-          - Effect: Deny
-            Principal: '*'
-            Action: s3:*
-            Resource:
-              - !GetAtt S3ForNetworkFirewallLog.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForNetworkFirewallLog.Arn
-                  - /*
-            Condition:
-              Bool:
-                aws:SecureTransport: false
 
 Outputs:
   EndpointIds:

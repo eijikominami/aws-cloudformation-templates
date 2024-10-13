@@ -23,7 +23,8 @@ Metadata:
       - Label: 
           default: 'Network Firewall Configuration'
         Parameters: 
-          - HomeNetworkCidrs
+          - HomeNetworkCidr
+          - CentralizedLogBucketName
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
@@ -44,6 +45,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
   HomeNetworkCidr:
     Type: String
     Default: ''
@@ -280,6 +285,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
+        CentralizedLogBucketName: !Ref CentralizedLogBucketName
         HomeNetworkCidr: !Ref HomeNetworkCidr
         SubnetIdAz1: !GetAtt Az1.Outputs.FirewallSubnetId
         SubnetIdAz2: !GetAtt Az2.Outputs.FirewallSubnetId

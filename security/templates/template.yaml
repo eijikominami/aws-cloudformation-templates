@@ -10,6 +10,7 @@ Metadata:
           - LogArchiveAccountId
           - AuditAccountId
           - SecurityOUId
+          - OrganizationId
           - OrganizationsRootId
       - Label:
           default: CloudTrail Configuration
@@ -34,12 +35,15 @@ Metadata:
           default: Logging Configuration
         Parameters:
           - SIEM
-          - EsLoaderServiceRoleArn
-          - GeoLite2LicenseKeyForSIEM
-          - SecurityLakeRoleArn
-          - SecurityLakeExternalId
-          - SecurityLakeSubscriberSqs
-          - SnsEmailForSIEM
+          - SIEMControlTowerLogBucketNameList
+          - SIEMControlTowerRoleArnForEsLoader
+          - SIEMControlTowerSqsForLogBuckets
+          - SIEMEsLoaderServiceRoleArn
+          - SIEMGeoLite2LicenseKey
+          - SIEMSecurityLakeExternalId
+          - SIEMSecurityLakeRoleArn
+          - SIEMSecurityLakeSubscriberSqs
+          - SIEMEmail
       - Label:
           default: Macie Configuration
         Parameters:
@@ -139,14 +143,6 @@ Parameters:
       - NIST
       - PCIDSS
     Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
-  EsLoaderServiceRoleArn:
-    Type: String
-    Default: ''
-    Description: The ARN of lambda function aes-siem-es-loader
-  GeoLite2LicenseKeyForSIEM:
-    Type: String
-    Default: ''
-    Description: The license key from MaxMind to enrich geoip location
   IAMAccessAnalyzer:
     Type: String
     Default: ACCOUNT
@@ -164,6 +160,10 @@ Parameters:
     Type: String
     Default: ''    
     Description: The id of the log archive account
+  OrganizationId:
+    Type: String
+    Default: ''
+    Description: The Organizations ID
   OrganizationsRootId:
     Type: String
     Default: ''    
@@ -172,18 +172,6 @@ Parameters:
     Type: String
     Default: ''    
     Description: The id of the security OU
-  SecurityLakeRoleArn:
-    Type: String
-    Default: ''    
-    Description: Specify IAM Role ARN to be assumed by aes-siem-es-loader
-  SecurityLakeExternalId:
-    Type: String
-    Default: ''    
-    Description: Specify Security Lake external ID for cross account
-  SecurityLakeSubscriberSqs:
-    Type: String
-    Default: ''    
-    Description: Specify SQS ARN of Security Lake Subscriber
   SIEM:
     Type: String
     Default: DISABLED
@@ -191,7 +179,42 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable SIEM environment [required]
-  SnsEmailForSIEM:
+  SIEMControlTowerLogBucketNameList:
+    Type: String
+    Default: ''
+    AllowedPattern: ^[-0-9a-z.\s,]*$
+    Description: The S3 log bucket names in the Log Archive account
+  SIEMControlTowerRoleArnForEsLoader:
+    Type: String
+    Default: ''
+    AllowedPattern: ^(arn:aws.*:iam::[0-9]{12}:role/.*|)$
+    Description: The IAM Role ARN to be assumed by aes-siem-es-loader
+  SIEMControlTowerSqsForLogBuckets:
+    Type: String
+    Default: ''
+    AllowedPattern: ^(arn:aws[0-9a-zA-Z:/_-]*|)$
+    Description: The SQS ARN for S3 log buckets in Log Archive Account
+  SIEMEsLoaderServiceRoleArn:
+    Type: String
+    Default: ''
+    Description: The ARN of lambda function aes-siem-es-loader
+  SIEMGeoLite2LicenseKey:
+    Type: String
+    Default: ''
+    Description: The license key from MaxMind to enrich geoip location
+  SIEMSecurityLakeExternalId:
+    Type: String
+    Default: ''    
+    Description: The Security Lake external ID for cross account
+  SIEMSecurityLakeRoleArn:
+    Type: String
+    Default: ''    
+    Description: The IAM Role ARN to be assumed by aes-siem-es-loader
+  SIEMSecurityLakeSubscriberSqs:
+    Type: String
+    Default: ''    
+    Description: The SQS ARN of Security Lake Subscriber
+  SIEMEmail:
     Type: String
     Default: '' 
     Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to
@@ -223,11 +246,11 @@ Conditions:
   CreateGuardDuty: !Or [ !Equals [ !Ref AmazonGuardDuty, ENABLED], !Equals [!Ref AmazonGuardDuty, NOTIFICATION_ONLY ] ]
   CreateGuardDutyEventBridgeOnly: !Equals [ !Ref AmazonGuardDuty, NOTIFICATION_ONLY ]
   CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref IAMAccessAnalyzer, DISABLED ] ]
-  CreateIAMRoleForAWSSupport: !Not [ !Equals [!Ref IAMUserArnToAssumeAWSSupportRole , ''] ]
+  CreateIAMRoleForAWSSupport: !Not [ !Equals [!Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !And [ !Equals [ !Ref AmazonMacie, ENABLED ], !Equals [ !Ref AmazonMacie, NOTIFICATION_ONLY ] ]
   CreateMacieEventBridgeOnly: !Equals [ !Ref AmazonMacie, NOTIFICATION_ONLY ]
   CreateSecurityHub: !Not [ !Equals [ !Ref AWSSecurityHub, DISABLED ] ]
-  CreateSIEM: !Equals [ !Ref SIEM, ENABLED ]
+  CreateSIEM: !And [ !Equals [ !Ref SIEM, ENABLED ], !Not [ !Equals [!Ref AuditAccountId, ''] ], !Not [ !Equals [!Ref LogArchiveAccountId, ''] ], !Not [ !Equals [!Ref OrganizationId, ''] ], !Not [ !Equals [!Ref SecurityOUId, ''] ], !Not [ !Equals [!Ref SIEMEmail, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn ,'']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn,'']
   CloudTrailIsCreatedByControlTower: !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ]
@@ -450,14 +473,18 @@ Resources:
       Parameters:
         AuditAccountId: !Ref AuditAccountId
         AllowedSourceIpAddressesForSIEM: 0.0.0.0/0
-        EsLoaderServiceRoleArn: !Ref EsLoaderServiceRoleArn
-        GeoLite2LicenseKeyForSIEM: !Ref GeoLite2LicenseKeyForSIEM
+        SIEMControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
+        SIEMControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
+        SIEMControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
         LogArchiveAccountId: !Ref LogArchiveAccountId
+        OrganizationId: !Ref OrganizationId
         SecurityOUId: !Ref SecurityOUId
-        SecurityLakeRoleArn: !Ref SecurityLakeRoleArn
-        SecurityLakeExternalId: !Ref SecurityLakeExternalId
-        SecurityLakeSubscriberSqs: !Ref SecurityLakeSubscriberSqs
-        SnsEmailForSIEM: !Ref SnsEmailForSIEM
+        SIEMSecurityLakeRoleArn: !Ref SIEMSecurityLakeRoleArn
+        SIEMSecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
+        SIEMSecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
+        SIEMEsLoaderServiceRoleArn: !Ref SIEMEsLoaderServiceRoleArn
+        SIEMGeoLite2LicenseKey: !Ref SIEMGeoLite2LicenseKey
+        SIEMEmail: !Ref SIEMEmail
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
