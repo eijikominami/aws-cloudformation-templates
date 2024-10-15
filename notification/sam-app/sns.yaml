@@ -1,6 +1,20 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudSAMTemplates/notification/sns creates Amazon SNS and related CloudWatch Alarm.
+Description: AWSCloudFormationTemplates/notification/sns creates Amazon SNS and related CloudWatch Alarm.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'SNS Configuration'
+        Parameters:
+          - TopicName
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
 
 Parameters:
   TopicName:

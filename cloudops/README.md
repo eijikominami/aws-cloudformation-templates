@@ -49,7 +49,7 @@ You can provide optional parameters as follows.
 | IncidentManagerWorkloadName | String | Workload | ○ | The workload name |
 | SSMAdminAccountId | Strig | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created |
-| SSMOrganizationID | String | | | AWS Organizations ID |
+| SSMOrganizationId | String | | | The Organizations ID |
 | SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
 
 ![](../images/architecture-cloudops.png)
@@ -86,7 +86,7 @@ This template sets ``AWS Systems Manager``.
 | --- | --- | --- | --- | --- |
 | **AdminAccountId** | String | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
 | **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
-| **OrganizationID** | String | | | AWS Organizations ID |
+| **OrganizationId** | String | | | The Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
 If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.

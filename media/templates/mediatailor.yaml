@@ -6,7 +6,7 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
-          default: 'IVS Configuration'
+          default: 'MediaTailor Configuration'
         Parameters: 
           - AdDecisionServerUrl
           - CdnContentSegmentUrlPrefix
@@ -31,11 +31,6 @@ Parameters:
     Type: String
     Default: ''
     Description: "A content delivery network (CDN) to cache content segments, so that content requests don’t always have to go to the origin server."   
-  LogicalName:
-    Type: String
-    Default: MediaTailor
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   MaxDurationSeconds:
     Type: Number
     Default: 120
@@ -54,6 +49,11 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The URL prefix for the parent manifest for the stream, minus the asset ID [required]
+  LogicalName:
+    Type: String
+    Default: MediaTailor
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

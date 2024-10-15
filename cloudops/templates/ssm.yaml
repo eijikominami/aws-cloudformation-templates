@@ -10,7 +10,7 @@ Metadata:
         Parameters: 
           - AdminAccountId
           - IgnoreResourceConflicts
-          - OrganizationID
+          - OrganizationId
           - PatchingAt
       - Label: 
           default: 'Notification Configuration'
@@ -37,10 +37,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable AWS Systems Manager Incident Manager [required]
-  OrganizationID:
+  OrganizationId:
     Type: String
     Default: ''
-    Description: AWS Organizations ID
+    Description: The Organizations ID
   PatchingAt:
     Type: Number
     Default: 3
@@ -76,7 +76,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateIAMRoleForMultiAccount: !And [ !Not [ !Equals [ !Ref AdminAccountId, ''] ], !Not [ !Equals [ !Ref OrganizationID, ''] ] ]
+  CreateIAMRoleForMultiAccount: !And [ !Not [ !Equals [ !Ref AdminAccountId, ''] ], !Not [ !Equals [ !Ref OrganizationId, ''] ] ]
   CreateResource: !Equals [ !Ref IgnoreResourceConflicts, DISABLED ]
   CreateResourceDataSync: !Equals [ !Ref AdminAccountId, !Ref AWS::AccountId ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -169,7 +169,7 @@ Resources:
           Action: sts:AssumeRole
           Condition: 
             StringEquals: 
-              aws:PrincipalOrgID: !Ref OrganizationID
+              aws:PrincipalOrgID: !Ref OrganizationId
         - Effect: Allow
           Principal: 
             Service: ssm.amazonaws.com

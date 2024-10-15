@@ -23,13 +23,6 @@ Parameters:
     Type: String
     AllowedPattern: ^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}$
     Description: The ARN of the IAM Identity Center instance responsible for authenticating monitor users [required]
-  Environment:
-    Type: String
-    Default: production
-    AllowedValues:
-      - production
-      - test
-      - development
   MaxWorkerCount:
     Type: Number
     Default: 10
@@ -42,6 +35,13 @@ Parameters:
     MinValue: 0
     MaxValue: 2147483647
     Description: The minimum number of workers in the fleet [requierd]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby

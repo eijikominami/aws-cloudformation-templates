@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWSCloudFormationTemplates/security/centralized-logging creates an environment for centralized logging.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Logging Configuration
+        Parameters:
+          - OrganizationId
+      - Label:
+          default: Tag Configuration
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  OrganizationId:
+    Type: String
+    Default: .+   
+    Description: The root id of AWS Organizations [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  S3ForCentralizedLogging:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub aws-waf-logs-and-centralized-logs-${AWS::Region}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 60
+            Status: Enabled
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: s3:ObjectCreated:*
+            Queue: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:aes-siem-ct
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  S3BucketPolicyForCentralizedLogging:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3ForCentralizedLogging
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: !Ref S3ForCentralizedLogging
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !GetAtt S3ForCentralizedLogging.Arn
+              - !Join
+                - ''
+                - - !GetAtt S3ForCentralizedLogging.Arn
+                  - /*
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+          - Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${S3ForCentralizedLogging}/*
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+                aws:SourceOrgID: !Ref OrganizationId
+          - Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource: !Sub arn:aws:s3:::${S3ForCentralizedLogging}
+            Condition:
+              StringEquals:
+                aws:SourceOrgID: !Ref OrganizationId

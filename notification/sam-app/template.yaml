@@ -35,6 +35,7 @@ Metadata:
           - SlackWorkspaceId
           - SlackChannelIdForDeployment
           - SlackChannelIdForAlert
+          - UnauthorizedApiCallsCloudWatchAlarmName
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -49,6 +50,14 @@ Metadata:
           - TagValue
 
 Parameters:
+  AutoScalingEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - ERROR_ONLY
+      - DISABLED
+    Description: Enable or disable the events rule about AutoScaling [required]
   CloudTrailAdditionalFilters:
     Type: String
     Default: ''
@@ -57,6 +66,21 @@ Parameters:
     Type: String
     Default: ''
     Description: The log group name for CloudTrail
+  EBSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - ERROR_ONLY
+      - DISABLED
+    Description: Enable or disable the events rule about EBS [required]
+  EC2EventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about EC2 [required]
   Encrypt:
     Type: String
     Default: false
@@ -74,6 +98,27 @@ Parameters:
     Default: ''
     NoEcho: true
     Description: Slack Hook Url for alert without schema string (e.g. hooks.slack.com/services/XXXXX)
+  KMSEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about KMS [required]
+  ManagementConsoleEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about Management Console [required]
+  ScheduledEventsRule:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the events rule about Scheduled Events [required]
   SlackWorkspaceId:
     Type: String
     Default: ''
@@ -98,50 +143,6 @@ Parameters:
     Type: String
     Default: '' 
     Description: Amazon SNS Topic ARN for deployment information
-  AutoScalingEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - ERROR_ONLY
-      - DISABLED
-    Description: Enable or disable the events rule about AutoScaling [required]
-  EBSEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - ERROR_ONLY
-      - DISABLED
-    Description: Enable or disable the events rule about EBS [required]
-  EC2EventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable the events rule about EC2 [required]
-  KMSEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable the events rule about KMS [required]
-  ManagementConsoleEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable the events rule about Management Console [required]
-  ScheduledEventsRule:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable the events rule about Scheduled Events [required]
   TagEventsRule:
     Type: String
     Default: ENABLED

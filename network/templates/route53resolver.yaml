@@ -8,9 +8,6 @@ Metadata:
       - Label: 
           default: 'Route53 Configuration'
         Parameters:
-          - DnsIpAz1
-          - DnsIpAz2
-          - DomainName
           - VPCCidrBlock
           - SubnetPrivateCidrBlockForAz1
           - SubnetPrivateCidrBlockForAz2
@@ -18,6 +15,10 @@ Metadata:
           - SubnetTransitCidrBlockForAz1
           - SubnetTransitCidrBlockForAz2
           - SubnetTransitCidrBlockForAz3
+          - DnsIpAz1
+          - DnsIpAz2
+          - DnsIpAz3
+          - DomainName
           - TransitGatewayId
           - OnpremDnsIp
           - PrincipalsToAssociateWithRoute53ResolverRule

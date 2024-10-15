@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/security/microsoftad sets AWS Directory Service for Microsoft Active Directory.
+Description: AWSCloudFormationTemplates/identity/microsoftad sets AWS Directory Service for Microsoft Active Directory.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -11,15 +11,15 @@ Metadata:
           - Edition
           - EnableSso
           - Name
-          - Password
           - ShortName
+          - Password
+          - VPCId
           - SubnetPrivateCidrBlockForAz1
           - SubnetPrivateIdForAz1
           - SubnetPrivateCidrBlockForAz2
           - SubnetPrivateIdForAz2
           - SubnetPrivateCidrBlockForAz3
           - SubnetPrivateIdForAz3
-          - VPCId
       - Label: 
           default: 'Management Instance Configuration'
         Parameters: 
@@ -56,11 +56,6 @@ Parameters:
       - true
       - false
     Description: Whether to enable single sign-on for a Microsoft Active Directory in AWS [required]
-  LogicalName:
-    Type: String
-    Default: MicrosoftAD
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   Name:
     Type: String
     Default: corp.example.com
@@ -114,6 +109,11 @@ Parameters:
   SNSForDeploymentArn:
     Type: String
     Default: ''
+  LogicalName:
+    Type: String
+    Default: MicrosoftAD
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production
@@ -427,8 +427,6 @@ Resources:
       GroupDescription: Security Group for a management instance
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
       Tags:
         - Key: Name

@@ -38,13 +38,13 @@
 
 このテンプレートは、 ``IAM Access Analyzer`` を有効化します。
 IAM Access Analyzer は、 ``Amazon EventBridge`` 経由で ``Amazon SNS`` に結果を通知します。 
-デプロイ完了後、 [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/access-analyzer-settings.html) することが可能です。
+デプロイ完了後、手動で [**Organizations 内の管理アカウントに権限を委任**](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/access-analyzer-settings.html) することが可能です。
 
 ### AWS Security Hub
 
 このテンプレートは、 ``AWS Security Hub`` を有効化します。
 また、コンプライアンスチェックが失敗したとき、 ``Amazon SNS`` は ``Amazon EventBridge`` 経由でメッセージを受け取ります。
-デプロイ完了後、**ポリシーを更新して Security Hub とセキュリティ基準を設定** します。
+デプロイ完了後、**パラメータを更新して Security Hub とセキュリティ基準を設定** します。
 
 ### Amazon GuardDuty
 
@@ -90,8 +90,11 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 ### ロギング
 
 このテンプレートは、 AWS CloudFormation スタックセットを用いて ``Amazon Security Lake`` と [``SIEM on Open Search Service``](https://github.com/aws-samples/siem-on-amazon-opensearch-service/) を構築します。
+
 もし、 Security Lake を Organizations 内で使用する場合は、Organizations の管理アカウントを使用して委任された [Security Lake 管理者を指定](https://docs.aws.amazon.com/ja_jp/security-lake/latest/userguide/getting-started.html#initial-account-setup) する必要があります。
-また、 ``SIEM on Open Search Service`` と連携させる場合には、[SQS の可視性タイムアウトを 5 分から 10 分に変更](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake_ja.md#security-lake-%E3%81%AE%E6%9C%89%E5%8A%B9%E5%8C%96%E3%81%A8%E8%A8%AD%E5%AE%9A)する必要があります。
+また、 ``SIEM on Open Search Service`` と連携させる場合には、[**SQS の可視性タイムアウトを 5 分から 10 分に変更**](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake_ja.md#security-lake-%E3%81%AE%E6%9C%89%E5%8A%B9%E5%8C%96%E3%81%A8%E8%A8%AD%E5%AE%9A)する必要があります。
+
+SIEM on Open Search Service の構築後、 [こちらの手順のように](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/controltower_ja.md#log-archive-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%A7%E3%81%AE%E6%BA%96%E5%82%99) S3 バケットに **通知設定を追加** してください。また、必要に応じてパラメータの更新も行なってください。
 
 ### Amazon EventBridge
 
@@ -115,7 +118,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AuditAccountId | String | | | 監査アカウントの ID |
-| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | ENABLEDを指定した場合、AWS CloudTrail が有効化されます。 |
+| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | | ENABLEDを指定した場合、AWS CloudTrail が有効化されます。 |
 | AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
@@ -124,90 +127,56 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。|
 | AWSSecurityHub | String | STANDARDS_ONLY | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
-| EsLoaderServiceRoleArn | String | | | aes-siem-es-loader Lambda 関数の ARN |
-| GeoLite2LicenseKeyForSIEM | String | | | MaxMind が発行した GEO IP API のライセンスキー |
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、 IAM Access Analyzer が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | LogArchiveAccountId | String | | | ログアーカイブアカウントの ID |
 | SecurityOUId | String | | | セキュリティ OU の ID |
-| SecurityLakeRoleArn | String | | | aes-siem-es-loader が使用する IAM ロール |
-| SecurityLakeExternalId | String | | | Security Lake の外部 ID |
-| SecurityLakeSubscriberSqs | String | | | Security Lake サブスクライバーの SQS ARN |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、SIEM が有効化されます。 |
-| SnsEmailForSIEM | String | | | SIEM に指定する E メールアドレス |
+| SIEMControlTowerLogBucketNameList | String | | | ログアーカイブアカウントの S3 ログバケット名。 **OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerRoleArnForEsLoader | String | | | aes-siem-es-loader が使用する IAM ロール名。 **OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerSqsForLogBuckets | String | | | ログアーカイブアカウントの SQS ARN。 **OpenSearch Service インストール後に指定。** |
+| SIEMEsLoaderServiceRoleArn | String | | | aes-siem-es-loader Lambda 関数の ARN。 **OpenSearch Service インストール後に指定。** |
+| SIEMGeoLite2LicenseKey | String | | | MaxMind が発行した GEO IP API のライセンスキー |
+| SIEMSecurityLakeExternalId | String | | | Security Lake の外部 ID。 **OpenSearch Service インストール後に指定。** |
+| SIEMSecurityLakeRoleArn | String | | | aes-siem-es-loader が使用する IAM ロール。 **OpenSearch Service インストール後に指定。** |
+| SIEMSecurityLakeSubscriberSqs | String | | | Security Lake サブスクライバーの SQS ARN。 **OpenSearch Service インストール後に指定。** |
+| SIEMEmail | String | | | SIEM に指定する E メールアドレス |
 
 ### マルチアカウント対応
 
 Amazon GuardDuty や AWS Security Hub を `Security tooling` アカウント、もしくは `Security view-only (Audit)` アカウントで使用する場合は、これらのアカウントを管理アカウントにて[管理者アカウントに指定](https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/designate-orgs-admin-account.html)してください。
 
-## Center for Internet Security (CIS) ベンチマークへの準拠
+## Security Hub Standards への準拠
 
-このテンプレートを実行することで、Center for Internet Security (CIS) ベンチマークの以下の項目に準拠します。
+このテンプレートを実行することで、以下の項目に準拠します。
 
-| No. | ルール | 実行内容 |
-| --- | --- | --- |
-| 1.3 | 90 日間以上使用されていない認証情報は無効にします | **Config** で定期的に確認を行い、非準拠の場合は **Lambda** で自動的に削除します。 |
-| 1.4 | アクセスキーは 90 日ごとに更新します | **Config** で定期的に確認を行い、非準拠の場合は **Lambda** で自動的に削除します。 |
-| 1.5 | IAM パスワードポリシーには少なくとも 1 つの大文字が必要です | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 1.6 | IAM パスワードポリシーには少なくとも 1 つの小文字が必要です | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 1.7 | IAM パスワードポリシーには少なくとも 1 つの記号が必要です | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 1.8 | IAM パスワードポリシーには少なくとも 1 つの数字が必要です | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 1.9 | IAM パスワードポリシーは 14 文字以上の長さが必要です | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 1.10 | IAM パスワードポリシーはパスワードの再使用を禁止しています | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 1.20 | AWS でインシデントを管理するためのサポートロールが作成されていることを確認します | AWS Support 用のIAM Roleを作成します。 |
-| 2.1 | CloudTrail はすべてのリージョンで有効になっています | **CloudTrail** と関連サービスを有効化します。 |
-| 2.2 | CloudTrail ログファイルの検証は有効になっています | **CloudTrail** と関連サービスを有効化します。 |
-| 2.3 | CloudTrail が記録する S3 バケットはパブリックアクセスできません | **CloudTrail** と関連サービスを有効化します。 |
-| 2.4 | CloudTrail 証跡は Amazon CloudWatch Logs によって統合されています | **CloudTrail** と関連サービスを有効化します。 |
-| 2.5 | すべてのリージョンで AWS Config が有効になっていることを確認します | **Config** と関連サービスを有効化します。 |
-| 2.6 | S3 バケットアクセスログ記録が CloudTrail S3 バケットで有効になっていることを確認します | **CloudTrail** と関連サービスを有効化します。 |
-| 2.7 | CloudTrail ログは保管時に AWS KMS CMK を使用して暗号化されていることを確認します | **CloudTrail** と関連サービスを有効化します。 |
-| 2.9 | すべての VPC で VPC フローログ記録が有効になっていることを確認します  | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。  |
-| 3.1 | 不正な API 呼び出しに対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.2 | MFA なしの AWS マネジメントコンソール サインインに対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.3 | ルート」アカウントに対してログメトリクスフィルタとアラームが存在することを確認します  | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.4 | MFA なしの IAM ポリシーの変更に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.5 | MFA なしの CloudTrail 設定の変更に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.6 | AWS マネジメントコンソール 認証の失敗に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.7 | カスタマー作成の CMK の無効化またはスケジュールされた削除に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.8 | S3 バケットの変更に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.9 | AWS Config 設定の変更に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.10 | セキュリティグループの変更に対するメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.11 | ネットワークアクセスコントロールリスト (NACL) への変更に対するログメトリクスとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.12 | ネットワークゲートウェイへの変更に対するログメトリクスとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.13 | ルートテーブルの変更に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 3.14 | VPC の変更に対してログメトリクスフィルタとアラームが存在することを確認します | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| 4.1| どのセキュリティグループでも 0.0.0.0/0 からポート 22 への入力を許可しないようにします | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 4.2| どのセキュリティグループでも 0.0.0.0/0 からポート 3389 への入力を許可しないようにします | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| 4.3| すべての VPC のデフォルトセキュリティグループがすべてのトラフィックを制限するようにします | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-
-## PCI DSS セキュリティ標準への準拠
-
-このテンプレートを実行することで、PCI DSS セキュリティ標準の以下の項目に準拠します。
-
-| No. | ルール | 実行内容 |
-| --- | --- | --- |
-| PCI.CloudTrail.1 | CloudTrail ログは、AWS KMS CMK を使用して保存時に暗号化する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
-| PCI.CloudTrail.2 | CloudTrail を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
-| PCI.CloudTrail.3 | CloudTrail ログファイルの検証を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
-| PCI.CloudTrail.4 | CloudTrail 証跡は CloudWatch ログと統合する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
-| PCI.Config.1 | AWS Config を有効にする必要があります。 | **Config** と関連サービスを有効化します。 |
-| PCI.CW.1 | 「root」ユーザーの使用には、ログメトリクスフィルターとアラームが存在する必要があります。 | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
-| PCI.EC2.2 | VPC のデフォルトのセキュリティグループでは、インバウンドトラフィックとアウトバウンドトラフィックが禁止されます。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| PCI.IAM.1 | IAM ルートユーザーアクセスキーが存在してはいけません。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| PCI.S3.4 | S3 バケットでは、サーバー側の暗号化を有効にする必要があります。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-
-## AWS の基本的なセキュリティのベストプラクティス標準への準拠
-
-このテンプレートを実行することで、AWS の基本的なセキュリティのベストプラクティス標準の以下の項目に準拠します。
-
-| No. | ルール | 実行内容 |
-| --- | --- | --- |
-| CloudTrail.1 | CloudTrail を有効にし、少なくとも 1 つのマルチリージョンの証跡で設定する必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
-| CloudTrail.2 | CloudTrail は保管時の暗号化を有効にする必要があります。 | **CloudTrail** と関連サービスを有効化します。 |
-| Config.1 | AWS Config を有効にする必要があります。 | **Config** と関連サービスを有効化します。 |
-| EC2.2 | VPC のデフォルトのセキュリティグループでは、インバウンドトラフィックとアウトバウンドトラフィックが禁止されます。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| GuardDuty.1 | GuardDuty を有効にする必要があります。 | **GuardDuty** と関連サービスを有効化します。 |
-| IAM.3 | IAM ユーザーのアクセスキーは 90 日ごとに更新する必要があります。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| IAM.4 | IAM ルートユーザーアクセスキーが存在してはいけません。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
-| S3.4 | S3 バケットでは、サーバー側の暗号化を有効にする必要があります。 | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| Control Id | ルール | FSBP | CIS | 実行内容 |
+| --- | --- | --- | --- | --- |
+| CloudTrail.1 | CloudTrail はすべてのリージョンで有効になっています | ○ | ○ | **CloudTrail** と関連サービスを有効化します。 |
+| CloudTrail.4 | CloudTrail ログファイルの検証は有効になっています | ○ | ○ | **CloudTrail** と関連サービスを有効化します。 |
+| CloudTrail.5 | CloudTrail 証跡は Amazon CloudWatch Logs によって統合されています | ○ | ○ | **CloudTrail** と関連サービスを有効化します。 |
+| CloudTrail.6 | CloudTrail が記録する S3 バケットはパブリックアクセスできません |  | ○ | **CloudTrail** と関連サービスを有効化します。 |
+| CloudTrail.7 | S3 バケットアクセスログ記録が CloudTrail S3 バケットで有効になっていることを確認します |  | ○ | **CloudTrail** と関連サービスを有効化します。 |
+| CloudWatch.1 | ルートアカウントに対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。  |
+| CloudWatch.2 | 不正な API 呼び出しに対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。  |
+| CloudWatch.3 | MFA なしの AWS マネジメントコンソール サインインに対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.6 | AWS マネジメントコンソール 認証の失敗に対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.7 | カスタマー作成の CMK の無効化またはスケジュールされた削除に対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.8 | S3 バケットの変更に対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.9 | AWS Config 設定の変更に対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.10 | セキュリティグループの変更に対するメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.11 | ネットワークアクセスコントロールリスト (NACL) への変更に対するログメトリクスとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.12 | ネットワークゲートウェイへの変更に対するログメトリクスとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.13 | ルートテーブルの変更に対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| CloudWatch.14 | VPC の変更に対してログメトリクスフィルタとアラームが存在することを確認します |  | ○ | ログメトリクスフィルタとCloudWatchアラームを作成します。 |
+| Config.1 | すべてのリージョンで AWS Config が有効になっていることを確認します | ○ | ○ | **Config** と関連サービスを有効化します。  |
+| EC2.2 | すべての VPC のデフォルトセキュリティグループがすべてのトラフィックを制限するようにします | ○ | ○ | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| EC2.6 | すべての VPC で VPC フローログ記録が有効になっていることを確認します | ○ | ○ | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| EC2.13 | どのセキュリティグループでも 0.0.0.0/0 からポート 22 への入力を許可しないようにします |  | ○ | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| EC2.14 | どのセキュリティグループでも 0.0.0.0/0 からポート 3389 への入力を許可しないようにします |  | ○ | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| IAM.3 | アクセスキーは 90 日ごとに更新します | ○ | ○ | **Config** で定期的に確認を行い、非準拠の場合は **Lambda** で自動的に削除します。 |
+| IAM.4 | IAM ルートユーザーアクセスキーが存在してはいけません。 | ○ | ○ | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| IAM.7 | IAM ユーザーのパスワードポリシーには強力な設定が必要です  | ○ | ○ | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |
+| IAM.18 | AWS でインシデントを管理するためのサポートロールが作成されていることを確認します | ○ | ○ | AWS Support 用のIAM Roleを作成します。 |
+| IAM.22 | 45 日間以上使用されていない認証情報は無効にします | ○ | ○ | 90 日間以上使用されていない認証情報は無効にします | **Config** で定期的に確認を行い、非準拠の場合は **Lambda** で自動的に削除します。 |
+| S3.17 | S3 バケットでは、サーバー側の暗号化を有効にする必要があります。 | | | **Config** で定期的に確認を行い、非準拠の場合は **SSM Automation** で自動修復を行います。 |

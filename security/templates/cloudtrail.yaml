@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/security/CloudTrail sets AWS CloudTrail.
+Description: AWSCloudFormationTemplates/security/cloudtrail sets AWS CloudTrail.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -11,6 +11,7 @@ Metadata:
           - AdditionalFilters
           - CloudTrailInsights
           - IsAlreadyCreatedByControlTower
+          - S3Trail
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -18,12 +19,16 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - Environment
           - LogicalName
+          - Environment
           - TagKey
           - TagValue
 
 Parameters:
+  AccessLogBucketName:
+    Type: String
+    Default: ''
+    Description: The S3 log bucket Name [required]
   AdditionalFilters:
     Type: String
     Default: ''
@@ -42,10 +47,6 @@ Parameters:
       - true
       - false
     Description: Already created by Control Tower [required]
-  AccessLogBucketName:
-    Type: String
-    Default: ''
-    Description: The S3 log bucket Name [required]
   S3Trail:
     Type: String
     Default: ENABLED
@@ -53,14 +54,14 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable CloudTrail S3 trail [required]
+  SnsTopicARN:
+    Type: String
+    AllowedPattern: .+
   LogicalName:
     Type: String
     Default: DefaultSecuritySettings
     AllowedPattern: .+
     Description: The custom prefix name [required]
-  SnsTopicARN:
-    Type: String
-    AllowedPattern: .+
   Environment:
     Type: String
     Default: production
@@ -375,74 +376,6 @@ Resources:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: ForRootAcount
-      Namespace: LogMetrics
-      Period: 60
-      Statistic: Maximum
-      Threshold: 1
-      TreatMissingData: notBreaching
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  # CIS 3.4 a log metric filter and alarm exist for IAM policy changes 
-  CloudWatchLogsMetricFilterCloudTrailIamPolicyChanges:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      FilterPattern: '{($.eventName=DeleteGroupPolicy) || ($.eventName=DeleteRolePolicy) || ($.eventName=DeleteUserPolicy) || ($.eventName=PutGroupPolicy) || ($.eventName=PutRolePolicy) || ($.eventName=PutUserPolicy) || ($.eventName=CreatePolicy) || ($.eventName=DeletePolicy) || ($.eventName=CreatePolicyVersion) || ($.eventName=DeletePolicyVersion) || ($.eventName=AttachRolePolicy) || ($.eventName=DetachRolePolicy) || ($.eventName=AttachUserPolicy) || ($.eventName=DetachUserPolicy) || ($.eventName=AttachGroupPolicy) || ($.eventName=DetachGroupPolicy)}'
-      LogGroupName: !If
-        - IsCreatedByControlTower
-        - aws-controltower/CloudTrailLogs
-        - !Ref CloudWatchLogsGroupForCloudTrail
-      MetricTransformations:
-        - MetricName: IamPolicyChanges 
-          MetricNamespace: LogMetrics
-          MetricValue: '1'
-  CloudWatchAlarmMetricFilterCloudTrailIamPolicyChanges:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !Ref SnsTopicARN
-      AlarmDescription: '*CloudTrail* が *IAMポリシーの変更を検知* しました。'
-      AlarmName: !Sub Warning-${LogicalName}-CloudTrail-IamPolicy-Changes
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      EvaluationPeriods: 1
-      MetricName: IamPolicyChanges
-      Namespace: LogMetrics
-      Period: 60
-      Statistic: Maximum
-      Threshold: 1
-      TreatMissingData: notBreaching
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  # CIS 3.5 a log metric filter and alarm exist for CloudTrail configuration changes 
-  CloudWatchLogsMetricFilterCloudTrailCloudTrailConfigurationChanges:
-    Type: AWS::Logs::MetricFilter
-    Properties:
-      FilterPattern: '{($.eventName=CreateTrail) || ($.eventName=UpdateTrail) || ($.eventName=DeleteTrail) || ($.eventName=StartLogging) || ($.eventName=StopLogging)}'
-      LogGroupName: !If
-        - IsCreatedByControlTower
-        - aws-controltower/CloudTrailLogs
-        - !Ref CloudWatchLogsGroupForCloudTrail
-      MetricTransformations:
-        - MetricName: CloudTrailConfigurationChanges 
-          MetricNamespace: LogMetrics
-          MetricValue: '1'
-  CloudWatchAlarmMetricFilterCloudTrailCloudTrailConfigurationChanges:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !Ref SnsTopicARN
-      AlarmDescription: '*CloudTrail* が *CloudTrailの設定変更を検知* しました。'
-      AlarmName: !Sub Warning-${LogicalName}-CloudTrail-CloudTrailConfiguration-Changes
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      EvaluationPeriods: 1
-      MetricName: CloudTrailConfigurationChanges
       Namespace: LogMetrics
       Period: 60
       Statistic: Maximum

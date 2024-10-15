@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/network builds an egress VPC.
+Description: AWSCloudFormationTemplates/network/egress builds an egress VPC.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -8,8 +8,7 @@ Metadata:
       - Label: 
           default: 'VPC Configuration'
         Parameters: 
-          - ResolverInboundRuleId
-          - ResolverOutboundRuleId
+          - VPCCidrBlock
           - SubnetPublicCidrBlockForAz1
           - SubnetTransitCidrBlockForAz1
           - SubnetFirewallCidrBlockForAz1
@@ -19,13 +18,19 @@ Metadata:
           - SubnetPublicCidrBlockForAz3
           - SubnetTransitCidrBlockForAz3
           - SubnetFirewallCidrBlockForAz3
-          - VPCCidrBlock
+          - ResolverInboundRuleId
+          - ResolverOutboundRuleId
+      - Label: 
+          default: 'Network Firewall Configuration'
+        Parameters: 
+          - HomeNetworkCidr
+          - CentralizedLogBucketName
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
+          - TransitGatewayId   
           - TransitGatewayDefaultRouteTableId
           - TransitGatewayDestinationCidrBlock
-          - TransitGatewayId   
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -40,6 +45,14 @@ Metadata:
           - TagValue
 
 Parameters:
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
+  HomeNetworkCidr:
+    Type: String
+    Default: ''
+    Description: The CIDR of your home network 
   ResolverInboundRuleId:
     Type: String
     Default: ''
@@ -272,6 +285,8 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
+        CentralizedLogBucketName: !Ref CentralizedLogBucketName
+        HomeNetworkCidr: !Ref HomeNetworkCidr
         SubnetIdAz1: !GetAtt Az1.Outputs.FirewallSubnetId
         SubnetIdAz2: !GetAtt Az2.Outputs.FirewallSubnetId
         SubnetIdAz3: !GetAtt Az3.Outputs.FirewallSubnetId

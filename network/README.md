@@ -58,7 +58,7 @@ You can provide optional parameters as follows:
 | DomainName | String | | | The name of the domain |
 | FirewallCidrBlockForEgressAz1 | String | 10.0.0.128/26 | | The firewall subnet CIDR block for Egress at AZ1 |
 | FirewallCidrBlockForEgressAz2 | String | 10.0.4.128/26 | | The firewall subnet CIDR block for Egress at AZ2 | 
-| IPAMProvisionedCidrs | String | 10.0.0.0/8 | ○ | The CIDR provisioned to the IPAM pool | 
+| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network  | 
 | OnpremDnsIp | String | | | One IPv4 address that you want to forward DNS queries to |
 | PrincipalsToAssociateWithIPAM | String | | | Specifies a list of one or more principals to associate with IPAM | 
 | PrincipalsToAssociateWithRoute53ResolverRule | String | | | Specifies a list of one or more principals to associate with Route 53 Resolver Rule | 
@@ -141,7 +141,7 @@ This template configures ``IP Address Manager (IPAM)``.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | PrincipalsToAssociateWithIPAM | String | | | Specifies a list of one or more principals to associate with IPAM |
-| ProvisionedCidrs | String | 10.0.0.0/8 | ○ | The CIDR provisioned to the IPAM pool |
+| ProvisionedCidrs | String | 10.0.0.0/8 | ○ | The CIDR of your home network  |
 
 ### Network Firewall
 

@@ -50,7 +50,7 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 | [Shared Service Template](../shared/README_JP.md) | SharedServices.json |
 | [Security Template](../security/README.md) | DefaultSecuritySettings.json |
 | [Security Template with Config Rule](../security-config-rules/README.md) | DefaultSecuritySettings-ConfigRules.json |
-| [Static Website Hosting Template](../static-website-hosting-with-ssl/README.md) | StaticWebsiteHosting.json |
+| [Static Website Hosting Template](../static-website-hosting/README.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](../web-servers/README.md) | WebServers.json |
 
 ## Deployment

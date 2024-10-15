@@ -31,10 +31,6 @@ Parameters:
       - ORGANIZATION
       - NOTIFICATION_ONLY
     Description: The type represents the zone of trust for the analyzer [required]
-  LogicalName:
-    Type: String
-    Default: DefaultSecuritySettings
-    Description: The custom prefix name [required]
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -43,6 +39,10 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: DefaultSecuritySettings
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

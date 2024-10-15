@@ -7,11 +7,16 @@ Metadata:
     ParameterGroups: 
       - Label: 
           default: 'AvailabilityZone Configuration'
-        Parameters: 
+        Parameters:
+          - VPCId 
           - SubnetIdAz1
           - SubnetIdAz2
           - SubnetIdAz3
-          - VPCId
+      - Label: 
+          default: 'Network Firewall Configuration'
+        Parameters: 
+          - HomeNetworkCidr
+          - CentralizedLogBucketName
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -20,6 +25,14 @@ Metadata:
           - TagValue
 
 Parameters:
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
+  HomeNetworkCidr:
+    Type: String
+    Default: ''
+    Description: The CIDRs of your home network 
   SubnetIdAz1:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id at AZ1 [required]
@@ -52,8 +65,10 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateLoggingConfiguration: !Not [ !Equals [ !Ref CentralizedLogBucketName, '']]
   CreateSubnetAz2: !Not [ !Equals [ !Ref SubnetIdAz2, ''] ]
   CreateSubnetAz3: !Not [ !Equals [ !Ref SubnetIdAz3, ''] ]
+  OverrideHomeNetworkCidr: !Not [ !Equals [ !Ref HomeNetworkCidr, ''] ]
 
 Resources:
   NetworkFirewall:
@@ -86,65 +101,50 @@ Resources:
     Properties: 
       Description: Network Firewall policy for Egress VPC
       FirewallPolicy: 
-        StatelessDefaultActions:
-          - 'aws:pass'
-        StatelessFragmentDefaultActions:
-          - 'aws:drop'
+        PolicyVariables: !If
+          - OverrideHomeNetworkCidr
+          - RuleVariables: 
+              HOME_NET:
+                Definition:
+                  - !Ref HomeNetworkCidr
+          - !Ref AWS::NoValue
+        StatefulDefaultActions:
+         - aws:drop_established
+        StatefulEngineOptions: 
+          RuleOrder: STRICT_ORDER  
         StatefulRuleGroupReferences:
-          - ResourceArn: !Ref NetworkFirewallPolicyStatefullGroup
-        StatelessRuleGroupReferences:
-          - ResourceArn: !Ref NetworkFirewallPolicyStatelessGroup
-            Priority: 100
+          - Priority: 1
+            ResourceArn: !Sub arn:aws:network-firewall:${AWS::Region}:aws-managed:stateful-rulegroup/ThreatSignaturesBotnetStrictOrder
+          - Priority: 2
+            ResourceArn: !Sub arn:aws:network-firewall:${AWS::Region}:aws-managed:stateful-rulegroup/MalwareDomainsStrictOrder
+          - Priority: 3
+            ResourceArn: !Sub arn:aws:network-firewall:${AWS::Region}:aws-managed:stateful-rulegroup/AbusedLegitMalwareDomainsStrictOrder
+          - Priority: 4
+            ResourceArn: !Sub arn:aws:network-firewall:${AWS::Region}:aws-managed:stateful-rulegroup/AbusedLegitBotNetCommandAndControlDomainsStrictOrder
+          - Priority: 5
+            ResourceArn: !Sub arn:aws:network-firewall:${AWS::Region}:aws-managed:stateful-rulegroup/ThreatSignaturesMalwareCoinminingStrictOrder
+        StatelessDefaultActions:
+          - aws:forward_to_sfe
+        StatelessFragmentDefaultActions:
+          - aws:pass
       FirewallPolicyName: Default
       Tags: 
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  NetworkFirewallPolicyStatefullGroup:
-    Type: AWS::NetworkFirewall::RuleGroup
-    Properties: 
-      Capacity: 100
-      Description: Network Firewall rule group for Egress VPC
-      RuleGroup: 
-        RulesSource:
-          RulesString: >-
-            pass tcp 10.20.20.0/24 45400:45500 <> 10.10.10.0/24 5203
-            (msg:"test";sid:1;rev:1;)
-        StatefulRuleOptions:
-          RuleOrder: STRICT_ORDER
-      RuleGroupName: StatefullDefault
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      Type: STATEFUL
-  NetworkFirewallPolicyStatelessGroup:
-    Type: AWS::NetworkFirewall::RuleGroup
-    Properties: 
-      Capacity: 100
-      Description: Network Firewall rule group for Egress VPC
-      RuleGroup: 
-        RulesSource:
-          StatelessRulesAndCustomActions:
-            StatelessRules:
-              - RuleDefinition:
-                  MatchAttributes:
-                    Sources:
-                      - AddressDefinition: 0.0.0.0/0
-                    Destinations:
-                      - AddressDefinition: 0.0.0.0/0
-                  Actions:
-                    - 'aws:pass'
-                Priority: 1
-      RuleGroupName: StatelessDefault
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      Type: STATELESS
+  NetworkFirewallLoggingConfiguration:
+    Condition: CreateLoggingConfiguration
+    Type: AWS::NetworkFirewall::LoggingConfiguration
+    Properties:
+      FirewallArn: !Ref NetworkFirewall
+      FirewallName: Default
+      LoggingConfiguration: 
+        LogDestinationConfigs: 
+          - LogDestination: 
+              bucketName: !Ref CentralizedLogBucketName
+            LogDestinationType: S3
+            LogType: ALERT
 
 Outputs:
   EndpointIds:

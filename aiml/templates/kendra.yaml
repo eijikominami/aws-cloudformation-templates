@@ -18,12 +18,6 @@ Metadata:
           - S3Crawler
           - S3BucketName
       - Label: 
-          default: 'Slack Configuration'
-        Parameters: 
-          - SlackCrawler
-          - SlackWorkspaceId
-          - SlackToken
-      - Label: 
           default: 'Web Crawler Configuration'
         Parameters: 
           - WebCrawler
@@ -73,22 +67,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The name of the Amazon S3 bucket
-  SlackCrawler:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable Slack crawler [required]
-  SlackToken:
-    Type: String
-    Default: ''
-    NoEcho: true
-    Description: The user or bot token created in Slack
-  SlackWorkspaceId:
-    Type: String
-    Default: ''
-    Description: Slack Workspace Name
   WebCrawler:
     Type: String
     Default: DISABLED
@@ -127,7 +105,6 @@ Conditions:
   UpdateWeekly: !Equals [ !Ref KendraSyncRunSchedule, WEEKLY]
   UpdateMonthly: !Equals [ !Ref KendraSyncRunSchedule, MONTHLY]
   CreateS3Datasource: !And [ !Equals [ !Ref S3Crawler, ENABLED], !Not [ !Equals [ !Ref S3BucketName, ''] ] ]
-  CreateSlackDatasource: !And [ !Equals [ !Ref SlackCrawler, ENABLED], !Not [ !Equals [ !Ref SlackToken, ''] ] , !Not [ !Equals [ !Ref SlackWorkspaceId, ''] ] ]
   CreateWebCrawlerDatasource: !Equals [ !Ref WebCrawler, ENABLED]
   CreateFaq: !Not [ !Equals [ !Ref KendraFaqS3Key, ''] ]
 
@@ -264,45 +241,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  IAMRoleForKendraSlack:
-    Condition: CreateSlackDatasource
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: kendra.amazonaws.com
-            Action: sts:AssumeRole
-      Description: A role required for Slack crawler to access SecretsManager.
-      Policies:
-        - PolicyName: SecretsManager
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                Resource: !Ref SecretsManagerForSlack
-        - PolicyName: KMS
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - kms:Decrypt
-                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
-                Condition:
-                  StringLike:
-                    kms:ViaService:
-                      - secretsmanager.*.amazonaws.com
-      RoleName: !Sub ${AWS::StackName}-KendraSlackCrawler-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   IAMRoleForKendraWebCrawler:
     Condition: CreateWebCrawlerDatasource
     Type: AWS::IAM::Role
@@ -353,19 +291,6 @@ Resources:
                 Resource: !Sub arn:aws:s3:::${S3BucketName}/*
       RoleName: !Sub ${AWS::StackName}-KendraFAQ-${AWS::Region}
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  # Secret Manager
-  SecretsManagerForSlack:
-    Condition: CreateSlackDatasource
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Name: !Sub ${AWS::StackName}/SlackToken
-      SecretString: 
-        !Sub slackToken/${SlackToken}
-      Tags: 
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey

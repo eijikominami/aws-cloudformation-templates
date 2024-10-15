@@ -26,7 +26,6 @@ Metadata:
           - Cpu
           - CpuArchitecture
           - DesiredCapacity
-          - DomainName
           - Memory
           - SecurityGroupId
           - PublicSubnetId1
@@ -44,12 +43,14 @@ Metadata:
           - DomainName
           - Route53HostedZoneId
       - Label: 
-          default: 'Notification Configuration'
+          default: 'Logging Configuration'
         Parameters: 
-          - CodeStarConnectionArn
+          - Logging
+          - LogBucketName
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - CodeStarConnectionArn
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -121,16 +122,27 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The GitHub repository name [required]
-  GitHubBranchNameForBuildSpec:
-    Type: String
-    Default: master
-    AllowedPattern: .+
-    Description: The Branch name of GitHub For BuildSpec [required]
   GitHubBranchName:
     Type: String
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
+  GitHubBranchNameForBuildSpec:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub For BuildSpec [required]
+  LogBucketName:
+    Type: String
+    Default: ''
+    Description: The custom S3 bucket name for access logging [conditional]
+  Logging:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable logging [required]
   Memory:
     Type: String
     Default: 3072
@@ -713,7 +725,7 @@ Resources:
                 TemplatePath: BuildArtifact_SAM::packaged.yaml
                 ParameterOverrides: !Join
                   - ''
-                  - - !Sub '{"ACMValidationMethod": "${ACMValidationMethod}", "ACMDomainName": "${ACMDomainName}", "AppPort": "${AppPort}", "AutoScalingMaxSize": "${AutoScalingMaxSize}", "Cpu": "${Cpu}", "CpuArchitecture": "${CpuArchitecture}", "DesiredCapacity": "${DesiredCapacity}", "DomainName": "${DomainName}", "ImageUri": "#{BuildContainerVariables.IMAGE_URI}", "Memory": "${Memory}", "SecurityGroupId": "${SecurityGroupId}", "PublicSubnetId1": "${PublicSubnetId1}", "PublicSubnetId2": "${PublicSubnetId2}", "PublicSubnetId3": "${PublicSubnetId3}", "PrivateSubnetId1": "${PrivateSubnetId1}", "PrivateSubnetId2": "${PrivateSubnetId2}", "PrivateSubnetId3": "${PrivateSubnetId3}", "VPCId": "${VPCId}", "Environment": "${Environment}", "Route53HostedZoneId": "${Route53HostedZoneId}", "LogicalName": "${LogicalName}", "TagKey": "${TagKey}", "TagValue": "${TagValue}", "SNSForAlertArn": "'
+                  - - !Sub '{"ACMValidationMethod": "${ACMValidationMethod}", "ACMDomainName": "${ACMDomainName}", "AppPort": "${AppPort}", "AutoScalingMaxSize": "${AutoScalingMaxSize}", "Cpu": "${Cpu}", "CpuArchitecture": "${CpuArchitecture}", "DesiredCapacity": "${DesiredCapacity}", "DomainName": "${DomainName}", "ImageUri": "#{BuildContainerVariables.IMAGE_URI}", "LogBucketName": "${LogBucketName}", "Logging": "${Logging}", "Memory": "${Memory}", "SecurityGroupId": "${SecurityGroupId}", "PublicSubnetId1": "${PublicSubnetId1}", "PublicSubnetId2": "${PublicSubnetId2}", "PublicSubnetId3": "${PublicSubnetId3}", "PrivateSubnetId1": "${PrivateSubnetId1}", "PrivateSubnetId2": "${PrivateSubnetId2}", "PrivateSubnetId3": "${PrivateSubnetId3}", "VPCId": "${VPCId}", "Environment": "${Environment}", "Route53HostedZoneId": "${Route53HostedZoneId}", "LogicalName": "${LogicalName}", "TagKey": "${TagKey}", "TagValue": "${TagValue}", "SNSForAlertArn": "'
                     - !If
                       - CreateSNSForAlert
                       - !GetAtt SNSForAlert.Outputs.SNSTopicArn

@@ -32,6 +32,7 @@ Metadata:
       - Label: 
           default: 'CloudFront Realtime Dashboard Configuration'
         Parameters: 
+          - RealtimeDashboardState
           - RealtimeDashboardElasticSearchVolumeSize
           - RealtimeDashboardElasticSearchInstanceType
           - RealtimeDashboardElasticSearchMasterType
@@ -40,7 +41,6 @@ Metadata:
           - RealtimeDashboardElasticSearchLifetime
           - RealtimeDashboardElasticsearchVersion
           - RealtimeDashboardKinesisFirehoseStreamNameSuffix
-          - RealtimeDashboardState
           - RealtimeDashboardSamplingRate
           - RealtimeDashboardKinesisShardCount
           - RealtimeKinesisNumberOfPutRecordThreshold
@@ -70,10 +70,6 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to CloudFront
-  DomainName:
-    Type: String
-    Default: ''
-    Description: The CNAME attached to CloudFront [conditional]
   CloudFrontAdditionalMetrics:
     Type: String
     Default: DISABLED
@@ -158,6 +154,21 @@ Parameters:
     Type: String
     Default: ''
     Description: The path to the 500 custom error page
+  DomainName:
+    Type: String
+    Default: ''
+    Description: The CNAME attached to CloudFront [conditional]
+  Logging:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable logging [required]
+  LogBucketName:
+    Type: String
+    Default: ''
+    Description: The custom S3 bucket name for access logging [conditional]
   RealtimeDashboardElasticSearchVolumeSize:
     Type: Number
     Default: 10
@@ -173,11 +184,6 @@ Parameters:
     Default: r5.large.search
     AllowedPattern: .+
     Description: The master type of OpenSearch Service [required]
-  RealtimeDashboardElasticSearchLifetime:
-    Type: Number
-    Default: 1
-    MinValue: 0
-    Description: The lifetime (hour) of OpenSearch Service [required]
   RealtimeDashboardElasticSearchMasterUserName:
     Type: String
     Default: root
@@ -189,6 +195,11 @@ Parameters:
     AllowedPattern: .+
     NoEcho: true
     Description: The password of OpenSearch Service [required]
+  RealtimeDashboardElasticSearchLifetime:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: The lifetime (hour) of OpenSearch Service [required]
   RealtimeDashboardElasticsearchVersion:
     Type: String
     Default: OpenSearch_2.13
@@ -230,17 +241,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The secret key that 'User-Agent' header contains  
-  Logging:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable logging [required]
-  LogBucketName:
-    Type: String
-    Default: ''
-    Description: The custom S3 bucket name for access logging [conditional]
   WebACLArn:
     Type: String
     Default: '' 
