@@ -438,7 +438,7 @@ Resources:
         EnvironmentVariables:
           - Name: REPOSITORY_URI
             Type: PLAINTEXT
-            Value: public.ecr.aws/eiji/aws-for-fluent-bit
+            Value: public.ecr.aws/eijikominami/aws-for-fluent-bit
           - Name: BASE_DIR
             Type: PLAINTEXT
             Value: shared/aws-for-fluent-bit

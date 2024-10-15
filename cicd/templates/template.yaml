@@ -667,7 +667,7 @@ Resources:
                 Version: '1'                 
               Configuration:
                 ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
-                FullRepositoryId: eiji/aws-cloudformation-templates
+                FullRepositoryId: eijikominami/aws-cloudformation-templates
                 BranchName: !Ref GitHubBranchName
               Name: AWSCloudFormationTemplates
               OutputArtifacts: 
