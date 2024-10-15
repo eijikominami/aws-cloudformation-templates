@@ -768,7 +768,7 @@ Resources:
         GitHubBranchName: !Ref GitHubBranchNameForArtifact
         GitHubBranchNameForBuildSpec: !Ref GitHubBranchNameForBuildSpec
         Logging: !Ref Logging
-        LogBucketName: !REf LogBucketName
+        LogBucketName: !Ref CentralizedLogBucketName
         Memory: 3072
         PublicSubnetId1: !GetAtt Az1.Outputs.PublicSubnetId
         PublicSubnetId2: !GetAtt Az2.Outputs.PublicSubnetId
