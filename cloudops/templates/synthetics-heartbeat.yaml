@@ -30,6 +30,14 @@ Metadata:
           - TagValue
 
 Parameters:
+  CanaryName:
+    Type: String
+    AllowedPattern: ^[0-9a-z_\-]{1,21}$
+    Description: CloudWatch Synthetics Canary Name [required]
+  DomainName:
+    Type: String
+    AllowedPattern: .+
+    Description: The watched domain name [required]
   IncidentManagerArn:
     Type: String
     Default: ''
@@ -45,14 +53,6 @@ Parameters:
     MinValue: 0
     MaxValue: 100
     Description: The threshold of success percent starting an incident [required]
-  CanaryName:
-    Type: String
-    AllowedPattern: ^[0-9a-z_\-]{1,21}$
-    Description: CloudWatch Synthetics Canary Name [required]
-  DomainName:
-    Type: String
-    AllowedPattern: .+
-    Description: The watched domain name [required]
   WatchedPagePath:
     Type: String
     Default: /index.html

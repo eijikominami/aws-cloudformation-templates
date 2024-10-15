@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/security/CloudTrail sets AWS CloudTrail.
+Description: AWSCloudFormationTemplates/security/cloudtrail sets AWS CloudTrail.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -11,6 +11,7 @@ Metadata:
           - AdditionalFilters
           - CloudTrailInsights
           - IsAlreadyCreatedByControlTower
+          - S3Trail
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -18,12 +19,16 @@ Metadata:
       - Label: 
           default: 'Tag Configuration'
         Parameters:
-          - Environment
           - LogicalName
+          - Environment
           - TagKey
           - TagValue
 
 Parameters:
+  AccessLogBucketName:
+    Type: String
+    Default: ''
+    Description: The S3 log bucket Name [required]
   AdditionalFilters:
     Type: String
     Default: ''
@@ -42,10 +47,6 @@ Parameters:
       - true
       - false
     Description: Already created by Control Tower [required]
-  AccessLogBucketName:
-    Type: String
-    Default: ''
-    Description: The S3 log bucket Name [required]
   S3Trail:
     Type: String
     Default: ENABLED
@@ -53,14 +54,14 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable CloudTrail S3 trail [required]
+  SnsTopicARN:
+    Type: String
+    AllowedPattern: .+
   LogicalName:
     Type: String
     Default: DefaultSecuritySettings
     AllowedPattern: .+
     Description: The custom prefix name [required]
-  SnsTopicARN:
-    Type: String
-    AllowedPattern: .+
   Environment:
     Type: String
     Default: production

@@ -103,23 +103,18 @@ Parameters:
     Default: 8
     MinValue: 8
     Description: EC2 Volume Size [required]
-  EipAllocationId1ForNLB:     
+  EipAllocationId1ForNLB:   
     Type: String 
     Default: ''
     Description: The Elastic Ip Allocation Id1 for Network LoadBalancer
-  EipAllocationId2ForNLB:     
+  EipAllocationId2ForNLB:    
     Type: String 
     Default: ''
     Description: The Elastic Ip Allocation Id2 for Network LoadBalancer
-  EipAllocationId3ForNLB:     
+  EipAllocationId3ForNLB:  
     Type: String 
     Default: ''
     Description: The Elastic Ip Allocation Id3 for Network LoadBalancer
-  LogicalName:
-    Type: String
-    Default: WebServers
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   LogBucketName:
     Type: String
     Default: ''
@@ -176,6 +171,11 @@ Parameters:
     Type: AWS::EC2::VPC::Id
     AllowedPattern: .+
     Description: VPC Id [required]
+  LogicalName:
+    Type: String
+    Default: WebServers
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

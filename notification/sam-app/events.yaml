@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/notification/eventbridge creates Amazon EventBridge to support events from AWS Services.
+Description: AWSCloudFormationTemplates/notification/events creates Amazon EventBridge to support events from AWS Services.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -8,8 +8,8 @@ Metadata:
       - Label: 
           default: 'EventBridge Configuration'
         Parameters:
-          - AutoScalingEventsRule
           - AppFlow
+          - AutoScalingEventsRule
           - CertificateManager
           - EBSEventsRule
           - EC2EventsRule
@@ -34,11 +34,6 @@ Metadata:
           - LogicalName
 
 Parameters:
-  LogicalName:
-    Type: String
-    Default: Notification-
-    AllowedPattern: .+
-    Description: Custom prefix name [required]
   AppFlow:
     Type: String
     Default: ENABLED
@@ -146,6 +141,11 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable the events rule about Trusted Advisor [required]
+  LogicalName:
+    Type: String
+    Default: Notification-
+    AllowedPattern: .+
+    Description: Custom prefix name [required]
   SNSForAlertArn:
     Type: String
     Default: ''

@@ -18,6 +18,8 @@ Metadata:
           - FirewallCidrBlockForEgressAz1
           - FirewallCidrBlockForEgressAz2
           - FirewallCidrBlockForEgressAz3
+          - TransitGatewayDestinationCidrBlock
+          - TransitGatewayDefaultRouteTableId
       - Label: 
           default: 'DNS Configuration'
         Parameters: 
@@ -43,6 +45,7 @@ Metadata:
           - DnsIpAz2
           - DnsIpAz3
           - DomainName
+          - OnpremDnsIp
       - Label: 
           default: 'Organizations Configuration'
         Parameters: 

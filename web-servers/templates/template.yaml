@@ -34,11 +34,11 @@ Metadata:
           - CloudFront403ErrorResponsePagePath
           - CloudFront404ErrorResponsePagePath
           - CloudFront500ErrorResponsePagePath
-          - DomainName
           - GlobalInfrastructure
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
+          - VPCCidrBlock
           - SubnetPublicCidrBlockForAz1
           - SubnetPrivateCidrBlockForAz1
           - SubnetTransitCidrBlockAz1
@@ -47,8 +47,7 @@ Metadata:
           - SubnetTransitCidrBlockAz2
           - SubnetPublicCidrBlockForAz3
           - SubnetPrivateCidrBlockForAz3
-          - SubnetTransitCidrBlockAz3
-          - VPCCidrBlock     
+          - SubnetTransitCidrBlockAz3   
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
@@ -83,8 +82,8 @@ Metadata:
           - GitHubOwnerNameForArtifact
           - GitHubRepoNameForArtifact
           - GitHubBranchNameForArtifact
-          - DockerFilePath
           - GitHubBranchNameForBuildSpec
+          - DockerFilePath
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -113,6 +112,19 @@ Parameters:
     Type: String
     Default: ''
     Description: The domain name created by Certification Manager
+  AutoScalingMaxSize:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Max Size [conditional]
+  AutoScalingLoadBalancerType:
+    Type: String
+    Default: None
+    AllowedValues:
+      - None
+      - application
+      - network  
+    Description: The autoScaling LoadBalancer Type [conditional]
   BucketNameForAnalysis:
     Type: String
     Default: ''
@@ -121,6 +133,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The bucket name artifact art stored
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging 
   CertificateManagerARN:
     Default: ''
     Type: String
@@ -137,50 +153,6 @@ Parameters:
       - CONTAINER
       - APPRUNNER
     Description: The category of computing platform [recuired]
-  DesiredCapacity:
-    Type: Number
-    Default: 1
-    MinValue: 0
-    Description: AutoScaling Desired Capacity [conditional]
-  DockerFilePath:
-    Type: String
-    Default: ''
-    Description: The path of Dockerfile
-  GitHubOwnerNameForArtifact:
-    Type: String
-    Default: '' 
-    Description: The GitHub owner name
-  GitHubRepoNameForArtifact:
-    Type: String
-    Default: '' 
-    Description: The GitHub repository name
-  GitHubBranchNameForArtifact:
-    Type: String
-    Default: master
-    AllowedPattern: .+
-    Description: The Branch name of GitHub
-  GitHubBranchNameForBuildSpec:
-    Type: String
-    Default: master
-    AllowedPattern: .+
-    Description: The Branch name of GitHub For BuildSpec
-  AutoScalingMaxSize:
-    Type: Number
-    Default: 1
-    MinValue: 0
-    Description: AutoScaling Max Size [conditional]
-  AutoScalingLoadBalancerType:
-    Type: String
-    Default: None
-    AllowedValues:
-      - None
-      - application
-      - network  
-    Description: The autoScaling LoadBalancer Type [conditional]
-  CentralizedLogBucketName:
-    Type: String
-    Default: ''
-    Description: The centralize S3 bucket name for logging 
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -236,6 +208,15 @@ Parameters:
     Type: String
     Default: ''
     Description: The path to the 500 custom error page
+  DesiredCapacity:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: AutoScaling Desired Capacity [conditional]
+  DockerFilePath:
+    Type: String
+    Default: ''
+    Description: The path of Dockerfile
   DomainName:
     Type: String
     Default: ''
@@ -262,6 +243,24 @@ Parameters:
     Default: 8
     MinValue: 8
     Description: EC2 Volume Size [conditional]
+  GitHubOwnerNameForArtifact:
+    Type: String
+    Default: '' 
+    Description: The GitHub owner name
+  GitHubRepoNameForArtifact:
+    Type: String
+    Default: '' 
+    Description: The GitHub repository name
+  GitHubBranchNameForArtifact:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub
+  GitHubBranchNameForBuildSpec:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub For BuildSpec
   GlobalInfrastructure:
     Type: String
     Default: NONE
@@ -1254,8 +1253,6 @@ Resources:
       GroupDescription: Security Group for Web Server
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
@@ -1289,16 +1286,10 @@ Resources:
       GroupDescription: Security Group for VPC Endpoints
       SecurityGroupEgress:
         - CidrIp: !Ref SubnetPrivateCidrBlockForAz1
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
         - CidrIp: !Ref SubnetPrivateCidrBlockForAz2
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
         - CidrIp: !Ref SubnetPrivateCidrBlockForAz3
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
       SecurityGroupIngress:
         - CidrIp: !Ref SubnetPrivateCidrBlockForAz1

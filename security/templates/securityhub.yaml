@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: 
   - AWS::LanguageExtensions
   - AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/security/SecurityHub sets AWS Security Hub.
+Description: AWSCloudFormationTemplates/security/securityhub sets AWS Security Hub.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -10,10 +10,10 @@ Metadata:
       - Label: 
           default: 'Security Hub Configuration'
         Parameters:
-          - DelegatedAdminAccountId
-          - OrganizationsRootId
           - SecurityHubType
           - SecurityHubStandards
+          - DelegatedAdminAccountId
+          - OrganizationsRootId
       - Label: 
           default: 'Notification Configuration'
         Parameters:
@@ -32,10 +32,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The AWS account identifier of the account to designate as the security account
-  LogicalName:
-    Type: String
-    Default: DefaultSecuritySettings
-    Description: The custom prefix name [required]
   OrganizationsRootId:
     Type: String
     Default: ''
@@ -70,6 +66,10 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: DefaultSecuritySettings
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

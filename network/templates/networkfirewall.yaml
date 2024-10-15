@@ -7,11 +7,11 @@ Metadata:
     ParameterGroups: 
       - Label: 
           default: 'AvailabilityZone Configuration'
-        Parameters: 
+        Parameters:
+          - VPCId 
           - SubnetIdAz1
           - SubnetIdAz2
           - SubnetIdAz3
-          - VPCId
       - Label: 
           default: 'Network Firewall Configuration'
         Parameters: 

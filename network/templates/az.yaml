@@ -8,15 +8,15 @@ Metadata:
       - Label: 
           default: 'AvailabilityZone Configuration'
         Parameters: 
+          - VPCId
           - AvailabilityZone
-          - InternetGatewayId
-          - NetworkAddressTranslation
-          - NetworkLoadBalancer
           - SubnetPublicCidrBlock
           - SubnetPrivateCidrBlock
           - SubnetTransitCidrBlock
           - SubnetFirewallCidrBlock
-          - VPCId
+          - InternetGatewayId
+          - NetworkAddressTranslation
+          - NetworkLoadBalancer
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -26,6 +26,7 @@ Metadata:
           default: 'Tag Configuration'
         Parameters:
           - LogicalName
+          - Environment
           - TagKey
           - TagValue
 

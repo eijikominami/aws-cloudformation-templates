@@ -104,9 +104,6 @@ Parameters:
     Type: Number
     Default: 10
     Description: The dollar value that triggers a notification if the threshold is exceeded [required]
-  SNSForAlertArn:
-    Type: String
-    Default: '' 
   WebACL:
     Type: String
     Default: DISABLED
@@ -114,6 +111,9 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable WebACL [required]
+  SNSForAlertArn:
+    Type: String
+    Default: '' 
   Environment:
     Type: String
     Default: production

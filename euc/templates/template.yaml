@@ -121,6 +121,18 @@ Parameters:
     Type: String
     Default: AppStream-WinServer2019-01-26-2024
     Description: The name of the image used to create the fleet [APPSTREAM]
+  ComputeTypeName:
+    Type: String
+    Default: PERFORMANCE
+    AllowedValues:
+      - GRAPHICS
+      - GRAPHICSPRO
+      - PERFORMANCE
+      - POWER
+      - POWERPRO
+      - STANDARD
+      - VALUE 
+    Description: The compute type [required]
   FSxDeploymentMode:
     Type: String
     Default: SINGLE_AZ_2
@@ -206,18 +218,6 @@ Parameters:
     Type: String
     Default: 0.0.0.0/0
     Description: The IPv4 CIDR block forward to TransitGateway
-  ComputeTypeName:
-    Type: String
-    Default: PERFORMANCE
-    AllowedValues:
-      - GRAPHICS
-      - GRAPHICSPRO
-      - PERFORMANCE
-      - POWER
-      - POWERPRO
-      - STANDARD
-      - VALUE 
-    Description: The compute type [required]
   VPCCidrBlock:
     Type: String
     Default: 10.2.8.0/21

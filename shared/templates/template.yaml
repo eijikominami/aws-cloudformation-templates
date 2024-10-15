@@ -11,15 +11,15 @@ Metadata:
           - ActiveDirectoryEdition
           - ActiveDirectoryEnableSso
           - ActiveDirectoryName
-          - ActiveDirectoryPassword
           - ActiveDirectoryShortName
+          - ActiveDirectoryPassword
           - ActiveDirectorySubnetCidrBlockForAz1
           - ActiveDirectorySubnetCidrBlockForAz2
           - ActiveDirectorySubnetCidrBlockForAz3
       - Label: 
           default: 'VPC Configuration'
         Parameters:
-          - ResolverRuleId
+          - VPCCidrBlock
           - SubnetPrivateCidrBlockAz1
           - SubnetPrivateCidrBlockAz2
           - SubnetPrivateCidrBlockAz3
@@ -28,7 +28,7 @@ Metadata:
           - SubnetTransitCidrBlockAz3
           - TransitGatewayId
           - TransitGatewayDestinationCidrBlock
-          - VPCCidrBlock
+          - ResolverRuleId
       - Label: 
           default: 'Route 53 Configuration'
         Parameters: 
@@ -700,20 +700,12 @@ Resources:
       GroupDescription: Security Group for VPC Endpoints
       SecurityGroupEgress:
         - CidrIp: !Ref ActiveDirectorySubnetCidrBlockForAz1
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
         - CidrIp: !Ref ActiveDirectorySubnetCidrBlockForAz2
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
         - CidrIp: !Ref SubnetPrivateCidrBlockAz1
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
         - CidrIp: !Ref SubnetPrivateCidrBlockAz2
-          FromPort: 0
-          ToPort: 0
           IpProtocol: '-1'
       SecurityGroupIngress:
         - CidrIp: !Ref ActiveDirectorySubnetCidrBlockForAz1

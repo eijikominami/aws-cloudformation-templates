@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/static-web-hosting/realtime-dashboard creates realtime dashboards for CloudFront logs.
+Description: AWSCloudFormationTemplates/edge/realtime-dashboard creates realtime dashboards for CloudFront logs.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -78,12 +78,6 @@ Parameters:
     Default: OpenSearch_2.13
     AllowedPattern: .+
     Description: The version of OpenSearch Service [required]
-  SamplingRate:
-    Type: Number
-    Default: 100
-    MinValue: 1
-    MaxValue: 100
-    Description: The sampling rate of logs sent by CloudFront [required]
   KinesisFirehoseStreamNameSuffix:
     Type: String
     Default: default
@@ -104,6 +98,12 @@ Parameters:
     Default: RealtimeDashboard
     AllowedPattern: .+
     Description: The custom prefix name [required]
+  SamplingRate:
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 100
+    Description: The sampling rate of logs sent by CloudFront [required]
   SNSForAlertArn:
     Type: String
     Default: '' 

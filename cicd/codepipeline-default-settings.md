@@ -40,7 +40,7 @@ If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFor
 | [Notification Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/notification/README.md) | Notification.json |
 | [Security Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security/README.md) | DefaultSecuritySettings.json |
 | [Security Template with Config Rule](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security-config-rules/README.md) | DefaultSecuritySettings-ConfigRules.json |
-| [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting-with-ssl/README.md) | StaticWebsiteHosting.json |
+| [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting/README.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README.md) | Notification.json |
 | [Systems Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README.md) | SystemsManager.json |
 
@@ -111,7 +111,7 @@ aws s3api create-bucket --bucket my-bucket --region us-east-1
 | [Notification Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/notification/README_JP.md) | Notification.json |
 | [Security Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security/README_JP.md) | DefaultSecuritySettings.json |
 | [Security Template with Config Rule](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/security-config-rules/README_JP.md) | DefaultSecuritySettings-ConfigRules.json |
-| [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting-with-ssl/README_JP.md) | StaticWebsiteHosting.json |
+| [Static Website Hosting Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/static-website-hosting/README_JP.md) | StaticWebsiteHosting.json |
 | [EC2-based Web Servers Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README_JP.md) | Notification.json |
 | [Systems Manager Template](https://github.com/eijikominami/aws-cloudformation-templates/tree/master/web-servers/README_JP.md) | SystemsManager.json |
 

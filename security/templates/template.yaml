@@ -51,9 +51,9 @@ Metadata:
       - Label:
           default: SecurityHub Configuration
         Parameters:
-          - IAMUserArnToAssumeAWSSupportRole
           - AWSSecurityHub
           - AWSSecurityHubStandards
+          - IAMUserArnToAssumeAWSSupportRole
       - Label:
           default: Notification Configuration
         Parameters:

@@ -30,10 +30,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable auto remediation [required]
-  LogicalName:
-    Type: String
-    Default: DefaultSecuritySettings
-    Description: The custom prefix name [required]
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -42,6 +38,10 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: DefaultSecuritySettings
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

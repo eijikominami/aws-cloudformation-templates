@@ -26,10 +26,10 @@ Metadata:
         Parameters: 
           - CloudOps
           - DefaultSecuritySettings
+          - Network
+          - Notification
           - SharedServices
           - StaticWebsiteHosting
-          - Notification
-          - Network
           - UploadArtifacts
           - WebServers
       - Label: 
@@ -667,7 +667,7 @@ Resources:
                 Version: '1'                 
               Configuration:
                 ConnectionArn: !GetAtt CodeStarConnection.ConnectionArn
-                FullRepositoryId: eijikominami/aws-cloudformation-templates
+                FullRepositoryId: eiji/aws-cloudformation-templates
                 BranchName: !Ref GitHubBranchName
               Name: AWSCloudFormationTemplates
               OutputArtifacts: 
@@ -1056,7 +1056,7 @@ Resources:
                   StackName: StaticWebsiteHosting
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source_CloudFormationTemplatesArtifact::static-website-hosting-with-ssl/templates/template.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::static-website-hosting/templates/template.yaml
                   ParameterOverrides: !If
                     - DeployGlobalSettings
                     - !Join

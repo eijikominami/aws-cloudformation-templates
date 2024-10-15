@@ -26,7 +26,6 @@ Metadata:
           - Cpu
           - CpuArchitecture
           - DesiredCapacity
-          - DomainName
           - Memory
           - SecurityGroupId
           - PublicSubnetId1
@@ -123,16 +122,16 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The GitHub repository name [required]
-  GitHubBranchNameForBuildSpec:
-    Type: String
-    Default: master
-    AllowedPattern: .+
-    Description: The Branch name of GitHub For BuildSpec [required]
   GitHubBranchName:
     Type: String
     Default: master
     AllowedPattern: .+
     Description: The Branch name of GitHub [required]
+  GitHubBranchNameForBuildSpec:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub For BuildSpec [required]
   LogBucketName:
     Type: String
     Default: ''

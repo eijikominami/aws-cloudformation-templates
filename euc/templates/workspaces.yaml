@@ -43,6 +43,10 @@ Parameters:
     Type: String
     Default: PERFORMANCE
     Description: The compute type
+  WorkspacesBundleId:
+    Type: String
+    Default: wsb-7jspy3qyc
+    Description: The identifier of the bundle for the WorkSpace [required]
   WorkspacesDeploy:
     Type: String
     Default: WORKSPACES
@@ -50,10 +54,6 @@ Parameters:
       - VPC_ONLY
       - WORKSPACES
     Description: The scope of the deploy. Amazon Workspaces can be built after you register a directory manually [required]
-  WorkspacesBundleId:
-    Type: String
-    Default: wsb-7jspy3qyc
-    Description: The identifier of the bundle for the WorkSpace [required]
   WorkspacesRootVolumeSizeGib:
     Type: Number
     Default: 80

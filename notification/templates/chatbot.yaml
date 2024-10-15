@@ -31,11 +31,6 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The IAM Role ARN for Chatbot [required]
-  LogicalName:
-    Type: String
-    Default: Default
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   SlackWorkspaceId:
     Type: String
     AllowedPattern: .+
@@ -47,6 +42,11 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS Topic ARN [required]
+  LogicalName:
+    Type: String
+    Default: Default
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production

@@ -95,34 +95,6 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to CloudFront
-  CloudWatchAppicationSignals:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable CloudFront additional metrics [required]
-  CodeStarConnectionArn:
-    Type: String
-    Default: ''
-    Description: The Amazon Resource Name (ARN) of the CodeStar connection
-  DomainName:
-    Type: String
-    AllowedPattern: .+
-    Description: The CNAME attached to CloudFront [required]
-  GitHubOwnerNameForWebsite:
-    Type: String
-    Default: '' 
-    Description: The GitHub owner name
-  GitHubRepoNameForWebsite:
-    Type: String
-    Default: '' 
-    Description: The GitHub repository name
-  GitHubBranchNameForWebsite:
-    Type: String
-    Default: master
-    AllowedPattern: .+
-    Description: The Branch name of GitHub
   CloudFrontAdditionalMetrics:
     Type: String
     Default: DISABLED
@@ -192,6 +164,41 @@ Parameters:
     Type: String
     Default: ''
     Description: The path to the 500 custom error page
+  CloudWatchAppicationSignals:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable CloudFront additional metrics [required]
+  CodeStarConnectionArn:
+    Type: String
+    Default: ''
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
+  DomainName:
+    Type: String
+    AllowedPattern: .+
+    Description: The CNAME attached to CloudFront [required]
+  GitHubOwnerNameForWebsite:
+    Type: String
+    Default: '' 
+    Description: The GitHub owner name
+  GitHubRepoNameForWebsite:
+    Type: String
+    Default: '' 
+    Description: The GitHub repository name
+  GitHubBranchNameForWebsite:
+    Type: String
+    Default: master
+    AllowedPattern: .+
+    Description: The Branch name of GitHub
+  Logging:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable logging [required]
   RealtimeDashboardElasticSearchVolumeSize:
     Type: Number
     Default: 10
@@ -268,13 +275,6 @@ Parameters:
     Type: String
     Default: ''
     Description: CloudWatch Synthetics Canary Name 
-  Logging:
-    Type: String
-    Default: ENABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable logging [required]
   WebACLArn:
     Type: String
     Default: '' 
@@ -461,8 +461,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/static-website-hosting-with-ssl/cicd.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/static-website-hosting-with-ssl/cicd.yaml
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/static-website-hosting/cicd.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/static-website-hosting/cicd.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

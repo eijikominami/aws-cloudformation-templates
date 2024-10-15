@@ -18,8 +18,8 @@ env:
     EUC_DIST_DIR: aws-cloudformation-templates/euc
     GLOBAL_SRC_DIR: global/templates
     GLOBAL_DIST_DIR: aws-cloudformation-templates/global
-    HOSTING_SRC_DIR: static-website-hosting-with-ssl/templates
-    HOSTING_DIST_DIR: aws-cloudformation-templates/static-website-hosting-with-ssl
+    HOSTING_SRC_DIR: static-website-hosting/templates
+    HOSTING_DIST_DIR: aws-cloudformation-templates/static-website-hosting
     IDENTITY_SRC_DIR: identity/templates
     IDENTITY_DIST_DIR: aws-cloudformation-templates/identity
     MEDIA_SRC_DIR: media/templates

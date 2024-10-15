@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/network builds an egress VPC.
+Description: AWSCloudFormationTemplates/network/egress builds an egress VPC.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -8,8 +8,7 @@ Metadata:
       - Label: 
           default: 'VPC Configuration'
         Parameters: 
-          - ResolverInboundRuleId
-          - ResolverOutboundRuleId
+          - VPCCidrBlock
           - SubnetPublicCidrBlockForAz1
           - SubnetTransitCidrBlockForAz1
           - SubnetFirewallCidrBlockForAz1
@@ -19,7 +18,8 @@ Metadata:
           - SubnetPublicCidrBlockForAz3
           - SubnetTransitCidrBlockForAz3
           - SubnetFirewallCidrBlockForAz3
-          - VPCCidrBlock
+          - ResolverInboundRuleId
+          - ResolverOutboundRuleId
       - Label: 
           default: 'Network Firewall Configuration'
         Parameters: 
@@ -28,9 +28,9 @@ Metadata:
       - Label:
           default: 'Transit Gateway Configuration'
         Parameters:
+          - TransitGatewayId   
           - TransitGatewayDefaultRouteTableId
           - TransitGatewayDestinationCidrBlock
-          - TransitGatewayId   
       - Label: 
           default: 'Notification Configuration'
         Parameters: 

@@ -39,17 +39,17 @@ Parameters:
     Type: String
     Default: ''
     Description: The secret key that 'User-Agent' header contains
-  LogicalName:
-    Type: String
-    Default: MediaStore
-    AllowedPattern: .+
-    Description: The custom prefix name [required]
   SNSForAlertArn:
     Type: String
     Default: '' 
   SNSForDeploymentArn:
     Type: String
     Default: ''
+  LogicalName:
+    Type: String
+    Default: MediaStore
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production
