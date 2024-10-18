@@ -13,6 +13,10 @@ Metadata:
           - LoadBalancerListenerArn
           - VPCId
       - Label: 
+          default: 'Notification Configuration'
+        Parameters:
+          - AlarmLevel
+      - Label: 
           default: 'Tag Configuration'
         Parameters:
           - Environment
@@ -21,6 +25,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   AppPort:
     Type: Number
     Default: 8080
@@ -113,6 +124,7 @@ Resources:
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         LoadBalancer: !Ref LoadBalancerFullName
         SNSTopicArn: !Ref SNSForAlertArn

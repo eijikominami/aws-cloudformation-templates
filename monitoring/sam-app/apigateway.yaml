@@ -2,7 +2,37 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for Amazon API Gateway
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'API Gateway Configuration'
+        Parameters: 
+          - ApiName
+          - ApiStageName
+          - ApiCount
+          - LatencyThreshold
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - AlarmLevel
+          - CustomAlarmName
+          - SNSTopicArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   CustomAlarmName:
     Type: String
     Default: ''
@@ -47,9 +77,11 @@ Parameters:
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+  CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
 
 Resources:
   AlarmApi4XXError:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -77,6 +109,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AlarmApi5XXError:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -109,6 +142,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AlarmApiLatency:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -140,6 +174,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AlarmApiCount:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true

@@ -55,6 +55,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -66,6 +67,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   CertificateManagerARN:
     Default: ''
     Type: String
@@ -302,6 +310,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         ElasticSearchVolumeSize: !Ref RealtimeDashboardElasticSearchVolumeSize
         ElasticSearchInstanceType: !Ref RealtimeDashboardElasticSearchInstanceType
         ElasticSearchMasterType: !Ref RealtimeDashboardElasticSearchMasterType

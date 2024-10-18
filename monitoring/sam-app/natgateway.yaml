@@ -2,7 +2,30 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for Amazon Nat Gateway
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - AlarmLevel
+          - CustomAlarmName
+          - SNSTopicArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   CustomAlarmName:
     Type: String
     Default: ''
@@ -29,9 +52,11 @@ Parameters:
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+  CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
 
 Resources:
   NatGatewayPacketsDropCount:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -59,6 +84,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   NatGatewayErrorPortAllocation:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true

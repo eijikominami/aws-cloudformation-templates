@@ -60,6 +60,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -113,6 +114,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The identifier of the AWS Directory Service directory for Workspaces
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   AppStreamImageBuilderImageName:
     Type: String
     Default: ''
@@ -319,6 +327,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         AvailabilityZone: !Select 
           - 0
           - Fn::GetAZs: !Ref 'AWS::Region'
@@ -361,6 +370,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         AvailabilityZone: !Select
           - 1
           - Fn::GetAZs: !Ref 'AWS::Region'
@@ -401,6 +411,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters: 
+        AlarmLevel: !Ref AlarmLevel
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
         LogicalName: !Ref AWS::StackName

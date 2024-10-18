@@ -15,6 +15,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SnsTopicARN
       - Label: 
           default: 'Tag Configuration'
@@ -33,6 +34,13 @@ Parameters:
     Type: String
     Default: ''
     Description: Additional expression of CloudWatch Logs metric filters
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   CloudTrailInsights:
     Type: String
     Default: DISABLED
@@ -81,6 +89,7 @@ Parameters:
 Conditions:
   CreateAdditionalFilters: !Not [ !Equals [ !Ref AdditionalFilters, '' ] ]
   CreateCloudTrailInsights: !Equals [ !Ref CloudTrailInsights, ENABLED ]
+  CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
   CreateS3Trail: !Equals [ !Ref S3Trail, ENABLED ]
   IsCreatedByControlTower: !Equals [ !Ref IsAlreadyCreatedByControlTower, true ]
 
@@ -298,6 +307,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailUnauthorizedAPICalls:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -468,6 +478,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailS3BucketPolicyChanges:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -570,6 +581,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailNACLChanges:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -604,6 +616,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailNetworkGatewayChanges:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -638,6 +651,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailRouteTableChanges:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
@@ -672,6 +686,7 @@ Resources:
           MetricNamespace: LogMetrics
           MetricValue: '1'
   CloudWatchAlarmMetricFilterCloudTrailVpcChanges:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true

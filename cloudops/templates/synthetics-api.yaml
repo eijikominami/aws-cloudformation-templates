@@ -21,7 +21,8 @@ Metadata:
           - Method
       - Label: 
           default: 'Notification Configuration'
-        Parameters: 
+        Parameters:
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -32,6 +33,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   CanaryName:
     Type: String
     AllowedPattern: ^[0-9a-z_\-]{1,21}$
@@ -94,6 +102,7 @@ Parameters:
 
 Conditions:
   CreateIncident: !Not [ !Equals [ !Ref IncidentManagerArn, ''] ]
+  CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -315,6 +324,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   CloudWatchAlarmSynthetics:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true

@@ -58,6 +58,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -68,6 +69,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   CentralizedLogBucketName:
     Type: String
     Default: ''
@@ -237,7 +245,8 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-      Parameters: 
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CentralizedLogBucketName: !Ref CentralizedLogBucketName
         HomeNetworkCidr: !Ref HomeNetworkCidr
         LogicalName: Egress
@@ -316,6 +325,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         DnsIpAz1: !Ref DnsIpAz1
         DnsIpAz2: !Ref DnsIpAz2
         DnsIpAz3: !Ref DnsIpAz3

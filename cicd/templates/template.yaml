@@ -45,6 +45,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForCICDArn
           - SNSForDeploymentArn
@@ -54,7 +55,14 @@ Metadata:
           - TagKey
           - TagValue
 
-Parameters: 
+Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   ArtifactBucketInVirginia:
     Type: String
     Default: ''  
@@ -782,7 +790,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::global/templates/template.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"CentralizedLogBucketName": "${CentralizedLogBucketName}", "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
                       - !If
                         - Development
                         - development
@@ -822,7 +830,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::security/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"OrganizationId": "${OrganizationId}", "OrganizationsRootId": "${OrganizationsRootId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "OrganizationId": "${OrganizationId}", "OrganizationsRootId": "${OrganizationsRootId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -899,7 +907,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::network/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"ManagementAccountId": "${ManagementAccountId}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "OrganizationId": "${OrganizationId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "ManagementAccountId": "${ManagementAccountId}", "OrganizationId": "${OrganizationId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -938,10 +946,11 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !If
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", '
+                      - !If
                         - DeployNotification
-                        - !Sub '{"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact_Notification", "Output.json", "SNSForFormattedAlert"]}, ' 
-                        - '{"'
+                        - !Sub '"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact_Notification", "Output.json", "SNSForFormattedAlert"]}, ' 
+                        - ''
                       - !Sub '"SSMOrganizationId": "${OrganizationId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
@@ -986,7 +995,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::shared/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -1022,7 +1031,7 @@ Resources:
                 TemplatePath: BuildArtifact_DefaultSecuritySettings-ConfigRules::packaged.yaml
                 ParameterOverrides: !Join
                   - ''
-                  - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                  - - !Sub '{"AlarmLevel": "${AlarmLevel}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                     - !If
                       - Development
                       - development
@@ -1061,7 +1070,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
+                      - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArn": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}", "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1069,7 +1078,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
+                      - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "RealtimeDashboardKinesisFirehoseStreamNameSuffix": "#{codepipeline.PipelineExecutionId}","Environment": "'
                         - !If
                           - Development
                           - development
@@ -1113,7 +1122,7 @@ Resources:
                     - DeployGlobalSettings
                     - !Join
                       - ''
-                      - - !Sub '{"CentralizedLogBucketName": "${CentralizedLogBucketName}", "CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}","SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                      - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "CertificateManagerARN": { "Fn::GetParam": ["GlobalSettings", "Output.json", "CertificationARN"]}, "ComputeType": "${WebServers}", "Route53HostedZoneId": { "Fn::GetParam": ["GlobalSettings", "Output.json", "HostedZoneId"]}, "WebACLArnForCloudFront": { "Fn::GetParam": ["GlobalSettings", "Output.json", "WebACLArn"]}, "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}","SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                         - !If
                           - Development
                           - development
@@ -1121,7 +1130,7 @@ Resources:
                         - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                     - !Join
                       - ''
-                      - - !Sub '{"CentralizedLogBucketName": "${CentralizedLogBucketName}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                      - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "BucketNameForArtifact": "${S3ForArtifact}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "GitHubBranchNameForBuildSpec": "${GitHubBranchName}", "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                         - !If
                           - Development
                           - development
@@ -1171,7 +1180,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::cicd/templates/upload-artifacts.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
                       - !If
                         - Development
                         - development
@@ -1216,6 +1225,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForDeployment
@@ -1246,6 +1256,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForDeployment
@@ -1276,6 +1287,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForDeployment

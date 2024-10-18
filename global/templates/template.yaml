@@ -36,6 +36,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
       - Label: 
           default: 'Tag Configuration'
@@ -56,6 +57,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The domain name created by Certification Manager
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   BillingAlertThreshold:
     Type: Number
     Default: 0
@@ -338,6 +346,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
         SemanticVersion: 2.2.7
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         CertificateArn: !Ref CertificateManager

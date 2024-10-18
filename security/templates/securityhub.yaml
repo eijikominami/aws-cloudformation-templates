@@ -16,7 +16,8 @@ Metadata:
           - OrganizationsRootId
       - Label: 
           default: 'Notification Configuration'
-        Parameters:
+        Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -28,6 +29,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   DelegatedAdminAccountId:
     Type: String
     Default: ''
@@ -262,6 +270,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForAlert

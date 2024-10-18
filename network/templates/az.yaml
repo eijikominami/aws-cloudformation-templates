@@ -20,6 +20,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -31,6 +32,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   AvailabilityZone:
     Type: AWS::EC2::AvailabilityZone::Name
     AllowedPattern: .+
@@ -307,6 +315,7 @@ Resources:
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !Ref SNSForAlertArn
         Environment: !Ref Environment

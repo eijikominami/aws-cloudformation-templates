@@ -57,6 +57,7 @@ Metadata:
       - Label:
           default: Notification Configuration
         Parameters:
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label:
@@ -67,6 +68,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   AuditAccountId:
     Type: String
     Default: ''  
@@ -267,6 +275,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         AnalyzerType: !Ref IAMAccessAnalyzer
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -299,6 +308,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         DelegatedAdminAccountId: !Ref AuditAccountId
         OrganizationsRootId: !Ref OrganizationsRootId
         SecurityHubStandards: !Join
@@ -335,6 +345,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         Detector: !If
           - CreateGuardDutyEventBridgeOnly
           - DISABLED
@@ -372,6 +383,7 @@ Resources:
       Parameters:
         AccessLogBucketName: !Ref S3ForAccessLog
         AdditionalFilters: !Ref AWSCloudTrailAdditionalFilters
+        AlarmLevel: !Ref AlarmLevel
         IsAlreadyCreatedByControlTower: !If 
           - CloudTrailIsCreatedByControlTower
           - true
@@ -404,6 +416,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         AWSConfigAutoRemediation: !Ref AWSConfigAutoRemediation
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -436,6 +449,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         Session: !If 
           - CreateMacieEventBridgeOnly
           - DISABLED
@@ -622,6 +636,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForAlert
@@ -667,6 +682,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForAlert

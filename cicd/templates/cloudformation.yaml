@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description:  AWSCloudFormationTemplates/cicd/cloudformaiton creates CloudFormation registry.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Artifact Configuration'
+        Parameters: 
+          - CodeStarConnectionArn
+
+Parameters:
+  CodeStarConnectionArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
+
+Resources:
+  Publisher:
+    Type: AWS::CloudFormation::Publisher
+    Properties:
+      AcceptTermsAndConditions: true
+      ConnectionArn: !Ref CodeStarConnectionArn

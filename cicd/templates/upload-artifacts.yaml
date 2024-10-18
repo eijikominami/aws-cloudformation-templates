@@ -8,6 +8,7 @@ Metadata:
       - Label: 
           default: 'Artifact Configuration'
         Parameters: 
+          - CodeStarConnectionArn
           - DestinationBucketNameForMasterBranch
           - DestinationBucketNameForTargetBranch
       - Label: 
@@ -28,6 +29,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -38,6 +40,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   BuildSpecForContainers:
     Type: String
     Default: buildspec.yml
@@ -53,6 +62,10 @@ Parameters:
     Default: buildspec.yml
     AllowedPattern: .+
     Description: The build specification file for new tags [required]
+  CodeStarConnectionArn:
+    Type: String
+    Default: ''
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
   DestinationBucketNameForMasterBranch:
     Type: String
     AllowedPattern: .+
@@ -113,6 +126,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateCloudFormation: !Not [ !Equals [ !Ref CodeStarConnectionArn, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   Development: !Equals [ !Ref Environment, development]
@@ -157,6 +171,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         BuildSpecForContainers: !Ref BuildSpecForContainers
         BuildSpecForCommits: !Ref BuildSpecForCommits
         BuildSpecForTags: !Ref BuildSpecForTags
@@ -168,22 +183,19 @@ Resources:
         ImageForContainers: !Ref ImageForContainers
         ImageForCommits: !Ref ImageForCommits
         ImageForTags: !Ref ImageForTags
-        SNSForAlertArn:
-          - !If
-            - CreateSNSForAlert
-            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-            - !Ref SNSForAlertArn
-        SNSForDeploymentArn:
-          - !If
-            - CreateSNSForDeployment
-            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-            - !Ref SNSForDeploymentArn
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
-        - Key: Name
-          Value: !Sub policy-${AWS::StackName}-${AWS::Region}
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
@@ -191,4 +203,24 @@ Resources:
       TemplateURL: !If
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cicd/codebuild.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/codebuild.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cicd/codebuild.yaml
+  CloudFormation:
+    Condition: CreateCloudFormation
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        CodeStarConnectionArn: !Ref CodeStarConnectionArn
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cicd/cloudformation.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cicd/cloudformation.yaml

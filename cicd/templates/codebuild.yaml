@@ -28,17 +28,26 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForCICDArn
           - SNSForDeploymentArn
-      - Label: 
+      - Label:
           default: 'Tag Configuration'
         Parameters: 
+          - LogicalName
           - Environment
           - TagKey
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   BuildSpecForContainers:
     Type: String
     Default: buildspec.yml
@@ -101,6 +110,11 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: CodeBuild
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   Environment:
     Type: String
     Default: production
@@ -137,7 +151,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        TopicName: !Sub Alert-createdby-${AWS::StackName}
+        TopicName: !Sub Alert-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -154,7 +168,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        TopicName: !Sub CICD-createdby-${AWS::StackName}
+        TopicName: !Sub CICD-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -166,7 +180,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
         SemanticVersion: 2.2.7
       Parameters:
-        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+        TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
@@ -246,7 +260,7 @@ Resources:
                   - codebuild:UpdateReport
                   - codebuild:BatchPutTestCases
                 Resource:
-                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${AWS::StackName}-*
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${LogicalName}-*
                 Effect: Allow
               - Action:
                   - ecr:GetDownloadUrlForLayer
@@ -258,7 +272,7 @@ Resources:
                 Resource: 
                   - '*'
                 Effect: Allow
-      RoleName: !Sub ${AWS::StackName}-CodeBuild-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-CodeBuild-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -285,7 +299,7 @@ Resources:
                 Resource:
                   - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/UploadArtifacts:*
                 Effect: Allow
-      RoleName: !Sub ${AWS::StackName}-CodeBuildBudgePublicRead-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-CodeBuildBudgePublicRead-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -313,7 +327,7 @@ Resources:
         CloudWatchLogs: 
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
-      Name: !Sub ${AWS::StackName}-master
+      Name: !Sub ${LogicalName}-master
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
@@ -360,7 +374,7 @@ Resources:
         CloudWatchLogs: 
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
-      Name: !Sub ${AWS::StackName}-${GitHubBranchName}
+      Name: !Sub ${LogicalName}-${GitHubBranchName}
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
@@ -403,7 +417,7 @@ Resources:
         CloudWatchLogs: 
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
-      Name: !Sub ${AWS::StackName}-Tags
+      Name: !Sub ${LogicalName}-Tags
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
@@ -451,7 +465,7 @@ Resources:
         CloudWatchLogs: 
           GroupName: !Ref CodeBuildLogGroup
           Status: ENABLED
-      Name: !Sub ${AWS::StackName}-Containers
+      Name: !Sub ${LogicalName}-Containers
       ResourceAccessRole: !GetAtt IAMRoleForCodeBuildBudgePublicRead.Arn
       ServiceRole: !GetAtt IAMRoleForCodeBuild.Arn
       Source:
@@ -549,7 +563,7 @@ Resources:
   CodeBuildLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: !Sub /aws/codebuild/${AWS::StackName}
+      LogGroupName: !Sub /aws/codebuild/${LogicalName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -569,7 +583,8 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        CustomAlarmName: !Ref AWS::StackName
+        AlarmLevel: !Ref AlarmLevel
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
@@ -593,7 +608,8 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        CustomAlarmName: !Ref AWS::StackName
+        AlarmLevel: !Ref AlarmLevel
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
@@ -617,7 +633,8 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        CustomAlarmName: !Ref AWS::StackName
+        AlarmLevel: !Ref AlarmLevel
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn

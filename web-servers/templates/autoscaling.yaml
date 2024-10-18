@@ -42,6 +42,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -64,6 +65,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The domain name created by Certification Manager
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   AutoScalingDesiredCapacity:
     Type: Number
     Default: 1
@@ -487,6 +495,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         LoadBalancer: !GetAtt LoadBalancer.LoadBalancerFullName
         SNSTopicArn: !If 

@@ -39,6 +39,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label: 
@@ -61,6 +62,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The domain name created by Certification Manager
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   AppPort:
     Type: Number
     Default: 80
@@ -375,6 +383,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         AppPort: !Ref AppPort
         LoadBalancerFullName: !GetAtt LoadBalancer.LoadBalancerFullName
         LoadBalancerListenerArn: !GetAtt LoadBalancerBlueListener.ListenerArn
@@ -415,6 +424,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         AppPort: !Ref AppPort
         LoadBalancerFullName: !GetAtt LoadBalancer.LoadBalancerFullName
         LoadBalancerListenerArn: !GetAtt LoadBalancerGreenListener.ListenerArn
