@@ -1168,7 +1168,7 @@ Resources:
                   StackName: UploadArtifacts
                   Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt IAMRoleForCloudFormation.Arn
-                  TemplatePath: Source_CloudFormationTemplatesArtifact::cicd/templates/codebuild.yaml
+                  TemplatePath: Source_CloudFormationTemplatesArtifact::cicd/templates/upload-artifacts.yaml
                   ParameterOverrides: !Join 
                     - ''
                     - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
