@@ -42,7 +42,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| IdentityCenterInstanceArn | String | | ○ | The ARN of the IAM Identity Center instance responsible for authenticating monitor users |
+| **IdentityCenterInstanceArn** | String | | ○ | The ARN of the IAM Identity Center instance responsible for authenticating monitor users |
 | MaxWorkerCount | Number | 10 | ○ | The maximum number of workers specified in the fleet |
 | MinWorkerCount | Number | 0 | ○ | The minimum number of workers in the fleet |
 
@@ -116,11 +116,11 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| AdMarker | ENABLED or DISABLED | DISABLED | ○ | Enable or disable ad marker |
+| AdMarker | ENABLED / DISABLED | DISABLED | ○ | Enable or disable ad marker |
 | ArchiveBucket | String | | | The S3 bucket Name LIVE-to-VOD contents are stored |
 | AudioBitrate | Number | 96000 | ○ | Average audio bitrate in bits/second |
-| AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Enable or disable automatic input failover |
-| ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | Select the class of channel you intend to attach this input to |
+| AutoInputFailover | ENABLED / DISABLED | ENABLED | ○ | Enable or disable automatic input failover |
+| ChannelClass | STANDARD / SINGLE_PIPELINE | STANDARD | ○ | Select the class of channel you intend to attach this input to |
 | ElementalLinkId1 | String | | | The unique ID for the Elemental Link device | 
 | ElementalLinkId2 | String | | | The unique ID for the Elemental Link device |
 | ElementalLinkType | HD / UHD | HD | | The type for the Elemental Link device |
@@ -132,7 +132,7 @@ You can provide optional parameters as follows.
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264 Level |
 | Height | Number | 540 | ○ | Output video height, in pixels |
 | HlsBucket | String | | | The S3 bucket Name HLS files are sent |
-| InputType | String | ENABLED | ○ | Input type |
+| InputType | String | RTMP | ○ | Input type |
 | InputStreamKey | String | stream | | A unique name for the location the RTMP stream is being pushed to |
 | InputVodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
 | InputWhitelistRules | String | 0.0.0.0/0 | ○ | A list of one or more IPv4 CIDR addresses to allow |

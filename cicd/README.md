@@ -65,7 +65,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | ArtifactBucketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |

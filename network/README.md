@@ -54,7 +54,7 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | CustomerGatewayOutsideIpAddress | String | | |  The Internet-routable IP address for the customer gateway's outside interface |
 | DnsIpAz1 | String | 10.0.8.53 | | The IPv4 address that you want to use for DNS queries |
@@ -95,7 +95,7 @@ This template configures ``Availability Zone``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | **AvailabilityZone** | AWS::EC2::AvailabilityZone::Name | | ○ | The Availability Zone name |
 | InternetGatewayId | String | | | The Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable NetworkAddressTranslation (NAT) |
@@ -112,7 +112,7 @@ This template configures ``Egress Central VPC``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network | 
 | ResolverInboundRuleId | String |  |  | The ID of the Resolver inbound rule that you associated with the VPC that is specified by VPCId| 
@@ -178,7 +178,7 @@ This template configures ``Route 53 Resolver``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | DnsIpAz1 | String | 10.0.8.53 | | The IPv4 address that you want to use for DNS queries |
 | DnsIpAz2 | String | 10.0.10.53 | | The IPv4 address that you want to use for DNS queries |
 | DnsIpAz3 | String | 10.0.12.53 | | The IPv4 address that you want to use for DNS queries |

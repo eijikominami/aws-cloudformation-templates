@@ -42,7 +42,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| IdentityCenterInstanceArn | String | | ○ | IAM Identity Center の ARN |
+| **IdentityCenterInstanceArn** | String | | ○ | IAM Identity Center の ARN |
 | MaxWorkerCount | Number | 10 | ○ | Fleet の Worker の最大数 |
 | MinWorkerCount | Number | 0 | ○ | Fleet の Worker の最小数 |
 
@@ -116,11 +116,11 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| AdMarker | ENABLED or DISABLED | DISABLED | ○ | Ad Markerを使用するかどうか |
+| AdMarker | ENABLED / DISABLED | DISABLED | ○ | Ad Markerを使用するかどうか |
 | ArchiveBucket | String | | | LIVE-to-VOD コンテンツを保存するバケット名 |
 | AudioBitrate | Number | 96000 | ○ | 音声ビットレート（bps） |
-| AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
-| ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
+| AutoInputFailover | ENABLED / DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
+| ChannelClass | STANDARD / SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
 | ElementalLinkId1 | String | | | Elemental Link の ID | 
 | ElementalLinkId2 | String | | | Elemental Link の ID |
 | ElementalLinkType | HD / UHD | HD | | Elemental Link のタイプ |
@@ -132,7 +132,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264レベル |
 | Height | Number | 540 | ○ | ビデオの高さ（px）|
 | HlsBucket | String | | | HLSファイルの送信バケット名 |
-| InputType | String | ENABLED | ○ | 入力タイプ |
+| InputType | String | RTMP | ○ | 入力タイプ |
 | InputStreamKey | String | stream | | ストリームキー |
 | InputWhitelistRules | String | 0.0.0.0/0 | ○ | 許可するIPアドレス範囲 |
 | MediaPackageChannelId | String | | | MediaPackage のチャネルID |

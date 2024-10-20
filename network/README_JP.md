@@ -54,7 +54,7 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabiliti
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | CustomerGatewayOutsideIpAddress | String | | | インターネットから疎通可能なカスタマーゲートウェイアドレス |
 | DnsIpAz1 | String | 10.0.8.53 | | Route53 に割り当てる IP アドレス |
@@ -96,7 +96,7 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | **AvailabilityZone** | AWS::EC2::AvailabilityZone::Name | | ○ | AZ名 |
 | InternetGatewayId | String | | | Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| | NAT Gateway を作成するかどうか |
@@ -113,7 +113,7 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
 | ResolverInboundRuleId | String |  |  | VPC に紐づけられたリゾルバーインバウンド ID | 
@@ -179,7 +179,7 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | DnsIpAz1 | String | 10.0.8.53 | | Route53 に割り当てる IP アドレス |
 | DnsIpAz2 | String | 10.0.10.53 | | Route53 に割り当てる IP アドレス |
 | DnsIpAz3 | String | 10.0.12.53 | | Route53 に割り当てる IP アドレス |

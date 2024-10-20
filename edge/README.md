@@ -35,7 +35,7 @@ This template creates ``CloudFront`` distribution.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | Enable or disable CloudFront additional metrics |
 | CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront** |
@@ -64,7 +64,7 @@ This template creates ``CloudFront`` distribution.
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
 | RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.13 | ○ | The version of OpenSearch Service |
 | RealtimeDashboardKinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
-| RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
+| **RealtimeDashboardState** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |

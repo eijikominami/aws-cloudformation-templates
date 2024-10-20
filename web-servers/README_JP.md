@@ -43,7 +43,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | AccountIdForAnalysis | String | | | 転送先の分析用AWSアカウント |
 | ACMValidationMethod | String | DNS | 条件付き | ドメインの検証方法 |
 | ACMDomainName | String | | | 証明書のドメイン名 |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | 'None'を指定した場合、ELBは作成されません。 |
 | BucketNameForAnalysis | String | | | 転送先の分析用 S3 バケット |
@@ -75,7 +75,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | GitHubRepoNameForArtifact | String | | | Artifact の GitHub リポジトリ名 |
 | GitHubBranchNameForArtifact | String | | | Artifact の GitHub ブランチ名 |
 | GitHubBranchNameForBuildSpec | String | | | BuildSpec の GitHub ブランチ名 |
-| GlobalInfrastructure | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | | ○ | CloudFront や Global Accelerator を有効にするかどうか |
+| **GlobalInfrastructure** | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | NONE | ○ | CloudFront や Global Accelerator を有効にするかどうか |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、ログ機能が有効化されます。 |
 | LogGroupNameTransferredToS3 | String | | | S3 にログを転送する CloudWatch Log Group 名 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |

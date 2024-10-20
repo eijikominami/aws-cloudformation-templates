@@ -100,7 +100,7 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AccountIdForAnalysis | String | | | The AWS account id for log analysis |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | BucketNameForAnalysis | String | | | The Amazon S3 bucket name for log analysis |
 | BucketNameForArtifact | String | | | The bucket name artifact art stored |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |

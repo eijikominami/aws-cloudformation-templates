@@ -43,7 +43,7 @@ You can provide optional parameters as follows.
 | AccountIdForAnalysis | String | | | The AWS account id for log analysis |
 | ACMValidationMethod | String | DNS | Conditional | The validation method that you own or control the domain |
 | ACMDomainName | String | | | The domain name created by Certification Manager |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AutoScalingMaxSize | Number | 1 | ○ | |
 | AutoScalingLoadBalancerType | None, application, network | None | ○ | If you set 'None', an ELB is NOT created |
 | BucketNameForAnalysis | String | | | The Amazon S3 bucket name for log analysis |
@@ -75,7 +75,7 @@ You can provide optional parameters as follows.
 | GitHubRepoNameForArtifact | String | | | The GitHub repository name of the artifact repository |
 | GitHubBranchNameForArtifact | String | | | The Branch name of GitHub for the artifact repository |
 | GitHubBranchNameForBuildSpec | String | | | The Branch name of GitHub for Buildspec |
-| GlobalInfrastructure | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | | ○ | Enable or disable CloudFront, Global Accelerator |
+| **GlobalInfrastructure** | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | NONE | ○ | Enable or disable CloudFront, Global Accelerator |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled |
 | LogGroupNameTransferredToS3 | String | | | The log group name transfferd to an S3 bucket |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |

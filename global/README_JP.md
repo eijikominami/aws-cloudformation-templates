@@ -48,7 +48,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name GlobalSetti
 | --- | --- | --- | --- | --- |
 | ACMValidationMethod | DNS / EMAIL | DNS | ○ | ドメインを所有または管理していることを検証するために使用する方法 |
 | **ACMDomainName** | String | | | ドメイン名を指定した場合、**SSL証明書**が作成されます。 |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | BillingAlertThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | BudgetName | String | Total | ○ | 予算名。 ``BillingAlertThreshold`` を変更する場合は、この値も変更してください。 |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |

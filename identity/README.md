@@ -49,13 +49,13 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | The EC2 Image Id |
 | Edition | Standard / Enterprise | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | EnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
-| Name | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
+| **Name** | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
 | Password | String | Password1+ | ○ | The password for the default administrative user named Admin |
-| ShortName | String | CORP | ○ | The NetBIOS name for your domain |
+| **ShortName** | String | CORP | ○ | The NetBIOS name for your domain |
 | SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/24 | conditional | The private subnet CIDR block at AZ1 |
 | SubnetPrivateIdForAz1 | String | | conditional | The private subnet id at AZ1 |
 | SubnetPrivateCidrBlockForAz2 | String | 10.3.4.0/24 | conditional | The private subnet CIDR block at AZ2 |

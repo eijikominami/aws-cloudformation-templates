@@ -66,7 +66,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | ArtifactBucketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
