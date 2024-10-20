@@ -117,8 +117,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AuditAccountId | String | | | 監査アカウントの ID |
-| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | | ENABLEDを指定した場合、AWS CloudTrail が有効化されます。 |
+| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS CloudTrail が有効化されます。 |
 | AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
@@ -130,16 +131,18 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、 IAM Access Analyzer が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | LogArchiveAccountId | String | | | ログアーカイブアカウントの ID |
+| OrganizationId | String | | | AWS Organizations の ID |
+| OrganizationsRootId | String | | | AWS Organizations のルート ID |
 | SecurityOUId | String | | | セキュリティ OU の ID |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、SIEM が有効化されます。 |
-| SIEMControlTowerLogBucketNameList | String | | | ログアーカイブアカウントの S3 ログバケット名。 **OpenSearch Service インストール後に指定。** |
-| SIEMControlTowerRoleArnForEsLoader | String | | | aes-siem-es-loader が使用する IAM ロール名。 **OpenSearch Service インストール後に指定。** |
-| SIEMControlTowerSqsForLogBuckets | String | | | ログアーカイブアカウントの SQS ARN。 **OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerLogBucketNameList | String | | ※ | ログアーカイブアカウントの S3 ログバケット名。 **OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerRoleArnForEsLoader | String | | ※ | aes-siem-es-loader が使用する IAM ロール名。 **OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerSqsForLogBuckets | String | | ※ | ログアーカイブアカウントの SQS ARN。 **OpenSearch Service インストール後に指定。** |
 | SIEMEsLoaderServiceRoleArn | String | | | aes-siem-es-loader Lambda 関数の ARN。 **OpenSearch Service インストール後に指定。** |
 | SIEMGeoLite2LicenseKey | String | | | MaxMind が発行した GEO IP API のライセンスキー |
-| SIEMSecurityLakeExternalId | String | | | Security Lake の外部 ID。 **OpenSearch Service インストール後に指定。** |
-| SIEMSecurityLakeRoleArn | String | | | aes-siem-es-loader が使用する IAM ロール。 **OpenSearch Service インストール後に指定。** |
-| SIEMSecurityLakeSubscriberSqs | String | | | Security Lake サブスクライバーの SQS ARN。 **OpenSearch Service インストール後に指定。** |
+| SIEMSecurityLakeExternalId | String | | ※ | Security Lake の外部 ID。 **OpenSearch Service インストール後に指定。** |
+| SIEMSecurityLakeRoleArn | String | | ※ | aes-siem-es-loader が使用する IAM ロール。 **OpenSearch Service インストール後に指定。** |
+| SIEMSecurityLakeSubscriberSqs | String | | ※ | Security Lake サブスクライバーの SQS ARN。 **OpenSearch Service インストール後に指定。** |
 | SIEMEmail | String | | | SIEM に指定する E メールアドレス |
 
 ### マルチアカウント対応

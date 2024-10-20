@@ -9,9 +9,9 @@ Metadata:
         Parameters: 
           - ArchiveBucket
           - ManifestName
+          - OutputType
           - StartoverWindowSeconds
           - SegmentDurationSeconds
-          - OutputType
           - VodSourceBucket
       - Label: 
           default: 'Tag Configuration'
@@ -30,6 +30,14 @@ Parameters:
     Type: String
     Default: index
     Description: A short string that's appended to the end of the endpoint URL to create a unique path to this endpoint [required]
+  OutputType:
+    Type: String
+    AllowedValues:
+      - APPLE_HLS
+      - ISO_DASH
+      - ALL  
+    Default: APPLE_HLS
+    Description: Output type [required] 
   StartoverWindowSeconds:
     Type: Number
     Default: 0
@@ -39,14 +47,6 @@ Parameters:
     Type: String
     Default: 3
     Description: Duration (in seconds) of each fragment [required]
-  OutputType:
-    Type: String
-    AllowedValues:
-      - APPLE_HLS
-      - ISO_DASH
-      - ALL  
-    Default: APPLE_HLS
-    Description: Output type [required] 
   VodSourceBucket:
     Type: String
     Default: ''

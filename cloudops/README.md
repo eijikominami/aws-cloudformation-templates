@@ -37,6 +37,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | **ApplicationInsight** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `ApplicationInsights` stack is deployed |
 | CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
 | **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `IncidentManager` stack is deployed |
@@ -84,9 +85,10 @@ This template sets ``AWS Systems Manager``.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| **AdminAccountId** | String | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
+| AdminAccountId | String | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
-| **OrganizationId** | String | | | The Organizations ID |
+| OrganizationId | String | | | The Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
 If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.
@@ -104,6 +106,14 @@ This template sets a notification channel of ``AWS Systems Manager Incident Mana
 | Email | String | | | The email address |
 | PhoneNumber | String | | | The Phone Number |
 | WorkloadName | String | Workload | ○ | The workload name |
+
+## Amazon CloudWatch Internet Monitor
+
+This template creates ``Amazon CloudWatch Internet Monitor``.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| **ResourceNames** | String |  | ○ | The resources that have been added for the monitor |
 
 ## Amazon CloudWatch Synthetics
 

@@ -42,7 +42,7 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| IdentityCenterInstanceArn | String | | ○ | IAM Identity Center の ARN |
+| **IdentityCenterInstanceArn** | String | | ○ | IAM Identity Center の ARN |
 | MaxWorkerCount | Number | 10 | ○ | Fleet の Worker の最大数 |
 | MinWorkerCount | Number | 0 | ○ | Fleet の Worker の最小数 |
 
@@ -91,30 +91,54 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | SenderType | String | srt-listener | ○ | 受信に用いるプロトコル |
 | SrtCallerSourceListenerPort | Number | 2000 | | SRT caller を用いる際の送信元ポート |
 
+### MediaConnect (アウトプット)
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |  
+| --- | --- | --- | --- | --- |
+| CidrAllowList | String | 0.0.0.0/0 | fujitsu-qos, srt-listener | 出力要求ができる IP アドレスの範囲 |
+| DestinationIpAddressOrEntitlementArn | String | | srt-caller, zixi-push, rist, rtp-fec, rtp | 配信先の IP アドレスか ARN |
+| **FlowArn** | String | | ○ | この出力が関連づけられているフローの ARN |
+| MinLatency | Number | 100 | srt-listener, srt-caller | 最小レイテンシー（ミリ秒） |
+| **Name** | String | | ○ | VPC インタフェースの名前 |
+| Port | Number | 9177 | fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp | コンテンツを配信する際に使用するポート番号 |
+| Protocol | String | srt-listener | ○ | 送信元が使用するプロトコル |
+
+### MediaConvert
+
+| 名前 | タイプ | デフォルト | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| AccelerationSettings | ENABLED/PREFERRED/DISABLED | DISABLED | ○ | ジョブを高速トランスコーディングで実行する条件 |
+| Category | 文字列 | Default | ○ | 作成するジョブテンプレートのカテゴリ |
+| Name | 文字列 | Default | ○ | 作成するジョブテンプレートの名前 |
+| StatusUpdateInterval | 数値 | 60 | ○ | MediaConvert が CloudWatch Events に STATUS_UPDATE イベントを送信する頻度 |
+
 ### MediaLive
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| AdMarker | ENABLED or DISABLED | DISABLED | ○ | Ad Markerを使用するかどうか |
+| AdMarker | ENABLED / DISABLED | DISABLED | ○ | Ad Markerを使用するかどうか |
+| ArchiveBucket | String | | | LIVE-to-VOD コンテンツを保存するバケット名 |
 | AudioBitrate | Number | 96000 | ○ | 音声ビットレート（bps） |
-| AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
-| ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
-| ElementalLinkId1 | String | | | The unique ID for the Elemental Link device | 
-| ElementalLinkId2 | String | | | The unique ID for the Elemental Link device |
-| FramerateDenominator | Number | 1001 | ○ | Framerate denominator |
-| FramerateNumerator | Number | 30000 | ○ | Framerate numerator |
+| AutoInputFailover | ENABLED / DISABLED | ENABLED | ○ | Auto input failoverを使用するかどうか |
+| ChannelClass | STANDARD / SINGLE_PIPELINE | STANDARD | ○ | チャネルクラス |
+| ElementalLinkId1 | String | | | Elemental Link の ID | 
+| ElementalLinkId2 | String | | | Elemental Link の ID |
+| ElementalLinkType | HD / UHD | HD | | Elemental Link のタイプ |
+| FramerateDenominator | Number | 1001 | ○ | フレームレートの分母 |
+| FramerateNumerator | Number | 30000 | ○ | フレームレートの分子 |
 | GopNumBFrames | Number | 3 | ○ | リファレンスフレームあたりのBフレームの数 |
 | GopSize | Number | 60 | ○ | GOPサイズ |
 | H264Profile | String | HIGH | ○ | H.264プロファイル |
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264レベル |
 | Height | Number | 540 | ○ | ビデオの高さ（px）|
 | HlsBucket | String | | | HLSファイルの送信バケット名 |
-| InputType | RTMP / ELEMENTAL_LINK / S3 | ENABLED | ○ | 入力タイプ |
+| InputType | String | RTMP | ○ | 入力タイプ |
 | InputStreamKey | String | stream | | ストリームキー |
 | InputWhitelistRules | String | 0.0.0.0/0 | ○ | 許可するIPアドレス範囲 |
 | MediaPackageChannelId | String | | | MediaPackage のチャネルID |
 | MediaStoreEndpoint | String | | | MediaStore のエンドポイントURL |
 | OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | 出力先のタイプ |
+| OutputHlsBucket | String | | HLS ファイルの送信先バケット名 |
 | OutputRtmpRtpUrl1 | String | | | 出力先のRTMP URL1 |
 | OutputRtmpStreamName1 | String | | | 出力先のRTMPストリーム名1 |
 | OutputRtmpRtpUrl2 | String | | | 出力先のRTMP URL2 |

@@ -65,16 +65,22 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | ArtifactBucketInVirginia | String | | | The S3 artifact bucket name in N.Verginia region |
+| CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
+| **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | The Docker image name for CodeBuild |
+| **DefaultSecuritySettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings` stack is deployed |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | The **GitHub owner name** for CloudFormation Template Configuration files |
 | **GitHubRepoNameForTemplateConfiguration** | String | | | The **GitHub repository name** for CloudFormation Template Configuration files |
-| TemplateConfigurationBasePath | String | | | The base path of template configration files |
-| **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
-| **DefaultSecuritySettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `DefaultSecuritySettings` stack is deployed |
+| GitHubBranchName | String | master | ○ | The Branch name of GitHub |
 | **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `GlobalSettings` stack is deployed |
+| ManagementAccountId | String | | | The management account ID |
 | **Network** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Network` stack is deployed |
 | **Notification** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Notification` stack is deployed |
-| **Route53** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `Route53` stack is deployed |
+| OrganizationsRootId | String | | | The root id of AWS Organizations |
+| **SharedServices** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `SharedServices` stack is deployed |
 | **StaticWebsiteHosting** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `StaticWebsiteHosting` stack is deployed |
+| TemplateConfigurationBasePath | String | | | The base path of template configration files |
+| **UploadArtifacts** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `UploadArtifacts` stack is deployed |
 | **WebServers** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed |

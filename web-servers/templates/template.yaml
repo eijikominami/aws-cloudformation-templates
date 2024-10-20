@@ -149,18 +149,6 @@ Parameters:
     Default: ''
     Type: String
     Description: The ARN of an SSL Certifiation attached to CloudFront
-  CodeStarConnectionArn:
-    Type: String
-    Default: ''
-    Description: The Amazon Resource Name (ARN) of the CodeStar connection
-  ComputeType:
-    Type: String
-    Default: INSTANCE
-    AllowedValues:
-      - INSTANCE
-      - CONTAINER
-      - APPRUNNER
-    Description: The category of computing platform [recuired]
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -216,6 +204,18 @@ Parameters:
     Type: String
     Default: ''
     Description: The path to the 500 custom error page
+  CodeStarConnectionArn:
+    Type: String
+    Default: ''
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection
+  ComputeType:
+    Type: String
+    Default: INSTANCE
+    AllowedValues:
+      - INSTANCE
+      - CONTAINER
+      - APPRUNNER
+    Description: The category of computing platform [recuired]
   DesiredCapacity:
     Type: Number
     Default: 1
@@ -287,7 +287,7 @@ Parameters:
   LogGroupNameTransferredToS3:
     Type: String
     Default: ''
-    Description: The log group name transfferd to an S3 bucket.
+    Description: The log group name transfferd to an S3 bucket
   Route53HostedZoneId:
     Type: String
     Default: ''
@@ -413,7 +413,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -462,7 +462,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -511,7 +511,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -821,7 +821,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -838,7 +838,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -1345,7 +1345,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1370,7 +1370,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1399,7 +1399,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

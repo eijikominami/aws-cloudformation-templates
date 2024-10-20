@@ -35,13 +35,15 @@ This template creates ``CloudFront`` distribution.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
+| CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | Enable or disable CloudFront additional metrics |
 | CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront** |
 | CloudFrontDefaultRootObject | String | index.html | | CloudFront Viewer Protocol Policy |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
-| CloudFrontOriginAccessControl | String | | Conditional | The origin access control |
+| CloudFrontOriginAccessControlId | String | | Conditional | The origin access control |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
 | CloudFrontOriginShield | true or false | false | ○ | A flag that specifies whether Origin Shield is enabled |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 
@@ -52,6 +54,8 @@ This template creates ``CloudFront`` distribution.
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
+| LogBucketName | String | | Conditional | The custom S3 bucket name for access logging |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
 | RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
@@ -60,7 +64,7 @@ This template creates ``CloudFront`` distribution.
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
 | RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.13 | ○ | The version of OpenSearch Service |
 | RealtimeDashboardKinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
-| RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
+| **RealtimeDashboardState** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
@@ -69,8 +73,6 @@ This template creates ``CloudFront`` distribution.
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3** |
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |
 | UserAgent | String | | | The secret key that 'User-Agent' header contains | 
-| Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
-| LogBucketName | String | | Conditional | The custom S3 bucket name for access logging |
 | WebACLArn | String | | | The ARN of Web ACL |
 
 ### Realtime Dashboard
@@ -151,5 +153,6 @@ This template sets ``AWS WAF``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | Scope | REGIONAL or CLOUDFRONT | REGIONAL | ○ | Specifies whether this is for an Amazon CloudFront distribution or for a regional application |
 | **TargetResourceArn** | String | | ○ | The ARN of the resource to associate with the web ACL |

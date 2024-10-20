@@ -116,8 +116,9 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AuditAccountId | String | | | The id of the audit account |
-| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | | Enable or disable AWS CloudTrail |
+| AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | ○ | Enable or disable AWS CloudTrail |
 | AWSCloudTrailAdditionalFilters | String | | | Additional expression of CloudWatch Logs metric filters |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
@@ -129,16 +130,18 @@ You can provide optional parameters as follows:
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | If it is ACCOUNT or ORGANIZATION, IAM Access Analyzer is enabled |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | LogArchiveAccountId | String | | | The id of the log archive account |
+| OrganizationId | String | | | The Organizations ID |
+| OrganizationsRootId | String | | | The root id of AWS Organizations |
 | SecurityOUId | String | | | The id of the security OU |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | Enable or disable SIEM environment |
-| SIEMControlTowerLogBucketNameList | String | | | The S3 log bucket names in the Log Archive account. **Specify after installing OpenSearch Service.** |
-| SIEMControlTowerRoleArnForEsLoader | String | | | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
-| SIEMControlTowerSqsForLogBuckets | String | | | The SQS ARN for S3 log buckets in Log Archive Account. **Specify after installing OpenSearch Service.** |
-| SIEMEsLoaderServiceRoleArn | String | | | The ARN of lambda function aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
+| SIEMControlTowerLogBucketNameList | String | | ※ | The S3 log bucket names in the Log Archive account. **Specify after installing OpenSearch Service.** |
+| SIEMControlTowerRoleArnForEsLoader | String | | ※ | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
+| SIEMControlTowerSqsForLogBuckets | String | | ※ | The SQS ARN for S3 log buckets in Log Archive Account. **Specify after installing OpenSearch Service.** |
+| SIEMEsLoaderServiceRoleArn | String | | ※ | The ARN of lambda function aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
 | SIEMGeoLite2LicenseKey | String | | | The license key from MaxMind to enrich geoip location |
-| SIEMSecurityLakeExternalId | String | | | The Security Lake external ID for cross account. **Specify after installing OpenSearch Service.** |
-| SIEMSecurityLakeRoleArn | String | | | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
-| SIEMSecurityLakeSubscriberSqs | String | | | The SQS ARN of Security Lake Subscriber. **Specify after installing OpenSearch Service.** |
+| SIEMSecurityLakeExternalId | String | | ※ | The Security Lake external ID for cross account. **Specify after installing OpenSearch Service.** |
+| SIEMSecurityLakeRoleArn | String | | ※ | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
+| SIEMSecurityLakeSubscriberSqs | String | | ※ | The SQS ARN of Security Lake Subscriber. **Specify after installing OpenSearch Service.** |
 | SIEMEmail | String | | | The email as SNS topic, where Amazon OpenSearch Service will send alerts to |
 
 ### Designating a GuardDuty and a Security Hub administrator account

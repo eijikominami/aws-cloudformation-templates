@@ -47,13 +47,15 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | ActiveDirectoryAccountNameForAppStream | String | AppStreamAdmin | | Active Directory のユーザ名 | 
-| ActiveDirectoryEdition | Enterprise / Standard | Standard | conditional |  Active Directory のエディション  |
-| ActiveDirectoryEnableSso  | true / false | true | conditional | Active Directory で SSO を有効にするかどうか |
-| ActiveDirectoryName | String | corp.example.com | conditional | Active Directory で使用するフルドメイン名 |
-| ActiveDirectoryPassword | String | Password1+ | conditional | Active Directory で使用する Admin ユーザのパスワード |
-| ActiveDirectoryShortName | String | CORP | conditional | NetBIOS 名 |
-| ActiveDirectoryIdForFSx | String | | conditional | FSx で使用する Active Directory ID |
-| ActiveDirectoryIdForWorkspaces | String | | conditional | Workspaces で使用する Active Directory ID |
+| ActiveDirectoryAddresses | String | | | Active Directory の IP アドレス | 
+| ActiveDirectoryEdition | Enterprise / Standard | Standard | 条件付き |  Active Directory のエディション  |
+| ActiveDirectoryEnableSso  | true / false | true | 条件付き | Active Directory で SSO を有効にするかどうか |
+| **ActiveDirectoryName** | String | corp.example.com | 条件付き | Active Directory で使用するフルドメイン名 |
+| ActiveDirectoryPassword | String | Password1+ | 条件付き | Active Directory で使用する Admin ユーザのパスワード |
+| **ActiveDirectoryShortName** | String | CORP | 条件付き | NetBIOS 名 |
+| ActiveDirectoryIdForFSx | String | | 条件付き | FSx で使用する Active Directory ID |
+| ActiveDirectoryIdForWorkspaces | String | | 条件付き | Workspaces で使用する Active Directory ID |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AppStreamImageBuilderImageName | String | | | AppStream Image Builder で使用するイメージ名 |
 | AppStreamImageName | String | | | AppStream で使用するイメージ名 |
 | ComputeTypeName | GRAPHICS / GRAPHICSPRO / PERFORMANCE / POWER / POWERPRO / STANDARD / VALUE | PERFORMANCE | ○ | コンピュートタイプ |
@@ -63,7 +65,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 | FSxThroughput | Number | 16 | ○ | FSx のスループット |
 | OrganizationalUnitDistinguishedNamesForAppStream | CommaDelimitedList | OU=EXAMPLE,DC=example,DC=com | | AppStream で使用する OU の distinguished names |
 | SamlMetadataDocument | String | | | IdP が作成した SAML メタデータ XML |
-| Service | WORKSPACES / APPSTREAM / VPC_ONLY | WORKSPACES | ○ | 構築する AWS サービス |
+| **Service** | WORKSPACES / APPSTREAM / VPC_ONLY | WORKSPACES | ○ | 構築する AWS サービス |
 | SubnetPrivateCidrBlockForAz1 | String | 10.2.8.0/23 | ○ | AZ1 のプライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockForAz2 | String | 10.2.12.0/23 | ○ | AZ2 のプライベートサブネットの CIDR ブロック |
 | SubnetPublicCidrBlockForAz1 | String | 10.2.10.0/24 | ○ | AZ1 のパブリックサブネットの CIDR ブロック |

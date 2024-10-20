@@ -21,6 +21,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `FirehoseStreamName` | String | | ○ | The Firehose stream name |
 | `OldestRecordAge` | Number | 120 | ○ | The threshold of the age of the oldest record |
@@ -52,6 +53,7 @@ cloudwatch-alarm-about-kinesis-data-firehose は、 Amazon Kinesis Data Firehose
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `FirehoseStreamName` | String | | ○ | ストリーム名 |
 | `OldestRecordAge` | Number | 120 | ○ | 最も古いレコードの閾値 |

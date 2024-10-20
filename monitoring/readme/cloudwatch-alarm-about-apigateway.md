@@ -21,6 +21,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `ApiCount` | Number | 0 | ○ | The threshold of ApiCount per minute |
 | `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | |
 | `ApiName` | String |  | ○ | The API Gateway api name |
@@ -55,6 +56,7 @@ cloudwatch-alarm-about-apigateway は、 Amazon API Gateway に関する Amazon 
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `ApiCount` | Number | 0 | ○ | リクエストの合計数 |
 | `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | メソッド名 |
 | `ApiName` | String |  | ○ | API名 |

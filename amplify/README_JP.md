@@ -33,6 +33,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name Amplify  --
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AmplifyConsoleAppId | String |  |  | この値は2回目以降のデプロイ時に指定できます。 |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
+| AmplifyConsoleAppId | String |  | ※ | **この値は2回目以降のデプロイ時に指定できます。** |
 | **DomainName** | String | | ○ | Amplify Console で使用するカスタムドメイン名 |
 | **RepositoryName** | String | | ○ | CodeCommit で使用するリポジトリ名 | 

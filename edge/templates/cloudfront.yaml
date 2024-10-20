@@ -85,6 +85,15 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable CloudFront additional metrics [required]      
+  CloudFrontAdditionalName:
+    Type: String
+    Default: ''
+    Description: The CNAME attached to CloudFront
+  CloudFrontDefaultRootObject:
+    Type: String
+    Default: index.html
+    AllowedPattern: .+
+    Description: CloudFront Viewer Protocol Policy [required]
   CloudFrontDefaultTTL:
     Default: 86400
     MinValue: 0
@@ -100,23 +109,6 @@ Parameters:
     MinValue: 0
     Type: Number
     Description: CloudFront Maximum TTL [required]
-  CloudFrontViewerProtocolPolicy:
-    Type: String
-    Default: redirect-to-https
-    AllowedValues:
-      - allow-all
-      - redirect-to-https
-      - https-only
-    Description: CloudFront Viewer Protocol Policy [required]
-  CloudFrontDefaultRootObject:
-    Type: String
-    Default: index.html
-    AllowedPattern: .+
-    Description: CloudFront Viewer Protocol Policy [required]
-  CloudFrontAdditionalName:
-    Type: String
-    Default: ''
-    Description: The CNAME attached to CloudFront
   CloudFrontOriginAccessControlId:
     Type: String
     Default: ''
@@ -139,10 +131,6 @@ Parameters:
       - S3
       - NOT_S3
     Description: The Origin Type [required]
-  CloudFrontSecondaryOriginId:
-    Type: String
-    Default: ''
-    Description: The S3 bucket name for Secondary Origin
   CloudFrontRestrictViewerAccess:
     Type: String
     Default: DISABLED
@@ -150,6 +138,18 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Restrict Viewer Access [required]  
+  CloudFrontSecondaryOriginId:
+    Type: String
+    Default: ''
+    Description: The S3 bucket name for Secondary Origin
+  CloudFrontViewerProtocolPolicy:
+    Type: String
+    Default: redirect-to-https
+    AllowedValues:
+      - allow-all
+      - redirect-to-https
+      - https-only
+    Description: CloudFront Viewer Protocol Policy [required]
   CloudFront403ErrorResponsePagePath:
     Type: String
     Default: ''
@@ -352,7 +352,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -369,7 +369,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

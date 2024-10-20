@@ -20,6 +20,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | The threshold of IteratorAgeMilliseconds |
 | `KinesisStreamName` | String | | ○ | The Kinesis stream name |
@@ -51,6 +52,7 @@ cloudwatch-alarm-about-kinesis-data-streams は、Amazon Kinesis Data Streams �
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | IteratorAgeMilliseconds の閾値 |
 | `KinesisStreamName` | String | | ○ | ストリーム名 |

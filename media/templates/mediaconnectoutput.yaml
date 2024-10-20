@@ -38,7 +38,7 @@ Parameters:
     Type: String
     Default: Default
     AllowedPattern: .+
-    Description: The name of the VPC interface
+    Description: The name of the VPC interface [required]
   Port:
     Type: Number
     Default: 9177

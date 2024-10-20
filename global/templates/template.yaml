@@ -78,13 +78,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The centralize S3 bucket name for logging 
-  CostUsageReport:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable AWS Config [required]
   CloudFrontErrorRateThreshold:
     Type: Number
     Default: 0
@@ -104,6 +97,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The target distribution ID monitored by CloudWatch Alarm
+  CostUsageReport:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable AWS Config [required]
   DomainName:
     Type: String
     Default: ''
@@ -210,7 +210,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -344,7 +344,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
@@ -660,7 +660,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn

@@ -48,11 +48,15 @@ aws cloudformation deploy --template-file template.yaml --stack-name GlobalSetti
 | --- | --- | --- | --- | --- |
 | ACMValidationMethod | DNS / EMAIL | DNS | ○ | ドメインを所有または管理していることを検証するために使用する方法 |
 | **ACMDomainName** | String | | | ドメイン名を指定した場合、**SSL証明書**が作成されます。 |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | BillingAlertThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | BudgetName | String | Total | ○ | 予算名。 ``BillingAlertThreshold`` を変更する場合は、この値も変更してください。 |
+| CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | CloudFrontErrorRateThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontErrorRequestPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontDistributionId | String | | | 監視対象のCloudFrontのディストリビューションID |
+| CostUsageReport | ENABLED / DISABLED | DISABLED　| | ENABLED に設定された場合、Cost Usage Report が作成されます。 |
 | DomainName | String | | | Route53に登録するドメイン名 | 
+| NotificationThreshold | Number | 10 | ○ | Cost Explorer から通知が送られる閾値 | 
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |

@@ -2,26 +2,6 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for AWS Certificate Manager
 
-Metadata: 
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-      - Label: 
-          default: 'Certification Manager Configuration'
-        Parameters: 
-          - CertificateArn
-      - Label: 
-          default: 'Notification Configuration'
-        Parameters: 
-          - AlarmLevel
-          - CustomAlarmName
-          - SNSTopicArn
-      - Label: 
-          default: 'Tag Configuration'
-        Parameters:
-          - Environment 
-          - TagKey
-          - TagValue
-
 Parameters:
   AlarmLevel:
     Type: String

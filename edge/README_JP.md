@@ -35,13 +35,15 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** に **SSL証明書** が紐付けられます。 |
+| CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 追加メトリクスが有効化されます。 |
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
 | CloudFrontDefaultRootObject | String | index.html | | CloudFront Viewer Protocol Policy |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
-| CloudFrontOriginAccessControl | String | | 条件付き | The origin access control |
+| CloudFrontOriginAccessControlId | String | | 条件付き | The origin access control |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
 | CloudFrontOriginShield | true or false | false | ○ | Origin Shield 有効化フラグ |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 
@@ -52,6 +54,8 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
+| LogBucketName | String | | 条件付き | ログを格納するバケット名 |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | OpenSearch Service のインスタンスタイプ |
 | RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | OpenSearch Service のマスタータイプ |
@@ -60,7 +64,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | OpenSearch Service のパスワード |
 | RealtimeDashboardElasticsearchVersion | String | OpenSearch_2.13 | ○ | OpenSearch Service のバージョン |
 | RealtimeDashboardKinesisFirehoseStreamNameSuffix | String | default | ○ | Kinesis Firehose ストリームの接頭語 |
-| RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
+| **RealtimeDashboardState** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
 | RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
@@ -69,8 +73,6 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | UserAgent | String | | | 'User-Agent' ヘッダが含む秘密鍵 | 
-| Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
-| LogBucketName | String | | 条件付き | ログを格納するバケット名 |
 | WebACLArn | String | | | WebACL のARN |
 
 ### Realtime Dashboard
@@ -151,5 +153,6 @@ PUT _template/custom_template
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | Scope | REGIONAL or CLOUDFRONT | REGIONAL | ○ | CloudFrontかリージョン単位のリソースであるかの指定 |
 | **TargetResourceArn** | String | | ○ | Web ACL と関連付けるリソースのARN |

@@ -7,6 +7,75 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/monitoring`` provides ``CloudWatch alarm`` for major AWS services.
 
+## AWS Certificate Manager
+
+The template creates the following alarms.
+
+| Namespace | MetricName | Threshold |
+| --- | --- | --- |
+| AWS/CertificateManager | **DaysToExpiry** | =<30 |
+| AWS/CertificateManager | **DaysToExpiry** | =<7 |
+| AWS/CertificateManager | **DaysToExpiry** | =<1 |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| `CertificateArn` | String | | ○ | The Certificate ARN |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel : String
+    CertificateArn : String
+    CustomAlarmName : String
+    CustomAlarmName : String
+    SNSTopicArn : Integer
+    Environment : Integer
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/acm.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel : String
+    CertificateArn : String
+    CustomAlarmName : String
+    CustomAlarmName : String
+    SNSTopicArn : Integer
+    Environment : Integer
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## API Gateway
 
 The template creates the following alarms.
@@ -22,6 +91,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `ApiMethodName` | GET / POST / DELETE / OPTIONS |  | ○ | |
 | `ApiName` | String |  | ○ | The API Gateway api name |
 | `ApiStageName` | String | | ○ | The API Gateway stage name |
@@ -43,6 +113,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: String
     ApiMethodName : String
     ApiName : String
     ApiStageName : String
@@ -69,7 +140,8 @@ Properties:
     SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
-  Parameters: 
+  Parameters:
+    AlarmLevel: String
     ApiMethodName : String
     ApiName : String
     ApiResourcePath : String
@@ -78,6 +150,131 @@ Properties:
     ApiCount : Integer
     LatencyThreshold : Integer
     ApiMethodName : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## AppFlow
+
+The template creates the following alarms.
+
+| Namespace | MetricName | FlowName | Threshold |
+| --- | --- | --- | --- |
+| AWS/AppFlow | **FlowExecutionsFailed** | `FlowName` | At least once a minute | 
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `FlowName` | String | | ○ | The AppFlow flow name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    FlowName : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appflow.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appflow
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    FlowName : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Application Load Balancer
+
+The template creates the following alarms.
+
+| Namespace | MetricName | TargetGroup | LoadBalancer | Threshold |
+| --- | --- | --- | --- | --- |
+| AWS/ApplicationELB | **UnHealthyHostCount** | `TargetGroup` | `LoadBalancer` | At least once a minute | 
+| AWS/ApplicationELB | **HTTPCode_Target_5XX_Count** | `TargetGroup` | `LoadBalancer` | At least once a minute | 
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `TargetGroup` | String | | ○ | The target group id |
+| `LoadBalancer` | String | | ○ | The load balancer name |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel : String
+    CustomAlarmName : String
+    TargetGroup: String
+    LoadBalancer: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/application-elb.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-application-elb
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel : String
+    CustomAlarmName : String
+    TargetGroup: String
+    LoadBalancer: String
     Environment: String
     TagKey: String
     TagValue: String
@@ -97,6 +294,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `Fleet` | String | | ○ | The name of the AppStream Fleet |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
@@ -114,6 +312,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: String
     CustomAlarmName : String
     Fleet : String
     SNSTopicArn : String
@@ -137,6 +336,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: String
     CustomAlarmName : String
     Fleet : String
     SNSTopicArn : String
@@ -614,6 +814,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `DomainName` | String | | ○ | The domain name |
 | `FreeStorageSpaceThreshold` | Number | | ○ | The threshold of the free storage space (MB) |
@@ -632,6 +833,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters:
+    AlarmLevel: String
     CustomAlarmName : String
     DomainName: String
     FreeStorageSpaceThreshold: Integer
@@ -656,6 +858,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: String
     CustomAlarmName : String
     DomainName: String
     FreeStorageSpaceThreshold: Integer
@@ -745,6 +948,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `EventsRuleName` | String | | ○ | The EventBridge rule name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
@@ -762,6 +966,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: String
     CustomAlarmName : String
     EventsRuleName: String
     SNSTopicArn : String
@@ -785,6 +990,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: String
     CustomAlarmName : String
     EventsRuleName: String
     SNSTopicArn : String
@@ -809,6 +1015,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | The threshold of IteratorAgeMilliseconds |
 | `KinesisStreamName` | String | | ○ | The Kinesis stream name |
@@ -828,6 +1035,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel : String
     CustomAlarmName : String
     IteratorAgeMillisecondsThreshold: Integer
     KinesisStreamName : String
@@ -853,6 +1061,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel : String
     CustomAlarmName : String
     IteratorAgeMillisecondsThreshold: Integer
     KinesisStreamName : String
@@ -879,6 +1088,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `IteratorAgeMillisecondsThreshold` | Integer | 30000 | ○ | The threshold of IteratorAgeMilliseconds |
 | `KinesisStreamName` | String | | ○ | The Kinesis stream name |
@@ -898,6 +1108,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: !Ref AlarmLevel
     CustomAlarmName : String
     IteratorAgeMillisecondsThreshold: Integer
     KinesisStreamName: String
@@ -923,6 +1134,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: !Ref AlarmLevel
     CustomAlarmName : String
     IteratorAgeMillisecondsThreshold: Integer
     KinesisStreamName: String
@@ -1071,6 +1283,81 @@ Properties:
     SourceName: String
     SourceARN: String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## MediaConnect (Source)
+
+The template creates the following alarms.
+
+| Namespace | MetricName | SourceARN | Threshold |
+| --- | --- | --- | --- |
+| AWS/MediaConnect | **SourcePTSError** | `SourceARN` | At least once a minute |
+| AWS/MediaConnect | **SourceCRCError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePIDError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceCATError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceTSByteError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePMTError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceTSSyncLoss** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePATError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceTransportError** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourceDroppedPackets** | `SourceARN` | At least once a minute | 
+| AWS/MediaConnect | **SourcePacketLossPercent** | `SourceARN` | > 0 | 
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom alram name |
+| `SourceName` | String |  | ○ | The source name |
+| `SourceARN` | String |  | ○ | The source ARN |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName: String
+    SourceName : String
+    SourceARN: String
+    SNSTopicArn: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconnect-source
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName: String
+    SourceName : String
+    SourceARN: String
+    SNSTopicArn: String
     Environment: String
     TagKey: String
     TagValue: String
@@ -1228,6 +1515,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `Environment` | String | production | | The value of `environment` tag |
@@ -1244,6 +1532,7 @@ Properties:
   NotificationARNs: 
     - String
   Parameters: 
+    AlarmLevel: String
     CustomAlarmName : String
     SNSTopicArn : String
     Environment: String
@@ -1265,7 +1554,8 @@ Properties:
     SemanticVersion: 2.2.7
   NotificationARNs: 
     - String
-  Parameters: 
+  Parameters:
+    AlarmLevel: String 
     CustomAlarmName : String
     SNSTopicArn : String
     Environment: String
@@ -1330,6 +1620,66 @@ Properties:
     CustomAlarmName : String
     SNSTopicArn : String
     SNSTopicName: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## SSM Run Command
+
+The template creates the following alarms.
+
+| Namespace | MetricName | Threshold |
+| --- | --- | --- | --- | --- |
+| AWS/SSM-RunCommand | `CommandsDeliveryTimedOut` | At least once a minute | 
+| AWS/SSM-RunCommand | `CommandsFailed` | At least once a minute | 
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ssm-command.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
     Environment: String
     TagKey: String
     TagValue: String

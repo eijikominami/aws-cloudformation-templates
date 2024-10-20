@@ -50,7 +50,7 @@ Metadata:
           default: 'Microsoft Active Directory Configuration'
         Parameters: 
           - ActiveDirectoryAccountNameForAppStream
-          - ActiveDirectorAddresses
+          - ActiveDirectoryAddresses
           - ActiveDirectoryEdition
           - ActiveDirectoryEnableSso
           - ActiveDirectoryName
@@ -75,7 +75,7 @@ Parameters:
     Type: String
     Default: appstream
     Description: The user name of the account [APPSTREAM]
-  ActiveDirectorAddresses:
+  ActiveDirectoryAddresses:
     Type: CommaDelimitedList
     Default: ''
     Description: The IPv4 addresses of Active Directory [APPSTREAM] 
@@ -320,7 +320,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -363,7 +363,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -526,7 +526,7 @@ Resources:
         DirectoryAddresses: !If
           - CreateDirectory
           - !GetAtt MicrosoftAD.Outputs.MicrosoftAdDnsIpAddresses
-          - !Join [ ',', !Ref ActiveDirectorAddresses ]
+          - !Join [ ',', !Ref ActiveDirectoryAddresses ]
         DirectoryName: !Ref ActiveDirectoryName
         OrganizationalUnitDistinguishedNames: !Ref OrganizationalUnitDistinguishedNamesForAppStream
         ImageBuilderImageName: !Ref AppStreamImageBuilderImageName
@@ -563,7 +563,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -580,7 +580,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -755,7 +755,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.7
+        SemanticVersion: 2.2.8
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

@@ -18,6 +18,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `DirectoryId` | String | | ○ | The id of the directory |
 | `DomainControllerIp` | String | | ○ | The IP of the domain controller |
@@ -46,6 +47,7 @@ cloudwatch-alarm-about-directoryservice は、AWS Directory Service に関する
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `DirectoryId` | String | | ○ | ディレクトリの ID |
 | `DomainControllerIp` | String | | ○ | ドメインコントローラの IP |

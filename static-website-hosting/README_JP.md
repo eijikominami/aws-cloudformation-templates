@@ -98,22 +98,28 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AccountIdForAnalysis | String | | | 転送先の分析用AWSアカウント |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | BucketNameForAnalysis | String | | | 転送先の分析用 S3 バケット |
 | BucketNameForArtifact | String | | | アーティファクトを保存する S3 バケット名 |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** に **SSL証明書** が紐付けられます。 |
-| **DomainName** | String | | ○ | ドメイン名 |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 追加のメトリクスが有効化されます。 |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL |  Number | 31536000 | ○ | CloudFront Maximum TTL |
 | CloudFrontViewerProtocolPolicy | allow-all / redirect-to-https / https-only | redirect-to-https | ○ | |
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
-| HlsBucket | String | | | HLSファイルの送信バケット名 |
 | CloudFrontSecondaryOriginId | String | | | SecondaryOriginIdを指定した場合、**CloudFront** に **セカンダリS3バケット** が紐付けられます。 |
 | CloudFrontRestrictViewerAccess | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、**CloudFront** の **Restrict Viewer Access** が有効化されます。 |
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
+| CloudWatchAppicationSignals | ENABLED / DISABLED | ENABLED | | ENABLEDを指定した場合、**Internet Monitor** と **CloudWatch Synthetics** が有効化されます。
+| CodeStarConnectionArn | String | | | CodeStar connection の ARN |
+| **DomainName** | String | | ○ | ドメイン名 |
+| GitHubOwnerNameForWebsite | String | | | コンテンツリポジトリの GitHub オーナー名 |
+| GitHubRepoNameForWebsite | String | | | コンテンツリポジトリの GitHub リポジトリ名 |
+| GitHubBranchNameForWebsite | String | | | コンテンツリポジトリの GitHub ブランチ名 |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | OpenSearch Service のインスタンスタイプ |
 | RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | OpenSearch Service のマスタータイプ |
@@ -128,7 +134,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
-| Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | WebACLArn | String | | | WebACL のARN |
 
 ### 手動設定

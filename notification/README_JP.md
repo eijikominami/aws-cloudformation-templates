@@ -130,7 +130,7 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| CloudTrailAdditionalFilters | String | | 追加の CloudWatch Logs メトリクスフィルター |
+| CloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | CloudTrailLogGroup | | | | ロググループを指定した場合、``Unauthorized API Calls`` イベントの詳細がSlackによって送信されます。 |
 | Encrypt | String | DISABLED | ○ | ENABLEDを指定した場合、AWS KMS カスタムキーで SlackのHook URL を暗号化します。 |
 | **HookUrlForDeployment** | String | | | Slack デプロイチャンネルのHook URL | 
@@ -149,7 +149,7 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | SupportEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Suport に関するイベントルールを作成します。 |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ |ENABLEDを指定した場合、Tag Events に関するイベントルールを作成します。 |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Trusted Advisor に関するイベントルールを作成します。 |
-| UnauthorizedApiCallsCloudWatchAlarmName | | UnauthorizedApiCallsCloudWatchAlarmName | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
+| UnauthorizedApiCallsCloudWatchAlarmName | String | | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
 | SNSForAlertArn | String | | | アラート用 Amazon SNS トピックの ARN | 
 | SNSForAlertArn | String | | | CI/CD用 Amazon SNS トピックの ARN | 
 | SNSForDeploymentArn | String | | | デプロイ用 Amazon SNS トピックの ARN |

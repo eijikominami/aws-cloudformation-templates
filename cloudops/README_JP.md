@@ -37,6 +37,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | **ApplicationInsights** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`ApplicationInsights` スタックがデプロイされます。 |
 | CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | CodeGuru で使用する GitHub オーナー名とリポジトリ名 |
 | **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`IncidentManager` スタックがデプロイされます。 |
@@ -84,9 +85,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **AdminAccountId** | String | | | AWS Systems Manager Automation を設定する AWS アカウント ID |
+| AdminAccountId | String | | | AWS Systems Manager Automation を設定する AWS アカウント ID |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | AWS Systems Manager Incident Manager を有効化するかどうか |
-| **OrganizationId** | String | | | The Organizations ID |
+| OrganizationId | String | | | The Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
 
 AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて  **Systems Manager** と **AWS Trusted Advisor** の `アクセス有効化` を設定してください。
@@ -104,6 +106,14 @@ AWS Systems Manager Explorer を `Shared Services` アカウントで使用す�
 | Email | String | | | Eメールアドレス |
 | PhoneNumber | String | | | 電話番号 |
 | WorkloadName | String | Workload | ○ | ワークロード名 |
+
+## Amazon CloudWatch Internet Monitor
+
+Tこのテンプレートは、``Amazon CloudWatch Internet Monitor`` を作成します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
+| --- | --- | --- | --- | --- |
+| **ResourceNames** | String |  | ○ | モニターに追加するリソース |
 
 ## Amazon CloudWatch Synthetics
 

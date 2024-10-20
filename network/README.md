@@ -54,24 +54,30 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
+| CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | CustomerGatewayOutsideIpAddress | String | | |  The Internet-routable IP address for the customer gateway's outside interface |
+| DnsIpAz1 | String | 10.0.8.53 | | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz2 | String | 10.0.10.53 | | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz3 | String | 10.0.12.53 | | The IPv4 address that you want to use for DNS queries |
 | DomainName | String | | | The name of the domain |
 | FirewallCidrBlockForEgressAz1 | String | 10.0.0.128/26 | | The firewall subnet CIDR block for Egress at AZ1 |
-| FirewallCidrBlockForEgressAz2 | String | 10.0.4.128/26 | | The firewall subnet CIDR block for Egress at AZ2 | 
-| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network  | 
+| FirewallCidrBlockForEgressAz2 | String | 10.0.2.128/26 | | The firewall subnet CIDR block for Egress at AZ2 | 
+| FirewallCidrBlockForEgressAz3 | String | 10.0.4.128/26 | | The firewall subnet CIDR block for Egress at AZ3 |
+| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network | 
 | OnpremDnsIp | String | | | One IPv4 address that you want to forward DNS queries to |
-| PrincipalsToAssociateWithIPAM | String | | | Specifies a list of one or more principals to associate with IPAM | 
-| PrincipalsToAssociateWithRoute53ResolverRule | String | | | Specifies a list of one or more principals to associate with Route 53 Resolver Rule | 
-| PrincipalsToAssociateWithTransitGateway | String | | | Specifies a list of one or more principals to associate with Transit Gateway | 
+| OrganizationId | String | | | The Organizations ID |
 | PrivateCidrBlockForDNSAz1 | String | 10.0.8.0/24 | ○ | The private subnet CIDR block for DNS at AZ1 |
-| PrivateCidrBlockForDNSAz2 | String | 10.0.12.0/24 | ○ | The private subnet CIDR block for DNS at AZ2 |
+| PrivateCidrBlockForDNSAz2 | String | 10.0.10.0/24 | ○ | The private subnet CIDR block for DNS at AZ2 |
+| PrivateCidrBlockForDNSAz3 | String | 10.0.12.0/24 | ○ | The private subnet CIDR block for DNS at AZ3 |
 | PublicCidrBlockForEgressAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block for Egress at AZ1 | 
-| PublicCidrBlockForEgressAz2 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block for Egress at AZ2 | 
-| Route53ResolverDirection | BOTH / INBOUND_ONLY / OUTBOUND_ONLY / DISABLED | DISABLED | ○ | Indicates whether the Route 53 Resolver endpoint allows inbound or outbound DNS queries |
+| PublicCidrBlockForEgressAz2 | String | 10.0.2.0/26 | ○ | The public subnet CIDR block for Egress at AZ2 | 
+| PublicCidrBlockForEgressAz3 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block for Egress at AZ3 | 
 | TransitCidrBlockForEgressAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block for Egress at AZ1 | 
 | TransitCidrBlockForEgressAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block for Egress at AZ2 | 
 | TransitCidrBlockForDNSAz1 | String | 10.0.11.0/24 | ○ | The transit subnet CIDR block for DNS at AZ1 | 
-| TransitCidrBlockForDNSAz2 | String | 10.0.15.0/24 | ○ | The transit subnet CIDR block for DNS at AZ2 | 
+| TransitCidrBlockForDNSAz2 | String | 10.0.13.0/24 | ○ | The transit subnet CIDR block for DNS at AZ2 | 
+| TransitCidrBlockForDNSAz3 | String | 10.0.15.0/24 | ○ | The transit subnet CIDR block for DNS at AZ3 | 
 | TransitGatewayDefaultRouteTableId | String | | | The id of the default Transit Gateway Route Table | 
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
 | VPCCidrBlockForEgress | String | 10.0.0.0/21 | ○ | The Egress VPC CIDR block | 
@@ -89,6 +95,7 @@ This template configures ``Availability Zone``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | **AvailabilityZone** | AWS::EC2::AvailabilityZone::Name | | ○ | The Availability Zone name |
 | InternetGatewayId | String | | | The Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable NetworkAddressTranslation (NAT) |
@@ -99,20 +106,29 @@ This template configures ``Availability Zone``.
 | SubnetFirewallCidrBlock | String | | | The firewall subnet CIDR block |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | The VPC id  |
 
-### Egress/Ingress VPC
+### Egress VPC
 
-This template configures ``Egress/Ingress Central VPC``.
+This template configures ``Egress Central VPC``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26| ○ | The firewall subnet CIDR block at AZ1 | 
-| SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26| ○ | The firewall subnet CIDR block at AZ2 | 
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
+| CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
+| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network | 
+| ResolverInboundRuleId | String |  |  | The ID of the Resolver inbound rule that you associated with the VPC that is specified by VPCId| 
+| ResolverOutboundRuleId | String |  |  | The ID of the Resolver outbound rule that you associated with the VPC that is specified by VPCId | 
+| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | The firewall subnet CIDR block at AZ1 | 
+| SubnetFirewallCidrBlockForAz2 | String | 10.0.2.128/26 | ○ | The firewall subnet CIDR block at AZ2 | 
+| SubnetFirewallCidrBlockForAz3 | String | 10.0.4.128/26 | ○ | The firewall subnet CIDR block at AZ3 | 
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | The public subnet CIDR block at AZ1 |
-| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block at AZ2 |
+| SubnetPublicCidrBlockForAz2 | String | 10.0.2.0/26 | ○ | The public subnet CIDR block at AZ2 |
+| SubnetPublicCidrBlockForAz3 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block at AZ3 |
 | SubnetTransitCidrBlockForAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block at AZ1 |
-| SubnetTransitCidrBlockForAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block at AZ2 |
+| SubnetTransitCidrBlockForAz2 | String | 10.0.2.64/26 | ○ | The transit subnet CIDR block at AZ2 |
+| SubnetTransitCidrBlockForAz3 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block at AZ3 |
 | TransitGatewayDefaultRouteTableId | String | | | The id of the default Transit Gateway Route Table | 
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
+| **TransitGatewayId** | String | | ○ | The ID of the transit gateway | 
 | VPCCidrBlock | String | 10.0.0.0/21 | ○ | The VPC CIDR block | 
 
 ### Global Accelerator
@@ -149,6 +165,8 @@ This template configures ``Network Firewall``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
+| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network | 
 | SubnetIdAz1 | String | | | The firewall subnet id in AZ1 |
 | SubnetIdAz2 | String | | | The firewall subnet id in AZ2 |
 | SubnetIdAz3 | String | | | The firewall subnet id in AZ3 |
@@ -160,14 +178,19 @@ This template configures ``Route 53 Resolver``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| Direction | BOTH / INBOUND_ONLY / OUTBOUND_ONLY / DISABLED | DISABLED | ○ | Indicates whether the Route 53 Resolver endpoint allows inbound or outbound DNS queries |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
+| DnsIpAz1 | String | 10.0.8.53 | | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz2 | String | 10.0.10.53 | | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz3 | String | 10.0.12.53 | | The IPv4 address that you want to use for DNS queries |
 | DomainName | String | | | The name of the domain |
 | OnpremDnsIp | String | | | One IPv4 address that you want to forward DNS queries to |
 | PrincipalsToAssociateWithRoute53ResolverRule | String | | | Specifies a list of one or more principals to associate with Route 53 Resolver Rule |
 | SubnetPrivateCidrBlockForAz1 | String | 10.0.8.0/24 | ○ | The private subnet CIDR block at AZ1 |
-| SubnetPrivateCidrBlockForAz2 | String | 10.0.12.0/24 | ○ | The private subnet CIDR block at AZ2 |
-| TransitCidrBlockForDNSAz1 | String | 10.0.11.0/24 | ○ | The transit subnet CIDR block at AZ1 | 
-| TransitCidrBlockForDNSAz2 | String | 10.0.15.0/24 | ○ | The transit subnet CIDR block at AZ2 | 
+| SubnetPrivateCidrBlockForAz2 | String | 10.0.10.0/24 | ○ | The private subnet CIDR block at AZ2 |
+| SubnetPrivateCidrBlockForAz3 | String | 10.0.12.0/24 | ○ | The private subnet CIDR block at AZ3 |
+| SubnetTransitCidrBlockForAz1 | String | 10.0.11.0/24 | ○ | The transit subnet CIDR block at AZ1 | 
+| SubnetTransitCidrBlockForAz2 | String | 10.0.13.0/24 | ○ | The transit subnet CIDR block at AZ2 | 
+| SubnetTransitCidrBlockForAz3 | String | 10.0.15.0/24 | ○ | The transit subnet CIDR block at AZ3 | 
 | **TransitGatewayId** | String | | ○ | The ID of the transit gateway | 
 | VPCCidrBlock | String | 10.0.8.0/21 | ○ | The VPC CIDR block | 
 

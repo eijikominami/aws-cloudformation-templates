@@ -42,12 +42,13 @@ You can provide optional parameters as follows.
 | AccountIdForArchive | String | | | The AWS account id for log archive |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
-| ActiveDirectoryName | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
+| **ActiveDirectoryName** | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
 | ActiveDirectoryPassword | String | Password1+ | ○ | The password for the default administrative user named Admin |
-| ActiveDirectoryShortName | String | CORP | ○ | The NetBIOS name for your domain |
+| **ActiveDirectoryShortName** | String | CORP | ○ | The NetBIOS name for your domain |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.64/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.64/26 | ○ | The public subnet CIDR block at AZ2 |
 | ActiveDirectorySubnetCidrBlockForAz3 | String | 10.3.128.64/26 | ○ | The public subnet CIDR block at AZ3 |
+| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
 | DomainName | String | | | The private domain name which this VPC has |
 | FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Whether to enable FluentBit for collecting syslog format logs |
@@ -73,12 +74,12 @@ This template configures FluentBit for Syslog.
 | AppPort | Number | 514 | ○ | The port on which the container is listening |
 | BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
 | Cpu | Number | 1024 | ○ | The number of cpu units reserved for the container |
-| CpuArchitecture | String | ARM64 | The CPU architecture |
+| CpuArchitecture | String | ARM64 | ○ | The CPU architecture |
 | DesiredCapacity | String | 1 | ○ | The number of instantiations |
+| Memory | String | 3072 | ○ | The amount (in MiB) of memory to present to the container |
 | SubnetIdAz1 | AWS::EC2::Subnet::Id | | ○ | The subnet id at AZ1 |
 | SubnetIdAz2 | AWS::EC2::Subnet::Id | | ○ | The subnet id at AZ2 |
 | SubnetIdAz3 | AWS::EC2::Subnet::Id | | ○ | The subnet id at AZ3 |
-| Memory | String | 3072 | ○ | The amount (in MiB) of memory to present to the container |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | The VPC CIDR block |
 | VPCId | AWS::EC2::VPC::Id | | ○ | VPC Id | 
 
