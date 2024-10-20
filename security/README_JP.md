@@ -117,6 +117,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | AuditAccountId | String | | | 監査アカウントの ID |
 | AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | | ENABLEDを指定した場合、AWS CloudTrail が有効化されます。 |
 | AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
@@ -130,6 +131,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、 IAM Access Analyzer が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
 | LogArchiveAccountId | String | | | ログアーカイブアカウントの ID |
+| OrganizationId | String | | | AWS Organizations の ID |
+| OrganizationsRootId | String | | | AWS Organizations のルート ID |
 | SecurityOUId | String | | | セキュリティ OU の ID |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、SIEM が有効化されます。 |
 | SIEMControlTowerLogBucketNameList | String | | | ログアーカイブアカウントの S3 ログバケット名。 **OpenSearch Service インストール後に指定。** |

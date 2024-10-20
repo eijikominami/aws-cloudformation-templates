@@ -130,7 +130,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
-| CloudTrailAdditionalFilters | String | | Additional expression of CloudWatch Logs metric filters |
+| CloudTrailAdditionalFilters | String | | | Additional expression of CloudWatch Logs metric filters |
 | CloudTrailLogGroup | | | | If it is not empty, Slack sends details about ``Unauthorized API Calls`` logs |
 | Encrypt | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Slack hook urls are encrypted by an AWS KMS Custom key |
 | **HookUrlForDeployment** | String | | | Slack Hook Url for deployment information | 
@@ -149,7 +149,7 @@ You can provide optional parameters as follows.
 | SupportEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about AWS Support is enabled |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Tag Events is enabled |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Trusted Advisor is enabled |
-| UnauthorizedApiCallsCloudWatchAlarmName | | UnauthorizedApiCallsCloudWatchAlarmName | ○ | The CloudWatch Alarm name to notify unauthorized API calls |
+| UnauthorizedApiCallsCloudWatchAlarmName | String | | ○ | The CloudWatch Alarm name to notify unauthorized API calls |
 | SNSForAlertArn | String | | | Amazon SNS Topic ARN for alert | 
 | SNSForAlertArn | String | | | Amazon SNS Topic ARN for CI/CD information | 
 | SNSForDeploymentArn | String | | | Amazon SNS Topic ARN for deployment information |

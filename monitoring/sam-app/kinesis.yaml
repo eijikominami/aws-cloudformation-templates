@@ -2,28 +2,6 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for Amazon Kinesis Data Streams
 
-Metadata: 
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-      - Label: 
-          default: 'Kinesis Data Streams Configuration'
-        Parameters: 
-          - KinesisStreamName
-          - IteratorAgeMillisecondsThreshold
-          - NumberOfPutRecordThreshold
-      - Label: 
-          default: 'Notification Configuration'
-        Parameters: 
-          - AlarmLevel
-          - CustomAlarmName
-          - SNSTopicArn
-      - Label: 
-          default: 'Tag Configuration'
-        Parameters:
-          - Environment 
-          - TagKey
-          - TagValue
-
 Parameters:
   AlarmLevel:
     Type: String

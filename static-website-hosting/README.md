@@ -100,10 +100,10 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AccountIdForAnalysis | String | | | The AWS account id for log analysis |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | BucketNameForAnalysis | String | | | The Amazon S3 bucket name for log analysis |
 | BucketNameForArtifact | String | | | The bucket name artifact art stored |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
-| **DomainName** | String | | ○ | The CNAME attached to CloudFront |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, additional metrics is enabled |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
@@ -116,6 +116,13 @@ You can provide optional parameters as follows.
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
+| CloudWatchAppicationSignals | ENABLED / DISABLED | ENABLED | | If it is ENABLED, Logging is enabled on **Internet Monitor** and **CloudWatch Synthetics**  |
+| CodeStarConnectionArn | String | | | The Amazon Resource Name (ARN) of the CodeStar connection |
+| **DomainName** | String | | ○ | The CNAME attached to CloudFront |
+| GitHubOwnerNameForWebsite | String | | | The GitHub owner name of the contents repository |
+| GitHubRepoNameForWebsite | String | | | The GitHub repository name of the contents repository |
+| GitHubBranchNameForWebsite | String | | | The Branch name of GitHub for the contents repository |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
 | RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
@@ -130,7 +137,6 @@ You can provide optional parameters as follows.
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3** |
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |
-| Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
 | WebACLArn | String | | | The ARN of Web ACL |
 
 ### Manual Deployment

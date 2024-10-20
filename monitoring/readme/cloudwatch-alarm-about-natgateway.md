@@ -19,6 +19,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `Environment` | String | production | | The value of `environment` tag |
@@ -46,6 +47,7 @@ cloudwatch-alarm-about-natgateway は、NAT Gateway に関する Amazon CloudWat
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `Environment` | String | production | | `environment` タグの値 |

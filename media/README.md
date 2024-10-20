@@ -91,16 +91,39 @@ You can provide optional parameters as follows.
 | SenderType | String | srt-listener | ○ | The protocol that is used by the source |
 | SrtCallerSourceListenerPort | Number | 2000 | | Source port for SRT-caller protocol |
 
+### MediaConnect (Output)
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| CidrAllowList | String | 0.0.0.0/0 | fujitsu-qos, srt-listener | The range of IP addresses that are allowed to initiate output requests to this flow |
+| DestinationIpAddressOrEntitlementArn | String | | srt-caller, zixi-push, rist, rtp-fec, rtp |  The IP address or the ARN of the the distination |
+| **FlowArn** | String | | ○ | The Amazon Resource Name (ARN) of the flow this output is attached to |
+| MinLatency | Number | 100 | srt-listener, srt-caller | The minimum latency in milliseconds for SRT-based streams |
+| **Name** | String | | ○ | The name of the VPC interface |
+| Port | Number | 9177 | fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp | The port to use when MediaConnect distributes content to the output |
+| Protocol | String | srt-listener | ○ | The protocol that is used by the source |
+
+### MediaConvert
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| AccelerationSettings | ENABLED/PREFERRED/DISABLED | DISABLED | ○ | Specify the conditions when the service will run your job with accelerated transcoding |
+| Category | String | Default | ○ | A category for the job template you are creating |
+| Name | String | Default | ○ | The name of the job template you are creating |
+| StatusUpdateInterval | Number | 60 | ○ | How often MediaConvert sends STATUS_UPDATE events to Amazon CloudWatch Events |
+
 ### MediaLive
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | AdMarker | ENABLED or DISABLED | DISABLED | ○ | Enable or disable ad marker |
+| ArchiveBucket | String | | | The S3 bucket Name LIVE-to-VOD contents are stored |
 | AudioBitrate | Number | 96000 | ○ | Average audio bitrate in bits/second |
 | AutoInputFailover | ENABLED or DISABLED | ENABLED | ○ | Enable or disable automatic input failover |
 | ChannelClass | STANDARD or SINGLE_PIPELINE | STANDARD | ○ | Select the class of channel you intend to attach this input to |
 | ElementalLinkId1 | String | | | The unique ID for the Elemental Link device | 
 | ElementalLinkId2 | String | | | The unique ID for the Elemental Link device |
+| ElementalLinkType | HD / UHD | HD | | The type for the Elemental Link device |
 | FramerateDenominator | Number | 1001 | ○ | Framerate denominator |
 | FramerateNumerator | Number | 30000 | ○ | Framerate numerator |
 | GopNumBFrames | Number | 3 | ○ | Number of B-frames between reference frames |
@@ -109,19 +132,20 @@ You can provide optional parameters as follows.
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264 Level |
 | Height | Number | 540 | ○ | Output video height, in pixels |
 | HlsBucket | String | | | The S3 bucket Name HLS files are sent |
-| InputType | RTMP / ELEMENTAL_LINK / S3 | ENABLED | ○ | Input type |
+| InputType | String | ENABLED | ○ | Input type |
 | InputStreamKey | String | stream | | A unique name for the location the RTMP stream is being pushed to |
 | InputVodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
+| InputWhitelistRules | String | 0.0.0.0/0 | ○ | A list of one or more IPv4 CIDR addresses to allow |
 | MediaPackageChannelId | String | | | The MediaPackage channel id |
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
 | OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | Output type |
+| OutputHlsBucket | String | | The S3 bucket Name HLS files are sent |
 | OutputRtmpRtpUrl1 | String | | | The rtmp url a stream sends to |
 | OutputRtmpStreamName1 | String | | | The rtmp stream name a stream sends to |
 | OutputRtmpRtpUrl2 | String | | | The rtmp url a stream sends to |
 | OutputRtmpStreamName2 | String | | | The rtmp stream name a stream sends to |
 | VideoBitrate | Number | 2200000 | ○ | Average video bitrate in bits/second |
 | Width | Number | 960 | ○ | Output video width, in pixels |
-| WhitelistRules | String | 0.0.0.0/0 | ○ | A list of one or more IPv4 CIDR addresses to allow |
 
 ### MediaPackage
 

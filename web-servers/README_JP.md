@@ -40,15 +40,16 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| AutoScalingMaxSize | Number | 1 | ○ | |
-| AutoScalingLoadBalancerType | None, application, network | None | ○ | 'None'を指定した場合、ELBは作成されません。 |
+| AccountIdForAnalysis | String | | | 転送先の分析用AWSアカウント |
 | ACMValidationMethod | String | DNS | 条件付き | ドメインの検証方法 |
 | ACMDomainName | String | | | 証明書のドメイン名 |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| AutoScalingMaxSize | Number | 1 | ○ | |
+| AutoScalingLoadBalancerType | None, application, network | None | ○ | 'None'を指定した場合、ELBは作成されません。 |
 | BucketNameForAnalysis | String | | | 転送先の分析用 S3 バケット |
 | BucketNameForArtifact | String | | | アーティファクトを保存する S3 バケット名 |
+| CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** もしくは **Elastic Load Balancer** に **SSL証明書** が紐付けられます。 |
-| DesiredCapacity | Number | 1 | ○ | | 
-| **DomainName** | String | | ○ | |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | |
 | CloudFrontMinimumTTL | Number | 0 | ○ | |
 | CloudFrontMaximumTTL |  Number | 31536000 | ○ | |
@@ -59,6 +60,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
+| CodeStarConnectionArn | String | | | CodeStar connection の ARN |
+| ComputeType | INSTANCE / CONTAINER / APPRUNNER | INSTANCE | ○ | コンピュート基盤 |
+| DesiredCapacity | Number | 1 | ○ | | 
+| DockerFilePath | String | | | Dockerfile のパス | 
 | DomainName | String | | | ドメイン名 | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | スナップショット作成時刻 (UTC) |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
@@ -66,7 +71,13 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2PatchingAt | Number | 3 | ○ | パッチ処理を開始する時刻 |
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
 | EC2VolumeSize | Number | 8 | ○ | |
+| GitHubOwnerNameForArtifact | String | | | Artifact の GitHub オーナー名 |
+| GitHubRepoNameForArtifact | String | | | Artifact の GitHub リポジトリ名 |
+| GitHubBranchNameForArtifact | String | | | Artifact の GitHub ブランチ名 |
+| GitHubBranchNameForBuildSpec | String | | | BuildSpec の GitHub ブランチ名 |
 | GlobalInfrastructure | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | | ○ | CloudFront や Global Accelerator を有効にするかどうか |
+| Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、ログ機能が有効化されます。 |
+| LogGroupNameTransferredToS3 | String | | | S3 にログを転送する CloudWatch Log Group 名 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | SubnetPrivateCidrBlockForAz1 | String | 10.1.0.0/24 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockForAz2 | String | 10.1.2.0/24 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
@@ -79,9 +90,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | SubnetTransitCidrBlockForAz3 | String | 10.1.5.128/25 | ○ | AZ3 の トランジットサブネットの CIDR ブロック |
 | TransitGatewayId | String | | | Transit Gateway の Id |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGatewayに転送するアドレス範囲 |
+| VPCCidrBlock | String | 10.1.0.0/21 | ○ | VPC の CIDR ブロック |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
 | WebACLArnForCloudFront | String | | | CloudFrontにアタッチするWAFのARN |
-| VPCCidrBlock | String | 10.1.0.0/21 | ○ | VPC の CIDR ブロック |
 
 ## トラブルシューティング
 

@@ -78,13 +78,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The centralize S3 bucket name for logging 
-  CostUsageReport:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Enable or disable AWS Config [required]
   CloudFrontErrorRateThreshold:
     Type: Number
     Default: 0
@@ -104,6 +97,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The target distribution ID monitored by CloudWatch Alarm
+  CostUsageReport:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable AWS Config [required]
   DomainName:
     Type: String
     Default: ''

@@ -54,24 +54,31 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabiliti
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | CustomerGatewayOutsideIpAddress | String | | | インターネットから疎通可能なカスタマーゲートウェイアドレス |
+| DnsIpAz1 | String | 10.0.8.53 | | Route53 に割り当てる IP アドレス |
+| DnsIpAz2 | String | 10.0.10.53 | | Route53 に割り当てる IP アドレス |
+| DnsIpAz3 | String | 10.0.12.53 | | Route53 に割り当てる IP アドレス |
 | DomainName | String | | | ドメイン名 |
 | FirewallCidrBlockForEgressAz1 | String | 10.0.0.128/26 | | AZ1 の Egress VPC Firewall サブネットの CIDR ブロック | 
-| FirewallCidrBlockForEgressAz2 | String | 10.0.4.128/26 | | AZ2 の Egress VPC Firewall サブネットの CIDR ブロック | 
+| FirewallCidrBlockForEgressAz2 | String | 10.0.2.128/26 | | AZ2 の Egress VPC Firewall サブネットの CIDR ブロック | 
+| FirewallCidrBlockForEgressAz3 | String | 10.0.4.128/26 | | AZ3 の Egress VPC Firewall サブネットの CIDR ブロック | 
 | HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
 | OnpremDnsIp | String | | | DNS クエリを転送するオンプレミスのIPアドレス |
-| PrincipalsToAssociateWithIPAM | String | | | IPAM に関連付ける 1 つ以上のプリンシパルのリスト | 
-| PrincipalsToAssociateWithRoute53ResolverRule | String | | | Route 53 Resolver Rule に関連付ける 1 つ以上のプリンシパルのリスト | 
-| PrincipalsToAssociateWithTransitGateway | String | | | Transit Gateway に関連付ける 1 つ以上のプリンシパルのリスト | 
+| OrganizationId | String | | | AWS Organizations の ID |
 | PrivateCidrBlockForDNSAz1 | String | 10.0.8.0/24 | ○ | AZ1 の DNS VPC Private サブネットの CIDR ブロック |
-| PrivateCidrBlockForDNSAz2 | String | 10.0.12.0/24 | ○ | AZ2 の DNS VPC Private サブネットの CIDR ブロック |
+| PrivateCidrBlockForDNSAz2 | String | 10.0.10.0/24 | ○ | AZ2 の DNS VPC Private サブネットの CIDR ブロック |
+| PrivateCidrBlockForDNSAz3 | String | 10.0.12.0/24 | ○ | AZ3 の DNS VPC Private サブネットの CIDR ブロック |
 | PublicCidrBlockForEgressAz1 | String | 10.0.0.0/26 | ○ | AZ1 の Egress VPC パブリックサブネットの CIDR ブロック | 
-| PublicCidrBlockForEgressAz2 | String | 10.0.4.0/26 | ○ | AZ2 の Egress VPC パブリックサブネットの CIDR ブロック | 
-| Route53ResolverDirection | BOTH / INBOUND_ONLY / OUTBOUND_ONLY / DISABLED | DISABLED | ○ | Route 53 が受け付ける DNS クエリ |
+| PublicCidrBlockForEgressAz2 | String | 10.0.2.0/26 | ○ | AZ2 の Egress VPC パブリックサブネットの CIDR ブロック | 
+| PublicCidrBlockForEgressAz3 | String | 10.0.4.0/26 | ○ | AZ3 の Egress VPC パブリックサブネットの CIDR ブロック | 
 | TransitCidrBlockForEgressAz1 | String | 10.0.0.64/26 | ○ | AZ1 の Egress VPC Transit サブネットの CIDR ブロック | 
-| TransitCidrBlockForEgressAz2 | String | 10.0.4.64/26 | ○ | AZ2 の Egress VPC Transit サブネットの CIDR ブロック | 
+| TransitCidrBlockForEgressAz2 | String | 10.0.2.64/26 | ○ | AZ2 の Egress VPC Transit サブネットの CIDR ブロック | 
+| TransitCidrBlockForEgressAz3 | String | 10.0.4.64/26 | ○ | AZ3 の Egress VPC Transit サブネットの CIDR ブロック | 
 | TransitCidrBlockForDNSAz1 | String | 10.0.11.0/24 | ○ | AZ1 の DNS VPC Transit サブネットの CIDR ブロック | 
-| TransitCidrBlockForDNSAz2 | String | 10.0.15.0/24 | ○ | AZ2 の DNS VPC Transit サブネットの CIDR ブロック | 
+| TransitCidrBlockForDNSAz2 | String | 10.0.13.0/24 | ○ | AZ2 の DNS VPC Transit サブネットの CIDR ブロック | 
+| TransitCidrBlockForDNSAz3 | String | 10.0.15.0/24 | ○ | AZ3 の DNS VPC Transit サブネットの CIDR ブロック | 
 | TransitGatewayDefaultRouteTableId | String | | | Transit Gateway のデフォルトルートテーブル ID | 
 | TransitGatewayDestinationCidrBlock | String | | | Transit Gateway に転送するサブネットの CIDR ブロック | 
 | VPCCidrBlockForEgress | String | 10.0.0.0/21 | ○ | Egress VPC の CIDR ブロック | 
@@ -89,6 +96,7 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | **AvailabilityZone** | AWS::EC2::AvailabilityZone::Name | | ○ | AZ名 |
 | InternetGatewayId | String | | | Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| | NAT Gateway を作成するかどうか |
@@ -99,20 +107,29 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | SubnetFirewallCidrBlock | String | | | Firewall サブネットのCIDRブロック |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | VPC id  |
 
-### Egress/Ingress VPC
+### Egress VPC
 
-このテンプレートは、 ``Egress/Ingress Central VPC`` を構成します。
+このテンプレートは、 ``Egress Central VPC`` を構成します。
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26| ○ | AZ1 の Firewall サブネットの CIDR ブロック | 
-| SubnetFirewallCidrBlockForAz2 | String | 10.0.4.128/26| ○ | AZ2 の Firewall サブネットの CIDR ブロック | 
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| CentralizedLogBucketName | String | | | 集約ログバケット名 |
+| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
+| ResolverInboundRuleId | String |  |  | VPC に紐づけられたリゾルバーインバウンド ID | 
+| ResolverOutboundRuleId | String |  |  | VPC に紐づけられたリゾルバーアウトバンド ID | 
+| SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | AZ1 の Firewall サブネットの CIDR ブロック | 
+| SubnetFirewallCidrBlockForAz2 | String | 10.0.2.128/26 | ○ | AZ2 の Firewall サブネットの CIDR ブロック | 
+| SubnetFirewallCidrBlockForAz3 | String | 10.0.4.128/26 | ○ | AZ3 の Firewall サブネットの CIDR ブロック | 
 | SubnetPublicCidrBlockForAz1 | String | 10.0.0.0/26 | ○ | AZ1 の Public サブネットの CIDR ブロック |
-| SubnetPublicCidrBlockForAz2 | String | 10.0.4.0/26 | ○ | AZ2 の Public サブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz2 | String | 10.0.2.0/26 | ○ | AZ2 の Public サブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz3 | String | 10.0.4.0/26 | ○ | AZ3 の Public サブネットの CIDR ブロック |
 | SubnetTransitCidrBlockForAz1 | String | 10.0.0.64/26 | ○ | AZ1 の Transit サブネットの CIDR ブロック |
-| SubnetTransitCidrBlockForAz2 | String | 10.0.4.64/26 | ○ | AZ1 の Transit サブネットの CIDR ブロック |
+| SubnetTransitCidrBlockForAz2 | String | 10.0.2.64/26 | ○ | AZ2 の Transit サブネットの CIDR ブロック |
+| SubnetTransitCidrBlockForAz3 | String | 10.0.4.64/26 | ○ | AZ3 の Transit サブネットの CIDR ブロック |
 | TransitGatewayDefaultRouteTableId | String | | | Transit Gateway のデフォルトルートテーブル ID | 
 | TransitGatewayDestinationCidrBlock | String | | | Transit Gateway に転送するサブネットの CIDR ブロック | 
+| **TransitGatewayId** | String | | ○ | Transit Gateway の ID | 
 | VPCCidrBlock | String | 10.0.0.0/21 | ○ | VPC の CIDR ブロック | 
 
 ### Global Accelerator
@@ -149,6 +166,8 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| CentralizedLogBucketName | String | | | 集約ログバケット名 |
+| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
 | SubnetIdAz1 | String | | | The firewall subnet id in AZ1 |
 | SubnetIdAz2 | String | | | The firewall subnet id in AZ2 |
 | SubnetIdAz3 | String | | | The firewall subnet id in AZ3 |
@@ -160,14 +179,19 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| Direction | BOTH / INBOUND_ONLY / OUTBOUND_ONLY / DISABLED | DISABLED | ○ | Route 53 が受け付ける DNS クエリ |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| DnsIpAz1 | String | 10.0.8.53 | | Route53 に割り当てる IP アドレス |
+| DnsIpAz2 | String | 10.0.10.53 | | Route53 に割り当てる IP アドレス |
+| DnsIpAz3 | String | 10.0.12.53 | | Route53 に割り当てる IP アドレス |
 | DomainName | String | | | ドメイン名 |
 | OnpremDnsIp | String | | | DNS クエリを転送するオンプレミスのIPアドレス |
 | PrincipalsToAssociateWithRoute53ResolverRule | String | | | Route 53 に関連付ける 1 つ以上のプリンシパルのリスト |
 | SubnetPrivateCidrBlockForAz1 | String | 10.0.8.0/24 | ○ | AZ1 の Private サブネットの CIDR ブロック |
-| SubnetPrivateCidrBlockForAz2 | String | 10.0.12.0/24 | ○ | AZ2 の Private サブネットの CIDR ブロック |
-| TransitCidrBlockForDNSAz1 | String | 10.0.11.0/24 | ○ | AZ1 の Transit サブネットの CIDR ブロック | 
-| TransitCidrBlockForDNSAz2 | String | 10.0.15.0/24 | ○ | AZ2 の Transit サブネットの CIDR ブロック | 
+| SubnetPrivateCidrBlockForAz2 | String | 10.0.10.0/24 | ○ | AZ2 の Private サブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz3 | String | 10.0.12.0/24 | ○ | AZ3 の Private サブネットの CIDR ブロック |
+| SubnetTransitCidrBlockForAz1 | String | 10.0.11.0/24 | ○ | AZ1 の Transit サブネットの CIDR ブロック | 
+| SubnetTransitCidrBlockForAz2 | String | 10.0.13.0/24 | ○ | AZ2 の Transit サブネットの CIDR ブロック | 
+| SubnetTransitCidrBlockForAz3 | String | 10.0.15.0/24 | ○ | AZ3 の Transit サブネットの CIDR ブロック | 
 | **TransitGatewayId** | String | | ○ | Transit Gateway ID | 
 | VPCCidrBlock | String | 10.0.8.0/21 | ○ | VPC の CIDR ブロック | 
 

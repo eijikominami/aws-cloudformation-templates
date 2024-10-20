@@ -18,6 +18,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom alram name |
 | `ProjectName` | String |  | ○ | The CodeBuild project name |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
@@ -45,6 +46,7 @@ cloudwatch-alarm-about-codebuild は、AWS CodeBuild に関する Amazon CloudWa
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `ProjectName` | String |  | ○ | プロジェクト名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |

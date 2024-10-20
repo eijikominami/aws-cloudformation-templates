@@ -49,6 +49,8 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | The EC2 Image Id |
 | Edition | Standard / Enterprise | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | EnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
 | Name | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |

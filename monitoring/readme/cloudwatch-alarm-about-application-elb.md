@@ -19,6 +19,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `TargetGroup` | String | | ○ | The target group id |
 | `LoadBalancer` | String | | ○ | The load balancer name |
@@ -47,6 +48,7 @@ cloudwatch-alarm-about-application-elb は、Application Load Balancer に関す
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `TargetGroup` | String | | ○ | ターゲットグループID |
 | `LoadBalancer` | String | | ○ | ロードバランサー名 |

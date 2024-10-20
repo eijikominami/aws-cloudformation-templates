@@ -35,6 +35,7 @@ You can provide optional parameters as follows:
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
 | ActiveDirectoryAccountNameForAppStream | String | AppStreamAdmin | | The user name of the account | 
+| ActiveDirectoryAddresses | String | AppStreamAdmin | | The IPv4 addresses of Active Directory | 
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | conditional |  The edition of AWS Directory Service for Microsoft Active Directory  | 
 | ActiveDirectoryEnableSso  | true / false | true | conditional | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
 | ActiveDirectoryName | String | corp.example.com | conditional | The fully qualified domain name for the AWS Managed Microsoft AD directory |
@@ -42,6 +43,7 @@ You can provide optional parameters as follows:
 | ActiveDirectoryShortName | String | CORP | conditional | The NetBIOS name for your domain |
 | ActiveDirectoryIdForFSx | String | | conditional | The identifier of the AWS Directory Service directory for FSx |
 | ActiveDirectoryIdForWorkspaces | String | | conditional | The identifier of the AWS Directory Service directory for Workspaces |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | AppStreamImageBuilderImageName | String | | | The name of the image used to create the fleet |
 | AppStreamImageName | String | | | The name of the image used to create the fleet |
 | ComputeTypeName | GRAPHICS / GRAPHICSPRO / PERFORMANCE / POWER / POWERPRO / STANDARD / VALUE | PERFORMANCE | ○ | The compute type |

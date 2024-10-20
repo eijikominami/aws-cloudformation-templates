@@ -116,6 +116,7 @@ You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | AuditAccountId | String | | | The id of the audit account |
 | AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | | Enable or disable AWS CloudTrail |
 | AWSCloudTrailAdditionalFilters | String | | | Additional expression of CloudWatch Logs metric filters |
@@ -129,6 +130,8 @@ You can provide optional parameters as follows:
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | If it is ACCOUNT or ORGANIZATION, IAM Access Analyzer is enabled |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | LogArchiveAccountId | String | | | The id of the log archive account |
+| OrganizationId | String | | | The Organizations ID |
+| OrganizationsRootId | String | | | The root id of AWS Organizations |
 | SecurityOUId | String | | | The id of the security OU |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | Enable or disable SIEM environment |
 | SIEMControlTowerLogBucketNameList | String | | | The S3 log bucket names in the Log Archive account. **Specify after installing OpenSearch Service.** |

@@ -50,7 +50,7 @@ Metadata:
           default: 'Microsoft Active Directory Configuration'
         Parameters: 
           - ActiveDirectoryAccountNameForAppStream
-          - ActiveDirectorAddresses
+          - ActiveDirectoryAddresses
           - ActiveDirectoryEdition
           - ActiveDirectoryEnableSso
           - ActiveDirectoryName
@@ -75,7 +75,7 @@ Parameters:
     Type: String
     Default: appstream
     Description: The user name of the account [APPSTREAM]
-  ActiveDirectorAddresses:
+  ActiveDirectoryAddresses:
     Type: CommaDelimitedList
     Default: ''
     Description: The IPv4 addresses of Active Directory [APPSTREAM] 
@@ -526,7 +526,7 @@ Resources:
         DirectoryAddresses: !If
           - CreateDirectory
           - !GetAtt MicrosoftAD.Outputs.MicrosoftAdDnsIpAddresses
-          - !Join [ ',', !Ref ActiveDirectorAddresses ]
+          - !Join [ ',', !Ref ActiveDirectoryAddresses ]
         DirectoryName: !Ref ActiveDirectoryName
         OrganizationalUnitDistinguishedNames: !Ref OrganizationalUnitDistinguishedNamesForAppStream
         ImageBuilderImageName: !Ref AppStreamImageBuilderImageName

@@ -28,6 +28,7 @@ You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
 | `CustomAlarmName` | String | | | The custom Alram name |
 | `DomainName` | String | | ○ | The domain name |
 | `FreeStorageSpaceThreshold` | Number | | ○ | The threshold of the free storage space (MB) |
@@ -66,6 +67,7 @@ cloudwatch-alarm-about-elasticsearch は、 Amazon OpenSearch Service に関す�
 
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `DomainName` | String | | ○ | ドメイン名 |
 | `FreeStorageSpaceThreshold` | Number | | ○ | ストレージの空き容量の閾値（MB） |

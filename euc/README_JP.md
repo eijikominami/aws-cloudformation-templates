@@ -47,6 +47,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | ActiveDirectoryAccountNameForAppStream | String | AppStreamAdmin | | Active Directory のユーザ名 | 
+| ActiveDirectoryAddresses | String | AppStreamAdmin | | Active Directory の IP アドレス | 
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | conditional |  Active Directory のエディション  |
 | ActiveDirectoryEnableSso  | true / false | true | conditional | Active Directory で SSO を有効にするかどうか |
 | ActiveDirectoryName | String | corp.example.com | conditional | Active Directory で使用するフルドメイン名 |
@@ -54,6 +55,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 | ActiveDirectoryShortName | String | CORP | conditional | NetBIOS 名 |
 | ActiveDirectoryIdForFSx | String | | conditional | FSx で使用する Active Directory ID |
 | ActiveDirectoryIdForWorkspaces | String | | conditional | Workspaces で使用する Active Directory ID |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | AppStreamImageBuilderImageName | String | | | AppStream Image Builder で使用するイメージ名 |
 | AppStreamImageName | String | | | AppStream で使用するイメージ名 |
 | ComputeTypeName | GRAPHICS / GRAPHICSPRO / PERFORMANCE / POWER / POWERPRO / STANDARD / VALUE | PERFORMANCE | ○ | コンピュートタイプ |

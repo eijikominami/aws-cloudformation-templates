@@ -189,14 +189,14 @@ Parameters:
     Default: 10.0.15.0/24
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block for DNS at AZ3 [required]
-  TransitGatewayDestinationCidrBlock:
-    Type: String
-    Default: ''
-    Description: The IPv4 CIDR block forward to TransitGateway
   TransitGatewayDefaultRouteTableId:
     Type: String
     Default: ''
     Description: The id of the default Transit Gateway Route Table
+  TransitGatewayDestinationCidrBlock:
+    Type: String
+    Default: ''
+    Description: The IPv4 CIDR block forward to TransitGateway
   VPCCidrBlockForEgress:
     Type: String
     Default: 10.0.0.0/21

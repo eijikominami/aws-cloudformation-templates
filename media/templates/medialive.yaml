@@ -154,14 +154,6 @@ Parameters:
     Type: Number
     Default: 540
     Description: Output video height, in pixels [required]
-  MediaPackageChannelId:
-    Type: String
-    Default: ''
-    Description: The MediaPackage channel id [MEDIA_PACKAGE]
-  MediaStoreEndpoint:
-    Type: String
-    Default: ''
-    Description: The endpoint of MediaStore [MEDIA_STORE]
   InputType:
     Type: String
     Default: RTMP
@@ -181,6 +173,14 @@ Parameters:
     AllowedPattern: ^[0-9./]*$
     Default: 0.0.0.0/0
     Description: A list of one or more IPv4 CIDR addresses to allow (e.g. 0.0.0.0/0) [required]
+  MediaPackageChannelId:
+    Type: String
+    Default: ''
+    Description: The MediaPackage channel id [MEDIA_PACKAGE]
+  MediaStoreEndpoint:
+    Type: String
+    Default: ''
+    Description: The endpoint of MediaStore [MEDIA_STORE]
   OutputType:
     Type: String
     AllowedValues:

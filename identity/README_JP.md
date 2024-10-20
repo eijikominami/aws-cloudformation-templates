@@ -51,6 +51,8 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | EC2 のイメージ ID |
 | Edition | Standard / Enterprise | Standard | ○ | Microsoft Active Directory のエディション |
 | EnableSso | true / false | true | ○ | シングルサインオンを有効化するかどうか |
 | Name | String | corp.example.com | ○ | ドメイン名 |

@@ -48,6 +48,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.64.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
 | ActiveDirectorySubnetCidrBlockForAz3 | String | 10.1.64.128/26 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
+| AlarmLevel | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
 | BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
 | DomainName | String | | | ドメイン名 |
 | FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Syslog フォーマットのログ収集ののための FluentBit を作成するかどうか |
@@ -75,10 +76,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 | Cpu | Number | 1024 | ○ | コンテナの CPU ユニット数 |
 | CpuArchitecture | String | ARM64 | CPU アーキテクチャ |
 | DesiredCapacity | String | 1 | ○ | 希望するインスタンスの数 |
+| Memory | String | 3072 | ○ | コンテナのメモリ(MiB) |
 | SubnetIdAz1 | AWS::EC2::Subnet::Id | | ○ | AZ1 のサブネット ID |
 | SubnetIdAz2 | AWS::EC2::Subnet::Id | | ○ | AZ2 のサブネット ID |
 | SubnetIdAz3 | AWS::EC2::Subnet::Id | | ○ | AZ3 のサブネット ID |
-| Memory | String | 3072 | ○ | コンテナのメモリ(MiB) |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | VPC の CIDR ブロック |
 | VPCId | AWS::EC2::VPC::Id | | ○ | VPC Id | 
 
