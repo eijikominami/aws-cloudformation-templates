@@ -50,3 +50,6 @@ cloudwatch-alarm-about-transitgateway-attachment は、AWS Transit Gateway ア�
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TransitGatewayId` | String | | ○ | Transit Gateway の ID |
 | `TransitGatewayAttachmentId` | String | | ○ | Transit Gateway アタッチメントの ID |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

@@ -1643,6 +1643,9 @@ Properties:
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ### Syntax
 

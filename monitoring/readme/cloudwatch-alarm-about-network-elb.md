@@ -1,17 +1,17 @@
 Please scroll down for the Japanese version. / **日本語の説明は下にあります。**
 
-# cloudwatch-alarm-about-ssm(en)
+# cloudwatch-alarm-about-network-elb(en)
 
-cloudwatch-alarm-about-ssm creates Amazon AWS Systems Manager Run Command.
+cloudwatch-alarm-about-network-elb creates Amazon CloudWatch Alarm about Network Load Balancer.
 
 ## CloudWatch Alarm
 
 The template creates the following alarms.
 
-| Namespace | MetricName | Threshold |
+| Namespace | MetricName | TargetGroup | LoadBalancer | Threshold |
 | --- | --- | --- | --- | --- |
-| AWS/SSM-RunCommand | `CommandsDeliveryTimedOut` | At least once a minute | 
-| AWS/SSM-RunCommand | `CommandsFailed` | At least once a minute | 
+| AWS/NetworkELB | **UnHealthyHostCount** | `TargetGroup` | `LoadBalancer` | At least once a minute | 
+| AWS/NetworkELB | **PortAllocationErrorCount** | `TargetGroup` | `LoadBalancer` | At least once a minute | 
 
 ## Parameters
 
@@ -20,25 +20,26 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
-| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `TargetGroup` | String | | ○ | The target group id |
+| `LoadBalancer` | String | | ○ | The load balancer name |
 | `Environment` | String | production | | The value of `environment` tag |
 | `TagKey` | String | createdby | | A tag key |
 | `TagValue` | String | aws-cloudformation-templates | | A tag value |
 
 ---------------------------------------
 
-# cloudwatch-alarm-about-ssm(ja)
+# cloudwatch-alarm-about-network-elb(ja)
 
-cloudwatch-alarm-about-ssm は、 Amazon AWS Systems Manager Run Command に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-network-elb Network Load Balancer に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
 このテンプレートは、以下のアラームを作成します。
 
-| ネームスペース | メトリクス | 閾値 |
+| ネームスペース | メトリクス | TargetGroup | LoadBalancer | 閾値 |
 | --- | --- | --- | --- | --- |
-| AWS/SSM-RunCommand | `CommandsDeliveryTimedOut` | 1分間に1回以上 | 
-| AWS/SSM-RunCommand | `CommandsFailed` | 1分間に1回以上 | 
+| AWS/NetworkELB | **UnHealthyHostCount** | `TargetGroup` | `LoadBalancer` | 1分間に1回以上 | 
+| AWS/NetworkELB | **PortAllocationErrorCount** | `TargetGroup` | `LoadBalancer` | 1分間に1回以上 | 
 
 ## パラメータ
 
@@ -47,7 +48,8 @@ cloudwatch-alarm-about-ssm は、 Amazon AWS Systems Manager Run Command に関�
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `TargetGroup` | String | | ○ | ターゲットグループID |
+| `LoadBalancer` | String | | ○ | ロードバランサー名 |
 | `Environment` | String | production | | `environment` タグの値 |
 | `TagKey` | String | createdby | | タグキー |
 | `TagValue` | String | aws-cloudformation-templates | | タグ値 |

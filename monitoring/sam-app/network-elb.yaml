@@ -1,15 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for Application Load Balancer
+Description: CloudWatch alarm for Network Load Balancer
 
 Parameters:
-  AlarmLevel:
-    Type: String
-    Default: NOTICE
-    AllowedValues:
-      - NOTICE
-      - WARNING
-    Description: The alarm level of CloudWatch alarms
   CustomAlarmName:
     Type: String
     Default: ''
@@ -18,14 +11,14 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The load balancer name [required]  
-  SNSTopicArn:
-    Type: String
-    AllowedPattern: .+
-    Description: The SNS topic ARN [required]
   TargetGroup:
     Type: String
     AllowedPattern: .+
     Description: The target group id [required]
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
   Environment:
     Type: String
     Default: production
@@ -44,30 +37,29 @@ Parameters:
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
-  CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
 
 Resources:
-  UnHealthyHost:
+  UnHealthyHostCount:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *異常なホストが検出* されました。'
+      AlarmDescription: !Sub '*Network Load Balancer* (${CustomAlarmName}) で *異常なホストが検出* されました。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-ALB-UnHealthyHost
-        - Warning-ALB-UnHealthyHost
+        - !Sub Warning-${CustomAlarmName}-NLB-UnHealthyHostCount
+        - Warning-NLB-UnHealthyHostCount
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: TargetGroup
-          Value: !Ref TargetGroup
         - Name: LoadBalancer
           Value: !Ref LoadBalancer
+        - Name: TargetGroup
+          Value: !Ref TargetGroup
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
       MetricName: UnHealthyHostCount
-      Namespace: AWS/ApplicationELB
+      Namespace: AWS/NetworkELB
       OKActions:
         - !Ref SNSTopicArn
       Period: 60
@@ -79,28 +71,25 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  HTTPCodeTarget5XX:
-    Condition: CreateNoticeAlarm
+  PortAllocationErrorCount:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *5XXレスポンスが発生* しました。'
+      AlarmDescription: !Sub '*Network Load Balancer* (${CustomAlarmName}) で *ポート割り当てエラー* が発生しました。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Notice-${CustomAlarmName}-ALB-HTTPCode-Target-5XX-Count
-        - Notice-ALB-HTTPCode-Target-5XX-Count
-      ComparisonOperator: LessThanOrEqualToThreshold
+        - !Sub Warning-${CustomAlarmName}-NLB-PortAllocationErrorCount
+        - Warning-NLB-PortAllocationErrorCount
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: TargetGroup
-          Value: !Ref TargetGroup
         - Name: LoadBalancer
           Value: !Ref LoadBalancer
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: HTTPCode_Target_5XX_Count
-      Namespace: AWS/ApplicationELB
+      MetricName: PortAllocationErrorCount
+      Namespace: AWS/NetworkELB
       OKActions:
         - !Ref SNSTopicArn
       Period: 60

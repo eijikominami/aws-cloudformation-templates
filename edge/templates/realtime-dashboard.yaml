@@ -600,6 +600,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
         SemanticVersion: 2.2.8
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForAlert
@@ -1003,6 +1004,7 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
         SemanticVersion: 2.2.8
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !If
           - CreateSNSForAlert

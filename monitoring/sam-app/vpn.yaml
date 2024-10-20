@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for Site-to-Site VPN
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  VpnId:
+    Type: String
+    AllowedPattern: .+
+    Description: The id of the VPN ID [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+  
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  Down:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*VPN* (${VpnId}) が DOWN しています。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-VPN-Down-${VpnId}
+        - !Sub Warning-VPN-Down-${VpnId}
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: VpnId
+          Value: !Ref VpnId
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: TunnelState
+      Namespace: AWS/VPN
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Minimum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

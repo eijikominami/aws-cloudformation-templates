@@ -39,6 +39,7 @@ Metadata:
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
+          - AlarmLevel
           - SNSForAlertArn
           - SNSForCICDArn
           - SNSForDeploymentArn
@@ -50,6 +51,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   AutoScalingEventsRule:
     Type: String
     Default: ENABLED
@@ -524,6 +532,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForAlert
@@ -604,6 +613,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForAlert
@@ -695,6 +705,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForAlert

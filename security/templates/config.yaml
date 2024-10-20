@@ -537,6 +537,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
         SNSTopicArn: !If
           - CreateSNSForDeployment

@@ -868,7 +868,7 @@ Resources:
                   TemplatePath: BuildArtifact_Notification::packaged.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -1180,7 +1180,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::cicd/templates/upload-artifacts.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForCICDArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
