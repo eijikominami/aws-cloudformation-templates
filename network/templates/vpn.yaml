@@ -12,6 +12,11 @@ Metadata:
           - StaticRoutesOnly
           - TransitGatewayId
       - Label: 
+          default: 'Notofication Configuration'
+        Parameters:
+          - SNSForAlertArn 
+          - SNSForDeploymentArn
+      - Label: 
           default: 'Tag Configuration'
         Parameters:
           - Environment 
@@ -35,6 +40,14 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The ID of the transit gateway associated with the VPN connection [required] 
+  SNSForAlertArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The Amazon SNS topic ARN for alert [required]
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information [required]
   Environment:
     Type: String
     Default: production
@@ -84,3 +97,21 @@ Resources:
           Value: !Ref TagValue
       TransitGatewayId: !Ref TransitGatewayId
       Type: ipsec.1
+  CloudWatchAlarmVPN:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-vpn
+        SemanticVersion: 2.2.9
+      NotificationARNs: 
+        - !Ref SNSForDeploymentArn
+      Parameters:
+        CustomAlarmName: !Ref AWS::StackName
+        VpnId: !Ref VPNConnection
+        SNSTopicArn: !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue

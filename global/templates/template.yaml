@@ -122,6 +122,7 @@ Parameters:
   SNSForAlertArn:
     Type: String
     Default: '' 
+    Description: The Amazon SNS topic ARN for alert
   Environment:
     Type: String
     Default: production
@@ -210,7 +211,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -344,7 +345,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
@@ -660,7 +661,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName

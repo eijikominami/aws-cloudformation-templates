@@ -149,11 +149,11 @@ Parameters:
   SNSForAlertArn:
     Type: String
     Default: ''
-    Description: Amazon SNS Topic ARN for alert
+    Description: The Amazon SNS topic ARN for alert
   SNSForDeploymentArn:
     Type: String
     Default: ''
-    Description: Amazon SNS Topic ARN for deployment
+    Description: The Amazon SNS topic ARN for deployment information
 
 Conditions:
   SubscribeAutoScalingErrorEventOnly: !Equals [ !Ref AutoScalingEventsRule, ERROR_ONLY]

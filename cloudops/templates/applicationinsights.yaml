@@ -19,7 +19,7 @@ Parameters:
   SNSForAlertArn:
     Type: String
     AllowedPattern: .+
-    Description: The ARN of an Amazon SNS topic [required]
+    Description: The Amazon SNS topic ARN for alert [required]
   Environment:
     Type: String
     Default: production

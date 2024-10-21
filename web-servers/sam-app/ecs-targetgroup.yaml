@@ -120,7 +120,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-application-elb
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:
