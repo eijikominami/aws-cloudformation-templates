@@ -1,16 +1,16 @@
 Please scroll down for the Japanese version. / **日本語の説明は下にあります。**
 
-# cloudwatch-alarm-about-vpn(en)
+# cloudwatch-alarm-about-route53-resolver(en)
 
-cloudwatch-alarm-about-vpn creates Amazon CloudWatch Alarm about AWS Site-to-Site VPN.
+cloudwatch-alarm-about-route53-resolver creates Amazon CloudWatch Alarm about Route 53 Resolver.
 
 ## CloudWatch Alarm
 
 The template creates the following alarms.
 
-| Namespace | MetricName | VPNId | Threshold |
-| --- | --- | --- |
-| AWS/VPN | **TunnelState** | `VpnId` | 0 |
+| Namespace | MetricName | EndpointId | Threshold |
+| --- | --- | --- | --- |
+| AWS/Route53Resolver | **EndpointUnhealthyENICount** | `EndpointId` | At least once a minute |
 
 ## Parameters
 
@@ -19,7 +19,7 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | The custom Alram name |
-| `VpnId` | String | | ○ | The VPN ID |
+| `EndpointId` | String | | ○ | The endpoint ID |
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `Environment` | String | production | | The value of `environment` tag |
 | `TagKey` | String | createdby | | A tag key |
@@ -27,17 +27,17 @@ You can provide optional parameters as follows.
 
 ---------------------------------------
 
-# cloudwatch-alarm-about-vpn(ja)
+# cloudwatch-alarm-about-route53-resolver(ja)
 
-cloudwatch-alarm-about-vpn は、Amazon Site-to-Site VPN に関する Amazon CloudWatch アラームを作成します。
+cloudwatch-alarm-about-route53-resolver は、Route 53 Resolver に関する Amazon CloudWatch アラームを作成します。
 
 ## CloudWatch アラーム
 
 このテンプレートは、以下のアラームを作成します。
 
-| ネームスペース | メトリクス | VPN ID | 閾値 |
-| --- | --- | --- |
-| AWS/VPN | **TunnelState** | `VpnId` | 0 |
+| ネームスペース | メトリクス | エンドポイント ID | 閾値 |
+| --- | --- | --- | --- |
+| AWS/Route53Resolver | **EndpointUnhealthyENICount** | `EndpointId` | 1分間に1回以上 |
 
 ## パラメータ
 
@@ -46,7 +46,7 @@ cloudwatch-alarm-about-vpn は、Amazon Site-to-Site VPN に関する Amazon Clo
 | パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
 | --- | --- | --- | --- | --- |
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
-| `VpnId` | String | | ○ | VPN ID |
+| `EndpointId` | String | | ○ | エンドポイント ID |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `Environment` | String | production | | `environment` タグの値 |
 | `TagKey` | String | createdby | | タグキー |

@@ -1,23 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for AWS Elemental MediaLive
+Description: CloudWatch alarm for AWS Config
 
 Parameters:
   CustomAlarmName:
     Type: String
     Default: ''
-    Description: The custom alram name
-  InputDeviceId:
-    Type: String
-    Default: ''
-    Description: Input device Id
-  DeviceType:
-    Type: String
-    Default: HD
-    AllowedValues:
-      - HD
-      - UHD
-    Description: The device type 
+    Description: The custom Alram name
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
@@ -42,57 +31,22 @@ Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
 
 Resources:
-  Temperature:
+  ChangeNotificationsDeliveryFailed:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) の *筐体温度が上昇* しています。熱暴走を避けるために空冷等の対策を行なってください。'
+      AlarmDescription: !Sub '*Config* で *変更通知の配信に失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/config/latest/developerguide/viewing-the-aws-config-dashboard.html|Viewing the AWS Config Dashboard> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-Temperature-Over-40
-        - !Sub Warning-ElementalLink-${InputDeviceId}-Temperature-Over-40
-      ComparisonOperator: LessThanThreshold
-      Dimensions:
-        - Name: InputDeviceId
-          Value: !Ref InputDeviceId
-        - Name: DeviceType
-          Value: !Ref DeviceType
-      EvaluationPeriods: 1
-      MetricName: Temperature
-      Namespace: AWS/MediaLive
-      OKActions:
-        - !Ref SNSTopicArn
-      Period: 60
-      Statistic: Average
-      Threshold: 1
-      TreatMissingData: notBreaching
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  NotRecoveredPackets:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) が *パケットを受信できていません* 。予備に切り替えるなどの操作を行なってください。'
-      AlarmName: !If
-        - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-NotRecoveredPackets
-        - !Sub Warning-ElementalLink-${InputDeviceId}-NotRecoveredPackets
+        - !Sub Notice-${CustomAlarmName}-Config-ChangeNotificationsDeliveryFailed
+        - Notice-Config-ChangeNotificationsDeliveryFailed
       ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: InputDeviceId
-          Value: !Ref InputDeviceId
-        - Name: DeviceType
-          Value: !Ref DeviceType
+      DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: NotRecoveredPackets
-      Namespace: AWS/MediaLive
+      MetricName: ChangeNotificationsDeliveryFailed
+      Namespace: AWS/Config
       OKActions:
         - !Ref SNSTopicArn
       Period: 60
@@ -104,26 +58,49 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  ErrorSeconds:
+  ConfigHistoryExportFailed:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*ElementalLink* (${InputDeviceId}) で *エラーが発生* しています。予備に切り替えるなどの操作を行なってください。'
+      AlarmDescription: !Sub '*Config* で *設定履歴のエクスポートに失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/config/latest/developerguide/viewing-the-aws-config-dashboard.html|Viewing the AWS Config Dashboard> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-ElementalLink-${InputDeviceId}-ErrorSeconds
-        - !Sub Warning-ElementalLink-${InputDeviceId}-ErrorSeconds
+        - !Sub Notice-${CustomAlarmName}-Config-ConfigHistoryExportFailed
+        - Notice-Config-ConfigHistoryExportFailed
       ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: InputDeviceId
-          Value: !Ref InputDeviceId
-        - Name: DeviceType
-          Value: !Ref DeviceType
+      DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: ErrorSeconds
-      Namespace: AWS/MediaLive
+      MetricName: ConfigHistoryExportFailed
+      Namespace: AWS/Config
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ConfigSnapshotExportFailed:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Config* で *設定スナップショットのエクスポートに失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/config/latest/developerguide/viewing-the-aws-config-dashboard.html|Viewing the AWS Config Dashboard> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Notice-${CustomAlarmName}-Config-ConfigSnapshotExportFailed
+        - Notice-Config-ConfigSnapshotExportFailed
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: ConfigSnapshotExportFailed
+      Namespace: AWS/Config
       OKActions:
         - !Ref SNSTopicArn
       Period: 60

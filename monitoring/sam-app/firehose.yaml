@@ -55,7 +55,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *Elasticsearchへの配信遅延が発生* しています。'
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *OpenSearch Service への配信遅延が発生* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Data-Freshness
@@ -85,7 +85,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetShardIteratorが発生* しています。'
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetShardIteratorが発生* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Shard-Iterator
@@ -115,7 +115,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetRecordsが発生* しています。'
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *ThrottledGetRecordsが発生* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Throttled-Get-Records
@@ -145,7 +145,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *Elasticsearchへのデータ配信が失敗* しています。'
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *OpenSearch Service へのデータ配信が失敗* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-Elasticsearch-Failed
@@ -175,7 +175,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *S3へのデータ配信が失敗* しています。'
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) で *S3へのデータ配信が失敗* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-Delivery-To-S3-Failed

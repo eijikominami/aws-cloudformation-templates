@@ -53,7 +53,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *異常なホストが検出* されました。'
+      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *異常なホストが検出* されました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html|Application Load Balancer の CloudWatch メトリクス> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-ALB-UnHealthyHost
@@ -86,7 +86,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *5XXレスポンスが発生* しました。'
+      AlarmDescription: !Sub '*Application Load Balancer* (${CustomAlarmName}) で *5XXレスポンスが発生* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html|Application Load Balancer の CloudWatch メトリクス> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-ALB-HTTPCode-Target-5XX-Count

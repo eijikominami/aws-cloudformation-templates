@@ -41,7 +41,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Workspaces* (${DirectoryId}) に正常ではない端末があります。'
+      AlarmDescription: !Sub '*Workspaces* (${DirectoryId}) に正常ではない端末があります。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/cloudwatch-metrics.html|CloudWatch メトリクスを使用して WorkSpaces をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Workspaces-Unhealthy-${DirectoryId}

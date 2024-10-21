@@ -45,7 +45,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Network Load Balancer* (${CustomAlarmName}) で *異常なホストが検出* されました。'
+      AlarmDescription: !Sub '*Network Load Balancer* (${CustomAlarmName}) で *異常なホストが検出* されました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/network/load-balancer-cloudwatch-metrics.html|Network Load Balancer の CloudWatch メトリクス> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-NLB-UnHealthyHostCount
@@ -77,7 +77,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Network Load Balancer* (${CustomAlarmName}) で *ポート割り当てエラー* が発生しました。'
+      AlarmDescription: !Sub '*Network Load Balancer* (${CustomAlarmName}) で *ポート割り当てエラー* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/network/load-balancer-cloudwatch-metrics.html|Network Load Balancer の CloudWatch メトリクス> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-NLB-PortAllocationErrorCount

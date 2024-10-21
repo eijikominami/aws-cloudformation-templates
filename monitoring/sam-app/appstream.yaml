@@ -41,7 +41,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Workspaces* (${Fleet}) で容量不足により拒否されたセッションリクエストがあります。'
+      AlarmDescription: !Sub '*Workspaces* (${Fleet}) で *異常なステータスを返した Workspaces* があります。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/cloudwatch-metrics.html|CloudWatch メトリクス を使用して WorkSpaces をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Workspaces-Unhealthy-${Fleet}

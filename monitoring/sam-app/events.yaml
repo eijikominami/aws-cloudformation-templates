@@ -50,7 +50,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions: 
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*${EventsRuleName}* の *呼び出しが失敗* しました。'
+      AlarmDescription: !Sub '*${EventsRuleName}* の *呼び出しが失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/eventbridge/latest/userguide/eb-monitoring.html#eb-metrics|EventBridge メトリクス> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Events-${EventsRuleName}-FailedInvocations

@@ -41,7 +41,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*VPN* (${VpnId}) が DOWN しています。'
+      AlarmDescription: !Sub '*VPN* (${VpnId}) が *DOWN* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/vpn/latest/s2svpn/monitoring-cloudwatch-vpn.html|Amazon CloudWatch を使用して AWS Site-to-Site VPN トンネルをモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-VPN-Down-${VpnId}

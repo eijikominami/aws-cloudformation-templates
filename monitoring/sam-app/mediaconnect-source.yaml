@@ -45,7 +45,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePTSError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePTSError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePTSError
@@ -74,7 +74,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceCRCError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceCRCError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceCRCError
@@ -103,7 +103,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePIDError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePIDError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePIDError
@@ -132,7 +132,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceCATError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceCATError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceCATError
@@ -161,7 +161,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTSByteError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTSByteError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceTSByteError
@@ -190,7 +190,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePMTError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePMTError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePMTError
@@ -219,7 +219,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTSSyncLoss* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTSSyncLoss* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceTSSyncLoss
@@ -248,7 +248,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePATError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePATError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePATError
@@ -277,7 +277,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTransportError* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceTransportError* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceTransportError
@@ -306,7 +306,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceDroppedPackets* が発生しました。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourceDroppedPackets* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourceDroppedPackets
@@ -335,7 +335,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePacketLossPercent* が上昇しています。'
+      AlarmDescription: !Sub '*MediaConnect* (${SourceName}) の入力で *SourcePacketLossPercent* が上昇しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconnect/latest/ug/monitor-with-cloudwatch.html|Amazon CloudWatch メトリクスを使用し、AWS Elemental MediaConnect をモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaConnect-${SourceName}-SourcePacketLossPercent
