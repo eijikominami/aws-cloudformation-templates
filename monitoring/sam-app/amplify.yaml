@@ -1,16 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for Amazon Route 53 Resolver
+Description: CloudWatch alarm for AWS Amplify
 
 Parameters:
+  AppId:
+    Type: String
+    AllowedPattern: .+
+    Description: The app id [required]
   CustomAlarmName:
     Type: String
     Default: ''
     Description: The custom Alram name
-  EndpointId:
-    Type: String
-    AllowedPattern: .+
-    Description: The endpoint ID of the Route 53 Resolver [required]  
   SNSTopicArn:
     Type: String
     AllowedPattern: .+
@@ -35,29 +35,29 @@ Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
 
 Resources:
-  EndpointUnhealthyENICount:
+  5xxErrors:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: '*Route53 Resolver* に *復旧の必要のある ENI* があります。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/monitoring-resolver-with-cloudwatch.html|Amazon CloudWatch による Route 53 Resolver エンドポイントのモニタリング> をご覧ください。'
+      AlarmDescription: !Sub '*Amplify* (${AppId}) で *5XXエラー* が発生しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-Route53Resolver-EndpointUnhealthyENICount
-        - Warning-Route53Resolver-EndpointUnhealthyENICount
+        - !Sub Warning-${CustomAlarmName}-Amplify-5xxErrors
+        - Warning-Amplify-5xxErrors
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: EndpointId
-          Value: !Ref EndpointId
+        - Name: App
+          Value: !Ref AppId
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: EndpointUnhealthyENICount
-      Namespace: AWS/Route53Resolver
+      MetricName: 5xxErrors
+      Namespace: AWS/AmplifyHosting
       OKActions:
         - !Ref SNSTopicArn
       Period: 60
-      Statistic: Maximum
+      Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
       Tags: 

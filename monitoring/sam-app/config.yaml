@@ -40,8 +40,8 @@ Resources:
       AlarmDescription: !Sub '*Config* で *変更通知の配信に失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/config/latest/developerguide/viewing-the-aws-config-dashboard.html|Viewing the AWS Config Dashboard> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Notice-${CustomAlarmName}-Config-ChangeNotificationsDeliveryFailed
-        - Notice-Config-ChangeNotificationsDeliveryFailed
+        - !Sub Warning-${CustomAlarmName}-Config-ChangeNotificationsDeliveryFailed
+        - Warning-Config-ChangeNotificationsDeliveryFailed
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
@@ -67,8 +67,8 @@ Resources:
       AlarmDescription: !Sub '*Config* で *設定履歴のエクスポートに失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/config/latest/developerguide/viewing-the-aws-config-dashboard.html|Viewing the AWS Config Dashboard> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Notice-${CustomAlarmName}-Config-ConfigHistoryExportFailed
-        - Notice-Config-ConfigHistoryExportFailed
+        - !Sub Warning-${CustomAlarmName}-Config-ConfigHistoryExportFailed
+        - Warning-Config-ConfigHistoryExportFailed
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
@@ -94,8 +94,8 @@ Resources:
       AlarmDescription: !Sub '*Config* で *設定スナップショットのエクスポートに失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/config/latest/developerguide/viewing-the-aws-config-dashboard.html|Viewing the AWS Config Dashboard> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Notice-${CustomAlarmName}-Config-ConfigSnapshotExportFailed
-        - Notice-Config-ConfigSnapshotExportFailed
+        - !Sub Warning-${CustomAlarmName}-Config-ConfigSnapshotExportFailed
+        - Warning-Config-ConfigSnapshotExportFailed
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       EvaluationPeriods: 1

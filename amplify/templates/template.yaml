@@ -260,6 +260,25 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # CloudWatch
+  CloudWatchAlarmConfig:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-amplify
+        SemanticVersion: 2.2.9
+      NotificationARNs: 
+        - !Ref SNSForDeploymentArn
+      Parameters:
+        AppId: !GetAtt AmplifyConsole.AppId
+        CustomAlarmName: !Ref AWS::StackName
+        SNSTopicArn: !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
 
 Outputs:
   AmplifyAppId:

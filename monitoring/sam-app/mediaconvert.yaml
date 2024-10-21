@@ -1,0 +1,265 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for AWS Elemental MediaConvert
+
+Parameters:
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom alram name
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+
+Resources:
+  CreateJobErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *CreateJob が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-CreateJob-Errors
+        - !Sub Warning-MediaConvert-CreateJob-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: CreateJob
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  GetJobErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *GetJob が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-GetJob-Errors
+        - !Sub Warning-MediaConvert-GetJob-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: GetJob
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  GetQueueErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *GetQueue が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-GetQueue-Errors
+        - !Sub Warning-MediaConvert-GetQueue-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: GetQueue
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ListJobsErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *ListJobs が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-ListJobs-Errors
+        - !Sub Warning-MediaConvert-ListJobs-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: ListJobs
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ListJobTemplatesErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *ListJobTemplates が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-ListJobTemplates-Errors
+        - !Sub Warning-MediaConvert-ListJobTemplates-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: ListJobTemplates
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ListPresetsErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *ListPresets が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-ListPresets-Errors
+        - !Sub Warning-MediaConvert-ListPresets-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: ListPresets
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ListQueuesErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *ListQueues が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-ListQueues-Errors
+        - !Sub Warning-MediaConvert-ListQueues-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: ListQueues
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  ListTagsForResourceErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions: 
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*MediaConvert* で *ListTagsForResource が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/mediaconvert/latest/ug/metrics.html|MediaConvert CloudWatch メトリクスのリスト> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-MediaConvert-ListTagsForResource-Errors
+        - !Sub Warning-MediaConvert-ListTagsForResource-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: Operation
+          Value: ListTagsForResource
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/MediaConvert
+      OKActions: 
+        - !Ref SNSTopicArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

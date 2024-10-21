@@ -76,6 +76,68 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## Amplify
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | AppID | 閾値 |
+| --- | --- | --- | --- |
+| AWS/AmplifyHosting | **5xxErrors** | `AppId` | 1分間に1回以上 |
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `AppId` | String | | ○ | アプリ ID |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AppId: String
+    CustomAlarmName: String
+    SNSTopicArn: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/amplify.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-amplify
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AppId: String
+    CustomAlarmName: String
+    SNSTopicArn: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## API Gateway
 
 このテンプレートは、以下のアラームを作成します。
@@ -401,6 +463,67 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Config
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | 閾値 |
+| --- | --- | --- |
+| AWS/Config | **ChangeNotificationsDeliveryFailed** | 1分間に1回以上 |
+| AWS/Config | **ConfigHistoryExportFailed** | 1分間に1回以上 |
+| AWS/Config | **ConfigSnapshotExportFailed** | 1分間に1回以上 |
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName: String
+    SNSTopicArn: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/config.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-config
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName: String
+    SNSTopicArn: String
     Environment: String
     TagKey: String
     TagValue: String
@@ -1366,6 +1489,72 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## MediaConvert
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | Operation | 閾値 |
+| --- | --- | --- | --- | --- |
+| AWS/MediaConvert | **Errors** | CreateJob | 1分間に1回以上 | 
+| AWS/MediaConvert | **Errors** | GetJob | 1分間に1回以上 | 
+| AWS/MediaConvert | **Errors** | GetQueue | 1分間に1回以上 | 
+| AWS/MediaConvert | **Errors** | ListJobs | 1分間に1回以上 | 
+| AWS/MediaConvert | **Errors** | ListJobTemplates | 1分間に1回以上 | 
+| AWS/MediaConvert | **Errors** | ListPresets | 1分間に1回以上 | 
+| AWS/MediaConvert | **Errors** | ListQueues | 1分間に1回以上 | 
+| AWS/MediaConvert | **Errors** | ListTagsForResource | 1分間に1回以上 | 
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconvert.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconvert
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## MediaLive
 
 このテンプレートは、以下のアラームを作成します。
@@ -1556,6 +1745,69 @@ Properties:
   Parameters: 
     AlarmLevel: String
     CustomAlarmName : String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Route 53 Resolver
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | エンドポイント ID | 閾値 |
+| --- | --- | --- | --- |
+| AWS/Route53Resolver | **EndpointUnhealthyENICount** | `EndpointId` | 1分間に1回以上 |
+
+## パラメータ
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `EndpointId` | String | | ○ | エンドポイント ID |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+
+### Syntax
+
+AWS CloudFormation テンプレートでこのエンティティを宣言するには、次の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointId: String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/route53-resolver.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-route53-resolver
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointId: String
     SNSTopicArn : String
     Environment: String
     TagKey: String
