@@ -225,10 +225,12 @@ Parameters:
     Description: Output video width, in pixels [required]
   SNSForAlertArn:
     Type: String
-    Default: '' 
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
   SNSForDeploymentArn:
     Type: String
     Default: ''
+    Description: The Amazon SNS topic ARN for deployment information
   LogicalName:
     Type: String
     Default: MediaLive
@@ -278,7 +280,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -295,7 +297,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -875,7 +877,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -902,7 +904,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -929,7 +931,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -955,7 +957,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

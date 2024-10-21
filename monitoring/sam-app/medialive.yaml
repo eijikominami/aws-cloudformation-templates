@@ -49,7 +49,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *4XX エラー* が発生しました。'
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *4XX エラー* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/medialive/latest/ug/monitoring-eml-metrics.html|Amazon CloudWatch メトリクスを使用したチャネルのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-4XX-Error-Occured
@@ -82,7 +82,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *5XX エラー* が発生しました。'
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の出力で *5XX エラー* が発生しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/medialive/latest/ug/monitoring-eml-metrics.html|Amazon CloudWatch メトリクスを使用したチャネルのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-5XX-Error-Occured
@@ -115,7 +115,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) で *アラートが発生* しています。'
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) で *アラートが発生* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/medialive/latest/ug/monitoring-eml-metrics.html|Amazon CloudWatch メトリクスを使用したチャネルのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Active-Alerts
@@ -146,7 +146,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の *現用入力が非アクティブ* です。'
+      AlarmDescription: !Sub '*MediaLive* (${ChannelId}) の *現用入力が非アクティブ* です。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/medialive/latest/ug/monitoring-eml-metrics.html|Amazon CloudWatch メトリクスを使用したチャネルのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaLive-${ChannelId}-Primary-Input-Inactive

@@ -3,6 +3,13 @@ Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for AWS Lambda
 
 Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
   CustomAlarmName:
     Type: String
     Default: ''
@@ -43,6 +50,7 @@ Parameters:
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
   CreateMetricFilter: !Not [ !Equals [ !Ref MetricFilterPattern, '' ] ]
+  CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
 
 Resources:
   AlarmLambdaErrors:
@@ -115,6 +123,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   AlarmLambdaTimeoutWillOccur:
+    Condition: CreateNoticeAlarm
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true

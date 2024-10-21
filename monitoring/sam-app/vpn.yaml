@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for Amazon AppFlow
+Description: CloudWatch alarm for Site-to-Site VPN
 
 Parameters:
   CustomAlarmName:
@@ -11,10 +11,10 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS topic ARN [required]
-  FlowName:
+  VpnId:
     Type: String
     AllowedPattern: .+
-    Description: The AppFlow flow name [required]
+    Description: The id of the VPN ID [required]
   Environment:
     Type: String
     Default: production
@@ -29,35 +29,35 @@ Parameters:
   TagValue:
     Type: String
     Default: aws-cloudformation-templates
-    AllowedPattern: .+    
+    AllowedPattern: .+  
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
 
 Resources:
-  AppFlowExecutionsFailed:
+  Down:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*AppFlow* (${FlowName}) でフローの実行が失敗しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/appflow/latest/userguide/monitoring-cloudwatch.html|Monitoring Amazon AppFlow with Amazon CloudWatch> をご覧ください。'
+      AlarmDescription: !Sub '*VPN* (${VpnId}) が *DOWN* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/vpn/latest/s2svpn/monitoring-cloudwatch-vpn.html|Amazon CloudWatch を使用して AWS Site-to-Site VPN トンネルをモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-AppFlow-FlowExecutionsFailed
-        - Warning-AppFlow-FlowExecutionsFailed
-      ComparisonOperator: LessThanOrEqualToThreshold
+        - !Sub Warning-${CustomAlarmName}-VPN-Down-${VpnId}
+        - !Sub Warning-VPN-Down-${VpnId}
+      ComparisonOperator: LessThanThreshold
       Dimensions:
-        - Name: FlowName
-          Value: !Ref FlowName
+        - Name: VpnId
+          Value: !Ref VpnId
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: FlowExecutionsFailed
-      Namespace: AWS/AppFlow
+      MetricName: TunnelState
+      Namespace: AWS/VPN
       OKActions:
         - !Ref SNSTopicArn
       Period: 60
-      Statistic: Sum
+      Statistic: Minimum
       Threshold: 1
       TreatMissingData: notBreaching
       Tags: 

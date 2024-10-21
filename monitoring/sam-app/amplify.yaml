@@ -1,8 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for Amazon AppFlow
+Description: CloudWatch alarm for AWS Amplify
 
 Parameters:
+  AppId:
+    Type: String
+    AllowedPattern: .+
+    Description: The app id [required]
   CustomAlarmName:
     Type: String
     Default: ''
@@ -11,10 +15,6 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS topic ARN [required]
-  FlowName:
-    Type: String
-    AllowedPattern: .+
-    Description: The AppFlow flow name [required]
   Environment:
     Type: String
     Default: production
@@ -29,31 +29,31 @@ Parameters:
   TagValue:
     Type: String
     Default: aws-cloudformation-templates
-    AllowedPattern: .+    
+    AllowedPattern: .+
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
 
 Resources:
-  AppFlowExecutionsFailed:
+  5xxErrors:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*AppFlow* (${FlowName}) でフローの実行が失敗しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/appflow/latest/userguide/monitoring-cloudwatch.html|Monitoring Amazon AppFlow with Amazon CloudWatch> をご覧ください。'
+      AlarmDescription: !Sub '*Amplify* (${AppId}) で *5XXエラー* が発生しています。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-AppFlow-FlowExecutionsFailed
-        - Warning-AppFlow-FlowExecutionsFailed
-      ComparisonOperator: LessThanOrEqualToThreshold
+        - !Sub Warning-${CustomAlarmName}-Amplify-5xxErrors
+        - Warning-Amplify-5xxErrors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
-        - Name: FlowName
-          Value: !Ref FlowName
+        - Name: App
+          Value: !Ref AppId
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      MetricName: FlowExecutionsFailed
-      Namespace: AWS/AppFlow
+      MetricName: 5xxErrors
+      Namespace: AWS/AmplifyHosting
       OKActions:
         - !Ref SNSTopicArn
       Period: 60

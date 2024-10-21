@@ -76,6 +76,68 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## Amplify
+
+The template creates the following alarms.
+
+| Namespace | MetricName | AppId | Threshold |
+| --- | --- | --- | --- |
+| AWS/AmplifyHosting | **5xxErrors** | `AppId` | At least once a minute |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `AppId` | String | | ○ | The app id |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AppId: String
+    CustomAlarmName: String
+    SNSTopicArn: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/amplify.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-amplifys
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AppId: String
+    CustomAlarmName: String
+    SNSTopicArn: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## API Gateway
 
 The template creates the following alarms.
@@ -402,6 +464,67 @@ Properties:
     CustomAlarmName : String
     ProjectName : String
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Config
+
+The template creates the following alarms.
+
+| Namespace | MetricName | Threshold |
+| --- | --- | --- |
+| AWS/Config | **ChangeNotificationsDeliveryFailed** | At least once a minute |
+| AWS/Config | **ConfigHistoryExportFailed** | At least once a minute |
+| AWS/Config | **ConfigSnapshotExportFailed** | At least once a minute |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName: String
+    SNSTopicArn: String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/cofig.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-cofig
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName: String
+    SNSTopicArn: String
     Environment: String
     TagKey: String
     TagValue: String
@@ -1365,6 +1488,72 @@ Properties:
   TimeoutInMinutes: Integer
 ```
 
+## MediaConvert
+
+The template creates the following alarms.
+
+| Namespace | MetricName | Operation | Threshold |
+| --- | --- | --- | --- |
+| AWS/MediaConvert | **Errors** | CreateJob | At least once a minute | 
+| AWS/MediaConvert | **Errors** | GetJob | At least once a minute | 
+| AWS/MediaConvert | **Errors** | GetQueue | At least once a minute | 
+| AWS/MediaConvert | **Errors** | ListJobs | At least once a minute | 
+| AWS/MediaConvert | **Errors** | ListJobTemplates | At least once a minute | 
+| AWS/MediaConvert | **Errors** | ListPresets | At least once a minute | 
+| AWS/MediaConvert | **Errors** | ListQueues | At least once a minute | 
+| AWS/MediaConvert | **Errors** | ListTagsForResource | At least once a minute | 
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconvert.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconvert
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
 ## MediaLive
 
 The template creates the following alarms.
@@ -1557,6 +1746,68 @@ Properties:
   Parameters:
     AlarmLevel: String 
     CustomAlarmName : String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Route 53 Resolver
+
+The template creates the following alarms.
+
+| Namespace | MetricName | EndpointId | Threshold |
+| --- | --- | --- | --- |
+| AWS/Route53Resolver | **EndpointUnhealthyENICount** | `EndpointId` | At least once a minute |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `CustomAlarmName` | String | | | The custom Alram name |
+| `EndpointId` | String | | ○ | The endpoint ID |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointId: String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/route53-resolver.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-route53-resolver
+    SemanticVersion: 2.2.7
+  NotificationARNs: 
+    - String
+  Parameters: 
+    CustomAlarmName : String
+    EndpointId: String
     SNSTopicArn : String
     Environment: String
     TagKey: String

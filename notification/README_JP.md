@@ -151,5 +151,5 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Trusted Advisor に関するイベントルールを作成します。 |
 | UnauthorizedApiCallsCloudWatchAlarmName | String | | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
 | SNSForAlertArn | String | | | アラート用 Amazon SNS トピックの ARN | 
-| SNSForAlertArn | String | | | CI/CD用 Amazon SNS トピックの ARN | 
+| SNSForCICDArn | String | | | CI/CD用 Amazon SNS トピックの ARN | 
 | SNSForDeploymentArn | String | | | デプロイ用 Amazon SNS トピックの ARN |

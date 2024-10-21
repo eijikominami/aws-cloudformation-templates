@@ -53,7 +53,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *クラスタ異常が発生* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *クラスタ異常が発生* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Cluster-Status
@@ -118,7 +118,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードで異常が発生* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードで異常が発生* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Master-Reachable-From-Node
@@ -150,7 +150,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *自動スナップショットの作成が失敗* しました。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *自動スナップショットの作成が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Automated-Snapshot-Failure
@@ -182,7 +182,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *Kibanaの異常が発生* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *Kibanaの異常が発生* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Kibana-Healthy-Nodes
@@ -214,7 +214,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) の *ディスクの空き容量が減少* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) の *ディスクの空き容量が減少* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-Elasticsearch-${DomainName}-Free-Storage-Space
@@ -246,7 +246,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードのCPU使用率が上昇* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードのCPU使用率が上昇* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Master-CPU-Utilization
@@ -278,7 +278,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードのJVMメモリ負荷率が上昇* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *マスターノードのJVMメモリ負荷率が上昇* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Master-JVM-Memory-Pressure
@@ -310,7 +310,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのCPU使用率が上昇* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのCPU使用率が上昇* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Data-CPU-Utilization
@@ -342,7 +342,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのJVMメモリ負荷率が上昇* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのJVMメモリ負荷率が上昇* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Data-JVM-Memory-Pressure
@@ -374,7 +374,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのメモリ使用率が上昇* しています。'
+      AlarmDescription: !Sub '*Elasticsearch* (${DomainName}) で *データノードのメモリ使用率が上昇* しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html|Amazon CloudWatch による OpenSearch クラスターメトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-Elasticsearch-${DomainName}-Data-Sys-Memory-Utilization

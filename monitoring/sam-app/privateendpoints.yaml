@@ -53,7 +53,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*PrivateLinkEndpoints* (${VPCEndpointId}) で *パケットのドロップ* が発生しています。'
+      AlarmDescription: !Sub '*PrivateLinkEndpoints* (${VPCEndpointId}) で *パケットのドロップ* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/vpc/latest/privatelink/privatelink-cloudwatch-metrics.html|AWS PrivateLink の CloudWatch メトリクス> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-PrivateLinkEndpoints-PacketsDropped-Occured-${VPCEndpointId}

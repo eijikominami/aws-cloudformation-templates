@@ -75,7 +75,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*Directory Service* (${CustomAlarmName}) で再帰的なクエリの失敗が発生しています。'
+      AlarmDescription: !Sub '*Directory Service* (${CustomAlarmName}) で再帰的なクエリの失敗が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_monitor_dc_performance.html|パフォーマンスメトリクスを使用してドメインコントローラーをモニタリングする> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-DirectoryService-RecursiveQueryFailure-{DirectoryId}

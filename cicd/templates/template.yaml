@@ -216,7 +216,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -236,7 +236,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -251,7 +251,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -868,7 +868,7 @@ Resources:
                   TemplatePath: BuildArtifact_Notification::packaged.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForCICDArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -1180,7 +1180,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::cicd/templates/upload-artifacts.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]},"Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CodeStarConnectionArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "CodeStarConnectionArn"]}, "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "SNSForCICDArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForCICDArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -1218,7 +1218,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1249,7 +1249,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1280,7 +1280,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.8
+        SemanticVersion: 2.2.9
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1420,19 +1420,19 @@ Outputs:
    Description: The Amazon Resource Name (ARN) of the CodeStar connection
    Value: !GetAtt CodeStarConnection.ConnectionArn
   SNSForAlertArn:
-    Description: SNS ARN for Alert
+    Description: The Amazon SNS topic ARN for alert
     Value: !If
       - CreateSNSForAlert
       - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       - !Ref SNSForAlertArn
   SNSForCICDArn:
-    Description: SNS ARN for CICD
+    Description: The Amazon SNS topic ARN for CI/CD information
     Value: !If
       - CreateSNSForCICD
       - !GetAtt SNSForCICD.Outputs.SNSTopicArn
       - !Ref SNSForCICDArn
   SNSForDeploymentArn:
-    Description: SNS ARN for Deployment
+    Description: The Amazon SNS topic ARN for deployment information
     Value: !If
       - CreateSNSForDeployment
       - !GetAtt SNSForDeployment.Outputs.SNSTopicArn

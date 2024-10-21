@@ -50,7 +50,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り30日以下です。'
+      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り30日以下です。証明書の更新は、<https://docs.aws.amazon.com/ja_jp/acm/latest/userguide/managed-renewal.html|マネージド証明書の更新> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Notice-${CustomAlarmName}-CertificateManager-DaysToExpiry-30
@@ -80,7 +80,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り7日以下です。'
+      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り7日以下です。証明書の更新は、<https://docs.aws.amazon.com/ja_jp/acm/latest/userguide/managed-renewal.html|マネージド証明書の更新> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-7
@@ -110,7 +110,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り1日以下です。'
+      AlarmDescription: !Sub '*CertificateManager* (${CustomAlarmName}) の有効期限は残り1日以下です。証明書の更新は、<https://docs.aws.amazon.com/ja_jp/acm/latest/userguide/managed-renewal.html|マネージド証明書の更新> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-CertificateManager-DaysToExpiry-1

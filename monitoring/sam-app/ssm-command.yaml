@@ -37,7 +37,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*SSM (RunCommand)* で *タイムアウト* が発生しています。'
+      AlarmDescription: !Sub '*SSM (RunCommand)* で *タイムアウト* が発生しています。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/monitoring-cloudwatch-metrics.html|Amazon CloudWatch を使用した Run Command メトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-SSM-DeliveryTimedOut
@@ -64,7 +64,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*SSM (RunCommand)* で *コマンド実行が失敗* しました。'
+      AlarmDescription: !Sub '*SSM (RunCommand)* で *コマンド実行が失敗* しました。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/monitoring-cloudwatch-metrics.html|Amazon CloudWatch を使用した Run Command メトリクスのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-SSM-CommandsFailed

@@ -41,7 +41,8 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *PutRequestsでスロットリングが発生* しました。'
+      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *PutRequestsでスロットリングが発生* しました。このエラーの詳細は、<https://docs.aws.amazon.com/mediastore/latest/ug/monitor-with-cloudwatch-metrics.html|Monitoring AWS Elemental MediaStore with Amazon CloudWatch metrics
+> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaStore-${ContainerName}-PutRequests-Throttle
@@ -72,7 +73,8 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *ListRequestsでスロットリングが発生* しました。'
+      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *ListRequestsでスロットリングが発生* しました。このエラーの詳細は、<https://docs.aws.amazon.com/mediastore/latest/ug/monitor-with-cloudwatch-metrics.html|Monitoring AWS Elemental MediaStore with Amazon CloudWatch metrics
+> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaStore-${ContainerName}-ListRequests-Throttle
@@ -103,7 +105,8 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref SNSTopicArn
-      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *DeleteRequestsスロットリングが発生* しました。'
+      AlarmDescription: !Sub '*MediaStore* (${ContainerName}) の *DeleteRequestsスロットリングが発生* しました。このエラーの詳細は、<https://docs.aws.amazon.com/mediastore/latest/ug/monitor-with-cloudwatch-metrics.html|Monitoring AWS Elemental MediaStore with Amazon CloudWatch metrics
+> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
         - !Sub Warning-${CustomAlarmName}-MediaStore-${ContainerName}-DeleteRequests-Throttle

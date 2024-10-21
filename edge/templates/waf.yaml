@@ -70,7 +70,7 @@ Resources:
       Rules: 
         - Name: AWSManagedRulesKnownBadInputsRuleSet
           OverrideAction:
-            Count: {}
+            None: {}
           Priority: 0
           Statement: 
             # Restrict log4j2 message lookup (CWE-117)
@@ -84,7 +84,7 @@ Resources:
             SampledRequestsEnabled: false
         - Name: AWSManagedRulesCommonRuleSet
           OverrideAction:
-            Count: {}
+            None: {}
           Priority: 1
           Statement: 
             ManagedRuleGroupStatement: 
@@ -96,7 +96,7 @@ Resources:
             SampledRequestsEnabled: false
         - Name: AWSManagedRulesAdminProtectionRuleSet
           OverrideAction:
-            Count: {}
+            None: {}
           Priority: 2
           Statement: 
             ManagedRuleGroupStatement: 
@@ -108,7 +108,7 @@ Resources:
             SampledRequestsEnabled: false
         - Name: AWSManagedRulesAmazonIpReputationList
           OverrideAction:
-            Count: {}
+            None: {}
           Priority: 3
           Statement: 
             ManagedRuleGroupStatement: 

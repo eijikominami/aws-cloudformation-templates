@@ -48,3 +48,6 @@ cloudwatch-alarm-about-transitgateway は、AWS Transit Gateway に関する Ama
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TransitGatewayId` | String | | ○ | Transit Gateway の ID |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |

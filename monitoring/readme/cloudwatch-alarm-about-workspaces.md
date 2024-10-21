@@ -48,3 +48,6 @@ cloudwatch-alarm-about-workspaces は、Amazon Workspaces アタッチメント�
 | `CustomAlarmName` | String | | | カスタムアラーム名 |
 | `DirectoryId` | String | | ○ | Workspaces ディレクトリ ID |
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグ値 |
