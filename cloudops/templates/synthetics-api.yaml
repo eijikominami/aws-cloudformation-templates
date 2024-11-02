@@ -229,6 +229,9 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
+      ResourcesToReplicateTags:
+        - environment
+        - !Ref TagKey
       RuntimeVersion: syn-nodejs-puppeteer-9.0
       Schedule: 
         DurationInSeconds: '0'
