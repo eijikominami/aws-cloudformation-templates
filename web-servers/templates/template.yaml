@@ -395,7 +395,7 @@ Conditions:
   CreateGlobalAccelerator: !Equals [ !Ref GlobalInfrastructure, GLOBAL_ACCELERATOR ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreatePrivateSubnets: !Or [ !And [ !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ], !Equals [ !Ref ComputeType, INSTANCE ] ], !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]]
-  CreateRoute53: !And [ !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
+  CreateEC2AndRoute53: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Equals [ !Ref ComputeType, INSTANCE ], !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -1189,15 +1189,28 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  EIPAssociation:
+  ENIForEC2:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      GroupSet:
+        - !Ref SecurityGroupWeb
+      SubnetId: !GetAtt Az1.Outputs.PublicSubnetId
+      Tags: 
+        - Key: Name
+          Value: !Sub eni-${AWS::StackName}-{AWS::Region}-ec2
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  EIPAssociationForEC2:
     Condition: CreateEC2
     Type: AWS::EC2::EIPAssociation
     Properties: 
       AllocationId: !GetAtt EIPForEC2Instance.AllocationId
-      InstanceId: !Ref EC2
+      NetworkInterfaceId: !Ref ENIForEC2
   # Route53
   Route53RecordSet:
-    Condition: CreateRoute53
+    Condition: CreateEC2AndRoute53
     Type: AWS::Route53::RecordSet
     Properties:
       Comment: !Ref DomainName
@@ -1229,9 +1242,9 @@ Resources:
         - !Ref EC2KeyName
         - !Ref AWS::NoValue
       Monitoring: true
-      SecurityGroupIds: 
-        - !Ref SecurityGroupWeb
-      SubnetId: !GetAtt Az1.Outputs.PublicSubnetId
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          NetworkInterfaceId: !Ref ENIForEC2
       UserData: !Base64
         Fn::Join:
           - ''
