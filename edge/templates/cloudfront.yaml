@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/edge/cloudfront creates an Amazon CloudFront.
+Description: aws-cloudformation-templates/edge/cloudfront creates an Amazon CloudFront.
 
 Metadata: 
   AWS::CloudFormation::Interface:

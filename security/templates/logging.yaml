@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/security/logging is a solution for collecting multiple types of logs.
+Description: aws-cloudformation-templates/security/logging is a solution for collecting multiple types of logs.
 
 Metadata:
   AWS::CloudFormation::Interface:

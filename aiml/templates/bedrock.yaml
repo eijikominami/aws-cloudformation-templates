@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/aiml/bedrock sets Amazon Bedrock.
+Description: aws-cloudformation-templates/aiml/bedrock sets Amazon Bedrock.
 
 Metadata: 
   AWS::CloudFormation::Interface:

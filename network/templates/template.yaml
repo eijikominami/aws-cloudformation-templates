@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/network sets basic configurations for network.
+Description: aws-cloudformation-templates/network sets basic configurations for network.
 
 Metadata: 
   AWS::CloudFormation::Interface:

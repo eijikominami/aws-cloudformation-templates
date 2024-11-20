@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/edge/realtime-dashboard creates realtime dashboards for CloudFront logs.
+Description: aws-cloudformation-templates/edge/realtime-dashboard creates realtime dashboards for CloudFront logs.
 
 Metadata: 
   AWS::CloudFormation::Interface:

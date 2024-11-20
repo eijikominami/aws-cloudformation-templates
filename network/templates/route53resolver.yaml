@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/network/route53 creates a Route53 Resolver.
+Description: aws-cloudformation-templates/network/route53 creates a Route53 Resolver.
 
 Metadata: 
   AWS::CloudFormation::Interface:

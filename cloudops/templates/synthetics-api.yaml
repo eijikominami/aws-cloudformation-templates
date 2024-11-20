@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/cloudops/synthetics-api creates an AWS CloudWatch Synthetics canary.
+Description: aws-cloudformation-templates/cloudops/synthetics-api creates an AWS CloudWatch Synthetics canary.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -229,9 +229,6 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      ResourcesToReplicateTags:
-        - environment
-        - !Ref TagKey
       RuntimeVersion: syn-nodejs-puppeteer-9.0
       Schedule: 
         DurationInSeconds: '0'

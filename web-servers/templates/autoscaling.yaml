@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/web-servers/autoscaling creates Auto Scaling Group and Application Load Balancer or Network Load Balancer.
+Description: aws-cloudformation-templates/web-servers/autoscaling creates Auto Scaling Group and Application Load Balancer or Network Load Balancer.
 
 Metadata: 
   AWS::CloudFormation::Interface:

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/shared/fluentbit creates log servers on Amazon Elastic Container Service.
+Description: aws-cloudformation-templates/shared/fluentbit creates log servers on Amazon Elastic Container Service.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -646,6 +646,21 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  RouteTableForS3EndpointAz1Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !Ref SubnetIdAz1
+  RouteTableForS3EndpointAz2Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !Ref SubnetIdAz2
+  RouteTableForS3EndpointAz3Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !Ref SubnetIdAz3
   # CloudWatch
   CloudWatchAlarmECS:
     Type: AWS::Serverless::Application

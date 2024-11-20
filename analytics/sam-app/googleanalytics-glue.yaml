@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/analytics/googleanalytics-glue creates an AppFlow flow for Google Analytics.
+Description: aws-cloudformation-templates/analytics/googleanalytics-glue creates an AppFlow flow for Google Analytics.
 
 Metadata: 
   AWS::CloudFormation::Interface:

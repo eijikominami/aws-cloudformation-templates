@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/static-web-hosting creates an environment for static website hosting.
+Description: aws-cloudformation-templates/static-web-hosting creates an environment for static website hosting.
 
 Metadata: 
   AWS::CloudFormation::Interface:

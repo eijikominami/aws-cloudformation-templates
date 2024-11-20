@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: 
   - AWS::LanguageExtensions
   - AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/security/securityhub sets AWS Security Hub.
+Description: aws-cloudformation-templates/security/securityhub sets AWS Security Hub.
 
 Metadata: 
   AWS::CloudFormation::Interface:

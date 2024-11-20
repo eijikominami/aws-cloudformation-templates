@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/notification sends notifications to Slack.
+Description: aws-cloudformation-templates/notification sends notifications to Slack.
 
 Globals:
   Function:

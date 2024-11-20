@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/cloudops/codeguru creates AWS CodeGuru Reviewer.
+Description: aws-cloudformation-templates/cloudops/codeguru creates AWS CodeGuru Reviewer.
 
 Metadata:
   AWS::CloudFormation::Interface:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/cloudops/resourceexplorer sets AWS Resource Explorer.
+Description: aws-cloudformation-templates/cloudops/resourceexplorer sets AWS Resource Explorer.
 
 Metadata: 
   AWS::CloudFormation::Interface:

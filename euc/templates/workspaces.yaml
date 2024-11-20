@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform:
   - AWS::LanguageExtensions
   - AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/euc/workspaces sets Amazon Workspaces.
+Description: aws-cloudformation-templates/euc/workspaces sets Amazon Workspaces.
 
 Metadata: 
   AWS::CloudFormation::Interface:

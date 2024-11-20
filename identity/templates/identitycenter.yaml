@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/identity/microsoftad sets AWS IAM Identity Center.
+Description: aws-cloudformation-templates/identity/microsoftad sets AWS IAM Identity Center.
 Metadata: 
   AWS::CloudFormation::Interface:
     ParameterGroups:

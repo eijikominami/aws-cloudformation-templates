@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/euc/appstream sets Amazon AppStream 2.0.
+Description: aws-cloudformation-templates/euc/appstream sets Amazon AppStream 2.0.
 
 Metadata: 
   AWS::CloudFormation::Interface:

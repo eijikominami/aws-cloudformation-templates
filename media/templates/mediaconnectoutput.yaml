@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/media/mediaconnectoutput sets Elemental MediaConnect output.
+Description: aws-cloudformation-templates/media/mediaconnectoutput sets Elemental MediaConnect output.
 
 Metadata: 
   AWS::CloudFormation::Interface:

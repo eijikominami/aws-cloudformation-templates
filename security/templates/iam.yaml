@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/security/iam sets IAM.
+Description: aws-cloudformation-templates/security/iam sets IAM.
 
 Metadata: 
   AWS::CloudFormation::Interface:

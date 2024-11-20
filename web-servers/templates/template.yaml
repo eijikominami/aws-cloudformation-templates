@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/web-servers creates an Elastic Load Balancer and EC2 instances for Web Servers.
+Description: aws-cloudformation-templates/web-servers creates an Elastic Load Balancer and EC2 instances for Web Servers.
 
 Metadata: 
   AWS::CloudFormation::Interface:

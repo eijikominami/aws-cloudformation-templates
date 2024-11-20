@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/security/securitylake sets Amazon Security Lake.
+Description: aws-cloudformation-templates/security/securitylake sets Amazon Security Lake.
 
 Metadata: 
   AWS::CloudFormation::Interface:

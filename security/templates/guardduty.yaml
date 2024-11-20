@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/security/guardduty sets Amazon GuardDuty.
+Description: aws-cloudformation-templates/security/guardduty sets Amazon GuardDuty.
 
 Metadata: 
   AWS::CloudFormation::Interface:
