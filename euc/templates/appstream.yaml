@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/euc/appstream sets Amazon AppStream 2.0.
+Description: aws-cloudformation-templates/euc/appstream sets Amazon AppStream 2.0.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -351,7 +351,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appstream
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

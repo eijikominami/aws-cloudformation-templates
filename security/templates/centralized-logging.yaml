@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/security/centralized-logging creates an environment for centralized logging.
+Description: aws-cloudformation-templates/security/centralized-logging creates an environment for centralized logging.
 
 Metadata:
   AWS::CloudFormation::Interface:

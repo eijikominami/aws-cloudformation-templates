@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform:
   - AWS::LanguageExtensions
   - AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/euc/workspaces sets Amazon Workspaces.
+Description: aws-cloudformation-templates/euc/workspaces sets Amazon Workspaces.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -139,7 +139,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-workspaces
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

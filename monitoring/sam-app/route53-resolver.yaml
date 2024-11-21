@@ -44,8 +44,8 @@ Resources:
       AlarmDescription: '*Route53 Resolver* に *復旧の必要のある ENI* があります。このエラーの詳細は、<https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/monitoring-resolver-with-cloudwatch.html|Amazon CloudWatch による Route 53 Resolver エンドポイントのモニタリング> をご覧ください。'
       AlarmName: !If
         - CreateCustomAlarmName
-        - !Sub Warning-${CustomAlarmName}-Route53Resolver-EndpointUnhealthyENICount
-        - Warning-Route53Resolver-EndpointUnhealthyENICount
+        - !Sub Warning-${CustomAlarmName}-Route53Resolver-${EndpointId}-EndpointUnhealthyENICount
+        - !Sub Warning-Route53Resolver-${EndpointId}-EndpointUnhealthyENICount
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: EndpointId

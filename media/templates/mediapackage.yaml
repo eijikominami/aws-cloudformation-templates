@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/media/mediapackage sets Elemental MediaPackage.
+Description: aws-cloudformation-templates/media/mediapackage sets Elemental MediaPackage.
 
 Metadata: 
   AWS::CloudFormation::Interface:

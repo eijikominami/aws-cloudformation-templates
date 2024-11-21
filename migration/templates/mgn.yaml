@@ -1,0 +1,611 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: aws-cloudformation-templates/mgn creates an environment for AWS Application Migration Service.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Network Configuration (Exsiting VPC)'
+        Parameters: 
+          - VPCId
+          - VPCCidrBlock
+          - SubnetIdAz1
+          - SubnetIdAz2
+          - SubnetIdAz3
+      - Label: 
+          default: 'Network Configuration (New VPC)'
+        Parameters: 
+          - VPCCidrBlock
+          - SubnetCidrBlockAz1
+          - SubnetCidrBlockAz2
+          - SubnetCidrBlockAz3
+      - Label: 
+          default: 'Network Configuration'
+        Parameters: 
+          - DnsIpAz1
+          - DnsIpAz2
+          - DnsIpAz3
+          - SourceCidrBlock
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - AlarmLevel
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
+
+Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
+  DnsIpAz1:
+    Type: String
+    Default: 10.0.0.53
+    Description: The IPv4 address that you want to use for DNS queries
+  DnsIpAz2:
+    Type: String
+    Default: 10.0.1.53
+    Description: The IPv4 address that you want to use for DNS queries
+  DnsIpAz3:
+    Type: String
+    Default: 10.0.2.53
+    Description: The IPv4 address that you want to use for DNS queries
+  SourceCidrBlock:
+    Type: String
+    Default: 0.0.0.0/0
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block of source servers [required]
+  SubnetCidrBlockAz1:
+    Type: String
+    Default: 10.0.0.0/24
+    Description: The subnet CIDR block
+  SubnetCidrBlockAz2:
+    Type: String
+    Default: 10.0.1.0/24
+    Description: The subnet CIDR block
+  SubnetCidrBlockAz3:
+    Type: String
+    Default: 10.0.2.0/24
+    Description: The subnet CIDR block
+  SubnetIdAz1:
+    Type: String
+    Default: ''
+    Description: The private subnet Id
+  SubnetIdAz2:
+    Type: String
+    Default: ''
+    Description: The private subnet Id
+  SubnetIdAz3:
+    Type: String
+    Default: ''
+    Description: The private subnet Id
+  VPCCidrBlock:
+    Type: String
+    Default: 10.0.0.0/22
+    AllowedPattern: ^[0-9./]*$
+    Description: The VPC CIDR block [required]
+  VPCId:
+    Type: String
+    Default: ''
+    Description: The VPC Id 
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for deployment information
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  CreateSubnetAz1: !And [ !Equals [ !Ref VPCId, ''], !Equals [ !Ref SubnetIdAz1, '' ] ]
+  CreateSubnetAz2: !And [ !Equals [ !Ref VPCId, ''], !Equals [ !Ref SubnetIdAz2, '' ] ]
+  CreateSubnetAz3: !And [ !Equals [ !Ref VPCId, ''], !Equals [ !Ref SubnetIdAz3, '' ] ]
+  CreateVPC: !Equals [ !Ref VPCId, '' ]
+  DnsIpAz1IsEmpty: !Equals [ !Ref DnsIpAz1, '']
+  DnsIpAz2IsEmpty: !Equals [ !Ref DnsIpAz2, '']
+  DnsIpAz3IsEmpty: !Equals [ !Ref DnsIpAz3, '']
+
+Resources:
+  # Nested Stack
+  Az1:
+    Condition: CreateSubnetAz1
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.2.13
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
+        AvailabilityZone: !Select 
+          - 0
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        NetworkLoadBalancer: DISABLED
+        LogicalName: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetCidrBlockAz1
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn   
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  Az2:
+    Condition: CreateSubnetAz2
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.2.13
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
+        AvailabilityZone: !Select 
+          - 1
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        NetworkLoadBalancer: DISABLED
+        LogicalName: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetCidrBlockAz2
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn   
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  Az3:
+    Condition: CreateSubnetAz3
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
+        SemanticVersion: 2.2.13
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
+        AvailabilityZone: !Select 
+          - 2
+          - Fn::GetAZs: !Ref 'AWS::Region'
+        NetworkLoadBalancer: DISABLED
+        LogicalName: !Ref AWS::StackName
+        SubnetPrivateCidrBlock: !Ref SubnetCidrBlockAz3
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn   
+        VPCId: !Ref VPC
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.13
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.13
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # IAM
+  IAMUserForMGN:
+    Type: AWS::IAM::User
+    Properties:
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AWSApplicationMigrationAgentInstallationPolicy
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      UserName: mgn-agent
+  IAMUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      Status: Active
+      UserName: !Ref IAMUserForMGN
+  IAMRoleForVPCFlowLog:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for VPC FlowLog.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - execute-api:Invoke
+                Resource: !Sub arn:aws:execute-api:${AWS::Region}:*:*/POST/CreateSessionForMgn
+      RoleName: !Sub ${AWS::StackName}-AWSVPCFlowLogRole-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # VPC
+  VPC:
+    Condition: CreateVPC
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidrBlock
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub vpc-${AWS::StackName}-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  VPCFlowLog:
+    Condition: CreateVPC
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt IAMRoleForVPCFlowLog.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref CloudWatchLogsGroupForVPCFlowLog
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # VPC Endpoint
+  MGNEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.mgn
+      SubnetIds: 
+        - !If
+          - CreateSubnetAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz1
+        - !If
+          - CreateSubnetAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz2
+        - !If
+          - CreateSubnetAz3
+          - !GetAtt Az3.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz3
+      VpcEndpointType: Interface
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+  EC2Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2
+      SubnetIds: 
+        - !If
+          - CreateSubnetAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz1
+        - !If
+          - CreateSubnetAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz2
+        - !If
+          - CreateSubnetAz3
+          - !GetAtt Az3.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz3
+      VpcEndpointType: Interface
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+  S3InterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: false
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      SubnetIds: 
+        - !If
+          - CreateSubnetAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz1
+        - !If
+          - CreateSubnetAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz2
+        - !If
+          - CreateSubnetAz3
+          - !GetAtt Az3.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz3
+      VpcEndpointType: Interface
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+  SecurityGroupForEndpoint:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+      GroupDescription: Security Group for VPC Endpoints
+      SecurityGroupEgress:
+        - CidrIp: !Ref VPCCidrBlock
+          IpProtocol: '-1'
+      SecurityGroupIngress:
+        - CidrIp: !Ref VPCCidrBlock
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+        - CidrIp: !Ref SourceCidrBlock
+          Description: https
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: TCP
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-vpce
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+  S3GatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      RouteTableIds:
+        - !Ref RouteTableForS3Endpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+  RouteTableForS3Endpoint:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Sub rtb-${AWS::StackName}-s3endpoint
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  RouteTableForS3EndpointAz1Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !If
+        - CreateSubnetAz1
+        - !GetAtt Az1.Outputs.PrivateSubnetId
+        - !Ref SubnetIdAz1
+  RouteTableForS3EndpointAz2Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !If
+        - CreateSubnetAz2
+        - !GetAtt Az2.Outputs.PrivateSubnetId
+        - !Ref SubnetIdAz2
+  RouteTableForS3EndpointAz3Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !If
+        - CreateSubnetAz3
+        - !GetAtt Az3.Outputs.PrivateSubnetId
+        - !Ref SubnetIdAz3
+  # Route 53 Resolover Endpoint
+  Route53ResolverInbound:
+    Type: AWS::Route53Resolver::ResolverEndpoint
+    Properties: 
+      Direction: INBOUND
+      IpAddresses: 
+        - Ip: !If
+            - DnsIpAz1IsEmpty
+            - !Ref AWS::NoValue
+            - !Ref DnsIpAz1
+          SubnetId: !If
+            - CreateSubnetAz1
+            - !GetAtt Az1.Outputs.PrivateSubnetId
+            - !Ref SubnetIdAz1
+        - Ip: !If
+            - DnsIpAz2IsEmpty
+            - !Ref AWS::NoValue
+            - !Ref DnsIpAz2
+          SubnetId: !If
+            - CreateSubnetAz2
+            - !GetAtt Az2.Outputs.PrivateSubnetId
+            - !Ref SubnetIdAz2
+        - Ip: !If
+            - DnsIpAz3IsEmpty
+            - !Ref AWS::NoValue
+            - !Ref DnsIpAz3
+          SubnetId: !If
+            - CreateSubnetAz3
+            - !GetAtt Az3.Outputs.PrivateSubnetId
+            - !Ref SubnetIdAz3
+      Name: !Sub rslvr-in-${AWS::StackName}-${AWS::Region}
+      SecurityGroupIds:
+        - !Ref SecurityGroupForRoute53Resolver
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  SecurityGroupForRoute53Resolver:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: !Sub sgp-${AWS::StackName}-${AWS::Region}-route53resolver
+      GroupDescription: Security Group for VPC Endpoints
+      SecurityGroupEgress:
+        - IpProtocol: udp
+          Description: All UDP Traffic
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          Description: All TCP Traffic
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: udp
+          Description: DNS
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          Description: DNS
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub sgp-${AWS::StackName}-${AWS::Region}-route53resolver
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+  # CloudWatch
+  CloudWatchLogsGroupForVPCFlowLog:
+    Condition: CreateVPC
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/vpc/${AWS::StackName}
+      RetentionInDays: 60
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  InstallCommabdForWindows:
+    Description: The command to install an MGN Windows agent
+    Value: !Join
+      - ''
+      - - !Sub '.\AwsReplicationWindowsInstaller.exe --region ${AWS::Region} --aws-access-key-id ${IAMUserAccessKey} --aws-secret-access-key '
+        - !GetAtt IAMUserAccessKey.SecretAccessKey
+        - ' --no-prompt'
+  InstallCommabdForLinux:
+    Description: The command to install an MGN Linux agent
+    Value: !Join
+      - ''
+      - - !Sub 'sudo chmod +x aws-replication-installer-init; sudo ./aws-replication-installer-init --region ${AWS::Region} --aws-access-key-id ${IAMUserAccessKey} --aws-secret-access-key '
+        - !GetAtt IAMUserAccessKey.SecretAccessKey
+        - ' --no-prompt'

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/security/cloudtrail sets AWS CloudTrail.
+Description: aws-cloudformation-templates/security/cloudtrail sets AWS CloudTrail.
 
 Metadata: 
   AWS::CloudFormation::Interface:

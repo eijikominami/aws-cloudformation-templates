@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/media/mediaconvert sets Elemental MediaConvert.
+Description: aws-cloudformation-templates/media/mediaconvert sets Elemental MediaConvert.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -103,7 +103,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -120,7 +120,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -480,7 +480,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconvert
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

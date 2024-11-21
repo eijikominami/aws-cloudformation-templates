@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWSCloudFormationTemplates/web-servers/dlm creates a DataLifecycleManager.
+Description: aws-cloudformation-templates/web-servers/dlm creates a DataLifecycleManager.
 
 Metadata: 
   AWS::CloudFormation::Interface:

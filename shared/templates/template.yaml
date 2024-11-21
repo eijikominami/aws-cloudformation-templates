@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/shared sets shared services.
+Description: aws-cloudformation-templates/shared sets shared services.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -249,7 +249,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -283,7 +283,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -317,7 +317,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -414,7 +414,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -431,7 +431,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -752,9 +752,37 @@ Resources:
   S3Endpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
+      RouteTableIds:
+        - !Ref RouteTableForS3Endpoint
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcEndpointType: Gateway
       VpcId: !Ref VPC
+  RouteTableForS3Endpoint:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub rtb-${AWS::StackName}-s3endpoint
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  RouteTableForS3EndpointAz1Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !GetAtt Az1.Outputs.PrivateSubnetId
+  RouteTableForS3EndpointAz2Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !GetAtt Az2.Outputs.PrivateSubnetId
+  RouteTableForS3EndpointAz3Association:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTableForS3Endpoint
+      SubnetId: !GetAtt Az3.Outputs.PrivateSubnetId
   # CloudWatch
   CloudWatchLogsGroupForVPCFlowLog:
     Type: AWS::Logs::LogGroup
@@ -772,7 +800,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -797,7 +825,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -824,7 +852,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -851,7 +879,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -878,7 +906,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -905,7 +933,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/network/ipam creates an Amazon VPC IP Address Manager (IPAM).
+Description: aws-cloudformation-templates/network/ipam creates an Amazon VPC IP Address Manager (IPAM).
 
 Metadata: 
   AWS::CloudFormation::Interface:

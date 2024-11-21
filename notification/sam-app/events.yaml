@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/notification/events creates Amazon EventBridge to support events from AWS Services.
+Description: aws-cloudformation-templates/notification/events creates Amazon EventBridge to support events from AWS Services.
 
 Metadata: 
   AWS::CloudFormation::Interface:

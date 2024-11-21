@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/cloudops/applicationinsights creates a group of Amazon CloudWatch Application Insights.
+Description: aws-cloudformation-templates/cloudops/applicationinsights creates a group of Amazon CloudWatch Application Insights.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:

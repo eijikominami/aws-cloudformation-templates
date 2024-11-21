@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/network/networkaccessanalyzer creates an Network Access Analyzer.
+Description: aws-cloudformation-templates/network/networkaccessanalyzer creates an Network Access Analyzer.
 
 Metadata: 
   AWS::CloudFormation::Interface:

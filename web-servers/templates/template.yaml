@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: AWSCloudFormationTemplates/web-servers creates an Elastic Load Balancer and EC2 instances for Web Servers.
+Description: aws-cloudformation-templates/web-servers creates an Elastic Load Balancer and EC2 instances for Web Servers.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -395,7 +395,7 @@ Conditions:
   CreateGlobalAccelerator: !Equals [ !Ref GlobalInfrastructure, GLOBAL_ACCELERATOR ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreatePrivateSubnets: !Or [ !And [ !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ], !Equals [ !Ref ComputeType, INSTANCE ] ], !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]]
-  CreateRoute53: !And [ !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
+  CreateEC2AndRoute53: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Equals [ !Ref ComputeType, INSTANCE ], !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -415,7 +415,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -464,7 +464,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -513,7 +513,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -823,7 +823,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -840,7 +840,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -1189,15 +1189,28 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  EIPAssociation:
+  ENIForEC2:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      GroupSet:
+        - !Ref SecurityGroupWeb
+      SubnetId: !GetAtt Az1.Outputs.PublicSubnetId
+      Tags: 
+        - Key: Name
+          Value: !Sub eni-${AWS::StackName}-{AWS::Region}-ec2
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  EIPAssociationForEC2:
     Condition: CreateEC2
     Type: AWS::EC2::EIPAssociation
     Properties: 
       AllocationId: !GetAtt EIPForEC2Instance.AllocationId
-      InstanceId: !Ref EC2
+      NetworkInterfaceId: !Ref ENIForEC2
   # Route53
   Route53RecordSet:
-    Condition: CreateRoute53
+    Condition: CreateEC2AndRoute53
     Type: AWS::Route53::RecordSet
     Properties:
       Comment: !Ref DomainName
@@ -1229,9 +1242,9 @@ Resources:
         - !Ref EC2KeyName
         - !Ref AWS::NoValue
       Monitoring: true
-      SecurityGroupIds: 
-        - !Ref SecurityGroupWeb
-      SubnetId: !GetAtt Az1.Outputs.PublicSubnetId
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          NetworkInterfaceId: !Ref ENIForEC2
       UserData: !Base64
         Fn::Join:
           - ''
@@ -1347,7 +1360,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1372,7 +1385,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1401,7 +1414,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.9
+        SemanticVersion: 2.2.13
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
