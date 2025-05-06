@@ -68,3 +68,7 @@ You can provide optional parameters as follows.
 ### Installing the Active Directory administration tools
 
 After deploying this template, [install the Active Directory Administration Tools on Windows Server](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html#install_ad_tools_winserver). Next, switch the user to `DOMAIN\Admin` and [create users and groups](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html) with the **Active Directory Users and Computers tool**.
+
+### Storing Security Event Logs in Amazon CloudWatch Logs and Amazon S3
+
+To store domain controller security event logs in Amazon CloudWatch Logs and Amazon S3, you need to manually enable the log forwarding feature through the AWS Management Console. This configuration allows you to forward security events from your domain controllers for monitoring and audit purposes.

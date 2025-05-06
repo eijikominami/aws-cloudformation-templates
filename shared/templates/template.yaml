@@ -226,6 +226,7 @@ Resources:
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
         LogicalName: !Ref AWS::StackName
+        LoggingBucketArn: !Sub arn:aws:s3:::${BucketNameForArchive}
         Name: !Ref ActiveDirectoryName
         Password: !Ref ActiveDirectoryPassword
         ShortName: !Ref ActiveDirectoryShortName
@@ -381,6 +382,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         AccountIdForArchive: !Ref AccountIdForArchive
+        AlarmLevel: !Ref AlarmLevel
         BucketNameForArchive: !Ref BucketNameForArchive
         CpuArchitecture: ARM64
         SubnetIdAz1: !GetAtt Az1.Outputs.PrivateSubnetId

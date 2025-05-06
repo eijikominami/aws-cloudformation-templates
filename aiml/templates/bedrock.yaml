@@ -7,7 +7,8 @@ Metadata:
     ParameterGroups: 
       - Label: 
           default: 'Bedrock Configuration'
-        Parameters: 
+        Parameters:
+          - KnowledgeBaseEmbeddingModel
           - PineconeEndpointUrl
           - PineconeApikey
       - Label: 
@@ -17,14 +18,23 @@ Metadata:
           - TagValue
 
 Parameters: 
+  KnowledgeBaseEmbeddingModel:
+    Type: String
+    Default: amazon.titan-embed-text-v2:0
+    AllowedValues:
+      - amazon.titan-embed-text-v1
+      - amazon.titan-embed-text-v2:0
+      - cohere.embed-multilingual-v3
+      - cohere.embed-english-v3
+    Description: The embedding model for Bedrock Knowledge Base [required]
   PineconeEndpointUrl:
     Type: String
     AllowedPattern: .+
-    Description: The endpoint URL of Pinecone
+    Description: The endpoint URL of Pinecone [required]
   PineconeApikey:
     Type: String
     AllowedPattern: .+   
-    Description: The api key of Pinecone
+    Description: The api key of Pinecone [required]
   TagKey:
     Type: String
     Default: createdby
@@ -60,7 +70,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - bedrock:InvokeModel
-                Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v1
+                Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${KnowledgeBaseEmbeddingModel}
               - Effect: Allow
                 Action:
                   - s3:ListBucket
@@ -94,7 +104,7 @@ Resources:
       KnowledgeBaseConfiguration: 
         Type: VECTOR
         VectorKnowledgeBaseConfiguration: 
-          EmbeddingModelArn: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v1
+          EmbeddingModelArn: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${KnowledgeBaseEmbeddingModel}
       Name: !Ref AWS::StackName
       RoleArn: !GetAtt IAMRoleForBedrock.Arn
       StorageConfiguration: 

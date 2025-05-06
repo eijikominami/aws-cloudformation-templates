@@ -34,6 +34,8 @@ Metadata:
       - Label:
           default: Logging Configuration
         Parameters:
+          - CentralizedLogBucketName
+          - CentralizedLoggingFirehoseRoleArns
           - SIEM
           - SIEMControlTowerLogBucketNameList
           - SIEMControlTowerRoleArnForEsLoader
@@ -150,7 +152,15 @@ Parameters:
       - CIS
       - NIST
       - PCIDSS
-    Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
+    Description: The standard that you want to enable (FSBP, TAGGING, CIS, NIST, PCIDSS)
+  CentralizedLogBucketName:
+    Type: String
+    Default: ''
+    Description: The centralize S3 bucket name for logging
+  CentralizedLoggingFirehoseRoleArns:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role
   IAMAccessAnalyzer:
     Type: String
     Default: ACCOUNT
@@ -255,6 +265,7 @@ Conditions:
   CreateConfig: !Equals [ !Ref AWSConfig, ENABLED ]
   CreateGuardDuty: !Or [ !Equals [ !Ref AmazonGuardDuty, ENABLED], !Equals [!Ref AmazonGuardDuty, NOTIFICATION_ONLY ] ]
   CreateGuardDutyEventBridgeOnly: !Equals [ !Ref AmazonGuardDuty, NOTIFICATION_ONLY ]
+  CreateFirehose: !Or [ !Not [ !Equals [ !Ref CentralizedLogBucketName, '' ] ], !Not [ !Equals [ !Ref SIEMEsLoaderServiceRoleArn, '' ] ] ]
   CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref IAMAccessAnalyzer, DISABLED ] ]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [!Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
   CreateMacie: !And [ !Equals [ !Ref AmazonMacie, ENABLED ], !Equals [ !Ref AmazonMacie, NOTIFICATION_ONLY ] ]
@@ -265,6 +276,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn,'']
   CloudTrailIsCreatedByControlTower: !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ]
   Development: !Equals [ !Ref Environment, development ]
+  HasFirehoseRoles: !Not [ !Equals [ !Join [',', !Ref CentralizedLoggingFirehoseRoleArns], ''] ]
 
 Resources:
   IAM:
@@ -313,9 +325,7 @@ Resources:
         AlarmLevel: !Ref AlarmLevel
         DelegatedAdminAccountId: !Ref AuditAccountId
         OrganizationsRootId: !Ref OrganizationsRootId
-        SecurityHubStandards: !Join
-          - ','
-          - !Ref AWSSecurityHubStandards
+        SecurityHubStandards: !Join [',', !Ref AWSSecurityHubStandards]
         SecurityHubType: !Ref AWSSecurityHub
         SNSForAlertArn: !If
           - CreateSNSForAlert
@@ -492,6 +502,12 @@ Resources:
         SIEMControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
         SIEMControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
         SIEMControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
+        CentralizedLoggingFirehoseRoleArns: !If
+          - HasFirehoseRoles     
+          - !Join
+              - ','
+              - !Ref CentralizedLoggingFirehoseRoleArns
+          - ''
         LogArchiveAccountId: !Ref LogArchiveAccountId
         OrganizationId: !Ref OrganizationId
         SecurityOUId: !Ref SecurityOUId
@@ -542,6 +558,7 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  # IAM
   IAMRoleForAWSSupport:
     Condition: CreateIAMRoleForAWSSupport
     Type: AWS::IAM::Role
@@ -562,6 +579,181 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForFirehose:
+    Condition: CreateFirehose
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for Kinesis Firehose.
+      Policies:
+        - PolicyName: S3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub arn:aws:s3:::${CentralizedLogBucketName}
+                  - !Sub arn:aws:s3:::${CentralizedLogBucketName}/*
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource: !GetAtt CloudWatchLogsGroupForFirehose.Arn
+      RoleName: !Sub ${AWS::StackName}-Firehose-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForEventBridge:
+    Condition: CreateFirehose
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for EventBridge.
+      Policies:
+        - PolicyName: Firehose
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource: !GetAtt Firehose.Arn
+      RoleName: !Sub ${AWS::StackName}-EventBridge-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # EventBridge to S3
+  CloudWatchEventsForGuardDuty:
+    Condition: CreateFirehose
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for SIEM GuardDuty created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.guardduty
+        detail-type: 
+          - GuardDuty Finding
+      Name: SIEM-GuardDuty
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt Firehose.Arn
+          Id: CloudWatchEventsForSIEMInspector2
+          RoleArn: !GetAtt IAMRoleForEventBridge.Arn
+  CloudWatchEventsForInspector2:
+    Condition: CreateFirehose
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for SIEM Inspector2 created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.inspector2
+        detail-type: 
+          - Inspector2 Coverage
+          - Inspector2 Finding
+      Name: SIEM-Inspector2
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt Firehose.Arn
+          Id: CloudWatchEventsForSIEMInspector2
+          RoleArn: !GetAtt IAMRoleForEventBridge.Arn
+  CloudWatchEventsForSecurityHubFindings:
+    Condition: CreateFirehose
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for SIEM SecurityHub Findings created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.securityhub
+        detail-type: 
+          - Security Hub Findings - Imported
+      Name: SIEM-SecurityHub
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt Firehose.Arn
+          Id: CloudWatchEventsForSIEMSecurityHub
+          RoleArn: !GetAtt IAMRoleForEventBridge.Arn
+  CloudWatchEventsForConfig:
+    Condition: CreateFirehose
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: !Sub Rule for SIEM Config created by ${AWS::StackName}.
+      EventPattern:
+        source:
+          - aws.config
+        detail-type: 
+          - Config Rules Compliance Change
+      Name: SIEM-Config
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt Firehose.Arn
+          Id: CloudWatchEventsForSIEMConfig
+          RoleArn: !GetAtt IAMRoleForEventBridge.Arn
+  Firehose:
+    Condition: CreateFirehose
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamName: !Sub EventBridgeToS3-created-by-${AWS::StackName}
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration: 
+        BucketARN: !Sub arn:aws:s3:::${CentralizedLogBucketName}
+        BufferingHints: 
+          IntervalInSeconds: 300
+          SizeInMBs: 64
+        CloudWatchLoggingOptions: 
+          Enabled: true
+          LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+          LogStreamName: !Ref CloudWatchLogsStreamForFirehoseS3
+        CompressionFormat: GZIP
+        DynamicPartitioningConfiguration:
+          Enabled: true
+          RetryOptions:
+            DurationInSeconds: 30
+        ErrorOutputPrefix: ErrorLogs/
+        Prefix: AWSLogs/!{partitionKeyFromQuery:account}/!{partitionKeyFromQuery:service}/!{partitionKeyFromQuery:detailtype}/!{partitionKeyFromQuery:region}/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            - Parameters:
+                - ParameterName: MetadataExtractionQuery
+                  ParameterValue: '{service: .source, account: .account, region: .region, detailtype: ."detail-type"| gsub(" "; "_")}'
+                - ParameterName: JsonParsingEngine
+                  ParameterValue: JQ-1.6
+              Type: MetadataExtraction
+        RoleARN: !GetAtt IAMRoleForFirehose.Arn
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # S3
   S3ForAccessLog:
     Type: AWS::S3::Bucket
     UpdateReplacePolicy: Retain
@@ -611,6 +803,7 @@ Resources:
             Condition:
               Bool:
                 aws:SecureTransport: false
+  # CloudWatch
   CloudWatchEventsForHealth:
     Type: AWS::Events::Rule
     Properties:
@@ -697,6 +890,24 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  CloudWatchLogsGroupForFirehose:
+    Condition: CreateFirehose
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupClass: INFREQUENT_ACCESS
+      LogGroupName: !Sub /aws/kinesisfirehose/${AWS::StackName}
+      RetentionInDays: 60
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchLogsStreamForFirehoseS3:
+    Condition: CreateFirehose
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+      LogStreamName: FirehoseToS3
         
 Outputs:
   SNSForAlertArn:

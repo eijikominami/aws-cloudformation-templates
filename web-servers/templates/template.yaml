@@ -402,7 +402,7 @@ Conditions:
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
   CreateWAFForCloudFront: !And [!Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref WebACL, ENABLED ] ]
   CreateWAFForALB: !And [!Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, application ], !Equals [ !Ref ComputeType, INSTANCE ], !Equals [ !Ref WebACL, ENABLED ] ]
-  CreateKinesisFirehose: !Not [ !Equals [ !Ref LogGroupNameTransferredToS3, '' ] ]
+  CreateFirehose: !Not [ !Equals [ !Ref LogGroupNameTransferredToS3, '' ] ]
   Development: !Equals [ !Ref Environment, development]
 
 Resources:
@@ -920,7 +920,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForFirehose:
-    Condition: CreateKinesisFirehose
+    Condition: CreateFirehose
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -944,7 +944,21 @@ Resources:
                   - s3:ListBucket
                   - s3:ListBucketMultipartUploads
                   - s3:PutObject
-                Resource: '*'
+                  - s3:PutObjectAcl
+                Resource:
+                  - !GetAtt S3ForAccessLog.Arn
+                  - !Join
+                      - ''
+                      - - !GetAtt S3ForAccessLog.Arn
+                        - '/*'
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource: !GetAtt CloudWatchLogsGroupForFirehose.Arn
       RoleName: !Sub ${AWS::StackName}-Firehose-${AWS::Region}
       Tags:
         - Key: environment
@@ -952,7 +966,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForCloudWatchLogs:
-    Condition: CreateKinesisFirehose
+    Condition: CreateFirehose
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -1515,7 +1529,7 @@ Resources:
                 aws:SecureTransport: true
   # CloudWatch Logs to S3
   SubscriptionFilter:
-    Condition: CreateKinesisFirehose
+    Condition: CreateFirehose
     Type: AWS::Logs::SubscriptionFilter
     Properties: 
       DestinationArn: !GetAtt Firehose.Arn
@@ -1523,7 +1537,7 @@ Resources:
       LogGroupName: !Ref LogGroupNameTransferredToS3
       RoleArn: !GetAtt IAMRoleForCloudWatchLogs.Arn
   Firehose:
-    Condition: CreateKinesisFirehose
+    Condition: CreateFirehose
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties: 
       DeliveryStreamName: !Sub CloudWatchLogsToS3-created-by-${AWS::StackName}
@@ -1533,6 +1547,10 @@ Resources:
         BufferingHints: 
           IntervalInSeconds: 300
           SizeInMBs: 5
+        CloudWatchLoggingOptions: 
+          Enabled: true
+          LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+          LogStreamName: !Ref CloudWatchLogsStreamForFirehoseS3
         Prefix: !Sub CloudWatchLogs${LogGroupNameTransferredToS3}/
         RoleARN: !GetAtt IAMRoleForFirehose.Arn
       Tags: 
@@ -1540,6 +1558,51 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  # CloudWatch
+  CloudWatchAlarmFirehose:
+    Condition: CreateFirehose
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
+        SemanticVersion: 2.2.13
+      NotificationARNs: 
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters: 
+        AlarmLevel: !Ref AlarmLevel
+        CustomAlarmName : !Ref AWS::StackName
+        FirehoseStreamName: !Ref Firehose
+        SNSTopicArn: !If 
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  CloudWatchLogsGroupForFirehose:
+    Condition: CreateFirehose
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupClass: INFREQUENT_ACCESS
+      LogGroupName: !Sub /aws/kinesisfirehose/${AWS::StackName}
+      RetentionInDays: 60
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CloudWatchLogsStreamForFirehoseS3:
+    Condition: CreateFirehose
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref CloudWatchLogsGroupForFirehose
+      LogStreamName: FirehoseToS3
 
 Outputs:
   CloudFrontURL:

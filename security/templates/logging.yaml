@@ -14,6 +14,7 @@ Metadata:
           default: SIEM Configuration
         Parameters:
           - AllowedSourceIpAddressesForSIEM
+          - CentralizedLoggingFirehoseRoleArns
           - SIEMControlTowerLogBucketNameList
           - SIEMControlTowerRoleArnForEsLoader
           - SIEMControlTowerSqsForLogBuckets
@@ -90,6 +91,10 @@ Parameters:
     Type: String
     AllowedPattern: .+  
     Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to [required]
+  CentralizedLoggingFirehoseRoleArns:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role
   Environment:
     Type: String
     Default: production
@@ -109,6 +114,7 @@ Parameters:
 Conditions:
   CreateSIEMIntegrationWithControlTower: !Not [ !Equals [!Ref SIEMEsLoaderServiceRoleArn , ''] ]
   Development: !Equals [ !Ref Environment, development ]
+  HasFirehoseRoles: !Not [ !Equals [ !Join [',', !Ref CentralizedLoggingFirehoseRoleArns], ''] ]
 
 Resources:
   SecurityLake:
@@ -273,6 +279,13 @@ Resources:
         MaxConcurrentCount: 1
         RegionConcurrencyType: SEQUENTIAL
       Parameters: 
+        - ParameterKey: FirehoseRoleArns
+          ParameterValue: !If
+            - HasFirehoseRoles
+            - !Join
+              - ','
+              - !Ref CentralizedLoggingFirehoseRoleArns
+            - ''
         - ParameterKey: OrganizationId
           ParameterValue: !Ref OrganizationId
         - ParameterKey: Environment

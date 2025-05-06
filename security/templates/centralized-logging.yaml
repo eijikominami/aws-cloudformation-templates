@@ -7,6 +7,7 @@ Metadata:
       - Label:
           default: Logging Configuration
         Parameters:
+          - FirehoseRoleArns
           - OrganizationId
       - Label:
           default: Tag Configuration
@@ -16,6 +17,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  FirehoseRoleArns:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role
   OrganizationId:
     Type: String
     Default: .+   
@@ -35,6 +40,9 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
+
+Conditions:
+  CreateBucketPolicyForFirehose: !Not [ !Equals [ !Join [',', !Ref FirehoseRoleArns], ''] ]
 
 Resources:
   S3ForCentralizedLogging:
@@ -90,6 +98,7 @@ Resources:
             Condition:
               Bool:
                 aws:SecureTransport: false
+          # CloudWatch Logs
           - Effect: Allow
             Principal:
               Service: delivery.logs.amazonaws.com
@@ -107,3 +116,21 @@ Resources:
             Condition:
               StringEquals:
                 aws:SourceOrgID: !Ref OrganizationId
+          # Firehose
+          - !If
+            - CreateBucketPolicyForFirehose
+            - Effect: Allow
+              Principal:
+                AWS: !Ref FirehoseRoleArns
+              Action:
+                - s3:AbortMultipartUpload
+                - s3:GetBucketLocation
+                - s3:GetObject
+                - s3:ListBucket
+                - s3:ListBucketMultipartUploads
+                - s3:PutObject
+                - s3:PutObjectAcl
+              Resource:
+                - !Sub arn:aws:s3:::${S3ForCentralizedLogging}
+                - !Sub arn:aws:s3:::${S3ForCentralizedLogging}/*
+            - !Ref AWS::NoValue

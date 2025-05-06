@@ -154,6 +154,7 @@ Resources:
       Targets:
         - Arn: !Ref SNSForAlertArn
           Id: CloudWatchEventsForGuardDuty
+  # CloudWatch
   AlarmEventsForGuardDuty:
     Type: AWS::Serverless::Application
     Properties:
