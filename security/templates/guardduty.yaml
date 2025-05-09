@@ -9,6 +9,7 @@ Metadata:
           default: 'GuardDuty Configuration'
         Parameters: 
           - Detector
+          - FindingsDestinationBucketArn
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -38,6 +39,10 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: The GuardDuty detector [required]
+  FindingsDestinationBucketArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon S3 bucket ARN for GuardDuty to send findings to
   SNSForAlertArn:
     Type: String
     Default: ''
@@ -68,6 +73,7 @@ Parameters:
 
 Conditions:
   CreateDetector: !Equals [ !Ref Detector, ENABLED]
+  CreatePublishingDestination: !Not [ !Equals [ !Ref FindingsDestinationBucketArn, '' ]]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -124,6 +130,19 @@ Resources:
           Enable: true      
       Enable: true
       Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  GuardDutyPublishingDestination:
+    Condition: CreatePublishingDestination
+    Type: AWS::GuardDuty::PublishingDestination
+    Properties:
+      DestinationProperties: 
+        DestinationArn: !Ref FindingsDestinationBucketArn
+      DestinationType: S3
+      DetectorId: !Ref GuardDutyDetector
+      Tags: 
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey

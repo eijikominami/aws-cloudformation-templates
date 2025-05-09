@@ -362,6 +362,7 @@ Resources:
           - CreateGuardDutyEventBridgeOnly
           - DISABLED
           - ENABLED
+        FindingsDestinationBucketArn: !Sub arn:aws:s3:::${CentralizedLogBucketName}
         LogicalName: !Ref AWS::StackName
         SNSForAlertArn: !If
           - CreateSNSForDeployment
