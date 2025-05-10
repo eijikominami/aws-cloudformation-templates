@@ -42,6 +42,7 @@ Metadata:
           - SIEMControlTowerSqsForLogBuckets
           - SIEMEsLoaderServiceRoleArn
           - SIEMGeoLite2LicenseKey
+          - SIEMKmsKeyArn
           - SIEMSecurityLakeExternalId
           - SIEMSecurityLakeRoleArn
           - SIEMSecurityLakeSubscriberSqs
@@ -220,6 +221,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The license key from MaxMind to enrich geoip location
+  SIEMKmsKeyArn:
+    Type: String
+    Default: '' 
+    Description: The KMS key ARN for SIEM to encrypt findings    
   SIEMSecurityLakeExternalId:
     Type: String
     Default: ''    
@@ -268,10 +273,10 @@ Conditions:
   CreateFirehose: !Or [ !Not [ !Equals [ !Ref CentralizedLogBucketName, '' ] ], !Not [ !Equals [ !Ref SIEMEsLoaderServiceRoleArn, '' ] ] ]
   CreateIAMAccessAnalyzer: !Not [ !Equals [ !Ref IAMAccessAnalyzer, DISABLED ] ]
   CreateIAMRoleForAWSSupport: !Not [ !Equals [!Ref IAMUserArnToAssumeAWSSupportRole, ''] ]
+  CreateLogging: !And [ !Not [ !Equals [ !Ref AuditAccountId, ''] ], !Not [ !Equals [!Ref LogArchiveAccountId, ''] ], !Not [ !Equals [ !Ref OrganizationId, ''] ], !Not [ !Equals [ !Ref SecurityOUId, ''] ] ]
   CreateMacie: !And [ !Equals [ !Ref AmazonMacie, ENABLED ], !Equals [ !Ref AmazonMacie, NOTIFICATION_ONLY ] ]
   CreateMacieEventBridgeOnly: !Equals [ !Ref AmazonMacie, NOTIFICATION_ONLY ]
   CreateSecurityHub: !Not [ !Equals [ !Ref AWSSecurityHub, DISABLED ] ]
-  CreateSIEM: !And [ !Equals [ !Ref SIEM, ENABLED ], !Not [ !Equals [!Ref AuditAccountId, ''] ], !Not [ !Equals [!Ref LogArchiveAccountId, ''] ], !Not [ !Equals [!Ref OrganizationId, ''] ], !Not [ !Equals [!Ref SecurityOUId, ''] ], !Not [ !Equals [!Ref SIEMEmail, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn ,'']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn,'']
   CloudTrailIsCreatedByControlTower: !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ]
@@ -342,43 +347,6 @@ Resources:
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securityhub.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securityhub.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  GuardDuty:
-    Condition: CreateGuardDuty
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        AlarmLevel: !Ref AlarmLevel
-        Detector: !If
-          - CreateGuardDutyEventBridgeOnly
-          - DISABLED
-          - ENABLED
-        FindingsDestinationBucketArn: !Sub arn:aws:s3:::${CentralizedLogBucketName}
-        LogicalName: !Ref AWS::StackName
-        SNSForAlertArn: !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-        SNSForDeploymentArn: !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/guardduty.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/guardduty.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -489,7 +457,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   Logging:
-    Condition: CreateSIEM
+    Condition: CreateLogging
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -500,6 +468,7 @@ Resources:
       Parameters:
         AuditAccountId: !Ref AuditAccountId
         AllowedSourceIpAddressesForSIEM: 0.0.0.0/0
+        SIEM: !Ref SIEM
         SIEMControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
         SIEMControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
         SIEMControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets

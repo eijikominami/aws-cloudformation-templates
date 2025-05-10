@@ -15,6 +15,7 @@ Metadata:
         Parameters:
           - AllowedSourceIpAddressesForSIEM
           - CentralizedLoggingFirehoseRoleArns
+          - SIEM
           - SIEMControlTowerLogBucketNameList
           - SIEMControlTowerRoleArnForEsLoader
           - SIEMControlTowerSqsForLogBuckets
@@ -34,7 +35,7 @@ Metadata:
 Parameters:
   AuditAccountId:
     Type: String
-    AllowedPattern: .+       
+    AllowedPattern: .+
     Description: The id of the audit account [required]
   AllowedSourceIpAddressesForSIEM:
     Type: String
@@ -46,12 +47,19 @@ Parameters:
     Description: The id of the log archive account [required]
   OrganizationId:
     Type: String
-    Default: .+   
+    Default: .+
     Description: The root id of AWS Organizations [required]
   SecurityOUId:
     Type: String
-    AllowedPattern: .+       
+    AllowedPattern: .+  
     Description: The id of the security OU [required]
+  SIEM:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable SIEM environment [required]
   SIEMControlTowerLogBucketNameList:
     Type: String
     Default: ''
@@ -77,19 +85,19 @@ Parameters:
     Description: The license key from MaxMind to enrich geoip location
   SIEMSecurityLakeExternalId:
     Type: String
-    Default: ''    
+    Default: ''
     Description: The Security Lake external ID for cross account
   SIEMSecurityLakeRoleArn:
     Type: String
-    Default: ''    
+    Default: ''
     Description: The IAM Role ARN to be assumed by aes-siem-es-loader
   SIEMSecurityLakeSubscriberSqs:
     Type: String
-    Default: ''    
+    Default: ''
     Description: The SQS ARN of Security Lake Subscriber
   SIEMEmail:
     Type: String
-    AllowedPattern: .+  
+    Default: ''
     Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to [required]
   CentralizedLoggingFirehoseRoleArns:
     Type: CommaDelimitedList
@@ -112,7 +120,8 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateSIEMIntegrationWithControlTower: !Not [ !Equals [!Ref SIEMEsLoaderServiceRoleArn , ''] ]
+  CreateSIEM: !And [ !Equals [ !Ref SIEM, ENABLED ], !Not [ !Equals [ !Ref SIEMEmail, ''] ] ]
+  CreateSIEMIntegrationWithControlTower: !And [ !Equals [ !Ref SIEM, ENABLED ], !Not [ !Equals [ !Ref SIEMEmail, ''] ], !Not [ !Equals [!Ref SIEMEsLoaderServiceRoleArn , ''] ] ]
   Development: !Equals [ !Ref Environment, development ]
   HasFirehoseRoles: !Not [ !Equals [ !Join [',', !Ref CentralizedLoggingFirehoseRoleArns], ''] ]
 
@@ -166,6 +175,7 @@ Resources:
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securitylake.yaml
         - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securitylake.yaml
   SIEMOnAmazonOpenSearchService:
+    Condition: CreateSIEM
     Type: AWS::CloudFormation::StackSet
     Properties:
       AutoDeployment: 
@@ -259,9 +269,6 @@ Resources:
           Value: !Ref TagValue  
       TemplateURL: https://aes-siem.s3.ap-northeast-1.amazonaws.com/log-exporter/siem-integration-with-control-tower.template
   CentralizedLogging:
-    Condition: CreateSIEMIntegrationWithControlTower
-    DependsOn:
-      - SIEMIntegrationWithControlTower
     Type: AWS::CloudFormation::StackSet
     Properties:
       AutoDeployment: 
