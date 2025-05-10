@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: aws-cloudformation-templates/mgn creates an environment for AWS Application Migration Service.
+Description: aws-cloudformation-templates/mgn creates an environment for AWS Application Migration Service or AWS Elastic Disaster Recovery.
 
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -275,6 +275,7 @@ Resources:
     Properties:
       ManagedPolicyArns: 
         - arn:aws:iam::aws:policy/AWSApplicationMigrationAgentInstallationPolicy
+        - arn:aws:iam::aws:policy/AWSElasticDisasterRecoveryAgentInstallationPolicy
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -358,6 +359,31 @@ Resources:
       SecurityGroupIds: 
         - !Ref SecurityGroupForEndpoint
       ServiceName: !Sub com.amazonaws.${AWS::Region}.mgn
+      SubnetIds: 
+        - !If
+          - CreateSubnetAz1
+          - !GetAtt Az1.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz1
+        - !If
+          - CreateSubnetAz2
+          - !GetAtt Az2.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz2
+        - !If
+          - CreateSubnetAz3
+          - !GetAtt Az3.Outputs.PrivateSubnetId
+          - !Ref SubnetIdAz3
+      VpcEndpointType: Interface
+      VpcId: !If
+        - CreateVPC
+        - !Ref VPC
+        - !Ref VPCId
+  DRSEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: true
+      SecurityGroupIds: 
+        - !Ref SecurityGroupForEndpoint
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.drs
       SubnetIds: 
         - !If
           - CreateSubnetAz1

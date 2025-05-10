@@ -46,14 +46,14 @@ Parameters:
     Description: The root id of AWS Organizations
   SecurityHubStandards:
     Type: CommaDelimitedList
-    Default: FSBP, TAGGING, CIS
+    Default: FSBP, CIS
     AllowedValues:
       - FSBP
       - TAGGING
       - CIS
       - NIST
       - PCIDSS
-    Description: The standard that you want to enable (FSBP, CIS, NIST, PCIDSS)
+    Description: The standard that you want to enable (FSBP, TAGGING, CIS, NIST, PCIDSS)
   SecurityHubType:
     Type: String
     Default: STANDARDS_ONLY
@@ -257,6 +257,7 @@ Resources:
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
           Id: CloudWatchEventsForSecurityHub
+  # CloudWatch
   AlarmEventsForSecurityHubFindings:
     Condition: CreateCloudWatchEventsForSecurityHubFindings
     Type: AWS::Serverless::Application

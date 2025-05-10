@@ -1234,9 +1234,8 @@ Properties:
   Parameters: 
     AlarmLevel: !Ref AlarmLevel
     CustomAlarmName : String
-    IteratorAgeMillisecondsThreshold: Integer
-    KinesisStreamName: String
-    NumberOfPutRecordThreshold: Integer
+    FirehoseStreamName: String
+    OldestRecordAge: Integer
     SNSTopicArn : String
     Environment: String
     TagKey: String
@@ -1260,9 +1259,8 @@ Properties:
   Parameters: 
     AlarmLevel: !Ref AlarmLevel
     CustomAlarmName : String
-    IteratorAgeMillisecondsThreshold: Integer
-    KinesisStreamName: String
-    NumberOfPutRecordThreshold: Integer
+    FirehoseStreamName: String
+    OldestRecordAge: Integer
     SNSTopicArn : String
     Environment: String
     TagKey: String

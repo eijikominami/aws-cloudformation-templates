@@ -830,7 +830,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::security/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "OrganizationId": "${OrganizationId}", "OrganizationsRootId": "${OrganizationsRootId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "OrganizationId": "${OrganizationId}", "OrganizationsRootId": "${OrganizationsRootId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
@@ -995,7 +995,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::shared/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "BucketNameForArchive": "${CentralizedLogBucketName}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development

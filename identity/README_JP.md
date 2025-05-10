@@ -69,3 +69,7 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 ### AWS Managed Microsoft AD を用いたユーザーとグループを管理
 
 このテンプレートのデプロイ完了後、 [Active Directory 管理ツールのインストール](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html) を行ってください。次に `DOMAIN*\Admin` ユーザに切り替えた上で、 **Active Directory Users and Computers tool** を用いて、 [ユーザとグループの作成](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html)　を行ってください。
+
+### セキュリティイベントログの Amazon CloudWatch Logs および Amazon S3 への保存
+
+ドメインコントローラーのセキュリティイベントログを Amazon CloudWatch Logs および Amazon S3 に保存するためには、 **マネージメントコンソールから手動で** ログ転送機能を有効にします。
