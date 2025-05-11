@@ -10,6 +10,11 @@ Parameters:
       - NOTICE
       - WARNING
     Description: The alarm level of CloudWatch alarms
+  LogicalName:
+    Type: String
+    Default: TransferSNS
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   SourceSNSArn:
     Type: String
     AllowedPattern: ^arn:aws[a-z\-]*:sns:[a-z0-9\-]+:\d{12}:.*
@@ -76,7 +81,7 @@ Resources:
                 Action:
                   - logs:PutLogEvents
                 Resource: '*' 
-      RoleName: !Sub ${AWS::StackName}-LambdaForGlobal-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-LambdaForGlobal-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

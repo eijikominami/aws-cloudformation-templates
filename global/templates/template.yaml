@@ -245,8 +245,9 @@ Resources:
           - !Ref AWS::NoValue
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        LogicalName: !Ref AWS::StackName
         DestinationSNSArn: !Ref SNSForAlertArn
+        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
@@ -267,8 +268,9 @@ Resources:
         - !Ref SNSForDeploymentArn
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        SourceSNSArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-        DestinationSNSArn: !Ref SNSForDeploymentArn
+        LogicalName: !Ref AWS::StackName
+        DestinationSNSArn: !Ref SNSForAlertArn
+        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

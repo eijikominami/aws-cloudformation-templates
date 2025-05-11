@@ -120,8 +120,9 @@ Resources:
           - !Ref AWS::NoValue
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        LogicalName: !Ref LogicalName
         DestinationSNSArn: !Ref SNSForAlertArn
+        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
