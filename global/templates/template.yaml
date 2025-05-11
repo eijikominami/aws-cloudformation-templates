@@ -147,8 +147,6 @@ Parameters:
 Conditions:
   CreateACMCertificate: !Not [ !Equals [ !Ref ACMDomainName, '' ] ]
   CreateCostUsageReport: !Equals [ !Ref CostUsageReport, ENABLED]
-  CreateSNSForAlertTransfer: !Not [ !Equals [ !Ref SNSForAlertArn, ''] ]
-  CreateSNSForDeploymentTransfer: !Not [ !Equals [ !Ref SNSForDeploymentArn, ''] ]
   CreateBudget: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
   CreateCloudWatchAlarmBilling: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
   CreateCloudWatchAlarmCloudFrontErrorRate: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRateThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
@@ -157,6 +155,8 @@ Conditions:
   CreateRoute53: !Not [ !Equals [ !Ref DomainName, '' ] ]
   CreateWebACL: !Equals [ !Ref WebACL, ENABLED ]
   Development: !Equals [ !Ref Environment, development]
+  HasSNSForAlertArn: !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
+  HasSNSForDeployment: !Not [ !Equals [ !Ref SNSForDeploymentArn, ''] ]
 
 Resources:
   # Nested Stack
@@ -235,12 +235,12 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   TransferAlertTopic:
-    Condition: CreateSNSForAlertTransfer
+    Condition: HasSNSForAlertArn
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
         - !If
-          - CreateSNSForDeploymentTransfer
+          - HasSNSForDeployment
           - !Ref SNSForDeploymentArn
           - !Ref AWS::NoValue
       Parameters:
@@ -261,7 +261,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   TransferDeploymentTopic:
-    Condition: CreateSNSForDeploymentTransfer
+    Condition: HasSNSForDeployment
     Type: AWS::CloudFormation::Stack
     Properties:
       NotificationARNs:
@@ -391,6 +391,33 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Name: !Ref DomainName
+  # SNS
+  SNSTopicPolicy:
+    Condition: HasSNSForAlertArn
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: 
+        - !Ref SNSForAlertArn
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AWSAnomalyDetectionSNSPublishingPermissions
+            Effect: Allow
+            Principal:
+              Service: costalerts.amazonaws.com
+            Resource: !Ref SNSForAlertArn
+            Action: 'sns:Publish'
+          - Sid: AWSBudgetsSNSPublishingPermissions
+            Effect: Allow
+            Principal:
+              Service: budgets.amazonaws.com
+            Resource: !Ref SNSForAlertArn
+            Action: 'sns:Publish'
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:budgets::${AWS::AccountId}:*
   # CloudWatch
   CloudWatchAlarmBilling:
     Condition: CreateCloudWatchAlarmBilling
