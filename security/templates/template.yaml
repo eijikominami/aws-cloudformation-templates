@@ -9,6 +9,7 @@ Metadata:
         Parameters:
           - LogArchiveAccountId
           - AuditAccountId
+          - GovernedRegions
           - SecurityOUId
           - OrganizationId
           - OrganizationsRootId
@@ -162,6 +163,10 @@ Parameters:
     Type: CommaDelimitedList
     Default: ''
     Description: List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role
+  GovernedRegions:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: List of AWS Control Tower governed regions
   IAMAccessAnalyzer:
     Type: String
     Default: ACCOUNT
@@ -282,6 +287,7 @@ Conditions:
   CloudTrailIsCreatedByControlTower: !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ]
   Development: !Equals [ !Ref Environment, development ]
   HasFirehoseRoles: !Not [ !Equals [ !Join [',', !Ref CentralizedLoggingFirehoseRoleArns], ''] ]
+  HasGovernedRegions: !Not [ !Equals [ !Join [',', !Ref GovernedRegions], ''] ]
 
 Resources:
   IAM:
@@ -352,6 +358,74 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  GuardDuty:
+    Condition: CreateGuardDuty
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      AutoDeployment: 
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      CallAs: SELF
+      Capabilities: 
+        - CAPABILITY_NAMED_IAM
+      Description: SIEM on Amazon OpenSearch Service
+      ManagedExecution: 
+        Active: false
+      OperationPreferences: 
+        ConcurrencyMode: STRICT_FAILURE_TOLERANCE
+        FailureToleranceCount: 0
+        MaxConcurrentCount: 1
+        RegionConcurrencyType: SEQUENTIAL
+      Parameters: 
+        - ParameterKey: AlarmLevel
+          ParameterValue: !Ref AlarmLevel
+        - ParameterKey: Detector
+          ParameterValue: !If
+            - CreateGuardDutyEventBridgeOnly
+            - DISABLED
+            - ENABLED
+        - ParameterKey: FindingsDestinationBucketArn
+          ParameterValue: !Sub arn:aws:s3:::${CentralizedLogBucketName}
+        - ParameterKey: KmsKeyArn
+          ParameterValue: !Ref SIEMKmsKeyArn
+        - ParameterKey: SNSForAlertArn
+          ParameterValue: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
+        - ParameterKey: SNSForDeploymentArn
+          ParameterValue: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+        - ParameterKey: LogicalName
+          ParameterValue: !Ref AWS::StackName
+        - ParameterKey: Environment
+          ParameterValue: !Ref Environment
+        - ParameterKey: TagKey
+          ParameterValue: !Ref TagKey
+        - ParameterKey: TagValue
+          ParameterValue: !Ref TagValue
+      PermissionModel: SERVICE_MANAGED
+      StackInstancesGroup: 
+        - DeploymentTargets: 
+            AccountFilterType: INTERSECTION
+            Accounts: 
+              - !Ref AWS::AccountId
+          Regions: !If
+            - HasGovernedRegions
+            - !Ref GovernedRegions
+            - !Ref AWS::Region
+      StackSetName: GuardDuty
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/guardduty.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/guardduty.yaml
   CloudTrail:
     Condition: CreateCloudTrail
     Type: AWS::CloudFormation::Stack
