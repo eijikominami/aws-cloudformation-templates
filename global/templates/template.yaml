@@ -38,6 +38,7 @@ Metadata:
         Parameters: 
           - AlarmLevel
           - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -123,6 +124,10 @@ Parameters:
     Type: String
     Default: '' 
     Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: '' 
+    Description: The Amazon SNS topic ARN for deployment information
   Environment:
     Type: String
     Default: production
@@ -143,6 +148,7 @@ Conditions:
   CreateACMCertificate: !Not [ !Equals [ !Ref ACMDomainName, '' ] ]
   CreateCostUsageReport: !Equals [ !Ref CostUsageReport, ENABLED]
   CreateSNSForAlertTransfer: !Not [ !Equals [ !Ref SNSForAlertArn, ''] ]
+  CreateSNSForDeploymentTransfer: !Not [ !Equals [ !Ref SNSForDeploymentArn, ''] ]
   CreateBudget: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
   CreateCloudWatchAlarmBilling: !Not [ !Equals [ !Ref BillingAlertThreshold, 0 ] ]
   CreateCloudWatchAlarmCloudFrontErrorRate: !And [ !Not [ !Equals [ !Ref CloudFrontErrorRateThreshold, 0 ] ], !Not [ !Equals [ !Ref CloudFrontDistributionId, ''] ] ]
@@ -217,46 +223,59 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  # IAM
-  IAMRoleForLambda:
-    Condition: CreateSNSForAlertTransfer
-    Type: AWS::IAM::Role
+  SNSForDeployment:
+    Type: AWS::Serverless::Application
     Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Description: A role required for Lambda to access SNS and CloudWatch Logs.
-      ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-          - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
-          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
-      Policies:
-        - PolicyName: SNS
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sns:publish
-                Resource:
-                  - !Ref SNSForAlertArn
-        - PolicyName: CloudWatchLogs
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - logs:PutLogEvents
-                Resource: '*' 
-      RoleName: !Sub ${AWS::StackName}-LambdaForGlobal-${AWS::Region}
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.13
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  TransferAlertTopic:
+    Condition: CreateSNSForAlertTransfer
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeploymentTransfer
+          - !Ref SNSForDeploymentArn
+          - !Ref AWS::NoValue
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
+        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        DestinationSNSArn: !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/transfer-sns-topic.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/transfer-sns-topic.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  TransferDeploymentTopic:
+    Condition: CreateSNSForDeploymentTransfer
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !Ref SNSForDeploymentArn
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
+        SourceSNSArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        DestinationSNSArn: !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/transfer-sns-topic.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/transfer-sns-topic.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -543,137 +562,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  # Lambda
-  LambdaTransferSNSTopic:
-    Condition: CreateSNSForAlertTransfer
-    DependsOn:
-      - LambdaTransferSNSTopicLogGroup
-    Type: AWS::Lambda::Function
-    Properties:
-      Architectures:
-        - arm64
-      Code:
-        ZipFile: !Sub |
-          import boto3
-
-          def lambda_handler(event, context):
-
-            sns_topic_arn = '${SNSForAlertArn}'
-            sns = boto3.client('sns',region_name=sns_topic_arn.split(':')[3])
-            
-            for record in event['Records']:
-              if record['Sns']['Subject'] is None:
-                  request = {
-                    'TopicArn': '${SNSForAlertArn}',
-                    'Message': record['Sns']['Message']
-                  }
-              else:
-                  request = {
-                      'TopicArn': '${SNSForAlertArn}',
-                      'Message': record['Sns']['Message'],
-                      'Subject': record['Sns']['Subject']
-                  }  
-              sns.publish(**request)
-      Description: SNSトピックを転送します。
-      Environment:
-        Variables:
-          AWS_LAMBDA_EXEC_WRAPPER:  !If
-            - Development
-            - /opt/codeguru_profiler_lambda_exec
-            - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
-            - Development
-            - !Ref AWS::Region
-            - !Ref AWS::NoValue
-      FunctionName: transferSNSTopic
-      Handler: index.lambda_handler
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-      MemorySize: 128
-      Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.9
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      Timeout: 3
-      TracingConfig:
-        Mode: Active
-  LambdaTransferSNSTopicPermission:
-    Condition: CreateSNSForAlertTransfer
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref LambdaTransferSNSTopic
-      Principal: sns.amazonaws.com
-      # DO NOT write 'SourceAccount' option.
-      SourceArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
-  LambdaTransferSNSTopicLogGroup:
-    Condition: CreateSNSForAlertTransfer
-    Type: AWS::Logs::LogGroup
-    Properties: 
-      LogGroupName: /aws/lambda/transferSNSTopic
-      RetentionInDays: 60
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  # SNS
-  SNSSubscription:
-    Condition: CreateSNSForAlertTransfer
-    Type: AWS::SNS::Subscription
-    Properties: 
-      Endpoint: !GetAtt LambdaTransferSNSTopic.Arn
-      Protocol: lambda
-      TopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
-  SNSTopicPolicy:
-    Condition: CreateSNSForAlertTransfer
-    Type: AWS::SNS::TopicPolicy
-    Properties:
-      Topics: 
-        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: AWSAnomalyDetectionSNSPublishingPermissions
-            Effect: Allow
-            Principal:
-              Service: costalerts.amazonaws.com
-            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
-            Action: 'sns:Publish'
-          - Sid: AWSBudgetsSNSPublishingPermissions
-            Effect: Allow
-            Principal:
-              Service: budgets.amazonaws.com
-            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
-            Action: 'sns:Publish'
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref AWS::AccountId
-              ArnLike:
-                aws:SourceArn: !Sub arn:aws:budgets::${AWS::AccountId}:*
-  # CloudWatch Alarm for Lambda
-  AlarmLambdaTransferSNSTopic:
-    Condition: CreateSNSForAlertTransfer
-    Type: AWS::Serverless::Application
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.13
-      Parameters:
-        AlarmLevel: !Ref AlarmLevel
-        CustomAlarmName: !Ref AWS::StackName
-        SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
-        MetricFilterPattern: ''
-        FunctionResouceName: !Ref LambdaTransferSNSTopic
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
     
 Outputs:
   CertificationARN:

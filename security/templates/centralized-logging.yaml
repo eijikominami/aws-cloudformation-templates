@@ -134,3 +134,24 @@ Resources:
                 - !Sub arn:aws:s3:::${S3ForCentralizedLogging}
                 - !Sub arn:aws:s3:::${S3ForCentralizedLogging}/*
             - !Ref AWS::NoValue
+          # GuardDuty
+          - Effect: Deny
+            Principal:
+              Service: guardduty.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${S3ForCentralizedLogging}/*
+            Condition:
+              StringNotEquals:
+                s3:x-amz-server-side-encryption: aws:kms
+          - Effect: Allow
+            Principal:
+              Service: guardduty.amazonaws.com
+            Action:
+              - s3:PutObject
+              - s3:GetBucketLocation
+            Resource:
+              - !Sub arn:aws:s3:::${S3ForCentralizedLogging}
+              - !Sub arn:aws:s3:::${S3ForCentralizedLogging}/*
+            Condition:
+              StringEquals:
+                aws:SourceOrgID: !Ref OrganizationId
