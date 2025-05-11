@@ -368,7 +368,7 @@ Resources:
       CallAs: SELF
       Capabilities: 
         - CAPABILITY_NAMED_IAM
-      Description: SIEM on Amazon OpenSearch Service
+      Description: GuardDuty
       ManagedExecution: 
         Active: false
       OperationPreferences: 
@@ -406,7 +406,7 @@ Resources:
           ParameterValue: !Ref TagKey
         - ParameterKey: TagValue
           ParameterValue: !Ref TagValue
-      PermissionModel: SERVICE_MANAGED
+      PermissionModel: SELF_MANAGED
       StackInstancesGroup: 
         - DeploymentTargets: 
             AccountFilterType: INTERSECTION
