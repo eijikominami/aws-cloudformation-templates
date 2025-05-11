@@ -393,11 +393,10 @@ Resources:
       Name: !Ref DomainName
   # SNS
   SNSTopicPolicy:
-    Condition: HasSNSForAlertArn
     Type: AWS::SNS::TopicPolicy
     Properties:
       Topics: 
-        - !Ref SNSForAlertArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -405,13 +404,13 @@ Resources:
             Effect: Allow
             Principal:
               Service: costalerts.amazonaws.com
-            Resource: !Ref SNSForAlertArn
+            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
             Action: 'sns:Publish'
           - Sid: AWSBudgetsSNSPublishingPermissions
             Effect: Allow
             Principal:
               Service: budgets.amazonaws.com
-            Resource: !Ref SNSForAlertArn
+            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
             Action: 'sns:Publish'
             Condition:
               StringEquals:

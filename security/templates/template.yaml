@@ -405,7 +405,6 @@ Resources:
       PermissionModel: SELF_MANAGED
       StackInstancesGroup: 
         - DeploymentTargets: 
-            AccountFilterType: INTERSECTION
             Accounts: 
               - !Ref AWS::AccountId
           Regions: !If
