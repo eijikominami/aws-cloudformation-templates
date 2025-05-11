@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: aws-cloudformation-templates/security/detective creates Amazon Detective.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  AdminAccountId:
+    Type: String
+    Description: AWS account ID that is the administrator account of Detective
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateDetectiveOrganizationAdmin: !Not [ !Equals [ !Ref AdminAccountId, '' ] ]
+
+Resources:
+  DetectiveOrganizationAdmin:
+    Condition: CreateDetectiveOrganizationAdmin
+    Type: AWS::Detective::OrganizationAdmin
+    Properties:
+      AccountId: !Ref AdminAccountId
+  DetectiveGraph:
+    Type: AWS::Detective::Graph
+    Properties:
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

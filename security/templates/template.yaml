@@ -415,7 +415,7 @@ Resources:
           Regions: !If
             - HasGovernedRegions
             - !Ref GovernedRegions
-            - !Ref AWS::Region
+            - - !Ref AWS::Region
       StackSetName: GuardDuty
       Tags: 
         - Key: environment

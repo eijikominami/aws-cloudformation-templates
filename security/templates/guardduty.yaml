@@ -120,9 +120,32 @@ Resources:
           - !Ref AWS::NoValue
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        LogicalName: !Ref LogicalName
+        LogicalName: !Sub ${LogicalName}-Alert
         DestinationSNSArn: !Ref SNSForAlertArn
         SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/transfer-sns-topic.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/transfer-sns-topic.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  TransferDeploymentTopic:
+    Condition: CreateSNSForDeploymentTransfer
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !Ref SNSForDeploymentArn
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
+        LogicalName: !Sub ${LogicalName}-rDeployment
+        DestinationSNSArn: !Ref SNSForDeploymentArn
+        SourceSNSArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

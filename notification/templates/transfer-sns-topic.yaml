@@ -12,7 +12,7 @@ Parameters:
     Description: The alarm level of CloudWatch alarms
   LogicalName:
     Type: String
-    Default: TransferSNS
+    Default: transferSNSTopic
     AllowedPattern: .+
     Description: The custom prefix name [required]
   SourceSNSArn:
@@ -128,7 +128,7 @@ Resources:
             - Development
             - !Ref AWS::Region
             - !Ref AWS::NoValue
-      FunctionName: transferSNSTopic
+      FunctionName: !Ref LogicalName
       Handler: index.lambda_handler
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
@@ -154,7 +154,7 @@ Resources:
   LambdaTransferSNSTopicLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: /aws/lambda/transferSNSTopic
+      LogGroupName: !Sub /aws/lambda/${LogicalName}
       RetentionInDays: 60
       Tags: 
         - Key: environment
@@ -202,7 +202,7 @@ Resources:
         SemanticVersion: 2.2.13
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        CustomAlarmName: !Ref AWS::StackName
+        CustomAlarmName: !Ref LogicalName
         SNSTopicArn: !Ref DestinationSNSArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaTransferSNSTopic

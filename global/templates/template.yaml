@@ -245,7 +245,7 @@ Resources:
           - !Ref AWS::NoValue
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        LogicalName: !Ref AWS::StackName
+        LogicalName: !Sub ${AWS::StackName}-Alert
         DestinationSNSArn: !Ref SNSForAlertArn
         SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         Environment: !Ref Environment
@@ -268,7 +268,7 @@ Resources:
         - !Ref SNSForDeploymentArn
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        LogicalName: !Ref AWS::StackName
+        LogicalName: !Sub ${AWS::StackName}-Deployment
         DestinationSNSArn: !Ref SNSForAlertArn
         SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         Environment: !Ref Environment
