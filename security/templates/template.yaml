@@ -362,10 +362,6 @@ Resources:
     Condition: CreateGuardDuty
     Type: AWS::CloudFormation::StackSet
     Properties:
-      AutoDeployment: 
-        Enabled: true
-        RetainStacksOnAccountRemoval: false
-      CallAs: SELF
       Capabilities: 
         - CAPABILITY_NAMED_IAM
       Description: GuardDuty
