@@ -363,7 +363,7 @@ Resources:
     Type: AWS::CloudFormation::StackSet
     Properties:
       Capabilities: 
-        - CAPABILITY_NAMED_IAM
+        - CAPABILITY_AUTO_EXPAND
       Description: GuardDuty
       ManagedExecution: 
         Active: false
