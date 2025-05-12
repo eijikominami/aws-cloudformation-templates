@@ -651,7 +651,7 @@ Resources:
                 Action:
                   - cloudformation:*
                 Resource: '*'
-      RoleName: AWSCloudFormationStackSetExecution
+      RoleName: AWSCloudFormationStackSetExecutionRole
       Tags:
         - Key: environment
           Value: !If
