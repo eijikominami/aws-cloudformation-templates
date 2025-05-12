@@ -598,6 +598,32 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
+  IAMRoleForCloudFormationStackSets:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for AWS CloudFormation Stack Sets.
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource: arn:aws:iam::*:role/AWSCloudFormationStackSetExecutionRole
+      RoleName: AWSCloudFormationStackSetAdministrationRole
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   IAMRoleForAWSSupport:
     Condition: CreateIAMRoleForAWSSupport
     Type: AWS::IAM::Role
