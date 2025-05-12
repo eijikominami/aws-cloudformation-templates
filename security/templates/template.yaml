@@ -362,10 +362,10 @@ Resources:
     Condition: CreateGuardDuty
     Type: AWS::CloudFormation::StackSet
     Properties:
+      AdministrationRoleARN: !GetAtt IAMRoleForCloudFormationStackSets.Arn
       Capabilities: 
         - CAPABILITY_AUTO_EXPAND
       Description: GuardDuty
-      ExecutionRoleName: !Ref IAMRoleForCloudFormationStackSets
       ManagedExecution:
         Active: false
       OperationPreferences: 
@@ -612,7 +612,7 @@ Resources:
       Description: A role required for CloudFormation StackSets to access related resources.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
-      RoleName: !Sub ${AWS::StackName}-StackSets-${AWS::Region}
+      RoleName: AWSCloudFormationStackSetAdministrationRolezz
       Tags:
         - Key: environment
           Value: !If
