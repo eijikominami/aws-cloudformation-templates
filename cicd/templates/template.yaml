@@ -795,7 +795,7 @@ Resources:
                         - Development
                         - development
                         - production
-                      - !Sub '", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
+                      - !Sub '", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact
                     - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}GlobalSettings.json
