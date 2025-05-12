@@ -81,7 +81,7 @@ Resources:
                 Action:
                   - logs:PutLogEvents
                 Resource: '*' 
-      RoleName: !Sub ${LogicalName}-LambdaForGlobal-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-Lambda-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

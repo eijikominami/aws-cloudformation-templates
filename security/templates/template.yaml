@@ -365,7 +365,7 @@ Resources:
       Capabilities: 
         - CAPABILITY_AUTO_EXPAND
       Description: GuardDuty
-      ExecutionRoleName: !GetAtt IAMRoleForCloudFormationStackSets.Arn
+      ExecutionRoleName: !Ref IAMRoleForCloudFormationStackSets
       ManagedExecution:
         Active: false
       OperationPreferences: 
