@@ -358,6 +358,70 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  GuardDuty:
+    Condition: CreateGuardDuty
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      AdministrationRoleARN: !GetAtt IAMRoleForCloudFormationStackSetsAdministration.Arn
+      Capabilities: 
+        - CAPABILITY_AUTO_EXPAND
+      Description: GuardDuty
+      ManagedExecution:
+        Active: false
+      OperationPreferences: 
+        ConcurrencyMode: STRICT_FAILURE_TOLERANCE
+        FailureToleranceCount: 0
+        MaxConcurrentCount: 1
+        RegionConcurrencyType: SEQUENTIAL
+      Parameters: 
+        - ParameterKey: AlarmLevel
+          ParameterValue: !Ref AlarmLevel
+        - ParameterKey: Detector
+          ParameterValue: !If
+            - CreateGuardDutyEventBridgeOnly
+            - DISABLED
+            - ENABLED
+        - ParameterKey: FindingsDestinationBucketArn
+          ParameterValue: !Sub arn:aws:s3:::${CentralizedLogBucketName}
+        - ParameterKey: KmsKeyArn
+          ParameterValue: !Ref SIEMKmsKeyArn
+        - ParameterKey: SNSForAlertArn
+          ParameterValue: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
+        - ParameterKey: SNSForDeploymentArn
+          ParameterValue: !If
+            - CreateSNSForDeployment
+            - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - !Ref SNSForDeploymentArn
+        - ParameterKey: LogicalName
+          ParameterValue: !Ref AWS::StackName
+        - ParameterKey: Environment
+          ParameterValue: !Ref Environment
+        - ParameterKey: TagKey
+          ParameterValue: !Ref TagKey
+        - ParameterKey: TagValue
+          ParameterValue: !Ref TagValue
+      PermissionModel: SELF_MANAGED
+      StackInstancesGroup: 
+        - DeploymentTargets: 
+            Accounts: 
+              - !Ref AWS::AccountId
+          Regions: !If
+            - HasGovernedRegions
+            - !Ref GovernedRegions
+            - - !Ref AWS::Region
+      StackSetName: GuardDuty
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue  
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/guardduty.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/guardduty.yaml
   CloudTrail:
     Condition: CreateCloudTrail
     Type: AWS::CloudFormation::Stack
