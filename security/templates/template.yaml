@@ -619,7 +619,7 @@ Resources:
                 Action:
                   - sts:AssumeRole
                 Resource:
-                  - arn:aws:iam::*:role/AWSCloudFormationStackSetExecutionRole
+                  - !GetAtt IAMRoleForCloudFormationStackSetsExecution.Arn
       RoleName: AWSCloudFormationStackSetAdministrationRole
       Tags:
         - Key: environment
