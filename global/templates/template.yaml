@@ -269,8 +269,8 @@ Resources:
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         LogicalName: !Sub ${AWS::StackName}-Deployment
-        DestinationSNSArn: !Ref SNSForAlertArn
-        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        DestinationSNSArn: !Ref SNSForDeploymentArn
+        SourceSNSArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
