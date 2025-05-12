@@ -612,7 +612,7 @@ Resources:
       Description: A role required for CloudFormation StackSets to access related resources.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
-      RoleName: !Sub ${AWS::StackName}-CloudFormationStackSets-${AWS::Region}
+      RoleName: !Sub ${AWS::StackName}-StackSets-${AWS::Region}
       Tags:
         - Key: environment
           Value: !If
