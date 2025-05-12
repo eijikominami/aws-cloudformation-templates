@@ -362,7 +362,7 @@ Resources:
     Condition: CreateGuardDuty
     Type: AWS::CloudFormation::StackSet
     Properties:
-      AdministrationRoleARN: !GetAtt IAMRoleForCloudFormationStackSets.Arn
+      AdministrationRoleARN: !GetAtt IAMRoleForCloudFormationStackSetsAdministration.Arn
       Capabilities: 
         - CAPABILITY_AUTO_EXPAND
       Description: GuardDuty
@@ -599,7 +599,7 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
   # IAM
-  IAMRoleForCloudFormationStackSets:
+  IAMRoleForCloudFormationStackSetsAdministration:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -609,10 +609,49 @@ Resources:
             Principal:
               Service: cloudformation.amazonaws.com
             Action: sts:AssumeRole
-      Description: A role required for CloudFormation StackSets to access related resources.
+      Description: A role required for CloudFormation StackSets to access related resources as an administrator.
+      Policies:
+        - PolicyName: IAM
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - arn:aws:iam::*:role/AWSCloudFormationStackSetExecutionRole
+      RoleName: AWSCloudFormationStackSetAdministrationRole
+      Tags:
+        - Key: environment
+          Value: !If
+            - Development
+            - development
+            - production
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForCloudFormationStackSetsExecution:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: sts:AssumeRole
+      Description: A role required for CloudFormation StackSets to access related resources as an executor.
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
-      RoleName: AWSCloudFormationStackSetAdministrationRolezz
+      Policies:
+        - PolicyName: CloudFormation
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:*
+                Resource: '*'
+      RoleName: AWSCloudFormationStackSetExecution
       Tags:
         - Key: environment
           Value: !If
