@@ -391,6 +391,32 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Name: !Ref DomainName
+  # SNS
+  SNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: 
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AWSAnomalyDetectionSNSPublishingPermissions
+            Effect: Allow
+            Principal:
+              Service: costalerts.amazonaws.com
+            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            Action: 'sns:Publish'
+          - Sid: AWSBudgetsSNSPublishingPermissions
+            Effect: Allow
+            Principal:
+              Service: budgets.amazonaws.com
+            Resource: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            Action: 'sns:Publish'
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:budgets::${AWS::AccountId}:*
   # CloudWatch
   CloudWatchAlarmBilling:
     Condition: CreateCloudWatchAlarmBilling

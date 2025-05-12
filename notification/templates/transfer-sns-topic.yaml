@@ -68,7 +68,7 @@ Resources:
                 Action:
                   - sns:publish
                 Resource:
-                  - !Ref SourceSNSArn
+                  - !Ref DestinationSNSArn
         - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
@@ -101,20 +101,20 @@ Resources:
 
           def lambda_handler(event, context):
 
-            sns_topic_arn = '${SourceSNSArn}'
+            sns_topic_arn = '${DestinationSNSArn}'
             sns = boto3.client('sns',region_name=sns_topic_arn.split(':')[3])
             
             for record in event['Records']:
               if record['Sns']['Subject'] is None:
                   request = {
-                    'TopicArn': '${SourceSNSArn}',
+                    'TopicArn': '${DestinationSNSArn}',
                     'Message': record['Sns']['Message']
                   }
               else:
                   request = {
-                      'TopicArn': '${SourceSNSArn}',
-                      'Message': record['Sns']['Message'],
-                      'Subject': record['Sns']['Subject']
+                    'TopicArn': '${DestinationSNSArn}',
+                    'Message': record['Sns']['Message'],
+                    'Subject': record['Sns']['Subject']
                   }  
               sns.publish(**request)
       Description: SNSトピックを転送します。
@@ -150,7 +150,7 @@ Resources:
       FunctionName: !Ref LambdaTransferSNSTopic
       Principal: sns.amazonaws.com
       # DO NOT write 'SourceAccount' option.
-      SourceArn: !Ref DestinationSNSArn
+      SourceArn: !Ref SourceSNSArn
   LambdaTransferSNSTopicLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
@@ -167,7 +167,7 @@ Resources:
     Properties: 
       Endpoint: !GetAtt LambdaTransferSNSTopic.Arn
       Protocol: lambda
-      TopicArn: !Ref DestinationSNSArn
+      TopicArn: !Ref SourceSNSArn
   # CloudWatch Alarm for Lambda
   AlarmLambdaTransferSNSTopic:
     Type: AWS::Serverless::Application
@@ -178,7 +178,7 @@ Resources:
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref LogicalName
-        SNSTopicArn: !Ref DestinationSNSArn
+        SNSTopicArn: !Ref SourceSNSArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaTransferSNSTopic
         Environment: !Ref Environment
