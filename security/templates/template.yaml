@@ -365,7 +365,8 @@ Resources:
       Capabilities: 
         - CAPABILITY_AUTO_EXPAND
       Description: GuardDuty
-      ManagedExecution: 
+      ExecutionRoleName: !GetAtt IAMRoleForCloudFormationStackSets.Arn
+      ManagedExecution:
         Active: false
       OperationPreferences: 
         ConcurrencyMode: STRICT_FAILURE_TOLERANCE
@@ -608,20 +609,16 @@ Resources:
             Principal:
               Service: cloudformation.amazonaws.com
             Action: sts:AssumeRole
-      Description: A role required for AWS CloudFormation Stack Sets.
-      Policies:
-        - PolicyName: CloudWatchLogs
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sts:AssumeRole
-                Resource: arn:aws:iam::*:role/AWSCloudFormationStackSetExecutionRole
-      RoleName: AWSCloudFormationStackSetAdministrationRole
+      Description: A role required for CloudFormation StackSets to access related resources.
+      ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AdministratorAccess
+      RoleName: !Sub ${AWS::StackName}-CloudFormationStackSets-${AWS::Region}
       Tags:
         - Key: environment
-          Value: !Ref Environment
+          Value: !If
+            - Development
+            - development
+            - production
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForAWSSupport:
