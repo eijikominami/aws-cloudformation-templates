@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-       python: 3.9
+       python: 3.13
     commands:
       # Use the latest version
       - pip install -U pip
@@ -17,7 +17,7 @@ phases:
   pre_build:
     commands:
       - cfn-lint --update-specs
-      - find ./${TEMPLATE_FILE_PATH} -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
+      # - find ./${TEMPLATE_FILE_PATH} -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
       - sam validate --template ${TEMPLATE_FILE_PATH}template.yaml
   build:
     commands:

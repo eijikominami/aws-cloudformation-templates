@@ -7,13 +7,22 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/shared`` builds shared services in your AWS Organizations accounts.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- AWS Organizations set up with appropriate organizational units
+- IAM Identity Center instance configured (if using SSO integration)
+- VPC and networking infrastructure planned for shared services
+- S3 bucket for log archiving (if using FluentBit logging)
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) |
 
 If you want to deploy each service individually, click the button below.
 
@@ -32,7 +41,7 @@ The following sections describe the individual components of the architecture.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows.
@@ -86,3 +95,41 @@ This template configures FluentBit for Syslog.
 ### Trusted access with IAM Identity Center
 
 You can enable trusted access using either the AWS IAM Identity Center console or the AWS Organizations console and connect with AWS Managed Microsoft AD manually.
+
+## Troubleshooting
+
+### Active Directory Issues
+
+If AWS Managed Microsoft AD is not working properly:
+
+1. Verify that the VPC and subnets have proper DNS resolution configured
+2. Check that security groups allow the necessary Active Directory ports
+3. Ensure that the domain name doesn't conflict with existing domains
+4. Verify that the password meets complexity requirements
+
+### FluentBit Issues
+
+If FluentBit is not collecting or forwarding logs:
+
+1. Check that the ECS service is running and healthy
+2. Verify that the FluentBit configuration is correct for your log sources
+3. Ensure that the S3 bucket for log archiving exists and has proper permissions
+4. Monitor CloudWatch Logs for FluentBit container errors
+
+### IAM Identity Center Integration Issues
+
+If IAM Identity Center integration is not working:
+
+1. Verify that trusted access is enabled for IAM Identity Center in AWS Organizations
+2. Check that the Identity Center instance ARN is correct
+3. Ensure that the connection to AWS Managed Microsoft AD is properly configured
+4. Verify that users and groups are properly synchronized
+
+### Network Connectivity Issues
+
+If shared services cannot communicate properly:
+
+1. Verify that Transit Gateway attachments are configured correctly
+2. Check that route tables are properly configured for cross-VPC communication
+3. Ensure that security groups and NACLs allow the required traffic
+4. Verify that DNS resolution is working for shared services

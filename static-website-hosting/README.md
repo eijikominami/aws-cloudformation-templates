@@ -7,6 +7,15 @@ English / [**日本語**](README_JP.md)
 
 ``AWSCloudFormationTemplates/static-website-hosting`` builds ``Amazon CloudFront``, ``Amazon S3`` and related resources for **static website hosting**.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Domain name registered and Route53 hosted zone configured
+- SSL certificate created in AWS Certificate Manager (in us-east-1 for CloudFront)
+- S3 bucket for storing website artifacts and logs
+- Understanding of CloudFront distribution and caching behavior
+
 ## TL;DR
 
 If you just want to deploy the stack follow these steps.
@@ -148,3 +157,49 @@ Therefore create ``Origin Group`` and edit ``Default Cache Behavior Settings`` m
 
 1. Create ``Origin Group`` with ``Origins`` and ``Failover criteria`` .
 2. Change ``Origin or Origin Group`` at ``Default Cache Behavior Settings`` to ``Origin Group`` you created.
+## Troubleshooting
+
+### CloudFront Issues
+
+If CloudFront distribution is not serving content correctly:
+
+1. Verify that the origin S3 bucket exists and contains the website files
+2. Check that the Origin Access Identity (OAI) has proper permissions to access the S3 bucket
+3. Ensure that the SSL certificate is valid and issued for the correct domain
+4. Verify that the Route53 hosted zone is properly configured with the correct DNS records
+
+### SSL Certificate Issues
+
+If SSL certificate is not working with CloudFront:
+
+1. Ensure that the certificate is created in the us-east-1 region (required for CloudFront)
+2. Verify that the certificate includes all necessary domain names (primary and aliases)
+3. Check that the certificate validation is complete and the certificate is issued
+4. Ensure that the certificate ARN is correctly specified in the template parameters
+
+### S3 Access Issues
+
+If S3 bucket access is not working properly:
+
+1. Verify that the S3 bucket policy allows access from the CloudFront OAI
+2. Check that the bucket is not blocking public access when it should allow CloudFront access
+3. Ensure that the website files are uploaded to the correct S3 bucket
+4. Verify that the default root object is configured correctly in CloudFront
+
+### WAF Issues
+
+If WAF is blocking legitimate traffic:
+
+1. Review WAF logs to identify which rules are blocking traffic
+2. Adjust WAF rule configurations or add exceptions for legitimate traffic
+3. Monitor CloudWatch metrics for WAF to understand traffic patterns
+4. Consider adjusting rate limiting rules if they're too restrictive
+
+### Real-time Dashboard Issues
+
+If the real-time dashboard is not showing data:
+
+1. Verify that CloudFront real-time logs are enabled and configured correctly
+2. Check that Kinesis Data Streams is receiving data from CloudFront
+3. Ensure that the OpenSearch Service cluster is healthy and accessible
+4. Verify that the Lambda function for log processing is working correctly

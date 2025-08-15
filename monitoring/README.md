@@ -7,6 +7,27 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/monitoring`` provides ``CloudWatch alarm`` for major AWS services.
 
+## Prerequisites
+
+Before deploying these monitoring templates, ensure you have:
+
+- SNS topics configured for alarm notifications
+- Understanding of CloudWatch metrics and alarm thresholds for your specific use case
+- Appropriate IAM permissions for CloudWatch and SNS services
+
+## TL;DR
+
+If you want to deploy monitoring templates quickly, you can use the AWS Serverless Application Repository. Each monitoring template is available as a serverless application that you can deploy directly from the console.
+
+| Service | Application Repository Link |
+| --- | --- |
+| ACM | [cloudwatch-alarm-about-acm](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-acm) |
+| Amplify | [cloudwatch-alarm-about-amplify](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-amplify) |
+| API Gateway | [cloudwatch-alarm-about-apigateway](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-apigateway) |
+| Application ELB | [cloudwatch-alarm-about-application-elb](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-application-elb) |
+| EC2 | [cloudwatch-alarm-about-ec2](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ec2) |
+| Lambda | [cloudwatch-alarm-about-lambda](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-lambda) |
+
 ## AWS Certificate Manager
 
 The template creates the following alarms.
@@ -2199,3 +2220,41 @@ Properties:
   Tags: Map
   TimeoutInMinutes: Integer
 ```
+## 
+Troubleshooting
+
+### CloudWatch Alarm Issues
+
+If CloudWatch alarms are not triggering correctly:
+
+1. Verify that the metric names and namespaces are correct for your AWS services
+2. Check that the alarm thresholds are appropriate for your workload patterns
+3. Ensure that the SNS topics have the correct permissions and subscribers
+4. Verify that the alarm evaluation periods and datapoints are configured correctly
+
+### SNS Notification Issues
+
+If you're not receiving alarm notifications:
+
+1. Check that SNS topic subscriptions are confirmed
+2. Verify that email addresses or endpoints are correct and accessible
+3. Ensure that SNS topic policies allow CloudWatch to publish messages
+4. Check spam folders for email notifications
+
+### Metric Data Issues
+
+If metrics are not appearing or seem incorrect:
+
+1. Verify that the AWS services are publishing metrics to CloudWatch
+2. Check that custom metrics are being published with correct dimensions
+3. Ensure that CloudWatch agent is properly configured (for EC2 custom metrics)
+4. Verify that the metric retention period hasn't expired
+
+### Permission Issues
+
+If alarms cannot be created or modified:
+
+1. Verify that IAM roles have the necessary CloudWatch permissions
+2. Check that cross-account access is properly configured if applicable
+3. Ensure that service-linked roles are created for AWS services
+4. Verify that resource-based policies allow the required actions

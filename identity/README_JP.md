@@ -7,6 +7,14 @@
  
 ``AWSCloudFormationTemplates/identity`` は、アイデンティティ、リソース、アクセス許可をセキュアかつ大規模に管理可能な AWS Identity Services を構築します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- プライベートサブネットが設定された VPC（Managed Microsoft AD 用）
+- Active Directory 用に計画されたドメイン名（Managed Microsoft AD 用）
+- IAM Identity Center インスタンス要件の理解
+
 ## TL;DR
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
@@ -25,14 +33,14 @@
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file identitycenter.yaml --stack-name IdentityCenter --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/identitycenter.yaml --stack-name IdentityCenter --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| DefaultSessionDuration | String | PT12H | ○ |　ISO-8601 におけるアプリケーションユーザーのセッション有効期間 |
+| DefaultSessionDuration | String | PT12H | ○ | ISO-8601 におけるアプリケーションユーザーのセッション有効期間 |
 | InstanceArn | String |  |  | IAM Identity Center の ARN |
 
 ## AWS Managed Microsoft AD
@@ -44,7 +52,7 @@ aws cloudformation deploy --template-file identitycenter.yaml --stack-name Ident
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file microsoftad.yaml --stack-name MicrosoftAD --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/microsoftad.yaml --stack-name MicrosoftAD --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -56,20 +64,49 @@ aws cloudformation deploy --template-file microsoftad.yaml --stack-name Microsof
 | Edition | Standard / Enterprise | Standard | ○ | Microsoft Active Directory のエディション |
 | EnableSso | true / false | true | ○ | シングルサインオンを有効化するかどうか |
 | **Name** | String | corp.example.com | ○ | ドメイン名 |
-| Password | String | Password1+ | ○ | Admin ユーザのドメイン名 |
-| **ShortName** | String | CORP | ○ | The NetBIOS name for your domain |
-| SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/24 | ○ | AZ1 にあるプライベートサブネットのCIDRブロック |
+| Password | String | Password1+ | ○ | Admin ユーザーのパスワード |
+| **ShortName** | String | CORP | ○ | NetBIOS 名 |
+| SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/24 | ○ | AZ1 にあるプライベートサブネットの CIDR ブロック |
 | SubnetPrivateIdForAz1 | String | | ○ | AZ1 のプライベートサブネット ID |
-| SubnetPrivateCidrBlockForAz2 | String | 10.3.4.0/24 | ○ | AZ2 にあるプライベートサブネットのCIDRブロック |
+| SubnetPrivateCidrBlockForAz2 | String | 10.3.4.0/24 | ○ | AZ2 にあるプライベートサブネットの CIDR ブロック |
 | SubnetPrivateIdForAz2 | String | | ○ | AZ2 のプライベートサブネット ID |
-| SubnetPrivateCidrBlockForAz3 | String | 10.3.8.0/24 | 条件付き | AZ3 にあるプライベートサブネットのCIDRブロック |
+| SubnetPrivateCidrBlockForAz3 | String | 10.3.8.0/24 | 条件付き | AZ3 にあるプライベートサブネットの CIDR ブロック |
 | SubnetPrivateIdForAz3 | String | | 条件付き | AZ3 のプライベートサブネット ID |
 | VPCId | String | | ○ | VPC ID |
 
 ### AWS Managed Microsoft AD を用いたユーザーとグループを管理
 
-このテンプレートのデプロイ完了後、 [Active Directory 管理ツールのインストール](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html) を行ってください。次に `DOMAIN*\Admin` ユーザに切り替えた上で、 **Active Directory Users and Computers tool** を用いて、 [ユーザとグループの作成](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html)　を行ってください。
+このテンプレートのデプロイ完了後、[Active Directory 管理ツールのインストール](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_install_ad_tools.html)を行ってください。次に `DOMAIN\Admin` ユーザーに切り替えた上で、**Active Directory Users and Computers tool** を用いて、[ユーザーとグループの作成](https://docs.aws.amazon.com/ja_jp/directoryservice/latest/admin-guide/ms_ad_manage_users_groups_create_user.html)を行ってください。
 
 ### セキュリティイベントログの Amazon CloudWatch Logs および Amazon S3 への保存
 
-ドメインコントローラーのセキュリティイベントログを Amazon CloudWatch Logs および Amazon S3 に保存するためには、 **マネージメントコンソールから手動で** ログ転送機能を有効にします。
+ドメインコントローラーのセキュリティイベントログを Amazon CloudWatch Logs および Amazon S3 に保存するためには、**マネジメントコンソールから手動で**ログ転送機能を有効にします。
+
+## トラブルシューティング
+
+### IAM Identity Center の問題
+
+IAM Identity Center が正常に動作しない場合：
+
+1. IAM Identity Center を管理するために必要な権限があることを確認してください
+2. お使いのリージョンで Identity Center インスタンスが適切に設定されていることを確認してください
+3. 権限セットがユーザーとグループに正しく割り当てられていることを確認してください
+4. SAML を使用している場合、外部アイデンティティプロバイダーが適切に設定されていることを確認してください
+
+### Managed Microsoft AD の問題
+
+Managed Microsoft AD が正常に機能しない場合：
+
+1. VPC とサブネットで適切な DNS 解決が設定されていることを確認してください
+2. セキュリティグループが必要な Active Directory ポートを許可していることを確認してください
+3. ドメイン名が既存のドメインと競合していないことを確認してください
+4. パスワードが複雑さの要件を満たしていることを確認してください
+
+### ドメインコントローラーアクセスの問題
+
+ドメインコントローラーにアクセスできない場合：
+
+1. 正しい VPC とサブネットから接続していることを確認してください
+2. セキュリティグループがポート 3389 での RDP アクセスを許可していることを確認してください
+3. ドメイン管理者の認証情報が正しいことを確認してください
+4. ドメインコントローラーが正常な状態であることを確認してください

@@ -7,6 +7,14 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/notification`` sets up AWS Chatbot and AWS Lambda to send notifications to Slack.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Slack workspace with appropriate permissions to create apps and webhooks
+- AWS Chatbot initial authorization completed with Slack workspace ID obtained
+- Slack Incoming Webhook URLs configured for your channels
+
 ```bash
 .
 ├── README_JP.md                    <-- Instructions file (Japanese)
@@ -153,3 +161,40 @@ You can provide optional parameters as follows.
 | SNSForAlertArn | String | | | Amazon SNS Topic ARN for alert | 
 | SNSForAlertArn | String | | | Amazon SNS Topic ARN for CI/CD information | 
 | SNSForDeploymentArn | String | | | Amazon SNS Topic ARN for deployment information |
+## Troubleshooting
+
+### AWS Chatbot Issues
+
+If AWS Chatbot is not sending notifications to Slack:
+
+1. Verify that the Slack workspace ID is correct and the authorization is still valid
+2. Check that the Slack channel exists and the bot has permission to post messages
+3. Ensure that the SNS topic has the correct permissions for AWS Chatbot to subscribe
+4. Verify that the IAM role for AWS Chatbot has the necessary permissions
+
+### Slack Webhook Issues
+
+If Slack webhooks are not working:
+
+1. Verify that the webhook URL is correct and still active
+2. Check that the Slack app has the necessary permissions in your workspace
+3. Ensure that the webhook is configured for the correct channel
+4. Test the webhook URL directly to confirm it's working
+
+### EventBridge Rule Issues
+
+If EventBridge rules are not triggering:
+
+1. Verify that the event patterns match the actual events being generated
+2. Check that the target SNS topic exists and has the correct permissions
+3. Ensure that the EventBridge rule is enabled
+4. Monitor CloudWatch metrics for EventBridge to see if events are being processed
+
+### Lambda Function Issues
+
+If Lambda functions are failing:
+
+1. Check CloudWatch Logs for error messages and stack traces
+2. Verify that the Lambda function has the necessary IAM permissions
+3. Ensure that environment variables are correctly configured
+4. Check that the Lambda function timeout is sufficient for processing

@@ -7,13 +7,20 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/network`` sets VPC and network elements.
 
+## Prerequisites
+
+- AWS Organizations setup (for cross-account networking features)
+- Route 53 hosted zones for DNS management (if using custom domains)
+- On-premises network configuration details (for VPN and hybrid connectivity)
+- Appropriate IAM permissions for VPC, Transit Gateway, and networking services
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml) | 
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/templates/template.yaml) | 
 
 If you want to deploy each service individually, click the button below.
 
@@ -36,18 +43,74 @@ The following sections describe the individual components of the architecture.
 
 ## Deployment
 
-Execute the command to deploy.
+## Deployment
+
+Execute the command to deploy the main template.
 
 ```bash
-aws cloudformation deploy --template-file az.yaml --stack-name AvailabilityZone --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file egress.yaml --stack-name EgressVPC --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file globalaccelerator.yaml --stack-name GlobalAccelerator
-aws cloudformation deploy --template-file ipam.yaml --stack-name IPAM --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file networkaccessanalyzer.yaml --stack-name NetworkAccessAnalyzer --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file networkfirewall.yaml --stack-name NetworkFirewall --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file route53resolver.yaml --stack-name Route53
-aws cloudformation deploy --template-file transitgateway.yaml --stack-name TransitGateway --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name Network --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+```
+
+Or deploy individual components:
+
+```bash
+aws cloudformation deploy --template-file templates/az.yaml --stack-name AvailabilityZone --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/egress.yaml --stack-name EgressVPC --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/globalaccelerator.yaml --stack-name GlobalAccelerator
+aws cloudformation deploy --template-file templates/ipam.yaml --stack-name IPAM --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/networkaccessanalyzer.yaml --stack-name NetworkAccessAnalyzer --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/networkfirewall.yaml --stack-name NetworkFirewall --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/route53resolver.yaml --stack-name Route53
+aws cloudformation deploy --template-file templates/transitgateway.yaml --stack-name TransitGateway --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/vpn.yaml --stack-name VPN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+```
+
+## Troubleshooting
+
+### VPC and Subnet Configuration Issues
+
+If you encounter VPC or subnet configuration problems:
+
+1. Verify that CIDR blocks do not overlap with existing VPCs
+2. Ensure subnet CIDR blocks are within the VPC CIDR range
+3. Check that availability zones are available in your region
+4. Verify that you have sufficient IP addresses for your requirements
+
+### Transit Gateway Connectivity Issues
+
+If Transit Gateway connections are not working:
+
+1. Check route table configurations and propagations
+2. Verify that security groups and NACLs allow required traffic
+3. Ensure that Transit Gateway attachments are in the correct state
+4. Check for conflicting routes in route tables
+
+### VPN Connection Problems
+
+If VPN connections are failing:
+
+1. Verify that the customer gateway IP address is correct and accessible
+2. Check that BGP configuration matches on both sides
+3. Ensure that security groups allow VPN traffic
+4. Verify that on-premises firewall rules allow VPN traffic
+
+### DNS Resolution Issues
+
+If DNS resolution is not working:
+
+1. Check that Route 53 resolver rules are properly configured
+2. Verify that DNS forwarder IP addresses are correct
+3. Ensure that VPC DNS resolution and DNS hostnames are enabled
+4. Check that security groups allow DNS traffic (port 53)
+
+### Network Firewall Issues
+
+If Network Firewall is not filtering traffic correctly:
+
+1. Verify that firewall rules are properly configured
+2. Check that traffic is being routed through the firewall subnets
+3. Ensure that firewall policies match your security requirements
+4. Review firewall logs for blocked or allowed traffic patterns
 ```
 
 You can provide optional parameters as follows:
