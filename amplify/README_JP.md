@@ -7,6 +7,14 @@
 
 ``AWSCloudFormationTemplates/amplify`` は、 ``AWS Amplify``, ``AWS CodeCommit`` などを用いて CI/CD 環境を構築します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 登録済みでアクセス可能なカスタムドメイン名
+- ドメイン管理用の Route 53 ホストゾーン（推奨）
+- Amplify、CodeCommit、SNS サービスに対する適切な IAM 権限
+
 ## TL;DR
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。

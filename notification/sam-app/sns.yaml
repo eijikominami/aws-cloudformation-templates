@@ -2,7 +2,17 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/notification/sns creates Amazon SNS and related CloudWatch Alarm.
 
-Metadata: 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: sns-topic
+    Description: Create Amazon SNS and related CloudWatch Alarm.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/sns-topic.md
+    Labels: []
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 

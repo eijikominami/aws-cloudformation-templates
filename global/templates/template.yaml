@@ -217,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -228,7 +228,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -248,6 +248,7 @@ Resources:
         SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         DestinationSNSArn: !Ref SNSForAlertArn
         Environment: !Ref Environment
+        LogicalName: TransferAlertTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
@@ -270,6 +271,7 @@ Resources:
         SourceSNSArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
         DestinationSNSArn: !Ref SNSForDeploymentArn
         Environment: !Ref Environment
+        LogicalName: TransferDeploymentTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
@@ -364,7 +366,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName

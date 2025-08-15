@@ -5,7 +5,15 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates) 
  
-``AWSCloudFormationTemplates/notification`` は、 ``AWS Chatbot`` と ``AWS Lambda`` を用いて **Slackに通知を送信** します。
+``AWSCloudFormationTemplates/notification`` は、``AWS Chatbot`` と ``AWS Lambda`` を用いて **Slack に通知を送信** します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- アプリと Webhook を作成する適切な権限を持つ Slack ワークスペース
+- Slack ワークスペース ID を取得した AWS Chatbot の初期認証完了
+- チャンネル用に設定された Slack Incoming Webhook URL
 
 ```bash
 .

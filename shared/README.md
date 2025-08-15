@@ -7,13 +7,22 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/shared`` builds shared services in your AWS Organizations accounts.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- AWS Organizations set up with appropriate organizational units
+- IAM Identity Center instance configured (if using SSO integration)
+- VPC and networking infrastructure planned for shared services
+- S3 bucket for log archiving (if using FluentBit logging)
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) |
 
 If you want to deploy each service individually, click the button below.
 
@@ -32,7 +41,7 @@ The following sections describe the individual components of the architecture.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows.
@@ -86,3 +95,4 @@ This template configures FluentBit for Syslog.
 ### Trusted access with IAM Identity Center
 
 You can enable trusted access using either the AWS IAM Identity Center console or the AWS Organizations console and connect with AWS Managed Microsoft AD manually.
+

@@ -7,6 +7,14 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/global`` creates global settings on N.Virginia Region (`us-east-1`).
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Domain name registered for SSL certificate validation
+- CloudFront distribution ID (if monitoring CloudFront metrics)
+- S3 bucket for Cost and Usage Reports (if enabling CUR)
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
@@ -38,7 +46,7 @@ This template creates some other resources, such as ``Amazon SNS``.
 Execute the command to deploy in the ``us-east-1`` region because ``AWS Certificate Manager``, ``CloudFront`` and ``Billing`` only support the region.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name GlobalSettings --region us-east-1
+aws cloudformation deploy --template-file templates/template.yaml --stack-name GlobalSettings --region us-east-1
 ```
 
 You can provide optional parameters as follows.

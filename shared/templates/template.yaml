@@ -103,7 +103,7 @@ Parameters:
     Description: The public subnet CIDR block at AZ2 [required]
   ActiveDirectorySubnetCidrBlockForAz3:
     Type: String
-    Default: 10.3.128.0/26
+    Default: 10.3.138.0/26
     AllowedPattern: ^[0-9./]*$
     Description: The public subnet CIDR block at AZ3 [required]
   AlarmLevel:
@@ -144,7 +144,7 @@ Parameters:
     Description: The private subnet CIDR block at AZ2
   SubnetPrivateCidrBlockAz3:
     Type: String
-    Default: 10.3.128.64/26
+    Default: 10.3.138.64/26
     AllowedPattern: ^[0-9./]*$
     Description: The private subnet CIDR block at AZ3
   SubnetTransitCidrBlockAz1:
@@ -159,7 +159,7 @@ Parameters:
     Description: The transit subnet CIDR block at AZ2
   SubnetTransitCidrBlockAz3:
     Type: String
-    Default: 10.3.128.128/26
+    Default: 10.3.138.128/26
     AllowedPattern: ^[0-9./]*$
     Description: The transit subnet CIDR block at AZ3
   ResolverRuleId:
@@ -250,7 +250,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -284,7 +284,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -318,7 +318,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -416,7 +416,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -433,7 +433,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -802,7 +802,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -827,7 +827,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -854,7 +854,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -881,7 +881,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -908,7 +908,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -935,7 +935,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

@@ -7,6 +7,15 @@ English / [**日本語**](README_JP.md)
 
 ``AWSCloudFormationTemplates/security-config-rules`` deletes AWS resources without required tags. This template covers the following resources.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- AWS Config service enabled and configured
+- S3 bucket for SAM deployment artifacts
+- Understanding of resource tagging strategy and policies
+- Appropriate IAM permissions for Config rules and Lambda functions
+
 + Amazon S3 - Bucket
 + Amazon DynamoDB - Table
 + Amazon API Gateway - API
@@ -48,9 +57,10 @@ The following sections describe the individual components of the architecture.
 Execute the command to deploy.
 
 ```bash
+cd sam-app
 sam build
 sam package --output-template-file packaged.yaml --s3-bucket S3_BUCKET_NAME
-aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecuritySettings-ConfigRules --s3-bucket S3_BUCKET_NAM --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecuritySettings-ConfigRules --s3-bucket S3_BUCKET_NAME --capabilities CAPABILITY_NAMED_IAM
 ```
 
 You can provide optional parameters as follows.
@@ -60,4 +70,4 @@ You can provide optional parameters as follows.
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
 | RequiredTagKey | String | createdby | ○ | AWS Config removes AWSnresouces without this tag |
-| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Config removes AWSnresouces without this tag |
+| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Config removes AWS resources without this tag |

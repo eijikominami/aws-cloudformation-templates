@@ -22,6 +22,25 @@ Metadata:
           - Environment 
           - TagKey
           - TagValue
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: 'Directory Service Configuration'
+        Parameters: 
+          - DirectoryId
+          - DomainControllerIp
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - AlarmLevel
+          - CustomAlarmName
+          - SNSTopicArn
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment 
+          - TagKey
+          - TagValue
 
 Parameters:
   AlarmLevel:

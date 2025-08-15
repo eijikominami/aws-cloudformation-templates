@@ -41,7 +41,7 @@ This project uses the following modules.
 | Service | Resource | Version |
 | --- | --- | --- |
 | Amazon CloudWatch Synthetics | [Runtime](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Library_nodejs_puppeteer.html) | syn-nodejs-puppeteer-9.0 |
-| AWS CodeBuild | [Image](https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-env-ref-available.html) | aws/codebuild/amazonlinux2-aarch64-standard:2.0 (Python 3.9), aws/codebuild/amazonlinux2-aarch64-standard:3.0 (Buildx) |
+| AWS CodeBuild | [Image](https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-env-ref-available.html) | aws/codebuild/amazonlinux-aarch64-standard:3.0 (Python 3.13), aws/codebuild/amazonlinux-aarch64-standard:3.0 (Buildx) |
 | Amazon EBS | Volume Type | gp3 |
 | Amazon EC2 | Amazon Linux 2 Default AMI Id | ami-03dceaabddff8067e |
 | Amazon EC2 | Microsoft Windows Server 2022 Default AMI Id | ami-0659e3a420d8a74ea |
@@ -49,7 +49,7 @@ This project uses the following modules.
 | AWS Glue | PythonVersion | 3 |
 | AWS Lambda | [CodeGuru Profiler](https://docs.aws.amazon.com/codeguru/latest/profiler-ug/python-lambda-layers.html) | AWSCodeGuruProfilerPythonAgentLambdaLayer:11 (Python 3.9) |
 | AWS Lambda | [Lambda Insights](https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Lambda-Insights-extension-versionsARM.html) | LambdaInsightsExtension-Arm64:31 |
-| AWS Lambda | Python | 3.9 |
+| AWS Lambda | Python | 3.13 |
 | AWS Serverless Repository | aws-usage-queries | 0.1.5+19.38c7b8 |
 | AWS Systems Manager | [SSM Document Schema (Automation)](https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-schemas-features.html) | 0.3 |
 | AWS Systems Manager | [SSM Document Schema (Command)](https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-schemas-features.html) | 2.2 |

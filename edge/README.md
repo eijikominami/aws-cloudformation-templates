@@ -7,6 +7,15 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/edge`` builds edge services.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Custom domain name for CloudFront distribution (optional)
+- SSL certificate issued in AWS Certificate Manager (us-east-1 region)
+- Route 53 hosted zone for custom domain management (if using custom domains)
+- Target resource ARN for WAF protection (if using WAF)
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.

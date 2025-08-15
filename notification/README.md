@@ -7,6 +7,14 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/notification`` sets up AWS Chatbot and AWS Lambda to send notifications to Slack.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Slack workspace with appropriate permissions to create apps and webhooks
+- AWS Chatbot initial authorization completed with Slack workspace ID obtained
+- Slack Incoming Webhook URLs configured for your channels
+
 ```bash
 .
 ├── README_JP.md                    <-- Instructions file (Japanese)

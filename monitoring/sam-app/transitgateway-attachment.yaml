@@ -2,6 +2,18 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for AWS Transit Gateway attachments
 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: cloudwatch-alarm-about-transitgateway-attachment
+    Description: Create Amazon CloudWatch Alarm about AWS Transit Gateway Attachment.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/cloudwatch-alarm-about-transitgateway-attachment.md
+    Labels: []
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
+
 Parameters:
   CustomAlarmName:
     Type: String

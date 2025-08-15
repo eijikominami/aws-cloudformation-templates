@@ -7,13 +7,20 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/network`` sets VPC and network elements.
 
+## Prerequisites
+
+- AWS Organizations setup (for cross-account networking features)
+- Route 53 hosted zones for DNS management (if using custom domains)
+- On-premises network configuration details (for VPN and hybrid connectivity)
+- Appropriate IAM permissions for VPC, Transit Gateway, and networking services
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/template.yaml) | 
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Network&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/network/templates/template.yaml) | 
 
 If you want to deploy each service individually, click the button below.
 
@@ -36,18 +43,26 @@ The following sections describe the individual components of the architecture.
 
 ## Deployment
 
-Execute the command to deploy.
+## Deployment
+
+Execute the command to deploy the main template.
 
 ```bash
-aws cloudformation deploy --template-file az.yaml --stack-name AvailabilityZone --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file egress.yaml --stack-name EgressVPC --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file globalaccelerator.yaml --stack-name GlobalAccelerator
-aws cloudformation deploy --template-file ipam.yaml --stack-name IPAM --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file networkaccessanalyzer.yaml --stack-name NetworkAccessAnalyzer --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file networkfirewall.yaml --stack-name NetworkFirewall --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file route53resolver.yaml --stack-name Route53
-aws cloudformation deploy --template-file transitgateway.yaml --stack-name TransitGateway --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name Network --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+```
+
+Or deploy individual components:
+
+```bash
+aws cloudformation deploy --template-file templates/az.yaml --stack-name AvailabilityZone --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/egress.yaml --stack-name EgressVPC --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/globalaccelerator.yaml --stack-name GlobalAccelerator
+aws cloudformation deploy --template-file templates/ipam.yaml --stack-name IPAM --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/networkaccessanalyzer.yaml --stack-name NetworkAccessAnalyzer --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/networkfirewall.yaml --stack-name NetworkFirewall --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/route53resolver.yaml --stack-name Route53
+aws cloudformation deploy --template-file templates/transitgateway.yaml --stack-name TransitGateway --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/vpn.yaml --stack-name VPN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows:

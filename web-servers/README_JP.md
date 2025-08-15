@@ -7,6 +7,15 @@
  
 ``AWSCloudFormationTemplates/web-servers`` は、 ``Network Load Balancer``や ``VPC`` 、 ``EC2`` インスタンスなどの **EC2で構成されたWebサイトホスティング** に関連するAWSサービスを設定します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- EC2 インスタンスとロードバランサー用に設定された VPC とサブネット
+- EC2 インスタンスアクセス用に作成されたキーペア
+- Auto Scaling とロードバランシング要件の理解
+- デプロイアーティファクトとログを保存する S3 バケット
+
 ## TL;DR
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。
@@ -96,4 +105,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 
 ## トラブルシューティング
 
-`AWS-GatherSoftwareInventory` を含むSSM State Manager の関連付けが既に存在する場合、このテンプレートは失敗します。`IgnoreResourceConflicts` オプションを ENABLED に設定してこのテンプレートを実行してください。
+### SSM State Manager の問題
+
+`AWS-GatherSoftwareInventory` を含む SSM State Manager の関連付けが既に存在する場合、このテンプレートは失敗します。`IgnoreResourceConflicts` オプションを ENABLED に設定してこのテンプレートを実行してください。

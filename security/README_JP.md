@@ -7,6 +7,15 @@
 
 ``AWSCloudFormationTemplates/security`` は、 ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub``, ``Amazon Macie`` などの **セキュリティ** に関連するAWSサービスを設定します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- AWS Organizations のセットアップ（組織全体のセキュリティサービスを使用する場合）
+- Control Tower のデプロイ（Control Tower 統合を使用する場合）
+- セキュリティサービス（GuardDuty、Security Hub、Config など）に対する適切な IAM 権限
+- セキュリティ通知とアラート用のメールアドレス
+
 ## TL;DR
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。

@@ -7,16 +7,20 @@ English / [**日本語**](README_JP.md)
 
 ``AWSCloudFormationTemplates/static-website-hosting`` builds ``Amazon CloudFront``, ``Amazon S3`` and related resources for **static website hosting**.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Domain name registered and Route53 hosted zone configured
+- SSL certificate created in AWS Certificate Manager (in us-east-1 for CloudFront)
+- S3 bucket for storing website artifacts and logs
+- Understanding of CloudFront distribution and caching behavior
+
 ## TL;DR
 
-If you just want to deploy the stack follow these steps.
+If you just want to deploy the stack, click the button below.
 
-1. Before running this Cloudformation template, run both the ``Security`` template and ``Global Settings`` template in this project.
-
-+ [Security Template](../security/README.md)
-+ [Global Settings Template](../global/README.md)
-
-2. Click the button below.
+> **Note:** Before running this CloudFormation template, run both the [Security Template](../security/README.md) and [Global Settings Template](../global/README.md) in this project.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |

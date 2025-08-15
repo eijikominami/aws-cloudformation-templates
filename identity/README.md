@@ -7,6 +7,14 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/identity`` sets AWS Identity Services to manage identities, resources, and permissions securely at scale.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- VPC with private subnets configured (for Managed Microsoft AD)
+- Domain name planned for Active Directory (for Managed Microsoft AD)
+- Understanding of IAM Identity Center instance requirements
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
@@ -25,7 +33,7 @@ This template configures ``AWS IAM Identity Center``.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file identitycenter.yaml --stack-name IdentityCenter --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/identitycenter.yaml --stack-name IdentityCenter --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 | Name | Type | Default | Required | Details | 
@@ -42,7 +50,7 @@ This template configures ``AWS Managed Microsoft AD``.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file microsoftad.yaml --stack-name MicrosoftAD --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/microsoftad.yaml --stack-name MicrosoftAD --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows.

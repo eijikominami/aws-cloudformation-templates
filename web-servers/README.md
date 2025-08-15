@@ -7,6 +7,15 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/web-servers`` builds ``Network Load Balancer``, ``VPC`` and ``EC2`` instances and related resources for **EC2-based website hosting**.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- VPC and subnets configured for EC2 instances and load balancers
+- Key pair created for EC2 instance access
+- Understanding of Auto Scaling and load balancing requirements
+- S3 bucket for storing deployment artifacts and logs
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
@@ -66,7 +75,7 @@ You can provide optional parameters as follows.
 | DockerFilePath | String | | | The path of Dockerfile | 
 | DomainName | String | | | Domain name | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
-| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
 | EC2PatchingAt | Number | 3 | ○ | Starting time of patching process |
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set |
@@ -94,6 +103,9 @@ You can provide optional parameters as follows.
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
 
-## Trouble Shooting
+
+## Troubleshooting
+
+### SSM State Manager Issues
 
 If `SSM State Manager Association` already has `AWS-GatherSoftwareInventory`, the template will **fail**. Deploy this template with the `IgnoreResourceConflicts` option enabled.

@@ -5,7 +5,16 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/shared`` は、 AWS Organizations 内のアカウントにおける共通サービスを構築します。
+``AWSCloudFormationTemplates/shared`` は、AWS Organizations 内のアカウントにおける共通サービスを構築します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 適切な組織単位で設定された AWS Organizations
+- 設定された IAM Identity Center インスタンス（SSO 統合を使用する場合）
+- 共有サービス用に計画された VPC とネットワークインフラストラクチャ
+- ログアーカイブ用の S3 バケット（FluentBit ログを使用する場合）
 
 ## TL;DR
 
@@ -13,7 +22,7 @@
 
 | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) |
 
 以下のボタンから、個別のAWSサービスを有効化することも可能です。
 
@@ -32,7 +41,7 @@
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。

@@ -76,18 +76,18 @@ Parameters:
     Description: The name of the bucket where Amazon S3 should store development artifacts [required]  
   ImageForContainers:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:3.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
   ImageForCommits:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
   ImageForTags:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
   GitHubOAuthToken:
     Type: String
@@ -144,7 +144,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -161,7 +161,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -173,7 +173,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub CICD-createdby-${AWS::StackName}
       Tags:

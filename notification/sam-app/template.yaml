@@ -7,7 +7,7 @@ Globals:
     Architectures:
       - arm64
     Handler: lambda_function.lambda_handler
-    Runtime: python3.9
+    Runtime: python3.13
     Tracing: Active
 
 Metadata: 
@@ -49,6 +49,17 @@ Metadata:
           - Environment
           - TagKey
           - TagValue
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      LambdaInsights: arn:aws:lambda:us-east-1:580247275435:layer:LambdaInsightsExtension-Arm64:23
+    us-west-2:
+      LambdaInsights: arn:aws:lambda:us-west-2:580247275435:layer:LambdaInsightsExtension-Arm64:23
+    ap-northeast-1:
+      LambdaInsights: arn:aws:lambda:ap-northeast-1:580247275435:layer:LambdaInsightsExtension-Arm64:34
+    ap-northeast-3:
+      LambdaInsights: arn:aws:lambda:ap-northeast-3:194566237122:layer:LambdaInsightsExtension-Arm64:20
 
 Parameters:
   AlarmLevel:
@@ -205,7 +216,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -221,7 +232,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -238,7 +249,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -255,7 +266,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -266,7 +277,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/eventbridge-rules
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -474,7 +485,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:31
+          - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
         - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -525,7 +536,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -573,7 +584,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:31
+          - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
         - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -606,7 +617,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -664,7 +675,7 @@ Resources:
       Layers: !If
         - Development
         - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:31
+          - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
         - !Ref AWS::NoValue
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -698,7 +709,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

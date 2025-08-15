@@ -7,6 +7,15 @@
  
 ``AWSCloudFormationTemplates/edge`` AWSのエッジサービスを構築します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- CloudFront で使用するカスタムドメイン名（オプション）
+- AWS Certificate Manager で発行した SSL 証明書（us-east-1 リージョン）
+- Route 53 ホストゾーン（カスタムドメインを使用する場合）
+- WAF を使用する場合は、保護対象のリソース ARN
+
 ## TL;DR
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。

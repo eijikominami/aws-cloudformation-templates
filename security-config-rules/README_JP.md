@@ -5,7 +5,16 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
 
-``AWSCloudFormationTemplates/security-config-rules`` は **必要なタグが付与されていないAWSリソースを削除** します。このテンプレートは、以下のリソースに対応しています。
+``AWSCloudFormationTemplates/security-config-rules`` は **必要なタグが付与されていない AWS リソースを削除** します。このテンプレートは、以下のリソースに対応しています。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 有効化され設定された AWS Config サービス
+- SAM デプロイアーティファクト用の S3 バケット
+- リソースタグ戦略とポリシーの理解
+- Config ルールと Lambda 関数に対する適切な IAM 権限
 
 + Amazon S3 - Bucket
 + Amazon DynamoDB - Table
@@ -48,9 +57,10 @@
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
+cd sam-app
 sam build
 sam package --output-template-file packaged.yaml --s3-bucket S3_BUCKET_NAME
-aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecuritySettings-ConfigRules --s3-bucket S3_BUCKET_NAM --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecuritySettings-ConfigRules --s3-bucket S3_BUCKET_NAME --capabilities CAPABILITY_NAMED_IAM
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -58,6 +68,6 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecu
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
-| AWSConfigAutoRemediation | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、Lambda を用いた **自動修復機能** が有効化されます。 |
-| RequiredTagKey | String | createdby | ○ | AWS Configは、このタグの無いAWSリソースを削除します。 |
-| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Configは、このタグの無いAWSリソースを削除します。 |
+| AWSConfigAutoRemediation | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、Lambda を用いた **自動修復機能** が有効化されます。 |
+| RequiredTagKey | String | createdby | ○ | AWS Config は、このタグの無い AWS リソースを削除します。 |
+| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Config は、このタグの無い AWS リソースを削除します。 |

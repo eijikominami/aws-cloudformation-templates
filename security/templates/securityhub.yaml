@@ -96,7 +96,8 @@ Parameters:
 
 Conditions:
   CreateDelegatedAdmin: !Not [ !Equals [ !Ref DelegatedAdminAccountId, ''] ]
-  CreateCentraizedSettings: !Equals [ !Ref DelegatedAdminAccountId, '']
+  CreateFindingAggregator: !Equals [ !Ref DelegatedAdminAccountId, '']
+  CreateOrganizationConfiguration: !And [ !Not [ !Equals [ !Ref OrganizationsRootId, ''] ], !Equals [ !Ref DelegatedAdminAccountId, ''] ]
   CreatePolicyAssociation: !And [ !Not [ !Equals [ !Ref OrganizationsRootId, ''] ], !Equals [ !Ref DelegatedAdminAccountId, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -134,7 +135,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -151,7 +152,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -182,12 +183,14 @@ Resources:
     Properties:
       AdminAccountId: !Ref DelegatedAdminAccountId 
   SecurityHubFindingAggregator:
-    Condition: CreateCentraizedSettings
+    Condition: CreateFindingAggregator
     Type: AWS::SecurityHub::FindingAggregator
+    DependsOn:
+      - SecurityHub
     Properties:
       RegionLinkingMode: ALL_REGIONS
   SecurityHubOrganizationConfiguration:
-    Condition: CreateCentraizedSettings
+    Condition: CreateOrganizationConfiguration
     DependsOn:
       - SecurityHubFindingAggregator
     Type: AWS::SecurityHub::OrganizationConfiguration
@@ -197,7 +200,7 @@ Resources:
       AutoEnableStandards: NONE
       ConfigurationType: CENTRAL
   SecurityHubConfigurationPolicy:
-    Condition: CreateCentraizedSettings
+    Condition: CreateOrganizationConfiguration
     DependsOn:
       - SecurityHubFindingAggregator
       - SecurityHubOrganizationConfiguration
@@ -264,7 +267,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

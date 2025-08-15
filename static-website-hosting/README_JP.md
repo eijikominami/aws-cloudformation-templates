@@ -7,6 +7,15 @@
 
 ``AWSCloudFormationTemplates/static-website-hosting`` は、 ``Amazon CloudFront``, ``Amazon S3`` などの **静的Webサイトホスティング** に関連するAWSサービスを設定します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 登録されたドメイン名と設定された Route53 ホストゾーン
+- AWS Certificate Manager で作成された SSL 証明書（CloudFront 用に us-east-1 で）
+- ウェブサイトアーティファクトとログを保存する S3 バケット
+- CloudFront ディストリビューションとキャッシュ動作の理解
+
 ## TL;DR
 
 1. このテンプレートを実行する前に、本プロジェクトに含まれる ``Security`` テンプレートと ``Global Settings`` テンプレートの両方を実行してください。

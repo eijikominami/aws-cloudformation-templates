@@ -81,8 +81,8 @@ Parameters:
     Description: Enable or disable deployment of CloudOps template [required]
   CodeBuildImageName:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The Docker image name for CodeBuild [required]
   DefaultSecuritySettings:
     Type: String
@@ -192,6 +192,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateArtifactBucketInVirginia: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   CreateIncidentManager: !Equals [ !Ref CloudOps, ENABLED]
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -199,7 +200,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
   DeployDefaultSecuritySettings: !Equals [ !Ref DefaultSecuritySettings, ENABLED] 
-  DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
+  DeployGlobalSettings: !Or [ !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ], !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Equals [ !Ref AWS::Region, us-east-1] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployNetwork: !Equals [ !Ref Network, ENABLED]
   DeploySharedServices: !Equals [ !Ref SharedServices, ENABLED]
@@ -216,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -236,7 +237,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -251,7 +252,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -656,7 +657,7 @@ Resources:
             Type: S3
           Region: !Ref AWS::Region
         - !If
-          - DeployGlobalSettings
+          - CreateArtifactBucketInVirginia
           - ArtifactStore:
               Location: !Ref ArtifactBucketInVirginia
               Type: S3
@@ -714,14 +715,7 @@ Resources:
                 ParameterOverrides: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Ref AWS::NoValue
-                  - !Join
-                    - ''
-                    - - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}", "GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
-                      - !If
-                        - Development
-                        - development
-                        - production
-                      - !Sub '","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                  - !Sub '{"AlarmLevel": "${AlarmLevel}", "ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "CloudOps": "${CloudOps}", "CodeBuildImageName": "${CodeBuildImageName}", "DefaultSecuritySettings": "${DefaultSecuritySettings}", "GitHubBranchName": "${GitHubBranchName}", "GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}", "GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}", "GlobalSettings": "${GlobalSettings}", "ManagementAccountId": "${ManagementAccountId}", "Network": "${Network}", "Notification": "${Notification}", "OrganizationId": "${OrganizationId}", "OrganizationsRootId": "${OrganizationsRootId}", "SharedServices": "${SharedServices}", "SNSForAlertArn": "${SNSForAlertArn}", "SNSForCICDArn": "${SNSForCICDArn}", "SNSForDeploymentArn": "${SNSForDeploymentArn}", "StaticWebsiteHosting": "${StaticWebsiteHosting}", "TagKey": "${TagKey}", "TagValue": "${TagValue}", "TemplateConfigurationBasePath": "${TemplateConfigurationBasePath}", "UploadArtifacts": "${UploadArtifacts}", "WebServers": "${WebServers}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CICD.json  
@@ -1218,7 +1212,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1249,7 +1243,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1280,7 +1274,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

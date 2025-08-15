@@ -5,7 +5,16 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/media`` は、 ``AWS Elemental Media Services`` を構築します。
+``AWSCloudFormationTemplates/media`` は、``AWS Elemental Media Services`` を構築します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 設定された IAM Identity Center インスタンス（Deadline Cloud 用）
+- メディアコンテンツの保存とアーカイブ用に準備された S3 バケット
+- メディアストリーミングプロトコルと要件の理解
+- 設定された Content Delivery Network (CDN) エンドポイント（MediaTailor 用）
 
 > [!NOTE]
 > [**eijikominami/aws-cloudformation-samples/media**](hhttps://github.com/eijikominami/aws-cloudformation-samples/blob/master/media/README_JP.md) にサンプルテンプレート集があります。
@@ -28,12 +37,12 @@
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
-aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -175,4 +184,5 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | MaxDurationSeconds | Number | 120 | ○ | プリロールの最大秒 |
 | PersonalizationThresholdSeconds | Number | 8 | ○ | 埋められなかった広告時間の最大秒 |
 | **SlateAdUrl** | String | | ○ | 広告で使用されなかった時間に挿入されるスレートのURL |
-| **VideoContentSourceUrl** | String | | ○ | マニフェストファイルのURL |
+| **VideoContentSourceUrl** | String | | ○ | マニフェストファイルの URL |
+

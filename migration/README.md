@@ -7,7 +7,16 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/migration`` builds migration services.
 
-## Migration
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Source servers prepared for migration with AWS MGN agent installed
+- Network connectivity between source environment and AWS
+- VPC and subnets configured for target environment
+- Understanding of migration timeline and cutover requirements
+
+## TL;DR
 
 If you want to deploy each service individually, click the button below.
 
@@ -18,7 +27,7 @@ If you want to deploy each service individually, click the button below.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file mgn.yaml --stack-name MGN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mgn.yaml --stack-name MGN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 ### AWS Application Migration Service (AWS MGN)

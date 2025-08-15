@@ -7,6 +7,15 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/media`` builds AWS Elemental Media Services.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- IAM Identity Center instance configured (for Deadline Cloud)
+- S3 buckets prepared for media content storage and archiving
+- Understanding of media streaming protocols and requirements
+- Content Delivery Network (CDN) endpoints configured (for MediaTailor)
+
 > [!NOTE]
 > You can also get useful sample templates at [**eijikominami/aws-cloudformation-samples/media**](https://github.com/eijikominami/aws-cloudformation-samples/tree/master/media).
 
@@ -28,12 +37,12 @@ If you just want to deploy the stack, click the button below.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
-aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows.
@@ -176,3 +185,4 @@ You can provide optional parameters as follows.
 | PersonalizationThresholdSeconds | Number | 8 | ○ | Defines the maximum duration of underfilled ad time (in seconds) allowed in an ad break |
 | **SlateAdUrl** | String | | ○ | The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads |
 | **VideoContentSourceUrl** | String | | ○ | The URL prefix for the parent manifest for the stream, minus the asset ID |
+
