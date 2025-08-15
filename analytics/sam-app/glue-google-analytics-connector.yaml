@@ -1,0 +1,275 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: aws-cloudformation-templates/analytics/glue-google-analytics-connector creates IAM role and connection for Google Analytics connector.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Google Analytics 4 Configuration"
+        Parameters:
+          - AccountId
+          - ClientSecret
+          - LogicalName
+          - PropertyId
+          - PropertyNumber
+      - Label:
+          default: "Tag Configuration"
+        Parameters:
+          - TagKey
+          - TagValue
+
+Parameters:
+  AccountId:
+    Type: String
+    AllowedPattern: .+
+    Description: The Google Analytics 4 Account ID [required]
+  ClientSecret:
+    Type: String
+    NoEcho: true
+    Description: The client secret for Google Analytics 4 OAuth application [required]
+  LogicalName:
+    Type: String
+    Default: googleanalytics
+    AllowedPattern: ^[a-z0-9][a-z0-9-]*[a-z0-9]$
+    Description: The custom prefix name for resources (lowercase alphanumeric and hyphens only) [required]
+  PropertyId:
+    Type: String
+    AllowedPattern: .+
+    Description: The Google Analytics 4 Property ID (also used as Client ID) [required]
+  PropertyNumber:
+    Type: String
+    AllowedPattern: .+
+    Description: The Google Analytics 4 Property Number [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  # IAM Roles
+  IAMRoleForGlue:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: GoogleAnalyticsConnectorPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:ListConnectionTypes
+                  - glue:DescribeConnectionType
+                  - glue:RefreshOAuth2Tokens
+                  - glue:ListEntities
+                  - glue:DescribeEntity
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:PutSecretValue
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::aws-glue-assets-${AWS::AccountId}-${AWS::Region}"
+                  - !Sub "arn:aws:s3:::aws-glue-assets-${AWS::AccountId}-${AWS::Region}/*"
+                  - !GetAtt S3BucketForData.Arn
+                  - !Sub "${S3BucketForData.Arn}/*"
+      RoleName: !Sub ${LogicalName}-GlueRole-${AWS::Region}
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  IAMRoleForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: GlueJobManagementPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:CreateJob
+                  - glue:UpdateJob
+                  - glue:DeleteJob
+                  - glue:GetJob
+                  - glue:TagResource
+                  - glue:UntagResource
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt IAMRoleForGlue.Arn
+
+  # Secrets Manager
+  SecretsManager:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${LogicalName}-GA4-Secret-${AWS::Region}
+      Description: !Sub Secret for Google Analytics 4 connection created by ${AWS::StackName}
+      SecretString: !Sub '{"USER_MANAGED_CLIENT_APPLICATION_CLIENT_SECRET":"${ClientSecret}"}'
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # S3 Buckets
+  S3BucketForData:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${LogicalName}-raw-data-${AWS::Region}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # Glue Resources
+  GlueConnection:
+    Type: AWS::Glue::Connection
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      ConnectionInput:
+        AuthenticationConfiguration:
+          AuthenticationType: OAUTH2
+          OAuth2Properties:
+            OAuth2ClientApplication:
+              UserManagedClientApplicationClientId: !Ref PropertyId
+            OAuth2GrantType: AUTHORIZATION_CODE
+            TokenUrl: "https://oauth2.googleapis.com/token"
+          SecretArn: !Ref SecretsManager
+        ConnectionProperties:
+          KAFKA_SSL_ENABLED: false
+          ROLE_ARN: !GetAtt IAMRoleForGlue.Arn
+        ConnectionType: GOOGLEANALYTICS4
+        Description: !Sub Connection to Google Analytics 4 created by ${AWS::StackName}
+        Name: !Sub ${LogicalName}-GA4-Connection
+        ValidateCredentials: false
+
+  # Lambda Functions
+  GlueJobManagerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${LogicalName}-glue-job-manager
+      Runtime: python3.13
+      Handler: glue_job_manager.handler
+      CodeUri: src/
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Timeout: 300
+
+  # Glue Jobs (Custom Resource for Visual ETL support)
+  VisualETLJob:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt GlueJobManagerFunction.Arn
+      ServiceTimeout: 300
+      JobName: !Sub ${LogicalName}-GA4-ETL-Job
+      Role: !GetAtt IAMRoleForGlue.Arn
+      MaxRetries: 0
+      Timeout: 2880
+      GlueVersion: "4.0"
+      WorkerType: "G.1X"
+      NumberOfWorkers: 2
+      Description: !Sub ETL job to extract Google Analytics 4 data created by ${AWS::StackName}
+      AccountId: !Ref AWS::AccountId
+      Region: !Ref AWS::Region
+
+      DefaultArguments: !Sub >
+        {
+          "--TempDir": "s3://aws-glue-assets-${AWS::AccountId}-${AWS::Region}/temporary/",
+          "--job-bookmark-option": "job-bookmark-enable",
+          "--job-language": "python"
+        }
+
+      CodeGenConfigurationNodes: >
+        {
+          "node-1": {
+            "S3CatalogSource": {
+              "Name": "S3 bucket",
+              "Database": "default",
+              "Table": "sample_table"
+            }
+          },
+          "node-2": {
+            "ApplyMapping": {
+              "Name": "Change Schema",
+              "Inputs": ["node-1"],
+              "Mapping": [
+                {
+                  "ToKey": "id",
+                  "FromPath": ["id"],
+                  "FromType": "string",
+                  "ToType": "string"
+                }
+              ]
+            }
+          },
+          "node-3": {
+            "S3CatalogTarget": {
+              "Name": "S3 bucket",
+              "Inputs": ["node-2"],
+              "Database": "default",
+              "Table": "output_table"
+            }
+          }
+        }
+
+      Tags: !Sub >
+        {
+          "createdby": "${TagValue}"
+        }
+
+Outputs:
+  # Cross-stack referenced resources (MANDATORY)
+  ETLJobName:
+    Description: Name of the Google Analytics 4 ETL job
+    Value: !GetAtt VisualETLJob.JobName
+  ETLJobArn:
+    Description: ARN of the Google Analytics 4 ETL job
+    Value: !GetAtt VisualETLJob.JobArn
+  GlueConnectionName:
+    Description: Name of the Google Analytics 4 connection
+    Value: !Ref GlueConnection
+
+  S3BucketForDataArn:
+    Description: ARN of the S3 bucket for Google Analytics 4 raw data storage
+    Value: !GetAtt S3BucketForData.Arn
+  SecretsManagerArn:
+    Description: ARN of the AWS Secrets Manager secret for Google Analytics 4
+    Value: !Ref SecretsManager

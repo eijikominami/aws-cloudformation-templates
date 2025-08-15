@@ -5,7 +5,14 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates) 
 
-``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail`` , ``AWS Security Hub`` , ``Amazon Macie`` , and related resources.
+``AWSCloudFormationTemplates/security`` sets basic configurations for **security**. This builds ``Amazon GuardDuty``, ``AWS Config``, ``AWS CloudTrail``, ``AWS Security Hub``, ``Amazon Macie``, and related resources.
+
+## Prerequisites
+
+- AWS Organizations setup (for organization-wide security services)
+- Control Tower deployment (if using Control Tower integration)
+- Appropriate IAM permissions for security services (GuardDuty, Security Hub, Config, etc.)
+- Email address for security notifications and alerts
 
 ## TL;DR
 
@@ -13,7 +20,7 @@ If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DefaultSecuritySettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/template.yaml)  | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DefaultSecuritySettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DefaultSecuritySettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/templates/template.yaml)  | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DefaultSecuritySettings&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/templates/template.yaml) |
 
 If you want to deploy each service individually, click the button below.
 

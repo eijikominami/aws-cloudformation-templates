@@ -7,7 +7,7 @@ Globals:
     Architectures:
       - arm64
     Handler: lambda_function.lambda_handler
-    Runtime: python3.9
+    Runtime: python3.13
     Tracing: Active
 
 Metadata: 

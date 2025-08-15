@@ -7,6 +7,14 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/identity`` sets AWS Identity Services to manage identities, resources, and permissions securely at scale.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- VPC with private subnets configured (for Managed Microsoft AD)
+- Domain name planned for Active Directory (for Managed Microsoft AD)
+- Understanding of IAM Identity Center instance requirements
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
@@ -25,7 +33,7 @@ This template configures ``AWS IAM Identity Center``.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file identitycenter.yaml --stack-name IdentityCenter --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/identitycenter.yaml --stack-name IdentityCenter --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 | Name | Type | Default | Required | Details | 
@@ -42,7 +50,7 @@ This template configures ``AWS Managed Microsoft AD``.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file microsoftad.yaml --stack-name MicrosoftAD --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/microsoftad.yaml --stack-name MicrosoftAD --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows.
@@ -72,3 +80,32 @@ After deploying this template, [install the Active Directory Administration Tool
 ### Storing Security Event Logs in Amazon CloudWatch Logs and Amazon S3
 
 To store domain controller security event logs in Amazon CloudWatch Logs and Amazon S3, you need to manually enable the log forwarding feature through the AWS Management Console. This configuration allows you to forward security events from your domain controllers for monitoring and audit purposes.
+
+## Troubleshooting
+
+### IAM Identity Center Issues
+
+If IAM Identity Center is not working properly:
+
+1. Verify that you have the necessary permissions to manage IAM Identity Center
+2. Check that the Identity Center instance is properly configured in your region
+3. Ensure that permission sets are correctly assigned to users and groups
+4. Verify that external identity providers are properly configured if using SAML
+
+### Managed Microsoft AD Issues
+
+If Managed Microsoft AD is not functioning correctly:
+
+1. Verify that the VPC and subnets have proper DNS resolution configured
+2. Check that security groups allow the necessary Active Directory ports
+3. Ensure that the domain name doesn't conflict with existing domains
+4. Verify that the password meets complexity requirements
+
+### Domain Controller Access Issues
+
+If you cannot access domain controllers:
+
+1. Verify that you're connecting from the correct VPC and subnets
+2. Check that the security groups allow RDP access on port 3389
+3. Ensure that the domain admin credentials are correct
+4. Verify that the domain controllers are in a healthy state

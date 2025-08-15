@@ -47,7 +47,7 @@ env:
 phases:
   install:
     runtime-versions:
-       python: 3.9
+       python: 3.13
     commands:
       # Use the latest version
       - pip install -U pip

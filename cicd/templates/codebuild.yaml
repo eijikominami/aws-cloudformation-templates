@@ -73,18 +73,18 @@ Parameters:
     Description: The name of the bucket where Amazon S3 should store development artifacts [required]  
   ImageForContainers:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:3.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
   ImageForCommits:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
   ImageForTags:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-aarch64.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The image tag or image digest that identifies the Docker image to use for this build project [required]
   GitHubOAuthToken:
     Type: String

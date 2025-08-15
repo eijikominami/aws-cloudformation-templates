@@ -7,6 +7,15 @@
 
 ``AWSCloudFormationTemplates/static-website-hosting`` は、 ``Amazon CloudFront``, ``Amazon S3`` などの **静的Webサイトホスティング** に関連するAWSサービスを設定します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 登録されたドメイン名と設定された Route53 ホストゾーン
+- AWS Certificate Manager で作成された SSL 証明書（CloudFront 用に us-east-1 で）
+- ウェブサイトアーティファクトとログを保存する S3 バケット
+- CloudFront ディストリビューションとキャッシュ動作の理解
+
 ## TL;DR
 
 1. このテンプレートを実行する前に、本プロジェクトに含まれる ``Security`` テンプレートと ``Global Settings`` テンプレートの両方を実行してください。
@@ -144,4 +153,50 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 したがって、 CloudFormationのデプロイ完了後に、``Origin Group`` の作成と ``Default Cache Behavior Settings`` の**手動設定**が必要です。
 
 1. ``Origins`` と ``Failover criteria`` を含んだ ``Origin Group`` を作成します。
-2. ``Default Cache Behavior Settings`` の ``Origin or Origin Group`` に 1. で作成した ``Origin Group`` を指定します。
+2. ``Default Cache Behavior Settings`` の ``Origin or Origin Group`` に 1. で作成した ``Origin Group`` を指定します。## トラブルシ
+ューティング
+
+### CloudFront の問題
+
+CloudFront ディストリビューションがコンテンツを正しく配信しない場合：
+
+1. オリジン S3 バケットが存在し、ウェブサイトファイルが含まれていることを確認してください
+2. Origin Access Identity (OAI) が S3 バケットにアクセスする適切な権限を持っていることを確認してください
+3. SSL 証明書が有効で、正しいドメイン用に発行されていることを確認してください
+4. Route53 ホストゾーンが正しい DNS レコードで適切に設定されていることを確認してください
+
+### SSL 証明書の問題
+
+SSL 証明書が CloudFront で動作しない場合：
+
+1. 証明書が us-east-1 リージョンで作成されていることを確認してください（CloudFront に必要）
+2. 証明書が必要なすべてのドメイン名（プライマリとエイリアス）を含んでいることを確認してください
+3. 証明書の検証が完了し、証明書が発行されていることを確認してください
+4. 証明書 ARN がテンプレートパラメータで正しく指定されていることを確認してください
+
+### S3 アクセスの問題
+
+S3 バケットアクセスが正常に動作しない場合：
+
+1. S3 バケットポリシーが CloudFront OAI からのアクセスを許可していることを確認してください
+2. CloudFront アクセスを許可すべき時にバケットがパブリックアクセスをブロックしていないことを確認してください
+3. ウェブサイトファイルが正しい S3 バケットにアップロードされていることを確認してください
+4. CloudFront でデフォルトルートオブジェクトが正しく設定されていることを確認してください
+
+### WAF の問題
+
+WAF が正当なトラフィックをブロックしている場合：
+
+1. WAF ログを確認してどのルールがトラフィックをブロックしているかを特定してください
+2. WAF ルール設定を調整するか、正当なトラフィックに対する例外を追加してください
+3. WAF の CloudWatch メトリクスを監視してトラフィックパターンを理解してください
+4. レート制限ルールが制限的すぎる場合は調整を検討してください
+
+### リアルタイムダッシュボードの問題
+
+リアルタイムダッシュボードがデータを表示しない場合：
+
+1. CloudFront リアルタイムログが有効化され正しく設定されていることを確認してください
+2. Kinesis Data Streams が CloudFront からデータを受信していることを確認してください
+3. OpenSearch Service クラスターが正常でアクセス可能であることを確認してください
+4. ログ処理用の Lambda 関数が正しく動作していることを確認してください

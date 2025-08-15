@@ -5,7 +5,15 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/global`` は、 バージニア北部 (`us-east-1`)リージョンに ``AWS Certificate Manager`` と ``CloudFront`` および ``Billing`` に関する ``CloudWatch`` アラームを作成します。
+``AWSCloudFormationTemplates/global`` は、バージニア北部 (`us-east-1`) リージョンに ``AWS Certificate Manager`` と ``CloudFront`` および ``Billing`` に関する ``CloudWatch`` アラームを作成します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- SSL 証明書検証用に登録されたドメイン名
+- CloudFront メトリクス監視用の CloudFront ディストリビューション ID（CloudFront を監視する場合）
+- Cost and Usage Reports 用の S3 バケット（CUR を有効にする場合）
 
 ## TL;DR
 
@@ -39,7 +47,7 @@
 ``AWS Certificate Manager``, ``CloudFront``, ``Billing``は、``us-east-1`` リージョンでのみリソース作成が可能であるため、 ``us-east-1`` リージョンで実行してください。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name GlobalSettings --region us-east-1
+aws cloudformation deploy --template-file templates/template.yaml --stack-name GlobalSettings --region us-east-1
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -55,8 +63,37 @@ aws cloudformation deploy --template-file template.yaml --stack-name GlobalSetti
 | CloudFrontErrorRateThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontErrorRequestPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
-| CloudFrontDistributionId | String | | | 監視対象のCloudFrontのディストリビューションID |
+| CloudFrontDistributionId | String | | | 監視対象の CloudFront のディストリビューション ID |
 | CostUsageReport | ENABLED / DISABLED | DISABLED　| | ENABLED に設定された場合、Cost Usage Report が作成されます。 |
-| DomainName | String | | | Route53に登録するドメイン名 | 
+| DomainName | String | | | Route53 に登録するドメイン名 | 
 | NotificationThreshold | Number | 10 | ○ | Cost Explorer から通知が送られる閾値 | 
-| WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
+| WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAF は作成されません。 |
+
+## トラブルシューティング
+
+### Certificate Manager の問題
+
+SSL 証明書の検証が失敗する場合：
+
+1. ドメインを所有し、DNS またはメール検証にアクセスできることを確認してください
+2. 検証用の DNS レコードが適切に設定されていることを確認してください
+3. ドメインが他の AWS アカウントで既に検証されていないことを確認してください
+4. 証明書が us-east-1 リージョンで作成されていることを確認してください
+
+### 請求アラームの問題
+
+請求アラームが正しくトリガーされない場合：
+
+1. AWS アカウント設定で請求アラートが有効になっていることを確認してください
+2. 閾値が使用量に対して適切に設定されていることを確認してください
+3. SNS トピックが正しい権限とサブスクライバーを持っていることを確認してください
+4. 請求データには最大 24 時間の遅延がある可能性があることを覚えておいてください
+
+### CloudFront 監視の問題
+
+CloudFront アラームが動作しない場合：
+
+1. CloudFront ディストリビューション ID が正しく存在することを確認してください
+2. CloudFront メトリクスが CloudWatch に公開されていることを確認してください
+3. アラーム閾値がトラフィックパターンに適していることを確認してください
+4. グローバルメトリクス用にディストリビューションが us-east-1 リージョンにあることを確認してください

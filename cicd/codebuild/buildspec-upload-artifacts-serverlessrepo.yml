@@ -6,10 +6,15 @@ env:
     APP_ARN_PREFIX: arn:aws:serverlessrepo:us-east-1:172664222583:applications
 
 phases:
-  pre_build:
+  install:
+    runtime-versions:
+       python: 3.13
     commands:
       # Use the latest version
       - pip install -U awscli
+      # Semantic Version
+  pre_build:
+    commands:
       # Semantic Version
       - export SEMANTIC_VERSION=`echo ${CODEBUILD_WEBHOOK_TRIGGER} | sed -r 's/tag\/v([0-9\.]+).*-rc(.*)/\1/'`
       - echo $SEMANTIC_VERSION

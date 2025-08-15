@@ -5,15 +5,21 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/cloudops`` builds services for operational capabilities, such as ``Systems Manager`` and  ``DevOps Guru``.
+``AWSCloudFormationTemplates/cloudops`` builds services for operational capabilities, such as ``Systems Manager`` and ``DevOps Guru``.
 
-## CloudOps
+## Prerequisites
+
+- GitHub repository access for CodeGuru Reviewer integration
+- AWS Organizations setup (if using cross-account Systems Manager features)
+- Appropriate IAM permissions for CloudWatch, Systems Manager, and DevOps Guru services
+
+## TL;DR
 
 If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/templates/template.yaml) |
 
 If you want to deploy each service individually, click the button below.
 
@@ -27,33 +33,44 @@ If you want to deploy each service individually, click the button below.
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
 | Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) |
 
+## Architecture
+
+The following sections describe the individual components of the architecture.
+
+![](../images/architecture-cloudops.png)
+
+## Deployment
+
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name CloudOps --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
-You can provide optional parameters as follows.
+You can provide parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
-| **ApplicationInsight** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `ApplicationInsights` stack is deployed |
-| CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
-| **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `IncidentManager` stack is deployed |
-| IncidentManagerAlias | String | admimistrator | ○ | The unique and identifiable alias of the contact or escalation plan |
+| **AlarmLevel** | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
+| **ApplicationInsights** | ENABLED / DISABLED | ENABLED | ○ | Enable or disable Amazon CloudWatch Application Insights |
+| **CodeGuruTargetRepository** | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
+| **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
+| **IncidentManagerAlias** | String | administrator | ○ | The unique and identifiable alias of the contact or escalation plan |
 | IncidentManagerChatbotSnsArn | String | | | The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident |
-| IncidentManagerDisplayName | String | Administrator | ○ | The full name of the contact or escalation plan |
-| IncidentManagerDurationInMinutes | Number | 1 | ○ | The time to wait until beginning the next stage |
+| **IncidentManagerDisplayName** | String | Administrator | ○ | The full name of the contact or escalation plan |
+| **IncidentManagerDurationInMinutes** | Number | 1 | ○ | The time to wait until beginning the next stage |
 | IncidentManagerEmail | String | | | The email address |
-| IncidentManagerPhoneNumber | String | | | The Phone Number |
-| IncidentManagerWorkloadName | String | Workload | ○ | The workload name |
-| SSMAdminAccountId | Strig | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
-| SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | If **Enabled** is set, the resources does NOT created |
+| IncidentPhoneNumber | String | | | The phone number |
+| **IncidentManagerWorkloadName** | String | Workload | ○ | The workload name |
+| SSMAdminAccountId | String | | | AWS Account ID of the primary account for AWS Systems Manager Automation |
+| **SSMIgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | If ENABLED is set, the resources are NOT created |
 | SSMOrganizationId | String | | | The Organizations ID |
-| SSMPatchingAt | Number | 3 | ○ | Starting time of patching process. (Local Time) |
-
-![](../images/architecture-cloudops.png)
+| **SSMPatchingAt** | Number | 3 | ○ | Daily patching time (H) |
+| SNSForAlertArn | String | | | The Amazon SNS topic ARN for alert |
+| SNSForDeploymentArn | String | | | The Amazon SNS topic ARN for deployment information |
+| **Environment** | production / test / development | production | ○ | The environment type |
+| **TagKey** | String | createdby | ○ | Tag key for resource tagging |
+| **TagValue** | String | aws-cloudformation-templates | ○ | Tag value for resource tagging |
 
 ### Application Insight
 
@@ -152,3 +169,41 @@ The S3 bucket stores screenshots, HAR files, and logs from the hearbeat scripts.
 
 This template creates Amazon CloudWatch custom metrics and alarms.
 These alarms are trigged when the success rate is less than **90%**.
+
+## Troubleshooting
+
+### CodeGuru Reviewer Integration Issues
+
+If CodeGuru Reviewer is not working properly:
+
+1. Verify that the GitHub repository exists and is accessible
+2. Check that the repository name format is correct (owner/repository)
+3. Ensure proper GitHub integration is configured in AWS CodeGuru
+4. Verify IAM permissions for CodeGuru service
+
+### Systems Manager Patching Failures
+
+If Systems Manager patching is not working:
+
+1. Check that EC2 instances have the SSM Agent installed and running
+2. Verify that instances have appropriate IAM roles for Systems Manager
+3. Ensure patch groups are properly configured
+4. Check maintenance window settings and schedules
+
+### Incident Manager Notification Issues
+
+If Incident Manager notifications are not working:
+
+1. Verify SNS topic ARNs are correctly configured
+2. Check that contact information (email/phone) is valid
+3. Ensure AWS Chatbot integration is properly set up (if using)
+4. Verify escalation plan configuration and timing
+
+### Application Insights Monitoring Problems
+
+If Application Insights is not detecting issues:
+
+1. Verify that the application is properly instrumented
+2. Check that CloudWatch agent is installed and configured
+3. Ensure application components are correctly identified
+4. Verify that appropriate metrics are being collected

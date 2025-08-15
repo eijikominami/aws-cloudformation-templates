@@ -5,7 +5,28 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/monitoring`` は 主要なAWSサービスに関する ``CloudWatch アラーム`` を作成します。
+``AWSCloudFormationTemplates/monitoring`` は主要な AWS サービスに関する ``CloudWatch アラーム`` を作成します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- アラーム通知用に設定された SNS トピック
+- 特定のユースケースに対する CloudWatch メトリクスとアラーム閾値の理解
+- CloudWatch と SNS サービスに対する適切な IAM 権限
+
+## TL;DR
+
+監視テンプレートを素早くデプロイしたい場合は、AWS Serverless Application Repository を使用できます。各監視テンプレートは、コンソールから直接デプロイできるサーバーレスアプリケーションとして利用可能です。
+
+| サービス | Application Repository リンク |
+| --- | --- |
+| ACM | [cloudwatch-alarm-about-acm](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-acm) |
+| Amplify | [cloudwatch-alarm-about-amplify](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-amplify) |
+| API Gateway | [cloudwatch-alarm-about-apigateway](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-apigateway) |
+| Application ELB | [cloudwatch-alarm-about-application-elb](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-application-elb) |
+| EC2 | [cloudwatch-alarm-about-ec2](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ec2) |
+| Lambda | [cloudwatch-alarm-about-lambda](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-lambda) |
 
 ## AWS Certificate Manager
 
@@ -1234,8 +1255,9 @@ Properties:
   Parameters: 
     AlarmLevel: !Ref AlarmLevel
     CustomAlarmName : String
-    FirehoseStreamName: String
-    OldestRecordAge: Integer
+    IteratorAgeMillisecondsThreshold: Integer
+    KinesisStreamName: String
+    NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
     Environment: String
     TagKey: String
@@ -1259,8 +1281,9 @@ Properties:
   Parameters: 
     AlarmLevel: !Ref AlarmLevel
     CustomAlarmName : String
-    FirehoseStreamName: String
-    OldestRecordAge: Integer
+    IteratorAgeMillisecondsThreshold: Integer
+    KinesisStreamName: String
+    NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
     Environment: String
     TagKey: String
@@ -2200,4 +2223,41 @@ Properties:
     TagValue: String
   Tags: Map
   TimeoutInMinutes: Integer
-```
+```## トラブルシュー
+ティング
+
+### CloudWatch アラームの問題
+
+CloudWatch アラームが正しくトリガーされない場合：
+
+1. AWS サービスのメトリクス名とネームスペースが正しいことを確認してください
+2. アラーム閾値がワークロードパターンに適していることを確認してください
+3. SNS トピックが正しい権限とサブスクライバーを持っていることを確認してください
+4. アラーム評価期間とデータポイントが正しく設定されていることを確認してください
+
+### SNS 通知の問題
+
+アラーム通知を受信していない場合：
+
+1. SNS トピックサブスクリプションが確認済みであることを確認してください
+2. メールアドレスやエンドポイントが正しくアクセス可能であることを確認してください
+3. SNS トピックポリシーが CloudWatch にメッセージの公開を許可していることを確認してください
+4. メール通知についてはスパムフォルダーを確認してください
+
+### メトリクスデータの問題
+
+メトリクスが表示されない、または正しくない場合：
+
+1. AWS サービスが CloudWatch にメトリクスを公開していることを確認してください
+2. カスタムメトリクスが正しいディメンションで公開されていることを確認してください
+3. CloudWatch エージェントが適切に設定されていることを確認してください（EC2 カスタムメトリクス用）
+4. メトリクス保持期間が期限切れになっていないことを確認してください
+
+### 権限の問題
+
+アラームを作成または変更できない場合：
+
+1. IAM ロールが必要な CloudWatch 権限を持っていることを確認してください
+2. 該当する場合、クロスアカウントアクセスが適切に設定されていることを確認してください
+3. AWS サービス用のサービスリンクロールが作成されていることを確認してください
+4. リソースベースポリシーが必要なアクションを許可していることを確認してください

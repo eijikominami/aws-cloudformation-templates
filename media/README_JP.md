@@ -5,7 +5,16 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/media`` は、 ``AWS Elemental Media Services`` を構築します。
+``AWSCloudFormationTemplates/media`` は、``AWS Elemental Media Services`` を構築します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 設定された IAM Identity Center インスタンス（Deadline Cloud 用）
+- メディアコンテンツの保存とアーカイブ用に準備された S3 バケット
+- メディアストリーミングプロトコルと要件の理解
+- 設定された Content Delivery Network (CDN) エンドポイント（MediaTailor 用）
 
 > [!NOTE]
 > [**eijikominami/aws-cloudformation-samples/media**](hhttps://github.com/eijikominami/aws-cloudformation-samples/blob/master/media/README_JP.md) にサンプルテンプレート集があります。
@@ -28,12 +37,12 @@
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
-aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -175,4 +184,42 @@ aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStor
 | MaxDurationSeconds | Number | 120 | ○ | プリロールの最大秒 |
 | PersonalizationThresholdSeconds | Number | 8 | ○ | 埋められなかった広告時間の最大秒 |
 | **SlateAdUrl** | String | | ○ | 広告で使用されなかった時間に挿入されるスレートのURL |
-| **VideoContentSourceUrl** | String | | ○ | マニフェストファイルのURL |
+| **VideoContentSourceUrl** | String | | ○ | マニフェストファイルの URL |
+
+## トラブルシューティング
+
+### MediaLive の問題
+
+MediaLive チャンネルが開始されない、またはストリーミングが正常に動作しない場合：
+
+1. 入力ソースがアクセス可能で正しくストリーミングされていることを確認してください
+2. セキュリティグループが入力タイプに必要なポートを許可していることを確認してください
+3. 出力先（S3、MediaPackage など）が適切に設定されていることを確認してください
+4. IAM ロールが MediaLive 操作に必要な権限を持っていることを確認してください
+
+### MediaConnect の問題
+
+MediaConnect フローが動作しない場合：
+
+1. ソース IP アドレスが正しくホワイトリストに登録されていることを確認してください
+2. 指定されたポートが開いてアクセス可能であることを確認してください
+3. プロトコル設定がソースと宛先の間で一致していることを確認してください
+4. クロスアカウントアクセス用にエンタイトルメントが適切に設定されていることを確認してください
+
+### MediaPackage の問題
+
+MediaPackage がコンテンツを配信しない場合：
+
+1. MediaLive チャンネルが MediaPackage にコンテンツを正常に送信していることを確認してください
+2. オリジンエンドポイントが正しいプロトコルで適切に設定されていることを確認してください
+3. CDN ディストリビューションが正しい MediaPackage エンドポイントを指していることを確認してください
+4. アクセスポリシーが意図された視聴者を許可していることを確認してください
+
+### Deadline Cloud の問題
+
+Deadline Cloud ファームがジョブを処理しない場合：
+
+1. IAM Identity Center が適切に設定されアクセス可能であることを確認してください
+2. ワーカーインスタンスに必要なソフトウェアとライセンスがインストールされていることを確認してください
+3. ジョブ送信キューが適切に設定されていることを確認してください
+4. ストレージの場所がワーカーインスタンスからアクセス可能であることを確認してください

@@ -5,7 +5,15 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/euc`` は、エンドユーザコンピューティングに関する環境を構築します。
+``AWSCloudFormationTemplates/euc`` は、エンドユーザーコンピューティングに関する環境を構築します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- WorkSpaces と AppStream 統合用に設定された Active Directory ドメイン
+- SSO 統合用のアイデンティティプロバイダーからの SAML メタデータドキュメント
+- AppStream フリート用に準備されたカスタム AMI またはアプリケーションイメージ
 
 ## TL;DR
 
@@ -39,7 +47,7 @@ aws cloudformation deploy --template-file identitycenter.yaml --stack-name Ident
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name VDI --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name VDI --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -51,10 +59,10 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | 条件付き |  Active Directory のエディション  |
 | ActiveDirectoryEnableSso  | true / false | true | 条件付き | Active Directory で SSO を有効にするかどうか |
 | **ActiveDirectoryName** | String | corp.example.com | 条件付き | Active Directory で使用するフルドメイン名 |
-| ActiveDirectoryPassword | String | Password1+ | 条件付き | Active Directory で使用する Admin ユーザのパスワード |
+| ActiveDirectoryPassword | String | Password1+ | 条件付き | Active Directory で使用する Admin ユーザーのパスワード |
 | **ActiveDirectoryShortName** | String | CORP | 条件付き | NetBIOS 名 |
 | ActiveDirectoryIdForFSx | String | | 条件付き | FSx で使用する Active Directory ID |
-| ActiveDirectoryIdForWorkspaces | String | | 条件付き | Workspaces で使用する Active Directory ID |
+| ActiveDirectoryIdForWorkspaces | String | | 条件付き | WorkSpaces で使用する Active Directory ID |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AppStreamImageBuilderImageName | String | | | AppStream Image Builder で使用するイメージ名 |
 | AppStreamImageName | String | | | AppStream で使用するイメージ名 |
@@ -75,11 +83,40 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 | TransitGatewayId | String | | | Transit Gateway ID |
 | TransitGatewayDestinationCidrBlock | String | 0.0.0.0/0 | | Transit Gateway に転送するサブネットの CIDR ブロック |
 | VPCCidrBlock | String | 10.2.8.0/21 | ○ | VPC の CIDR ブロック |
-| WorkspacesBundleId | String | wsb-w94f3tgkh | | Workspaces のバンドル ID |
-| WorkspacesRootVolumeSizeGib | Number | 80 | ○ | Workspaces のルートボリュームのサイズ |
-| WorkspacesRunningMode | ALWAYS_ON / AUTO_STOP / MANUAL | AUTO_STOP | | Workspaces の Running Mode |
-| WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes | Number | 60 | ○ | Workspaces が自動的に停止するまでの時間 |
-| WorkspacesUserNames | CommaDelimitedList | | | ○ | Workspaces のプレイアウトイーザー名 |
-| WorkspacesUserVolumeSizeGib | Number | 100 | ○ | Workspaces のユーザボリュームのサイズ |
+| WorkspacesBundleId | String | wsb-w94f3tgkh | | WorkSpaces のバンドル ID |
+| WorkspacesRootVolumeSizeGib | Number | 80 | ○ | WorkSpaces のルートボリュームのサイズ |
+| WorkspacesRunningMode | ALWAYS_ON / AUTO_STOP / MANUAL | AUTO_STOP | | WorkSpaces の Running Mode |
+| WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes | Number | 60 | ○ | WorkSpaces が自動的に停止するまでの時間 |
+| WorkspacesUserNames | CommaDelimitedList | | | ○ | WorkSpaces のプレイアウトユーザー名 |
+| WorkspacesUserVolumeSizeGib | Number | 100 | ○ | WorkSpaces のユーザーボリュームのサイズ |
 
-AppStreams で Active Directory を使用する場合には、[**Active Directory 上で権限の設定を行う**](https://docs.aws.amazon.com/ja_jp/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions)必要があります。
+AppStream で Active Directory を使用する場合には、[**Active Directory 上で権限の設定を行う**](https://docs.aws.amazon.com/ja_jp/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions)必要があります。
+
+## トラブルシューティング
+
+### WorkSpaces の問題
+
+WorkSpaces が起動しない、または正常に機能しない場合：
+
+1. Active Directory が正常で WorkSpaces サブネットからアクセス可能であることを確認してください
+2. 指定されたバンドル ID がお使いのリージョンで利用可能であることを確認してください
+3. ユーザーが Active Directory に存在し、適切な権限を持っていることを確認してください
+4. VPC とサブネットが適切なルーティングとセキュリティグループ設定を持っていることを確認してください
+
+### AppStream の問題
+
+AppStream フリートまたはスタックが正常に動作しない場合：
+
+1. 指定されたイメージが存在し、正しいリージョンにあることを確認してください
+2. Active Directory 統合が正しい OU 設定で適切に設定されていることを確認してください
+3. フリートに十分な容量があり、RUNNING 状態であることを確認してください
+4. ユーザーが適切な AppStream スタックに割り当てられていることを確認してください
+
+### FSx の問題
+
+FSx ファイルシステムにアクセスできない場合：
+
+1. Active Directory 統合が適切に設定されていることを確認してください
+2. セキュリティグループが SMB トラフィックに必要なポートを許可していることを確認してください
+3. FSx ファイルシステムが WorkSpaces または AppStream インスタンスと同じ VPC にあることを確認してください
+4. FSx ファイルシステムの DNS 解決が正常に動作していることを確認してください

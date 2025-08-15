@@ -5,7 +5,16 @@
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
  
-``AWSCloudFormationTemplates/shared`` は、 AWS Organizations 内のアカウントにおける共通サービスを構築します。
+``AWSCloudFormationTemplates/shared`` は、AWS Organizations 内のアカウントにおける共通サービスを構築します。
+
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- 適切な組織単位で設定された AWS Organizations
+- 設定された IAM Identity Center インスタンス（SSO 統合を使用する場合）
+- 共有サービス用に計画された VPC とネットワークインフラストラクチャ
+- ログアーカイブ用の S3 バケット（FluentBit ログを使用する場合）
 
 ## TL;DR
 
@@ -13,7 +22,7 @@
 
 | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SharedServices&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/templates/template.yaml) |
 
 以下のボタンから、個別のAWSサービスを有効化することも可能です。
 
@@ -32,7 +41,7 @@
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/template.yaml --stack-name SharedServices --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 デプロイ時に、以下のパラメータを指定することができます。
@@ -86,3 +95,41 @@ aws cloudformation deploy --template-file template.yaml --stack-name SharedServi
 ### IAM Identity Center の信頼されたアクセス
 
 AWS IAM Identity Center のコンソール、もしくは AWS Organizations コンソールから信頼されたアクセスを有効化した上で、手動で AWS Managed Microsoft AD と接続することが可能です。
+
+## トラブルシューティング
+
+### Active Directory の問題
+
+AWS Managed Microsoft AD が正常に動作しない場合：
+
+1. VPC とサブネットで適切な DNS 解決が設定されていることを確認してください
+2. セキュリティグループが必要な Active Directory ポートを許可していることを確認してください
+3. ドメイン名が既存のドメインと競合していないことを確認してください
+4. パスワードが複雑さの要件を満たしていることを確認してください
+
+### FluentBit の問題
+
+FluentBit がログを収集または転送しない場合：
+
+1. ECS サービスが実行中で正常であることを確認してください
+2. FluentBit 設定がログソースに対して正しいことを確認してください
+3. ログアーカイブ用の S3 バケットが存在し、適切な権限を持っていることを確認してください
+4. FluentBit コンテナエラーについて CloudWatch ログを監視してください
+
+### IAM Identity Center 統合の問題
+
+IAM Identity Center 統合が動作しない場合：
+
+1. AWS Organizations で IAM Identity Center の信頼されたアクセスが有効になっていることを確認してください
+2. Identity Center インスタンス ARN が正しいことを確認してください
+3. AWS Managed Microsoft AD への接続が適切に設定されていることを確認してください
+4. ユーザーとグループが適切に同期されていることを確認してください
+
+### ネットワーク接続の問題
+
+共有サービスが正常に通信できない場合：
+
+1. Transit Gateway アタッチメントが正しく設定されていることを確認してください
+2. VPC 間通信用にルートテーブルが適切に設定されていることを確認してください
+3. セキュリティグループと NACL が必要なトラフィックを許可していることを確認してください
+4. 共有サービスの DNS 解決が動作していることを確認してください
