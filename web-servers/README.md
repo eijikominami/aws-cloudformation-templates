@@ -7,6 +7,15 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/web-servers`` builds ``Network Load Balancer``, ``VPC`` and ``EC2`` instances and related resources for **EC2-based website hosting**.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- VPC and subnets configured for EC2 instances and load balancers
+- Key pair created for EC2 instance access
+- Understanding of Auto Scaling and load balancing requirements
+- S3 bucket for storing deployment artifacts and logs
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
@@ -66,7 +75,7 @@ You can provide optional parameters as follows.
 | DockerFilePath | String | | | The path of Dockerfile | 
 | DomainName | String | | | Domain name | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
-| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
 | EC2PatchingAt | Number | 3 | ○ | Starting time of patching process |
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set |
@@ -94,6 +103,44 @@ You can provide optional parameters as follows.
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
 
-## Trouble Shooting
+## Troubleshooting
+
+### SSM State Manager Issues
 
 If `SSM State Manager Association` already has `AWS-GatherSoftwareInventory`, the template will **fail**. Deploy this template with the `IgnoreResourceConflicts` option enabled.
+
+### EC2 Instance Issues
+
+If EC2 instances are not launching or are unhealthy:
+
+1. Verify that the AMI ID is valid and available in your region
+2. Check that the instance type is available in the selected availability zones
+3. Ensure that the key pair exists if SSH access is required
+4. Verify that security groups allow the necessary traffic for your application
+
+### Load Balancer Issues
+
+If the load balancer is not distributing traffic correctly:
+
+1. Verify that target groups have healthy instances registered
+2. Check that security groups allow traffic between the load balancer and instances
+3. Ensure that health check settings are appropriate for your application
+4. Verify that the load balancer is deployed in the correct subnets
+
+### Auto Scaling Issues
+
+If Auto Scaling is not working as expected:
+
+1. Check that the launch template or configuration is correct
+2. Verify that the Auto Scaling group has the correct subnets configured
+3. Ensure that scaling policies are properly configured
+4. Monitor CloudWatch metrics to understand scaling behavior
+
+### CodePipeline/CodeDeploy Issues
+
+If CI/CD pipeline is failing:
+
+1. Verify that the GitHub connection is properly configured
+2. Check that the CodeBuild project has the necessary permissions
+3. Ensure that the deployment configuration matches your application requirements
+4. Review CloudWatch Logs for detailed error messages

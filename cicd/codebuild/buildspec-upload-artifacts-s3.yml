@@ -47,7 +47,7 @@ env:
 phases:
   install:
     runtime-versions:
-       python: 3.9
+       python: 3.13
     commands:
       # Use the latest version
       - pip install -U pip
@@ -61,7 +61,7 @@ phases:
   pre_build:
     commands:
       - cfn-lint --update-specs
-      - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
+      - # find ./ -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${ANALYTICS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive

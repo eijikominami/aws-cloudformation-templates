@@ -7,6 +7,15 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/media`` builds AWS Elemental Media Services.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- IAM Identity Center instance configured (for Deadline Cloud)
+- S3 buckets prepared for media content storage and archiving
+- Understanding of media streaming protocols and requirements
+- Content Delivery Network (CDN) endpoints configured (for MediaTailor)
+
 > [!NOTE]
 > You can also get useful sample templates at [**eijikominami/aws-cloudformation-samples/media**](https://github.com/eijikominami/aws-cloudformation-samples/tree/master/media).
 
@@ -28,12 +37,12 @@ If you just want to deploy the stack, click the button below.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-aws cloudformation deploy --template-file mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
-aws cloudformation deploy --template-file mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/mediapackage.yaml --stack-name MediaPackage --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name MediaStore --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 You can provide optional parameters as follows.
@@ -176,3 +185,41 @@ You can provide optional parameters as follows.
 | PersonalizationThresholdSeconds | Number | 8 | ○ | Defines the maximum duration of underfilled ad time (in seconds) allowed in an ad break |
 | **SlateAdUrl** | String | | ○ | The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads |
 | **VideoContentSourceUrl** | String | | ○ | The URL prefix for the parent manifest for the stream, minus the asset ID |
+
+## Troubleshooting
+
+### MediaLive Issues
+
+If MediaLive channels are not starting or streaming properly:
+
+1. Verify that input sources are accessible and streaming correctly
+2. Check that security groups allow the necessary ports for your input type
+3. Ensure that output destinations (S3, MediaPackage, etc.) are properly configured
+4. Verify that IAM roles have the necessary permissions for MediaLive operations
+
+### MediaConnect Issues
+
+If MediaConnect flows are not working:
+
+1. Verify that source IP addresses are correctly whitelisted
+2. Check that the specified ports are open and accessible
+3. Ensure that the protocol settings match between source and destination
+4. Verify that entitlements are properly configured for cross-account access
+
+### MediaPackage Issues
+
+If MediaPackage is not delivering content:
+
+1. Verify that the MediaLive channel is successfully sending content to MediaPackage
+2. Check that origin endpoints are properly configured with correct protocols
+3. Ensure that CDN distributions are pointing to the correct MediaPackage endpoints
+4. Verify that access policies allow the intended viewers
+
+### Deadline Cloud Issues
+
+If Deadline Cloud farms are not processing jobs:
+
+1. Verify that IAM Identity Center is properly configured and accessible
+2. Check that worker instances have the necessary software and licenses installed
+3. Ensure that job submission queues are properly configured
+4. Verify that storage locations are accessible from worker instances

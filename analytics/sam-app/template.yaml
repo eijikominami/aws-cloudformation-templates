@@ -1,106 +1,46 @@
-AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: aws-cloudformation-templates/analytics creates a data analytics platform.
+Description: aws-cloudformation-templates/analytics/template creates analytics resources.
 
-Metadata: 
+Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      - Label: 
-          default: 'AppFlow Configuration for Google Analytics'
-        Parameters: 
-          - GoogleAnalyticsAuthCode
-          - GoogleAnalyticsClientId
-          - GoogleAnalyticsClientSecret
-          - GoogleAnalyticsEntityName
-          - GoogleAnalyticsScheduleRate
-      - Label: 
-          default: 'Glue Configuration'
-        Parameters: 
-          - GlueDatabaseName
-          - GlueJobNumberOfWorkers
-          - GlueJobWorkerType
-      - Label: 
-          default: 'S3 Replication Configuration'
-        Parameters: 
-          - SourceAccountIAMRoleArn
-      - Label: 
-          default: 'Notification Configuration'
-        Parameters: 
-          - SNSForAlertArn
-          - SNSForDeploymentArn
-      - Label: 
-          default: 'Tag Configuration'
+      - Label:
+          default: "Google Analytics 4 Configuration"
         Parameters:
-          - Environment 
+          - GoogleAnalyticsAccountId
+          - GoogleAnalyticsClientSecret
+          - GoogleAnalyticsPropertyId
+          - GoogleAnalyticsPropertyNumber
+          - LogicalName
+      - Label:
+          default: "Tag Configuration"
+        Parameters:
           - TagKey
           - TagValue
 
 Parameters:
-  GoogleAnalyticsAuthCode:
+  GoogleAnalyticsAccountId:
     Type: String
-    Default: ''
-    NoEcho: true
-    Description: The code provided by the connector when it has been authenticated
-  GoogleAnalyticsClientId:
-    Type: String
-    Default: ''
-    Description: The identifier for OAuth2
+    AllowedPattern: .+
+    Description: The Google Analytics 4 Account ID [required]
   GoogleAnalyticsClientSecret:
     Type: String
-    Default: ''
     NoEcho: true
-    Description: The client secret used by the OAuth client to authenticate
-  GoogleAnalyticsEntityName:
+    Description: The client secret for Google Analytics 4 OAuth application [required]
+  GoogleAnalyticsPropertyId:
     Type: String
-    Default: ''
-    Description: The entity name (path) of Google Analytics [required]
-  GoogleAnalyticsScheduleRate:
-    Type: Number
-    Default: 24
-    MinValue: 24
-    Description: The rate at which the scheduled flow will run [required]
-  GlueDatabaseName: 
+    AllowedPattern: .+
+    Description: The Google Analytics 4 Client ID [required]
+  GoogleAnalyticsPropertyNumber:
     Type: String
-    Default: datalake
-    AllowedPattern: '[a-z0-9\_]+'
-    MinLength: 1
-    MaxLength: 20
-    Description: Prefix that is used for the created resources (20 chars, a-z, 0-9 and _ only) [required]
-  GlueJobNumberOfWorkers:
-    Type: Number
-    Default: 2
-    MinValue: 2
-    Description: The number of workers of a defined workerType that are allocated when a job runs [required] 
-  GlueJobWorkerType:
+    AllowedPattern: .+
+    Description: The Google Analytics 4 Property Number [required]
+  LogicalName:
     Type: String
-    Default: G.1X
-    AllowedValues:
-      - G.025X
-      - G.1X
-      - G.2X
-      - G.4X
-      - G.8X
-      - Z.2X
-    Description: The type of predefined worker that is allocated when a job runs [required] 
-  SourceAccountIAMRoleArn:
-    Type: String
-    Default: ''
-    Description: The role arn of account id source bucket is contained
-  SNSForAlertArn:
-    Type: String
-    Default: ''
-    Description: The Amazon SNS topic ARN for alert
-  SNSForDeploymentArn:
-    Type: String
-    Default: ''
-    Description: The Amazon SNS topic ARN for deployment information
-  Environment:
-    Type: String
-    Default: production
-    AllowedValues:
-      - production
-      - test
-      - development
+    Default: googleanalytics
+    AllowedPattern: ^[a-z0-9][a-z0-9-]*[a-z0-9]$
+    Description: The custom prefix name for resources (lowercase alphanumeric and hyphens only) [required]
   TagKey:
     Type: String
     Default: createdby
@@ -110,238 +50,35 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
-Conditions:
-  CreateTableForGoogleAnalytics: !And [ !Not [ !Equals [ !Ref GoogleAnalyticsAuthCode, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsClientId, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsClientSecret, ''] ], !Not [ !Equals [ !Ref GoogleAnalyticsEntityName, ''] ] ]
-  CreateBucketPolicy: !Not [ !Equals [ !Ref SourceAccountIAMRoleArn, ''] ]
-  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
-  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  Development: !Equals [ !Ref Environment, development]
-
 Resources:
-  # Nested Stack
-  SNSForAlert:
-    Condition: CreateSNSForAlert
-    Type: AWS::Serverless::Application
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        TopicName: !Sub Alert-createdby-${AWS::StackName}
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
-  SNSForDeployment:
-    Condition: CreateSNSForDeployment
-    Type: AWS::Serverless::Application
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
-      Parameters:
-        TopicName: !Sub Deployment-createdby-${AWS::StackName}
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
-  # S3
-  S3ForSource:
-    Type: AWS::S3::Bucket
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      BucketEncryption:
-        ServerSideEncryptionConfiguration: 
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      BucketName: !Join
-        - ''
-        - - datasource-
-          - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
-          - !Sub -${AWS::Region}-${AWS::AccountId}
-      PublicAccessBlockConfiguration: 
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  S3ForSourceBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties: 
-      Bucket: !Ref S3ForSource
-      PolicyDocument:
-        Version: 2012-10-17
-        Id: !Ref S3ForSource
-        Statement:
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource: 
-              - !GetAtt S3ForSource.Arn
-              - !Join
-                - ''
-                - - !GetAtt S3ForSource.Arn
-                  - /*
-            Condition:
-              NumericLessThan: 
-                s3:TlsVersion: 1.2
-              Bool:
-                aws:SecureTransport: true
-          - !If
-            - CreateBucketPolicy
-            - Effect: Allow
-              Principal:
-                AWS: !Ref SourceAccountIAMRoleArn
-              Action:
-                - s3:ReplicateDelete
-                - s3:ReplicateObject
-                - s3:ObjectOwnerOverrideToBucketOwner
-              Resource: !Join
-                  - ''
-                  - - !GetAtt S3ForSource.Arn
-                    - /*
-            - !Ref AWS::NoValue
-          - !If
-            - CreateBucketPolicy
-            - Effect: Allow
-              Principal:
-                AWS: !Ref SourceAccountIAMRoleArn
-              Action:
-                - 's3:List*'
-                - s3:GetBucketVersioning
-                - s3:PutBucketVersioning
-              Resource: !GetAtt S3ForSource.Arn
-            - !Ref AWS::NoValue
-          - !If
-            - CreateTableForGoogleAnalytics
-            - Effect: Allow
-              Principal:
-                Service: appflow.amazonaws.com
-              Action:
-                - s3:PutObject
-                - s3:AbortMultipartUpload
-                - s3:ListMultipartUploadParts
-                - s3:ListBucketMultipartUploads
-                - s3:GetBucketAcl
-                - s3:PutObjectAcl
-              Resource:
-                - !GetAtt S3ForSource.Arn
-                - !Join
-                  - ''
-                  - - !GetAtt S3ForSource.Arn
-                    - /*
-            - !Ref AWS::NoValue
-  S3ForGlue:
-    Type: AWS::S3::Bucket
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      BucketEncryption:
-        ServerSideEncryptionConfiguration: 
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      BucketName: !Join
-        - ''
-        - - glue-
-          - !Join ["-", !Split ["_", !Ref GlueDatabaseName]]
-          - !Sub -${AWS::Region}-${AWS::AccountId}
-      PublicAccessBlockConfiguration: 
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  # Glue
-  GlueDatabase:
-    Type: AWS::Glue::Database
-    Properties:
-      CatalogId: !Ref AWS::AccountId
-      DatabaseInput:
-        Description: !Sub Database for ${GlueDatabaseName} created by ${AWS::StackName}
-        Name: !Ref GlueDatabaseName
-  GlueRegistry:
-    Type: AWS::Glue::Registry
-    Properties:
-      Description: !Sub The resistory for ${AWS::StackName}
-      Name: !Ref AWS::StackName
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  # Athena
-  AthenaWorkgroup:
-    Type: AWS::Athena::WorkGroup
-    Properties: 
-      Description: !Sub Workgroup for ${AWS::StackName}
-      Name: !Ref AWS::StackName
-      RecursiveDeleteOption: false
-      State: ENABLED
-      Tags: 
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      WorkGroupConfiguration: 
-        EnforceWorkGroupConfiguration: false
-        PublishCloudWatchMetricsEnabled: true
-        RequesterPaysEnabled: false
-        ResultConfiguration: 
-          OutputLocation: !Sub s3://${S3ForSource}/athena-query-results/
-  # Analytics for Google Analytics
-  GoogleAnalytics:
-    DependsOn:
-      - S3ForSourceBucketPolicy
-    Condition: CreateTableForGoogleAnalytics
+  # Nested Stacks
+  GoogleAnalyticsConnector:
     Type: AWS::CloudFormation::Stack
     Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
+      TemplateURL: ./glue-google-analytics-connector.yaml
       Parameters:
-        AuthCode: !Ref GoogleAnalyticsAuthCode
-        ClientId: !Ref GoogleAnalyticsClientId
+        LogicalName: !Ref LogicalName
+        PropertyId: !Ref GoogleAnalyticsPropertyId
         ClientSecret: !Ref GoogleAnalyticsClientSecret
-        EntityName: !Ref GoogleAnalyticsEntityName
-        GlueDatabaseName: !Ref GlueDatabase
-        GlueJobNumberOfWorkers: !Ref GlueJobNumberOfWorkers
-        GlueJobWorkerType: !Ref GlueJobWorkerType
-        GlueRegistoryArn: !GetAtt GlueRegistry.Arn
-        ScheduleRate: !Ref GoogleAnalyticsScheduleRate
-        S3BucketNameForGlue: !Ref S3ForGlue
-        S3BucketNameForSource: !Ref S3ForSource
-        LogicalName: !Sub ${AWS::StackName}-ga
-        Environment: !Ref Environment
-        SNSForAlertArn: !If 
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn 
-          - !Ref SNSForAlertArn
-        SNSForDeploymentArn: !If 
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn        
+        AccountId: !Ref GoogleAnalyticsAccountId
+        PropertyNumber: !Ref GoogleAnalyticsPropertyNumber
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://eijikominami-test.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics.yaml
-        - https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/googleanalytics.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+
+Outputs:
+  # Resource ARNs (alphabetical order)
+
+  GoogleAnalyticsS3BucketForDataArn:
+    Description: ARN of the S3 bucket for Google Analytics 4 raw data storage
+    Value: !GetAtt GoogleAnalyticsConnector.Outputs.S3BucketForDataArn
+  GoogleAnalyticsSecretArn:
+    Description: ARN of the AWS Secrets Manager secret for Google Analytics 4
+    Value: !GetAtt GoogleAnalyticsConnector.Outputs.SecretsManagerArn
+
+  # Resource Names (alphabetical order)
+  GoogleAnalyticsETLJobName:
+    Description: Name of the Google Analytics 4 ETL job
+    Value: !GetAtt GoogleAnalyticsConnector.Outputs.ETLJobName
+  GoogleAnalyticsGlueConnectionName:
+    Description: Name of the Google Analytics 4 connection
+    Value: !GetAtt GoogleAnalyticsConnector.Outputs.GlueConnectionName

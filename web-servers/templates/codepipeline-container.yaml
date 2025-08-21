@@ -91,8 +91,8 @@ Parameters:
     Description: AutoScaling Max Size [required]
   CodeBuildImageName:
     Type: String
-    Default: aws/codebuild/amazonlinux2-aarch64-standard:2.0
-    AllowedPattern: ^aws/codebuild/amazonlinux2-.+$
+    Default: aws/codebuild/amazonlinux-aarch64-standard:3.0
+    AllowedPattern: ^aws/codebuild/amazonlinux.+$
     Description: The Docker image name for CodeBuild [required]
   CodeStarConnectionArn:
     Type: String

@@ -7,6 +7,14 @@ English / [**日本語**](README_JP.md)
  
 ``AWSCloudFormationTemplates/global`` creates global settings on N.Virginia Region (`us-east-1`).
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- Domain name registered for SSL certificate validation
+- CloudFront distribution ID (if monitoring CloudFront metrics)
+- S3 bucket for Cost and Usage Reports (if enabling CUR)
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
@@ -38,7 +46,7 @@ This template creates some other resources, such as ``Amazon SNS``.
 Execute the command to deploy in the ``us-east-1`` region because ``AWS Certificate Manager``, ``CloudFront`` and ``Billing`` only support the region.
 
 ```bash
-aws cloudformation deploy --template-file template.yaml --stack-name GlobalSettings --region us-east-1
+aws cloudformation deploy --template-file templates/template.yaml --stack-name GlobalSettings --region us-east-1
 ```
 
 You can provide optional parameters as follows.
@@ -58,3 +66,32 @@ You can provide optional parameters as follows.
 | DomainName | String | | | The name of the domain | 
 | NotificationThreshold | Number | 10 | ○ | The dollar value that triggers a notification if the threshold is exceeded | 
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If it is **DISABLED**, AWS WAF does NOT created |
+
+## Troubleshooting
+
+### Certificate Manager Issues
+
+If SSL certificate validation is failing:
+
+1. Verify that you own the domain and have access to DNS or email validation
+2. Check that DNS records for validation are properly configured
+3. Ensure that the domain is not already validated in another AWS account
+4. Verify that the certificate is being created in the us-east-1 region
+
+### Billing Alarm Issues
+
+If billing alarms are not triggering correctly:
+
+1. Verify that billing alerts are enabled in your AWS account preferences
+2. Check that the threshold values are set appropriately for your usage
+3. Ensure that the SNS topic has the correct permissions and subscribers
+4. Remember that billing data may have a delay of up to 24 hours
+
+### CloudFront Monitoring Issues
+
+If CloudFront alarms are not working:
+
+1. Verify that the CloudFront distribution ID is correct and exists
+2. Check that CloudFront metrics are being published to CloudWatch
+3. Ensure that the alarm thresholds are appropriate for your traffic patterns
+4. Verify that the distribution is in the us-east-1 region for global metrics
