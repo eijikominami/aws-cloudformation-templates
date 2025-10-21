@@ -96,7 +96,8 @@ Parameters:
 
 Conditions:
   CreateDelegatedAdmin: !Not [ !Equals [ !Ref DelegatedAdminAccountId, ''] ]
-  CreateCentraizedSettings: !Equals [ !Ref DelegatedAdminAccountId, '']
+  CreateFindingAggregator: !Equals [ !Ref DelegatedAdminAccountId, '']
+  CreateOrganizationConfiguration: !And [ !Not [ !Equals [ !Ref OrganizationsRootId, ''] ], !Equals [ !Ref DelegatedAdminAccountId, ''] ]
   CreatePolicyAssociation: !And [ !Not [ !Equals [ !Ref OrganizationsRootId, ''] ], !Equals [ !Ref DelegatedAdminAccountId, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -182,14 +183,14 @@ Resources:
     Properties:
       AdminAccountId: !Ref DelegatedAdminAccountId 
   SecurityHubFindingAggregator:
-    Condition: CreateCentraizedSettings
+    Condition: CreateFindingAggregator
     Type: AWS::SecurityHub::FindingAggregator
     DependsOn:
       - SecurityHub
     Properties:
       RegionLinkingMode: ALL_REGIONS
   SecurityHubOrganizationConfiguration:
-    Condition: CreateCentraizedSettings
+    Condition: CreateOrganizationConfiguration
     DependsOn:
       - SecurityHubFindingAggregator
     Type: AWS::SecurityHub::OrganizationConfiguration
@@ -199,7 +200,7 @@ Resources:
       AutoEnableStandards: NONE
       ConfigurationType: CENTRAL
   SecurityHubConfigurationPolicy:
-    Condition: CreateCentraizedSettings
+    Condition: CreateOrganizationConfiguration
     DependsOn:
       - SecurityHubFindingAggregator
       - SecurityHubOrganizationConfiguration
