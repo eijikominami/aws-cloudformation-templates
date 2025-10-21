@@ -184,6 +184,8 @@ Resources:
   SecurityHubFindingAggregator:
     Condition: CreateCentraizedSettings
     Type: AWS::SecurityHub::FindingAggregator
+    DependsOn:
+      - SecurityHub
     Properties:
       RegionLinkingMode: ALL_REGIONS
   SecurityHubOrganizationConfiguration:
