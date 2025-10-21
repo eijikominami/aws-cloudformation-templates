@@ -123,6 +123,7 @@ Resources:
         SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         DestinationSNSArn: !Ref SNSForAlertArn
         Environment: !Ref Environment
+        LogicalName: TransferGuardDutyTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If

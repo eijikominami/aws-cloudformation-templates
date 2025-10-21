@@ -248,6 +248,7 @@ Resources:
         SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         DestinationSNSArn: !Ref SNSForAlertArn
         Environment: !Ref Environment
+        LogicalName: TransferAlertTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
@@ -270,6 +271,7 @@ Resources:
         SourceSNSArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
         DestinationSNSArn: !Ref SNSForDeploymentArn
         Environment: !Ref Environment
+        LogicalName: TransferDeploymentTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If

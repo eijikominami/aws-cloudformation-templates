@@ -2,6 +2,23 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/transfer-sns-topic creates resources for cross-region SNS topic message forwarding
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - AlarmLevel
+          - SourceSNSArn
+          - DestinationSNSArn
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
+
 Parameters:
   AlarmLevel:
     Type: String
@@ -18,6 +35,18 @@ Parameters:
     Type: String
     AllowedPattern: ^arn:aws[a-z\-]*:sns:[a-z0-9\-]+:\d{12}:.*
     Description: The ARN of the destination SNS topic that messages will be forwarded to
+  LogicalName:
+    Type: String
+    Default: TransferSNS
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -26,13 +55,6 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
-  Environment:
-    Type: String
-    Default: production
-    AllowedValues:
-      - production
-      - test
-      - development
 
 Conditions:
   Development: !Equals [ !Ref Environment, 'development' ]
@@ -76,7 +98,7 @@ Resources:
                 Action:
                   - logs:PutLogEvents
                 Resource: '*' 
-      RoleName: !Sub ${AWS::StackName}-LambdaForGlobal-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-Lambda-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
