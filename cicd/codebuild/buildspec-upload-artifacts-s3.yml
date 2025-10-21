@@ -84,9 +84,9 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${STORAGE_DIST_DIR}/ --recursive
   build:
     commands:
-      - sam validate --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml
-      - sam build --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml --build-dir ${ANALYTICS_SRC_DIR}/.aws-sam/build
-      - sam package --template-file ${ANALYTICS_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${ANALYTICS_DIST_DIR} --output-template-file ${ANALYTICS_SRC_DIR}/googleanalytics-packaged.yaml
+      - sam validate --template ${ANALYTICS_SRC_DIR}/google-analytics.yaml
+      - sam build --template ${ANALYTICS_SRC_DIR}/google-analytics.yaml --build-dir ${ANALYTICS_SRC_DIR}/.aws-sam/build
+      - sam package --template-file ${ANALYTICS_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${ANALYTICS_DIST_DIR} --output-template-file ${ANALYTICS_SRC_DIR}/google-analytics-packaged.yaml
       - sam validate --template ${CICD_SRC_DIR}/template.yaml
       - sam build --template ${CICD_SRC_DIR}/template.yaml --build-dir ${CICD_SRC_DIR}/.aws-sam/build
       - sam package --template-file ${CICD_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${CICD_DIST_DIR} --output-template-file ${CICD_SRC_DIR}/packaged.yaml
