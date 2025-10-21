@@ -185,7 +185,7 @@ Resources:
     Properties:
       Parameters:
         NotificationThreshold: !Ref NotificationThreshold
-        SNSForAlertArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        SNSForAlertArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
       TemplateURL: !If
         - Development
         - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/global/costexplorer.yaml
@@ -212,6 +212,17 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  SNSForAlert:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.13
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   SNSForDeployment:
     Type: AWS::Serverless::Application
     Properties:
@@ -223,6 +234,31 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  TransferAlertTopic:
+    Condition: CreateSNSForAlertTransfer
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeploymentTransfer
+          - !Ref SNSForDeploymentArn
+          - !Ref AWS::NoValue
+      Parameters:
+        AlarmLevel: !Ref AlarmLevel
+        SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
+        DestinationSNSArn: !Ref SNSForAlertArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/transfer-sns-topic.yaml
+        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/transfer-sns-topic.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   TransferDeploymentTopic:
     Condition: CreateSNSForDeploymentTransfer
     Type: AWS::CloudFormation::Stack
@@ -264,7 +300,7 @@ Resources:
             Threshold: 50
             ThresholdType: PERCENTAGE
           Subscribers: 
-            - Address: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - Address: !GetAtt SNSForAlert.Outputs.SNSTopicArn
               SubscriptionType: SNS
         - Notification:
             ComparisonOperator: GREATER_THAN
@@ -272,7 +308,7 @@ Resources:
             Threshold: 80
             ThresholdType: PERCENTAGE
           Subscribers: 
-            - Address: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - Address: !GetAtt SNSForAlert.Outputs.SNSTopicArn
               SubscriptionType: SNS
         - Notification:
             ComparisonOperator: GREATER_THAN
@@ -280,7 +316,7 @@ Resources:
             Threshold: 100
             ThresholdType: PERCENTAGE
           Subscribers: 
-            - Address: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - Address: !GetAtt SNSForAlert.Outputs.SNSTopicArn
               SubscriptionType: SNS
         - Notification:
             ComparisonOperator: GREATER_THAN
@@ -288,7 +324,7 @@ Resources:
             Threshold: 150
             ThresholdType: PERCENTAGE
           Subscribers: 
-            - Address: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - Address: !GetAtt SNSForAlert.Outputs.SNSTopicArn
               SubscriptionType: SNS
         - Notification:
             ComparisonOperator: GREATER_THAN
@@ -296,7 +332,7 @@ Resources:
             Threshold: 200
             ThresholdType: PERCENTAGE
           Subscribers: 
-            - Address: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+            - Address: !GetAtt SNSForAlert.Outputs.SNSTopicArn
               SubscriptionType: SNS
   # CertificateManager
   CertificateManager:
@@ -332,7 +368,7 @@ Resources:
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
-        SNSTopicArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        SNSTopicArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
         CertificateArn: !Ref CertificateManager
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -360,7 +396,7 @@ Resources:
     Properties:
       ActionsEnabled: true
       AlarmActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: !Sub '*概算請求金額* が *$ ${BillingAlertThreshold} を超過* しています。'
       AlarmName: !Sub Warning-${AWS::StackName}-EstimatedCharges-is-Over-${BillingAlertThreshold}00-Yen
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -371,7 +407,7 @@ Resources:
       MetricName: EstimatedCharges
       Namespace: AWS/Billing
       OKActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       Period: 21600
       Statistic: Maximum
       Threshold: !Ref BillingAlertThreshold
@@ -387,7 +423,7 @@ Resources:
     Properties:
       ActionsEnabled: true
       AlarmActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *4XXエラー率が増加* しています。'
       AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-4XXErrorRate-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -400,7 +436,7 @@ Resources:
       MetricName: 4xxErrorRate
       Namespace: AWS/CloudFront
       OKActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       Period: 300
       Statistic: Average
       Threshold: !Ref CloudFrontErrorRateThreshold
@@ -416,7 +452,7 @@ Resources:
     Properties:
       ActionsEnabled: true
       AlarmActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *5XXエラー率が増加* しています。'
       AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-5XXErrorRate-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -429,7 +465,7 @@ Resources:
       MetricName: 5xxErrorRate
       Namespace: AWS/CloudFront
       OKActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       Period: 300
       Statistic: Average
       Threshold: !Ref CloudFrontErrorRateThreshold
@@ -445,7 +481,7 @@ Resources:
     Properties:
       ActionsEnabled: true
       AlarmActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *エラー率が増加* しています。'
       AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-TotalErrorRate-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -458,7 +494,7 @@ Resources:
       MetricName: TotalErrorRate
       Namespace: AWS/CloudFront
       OKActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       Period: 300
       Statistic: Average
       Threshold: !Ref CloudFrontErrorRateThreshold
@@ -474,7 +510,7 @@ Resources:
     Properties:
       ActionsEnabled: true
       AlarmActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *リクエスト数が増加* しています。'
       AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-Requests-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -487,7 +523,7 @@ Resources:
       MetricName: Requests
       Namespace: AWS/CloudFront
       OKActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       Period: 60
       Statistic: Maximum
       Threshold: !Ref CloudFrontErrorRequestPerMinuteThreshold
@@ -503,7 +539,7 @@ Resources:
     Properties:
       ActionsEnabled: true
       AlarmActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       AlarmDescription: '*CloudFront* の *ダウンロードサイズが増加* しています。'
       AlarmName: !Sub Warning-${AWS::StackName}-CloudFront-BytesDownloaded-Increased
       ComparisonOperator: GreaterThanOrEqualToThreshold
@@ -516,7 +552,7 @@ Resources:
       MetricName: BytesDownloaded
       Namespace: AWS/CloudFront
       OKActions:
-        - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+        - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       Period: 60
       Statistic: Maximum
       Threshold: !Ref CloudFrontBytesDownloadedPerMinuteThreshold
