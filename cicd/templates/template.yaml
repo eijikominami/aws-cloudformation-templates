@@ -192,6 +192,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateArtifactBucketInVirginia: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
   CreateIncidentManager: !Equals [ !Ref CloudOps, ENABLED]
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
@@ -199,7 +200,7 @@ Conditions:
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
   DeployDefaultSecuritySettings: !Equals [ !Ref DefaultSecuritySettings, ENABLED] 
-  DeployGlobalSettings: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
+  DeployGlobalSettings: !Or [ !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ], !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Equals [ !Ref AWS::Region, us-east-1] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
   DeployNetwork: !Equals [ !Ref Network, ENABLED]
   DeploySharedServices: !Equals [ !Ref SharedServices, ENABLED]
@@ -656,7 +657,7 @@ Resources:
             Type: S3
           Region: !Ref AWS::Region
         - !If
-          - DeployGlobalSettings
+          - CreateArtifactBucketInVirginia
           - ArtifactStore:
               Location: !Ref ArtifactBucketInVirginia
               Type: S3
