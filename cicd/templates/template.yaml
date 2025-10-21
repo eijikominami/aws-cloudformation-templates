@@ -714,14 +714,7 @@ Resources:
                 ParameterOverrides: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Ref AWS::NoValue
-                  - !Join
-                    - ''
-                    - - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}", "GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","Environment": "'
-                      - !If
-                        - Development
-                        - development
-                        - production
-                      - !Sub '","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
+                  - !Sub '{"ArtifactBucketInVirginia": "${ArtifactBucketInVirginia}","CodeBuildImageName": "${CodeBuildImageName}", "GitHubOwnerNameForTemplateConfiguration": "${GitHubOwnerNameForTemplateConfiguration}","GitHubRepoNameForTemplateConfiguration": "${GitHubRepoNameForTemplateConfiguration}","GlobalSettings": "${GlobalSettings}","Notification": "${Notification}","StaticWebsiteHosting": "${StaticWebsiteHosting}","WebServers": "${WebServers}","SNSForAlertArn": "${SNSForAlertArn}","SNSForCICDArn": "${SNSForCICDArn}","SNSForDeploymentArn": "${SNSForDeploymentArn}","TagKey": "${TagKey}","TagValue": "${TagValue}"}'
                 TemplateConfiguration: !If
                   - CreateCloudFormationConfigurationArtifact
                   - !Sub Source_CloudFormationConfigurationArtifact::${TemplateConfigurationBasePath}CICD.json  

@@ -1,0 +1,29 @@
+templates:
+  - template.yaml
+
+ignore_checks:
+  # 以下のチェックは無視（プロジェクト要件に応じて調整）
+  - W3002  # Parameter not used (将来の拡張で使用予定のパラメータ)
+
+include_checks:
+  # 追加のセキュリティチェックを有効化
+  - I  # Informational checks
+  - W  # Warning checks
+  - E  # Error checks
+
+configure_rules:
+  # リソース名の長さ制限を緩和（AWS制限内）
+  E3012:
+    strict: false
+  
+  # S3バケット名の一意性チェック
+  E3013:
+    strict: true
+
+# CFN Lint configuration for analytics platform
+
+# リージョン固有のチェック
+regions:
+  - us-east-1
+  - us-west-2
+  - ap-northeast-1
