@@ -65,6 +65,15 @@ aws cloudformation deploy --template-file templates/transitgateway.yaml --stack-
 aws cloudformation deploy --template-file templates/vpn.yaml --stack-name VPN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
+If DNS resolution is not working:
+
+1. Check that Route 53 resolver rules are properly configured
+2. Verify that DNS forwarder IP addresses are correct
+3. Ensure that VPC DNS resolution and DNS hostnames are enabled
+4. Check that security groups allow DNS traffic (port 53)
+
+```
+
 You can provide optional parameters as follows:
 
 | Name | Type | Default | Requied | Details | 

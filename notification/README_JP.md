@@ -160,4 +160,41 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | UnauthorizedApiCallsCloudWatchAlarmName | String | | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
 | SNSForAlertArn | String | | | アラート用 Amazon SNS トピックの ARN | 
 | SNSForCICDArn | String | | | CI/CD用 Amazon SNS トピックの ARN | 
-| SNSForDeploymentArn | String | | | デプロイ用 Amazon SNS トピックの ARN |
+| SNSForDeploymentArn | String | | | デプロイ用 Amazon SNS トピックの ARN |## トラ
+ブルシューティング
+
+### AWS Chatbot の問題
+
+AWS Chatbot が Slack に通知を送信しない場合：
+
+1. Slack ワークスペース ID が正しく、認証がまだ有効であることを確認してください
+2. Slack チャンネルが存在し、ボットがメッセージを投稿する権限を持っていることを確認してください
+3. SNS トピックが AWS Chatbot がサブスクライブするための正しい権限を持っていることを確認してください
+4. AWS Chatbot の IAM ロールが必要な権限を持っていることを確認してください
+
+### Slack Webhook の問題
+
+Slack Webhook が動作しない場合：
+
+1. Webhook URL が正しく、まだアクティブであることを確認してください
+2. Slack アプリがワークスペースで必要な権限を持っていることを確認してください
+3. Webhook が正しいチャンネル用に設定されていることを確認してください
+4. Webhook URL を直接テストして動作することを確認してください
+
+### EventBridge ルールの問題
+
+EventBridge ルールがトリガーされない場合：
+
+1. イベントパターンが生成される実際のイベントと一致していることを確認してください
+2. ターゲット SNS トピックが存在し、正しい権限を持っていることを確認してください
+3. EventBridge ルールが有効になっていることを確認してください
+4. EventBridge の CloudWatch メトリクスを監視してイベントが処理されているかを確認してください
+
+### Lambda 関数の問題
+
+Lambda 関数が失敗する場合：
+
+1. エラーメッセージとスタックトレースについて CloudWatch ログを確認してください
+2. Lambda 関数が必要な IAM 権限を持っていることを確認してください
+3. 環境変数が正しく設定されていることを確認してください
+4. Lambda 関数のタイムアウトが処理に十分であることを確認してください

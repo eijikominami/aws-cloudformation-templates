@@ -55,3 +55,41 @@ You can provide optional parameters as follows.
 | SubnetIdAz3 | String | | | The private subnet Id |
 | **VPCCidrBlock** | String | 10.0.0.0/22 | ○ | The VPC CIDR block |
 | VPCId | String | | | The VPC Id |
+
+## Troubleshooting
+
+### MGN Agent Issues
+
+If MGN agents are not connecting or replicating properly:
+
+1. Verify that source servers have internet connectivity to AWS MGN endpoints
+2. Check that required ports (443, 1500) are open in firewalls and security groups
+3. Ensure that the MGN agent is installed with proper permissions on source servers
+4. Verify that the MGN service is initialized in the target AWS region
+
+### Replication Issues
+
+If data replication is failing or slow:
+
+1. Check network bandwidth and latency between source and target environments
+2. Verify that source servers have sufficient disk space for staging area
+3. Ensure that EBS volume types and sizes are appropriate for workload requirements
+4. Monitor CloudWatch metrics for replication lag and throughput
+
+### Launch Template Issues
+
+If test or cutover launches are failing:
+
+1. Verify that launch templates have correct instance types and configurations
+2. Check that target subnets have sufficient IP addresses available
+3. Ensure that security groups allow necessary traffic for migrated applications
+4. Verify that IAM roles have permissions for EC2 instance operations
+
+### Network Configuration Issues
+
+If migrated instances cannot communicate properly:
+
+1. Verify that DNS resolution is working correctly in the target VPC
+2. Check that routing tables are configured for proper network access
+3. Ensure that security groups and NACLs allow required application traffic
+4. Verify that load balancers and other network services are properly configured
