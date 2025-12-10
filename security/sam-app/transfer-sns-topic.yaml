@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: aws-cloudformation-templates/notification/sns creates Amazon SNS and related CloudWatch Alarm.
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: transfer-alert-topic
+    Description: Create Amazon SNS topic for transfer alerts with CloudWatch monitoring.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami/LICENSE
+    ReadmeUrl: s3://eijikominami/readme/transfer-sns-topic.md
+    Labels: ['sns', 'cloudwatch', 'alerts']
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'SNS Configuration'
+        Parameters:
+          - TopicName
+      - Label: 
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  TopicName:
+    Type: String
+    Default: TransferAlertTopic
+    Description: Name of the SNS topic
+  Environment:
+    Type: String
+    Default: production
+    Description: Environment name
+  TagKey:
+    Type: String
+    Default: ''
+    Description: Custom tag key
+  TagValue:
+    Type: String
+    Default: ''
+    Description: Custom tag value
+
+Resources:
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Ref TopicName
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+          
+  CloudWatchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${TopicName}-NumberOfMessagesPublished"
+      MetricName: NumberOfMessagesPublished
+      Namespace: AWS/SNS
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TopicName
+          Value: !Ref SNSTopic
+
+Outputs:
+  SNSTopicArn:
+    Description: ARN of the SNS topic
+    Value: !Ref SNSTopic
+    Export:
+      Name: !Sub "${AWS::StackName}-SNSTopicArn"
