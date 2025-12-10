@@ -236,13 +236,11 @@ Resources:
         createdby: !Ref TagValue
   TransferAlertTopic:
     Condition: CreateSNSForAlertTransfer
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeploymentTransfer
-          - !Ref SNSForDeploymentArn
-          - !Ref AWS::NoValue
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/transfer-sns-topic
+        SemanticVersion: 2.2.24
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         SourceSNSArn: !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -251,21 +249,16 @@ Resources:
         LogicalName: TransferAlertTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/transfer-sns-topic.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/transfer-sns-topic.yaml
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   TransferDeploymentTopic:
     Condition: CreateSNSForDeploymentTransfer
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
-      NotificationARNs:
-        - !Ref SNSForDeploymentArn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/transfer-sns-topic
+        SemanticVersion: 2.2.24
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         SourceSNSArn: !GetAtt SNSForDeployment.Outputs.SNSTopicArn
@@ -274,15 +267,9 @@ Resources:
         LogicalName: TransferDeploymentTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/transfer-sns-topic.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/transfer-sns-topic.yaml
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # Budget 
   Budget:
     Condition: CreateBudget
