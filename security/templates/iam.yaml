@@ -2,7 +2,17 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/security/iam sets IAM.
 
-Metadata: 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: iam-access-analyzer
+    Description: Create IAM Access Analyzer and related CloudWatch Alarms.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/iam-access-analyzer.md
+    Labels: []
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 

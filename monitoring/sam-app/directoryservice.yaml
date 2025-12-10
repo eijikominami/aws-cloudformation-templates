@@ -1,27 +1,18 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: CloudWatch alarm for AWS AQDirectory Service
+Description: CloudWatch alarm for AWS Directory Service
 
-Metadata: 
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-      - Label: 
-          default: 'Directory Service Configuration'
-        Parameters: 
-          - DirectoryId
-          - DomainControllerIp
-      - Label: 
-          default: 'Notification Configuration'
-        Parameters: 
-          - AlarmLevel
-          - CustomAlarmName
-          - SNSTopicArn
-      - Label: 
-          default: 'Tag Configuration'
-        Parameters:
-          - Environment 
-          - TagKey
-          - TagValue
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: cloudwatch-alarm-about-directoryservice
+    Description: Create Amazon CloudWatch Alarm about AWS Directory Service.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/cloudwatch-alarm-about-directoryservice.md
+    Labels: []
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 

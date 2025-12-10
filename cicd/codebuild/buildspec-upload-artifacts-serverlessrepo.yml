@@ -26,6 +26,16 @@ phases:
       - aws s3 cp network/readme/ s3://${BUCKET_NAME}/readme/ --recursive --exclude "*" --include "*.md"
   build:
     commands:
+      # Package templates with Lambda functions (CodeUri needs to be S3 URI for sam publish)
+      - |
+        echo "Packaging security-config-rules template..."
+        sam package \
+          --template-file security-config-rules/sam-app/template.yaml \
+          --output-template-file security-config-rules/sam-app/packaged.yaml \
+          --s3-bucket ${BUCKET_NAME} \
+          --s3-prefix security-config-rules \
+          --region us-east-1
+        echo "✅ Packaged security-config-rules template"
       # Publish all templates using sam publish with semantic version
       - |
         FAILED_PUBLISH_COUNT=0
@@ -69,9 +79,9 @@ phases:
           monitoring/sam-app/workspaces.yaml \
           notification/sam-app/sns.yaml \
           notification/sam-app/events.yaml \
-          security/sam-app/iam.yaml \
-          security-config-rules/sam-app/template.yaml \
-          network/sam-app/az.yaml; do
+          security/templates/iam.yaml \
+          security-config-rules/sam-app/packaged.yaml \
+          network/templates/az.yaml; do
           echo "Publishing ${template}..."
           if sam publish --template ${template} --semantic-version ${SEMANTIC_VERSION} --region us-east-1; then
             echo "✅ Successfully published ${template}"
