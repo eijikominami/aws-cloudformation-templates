@@ -81,6 +81,7 @@ phases:
           notification/sam-app/sns.yaml \
           notification/sam-app/events.yaml \
           security/templates/iam.yaml \
+          security/sam-app/transfer-sns-topic.yaml \
           security-config-rules/sam-app/packaged.yaml \
           network/templates/az.yaml; do
           echo "Publishing ${template}..."
@@ -152,6 +153,7 @@ phases:
           sns-topic \
           eventbridge-rules \
           iam-access-analyzer \
+          transfer-alert-topic \
           delete-resources-without-required-tags \
           availability-zone; do
           echo "Setting policy for ${app_id}..."
