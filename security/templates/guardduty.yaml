@@ -81,7 +81,6 @@ Conditions:
   CreatePublishingDestination: !And [ !Equals [ !Ref Detector, ENABLED], !Not [ !Equals [ !Ref FindingsDestinationBucketArn, '' ] ], !Not [ !Equals [ !Ref KmsKeyArn, '' ] ] ]
   CreateSNSForAlertTransfer: !Not [ !Equals [ !Ref SNSForAlertArn, ''] ]
   CreateSNSForDeploymentTransfer: !Not [ !Equals [ !Ref SNSForDeploymentArn, ''] ]
-  Development: !Equals [ !Ref Environment, development]
 
 Resources:
   # Nested Stack
@@ -90,7 +89,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.14
+        SemanticVersion: 2.2.24
       NotificationARNs:
         - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
       Parameters:
@@ -103,7 +102,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.14
+        SemanticVersion: 2.2.24
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -111,7 +110,7 @@ Resources:
         createdby: !Ref TagValue
   TransferAlertTopic:
     Condition: CreateSNSForAlertTransfer
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Application
     Properties:
       NotificationARNs:
         - !If
@@ -126,15 +125,12 @@ Resources:
         LogicalName: TransferGuardDutyTopic
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/notification/transfer-sns-topic.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/transfer-sns-topic.yaml
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/transfer-sns-topic
+        SemanticVersion: 2.2.24
       Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+        environment: !Ref Environment
+        createdby: !Ref TagValue
   # Service-linked Role
   ServiceLinkedRoleForGuardDuty:
     Condition: CreateDetector
@@ -207,7 +203,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.14
+        SemanticVersion: 2.2.24
       NotificationARNs:
         - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
       Parameters:
