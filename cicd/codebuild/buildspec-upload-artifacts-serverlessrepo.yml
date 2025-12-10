@@ -3,6 +3,7 @@ version: 0.2
 env:
   variables:
     SOURCE_CODE_URL: https://github.com/eijikominami/aws-cloudformation-templates
+    APP_ARN_PREFIX: arn:aws:serverlessrepo:us-east-1:172664222583:applications
 
 phases:
   install:
