@@ -7,6 +7,14 @@
  
 ``AWSCloudFormationTemplates/cloudops`` は、``Systems Manager`` や ``DevOps Guru`` などの運用の可用性に関するサービスを構築します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- CodeGuru Reviewer 統合用の GitHub リポジトリへのアクセス
+- AWS Organizations のセットアップ（クロスアカウント Systems Manager 機能を使用する場合）
+- CloudWatch、Systems Manager、DevOps Guru サービスに対する適切な IAM 権限
+
 ## CloudOps
 
 以下のボタンをクリックすることで、この **CloudFormationをデプロイ** することが可能です。

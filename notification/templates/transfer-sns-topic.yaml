@@ -2,6 +2,23 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/transfer-sns-topic creates resources for cross-region SNS topic message forwarding
 
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - AlarmLevel
+          - SourceSNSArn
+          - DestinationSNSArn
+      - Label: 
+          default: 'Notification Configuration'
+        Parameters: 
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
+
 Parameters:
   AlarmLevel:
     Type: String
@@ -18,6 +35,18 @@ Parameters:
     Type: String
     AllowedPattern: ^arn:aws[a-z\-]*:sns:[a-z0-9\-]+:\d{12}:.*
     Description: The ARN of the destination SNS topic that messages will be forwarded to
+  LogicalName:
+    Type: String
+    Default: TransferSNS
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -26,13 +55,6 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
-  Environment:
-    Type: String
-    Default: production
-    AllowedValues:
-      - production
-      - test
-      - development
 
 Conditions:
   Development: !Equals [ !Ref Environment, 'development' ]
@@ -63,7 +85,7 @@ Resources:
                 Action:
                   - sns:publish
                 Resource:
-                  - !Ref SourceSNSArn
+                  - !Ref DestinationSNSArn
         - PolicyName: CloudWatchLogs
           PolicyDocument:
             Version: 2012-10-17
@@ -76,7 +98,7 @@ Resources:
                 Action:
                   - logs:PutLogEvents
                 Resource: '*' 
-      RoleName: !Sub ${AWS::StackName}-LambdaForGlobal-${AWS::Region}
+      RoleName: !Sub ${LogicalName}-Lambda-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -96,18 +118,18 @@ Resources:
 
           def lambda_handler(event, context):
 
-            sns_topic_arn = '${SourceSNSArn}'
+            sns_topic_arn = '${DestinationSNSArn}'
             sns = boto3.client('sns',region_name=sns_topic_arn.split(':')[3])
             
             for record in event['Records']:
               if record['Sns']['Subject'] is None:
                   request = {
-                    'TopicArn': '${SourceSNSArn}',
+                    'TopicArn': '${DestinationSNSArn}',
                     'Message': record['Sns']['Message']
                   }
               else:
                   request = {
-                      'TopicArn': '${SourceSNSArn}',
+                      'TopicArn': '${DestinationSNSArn}',
                       'Message': record['Sns']['Message'],
                       'Subject': record['Sns']['Subject']
                   }  
@@ -145,7 +167,7 @@ Resources:
       FunctionName: !Ref LambdaTransferSNSTopic
       Principal: sns.amazonaws.com
       # DO NOT write 'SourceAccount' option.
-      SourceArn: !Ref DestinationSNSArn
+      SourceArn: !Ref SourceSNSArn
   LambdaTransferSNSTopicLogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
@@ -162,43 +184,18 @@ Resources:
     Properties: 
       Endpoint: !GetAtt LambdaTransferSNSTopic.Arn
       Protocol: lambda
-      TopicArn: !Ref DestinationSNSArn
-  SNSTopicPolicy:
-    Type: AWS::SNS::TopicPolicy
-    Properties:
-      Topics: 
-        - !Ref DestinationSNSArn
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: AWSAnomalyDetectionSNSPublishingPermissions
-            Effect: Allow
-            Principal:
-              Service: costalerts.amazonaws.com
-            Resource: !Ref DestinationSNSArn
-            Action: 'sns:Publish'
-          - Sid: AWSBudgetsSNSPublishingPermissions
-            Effect: Allow
-            Principal:
-              Service: budgets.amazonaws.com
-            Resource: !Ref DestinationSNSArn
-            Action: 'sns:Publish'
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref AWS::AccountId
-              ArnLike:
-                aws:SourceArn: !Sub arn:aws:budgets::${AWS::AccountId}:*
+      TopicArn: !Ref SourceSNSArn
   # CloudWatch Alarm for Lambda
   AlarmLambdaTransferSNSTopic:
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName
-        SNSTopicArn: !Ref DestinationSNSArn
+        SNSTopicArn: !Ref SourceSNSArn
         MetricFilterPattern: ''
         FunctionResouceName: !Ref LambdaTransferSNSTopic
         Environment: !Ref Environment

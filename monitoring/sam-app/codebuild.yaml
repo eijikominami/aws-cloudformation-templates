@@ -2,6 +2,18 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: CloudWatch alarm for AWS CodeBuild
 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: cloudwatch-alarm-about-codebuild
+    Description: Create Amazon CloudWatch Alarm about AWS CodeBuild.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/cloudwatch-alarm-about-codebuild.md
+    Labels: []
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
+
 Parameters:
   AlarmLevel:
     Type: String

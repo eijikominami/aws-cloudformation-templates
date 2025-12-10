@@ -60,8 +60,12 @@ phases:
       - pip install cfn-lint
   pre_build:
     commands:
-      - cfn-lint --update-specs
-      - # find ./ -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
+      # cfn-lint is disabled because:
+      # - security/templates/securityhub.yaml has conditional DependsOn that cfn-lint cannot properly validate
+      # - The template supports both STANDARDS_* mode (creates SecurityHub) and ALERAM_* mode (uses existing SecurityHub)
+      # - Finding Aggregator needs DependsOn for STANDARDS_* mode but cfn-lint reports E3005 for ALERAM_* mode
+      # - cfn-lint --update-specs
+      # - find ./ -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
       - aws s3 rm s3://${BUCKET_NAME}/${AMPLIFY_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${ANALYTICS_DIST_DIR}/ --recursive
       - aws s3 rm s3://${BUCKET_NAME}/${CICD_DIST_DIR}/ --recursive
@@ -84,9 +88,9 @@ phases:
       - aws s3 rm s3://${BUCKET_NAME}/${STORAGE_DIST_DIR}/ --recursive
   build:
     commands:
-      - sam validate --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml
-      - sam build --template ${ANALYTICS_SRC_DIR}/googleanalytics.yaml --build-dir ${ANALYTICS_SRC_DIR}/.aws-sam/build
-      - sam package --template-file ${ANALYTICS_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${ANALYTICS_DIST_DIR} --output-template-file ${ANALYTICS_SRC_DIR}/googleanalytics-packaged.yaml
+      - sam validate --template ${ANALYTICS_SRC_DIR}/google-analytics.yaml
+      - sam build --template ${ANALYTICS_SRC_DIR}/google-analytics.yaml --build-dir ${ANALYTICS_SRC_DIR}/.aws-sam/build
+      - sam package --template-file ${ANALYTICS_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${ANALYTICS_DIST_DIR} --output-template-file ${ANALYTICS_SRC_DIR}/google-analytics-packaged.yaml
       - sam validate --template ${CICD_SRC_DIR}/template.yaml
       - sam build --template ${CICD_SRC_DIR}/template.yaml --build-dir ${CICD_SRC_DIR}/.aws-sam/build
       - sam package --template-file ${CICD_SRC_DIR}/.aws-sam/build/template.yaml --s3-bucket ${BUCKET_NAME} --s3-prefix ${CICD_DIST_DIR} --output-template-file ${CICD_SRC_DIR}/packaged.yaml

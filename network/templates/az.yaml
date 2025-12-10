@@ -2,7 +2,17 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/network/az creates a VPC Subnet and related resources.
 
-Metadata: 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: availability-zone
+    Description: Create a VPC Subnet and related resources for an Availability Zone.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/availability-zone.md
+    Labels: []
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
@@ -313,7 +323,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

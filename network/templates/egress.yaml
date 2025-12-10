@@ -176,7 +176,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -216,7 +216,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -256,7 +256,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -427,7 +427,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -444,7 +444,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -602,7 +602,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

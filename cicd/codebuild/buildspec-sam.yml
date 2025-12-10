@@ -16,7 +16,11 @@ phases:
       - pip install cfn-lint
   pre_build:
     commands:
-      - cfn-lint --update-specs
+      # cfn-lint is disabled because:
+      # - security/templates/securityhub.yaml has conditional DependsOn that cfn-lint cannot properly validate
+      # - The template supports both STANDARDS_* mode (creates SecurityHub) and ALERAM_* mode (uses existing SecurityHub)
+      # - Finding Aggregator needs DependsOn for STANDARDS_* mode but cfn-lint reports E3005 for ALERAM_* mode
+      # - cfn-lint --update-specs
       # - find ./${TEMPLATE_FILE_PATH} -type f -name "*.yaml" | xargs --no-run-if-empty -I{} cfn-lint --regions us-east-1 --ignore-checks W --template {}
       - sam validate --template ${TEMPLATE_FILE_PATH}template.yaml
   build:

@@ -7,6 +7,14 @@
 
 ``AWSCloudFormationTemplates/cicd`` は、`CodePipeline` を用いて このリポジトリにある CloudFormation テンプレートを一括デプロイします。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- GitHub リポジトリへのアクセス（テンプレート設定ファイル用）
+- S3 アーティファクトバケット（us-east-1 リージョン、Global Settings Template を使用する場合）
+- CodePipeline、CodeBuild、CloudFormation サービスに対する適切な IAM 権限
+
 ## TL;DR
 
 以下のいずれかのボタンをクリックすることで、 この **CloudFormationをデプロイ** することが可能です。
@@ -85,3 +93,35 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | TemplateConfigurationBasePath | String | | | 設定プロパティのあるディレクトリのパス |
 | **UploadArtifacts** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`UploadArtifacts` スタックがデプロイされます。 |
 | **WebServers** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |
+
+## Serverless Application Repository 統合
+
+この CI/CD パイプラインには、AWS Serverless Application Repository への自動公開機能が含まれています。
+
+### 仕組み
+
+`*-rc*` パターンにマッチする Git タグをプッシュすると、CodeBuild が自動的に以下を実行します：
+
+1. SAM テンプレートをビルド
+2. S3 にパッケージ化してアップロード
+3. AWS Serverless Application Repository に公開
+4. 参照用の ApplicationId を生成
+
+### トリガーパターン
+
+Webhook は以下のパターンにマッチするタグでトリガーされます： `^refs/tags/.*-rc.*$`
+
+**タグの例：**
+```bash
+git tag monitoring-glue-v1.0.0-rc
+git push origin monitoring-glue-v1.0.0-rc
+```
+
+### Buildspec
+
+ビルドプロセスは以下で定義されています： `codebuild/buildspec-upload-artifacts-serverlessrepo.yml`
+
+### 使用方法
+
+SAM テンプレートを作成して Serverless Application Repository に公開する詳細な手順については、以下を参照してください：
+- [Monitoring テンプレート開発者ガイド](../monitoring/CONTRIBUTING.md)

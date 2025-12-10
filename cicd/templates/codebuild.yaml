@@ -144,7 +144,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -161,7 +161,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -178,7 +178,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -219,8 +219,10 @@ Resources:
                 Effect: Allow
               # Required for creating the new application version in AWS Serverless Application Repository
               - Action:
+                  - serverlessrepo:CreateApplication
                   - serverlessrepo:CreateApplicationVersion
                   - serverlessrepo:UpdateApplication
+                  - serverlessrepo:PutApplicationPolicy
                 Resource: '*'
                 Effect: Allow
               # Required for uploading artifacts to S3 buckets
@@ -576,7 +578,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -601,7 +603,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -626,7 +628,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.13
+        SemanticVersion: 2.2.14
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

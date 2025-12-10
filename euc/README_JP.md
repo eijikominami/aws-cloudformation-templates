@@ -91,32 +91,3 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name V
 | WorkspacesUserVolumeSizeGib | Number | 100 | ○ | WorkSpaces のユーザーボリュームのサイズ |
 
 AppStream で Active Directory を使用する場合には、[**Active Directory 上で権限の設定を行う**](https://docs.aws.amazon.com/ja_jp/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions)必要があります。
-
-## トラブルシューティング
-
-### WorkSpaces の問題
-
-WorkSpaces が起動しない、または正常に機能しない場合：
-
-1. Active Directory が正常で WorkSpaces サブネットからアクセス可能であることを確認してください
-2. 指定されたバンドル ID がお使いのリージョンで利用可能であることを確認してください
-3. ユーザーが Active Directory に存在し、適切な権限を持っていることを確認してください
-4. VPC とサブネットが適切なルーティングとセキュリティグループ設定を持っていることを確認してください
-
-### AppStream の問題
-
-AppStream フリートまたはスタックが正常に動作しない場合：
-
-1. 指定されたイメージが存在し、正しいリージョンにあることを確認してください
-2. Active Directory 統合が正しい OU 設定で適切に設定されていることを確認してください
-3. フリートに十分な容量があり、RUNNING 状態であることを確認してください
-4. ユーザーが適切な AppStream スタックに割り当てられていることを確認してください
-
-### FSx の問題
-
-FSx ファイルシステムにアクセスできない場合：
-
-1. Active Directory 統合が適切に設定されていることを確認してください
-2. セキュリティグループが SMB トラフィックに必要なポートを許可していることを確認してください
-3. FSx ファイルシステムが WorkSpaces または AppStream インスタンスと同じ VPC にあることを確認してください
-4. FSx ファイルシステムの DNS 解決が正常に動作していることを確認してください

@@ -103,44 +103,9 @@ You can provide optional parameters as follows.
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
 
+
 ## Troubleshooting
 
 ### SSM State Manager Issues
 
 If `SSM State Manager Association` already has `AWS-GatherSoftwareInventory`, the template will **fail**. Deploy this template with the `IgnoreResourceConflicts` option enabled.
-
-### EC2 Instance Issues
-
-If EC2 instances are not launching or are unhealthy:
-
-1. Verify that the AMI ID is valid and available in your region
-2. Check that the instance type is available in the selected availability zones
-3. Ensure that the key pair exists if SSH access is required
-4. Verify that security groups allow the necessary traffic for your application
-
-### Load Balancer Issues
-
-If the load balancer is not distributing traffic correctly:
-
-1. Verify that target groups have healthy instances registered
-2. Check that security groups allow traffic between the load balancer and instances
-3. Ensure that health check settings are appropriate for your application
-4. Verify that the load balancer is deployed in the correct subnets
-
-### Auto Scaling Issues
-
-If Auto Scaling is not working as expected:
-
-1. Check that the launch template or configuration is correct
-2. Verify that the Auto Scaling group has the correct subnets configured
-3. Ensure that scaling policies are properly configured
-4. Monitor CloudWatch metrics to understand scaling behavior
-
-### CodePipeline/CodeDeploy Issues
-
-If CI/CD pipeline is failing:
-
-1. Verify that the GitHub connection is properly configured
-2. Check that the CodeBuild project has the necessary permissions
-3. Ensure that the deployment configuration matches your application requirements
-4. Review CloudWatch Logs for detailed error messages

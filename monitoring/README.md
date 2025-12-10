@@ -26,6 +26,7 @@ If you want to deploy monitoring templates quickly, you can use the AWS Serverle
 | API Gateway | [cloudwatch-alarm-about-apigateway](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-apigateway) |
 | Application ELB | [cloudwatch-alarm-about-application-elb](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-application-elb) |
 | EC2 | [cloudwatch-alarm-about-ec2](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-ec2) |
+| Glue | [cloudwatch-alarm-about-glue](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-glue) |
 | Lambda | [cloudwatch-alarm-about-lambda](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:172664222583:applications~cloudwatch-alarm-about-lambda) |
 
 ## AWS Certificate Manager
@@ -81,7 +82,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-acm
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -145,7 +146,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-amplifys
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -220,7 +221,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-apigateway
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters:
@@ -286,7 +287,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appflow
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -350,7 +351,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-application-elb
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -415,7 +416,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appstream
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -478,7 +479,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -540,7 +541,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-cofig
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -603,7 +604,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-directoryservice
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -667,7 +668,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb-throttle
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -728,7 +729,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-dynamodb
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -790,7 +791,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -853,7 +854,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -920,7 +921,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -998,7 +999,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-elasticsearch
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1065,7 +1066,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1130,7 +1131,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1201,7 +1202,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1274,7 +1275,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1284,6 +1285,75 @@ Properties:
     KinesisStreamName: String
     NumberOfPutRecordThreshold: Integer
     SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## Glue
+
+The template creates the following alarms.
+
+| Namespace | MetricName | JobName | JobRunId | Type | Threshold |
+| --- | --- | --- | --- | --- | --- |
+| Glue | **glue.driver.aggregate.numFailedTasks** | `JobName` | ALL | count | At least once in 5 minutes |
+| Glue | **glue.driver.aggregate.elapsedTime** | `JobName` | ALL | gauge | `TimeoutMilliseconds` |
+
+You can provide optional parameters as follows.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | The alarm level of CloudWatch alarms |
+| `CustomAlarmName` | String | | | The custom alarm name |
+| `JobName` | String | | ○ | The name of the Glue job |
+| `SNSTopicArn` | String | | ○ | The SNS topic ARN |
+| `TimeoutMilliseconds` | Integer | 3300000 | ○ | The threshold of job execution time in milliseconds |
+| `Environment` | String | production | | The value of `environment` tag |
+| `TagKey` | String | createdby | | A tag key |
+| `TagValue` | String | aws-cloudformation-templates | | A tag value |
+
+### Syntax
+
+To declare this entity in your AWS CloudFormation template, use the following syntax:
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel : String
+    CustomAlarmName : String
+    JobName: String
+    SNSTopicArn : String
+    TimeoutMilliseconds: Integer
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/glue.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-glue
+    SemanticVersion: 2.2.14
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel : String
+    CustomAlarmName : String
+    JobName: String
+    SNSTopicArn : String
+    TimeoutMilliseconds: Integer
     Environment: String
     TagKey: String
     TagValue: String
@@ -1344,7 +1414,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1419,7 +1489,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconnect-source
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1494,7 +1564,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconnect-source
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1562,7 +1632,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediaconvert
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1630,7 +1700,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1698,7 +1768,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-mediastore
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1761,7 +1831,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters:
@@ -1823,7 +1893,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-route53-resolver
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1885,7 +1955,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-sns
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -1946,7 +2016,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -2007,7 +2077,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -2071,7 +2141,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -2140,7 +2210,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoint
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -2207,7 +2277,7 @@ Type: AWS::Serverless::Application
 Properties:
   Location:
     ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-workspaces
-    SemanticVersion: 2.2.13
+    SemanticVersion: 2.2.14
   NotificationARNs: 
     - String
   Parameters: 
@@ -2220,41 +2290,3 @@ Properties:
   Tags: Map
   TimeoutInMinutes: Integer
 ```
-## 
-Troubleshooting
-
-### CloudWatch Alarm Issues
-
-If CloudWatch alarms are not triggering correctly:
-
-1. Verify that the metric names and namespaces are correct for your AWS services
-2. Check that the alarm thresholds are appropriate for your workload patterns
-3. Ensure that the SNS topics have the correct permissions and subscribers
-4. Verify that the alarm evaluation periods and datapoints are configured correctly
-
-### SNS Notification Issues
-
-If you're not receiving alarm notifications:
-
-1. Check that SNS topic subscriptions are confirmed
-2. Verify that email addresses or endpoints are correct and accessible
-3. Ensure that SNS topic policies allow CloudWatch to publish messages
-4. Check spam folders for email notifications
-
-### Metric Data Issues
-
-If metrics are not appearing or seem incorrect:
-
-1. Verify that the AWS services are publishing metrics to CloudWatch
-2. Check that custom metrics are being published with correct dimensions
-3. Ensure that CloudWatch agent is properly configured (for EC2 custom metrics)
-4. Verify that the metric retention period hasn't expired
-
-### Permission Issues
-
-If alarms cannot be created or modified:
-
-1. Verify that IAM roles have the necessary CloudWatch permissions
-2. Check that cross-account access is properly configured if applicable
-3. Ensure that service-linked roles are created for AWS services
-4. Verify that resource-based policies allow the required actions

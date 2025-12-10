@@ -18,14 +18,9 @@ Before deploying this template, ensure you have:
 
 ## TL;DR
 
-If you just want to deploy the stack follow these steps.
+If you just want to deploy the stack, click the button below.
 
-1. Before running this Cloudformation template, run both the ``Security`` template and ``Global Settings`` template in this project.
-
-+ [Security Template](../security/README.md)
-+ [Global Settings Template](../global/README.md)
-
-2. Click the button below.
+> **Note:** Before running this CloudFormation template, run both the [Security Template](../security/README.md) and [Global Settings Template](../global/README.md) in this project.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |

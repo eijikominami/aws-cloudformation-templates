@@ -49,31 +49,3 @@ You can provide parameters as follows:
 | **TagKey** | String | createdby | ○ | Tag key for resource tagging |
 | **TagValue** | String | aws-cloudformation-templates | ○ | Tag value for resource tagging |
 
-## Troubleshooting
-
-### Domain Configuration Issues
-
-If you encounter domain configuration problems:
-
-1. Verify that your domain is registered and accessible
-2. Check that DNS settings are properly configured
-3. Ensure Route 53 hosted zone exists for your domain (if using Route 53)
-4. Verify domain ownership in Amplify Console
-
-### Build and Deployment Failures
-
-If Amplify builds or deployments fail:
-
-1. Check build logs in Amplify Console for detailed error messages
-2. Verify that your repository contains proper build configuration
-3. Check IAM role permissions for Amplify service
-4. Ensure CodeCommit repository is accessible and contains valid code
-
-### SNS Notification Issues
-
-If SNS notifications are not working:
-
-1. Verify SNS topic ARNs are correctly configured
-2. Check SNS topic permissions and subscriptions
-3. Ensure EventBridge rules are properly configured
-4. Verify CloudWatch alarms are triggering correctly

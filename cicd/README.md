@@ -7,6 +7,14 @@ English / [**日本語**](README_JP.md)
 
 ``AWSCloudFormationTemplates/cicd`` deploys CloudFormation templates in this repository using `CodePipeline`.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- GitHub repository access for template configuration files
+- S3 artifact bucket in us-east-1 region (if deploying Global Settings Template)
+- Appropriate IAM permissions for CodePipeline, CodeBuild, and CloudFormation services
+
 ## TL;DR
 
 If you just want to deploy the stack, click one of the two buttons below.
@@ -84,3 +92,35 @@ You can provide optional parameters as follows.
 | TemplateConfigurationBasePath | String | | | The base path of template configration files |
 | **UploadArtifacts** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `UploadArtifacts` stack is deployed |
 | **WebServers** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, `WebServers` stack is deployed |
+
+## Serverless Application Repository Integration
+
+This CI/CD pipeline includes automatic publishing to AWS Serverless Application Repository.
+
+### How It Works
+
+When you push a Git tag matching the pattern `*-rc*`, CodeBuild automatically:
+
+1. Builds SAM templates
+2. Packages and uploads to S3
+3. Publishes to AWS Serverless Application Repository
+4. Generates ApplicationId for reference
+
+### Trigger Pattern
+
+The webhook is configured to trigger on tags matching: `^refs/tags/.*-rc.*$`
+
+**Example tags:**
+```bash
+git tag monitoring-glue-v1.0.0-rc
+git push origin monitoring-glue-v1.0.0-rc
+```
+
+### Buildspec
+
+The build process is defined in: `codebuild/buildspec-upload-artifacts-serverlessrepo.yml`
+
+### Usage
+
+For detailed instructions on creating and publishing SAM templates to Serverless Application Repository, see:
+- [Monitoring Templates Contributing Guide](../monitoring/CONTRIBUTING.md)

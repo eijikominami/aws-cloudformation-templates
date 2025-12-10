@@ -65,37 +65,6 @@ aws cloudformation deploy --template-file templates/transitgateway.yaml --stack-
 aws cloudformation deploy --template-file templates/vpn.yaml --stack-name VPN --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
-## Troubleshooting
-
-### VPC and Subnet Configuration Issues
-
-If you encounter VPC or subnet configuration problems:
-
-1. Verify that CIDR blocks do not overlap with existing VPCs
-2. Ensure subnet CIDR blocks are within the VPC CIDR range
-3. Check that availability zones are available in your region
-4. Verify that you have sufficient IP addresses for your requirements
-
-### Transit Gateway Connectivity Issues
-
-If Transit Gateway connections are not working:
-
-1. Check route table configurations and propagations
-2. Verify that security groups and NACLs allow required traffic
-3. Ensure that Transit Gateway attachments are in the correct state
-4. Check for conflicting routes in route tables
-
-### VPN Connection Problems
-
-If VPN connections are failing:
-
-1. Verify that the customer gateway IP address is correct and accessible
-2. Check that BGP configuration matches on both sides
-3. Ensure that security groups allow VPN traffic
-4. Verify that on-premises firewall rules allow VPN traffic
-
-### DNS Resolution Issues
-
 If DNS resolution is not working:
 
 1. Check that Route 53 resolver rules are properly configured
@@ -103,14 +72,6 @@ If DNS resolution is not working:
 3. Ensure that VPC DNS resolution and DNS hostnames are enabled
 4. Check that security groups allow DNS traffic (port 53)
 
-### Network Firewall Issues
-
-If Network Firewall is not filtering traffic correctly:
-
-1. Verify that firewall rules are properly configured
-2. Check that traffic is being routed through the firewall subnets
-3. Ensure that firewall policies match your security requirements
-4. Review firewall logs for blocked or allowed traffic patterns
 ```
 
 You can provide optional parameters as follows:
