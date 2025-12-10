@@ -2,7 +2,18 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/transfer-sns-topic creates resources for cross-region SNS topic message forwarding
 
-Metadata: 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: transfer-sns-topic
+    Description: Create resources for cross-region SNS topic message forwarding with Lambda
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/transfer-sns-topic.md
+    Labels: ['sns', 'lambda', 'cross-region', 'messaging']
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
+
   AWS::CloudFormation::Interface:
     ParameterGroups: 
       - Label: 
