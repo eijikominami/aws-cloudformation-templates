@@ -103,6 +103,14 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 もし、 Security Lake を Organizations 内で使用する場合は、Organizations の管理アカウントを使用して委任された [Security Lake 管理者を指定](https://docs.aws.amazon.com/ja_jp/security-lake/latest/userguide/getting-started.html#initial-account-setup) する必要があります。
 また、 ``SIEM on Open Search Service`` と連携させる場合には、[**SQS の可視性タイムアウトを 5 分から 10 分に変更**](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake_ja.md#security-lake-%E3%81%AE%E6%9C%89%E5%8A%B9%E5%8C%96%E3%81%A8%E8%A8%AD%E5%AE%9A)する必要があります。
 
+StackSets を Organizations 全体に展開する場合は、デプロイ前に管理アカウントで [**CloudFormation StackSets の委任管理者を登録**](https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html) する必要があります。
+
+```bash
+aws organizations register-delegated-administrator \
+  --account-id <AuditAccountId> \
+  --service-principal member.org.stacksets.cloudformation.amazonaws.com
+```
+
 SIEM on Open Search Service の構築後、 [こちらの手順のように](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/controltower_ja.md#log-archive-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%A7%E3%81%AE%E6%BA%96%E5%82%99) S3 バケットに **通知設定を追加** してください。また、必要に応じてパラメータの更新も行なってください。
 
 ### Amazon EventBridge

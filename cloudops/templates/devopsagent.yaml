@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: aws-cloudformation-templates/cloudops/devopsagent creates AWS DevOps Agent.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'DevOps Agent Configuration'
+        Parameters:
+          - AgentSpaceName
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  AgentSpaceName:
+    Type: String
+    Default: DefaultAgentSpace
+    Description: The name of the DevOps Agent Space
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  IAMRoleForAgentSpace:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: aidevops.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:aidevops:${AWS::Region}:${AWS::AccountId}:agentspace/*
+      Description: !Sub IAM role for DevOps Agent Space in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AIDevOpsAgentAccessPolicy
+      Policies:
+        - PolicyName: AllowCreateServiceLinkedRoles
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: AllowCreateServiceLinkedRoles
+                Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource:
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer
+      RoleName: !Sub ${AgentSpaceName}-AgentSpace-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForOperatorApp:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: aidevops.amazonaws.com
+            Action:
+              - sts:AssumeRole
+              - sts:TagSession
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:aidevops:${AWS::Region}:${AWS::AccountId}:agentspace/*
+      Description: !Sub IAM role for DevOps Agent Operator App in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AIDevOpsOperatorAppAccessPolicy
+      RoleName: !Sub ${AgentSpaceName}-OperatorApp-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  DevOpsAgentAgentSpace:
+    DependsOn: IAMRoleForAgentSpace
+    Type: AWS::DevOpsAgent::AgentSpace
+    Properties:
+      Description: !Sub DevOps Agent Space created by ${AWS::StackName}
+      Name: !Ref AgentSpaceName
+      OperatorApp:
+        Iam:
+          OperatorAppRoleArn: !GetAtt IAMRoleForOperatorApp.Arn
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  DevOpsAgentAssociationForAWS:
+    Type: AWS::DevOpsAgent::Association
+    Properties:
+      AgentSpaceId: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
+      Configuration:
+        Aws:
+          AssumableRoleArn: !GetAtt IAMRoleForAgentSpace.Arn
+          AccountId: !Ref AWS::AccountId
+          AccountType: monitor
+      ServiceId: aws
+
+Outputs:
+  DevOpsAgentAgentSpaceId:
+    Description: DevOps Agent Space ID
+    Value: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
+  DevOpsAgentAgentSpaceArn:
+    Description: DevOps Agent Space ARN
+    Value: !GetAtt DevOpsAgentAgentSpace.Arn

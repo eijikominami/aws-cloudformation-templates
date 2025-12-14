@@ -67,9 +67,6 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
-Conditions:
-  Development: !Equals [ !Ref Environment, 'development' ]
-
 Resources:
   # IAM
   IAMRoleForLambda:
@@ -86,7 +83,6 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
-          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
       Policies:
         - PolicyName: SNS
           PolicyDocument:
@@ -146,20 +142,9 @@ Resources:
                   }  
               sns.publish(**request)
       Description: SNSトピックを転送します。
-      Environment:
-        Variables:
-          AWS_LAMBDA_EXEC_WRAPPER:  !If
-            - Development
-            - /opt/codeguru_profiler_lambda_exec
-            - !Ref AWS::NoValue
-          AWS_CODEGURU_PROFILER_TARGET_REGION: !If
-            - Development
-            - !Ref AWS::Region
-            - !Ref AWS::NoValue
       FunctionName: transferSNSTopic
       Handler: index.lambda_handler
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
+
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.13

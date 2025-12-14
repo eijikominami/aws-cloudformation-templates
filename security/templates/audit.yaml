@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: aws-cloudformation-templates/security/audit deploys resources directly into the Audit account (SIEM, GuardDuty notifications).
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'SIEM Configuration'
+        Parameters:
+          - SIEM
+          - AllowedSourceIpAddressesForSIEM
+          - SIEMControlTowerLogBucketNameList
+          - SIEMControlTowerRoleArnForEsLoader
+          - SIEMControlTowerSqsForLogBuckets
+          - SIEMGeoLite2LicenseKey
+          - SIEMSecurityLakeSubscriberSqs
+          - SIEMSecurityLakeExternalId
+          - SIEMSecurityLakeRoleArn
+          - SIEMEmail
+      - Label:
+          default: 'GuardDuty Configuration'
+        Parameters:
+          - GuardDutyFindingsDestinationBucketArn
+          - GuardDutyKmsKeyArn
+      - Label:
+          default: 'Notification Configuration'
+        Parameters:
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  SIEM:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable SIEM on Amazon OpenSearch Service
+  AllowedSourceIpAddressesForSIEM:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: Allowed source IP addresses for SIEM
+  SIEMControlTowerLogBucketNameList:
+    Type: String
+    Default: ''
+  SIEMControlTowerRoleArnForEsLoader:
+    Type: String
+    Default: ''
+  SIEMControlTowerSqsForLogBuckets:
+    Type: String
+    Default: ''
+  SIEMGeoLite2LicenseKey:
+    Type: String
+    Default: ''
+    NoEcho: true
+  SIEMSecurityLakeSubscriberSqs:
+    Type: String
+    Default: ''
+  SIEMSecurityLakeExternalId:
+    Type: String
+    Default: ''
+  SIEMSecurityLakeRoleArn:
+    Type: String
+    Default: ''
+  SIEMEmail:
+    Type: String
+    Default: ''
+  GuardDutyFindingsDestinationBucketArn:
+    Type: String
+    Default: ''
+    Description: S3 bucket ARN for GuardDuty findings export
+  GuardDutyKmsKeyArn:
+    Type: String
+    Default: ''
+    Description: KMS key ARN for GuardDuty findings encryption
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateSIEM: !Equals [ !Ref SIEM, ENABLED ]
+  CreateGuardDutyExport: !And
+    - !Not [ !Equals [ !Ref GuardDutyFindingsDestinationBucketArn, '' ] ]
+    - !Not [ !Equals [ !Ref GuardDutyKmsKeyArn, '' ] ]
+  CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '' ]
+  CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '' ]
+
+Resources:
+  # SNS
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.24
+      Parameters:
+        TopicName: !Sub Alert-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.24
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${AWS::StackName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+  # SIEM on Amazon OpenSearch Service
+  SIEMOnAmazonOpenSearchService:
+    Condition: CreateSIEM
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        AllowedSourceIpAddresses: !Ref AllowedSourceIpAddressesForSIEM
+        ControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
+        ControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
+        ControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
+        DeploymentTarget: opensearch_serverless
+        GeoLite2LicenseKey: !Ref SIEMGeoLite2LicenseKey
+        SecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
+        SecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
+        SecurityLakeRoleArn: !Ref SIEMSecurityLakeRoleArn
+        SnsEmail: !Ref SIEMEmail
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TemplateURL: https://aes-siem-ap-northeast-1.s3.amazonaws.com/siem-on-amazon-opensearch-service.template
+  # GuardDuty
+  GuardDutyDetector:
+    Type: AWS::GuardDuty::Detector
+    Properties:
+      DataSources:
+        MalwareProtection:
+          ScanEc2InstanceWithFindings:
+            EbsVolumes: true
+        S3Logs:
+          Enable: true
+      Enable: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  GuardDutyPublishingDestination:
+    Condition: CreateGuardDutyExport
+    Type: AWS::GuardDuty::PublishingDestination
+    Properties:
+      DestinationProperties:
+        DestinationArn: !Ref GuardDutyFindingsDestinationBucketArn
+        KmsKeyArn: !Ref GuardDutyKmsKeyArn
+      DestinationType: S3
+      DetectorId: !Ref GuardDutyDetector
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # EventBridge for GuardDuty → SNS
+  CloudWatchEventsForGuardDuty:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: !Sub Rule for GuardDuty created by ${AWS::StackName}.
+      EventPattern: |
+        {
+           "source": [
+              "aws.guardduty"
+           ],
+           "detail-type": [
+              "GuardDuty Finding"
+           ],
+           "detail": {
+              "severity": [
+                 { "numeric": [ ">=", 4 ] }
+              ]
+           }
+        }
+      Name: GuardDuty
+      State: ENABLED
+      Targets:
+        - Arn: !If
+            - CreateSNSForAlert
+            - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+            - !Ref SNSForAlertArn
+          Id: CloudWatchEventsForGuardDuty

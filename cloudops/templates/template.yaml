@@ -10,23 +10,17 @@ Metadata:
         Parameters:
           - CodeGuruTargetRepository
       - Label:
+          default: 'DevOps Agent Configuration'
+        Parameters:
+          - DevOpsAgent
+          - DevOpsAgentSpaceName
+      - Label:
           default: Systems Manager Configuration
         Parameters:
           - SSMAdminAccountId
           - SSMIgnoreResourceConflicts
           - SSMOrganizationId
           - SSMPatchingAt
-      - Label:
-          default: Systems Manager Incident Manager Configuration
-        Parameters:
-          - IncidentManager
-          - IncidentManagerAlias
-          - IncidentManagerChatbotSnsArn
-          - IncidentManagerDisplayName
-          - IncidentManagerDurationInMinutes
-          - IncidentManagerEmail
-          - IncidentPhoneNumber
-          - IncidentManagerWorkloadName
       - Label:
           default: CloudWatch Application Insight Configuration
         Parameters:
@@ -63,46 +57,17 @@ Parameters:
     Type: String
     Default: eijikominami/aws-cloudformation-templates
     Description: The GitHub owner name and repository name for AWS CodeGuru Reviewer [required]
-  IncidentManager:
+  DevOpsAgent:
     Type: String
-    Default: DISABLED
+    Default: ENABLED
     AllowedValues:
       - ENABLED
       - DISABLED
-    Description: Enable or disable AWS Systems Manager Incident Manager [required]
-  IncidentManagerAlias:
+    Description: Enable or disable AWS DevOps Agent [required]
+  DevOpsAgentSpaceName:
     Type: String
-    Default: administrator
-    AllowedPattern: ^[a-z0-9_\-]*$
-    Description: The unique and identifiable alias of the contact or escalation plan [required]
-  IncidentManagerChatbotSnsArn:
-    Type: String
-    Default: ''
-    Description: The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident
-  IncidentManagerDisplayName:
-    Type: String
-    Default: Administrator
-    AllowedPattern: ^[\p{L}\p{Z}\p{N}_.\-]*$
-    Description: The full name of the contact or escalation plan [required]
-  IncidentManagerDurationInMinutes:
-    Type: Number
-    Default: 1
-    MinValue: 1
-    MaxValue: 30
-    Description: The time to wait until beginning the next stage [required]
-  IncidentManagerEmail:
-    Type: String
-    Default: ''
-    Description: The email address
-  IncidentPhoneNumber:
-    Type: String
-    Default: ''
-    Description: The Phone number
-  IncidentManagerWorkloadName:
-    Type: String
-    Default: Workload
-    AllowedPattern: .+
-    Description: The workload name [required]
+    Default: DefaultAgentSpace
+    Description: The name of the DevOps Agent Space
   SSMAdminAccountId:
     Type: String
     Default: ''
@@ -151,8 +116,8 @@ Conditions:
   CreateApplicationInsights: !Equals
     - !Ref ApplicationInsights
     - ENABLED
-  CreateIncidentManager: !Equals
-    - !Ref IncidentManager
+  CreateDevOpsAgent: !Equals
+    - !Ref DevOpsAgent
     - ENABLED
   CreateSNSForAlert: !Equals
     - !Ref SNSForAlertArn
@@ -184,8 +149,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/applicationinsights.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/applicationinsights.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/applicationinsights.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/applicationinsights.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -206,8 +171,31 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguru.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/codeguru.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguru.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/codeguru.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  DevOpsAgentStack:
+    Condition: CreateDevOpsAgent
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        AgentSpaceName: !Ref DevOpsAgentSpaceName
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsagent.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsagent.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -228,8 +216,8 @@ Resources:
           - !Ref SNSForAlertArn
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsguru.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsguru.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsguru.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsguru.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -248,8 +236,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/resourceexplorer.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -288,37 +276,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/ssm.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/ssm.yaml
-  SystemsManagerIncidentManager:
-    Condition: CreateIncidentManager
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        Alias: !Ref IncidentManagerAlias
-        ChatbotSnsArn: !Ref IncidentManagerChatbotSnsArn
-        DisplayName: !Ref IncidentManagerDisplayName
-        DurationInMinutes: !Ref IncidentManagerDurationInMinutes
-        Email: !Ref IncidentManagerEmail
-        PhoneNumber: !Ref IncidentPhoneNumber
-        WorkloadName: !Ref IncidentManagerWorkloadName
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/incidentmanager.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/incidentmanager.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/ssm.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/ssm.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

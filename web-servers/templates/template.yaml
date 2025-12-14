@@ -621,8 +621,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/autoscaling.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/autoscaling.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/autoscaling.yaml
   DataLifecycleManager:
     Condition: CreateDataLifecycleManager
     Type: AWS::CloudFormation::Stack
@@ -647,8 +647,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/dlm.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/dlm.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
   WAF:
     Condition: CreateWAFForALB
     Type: AWS::CloudFormation::Stack
@@ -672,8 +672,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/waf.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml
   CloudFront:
     Condition: CreateCloudFront
     Type: AWS::CloudFormation::Stack
@@ -728,8 +728,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/cloudfront.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/edge/cloudfront.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/cloudfront.yaml
   GlobalAccelerator:
     Condition: CreateGlobalAccelerator
     Type: AWS::CloudFormation::Stack
@@ -756,8 +756,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/globalaccelerator.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/network/globalaccelerator.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/globalaccelerator.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/network/globalaccelerator.yaml
   ContainerPipeline:
     Condition: CreateContainerPipeline
     Type: AWS::CloudFormation::Stack
@@ -815,8 +815,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/codepipeline-container.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/codepipeline-container.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/codepipeline-container.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/codepipeline-container.yaml
   SNSForAlert:
     Condition: CreateSNSForAlert
     Type: AWS::Serverless::Application

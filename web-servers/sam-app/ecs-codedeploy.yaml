@@ -125,7 +125,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
         - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
-        - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
         - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
       Policies:
         - PolicyName: CodeDeploy
@@ -213,8 +212,6 @@ Resources:
       Description: CodeDeploy DeploymentGroup 用のカスタムリソース Lambda です。
       FunctionName: codeDeployDeploymentGroupLambdaBG
       Handler: lambda_function.lambda_handler
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.13
@@ -297,8 +294,6 @@ Resources:
           PAGE_EXPECTED_STRING: !Ref PageExpectedString
       FunctionName: afterInstallHook
       Handler: index.lambda_handler
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
       MemorySize: 512
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.13
