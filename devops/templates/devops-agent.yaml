@@ -1,0 +1,410 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: aws-cloudformation-templates/devops/devops-agent sets AWS DevOps Agent.
+
+Globals:
+  Function:
+    Architectures:
+      - arm64
+    Handler: index.lambda_handler
+    Runtime: python3.13
+    Tracing: Active
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'DevOps Agent Configuration'
+        Parameters:
+          - AgentSpaceDescription
+          - AgentSpaceLocale
+          - AgentSpaceName
+      - Label:
+          default: 'Notification Configuration'
+        Parameters:
+          - AlarmLevel
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  AgentSpaceDescription:
+    Type: String
+    Default: AWS DevOps Agent space for CloudWatch alarm investigation
+    Description: The description of the agent space
+
+  AgentSpaceLocale:
+    Type: String
+    Default: en
+    AllowedValues:
+      - ar
+      - de
+      - en
+      - es
+      - fr
+      - id
+      - it
+      - ja
+      - ko
+      - pt
+      - th
+      - tr
+      - vi
+      - zh-cn
+      - zh-tw
+    Description: The language for agent responses
+
+  AgentSpaceName:
+    Type: String
+    Default: devops-agent-space
+    AllowedPattern: '[a-zA-Z0-9-]{1,64}'
+    Description: The name of the AWS DevOps Agent agent space [required]
+
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
+
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+
+  LogicalName:
+    Type: String
+    Default: DevOpsAgent
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for deployment information
+
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateSNSForAlert: !Equals [!Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [!Ref SNSForDeploymentArn, '']
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.24
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.24
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+  # IAM
+  IAMRoleForAgentSpace:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Sub 'arn:aws:aidevops:${AWS::Region}:${AWS::AccountId}:agentspace/*'
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+            Effect: Allow
+            Principal:
+              Service: aidevops.amazonaws.com
+        Version: '2012-10-17'
+      Description: !Sub IAM role for DevOps Agent Space in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AIDevOpsAgentAccessPolicy
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - iam:CreateServiceLinkedRole
+                Effect: Allow
+                Resource:
+                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer'
+            Version: '2012-10-17'
+          PolicyName: AllowCreateResourceExplorerServiceLinkedRole
+      RoleName: !Sub ${LogicalName}-AgentSpace-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  IAMRoleForCustomResourceLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Description: !Sub IAM role for DevOps Agent Custom Resource Lambda in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - aidevops:AssociateService
+                  - aidevops:CreateAgentSpace
+                  - aidevops:DeleteAgentSpace
+                  - aidevops:DeregisterService
+                  - aidevops:DisableOperatorApp
+                  - aidevops:DisassociateService
+                  - aidevops:EnableOperatorApp
+                  - aidevops:RegisterService
+                  - aidevops:UpdateAgentSpace
+                Effect: Allow
+                Resource: '*'
+              - Action:
+                  - iam:PassRole
+                Effect: Allow
+                Resource:
+                  - !GetAtt IAMRoleForAgentSpace.Arn
+                  - !GetAtt IAMRoleForWebappAdmin.Arn
+            Version: '2012-10-17'
+          PolicyName: DevOpsAgentSpaceManagement
+      RoleName: !Sub ${LogicalName}-DevOpsAgent-CustomResource-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  IAMRoleForWebappAdmin:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+              - sts:TagSession
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Sub 'arn:aws:aidevops:${AWS::Region}:${AWS::AccountId}:agentspace/*'
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+            Effect: Allow
+            Principal:
+              Service: aidevops.amazonaws.com
+        Version: '2012-10-17'
+      Description: !Sub IAM role for DevOps Agent Operator App in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AIDevOpsOperatorAppAccessPolicy
+      RoleName: !Sub ${LogicalName}-WebappAdmin-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # CloudWatch
+  CloudWatchAlarmForLambdaErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: AWS DevOps Agent custom resource Lambda errors
+      AlarmName: !Sub ${AlarmLevel}-${LogicalName}-DevOpsAgent-Lambda-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ServerlessFunctionForAgentSpaceCustomResource
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+  # Lambda
+  ServerlessFunctionForAgentSpaceCustomResource:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Custom Resource Lambda that creates an AWS DevOps Agent Agent Space
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+      FunctionName: !Sub ${LogicalName}-DevOpsAgent-AgentSpace-CR
+      InlineCode: |
+        import boto3
+        import cfnresponse
+        import json
+        import logging
+
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
+        def lambda_handler(event, context):
+            logger.info(json.dumps(event))
+            request_type = event['RequestType']
+            props = event.get('ResourceProperties', {})
+            physical_id = event.get('PhysicalResourceId', 'pending')
+
+            client = boto3.client('devops-agent', region_name=props.get('Region'))
+
+            try:
+                if request_type == 'Create':
+                    space = client.create_agent_space(
+                        name=props['AgentSpaceName'],
+                        description=props.get('AgentSpaceDescription', ''),
+                        locale=props.get('AgentSpaceLocale', 'en')
+                    )
+                    agent_space_id = space['agentSpace']['agentSpaceId']
+                    client.associate_service(
+                        agentSpaceId=agent_space_id,
+                        serviceId='aws',
+                        configuration={
+                            'aws': {
+                                'assumableRoleArn': props['AgentSpaceRoleArn'],
+                                'accountId': props['AccountId'],
+                                'accountType': 'monitor'
+                            }
+                        }
+                    )
+                    client.enable_operator_app(
+                        agentSpaceId=agent_space_id,
+                        authFlow='iam',
+                        operatorAppRoleArn=props['WebappAdminRoleArn']
+                    )
+                    svc = client.register_service(
+                        service='eventChannel',
+                        serviceDetails={'eventChannel': {'type': 'webhook'}},
+                        name=props['AgentSpaceName'] + '-event-channel'
+                    )
+                    ec = client.associate_service(
+                        agentSpaceId=agent_space_id,
+                        serviceId=svc['serviceId'],
+                        configuration={'eventChannel': {}}
+                    )
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS, {
+                        'AgentSpaceId': agent_space_id,
+                        'WebhookUrl': ec.get('webhook', {}).get('webhookUrl', '')
+                    }, agent_space_id)
+
+                elif request_type == 'Update':
+                    client.update_agent_space(
+                        agentSpaceId=physical_id,
+                        name=props['AgentSpaceName'],
+                        description=props.get('AgentSpaceDescription', ''),
+                        locale=props.get('AgentSpaceLocale', 'en')
+                    )
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS,
+                                     {'AgentSpaceId': physical_id}, physical_id)
+
+                elif request_type == 'Delete':
+                    try:
+                        client.delete_agent_space(agentSpaceId=physical_id)
+                    except client.exceptions.ResourceNotFoundException:
+                        pass
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physical_id)
+
+            except Exception as e:
+                logger.exception('Custom resource failed')
+                cfnresponse.send(event, context, cfnresponse.FAILED,
+                                 {'Message': str(e)}, physical_id)
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForCustomResourceLambda.Arn
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Timeout: 60
+
+  # Custom Resource
+  CustomResourceForAgentSpace:
+    Type: Custom::DevOpsAgentSpace
+    Properties:
+      AccountId: !Ref AWS::AccountId
+      AgentSpaceDescription: !Ref AgentSpaceDescription
+      AgentSpaceLocale: !Ref AgentSpaceLocale
+      AgentSpaceName: !Ref AgentSpaceName
+      AgentSpaceRoleArn: !GetAtt IAMRoleForAgentSpace.Arn
+      Region: !Ref AWS::Region
+      ServiceToken: !GetAtt ServerlessFunctionForAgentSpaceCustomResource.Arn
+      WebappAdminRoleArn: !GetAtt IAMRoleForWebappAdmin.Arn
+
+Outputs:
+  AgentSpaceId:
+    Description: The AWS DevOps Agent Agent Space ID
+    Value: !GetAtt CustomResourceForAgentSpace.AgentSpaceId
+
+  IAMRoleForAgentSpaceArn:
+    Description: The IAM role ARN for the DevOps Agent Space
+    Value: !GetAtt IAMRoleForAgentSpace.Arn
+
+  IAMRoleForWebappAdminArn:
+    Description: The IAM role ARN for the DevOps Agent Operator App
+    Value: !GetAtt IAMRoleForWebappAdmin.Arn
+
+  ConsoleUrl:
+    Description: The AWS DevOps Agent console URL for the Agent Space
+    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/devops-agent/home?region=${AWS::Region}#/agentspaces/${CustomResourceForAgentSpace.AgentSpaceId}'
+
+  WebhookUrl:
+    Description: The webhook URL for the DevOps Agent EventChannel
+    Value: !GetAtt CustomResourceForAgentSpace.WebhookUrl
