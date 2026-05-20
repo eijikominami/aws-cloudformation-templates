@@ -19,7 +19,7 @@ If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/templates/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/templates/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CloudOps&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/template.yaml) |
 
 If you want to deploy each service individually, click the button below.
 
@@ -28,10 +28,10 @@ If you want to deploy each service individually, click the button below.
 | CloudWatch Application Insights | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) |
 | CloudWatch Internet Monitor | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=InternetMonitor&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/internetmonitor.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=InternetMonitor&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/internetmonitor.yaml) |
 | CodeGuru Reviewer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=CodeGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguru.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguru.yaml) |
+| DevOps Agent | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DevOpsAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsagent.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsagent.yaml) |
 | DevOps Guru | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) |
 | Resource Explorer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) |
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
-| Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) |
 
 ## Architecture
 
@@ -44,33 +44,27 @@ The following sections describe the individual components of the architecture.
 Execute the command to deploy.
 
 ```bash
-aws cloudformation deploy --template-file templates/template.yaml --stack-name CloudOps --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
-You can provide parameters as follows.
+You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | **AlarmLevel** | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
-| **ApplicationInsights** | ENABLED / DISABLED | ENABLED | ○ | Enable or disable Amazon CloudWatch Application Insights |
-| **CodeGuruTargetRepository** | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
-| **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
-| **IncidentManagerAlias** | String | administrator | ○ | The unique and identifiable alias of the contact or escalation plan |
-| IncidentManagerChatbotSnsArn | String | | | The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident |
-| **IncidentManagerDisplayName** | String | Administrator | ○ | The full name of the contact or escalation plan |
-| **IncidentManagerDurationInMinutes** | Number | 1 | ○ | The time to wait until beginning the next stage |
-| IncidentManagerEmail | String | | | The email address |
-| IncidentPhoneNumber | String | | | The phone number |
-| **IncidentManagerWorkloadName** | String | Workload | ○ | The workload name |
+| **ApplicationInsights** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Amazon CloudWatch Application Insights |
+| CodeGuruTargetRepository | String | | | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
+| **DevOpsAgent** | PRIMARY / MEMBER / DISABLED | MEMBER | ○ | Enable or disable AWS DevOps Agent |
+| DevOpsAgentMemberAccountIds | CommaDelimitedList | | | Comma-separated list of MEMBER account IDs for cross-account webhook forwarding |
+| DevOpsAgentPrimaryAccountId | String | | conditional | Account ID of the PRIMARY account |
+| DevOpsAgentSpaceId | String | | conditional | AgentSpace ID from the PRIMARY account |
+| DevOpsAgentWebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | Minimum priority level to forward to DevOps Agent |
+| **ResourceExplorerIndexType** | AGGREGATOR / LOCAL | LOCAL | ○ | Resource Explorer index type |
 | SSMAdminAccountId | String | | | AWS Account ID of the primary account for AWS Systems Manager Automation |
-| **SSMIgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | If ENABLED is set, the resources are NOT created |
+| **SSMIgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager resource creation |
 | SSMOrganizationId | String | | | The Organizations ID |
+| SSMOrganizationsRootId | String | | | The Organizations Root ID |
 | **SSMPatchingAt** | Number | 3 | ○ | Daily patching time (H) |
-| SNSForAlertArn | String | | | The Amazon SNS topic ARN for alert |
-| SNSForDeploymentArn | String | | | The Amazon SNS topic ARN for deployment information |
-| **Environment** | production / test / development | production | ○ | The environment type |
-| **TagKey** | String | createdby | ○ | Tag key for resource tagging |
-| **TagValue** | String | aws-cloudformation-templates | ○ | Tag value for resource tagging |
 
 ### Application Insight
 
@@ -88,6 +82,44 @@ This template sets ``Amazon CodeGuru Reviewer``.
 | --- | --- | --- | --- | --- |
 | **CodeGuruTargetRepository** | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
 
+### DevOps Agent
+
+This template creates ``AWS DevOps Agent`` Agent Space, IAM roles, and AWS account associations. DevOps Agent provides automated incident investigation, proactive improvement recommendations, and on-demand SRE tasks. In PRIMARY mode, it also creates a cross-account configuration to receive CloudWatch Alarm notifications from MEMBER accounts' SNS Alert Topics and forward them to the DevOps Agent webhook.
+
+> [!NOTE]
+> The IAM role includes an `AdditionalServiceReadAccess` inline policy for permissions not yet included in the `AIDevOpsAgentAccessPolicy` managed policy. These permissions only take effect if they are also included in the [DevOps Agent permission guardrail](https://docs.aws.amazon.com/devopsagent/latest/userguide/aws-devops-agent-security-limiting-agent-access-in-an-aws-account.html). If access errors persist after deployment, the guardrail may not yet support these actions.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| **AgentSpaceName** | String | DefaultAgentSpace | ○ | The name of the Agent Space |
+| AgentSpaceId | String | | conditional | AgentSpace ID from the PRIMARY account |
+| MemberAccountIds | CommaDelimitedList | | | Comma-separated list of MEMBER account IDs for cross-account webhook forwarding |
+| Mode | PRIMARY / MEMBER | PRIMARY | ○ | PRIMARY creates AgentSpace, MEMBER creates IAM roles only |
+| PrimaryAccountId | String | | conditional | Account ID of the PRIMARY account that owns the AgentSpace |
+| SNSForAlertArn | String | | | The Amazon SNS topic ARN for alert |
+| WebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | Minimum priority level to forward to DevOps Agent |
+
+#### Webhook Forwarder Priority Filtering
+
+The WebhookForwarder Lambda receives all events from the SNS Alert topic and forwards only those meeting the `WebhookMinimumPriority` threshold (default: HIGH) to DevOps Agent.
+
+| Source | Condition | Priority | Forwarded |
+| --- | --- | --- | --- |
+| CloudWatch Alarm | Alarm name starts with `Incident` | CRITICAL | ○ |
+| CloudWatch Alarm | Alarm name starts with `Warning` | HIGH | ○ |
+| CloudWatch Alarm | Alarm name starts with `Notice` | MEDIUM | |
+| Security Hub | Severity label = CRITICAL | CRITICAL | ○ |
+| Security Hub | Severity label = HIGH | HIGH | ○ |
+| GuardDuty | Severity >= 7 | HIGH | ○ |
+| GuardDuty | Severity >= 4 | MEDIUM | |
+| AWS Health | Event type category = issue | CRITICAL | ○ |
+| AWS Health | Event type category = scheduledChange | MEDIUM | |
+| Cost Anomaly Detection | Anomaly score >= 0.7 | HIGH | ○ |
+| Cost Anomaly Detection | Anomaly score < 0.7 | MEDIUM | |
+| AutoScaling / EBS / SSM failure | Status = Failed or Timed Out | HIGH | ○ |
+
+Events not matching any of the above patterns (e.g., EC2 state changes, tag changes, console sign-ins) are skipped.
+
 ### DevOps Guru
 
 This template sets a notification channel of ``AWS DevOps Guru``.
@@ -104,25 +136,67 @@ This template sets ``AWS Systems Manager``.
 | --- | --- | --- | --- | --- |
 | AdminAccountId | String | | | AWS Account ID of the primary account (the account from which AWS Systems Manager Automation will be initiated) |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
-| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager Incident Manager |
+| **IgnoreResourceConflicts** | ENABLED / DISABLED | DISABLED | ○ | Enable or disable AWS Systems Manager resource creation |
 | OrganizationId | String | | | The Organizations ID |
+| OrganizationsRootId | String | | | The Organizations Root ID |
 | **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
-If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.
+To enable cross-account data aggregation in SSM Explorer, run the following in the **management account** (cannot be managed via CloudFormation):
 
-### Systems Manager Incident Manager
+```bash
+aws organizations enable-aws-service-access --service-principal opsdatasync.ssm.amazonaws.com
+```
 
-This template sets a notification channel of ``AWS Systems Manager Incident Manager``.
+### Default Host Management Configuration (DHMC)
 
-| Name | Type | Default | Required | Details |  
-| --- | --- | --- | --- | --- |
-| Alias | String | admimistrator | ○ | The unique and identifiable alias of the contact or escalation plan |
-| ChatbotSnsArn | String | | | The SNS targets that AWS Chatbot uses to notify the chat channel of updates to an incident |
-| DisplayName | String | Administrator | ○ | The full name of the contact or escalation plan |
-| DurationInMinutes | Number | 1 | ○ | The time to wait until beginning the next stage |
-| Email | String | | | The email address |
-| PhoneNumber | String | | | The Phone Number |
-| WorkloadName | String | Workload | ○ | The workload name |
+DHMC cannot be managed via CloudFormation (`AWS::SSM::ServiceSetting` is not a supported resource type). Enable it via API after deploying the CloudOps stack:
+
+```bash
+aws ssm update-service-setting \
+  --setting-id /ssm/managed-instance/default-ec2-instance-management-role \
+  --setting-value service-role/AWSSystemsManagerDefaultEC2InstanceManagementRole
+```
+
+The IAM role `AWSSystemsManagerDefaultEC2InstanceManagementRole` is created by `ssm.yaml`.
+
+### Operational Insights (OpsInsights)
+
+OpsInsights cannot be managed via CloudFormation. Enable it via API:
+
+```bash
+aws ssm update-service-setting \
+  --setting-id /ssm/opsinsights/opscenter \
+  --setting-value Enabled
+```
+
+### SSM Unified Console (Quick Setup)
+
+After deploying the CloudOps stack to all accounts, enable the SSM Unified Console organization-wide via Quick Setup CLI:
+
+```bash
+aws ssm-quicksetup create-configuration-manager \
+  --configuration-definitions '[{
+    "Type": "AWSQuickSetupType-SSM",
+    "TypeVersion": "3.0",
+    "Parameters": {
+      "AgentUpdateSchedule": "rate(14 days)",
+      "EnableDHMCSchedule": "rate(1 day)",
+      "HomeRegion": "ap-northeast-1",
+      "InventoryCollectionSchedule": "rate(12 hours)",
+      "TargetOrganizationalUnits": "<ORGANIZATION_ROOT_ID>",
+      "TargetRegions": "ap-northeast-1",
+      "DelegatedAccountId": "<DELEGATED_ADMIN_ACCOUNT_ID>"
+    }
+  }]'
+```
+
+Prerequisites (created by `ssm.yaml`):
+- `AWS-QuickSetup-SSM-RoleForEnablingExplorer`
+- `AWS-QuickSetup-SSM-EnableDHMC`
+- `AWS-QuickSetup-SSM-EnableAREX`
+- `AWS-QuickSetup-SSM-ManageInstanceProfile`
+
+Run from the delegated admin account (CloudOps). The configuration targets the entire Organization.
 
 ## Amazon CloudWatch Internet Monitor
 
@@ -170,3 +244,26 @@ The S3 bucket stores screenshots, HAR files, and logs from the hearbeat scripts.
 This template creates Amazon CloudWatch custom metrics and alarms.
 These alarms are trigged when the success rate is less than **90%**.
 
+## DevOps Agent (Cross-Account Association)
+
+The `devopsagent.yaml` template creates an AgentSpace in PRIMARY mode and IAM roles in MEMBER mode.
+
+### Known Limitation
+
+Cross-account associations **cannot** be created via CloudFormation or the `associate_service` API. Both return:
+
+```
+AccessDeniedException: Cross-account pass role is not allowed.
+```
+
+This is a service-side restriction (not an IAM Trust Policy issue). The MEMBER IAM roles are correctly configured with the PRIMARY account's `aws:SourceAccount` and `aws:SourceArn` in their trust policy.
+
+### Manual Step Required
+
+After deploying the CloudOps stack to all accounts, add secondary cloud sources via the **AWS Console**:
+
+1. Go to DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
+2. Click "Add secondary cloud source"
+3. Enter the member account ID and the existing role name (no need to create a new role — CFn already created it)
+
+Role name for all accounts: `DefaultAgentSpace-AgentSpace-ap-northeast-1`

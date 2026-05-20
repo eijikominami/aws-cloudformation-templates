@@ -65,7 +65,7 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecu
 
 You can provide optional parameters as follows.
 
-| Name | Type | Default | Requied | Details | 
+| Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |

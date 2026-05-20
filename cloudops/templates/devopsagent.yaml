@@ -7,7 +7,16 @@ Metadata:
       - Label:
           default: 'DevOps Agent Configuration'
         Parameters:
+          - Mode
+          - AgentSpaceId
           - AgentSpaceName
+          - PrimaryAccountId
+      - Label:
+          default: 'Webhook Forwarder Configuration'
+        Parameters:
+          - MemberAccountIds
+          - SNSForAlertArn
+          - WebhookMinimumPriority
       - Label:
           default: 'Tag Configuration'
         Parameters:
@@ -16,6 +25,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AgentSpaceId:
+    Type: String
+    Default: ''
+    Description: AgentSpace ID from the PRIMARY account (required for MEMBER)
   AgentSpaceName:
     Type: String
     Default: DefaultAgentSpace
@@ -27,6 +40,34 @@ Parameters:
       - production
       - test
       - development
+  MemberAccountIds:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: Comma-separated list of MEMBER account IDs for cross-account webhook forwarding
+  Mode:
+    Type: String
+    Default: PRIMARY
+    AllowedValues:
+      - PRIMARY
+      - MEMBER
+    Description: PRIMARY creates AgentSpace. MEMBER creates IAM roles only for cross-account access.
+  PrimaryAccountId:
+    Type: String
+    Default: ''
+    Description: Account ID of the PRIMARY account that owns the AgentSpace (required for MEMBER)
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  WebhookMinimumPriority:
+    Type: String
+    Default: HIGH
+    AllowedValues:
+      - CRITICAL
+      - HIGH
+      - MEDIUM
+      - LOW
+    Description: Minimum priority level to forward to DevOps Agent (inclusive). Alarms below this level are skipped.
   TagKey:
     Type: String
     Default: createdby
@@ -36,7 +77,20 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateAgentSpace: !Equals [ !Ref Mode, PRIMARY ]
+  CreateWebhookForwarder: !And
+    - !Condition CreateAgentSpace
+    - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
+  CreateWebhookPermissionsForMembers: !And
+    - !Condition CreateWebhookForwarder
+    - !Not [ !Equals [ !Join [ '', !Ref MemberAccountIds ], '' ] ]
+  Development: !Equals
+    - !Ref Environment
+    - development
+
 Resources:
+  # --- IAM Roles ---
   IAMRoleForAgentSpace:
     Type: AWS::IAM::Role
     Properties:
@@ -49,14 +103,15 @@ Resources:
             Action: sts:AssumeRole
             Condition:
               StringEquals:
-                aws:SourceAccount: !Ref AWS::AccountId
-              ArnLike:
-                aws:SourceArn: !Sub arn:aws:aidevops:${AWS::Region}:${AWS::AccountId}:agentspace/*
+                aws:SourceAccount: !If
+                  - CreateAgentSpace
+                  - !Ref AWS::AccountId
+                  - !Ref PrimaryAccountId
       Description: !Sub IAM role for DevOps Agent Space in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AIDevOpsAgentAccessPolicy
       Policies:
-        - PolicyName: AllowCreateServiceLinkedRoles
+        - PolicyName: AdditionalReadAccess
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -66,6 +121,21 @@ Resources:
                   - iam:CreateServiceLinkedRole
                 Resource:
                   - !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer
+              - Sid: AdditionalServiceReadAccess
+                Effect: Allow
+                Action:
+                  - cloudcontrol:GetResource
+                  - config:GetComplianceDetailsByConfigRule
+                  - config:GetComplianceDetailsByResource
+                  - iam:ListUsers
+                  - iam:ListPolicies
+                  - lambda:GetFunction
+                  - logs:ListLogGroupsForEntity
+                  - application-signals:ListObservedEntities
+                  - application-signals:ListServices
+                  - route53resolver:GetResolverEndpoint
+                  - route53resolver:ListResolverEndpoints
+                Resource: '*'
       RoleName: !Sub ${AgentSpaceName}-AgentSpace-${AWS::Region}
       Tags:
         - Key: environment
@@ -73,6 +143,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForOperatorApp:
+    Condition: CreateAgentSpace
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -98,7 +169,82 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForWebhookCustomResource:
+    Condition: CreateWebhookForwarder
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Webhook Custom Resource Lambda in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DevOpsAgentAndSecrets
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: DevOpsAgentWebhook
+                Effect: Allow
+                Action:
+                  - aidevops:RegisterService
+                  - aidevops:DeregisterService
+                  - aidevops:AssociateService
+                  - aidevops:DisassociateService
+                  - aidevops:ListServices
+                  - aidevops:ListWebhooks
+                Resource: '*'
+              - Sid: SecretsManager
+                Effect: Allow
+                Action:
+                  - secretsmanager:CreateSecret
+                  - secretsmanager:DeleteSecret
+                  - secretsmanager:PutSecretValue
+                  - secretsmanager:UpdateSecret
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AgentSpaceName}-WebhookCredentials-*
+      RoleName: !Sub ${AgentSpaceName}-WebhookCR-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for DevOps Agent Webhook Forwarder Lambda in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ReadWebhookSecret
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AgentSpaceName}-WebhookCredentials-*
+      RoleName: !Sub ${AgentSpaceName}-WebhookFwd-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # --- DevOps Agent Space ---
   DevOpsAgentAgentSpace:
+    Condition: CreateAgentSpace
     DependsOn: IAMRoleForAgentSpace
     Type: AWS::DevOpsAgent::AgentSpace
     Properties:
@@ -112,21 +258,396 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  DevOpsAgentAssociationForAWS:
+  DevOpsAgentAssociation:
+    Condition: CreateAgentSpace
     Type: AWS::DevOpsAgent::Association
     Properties:
       AgentSpaceId: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
       Configuration:
         Aws:
-          AssumableRoleArn: !GetAtt IAMRoleForAgentSpace.Arn
           AccountId: !Ref AWS::AccountId
           AccountType: monitor
+          AssumableRoleArn: !GetAtt IAMRoleForAgentSpace.Arn
       ServiceId: aws
 
+  # --- Webhook Custom Resource ---
+  LambdaFunctionForWebhookCustomResource:
+    Condition: CreateWebhookForwarder
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - arm64
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import json
+          import os
+
+          def handler(event, context):
+              try:
+                  props = event['ResourceProperties']
+                  agent_space_id = props['AgentSpaceId']
+                  secret_name = props['SecretName']
+                  client = boto3.client('devops-agent')
+                  sm = boto3.client('secretsmanager')
+
+                  if event['RequestType'] in ('Create', 'Update'):
+                      # Step 1: register-service (idempotent)
+                      try:
+                          reg = client.register_service(
+                              service='eventChannel',
+                              serviceDetails={'eventChannel': {'type': 'webhook'}},
+                              name=f"{os.environ.get('STACK_NAME', 'cfn')}-webhook"
+                          )
+                          service_id = reg['serviceId']
+                      except Exception as reg_err:
+                          if 'already registered' not in str(reg_err):
+                              raise
+                          # Already registered - get existing service_id
+                          services = client.list_services()
+                          service_id = next(s['serviceId'] for s in services['services'] if s['serviceType'] == 'eventChannel')
+
+                      # Step 2: associate-service
+                      try:
+                          assoc = client.associate_service(
+                              agentSpaceId=agent_space_id,
+                              serviceId=service_id,
+                              configuration={'eventChannel': {}}
+                          )
+                          webhook = assoc['webhook']
+                      except Exception as assoc_err:
+                          if 'already associated' not in str(assoc_err).lower() and 'conflict' not in str(assoc_err).lower():
+                              raise
+                          # Already associated - get webhook from list_webhooks
+                          webhooks = client.list_webhooks(agentSpaceId=agent_space_id)
+                          webhook = webhooks['webhooks'][0]
+
+                      # Step 3: Store in Secrets Manager
+                      secret_value = json.dumps({
+                          'webhookUrl': webhook['webhookUrl'],
+                          'webhookSecret': webhook['webhookSecret'],
+                          'webhookId': webhook['webhookId'],
+                          'serviceId': service_id,
+                          'associationId': assoc['association']['associationId']
+                      })
+                      try:
+                          sm.create_secret(Name=secret_name, SecretString=secret_value)
+                      except sm.exceptions.ResourceExistsException:
+                          sm.put_secret_value(SecretId=secret_name, SecretString=secret_value)
+
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  elif event['RequestType'] == 'Delete':
+                      # Best-effort cleanup
+                      try:
+                          sm.delete_secret(SecretId=secret_name, ForceDeleteWithoutRecovery=True)
+                      except Exception:
+                          pass
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+      Description: !Sub Custom Resource Lambda for DevOps Agent Webhook in ${AWS::StackName}
+      Environment:
+        Variables:
+          STACK_NAME: !Ref AWS::StackName
+      FunctionName: !Sub ${AgentSpaceName}-WebhookCR
+      Handler: index.handler
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:boto3-latest:1
+      Role: !GetAtt IAMRoleForWebhookCustomResource.Arn
+      Runtime: python3.12
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Timeout: 300
+  CustomResourceForWebhook:
+    Condition: CreateWebhookForwarder
+    DependsOn: DevOpsAgentAssociation
+    Type: Custom::WebhookRegistration
+    Properties:
+      AgentSpaceId: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
+      SecretName: !Sub ${AgentSpaceName}-WebhookCredentials
+      ServiceToken: !GetAtt LambdaFunctionForWebhookCustomResource.Arn
+      ServiceTimeout: 300
+
+  # --- Webhook Forwarder ---
+  LambdaFunctionForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    DependsOn: CustomResourceForWebhook
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - arm64
+      Code:
+        ZipFile: |
+          import base64
+          import boto3
+          import hashlib
+          import hmac
+          import json
+          import os
+          import urllib.request
+          from datetime import datetime, timezone
+
+          _cached = None
+
+          def get_credentials():
+              global _cached
+              if _cached:
+                  return _cached
+              sm = boto3.client('secretsmanager')
+              resp = sm.get_secret_value(SecretId=os.environ['SECRET_NAME'])
+              _cached = json.loads(resp['SecretString'])
+              return _cached
+
+          def transform_alarm(msg):
+              state = msg.get('NewStateValue', '')
+              if state == 'ALARM':
+                  action = 'created'
+              elif state == 'OK':
+                  action = 'resolved'
+              else:
+                  action = 'updated'
+              name = msg.get('AlarmName', '')
+              if name.startswith('Incident'):
+                  priority = 'CRITICAL'
+              elif name.startswith('Warning'):
+                  priority = 'HIGH'
+              elif name.startswith('Notice'):
+                  priority = 'MEDIUM'
+              else:
+                  priority = 'LOW'
+              return {
+                  'eventType': 'incident',
+                  'incidentId': f"{msg.get('AWSAccountId','')}-{name}",
+                  'action': action,
+                  'priority': priority,
+                  'title': name,
+                  'description': msg.get('AlarmDescription', msg.get('NewStateReason', '')),
+                  'timestamp': msg.get('StateChangeTime', datetime.now(timezone.utc).isoformat()),
+                  'service': f"aws-{msg.get('AWSAccountId','')}",
+                  'data': msg
+              }
+
+          def transform_eventbridge(msg):
+              source = msg.get('source', '')
+              detail = msg.get('detail', {})
+              detail_type = msg.get('detail-type', '')
+              account = msg.get('account', '')
+              timestamp = msg.get('time', datetime.now(timezone.utc).isoformat())
+
+              # SecurityHub
+              if source == 'aws.securityhub':
+                  findings = detail.get('findings', [{}])
+                  f = findings[0] if findings else {}
+                  severity = f.get('Severity', {}).get('Label', 'MEDIUM')
+                  return {
+                      'eventType': 'incident',
+                      'incidentId': f"{account}-securityhub-{f.get('Id', '')}",
+                      'action': 'created',
+                      'priority': severity,
+                      'title': f"[SecurityHub] {f.get('Title', 'Unknown')}",
+                      'description': f.get('Description', ''),
+                      'timestamp': timestamp,
+                      'service': f"aws-{f.get('AwsAccountId', account)}",
+                      'data': msg
+                  }
+
+              # GuardDuty
+              if source == 'aws.guardduty':
+                  sev = detail.get('severity', 0)
+                  if sev >= 7:
+                      priority = 'HIGH'
+                  elif sev >= 4:
+                      priority = 'MEDIUM'
+                  else:
+                      priority = 'LOW'
+                  return {
+                      'eventType': 'incident',
+                      'incidentId': f"{account}-guardduty-{detail.get('id', '')}",
+                      'action': 'created',
+                      'priority': priority,
+                      'title': f"[GuardDuty] {detail.get('title', detail.get('type', 'Unknown'))}",
+                      'description': detail.get('description', ''),
+                      'timestamp': timestamp,
+                      'service': f"aws-{account}",
+                      'data': msg
+                  }
+
+              # Health
+              if source == 'aws.health':
+                  category = detail.get('eventTypeCategory', '')
+                  if category == 'issue':
+                      priority = 'CRITICAL'
+                  elif category == 'scheduledChange':
+                      priority = 'MEDIUM'
+                  else:
+                      priority = 'LOW'
+                  desc_list = detail.get('eventDescription', [{}])
+                  description = desc_list[0].get('latestDescription', '') if desc_list else ''
+                  return {
+                      'eventType': 'incident',
+                      'incidentId': f"{account}-health-{detail.get('eventArn', '')}",
+                      'action': 'created' if detail.get('statusCode') != 'closed' else 'resolved',
+                      'priority': priority,
+                      'title': f"[Health] {detail.get('service', '')}: {detail.get('eventTypeCode', '')}",
+                      'description': description[:1000],
+                      'timestamp': timestamp,
+                      'service': f"aws-{detail.get('affectedAccount', account)}",
+                      'data': msg
+                  }
+
+              # Cost Anomaly
+              if source == 'aws.ce' or 'anomalyId' in detail:
+                  score = detail.get('anomalyScore', {}).get('currentScore', 0)
+                  impact = detail.get('impact', {})
+                  priority = 'HIGH' if score >= 0.7 else 'MEDIUM'
+                  total_impact = impact.get('totalImpact', 0)
+                  pct = impact.get('totalImpactPercentage', 0)
+                  return {
+                      'eventType': 'incident',
+                      'incidentId': f"{account}-costanomaly-{detail.get('anomalyId', '')}",
+                      'action': 'created',
+                      'priority': priority,
+                      'title': f"[CostAnomaly] {detail.get('dimensionValue', 'Unknown')} +${total_impact:.0f} ({pct:.0f}%)",
+                      'description': f"Monitor: {detail.get('monitorName', '')}",
+                      'timestamp': timestamp,
+                      'service': f"aws-{account}",
+                      'data': msg
+                  }
+
+              # Failed (AutoScaling, EBS, SSM)
+              failed_values = [detail.get('StatusCode', ''), detail.get('result', ''), detail.get('status', '')]
+              if any(v.lower() in ('failed', 'timed_out') for v in failed_values if v):
+                  return {
+                      'eventType': 'incident',
+                      'incidentId': f"{account}-{source.replace('aws.', '')}-{detail_type.replace(' ', '-')}",
+                      'action': 'created',
+                      'priority': 'HIGH',
+                      'title': f"[{source.replace('aws.', '').upper()}] {detail_type}",
+                      'description': json.dumps(detail, default=str)[:1000],
+                      'timestamp': timestamp,
+                      'service': f"aws-{account}",
+                      'data': msg
+                  }
+
+              return None
+
+          def handler(event, context):
+              creds = get_credentials()
+              webhook_url = creds['webhookUrl']
+              webhook_secret = creds['webhookSecret']
+              priority_order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'MINIMAL']
+              min_priority = os.environ.get('MINIMUM_PRIORITY', 'HIGH')
+              min_idx = priority_order.index(min_priority) if min_priority in priority_order else 1
+
+              for record in event.get('Records', []):
+                  raw = record['Sns']['Message']
+                  try:
+                      msg = json.loads(raw)
+                      if 'AlarmName' in msg:
+                          transformed = transform_alarm(msg)
+                      elif 'source' in msg and 'detail-type' in msg:
+                          transformed = transform_eventbridge(msg)
+                      else:
+                          transformed = None
+                      if not transformed:
+                          print(f"Skipped: unrecognized format")
+                          continue
+                      cur_idx = priority_order.index(transformed['priority']) if transformed['priority'] in priority_order else len(priority_order)
+                      if cur_idx > min_idx:
+                          print(f"Skipped: {transformed['title']} (priority={transformed['priority']}, minimum={min_priority})")
+                          continue
+                      payload = json.dumps(transformed)
+                  except (json.JSONDecodeError, KeyError) as e:
+                      print(f"Parse error: {e}")
+                      continue
+                  timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')
+                  sig = base64.b64encode(
+                      hmac.new(
+                          webhook_secret.encode(),
+                          f'{timestamp}:{payload}'.encode(),
+                          hashlib.sha256
+                      ).digest()
+                  ).decode()
+
+                  req = urllib.request.Request(
+                      webhook_url,
+                      data=payload.encode(),
+                      headers={
+                          'Content-Type': 'application/json',
+                          'x-amzn-event-signature': sig,
+                          'x-amzn-event-timestamp': timestamp
+                      },
+                      method='POST'
+                  )
+                  try:
+                      with urllib.request.urlopen(req, timeout=10) as resp:
+                          print(f"Sent: {transformed['title']} (priority={transformed['priority']}) -> {resp.status}")
+                  except Exception as e:
+                      print(f"Error sending {transformed['title']}: {e}")
+      Description: !Sub Webhook Forwarder Lambda for DevOps Agent in ${AWS::StackName}
+      Environment:
+        Variables:
+          MINIMUM_PRIORITY: !Ref WebhookMinimumPriority
+          SECRET_NAME: !Sub ${AgentSpaceName}-WebhookCredentials
+      FunctionName: !Sub ${AgentSpaceName}-WebhookForwarder
+      Handler: index.handler
+      Role: !GetAtt IAMRoleForWebhookForwarder.Arn
+      Runtime: python3.12
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Timeout: 30
+  LambdaPermissionForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunctionForWebhookForwarder
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref SNSForAlertArn
+  WebhookPermissionsForMembers:
+    Condition: CreateWebhookPermissionsForMembers
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        LambdaFunctionArn: !GetAtt LambdaFunctionForWebhookForwarder.Arn
+        MemberAccountIds: !Join [ ',', !Ref MemberAccountIds ]
+      TemplateURL: !If
+        - Development
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsagent-webhook-permissions.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsagent-webhook-permissions.yaml
+  WebhookSubscriptionsForMembers:
+    Condition: CreateWebhookPermissionsForMembers
+    DependsOn: WebhookPermissionsForMembers
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        LambdaFunctionArn: !GetAtt LambdaFunctionForWebhookForwarder.Arn
+        MemberAccountIds: !Join [ ',', !Ref MemberAccountIds ]
+      TemplateURL: !If
+        - Development
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsagent-webhook-subscriptions.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsagent-webhook-subscriptions.yaml
+  SNSSubscriptionForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !GetAtt LambdaFunctionForWebhookForwarder.Arn
+      Protocol: lambda
+      TopicArn: !Ref SNSForAlertArn
+
 Outputs:
-  DevOpsAgentAgentSpaceId:
-    Description: DevOps Agent Space ID
-    Value: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
   DevOpsAgentAgentSpaceArn:
+    Condition: CreateAgentSpace
     Description: DevOps Agent Space ARN
     Value: !GetAtt DevOpsAgentAgentSpace.Arn
+  DevOpsAgentAgentSpaceId:
+    Condition: CreateAgentSpace
+    Description: DevOps Agent Space ID
+    Value: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId

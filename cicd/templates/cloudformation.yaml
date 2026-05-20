@@ -14,7 +14,7 @@ Parameters:
   CodeStarConnectionArn:
     Type: String
     AllowedPattern: .+
-    Description: The Amazon Resource Name (ARN) of the CodeStar connection
+    Description: The Amazon Resource Name (ARN) of the CodeStar connection [required]
 
 Resources:
   Publisher:

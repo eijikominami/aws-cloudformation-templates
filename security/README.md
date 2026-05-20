@@ -34,6 +34,7 @@ If you want to deploy each service individually, click the button below.
 | Amazon Macie | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalName=Macie) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalName=Macie) |
 | Amazon Security Lake | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SecurityLake&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/securitylake.yaml&param_LogicalName=SecurityLake) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SecurityLake&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/securitylake.yaml&param_LogicalName=SecurityLake) |
 | Logging | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Logging&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/logging.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Logging&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/logging.yaml) |
+| Security Agent | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SecurityAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/security-agent.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SecurityAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/security-agent.yaml) |
 
 ## Architecture
 
@@ -102,6 +103,15 @@ If you integrates ``SIEM on Open Search Service`` with ``Security Lake``, [**cha
 
 After setting up the SIEM on OpenSearch Service, **add a notification configuration to the S3 bucket** by following [these steps](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/controltower.md#preparation-with-your-log-archive-account). Additionally, update the CloudFormation parameters as needed.
 
+### Security Agent
+
+This template sets ``AWS Security Agent``.
+
+| Name | Type | Default | Required | Details | 
+| --- | --- | --- | --- | --- |
+| **AgentSpaceName** | String | security-agent-space | ○ | The name of the AWS Security Agent agent space |
+| VpcId | String | | | The VPC in which Security Agent scanner runs |
+
 ### Amazon EventBridge
 
 This template creates ``Amazon EventBridge`` for ``AWS Health`` and ``AWS Trusted Advisor``.
@@ -121,31 +131,36 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 
 You can provide optional parameters as follows:
 
-| Name | Type | Default | Requied | Details | 
+| Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AuditAccountId | String | | | The id of the audit account |
 | AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | ○ | Enable or disable AWS CloudTrail |
 | AWSCloudTrailAdditionalFilters | String | | | Additional expression of CloudWatch Logs metric filters |
-| AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, creating trail is enabled |
-| AWSConfig | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, AWS Config is enabled |
-| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
-| AmazonGuadDuty | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon GuardDuty is enabled |
-| AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, Amazon Macie is enabled |
-| AWSSecurityHub | String | STANDARDS_ONLY | ○ | If it is ENABLED, AWS Security Hub enabled |
-| AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | | The standard that you want to enable |
-| IAMAccessAnalyzer | String | ACCOUNT | ○ | If it is ACCOUNT or ORGANIZATION, IAM Access Analyzer is enabled |
+| AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | Enable or disable CloudTrail trail |
+| AWSConfig | ENABLED / DISABLED | ENABLED | ○ | Enable or disable AWS Config |
+| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | Enable or disable auto remediation by SSM Automation and Lambda |
+| AmazonGuardDuty | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | Enable or disable Amazon GuardDuty |
+| AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | Enable or disable Amazon Macie |
+| AWSSecurityHub | String | STANDARDS_ONLY | ○ | Enable or disable AWS Security Hub |
+| AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | The standard that you want to enable |
+| CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
+| CentralizedLoggingFirehoseRoleArns | CommaDelimitedList | | | List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role |
+| IAMAccessAnalyzer | String | ACCOUNT | ○ | Enable or disable IAM Access Analyzer |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | LogArchiveAccountId | String | | | The id of the log archive account |
 | OrganizationId | String | | | The Organizations ID |
 | OrganizationsRootId | String | | | The root id of AWS Organizations |
+| SecurityAgent | ENABLED / DISABLED | ENABLED | ○ | Enable or disable AWS Security Agent |
+| SecurityAgentVpcId | String | | conditional | The VPC in which Security Agent scanner runs |
 | SecurityOUId | String | | | The id of the security OU |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | Enable or disable SIEM environment |
 | SIEMControlTowerLogBucketNameList | String | | ※ | The S3 log bucket names in the Log Archive account. **Specify after installing OpenSearch Service.** |
 | SIEMControlTowerRoleArnForEsLoader | String | | ※ | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
 | SIEMControlTowerSqsForLogBuckets | String | | ※ | The SQS ARN for S3 log buckets in Log Archive Account. **Specify after installing OpenSearch Service.** |
-| SIEMEsLoaderServiceRoleArn | String | | ※ | The ARN of lambda function aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
+| SIEMEsLoaderServiceRoleArn | String | | | The ARN of lambda function aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
 | SIEMGeoLite2LicenseKey | String | | | The license key from MaxMind to enrich geoip location |
+| SIEMKmsKeyArn | String | | | The KMS key ARN for SIEM to encrypt findings |
 | SIEMSecurityLakeExternalId | String | | ※ | The Security Lake external ID for cross account. **Specify after installing OpenSearch Service.** |
 | SIEMSecurityLakeRoleArn | String | | ※ | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
 | SIEMSecurityLakeSubscriberSqs | String | | ※ | The SQS ARN of Security Lake Subscriber. **Specify after installing OpenSearch Service.** |

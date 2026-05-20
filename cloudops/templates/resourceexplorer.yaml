@@ -11,6 +11,13 @@ Metadata:
           - TagValue
 
 Parameters:
+  IndexType:
+    Type: String
+    Default: LOCAL
+    AllowedValues:
+      - AGGREGATOR
+      - LOCAL
+    Description: AGGREGATOR for the primary account, LOCAL for member accounts
   TagKey:
     Type: String
     Default: createdby
@@ -26,7 +33,7 @@ Resources:
     Properties:
       Tags: 
         cratedby: !Ref TagValue
-      Type: AGGREGATOR
+      Type: !Ref IndexType
   ResourceExplorerView:
     DependsOn: 
       - ResourceExplorerIndex

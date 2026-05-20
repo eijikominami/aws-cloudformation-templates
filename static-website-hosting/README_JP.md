@@ -125,8 +125,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudWatchAppicationSignals | ENABLED / DISABLED | ENABLED | | ENABLEDを指定した場合、**Internet Monitor** と **CloudWatch Synthetics** が有効化されます。
 | CodeStarConnectionArn | String | | | CodeStar connection の ARN |
 | **DomainName** | String | | ○ | ドメイン名 |
-| GitHubOwnerNameForWebsite | String | | | コンテンツリポジトリの GitHub オーナー名 |
-| GitHubRepoNameForWebsite | String | | | コンテンツリポジトリの GitHub リポジトリ名 |
+| GitHubOwnerNameForWebsite | String | | ○ | コンテンツリポジトリの GitHub オーナー名 |
+| GitHubRepoNameForWebsite | String | | ○ | コンテンツリポジトリの GitHub リポジトリ名 |
 | GitHubBranchNameForWebsite | String | | | コンテンツリポジトリの GitHub ブランチ名 |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |

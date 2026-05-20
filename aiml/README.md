@@ -52,6 +52,7 @@ The template accepts the following parameters:
 | KendraEnabled | String | false | Yes | Enable Amazon Kendra resources |
 | KendraEdition | String | DEVELOPER_EDITION | Yes | The edition of Amazon Kendra to use |
 | S3BucketName | String | | No | S3 bucket name for Kendra data source |
+| WebCrawlerUrls | CommaDelimitedList | | Yes | The list of seed or starting point URLs of the websites you want to crawl |
 
 ## Outputs
 

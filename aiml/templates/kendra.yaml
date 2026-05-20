@@ -76,7 +76,7 @@ Parameters:
     Description: Enable or disable web crawler for Kendra datasource [required]
   WebCrawlerUrls:
     Type: CommaDelimitedList
-    Description: The list of seed or starting point URLs of the websites you want to crawl
+    Description: The list of seed or starting point URLs of the websites you want to crawl [required]
   WebCrawlDepth:
     Type: Number
     Default: 2

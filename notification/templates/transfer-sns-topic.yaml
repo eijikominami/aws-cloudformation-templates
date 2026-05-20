@@ -41,11 +41,11 @@ Parameters:
   SourceSNSArn:
     Type: String
     AllowedPattern: ^arn:aws[a-z\-]*:sns:[a-z0-9\-]+:\d{12}:.*
-    Description: The ARN of the source SNS topic that messages will be forwarded from
+    Description: The ARN of the source SNS topic that messages will be forwarded from [required]
   DestinationSNSArn:
     Type: String
     AllowedPattern: ^arn:aws[a-z\-]*:sns:[a-z0-9\-]+:\d{12}:.*
-    Description: The ARN of the destination SNS topic that messages will be forwarded to
+    Description: The ARN of the destination SNS topic that messages will be forwarded to [required]
   LogicalName:
     Type: String
     Default: TransferSNS
@@ -187,7 +187,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.24
+        SemanticVersion: 2.2.25
       Parameters:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName: !Ref AWS::StackName

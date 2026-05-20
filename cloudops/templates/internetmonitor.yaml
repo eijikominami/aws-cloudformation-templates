@@ -20,7 +20,7 @@ Parameters:
   ResourceNames:
     Type: CommaDelimitedList
     AllowedPattern: .+
-    Description: The resources that have been added for the monitor
+    Description: The resources that have been added for the monitor [required]
   Environment:
     Type: String
     Default: production
