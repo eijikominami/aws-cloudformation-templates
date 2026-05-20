@@ -1,0 +1,482 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: aws-cloudformation-templates/security/security-agent sets AWS Security Agent.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Security Agent Configuration
+        Parameters:
+          - AgentSpaceName
+          - AgentSpaceDescription
+          - VpcId
+          - SubnetIds
+          - NotificationEmail
+      - Label:
+          default: Notification Configuration
+        Parameters:
+          - SNSForAlertArn
+          - SNSForDeploymentArn
+      - Label:
+          default: Tag Configuration
+        Parameters:
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  AgentSpaceName:
+    Type: String
+    Default: security-agent-space
+    Description: The name of the AWS Security Agent agent space [required]
+    AllowedPattern: .+
+  AgentSpaceDescription:
+    Type: String
+    Default: AWS Security Agent agent space
+    Description: The description of the agent space
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The VPC in which Security Agent scanner runs [required]
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: The subnets (public, with internet access) in which Security Agent scanner runs [required]
+  NotificationEmail:
+    Type: String
+    Default: ''
+    Description: The email address to receive pentest completion notifications
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
+  SNSForDeploymentArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: SecurityAgent
+    Description: The custom prefix name [required]
+    AllowedPattern: .+
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateSNSForAlert: !Equals [!Ref SNSForAlertArn, '']
+  CreateSNSForDeployment: !Equals [!Ref SNSForDeploymentArn, '']
+  CreateEmailSubscription: !Not [!Equals [!Ref NotificationEmail, '']]
+
+Resources:
+  # Nested Stack
+  SNSForAlert:
+    Condition: CreateSNSForAlert
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.24
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        TopicName: !Sub Alert-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+  SNSForDeployment:
+    Condition: CreateSNSForDeployment
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
+        SemanticVersion: 2.2.24
+      Parameters:
+        TopicName: !Sub Deployment-createdby-${LogicalName}
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+  # SNS
+  SNSForPentestNotification:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub ${LogicalName}-pentest-notification
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  SNSEmailSubscription:
+    Condition: CreateEmailSubscription
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref NotificationEmail
+      Protocol: email
+      TopicArn: !Ref SNSForPentestNotification
+
+  # S3
+  S3ForArtifacts:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      BucketName: !Sub ${LogicalName}-securityagent-artifacts-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpirationInDays
+            ExpirationInDays: 180
+            Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VersioningConfiguration:
+        Status: Enabled
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3ForArtifacts
+      PolicyDocument:
+        Statement:
+          - Action: s3:*
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+            Effect: Deny
+            Principal: '*'
+            Resource:
+              - !GetAtt S3ForArtifacts.Arn
+              - !Sub ${S3ForArtifacts.Arn}/*
+            Sid: DenyNonHTTPS
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+              - s3:ListBucket
+            Effect: Allow
+            Principal:
+              Service: securityagent.amazonaws.com
+            Resource:
+              - !GetAtt S3ForArtifacts.Arn
+              - !Sub ${S3ForArtifacts.Arn}/*
+            Sid: AllowSecurityAgent
+
+  # CloudWatch Logs
+  LogGroupForSecurityAgent:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/securityagent/${LogicalName}
+      RetentionInDays: 90
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # EC2 Security Group
+  SecurityGroupForScanner:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for AWS Security Agent scanner — allows all outbound, no inbound
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic
+          IpProtocol: '-1'
+      Tags:
+        - Key: Name
+          Value: !Sub ${LogicalName}-security-agent-scanner
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      VpcId: !Ref VpcId
+
+  # IAM
+  IAMRoleForSecurityAgentService:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: securityagent.amazonaws.com
+        Version: '2012-10-17'
+      Description: Service role assumed by AWS Security Agent to run pentests and code reviews
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicyForSecurityAgentBase
+      RoleName: !Sub ${LogicalName}-security-agent-service-role
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  IAMManagedPolicyForSecurityAgentBase:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Base permissions for AWS Security Agent service role
+      ManagedPolicyName: !Sub ${LogicalName}-SecurityAgentBasePolicy
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+            Effect: Allow
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/securityagent/*
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Effect: Allow
+            Resource:
+              - !GetAtt S3ForArtifacts.Arn
+              - !Sub ${S3ForArtifacts.Arn}/*
+          - Action:
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeSubnets
+              - ec2:DescribeVpcs
+              - ec2:DescribeSecurityGroups
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - securityagent:BatchGetPentestJobs
+              - securityagent:BatchGetPentests
+              - securityagent:StartPentestJob
+              - securityagent:StopPentestJob
+              - securityagent:BatchGetFindings
+              - securityagent:ListFindings
+              - securityagent:UpdateFinding
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - sns:Publish
+            Effect: Allow
+            Resource: !Ref SNSForPentestNotification
+        Version: '2012-10-17'
+
+  IAMRoleForSecurityAgentApp:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub operator-iam-${AWS::AccountId}
+            Effect: Allow
+            Principal:
+              Service: securityagent.amazonaws.com
+        Version: '2012-10-17'
+      Description: App role for AWS Security Agent console access
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSSecurityAgentWebAppPolicy
+        - arn:aws:iam::aws:policy/SecurityAgentWebAppPolicy
+        - arn:aws:iam::aws:policy/service-role/SecurityAgentWebAppAPIPolicy
+      RoleName: !Sub ${LogicalName}-security-agent-app-role
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # Lambda Custom Resource — creates the Agent Space via the securityagent API
+  IAMRoleForCustomResourceLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - securityagent:CreateAgentSpace
+                  - securityagent:DeleteAgentSpace
+                  - securityagent:UpdateAgentSpace
+                  - securityagent:BatchGetAgentSpaces
+                  - securityagent:ListAgentSpaces
+                Effect: Allow
+                Resource: '*'
+          PolicyName: SecurityAgentSpaceManagement
+      RoleName: !Sub ${LogicalName}-security-agent-custom-resource-role
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  LambdaForAgentSpaceCustomResource:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures:
+        - arm64
+      Description: Custom Resource Lambda that creates an AWS Security Agent Agent Space
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+      FunctionName: !Sub ${LogicalName}-security-agent-space-cr
+      Handler: index.lambda_handler
+      InlineCode: |
+        import boto3
+        import cfnresponse
+        import logging
+        import json
+
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
+        def lambda_handler(event, context):
+            logger.info(json.dumps(event))
+            request_type = event['RequestType']
+            props = event.get('ResourceProperties', {})
+            physical_id = event.get('PhysicalResourceId', 'pending')
+
+            client = boto3.client('securityagent')
+
+            try:
+                if request_type == 'Create':
+                    resp = client.create_agent_space(
+                        name=props['AgentSpaceName'],
+                        description=props.get('AgentSpaceDescription', ''),
+                        awsResources={
+                            'logGroups': [props['LogGroupArn']],
+                            's3Buckets': [props['S3BucketName']],
+                        }
+                    )
+                    agent_space_id = resp['agentSpaceId']
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS,
+                                     {'AgentSpaceId': agent_space_id}, agent_space_id)
+
+                elif request_type == 'Update':
+                    client.update_agent_space(
+                        agentSpaceId=physical_id,
+                        name=props['AgentSpaceName'],
+                        description=props.get('AgentSpaceDescription', ''),
+                        awsResources={
+                            'logGroups': [props['LogGroupArn']],
+                            's3Buckets': [props['S3BucketName']],
+                        }
+                    )
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS,
+                                     {'AgentSpaceId': physical_id}, physical_id)
+
+                elif request_type == 'Delete':
+                    try:
+                        client.delete_agent_space(agentSpaceId=physical_id)
+                    except client.exceptions.ResourceNotFoundException:
+                        pass
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, physical_id)
+
+            except Exception as e:
+                logger.exception('Custom resource failed')
+                cfnresponse.send(event, context, cfnresponse.FAILED,
+                                 {'Message': str(e)}, physical_id)
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForCustomResourceLambda.Arn
+      Runtime: python3.13
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Timeout: 60
+
+  # Custom Resource — Agent Space
+  AgentSpace:
+    Type: Custom::SecurityAgentSpace
+    Properties:
+      AgentSpaceDescription: !Ref AgentSpaceDescription
+      AgentSpaceName: !Ref AgentSpaceName
+      LogGroupArn: !GetAtt LogGroupForSecurityAgent.Arn
+      S3BucketName: !Ref S3ForArtifacts
+      ServiceToken: !GetAtt LambdaForAgentSpaceCustomResource.Arn
+
+  # CloudWatch Alarm
+  AlarmLambdaCustomResource:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: AWS Security Agent custom resource Lambda errors
+      AlarmName: !Sub Warning-${LogicalName}-SecurityAgentSpace-Lambda-Errors
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaForAgentSpaceCustomResource
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+Outputs:
+  AgentSpaceId:
+    Description: The AWS Security Agent Agent Space ID
+    Value: !GetAtt AgentSpace.AgentSpaceId
+  ArtifactsBucketName:
+    Description: The S3 bucket name for Security Agent artifacts and documents
+    Value: !Ref S3ForArtifacts
+  LogGroupName:
+    Description: The CloudWatch log group name for Security Agent
+    Value: !Ref LogGroupForSecurityAgent
+  PentestNotificationTopicArn:
+    Description: The SNS topic ARN for pentest completion notifications
+    Value: !Ref SNSForPentestNotification
+  ScannerSecurityGroupId:
+    Description: The security group ID for the Security Agent scanner
+    Value: !GetAtt SecurityGroupForScanner.GroupId
+  ServiceRoleArn:
+    Description: The IAM service role ARN for AWS Security Agent
+    Value: !GetAtt IAMRoleForSecurityAgentService.Arn
