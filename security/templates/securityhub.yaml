@@ -185,8 +185,6 @@ Resources:
   SecurityHubFindingAggregator:
     Condition: CreateFindingAggregator
     Type: AWS::SecurityHub::FindingAggregator
-    DependsOn:
-      - SecurityHub
     Properties:
       RegionLinkingMode: ALL_REGIONS
   SecurityHubOrganizationConfiguration:

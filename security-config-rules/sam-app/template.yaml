@@ -243,8 +243,7 @@ Resources:
       FunctionName: checkRequiredTags
       Layers: !If
         - Development
-        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
+        - - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
         - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
@@ -327,8 +326,7 @@ Resources:
       FunctionName: deleteUnapplicableResources
       Layers: !If
         - Development
-        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
+        - - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
         - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn

@@ -78,6 +78,7 @@ Resources:
             Principal:
               Service:
                 - budgets.amazonaws.com
+                - costalerts.amazonaws.com
                 - events.amazonaws.com
                 - codestar-notifications.amazonaws.com
             Resource: !Ref SNSTopic

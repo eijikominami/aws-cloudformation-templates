@@ -309,8 +309,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/networkfirewall.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/networkfirewall.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/networkfirewall.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/network/networkfirewall.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

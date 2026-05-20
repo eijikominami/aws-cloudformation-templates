@@ -30,10 +30,10 @@
 | CloudWatch Application Insights | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ApplicationInsights&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/applicationinsights.yaml) |
 | CloudWatch Internet Monitor | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=InternetMonitor&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/internetmonitor.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=InternetMonitor&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/internetmonitor.yaml) |
 | CodeGuru Reviewer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=CodeGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguru.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=CodeGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/codeguru.yaml) |
+| DevOps Agent | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DevOpsAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsagent.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsagent.yaml) |
 | DevOps Guru | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DevOpsGuru&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/devopsguru.yaml) |
 | Resource Explorer | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=ResourceExplorer&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/resourceexplorer.yaml) |
 | Systems Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/ssm.yaml) |
-| Systems Manager Incident Manager | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SystemsManagerIncidentManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/incidentmanager.yaml) |
 
 以下のコマンドを実行することで、CloudFormationをデプロイすることが可能です。
 
@@ -48,14 +48,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | **ApplicationInsights** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`ApplicationInsights` スタックがデプロイされます。 |
 | CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | CodeGuru で使用する GitHub オーナー名とリポジトリ名 |
-| **IncidentManager** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`IncidentManager` スタックがデプロイされます。 |
-| IncidentManagerAlias | String | admimistrator | ○ | 連絡先のエイリアス |
-| IncidentManagerChatbotSnsArn | String | | | AWS Chatbot の ARN |
-| IncidentManagerDisplayName | String | Administrator | ○ | 連絡先のエイリアス |
-| IncidentManagerDurationInMinutes | Number | 1 | ○ | 次のステージに移行する時間（分） |
-| IncidentManagerEmail | String | | | Eメールアドレス |
-| IncidentManagerPhoneNumber | String | | | 電話番号 |
-| IncidentManagerWorkloadName | String | Workload | ○ | ワークロード名 |
+| **DevOpsAgent** | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、`DevOpsAgent` スタックがデプロイされます。 |
+| DevOpsAgentSpaceName | String | DefaultAgentSpace | ○ | DevOps Agent Space の名前 |
+| SSMAdminAccountId | Strig | | | SSM の管理を行う AWS アカウントの ID |
 | SSMAdminAccountId | Strig | | | SSM の管理を行う AWS アカウントの ID |
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
 | SSMOrganizationId | String | | | The Organizations ID |
@@ -79,6 +74,14 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | --- | --- | --- | --- | --- |
 | **CodeGuruTargetRepository** | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
 
+### DevOps Agent
+
+このテンプレートは、``AWS DevOps Agent`` の Agent Space、IAM ロール、AWS アカウント関連付けを作成します。DevOps Agent はインシデントの自動調査、予防的な改善提案、オンデマンド SRE タスクを提供します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| **AgentSpaceName** | String | DefaultAgentSpace | ○ | Agent Space の名前 |
+
 ### DevOps Guru
 
 このテンプレートは、``AWS DevOps Guru`` の通知チャンネルを作成します。
@@ -100,20 +103,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
 
 AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて  **Systems Manager** と **AWS Trusted Advisor** の `アクセス有効化` を設定してください。
-
-### Systems Manager Incident Manager
-
-このテンプレートは、``AWS Systems Manager Incident Manager`` を作成します。
-
-| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
-| --- | --- | --- | --- | --- |
-| Alias | String | admimistrator | ○ | 連絡先のエイリアス |
-| ChatbotSnsArn | String | | | AWS Chatbot の ARN |
-| DisplayName | String | Administrator | ○ | 連絡先のエイリアス |
-| DurationInMinutes | Number | 1 | ○ | 次のステージに移行する時間（分） |
-| Email | String | | | Eメールアドレス |
-| PhoneNumber | String | | | 電話番号 |
-| WorkloadName | String | Workload | ○ | ワークロード名 |
 
 ## Amazon CloudWatch Internet Monitor
 

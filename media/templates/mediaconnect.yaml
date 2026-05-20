@@ -441,8 +441,8 @@ Resources:
         Protocol: !Ref DestinationProtocol1
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -467,8 +467,8 @@ Resources:
         Protocol: !Ref DestinationProtocol2
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -493,8 +493,8 @@ Resources:
         Protocol: !Ref DestinationProtocol3
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -519,8 +519,8 @@ Resources:
         Protocol: !Ref DestinationProtocol4
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -545,8 +545,8 @@ Resources:
         Protocol: !Ref DestinationProtocol5
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -571,8 +571,8 @@ Resources:
         Protocol: !Ref DestinationProtocol6
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -597,8 +597,8 @@ Resources:
         Protocol: !Ref DestinationProtocol7
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -623,8 +623,8 @@ Resources:
         Protocol: !Ref DestinationProtocol8
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/media/mediaconnectoutput.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/media/mediaconnectoutput.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

@@ -280,8 +280,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/egress.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/egress.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/egress.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/network/egress.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -310,8 +310,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/transitgateway.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/transitgateway.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/transitgateway.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/network/transitgateway.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -356,8 +356,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/route53resolver.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/route53resolver.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/route53resolver.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/network/route53resolver.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -389,8 +389,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/vpn.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/vpn.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/vpn.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/network/vpn.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -414,8 +414,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/ipam.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/ipam.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/ipam.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/network/ipam.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -436,8 +436,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/networkaccessanalyzer.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/network/networkaccessanalyzer.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/network/networkaccessanalyzer.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/network/networkaccessanalyzer.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

@@ -280,6 +280,7 @@ Conditions:
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn ,'']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn,'']
   CloudTrailIsCreatedByControlTower: !Equals [ !Ref AWSCloudTrail, CREATED_BY_CONTROL_TOWER ]
+  CreateAudit: !Equals [ !Ref AuditAccountId, !Ref 'AWS::AccountId' ]
   Development: !Equals [ !Ref Environment, development ]
   HasFirehoseRoles: !Not [ !Equals [ !Join [',', !Ref CentralizedLoggingFirehoseRoleArns], ''] ]
 
@@ -310,8 +311,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/iam.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/iam.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/iam.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/security/iam.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -328,7 +329,10 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         AlarmLevel: !Ref AlarmLevel
-        DelegatedAdminAccountId: !Ref AuditAccountId
+        DelegatedAdminAccountId: !If
+          - CreateAudit
+          - ''
+          - !Ref AuditAccountId
         OrganizationsRootId: !Ref OrganizationsRootId
         SecurityHubStandards: !Join [',', !Ref AWSSecurityHubStandards]
         SecurityHubType: !Ref AWSSecurityHub
@@ -345,8 +349,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securityhub.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securityhub.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/securityhub.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/security/securityhub.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -380,8 +384,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/cloudtrail.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/cloudtrail.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/cloudtrail.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/security/cloudtrail.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -413,8 +417,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/config.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/config.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/security/config.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -449,8 +453,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/macie.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/macie.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/macie.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/security/macie.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -467,11 +471,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         AuditAccountId: !Ref AuditAccountId
-        AllowedSourceIpAddressesForSIEM: 0.0.0.0/0
         SIEM: !Ref SIEM
-        SIEMControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
-        SIEMControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
-        SIEMControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
         CentralizedLoggingFirehoseRoleArns: !If
           - HasFirehoseRoles     
           - !Join
@@ -481,19 +481,55 @@ Resources:
         LogArchiveAccountId: !Ref LogArchiveAccountId
         OrganizationId: !Ref OrganizationId
         SecurityOUId: !Ref SecurityOUId
-        SIEMSecurityLakeRoleArn: !Ref SIEMSecurityLakeRoleArn
-        SIEMSecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
-        SIEMSecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
         SIEMEsLoaderServiceRoleArn: !Ref SIEMEsLoaderServiceRoleArn
-        SIEMGeoLite2LicenseKey: !Ref SIEMGeoLite2LicenseKey
         SIEMEmail: !Ref SIEMEmail
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/logging.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/security/logging.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/logging.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/security/logging.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  Audit:
+    Condition: CreateAudit
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        SIEM: !Ref SIEM
+        AllowedSourceIpAddressesForSIEM: 0.0.0.0/0
+        SIEMControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
+        SIEMControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
+        SIEMControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
+        SIEMGeoLite2LicenseKey: !Ref SIEMGeoLite2LicenseKey
+        SIEMSecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
+        SIEMSecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
+        SIEMSecurityLakeRoleArn: !Ref SIEMSecurityLakeRoleArn
+        SIEMEmail: !Ref SIEMEmail
+        SNSForAlertArn: !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+        SNSForDeploymentArn: !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/security/audit.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/security/audit.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

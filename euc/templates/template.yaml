@@ -427,8 +427,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/microsoftad.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/microsoftad.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/microsoftad.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/microsoftad.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -467,8 +467,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/storage/fsx.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/storage/fsx.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/storage/fsx.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/storage/fsx.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -506,8 +506,8 @@ Resources:
         TagValue: !Ref TagValue   
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/euc/workspaces.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/euc/workspaces.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/euc/workspaces.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/euc/workspaces.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -552,8 +552,8 @@ Resources:
         TagValue: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/euc/appstream.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/euc/appstream.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/euc/appstream.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/euc/appstream.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

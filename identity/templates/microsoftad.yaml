@@ -551,8 +551,8 @@ Resources:
           Value: !Ref TagValue
       TemplateURL: !If
         - Development
-        - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/dlm.yaml
-        - https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/web-servers/dlm.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/web-servers/dlm.yaml
   # CloudWatch Logs to S3
   SubscriptionFilter:
     Condition: CreateFirehose

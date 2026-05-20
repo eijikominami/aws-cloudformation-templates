@@ -134,6 +134,12 @@ Resources:
                 - !Sub arn:aws:s3:::${S3ForCentralizedLogging}
                 - !Sub arn:aws:s3:::${S3ForCentralizedLogging}/*
             - !Ref AWS::NoValue
+          # ELB Access Logs
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::582318560864:root
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${S3ForCentralizedLogging}/AWSLogs/*
           # GuardDuty
           - Effect: Deny
             Principal:

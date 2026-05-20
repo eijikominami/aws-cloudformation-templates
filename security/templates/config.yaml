@@ -174,7 +174,6 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
-          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
       Policies:
         - PolicyName: IAM
           PolicyDocument:
@@ -493,18 +492,11 @@ Resources:
                                               AccessKeyId=access_key['AccessKeyId']
                                           )
       Description: 有効期限が過ぎたアクセスキーを削除します。
-      Environment:
-        Variables:
-          AWS_LAMBDA_EXEC_WRAPPER:  !If
-            - Development
-            - /opt/codeguru_profiler_lambda_exec
-            - !Ref AWS::NoValue
       FunctionName: deleteExpiredAccessKeys
       Handler: index.lambda_handler
       Layers: !If
         - Development
-        - - !Sub arn:aws:lambda:${AWS::Region}:157417159150:layer:AWSCodeGuruProfilerPythonAgentLambdaLayer:11
-          - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
+        - - !FindInMap [RegionMap, !Ref "AWS::Region", LambdaInsights]
         - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn

@@ -258,7 +258,6 @@ Resources:
       ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
-          - arn:aws:iam::aws:policy/AmazonCodeGuruProfilerAgentAccess
       Policies:
         - PolicyName: CloudWatchLogs
           PolicyDocument:
