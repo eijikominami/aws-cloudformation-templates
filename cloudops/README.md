@@ -88,6 +88,14 @@ This template sets ``Amazon CodeGuru Reviewer``.
 | --- | --- | --- | --- | --- |
 | **CodeGuruTargetRepository** | String | eijikominami/aws-cloudformation-templates | ○ | The GitHub owner name and repository name for AWS CodeGuru Reviewer |
 
+### DevOps Agent
+
+This template creates ``AWS DevOps Agent`` Agent Space, IAM roles, and AWS account associations. DevOps Agent provides automated incident investigation, proactive improvement recommendations, and on-demand SRE tasks.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| **AgentSpaceName** | String | DefaultAgentSpace | ○ | The name of the Agent Space |
+
 ### DevOps Guru
 
 This template sets a notification channel of ``AWS DevOps Guru``.
@@ -108,7 +116,62 @@ This template sets ``AWS Systems Manager``.
 | OrganizationId | String | | | The Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | Daily patching time (H) |
 
-If you use AWS Systems Manager Explorer in your `Shared Network` account, enable `Trusted Access` of **Systems Manager** and **AWS Trusted Advisor** in `AWS Organizations`.
+To enable cross-account data aggregation in SSM Explorer, run the following in the **management account** (cannot be managed via CloudFormation):
+
+```bash
+aws organizations enable-aws-service-access --service-principal opsdatasync.ssm.amazonaws.com
+```
+
+### Default Host Management Configuration (DHMC)
+
+DHMC cannot be managed via CloudFormation (`AWS::SSM::ServiceSetting` is not a supported resource type). Enable it via API after deploying the CloudOps stack:
+
+```bash
+aws ssm update-service-setting \
+  --setting-id /ssm/managed-instance/default-ec2-instance-management-role \
+  --setting-value service-role/AWSSystemsManagerDefaultEC2InstanceManagementRole
+```
+
+The IAM role `AWSSystemsManagerDefaultEC2InstanceManagementRole` is created by `ssm.yaml`.
+
+### Operational Insights (OpsInsights)
+
+OpsInsights cannot be managed via CloudFormation. Enable it via API:
+
+```bash
+aws ssm update-service-setting \
+  --setting-id /ssm/opsinsights/opscenter \
+  --setting-value Enabled
+```
+
+### SSM Unified Console (Quick Setup)
+
+After deploying the CloudOps stack to all accounts, enable the SSM Unified Console organization-wide via Quick Setup CLI:
+
+```bash
+aws ssm-quicksetup create-configuration-manager \
+  --configuration-definitions '[{
+    "Type": "AWSQuickSetupType-SSM",
+    "TypeVersion": "3.0",
+    "Parameters": {
+      "AgentUpdateSchedule": "rate(14 days)",
+      "EnableDHMCSchedule": "rate(1 day)",
+      "HomeRegion": "ap-northeast-1",
+      "InventoryCollectionSchedule": "rate(12 hours)",
+      "TargetOrganizationalUnits": "<ORGANIZATION_ROOT_ID>",
+      "TargetRegions": "ap-northeast-1",
+      "DelegatedAccountId": "<DELEGATED_ADMIN_ACCOUNT_ID>"
+    }
+  }]'
+```
+
+Prerequisites (created by `ssm.yaml`):
+- `AWS-QuickSetup-SSM-RoleForEnablingExplorer`
+- `AWS-QuickSetup-SSM-EnableDHMC`
+- `AWS-QuickSetup-SSM-EnableAREX`
+- `AWS-QuickSetup-SSM-ManageInstanceProfile`
+
+Run from the delegated admin account (CloudOps). The configuration targets the entire Organization.
 
 ### Systems Manager Incident Manager
 
@@ -170,3 +233,26 @@ The S3 bucket stores screenshots, HAR files, and logs from the hearbeat scripts.
 This template creates Amazon CloudWatch custom metrics and alarms.
 These alarms are trigged when the success rate is less than **90%**.
 
+## DevOps Agent (Cross-Account Association)
+
+The `devopsagent.yaml` template creates an AgentSpace in PRIMARY mode and IAM roles in MEMBER mode.
+
+### Known Limitation
+
+Cross-account associations **cannot** be created via CloudFormation or the `associate_service` API. Both return:
+
+```
+AccessDeniedException: Cross-account pass role is not allowed.
+```
+
+This is a service-side restriction (not an IAM Trust Policy issue). The MEMBER IAM roles are correctly configured with the PRIMARY account's `aws:SourceAccount` and `aws:SourceArn` in their trust policy.
+
+### Manual Step Required
+
+After deploying the CloudOps stack to all accounts, add secondary cloud sources via the **AWS Console**:
+
+1. Go to DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
+2. Click "Add secondary cloud source"
+3. Enter the member account ID and the existing role name (no need to create a new role — CFn already created it)
+
+Role name for all accounts: `DefaultAgentSpace-AgentSpace-ap-northeast-1`

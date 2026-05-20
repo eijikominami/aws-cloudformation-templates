@@ -73,10 +73,9 @@ Parameters:
     Description: The centralize S3 bucket name for logging
   CloudOps:
     Type: String
-    Default: DISABLED
+    Default: ENABLED
     AllowedValues:
       - ENABLED
-      - INCIDENT_MANAGER_DISABLED
       - DISABLED
     Description: Enable or disable deployment of CloudOps template [required]
   CodeBuildImageName:
@@ -193,12 +192,11 @@ Parameters:
 
 Conditions:
   CreateArtifactBucketInVirginia: !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ]
-  CreateIncidentManager: !Equals [ !Ref CloudOps, ENABLED]
   CreateCloudFormationConfigurationArtifact: !And [ !Not [ !Equals [ !Ref GitHubOwnerNameForTemplateConfiguration, ''] ], !Not [ !Equals [ !Ref GitHubRepoNameForTemplateConfiguration, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForCICD: !Equals [ !Ref SNSForCICDArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
-  DeployCloudOps: !Or [ !Equals [ !Ref CloudOps, ENABLED], !Equals [ !Ref CloudOps, INCIDENT_MANAGER_DISABLED] ]
+  DeployCloudOps: !Equals [ !Ref CloudOps, ENABLED]
   DeployDefaultSecuritySettings: !Equals [ !Ref DefaultSecuritySettings, ENABLED] 
   DeployGlobalSettings: !Or [ !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Not [ !Equals [ !Ref ArtifactBucketInVirginia, ''] ] ], !And [ !Equals [ !Ref GlobalSettings, ENABLED], !Equals [ !Ref AWS::Region, us-east-1] ] ]
   DeployNotification: !Equals [ !Ref Notification, ENABLED]
@@ -940,21 +938,11 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::cloudops/templates/template.yaml
                   ParameterOverrides: !Join
                     - ''
-                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", '
-                      - !If
-                        - DeployNotification
-                        - !Sub '"IncidentManagerChatbotSnsArn": { "Fn::GetParam": ["DeployArtifact_Notification", "Output.json", "SNSForFormattedAlert"]}, ' 
-                        - ''
-                      - !Sub '"SSMOrganizationId": "${OrganizationId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "SSMOrganizationId": "${OrganizationId}", "SNSForAlertArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForAlertArn"]}, "SNSForDeploymentArn": { "Fn::GetParam": ["DeployArtifact_CICD", "Output.json", "SNSForDeploymentArn"]}, "Environment": "'
                       - !If
                         - Development
                         - development
                         - production
-                      - !Sub '", "IncidentManager": "'
-                      - !If
-                        - CreateIncidentManager
-                        - ENABLED
-                        - DISABLED
                       - !Sub '", "TagKey": "${TagKey}", "TagValue": "${TagValue}"}'
                   TemplateConfiguration: !If
                     - CreateCloudFormationConfigurationArtifact

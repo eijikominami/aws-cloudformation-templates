@@ -7,7 +7,14 @@ Metadata:
       - Label:
           default: 'DevOps Agent Configuration'
         Parameters:
+          - Mode
+          - AgentSpaceId
           - AgentSpaceName
+          - PrimaryAccountId
+      - Label:
+          default: 'Webhook Forwarder Configuration'
+        Parameters:
+          - SNSForAlertArn
       - Label:
           default: 'Tag Configuration'
         Parameters:
@@ -16,6 +23,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AgentSpaceId:
+    Type: String
+    Default: ''
+    Description: AgentSpace ID from the PRIMARY account (required for MEMBER)
   AgentSpaceName:
     Type: String
     Default: DefaultAgentSpace
@@ -27,6 +38,21 @@ Parameters:
       - production
       - test
       - development
+  Mode:
+    Type: String
+    Default: PRIMARY
+    AllowedValues:
+      - PRIMARY
+      - MEMBER
+    Description: PRIMARY creates AgentSpace. MEMBER creates IAM roles only for cross-account access.
+  PrimaryAccountId:
+    Type: String
+    Default: ''
+    Description: Account ID of the PRIMARY account that owns the AgentSpace (required for MEMBER)
+  SNSForAlertArn:
+    Type: String
+    Default: ''
+    Description: The Amazon SNS topic ARN for alert
   TagKey:
     Type: String
     Default: createdby
@@ -36,7 +62,14 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateAgentSpace: !Equals [ !Ref Mode, PRIMARY ]
+  CreateWebhookForwarder: !And
+    - !Condition CreateAgentSpace
+    - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
+
 Resources:
+  # --- IAM Roles ---
   IAMRoleForAgentSpace:
     Type: AWS::IAM::Role
     Properties:
@@ -49,14 +82,15 @@ Resources:
             Action: sts:AssumeRole
             Condition:
               StringEquals:
-                aws:SourceAccount: !Ref AWS::AccountId
-              ArnLike:
-                aws:SourceArn: !Sub arn:aws:aidevops:${AWS::Region}:${AWS::AccountId}:agentspace/*
+                aws:SourceAccount: !If
+                  - CreateAgentSpace
+                  - !Ref AWS::AccountId
+                  - !Ref PrimaryAccountId
       Description: !Sub IAM role for DevOps Agent Space in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AIDevOpsAgentAccessPolicy
       Policies:
-        - PolicyName: AllowCreateServiceLinkedRoles
+        - PolicyName: AdditionalReadAccess
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -66,6 +100,19 @@ Resources:
                   - iam:CreateServiceLinkedRole
                 Resource:
                   - !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer
+              - Sid: LambdaGetFunction
+                Effect: Allow
+                Action:
+                  - lambda:GetFunction
+                Resource: '*'
+              - Sid: CloudControlAndObservability
+                Effect: Allow
+                Action:
+                  - cloudcontrol:GetResource
+                  - logs:ListLogGroupsForEntity
+                  - application-signals:ListObservedEntities
+                  - application-signals:ListServices
+                Resource: '*'
       RoleName: !Sub ${AgentSpaceName}-AgentSpace-${AWS::Region}
       Tags:
         - Key: environment
@@ -73,6 +120,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   IAMRoleForOperatorApp:
+    Condition: CreateAgentSpace
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -98,7 +146,82 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForWebhookCustomResource:
+    Condition: CreateWebhookForwarder
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Webhook Custom Resource Lambda in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DevOpsAgentAndSecrets
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: DevOpsAgentWebhook
+                Effect: Allow
+                Action:
+                  - aidevops:RegisterService
+                  - aidevops:DeregisterService
+                  - aidevops:AssociateService
+                  - aidevops:DisassociateService
+                  - aidevops:ListServices
+                  - aidevops:ListWebhooks
+                Resource: '*'
+              - Sid: SecretsManager
+                Effect: Allow
+                Action:
+                  - secretsmanager:CreateSecret
+                  - secretsmanager:DeleteSecret
+                  - secretsmanager:PutSecretValue
+                  - secretsmanager:UpdateSecret
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AgentSpaceName}-WebhookCredentials-*
+      RoleName: !Sub ${AgentSpaceName}-WebhookCR-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  IAMRoleForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for DevOps Agent Webhook Forwarder Lambda in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ReadWebhookSecret
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AgentSpaceName}-WebhookCredentials-*
+      RoleName: !Sub ${AgentSpaceName}-WebhookFwd-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # --- DevOps Agent Space ---
   DevOpsAgentAgentSpace:
+    Condition: CreateAgentSpace
     DependsOn: IAMRoleForAgentSpace
     Type: AWS::DevOpsAgent::AgentSpace
     Properties:
@@ -112,21 +235,215 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  DevOpsAgentAssociationForAWS:
+  DevOpsAgentAssociation:
+    Condition: CreateAgentSpace
     Type: AWS::DevOpsAgent::Association
     Properties:
       AgentSpaceId: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
       Configuration:
         Aws:
-          AssumableRoleArn: !GetAtt IAMRoleForAgentSpace.Arn
           AccountId: !Ref AWS::AccountId
           AccountType: monitor
+          AssumableRoleArn: !GetAtt IAMRoleForAgentSpace.Arn
       ServiceId: aws
 
+  # --- Webhook Custom Resource ---
+  LambdaFunctionForWebhookCustomResource:
+    Condition: CreateWebhookForwarder
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - arm64
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import json
+          import os
+
+          def handler(event, context):
+              try:
+                  props = event['ResourceProperties']
+                  agent_space_id = props['AgentSpaceId']
+                  secret_name = props['SecretName']
+                  client = boto3.client('devops-agent')
+                  sm = boto3.client('secretsmanager')
+
+                  if event['RequestType'] in ('Create', 'Update'):
+                      # Step 1: register-service (idempotent)
+                      try:
+                          reg = client.register_service(
+                              service='eventChannel',
+                              serviceDetails={'eventChannel': {'type': 'webhook'}},
+                              name=f"{os.environ.get('STACK_NAME', 'cfn')}-webhook"
+                          )
+                          service_id = reg['serviceId']
+                      except Exception as reg_err:
+                          if 'already registered' not in str(reg_err):
+                              raise
+                          # Already registered - get existing service_id
+                          services = client.list_services()
+                          service_id = next(s['serviceId'] for s in services['services'] if s['serviceType'] == 'eventChannel')
+
+                      # Step 2: associate-service
+                      try:
+                          assoc = client.associate_service(
+                              agentSpaceId=agent_space_id,
+                              serviceId=service_id,
+                              configuration={'eventChannel': {}}
+                          )
+                          webhook = assoc['webhook']
+                      except Exception as assoc_err:
+                          if 'already associated' not in str(assoc_err).lower() and 'conflict' not in str(assoc_err).lower():
+                              raise
+                          # Already associated - get webhook from list_webhooks
+                          webhooks = client.list_webhooks(agentSpaceId=agent_space_id)
+                          webhook = webhooks['webhooks'][0]
+
+                      # Step 3: Store in Secrets Manager
+                      secret_value = json.dumps({
+                          'webhookUrl': webhook['webhookUrl'],
+                          'webhookSecret': webhook['webhookSecret'],
+                          'webhookId': webhook['webhookId'],
+                          'serviceId': service_id,
+                          'associationId': assoc['association']['associationId']
+                      })
+                      try:
+                          sm.create_secret(Name=secret_name, SecretString=secret_value)
+                      except sm.exceptions.ResourceExistsException:
+                          sm.put_secret_value(SecretId=secret_name, SecretString=secret_value)
+
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  elif event['RequestType'] == 'Delete':
+                      # Best-effort cleanup
+                      try:
+                          sm.delete_secret(SecretId=secret_name, ForceDeleteWithoutRecovery=True)
+                      except Exception:
+                          pass
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+      Description: !Sub Custom Resource Lambda for DevOps Agent Webhook in ${AWS::StackName}
+      Environment:
+        Variables:
+          STACK_NAME: !Ref AWS::StackName
+      FunctionName: !Sub ${AgentSpaceName}-WebhookCR
+      Handler: index.handler
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:boto3-latest:1
+      Role: !GetAtt IAMRoleForWebhookCustomResource.Arn
+      Runtime: python3.12
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Timeout: 300
+  CustomResourceForWebhook:
+    Condition: CreateWebhookForwarder
+    DependsOn: DevOpsAgentAssociation
+    Type: Custom::WebhookRegistration
+    Properties:
+      AgentSpaceId: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
+      SecretName: !Sub ${AgentSpaceName}-WebhookCredentials
+      ServiceToken: !GetAtt LambdaFunctionForWebhookCustomResource.Arn
+      ServiceTimeout: 300
+
+  # --- Webhook Forwarder ---
+  LambdaFunctionForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    DependsOn: CustomResourceForWebhook
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - arm64
+      Code:
+        ZipFile: |
+          import base64
+          import boto3
+          import hashlib
+          import hmac
+          import json
+          import os
+          import urllib.request
+          from datetime import datetime, timezone
+
+          _cached = None
+
+          def get_credentials():
+              global _cached
+              if _cached:
+                  return _cached
+              sm = boto3.client('secretsmanager')
+              resp = sm.get_secret_value(SecretId=os.environ['SECRET_NAME'])
+              _cached = json.loads(resp['SecretString'])
+              return _cached
+
+          def handler(event, context):
+              creds = get_credentials()
+              webhook_url = creds['webhookUrl']
+              webhook_secret = creds['webhookSecret']
+
+              for record in event.get('Records', []):
+                  payload = record['Sns']['Message']
+                  timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')
+                  # HMAC-SHA256: sign "timestamp:payload" with base64 output
+                  sig = base64.b64encode(
+                      hmac.new(
+                          webhook_secret.encode(),
+                          f'{timestamp}:{payload}'.encode(),
+                          hashlib.sha256
+                      ).digest()
+                  ).decode()
+
+                  req = urllib.request.Request(
+                      webhook_url,
+                      data=payload.encode(),
+                      headers={
+                          'Content-Type': 'application/json',
+                          'x-amzn-event-signature': sig,
+                          'x-amzn-event-timestamp': timestamp
+                      },
+                      method='POST'
+                  )
+                  with urllib.request.urlopen(req, timeout=10) as resp:
+                      print(f'Status: {resp.status}')
+      Description: !Sub Webhook Forwarder Lambda for DevOps Agent in ${AWS::StackName}
+      Environment:
+        Variables:
+          SECRET_NAME: !Sub ${AgentSpaceName}-WebhookCredentials
+      FunctionName: !Sub ${AgentSpaceName}-WebhookForwarder
+      Handler: index.handler
+      Role: !GetAtt IAMRoleForWebhookForwarder.Arn
+      Runtime: python3.12
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Timeout: 30
+  LambdaPermissionForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunctionForWebhookForwarder
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref SNSForAlertArn
+  SNSSubscriptionForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !GetAtt LambdaFunctionForWebhookForwarder.Arn
+      Protocol: lambda
+      TopicArn: !Ref SNSForAlertArn
+
 Outputs:
-  DevOpsAgentAgentSpaceId:
-    Description: DevOps Agent Space ID
-    Value: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
   DevOpsAgentAgentSpaceArn:
+    Condition: CreateAgentSpace
     Description: DevOps Agent Space ARN
     Value: !GetAtt DevOpsAgentAgentSpace.Arn
+  DevOpsAgentAgentSpaceId:
+    Condition: CreateAgentSpace
+    Description: DevOps Agent Space ID
+    Value: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId

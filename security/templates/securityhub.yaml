@@ -187,21 +187,10 @@ Resources:
     Type: AWS::SecurityHub::FindingAggregator
     Properties:
       RegionLinkingMode: ALL_REGIONS
-  SecurityHubOrganizationConfiguration:
-    Condition: CreateOrganizationConfiguration
-    DependsOn:
-      - SecurityHubFindingAggregator
-    Type: AWS::SecurityHub::OrganizationConfiguration
-    Properties:
-      # Auto Enable and AutoEnableStandards can not be enabled for Central Configuration
-      AutoEnable: false
-      AutoEnableStandards: NONE
-      ConfigurationType: CENTRAL
   SecurityHubConfigurationPolicy:
     Condition: CreateOrganizationConfiguration
     DependsOn:
       - SecurityHubFindingAggregator
-      - SecurityHubOrganizationConfiguration
     Type: AWS::SecurityHub::ConfigurationPolicy
     Properties:
       ConfigurationPolicy: 
@@ -217,7 +206,6 @@ Resources:
     Condition: CreatePolicyAssociation
     DependsOn:
       - SecurityHubFindingAggregator
-      - SecurityHubOrganizationConfiguration
     Type: AWS::SecurityHub::PolicyAssociation
     Properties:
       ConfigurationPolicyId: !GetAtt SecurityHubConfigurationPolicy.Id

@@ -49,7 +49,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | **ApplicationInsights** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`ApplicationInsights` スタックがデプロイされます。 |
 | CodeGuruTargetRepository | String | eijikominami/aws-cloudformation-templates | ○ | CodeGuru で使用する GitHub オーナー名とリポジトリ名 |
 | **DevOpsAgent** | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、`DevOpsAgent` スタックがデプロイされます。 |
-| DevOpsAgentSpaceName | String | DefaultAgentSpace | ○ | DevOps Agent Space の名前 |
 | SSMAdminAccountId | Strig | | | SSM の管理を行う AWS アカウントの ID |
 | SSMAdminAccountId | Strig | | | SSM の管理を行う AWS アカウントの ID |
 | SSMIgnoreResourceConflicts | ENABLED / DISABLED | DISABLED | ○ | ENABLED に設定された場合、当該のリソースは生成されません。 |
@@ -102,7 +101,62 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | OrganizationId | String | | | The Organizations ID |
 | **PatchingAt** | Number | 3 | ○ | 日時のパッチ時刻 |
 
-AWS Systems Manager Explorer を `Shared Services` アカウントで使用する場合には、`AWS Organizations` にて  **Systems Manager** と **AWS Trusted Advisor** の `アクセス有効化` を設定してください。
+SSM Explorer のクロスアカウントデータ集約を有効化するには、**管理アカウント**で以下を実行してください。
+
+```bash
+aws organizations enable-aws-service-access --service-principal opsdatasync.ssm.amazonaws.com
+```
+
+### Default Host Management Configuration (DHMC)
+
+DHMC は CloudFormation で管理できないため、CloudOps スタックのデプロイ後に以下の手順で有効化してください。
+
+```bash
+aws ssm update-service-setting \
+  --setting-id /ssm/managed-instance/default-ec2-instance-management-role \
+  --setting-value service-role/AWSSystemsManagerDefaultEC2InstanceManagementRole
+```
+
+IAM ロール `AWSSystemsManagerDefaultEC2InstanceManagementRole` は ssm.yaml が作成します。
+
+### Operational Insights (OpsInsights)
+
+OpsInsights は CloudFormation で管理できないため、API で有効化してください。
+
+```bash
+aws ssm update-service-setting \
+  --setting-id /ssm/opsinsights/opscenter \
+  --setting-value Enabled
+```
+
+### SSM Unified Console (Quick Setup)
+
+全アカウントに CloudOps スタックをデプロイした後、Quick Setup CLI で SSM Unified Console を組織全体に有効化してください。
+
+```bash
+aws ssm-quicksetup create-configuration-manager \
+  --configuration-definitions '[{
+    "Type": "AWSQuickSetupType-SSM",
+    "TypeVersion": "3.0",
+    "Parameters": {
+      "AgentUpdateSchedule": "rate(14 days)",
+      "EnableDHMCSchedule": "rate(1 day)",
+      "HomeRegion": "<HOME_REGION>",
+      "InventoryCollectionSchedule": "rate(12 hours)",
+      "TargetOrganizationalUnits": "<ORGANIZATION_ROOT_ID>",
+      "TargetRegions": "<TARGET_REGION>",
+      "DelegatedAccountId": "<DELEGATED_ADMIN_ACCOUNT_ID>"
+    }
+  }]'
+```
+
+前提条件（`ssm.yaml` で作成済み）:
+- `AWS-QuickSetup-SSM-RoleForEnablingExplorer`
+- `AWS-QuickSetup-SSM-EnableDHMC`
+- `AWS-QuickSetup-SSM-EnableAREX`
+- `AWS-QuickSetup-SSM-ManageInstanceProfile`
+
+委任管理者アカウントから実行すると Organization 全体がターゲットになります。
 
 ## Amazon CloudWatch Internet Monitor
 
@@ -149,3 +203,25 @@ S3バケットは、ハートビートスクリプトが取得したスクリー
 
 このテンプレートは、CloudWatch のカスタムメトリクスとアラームを作成します。
 これらのアラームは、成功率が90%を下回ったときにトリガされます。
+
+## DevOps Agent
+
+`devopsagent.yaml` テンプレートは PRIMARY モードで AgentSpace を作成し、MEMBER モードで IAM ロールを作成します。
+
+### 既知の制限事項
+
+クロスアカウント Association は CloudFormation および `associate_service` API では作成**できません**。以下のエラーが返されます:
+
+```
+AccessDeniedException: Cross-account pass role is not allowed.
+```
+
+これは IAM Trust Policy の問題ではなく、サービス側の制限です。MEMBER 側の IAM ロールには PRIMARY アカウントの `aws:SourceAccount` と `aws:SourceArn` が正しく設定されています。
+
+### 手動手順
+
+全アカウントに CloudOps スタックをデプロイした後、**AWS コンソール**からセカンダリクラウドソースを追加してください:
+
+1. DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
+2. 「セカンダリクラウドソースを追加」をクリック
+3. メンバーアカウント ID と既存のロール名を入力（ロールは CFn で作成済みのため新規作成不要）
