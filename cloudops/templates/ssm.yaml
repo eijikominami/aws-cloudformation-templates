@@ -91,6 +91,7 @@ Conditions:
   CreateIAMRoleForMultiAccount: !And [ !Not [ !Equals [ !Ref AdminAccountId, ''] ], !Not [ !Equals [ !Ref OrganizationId, ''] ] ]
   CreateResource: !Equals [ !Ref IgnoreResourceConflicts, DISABLED ]
   CreateResourceDataSync: !Equals [ !Ref AdminAccountId, !Ref AWS::AccountId ]
+  CreateQuickSetup: !And [ !Equals [ !Ref AdminAccountId, !Ref AWS::AccountId ], !Equals [ !Ref IgnoreResourceConflicts, DISABLED ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
 
@@ -1056,7 +1057,7 @@ Resources:
           Value: !Ref TagValue
   # Quick Setup Configuration Managers (delegated admin only)
   SSMQuickSetupForUnifiedConsole:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1074,7 +1075,7 @@ Resources:
       Name: SSMUnifiedConsole
   # Quick Setup - Patch Policy
   SSMQuickSetupForPatchPolicy:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1099,7 +1100,7 @@ Resources:
       Name: PatchPolicy
   # Quick Setup - Config Recording
   SSMQuickSetupForConfigRecording:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1117,7 +1118,7 @@ Resources:
       Name: ConfigRecording
   # Quick Setup - Conformance Packs
   SSMQuickSetupForConformancePacks:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1132,7 +1133,7 @@ Resources:
       Name: ConformancePacks
   # Quick Setup - DevOps Guru
   SSMQuickSetupForDevOpsGuru:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1149,7 +1150,7 @@ Resources:
       Name: DevOpsGuru
   # Quick Setup - OpsCenter
   SSMQuickSetupForOpsCenter:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1162,7 +1163,7 @@ Resources:
       Name: OpsCenter
   # Quick Setup - Change Manager
   SSMQuickSetupForChangeManager:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1177,7 +1178,7 @@ Resources:
       Name: ChangeManager
   # Quick Setup - Resource Scheduler
   SSMQuickSetupForResourceScheduler:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1200,7 +1201,7 @@ Resources:
       Name: ResourceScheduler
   # Quick Setup - Resource Explorer
   SSMQuickSetupForResourceExplorer:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1214,7 +1215,7 @@ Resources:
       Name: ResourceExplorer
   # Quick Setup - Default Host Management Configuration
   SSMQuickSetupForDHMC:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1227,7 +1228,7 @@ Resources:
       Name: DHMC
   # Quick Setup - Distributor
   SSMQuickSetupForDistributor:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
@@ -1243,7 +1244,7 @@ Resources:
       Name: Distributor
   # Quick Setup - Host Management
   SSMQuickSetupForHostManagement:
-    Condition: CreateResourceDataSync
+    Condition: CreateQuickSetup
     Type: AWS::SSMQuickSetup::ConfigurationManager
     Properties:
       ConfigurationDefinitions:
