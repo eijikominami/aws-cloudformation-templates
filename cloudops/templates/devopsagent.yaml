@@ -463,7 +463,7 @@ Resources:
       Endpoint: !GetAtt LambdaFunctionForWebhookForwarder.Arn
       Protocol: lambda
       TopicArn: !Ref SNSForAlertArn
-  SNSSubscriptionForWebhookForwarderMember:
+  SNSSubscriptionForWebhookForwarderCrossAccount:
     Condition: CreateWebhookSubscriptionForMember
     Type: AWS::SNS::Subscription
     Properties:
