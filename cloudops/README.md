@@ -92,9 +92,14 @@ This template sets ``Amazon CodeGuru Reviewer``.
 
 This template creates ``AWS DevOps Agent`` Agent Space, IAM roles, and AWS account associations. DevOps Agent provides automated incident investigation, proactive improvement recommendations, and on-demand SRE tasks.
 
+In PRIMARY mode, it also creates a cross-account configuration to receive CloudWatch Alarm notifications from MEMBER accounts' SNS Alert Topics and forward them to the DevOps Agent webhook.
+
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | **AgentSpaceName** | String | DefaultAgentSpace | ○ | The name of the Agent Space |
+| MemberAccountIds | CommaDelimitedList | | | Comma-separated list of MEMBER account IDs for cross-account webhook forwarding (PRIMARY mode only) |
+| Mode | PRIMARY / MEMBER | PRIMARY | ○ | PRIMARY creates AgentSpace, MEMBER creates IAM roles only |
+| PrimaryAccountId | String | | | Account ID of the PRIMARY account that owns the AgentSpace (required for MEMBER) |
 
 ### DevOps Guru
 

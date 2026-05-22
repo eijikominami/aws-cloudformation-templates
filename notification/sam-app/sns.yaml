@@ -27,6 +27,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  CrossAccountSubscriberAccountId:
+    Type: String
+    Default: ''
+    Description: Account ID allowed to subscribe to this topic (for cross-account webhook forwarding)
   TopicName:
     Type: String
     Default: Default
@@ -46,6 +50,9 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
+
+Conditions:
+  AllowCrossAccountSubscribe: !Not [ !Equals [ !Ref CrossAccountSubscriberAccountId, '' ] ]
 
 Resources:
   SNSTopic:
@@ -83,6 +90,15 @@ Resources:
                 - codestar-notifications.amazonaws.com
             Resource: !Ref SNSTopic
             Action: 'sns:Publish'
+          - !If
+            - AllowCrossAccountSubscribe
+            - Sid: Cross-Account-Subscribe
+              Effect: Allow
+              Principal:
+                AWS: !Sub arn:aws:iam::${CrossAccountSubscriberAccountId}:root
+              Resource: !Ref SNSTopic
+              Action: 'sns:Subscribe'
+            - !Ref AWS::NoValue
   CloudWatchAlarmSNSNumberOfNotificationsFailed:
     Type: AWS::CloudWatch::Alarm
     Properties:

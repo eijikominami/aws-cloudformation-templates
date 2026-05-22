@@ -75,10 +75,6 @@ Conditions:
   CreateWebhookPermissionsForMembers: !And
     - !Condition CreateWebhookForwarder
     - !Not [ !Equals [ !Join [ '', !Ref MemberAccountIds ], '' ] ]
-  CreateWebhookSubscriptionForMember: !And
-    - !Equals [ !Ref Mode, MEMBER ]
-    - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
-    - !Not [ !Equals [ !Ref PrimaryAccountId, '' ] ]
   Development: !Equals
     - !Ref Environment
     - development
@@ -461,13 +457,6 @@ Resources:
     Type: AWS::SNS::Subscription
     Properties:
       Endpoint: !GetAtt LambdaFunctionForWebhookForwarder.Arn
-      Protocol: lambda
-      TopicArn: !Ref SNSForAlertArn
-  SNSSubscriptionForWebhookForwarderCrossAccount:
-    Condition: CreateWebhookSubscriptionForMember
-    Type: AWS::SNS::Subscription
-    Properties:
-      Endpoint: !Sub arn:aws:lambda:${AWS::Region}:${PrimaryAccountId}:function:${AgentSpaceName}-WebhookForwarder
       Protocol: lambda
       TopicArn: !Ref SNSForAlertArn
 

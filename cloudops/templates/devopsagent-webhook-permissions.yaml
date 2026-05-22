@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::LanguageExtensions
-Description: aws-cloudformation-templates/cloudops/devopsagent-webhook-permissions creates cross-account Lambda Permissions for webhook forwarding.
+Description: aws-cloudformation-templates/cloudops/devopsagent-webhook-permissions creates cross-account Lambda Permissions and SNS Subscriptions for webhook forwarding.
 
 Parameters:
   LambdaFunctionArn:
@@ -9,6 +9,10 @@ Parameters:
   MemberAccountIds:
     Type: CommaDelimitedList
     Description: List of MEMBER account IDs to allow SNS invoke from
+  SNSTopicName:
+    Type: String
+    Default: Alert-createdby-CICD
+    Description: Name of the SNS Alert topic in MEMBER accounts
 
 Resources:
   Fn::ForEach::LambdaPermissionForMember:
@@ -20,4 +24,13 @@ Resources:
           Action: lambda:InvokeFunction
           FunctionName: !Ref LambdaFunctionArn
           Principal: sns.amazonaws.com
-          SourceArn: !Sub arn:aws:sns:${AWS::Region}:${AccountId}:Alert-createdby-*
+          SourceArn: !Sub arn:aws:sns:${AWS::Region}:${AccountId}:${SNSTopicName}
+  Fn::ForEach::SNSSubscriptionForMember:
+    - AccountId
+    - !Ref MemberAccountIds
+    - SNSSubscriptionForWebhookForwarder${AccountId}:
+        Type: AWS::SNS::Subscription
+        Properties:
+          Endpoint: !Ref LambdaFunctionArn
+          Protocol: lambda
+          TopicArn: !Sub arn:aws:sns:${AWS::Region}:${AccountId}:${SNSTopicName}

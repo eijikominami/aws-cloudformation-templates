@@ -77,9 +77,14 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 このテンプレートは、``AWS DevOps Agent`` の Agent Space、IAM ロール、AWS アカウント関連付けを作成します。DevOps Agent はインシデントの自動調査、予防的な改善提案、オンデマンド SRE タスクを提供します。
 
+PRIMARY モードでは、MEMBER アカウントの SNS Alert Topic からの CloudWatch Alarm 通知を受信し、DevOps Agent の webhook に転送するクロスアカウント構成も作成します。
+
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | **AgentSpaceName** | String | DefaultAgentSpace | ○ | Agent Space の名前 |
+| MemberAccountIds | CommaDelimitedList | | | クロスアカウント webhook 転送を許可する MEMBER アカウント ID のカンマ区切りリスト（PRIMARY モードのみ） |
+| Mode | PRIMARY / MEMBER | PRIMARY | ○ | PRIMARY は AgentSpace を作成、MEMBER は IAM ロールのみ作成 |
+| PrimaryAccountId | String | | | AgentSpace を所有する PRIMARY アカウントの ID（MEMBER モードで必須） |
 
 ### DevOps Guru
 
@@ -210,7 +215,7 @@ S3バケットは、ハートビートスクリプトが取得したスクリー
 
 ### 既知の制限事項
 
-クロスアカウント Association は CloudFormation および `associate_service` API では作成**できません**。以下のエラーが返されます:
+クロスアカウント Association は CloudFormation および `associate_service` API では作成**できません**。以下のエラーが返されます。
 
 ```
 AccessDeniedException: Cross-account pass role is not allowed.
@@ -220,7 +225,7 @@ AccessDeniedException: Cross-account pass role is not allowed.
 
 ### 手動手順
 
-全アカウントに CloudOps スタックをデプロイした後、**AWS コンソール**からセカンダリクラウドソースを追加してください:
+全アカウントに CloudOps スタックをデプロイした後、**AWS コンソール**からセカンダリクラウドソースを追加してください。
 
 1. DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
 2. 「セカンダリクラウドソースを追加」をクリック
