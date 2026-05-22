@@ -146,8 +146,6 @@ Conditions:
       - ''
   CreateDevOpsAgent: !Not
     - !Equals [ !Ref DevOpsAgent, DISABLED ]
-  HasMemberAccountIds: !Not
-    - !Equals [ !Join [ '', !Ref DevOpsAgentMemberAccountIds ], '' ]
   CreateSNSForAlert: !Equals
     - !Ref SNSForAlertArn
     - ''
@@ -218,13 +216,7 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
-        MemberAccountIds: !If
-          - HasMemberAccountIds
-          - !Sub
-            - '${SelfAccountId},${AdditionalIds}'
-            - SelfAccountId: !Ref AWS::AccountId
-              AdditionalIds: !Join [ ',', !Ref DevOpsAgentMemberAccountIds ]
-          - !Ref AWS::AccountId
+        MemberAccountIds: !Join [ ',', !Ref DevOpsAgentMemberAccountIds ]
         Mode: !Ref DevOpsAgent
         PrimaryAccountId: !Ref DevOpsAgentPrimaryAccountId
         AgentSpaceId: !Ref DevOpsAgentSpaceId

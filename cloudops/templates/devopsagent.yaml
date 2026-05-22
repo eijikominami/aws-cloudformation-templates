@@ -1,5 +1,4 @@
 AWSTemplateFormatVersion: 2010-09-09
-Transform: AWS::LanguageExtensions
 Description: aws-cloudformation-templates/cloudops/devopsagent creates AWS DevOps Agent.
 
 Metadata:
@@ -73,6 +72,9 @@ Conditions:
   CreateWebhookForwarder: !And
     - !Condition CreateAgentSpace
     - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
+  CreateWebhookPermissionsForMembers: !And
+    - !Condition CreateWebhookForwarder
+    - !Not [ !Equals [ !Join [ '', !Ref MemberAccountIds ], '' ] ]
   CreateWebhookSubscriptionForMember: !And
     - !Equals [ !Ref Mode, MEMBER ]
     - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
@@ -432,17 +434,22 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Timeout: 30
-  Fn::ForEach::LambdaPermissionForMember:
-    - AccountId
-    - !Ref MemberAccountIds
-    - LambdaPermissionForWebhookForwarder${AccountId}:
-        Condition: CreateWebhookForwarder
-        Type: AWS::Lambda::Permission
-        Properties:
-          Action: lambda:InvokeFunction
-          FunctionName: !Ref LambdaFunctionForWebhookForwarder
-          Principal: sns.amazonaws.com
-          SourceArn: !Sub arn:aws:sns:${AWS::Region}:${AccountId}:Alert-createdby-*
+  LambdaPermissionForWebhookForwarder:
+    Condition: CreateWebhookForwarder
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunctionForWebhookForwarder
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref SNSForAlertArn
+  WebhookPermissionsForMembers:
+    Condition: CreateWebhookPermissionsForMembers
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        LambdaFunctionArn: !GetAtt LambdaFunctionForWebhookForwarder.Arn
+        MemberAccountIds: !Join [ ',', !Ref MemberAccountIds ]
+      TemplateURL: ./devopsagent-webhook-permissions.yaml
   SNSSubscriptionForWebhookForwarder:
     Condition: CreateWebhookForwarder
     Type: AWS::SNS::Subscription
