@@ -67,6 +67,10 @@ Conditions:
   CreateWebhookForwarder: !And
     - !Condition CreateAgentSpace
     - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
+  CreateWebhookSubscriptionForMember: !And
+    - !Equals [ !Ref Mode, MEMBER ]
+    - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
+    - !Not [ !Equals [ !Ref PrimaryAccountId, '' ] ]
 
 Resources:
   # --- IAM Roles ---
@@ -429,12 +433,19 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref LambdaFunctionForWebhookForwarder
       Principal: sns.amazonaws.com
-      SourceArn: !Ref SNSForAlertArn
+      SourceArn: !Sub arn:aws:sns:${AWS::Region}:*:Alert-createdby-*
   SNSSubscriptionForWebhookForwarder:
     Condition: CreateWebhookForwarder
     Type: AWS::SNS::Subscription
     Properties:
       Endpoint: !GetAtt LambdaFunctionForWebhookForwarder.Arn
+      Protocol: lambda
+      TopicArn: !Ref SNSForAlertArn
+  SNSSubscriptionForWebhookForwarderMember:
+    Condition: CreateWebhookSubscriptionForMember
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Sub arn:aws:lambda:${AWS::Region}:${PrimaryAccountId}:function:${AgentSpaceName}-WebhookForwarder
       Protocol: lambda
       TopicArn: !Ref SNSForAlertArn
 
