@@ -13,6 +13,7 @@ Metadata:
           default: 'DevOps Agent Configuration'
         Parameters:
           - DevOpsAgent
+          - DevOpsAgentMemberAccountIds
       - Label:
           default: 'Resource Explorer Configuration'
         Parameters:
@@ -68,6 +69,10 @@ Parameters:
       - MEMBER
       - DISABLED
     Description: PRIMARY creates AgentSpace and Aggregator Index. MEMBER creates IAM roles only. DISABLED skips entirely.
+  DevOpsAgentMemberAccountIds:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: Comma-separated list of MEMBER account IDs for cross-account webhook forwarding (for PRIMARY mode)
   DevOpsAgentPrimaryAccountId:
     Type: String
     Default: ''
@@ -141,6 +146,8 @@ Conditions:
       - ''
   CreateDevOpsAgent: !Not
     - !Equals [ !Ref DevOpsAgent, DISABLED ]
+  HasMemberAccountIds: !Not
+    - !Equals [ !Join [ '', !Ref DevOpsAgentMemberAccountIds ], '' ]
   CreateSNSForAlert: !Equals
     - !Ref SNSForAlertArn
     - ''
@@ -211,6 +218,13 @@ Resources:
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
       Parameters:
+        MemberAccountIds: !If
+          - HasMemberAccountIds
+          - !Sub
+            - '${SelfAccountId},${AdditionalIds}'
+            - SelfAccountId: !Ref AWS::AccountId
+              AdditionalIds: !Join [ ',', !Ref DevOpsAgentMemberAccountIds ]
+          - !Ref AWS::AccountId
         Mode: !Ref DevOpsAgent
         PrimaryAccountId: !Ref DevOpsAgentPrimaryAccountId
         AgentSpaceId: !Ref DevOpsAgentSpaceId

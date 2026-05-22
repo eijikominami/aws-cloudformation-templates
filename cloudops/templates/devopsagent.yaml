@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::LanguageExtensions
 Description: aws-cloudformation-templates/cloudops/devopsagent creates AWS DevOps Agent.
 
 Metadata:
@@ -14,6 +15,7 @@ Metadata:
       - Label:
           default: 'Webhook Forwarder Configuration'
         Parameters:
+          - MemberAccountIds
           - SNSForAlertArn
       - Label:
           default: 'Tag Configuration'
@@ -38,6 +40,10 @@ Parameters:
       - production
       - test
       - development
+  MemberAccountIds:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: Comma-separated list of MEMBER account IDs for cross-account webhook forwarding
   Mode:
     Type: String
     Default: PRIMARY
@@ -426,14 +432,17 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       Timeout: 30
-  LambdaPermissionForWebhookForwarder:
-    Condition: CreateWebhookForwarder
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref LambdaFunctionForWebhookForwarder
-      Principal: sns.amazonaws.com
-      SourceArn: !Sub arn:aws:sns:${AWS::Region}:*:Alert-createdby-*
+  Fn::ForEach::LambdaPermissionForMember:
+    - AccountId
+    - !Ref MemberAccountIds
+    - LambdaPermissionForWebhookForwarder${AccountId}:
+        Condition: CreateWebhookForwarder
+        Type: AWS::Lambda::Permission
+        Properties:
+          Action: lambda:InvokeFunction
+          FunctionName: !Ref LambdaFunctionForWebhookForwarder
+          Principal: sns.amazonaws.com
+          SourceArn: !Sub arn:aws:sns:${AWS::Region}:${AccountId}:Alert-createdby-*
   SNSSubscriptionForWebhookForwarder:
     Condition: CreateWebhookForwarder
     Type: AWS::SNS::Subscription
