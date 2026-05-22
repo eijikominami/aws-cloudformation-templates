@@ -79,6 +79,9 @@ Conditions:
     - !Equals [ !Ref Mode, MEMBER ]
     - !Not [ !Equals [ !Ref SNSForAlertArn, '' ] ]
     - !Not [ !Equals [ !Ref PrimaryAccountId, '' ] ]
+  Development: !Equals
+    - !Ref Environment
+    - development
 
 Resources:
   # --- IAM Roles ---
@@ -449,7 +452,10 @@ Resources:
       Parameters:
         LambdaFunctionArn: !GetAtt LambdaFunctionForWebhookForwarder.Arn
         MemberAccountIds: !Join [ ',', !Ref MemberAccountIds ]
-      TemplateURL: ./devopsagent-webhook-permissions.yaml
+      TemplateURL: !If
+        - Development
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/devopsagent-webhook-permissions.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/devopsagent-webhook-permissions.yaml
   SNSSubscriptionForWebhookForwarder:
     Condition: CreateWebhookForwarder
     Type: AWS::SNS::Subscription
