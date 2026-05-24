@@ -272,6 +272,10 @@ Parameters:
       - production
       - test
       - development
+  GitHubCodeScanRepository:
+    Type: String
+    Default: ''
+    Description: GitHub owner/repo for OIDC trust (e.g. eijikominami/aws-cloudformation-templates)
   TagKey:
     Type: String
     Default: createdby
@@ -565,6 +569,8 @@ Resources:
         AmazonGuardDuty: !Ref AmazonGuardDuty
         AmazonGuardDutyFindingsDestinationBucketArn: !Sub arn:aws:s3:::${CentralizedLogBucketName}
         AmazonGuardDutyKmsKeyArn: !Ref SIEMKmsKeyArn
+        GitHubCodeScanRepository: !Ref GitHubCodeScanRepository
+        LogicalName: !Ref AWS::StackName
         SIEM: !Ref SIEM
         SIEMControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
         SIEMControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader

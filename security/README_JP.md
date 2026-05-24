@@ -157,6 +157,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
 | CentralizedLogBucketName | String | | | 集約ログ用の S3 バケット名 |
 | CentralizedLoggingFirehoseRoleArns | CommaDelimitedList | | | ソースアカウントでクロスアカウントロールを引き受ける IAM ロール ARN のリスト |
+| GitHubCodeScanRepository | String | | | OIDC 信頼対象の GitHub オーナー/リポジトリ名（例: eijikominami/aws-cloudformation-templates） |
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、IAM Access Analyzer が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受ける IAM ユーザの ARN |
 | LogArchiveAccountId | String | | | ログアーカイブアカウントの ID |

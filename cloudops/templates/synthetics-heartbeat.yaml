@@ -6,12 +6,6 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: 
-          default: 'Incident Manager Configuration'
-        Parameters: 
-          - IncidentManagerArn
-          - IncidentDurationInSeconds
-          - IncidentSuccessPercentThreshold
-      - Label: 
           default: 'Synthetics Configuration'
         Parameters: 
           - CanaryName
@@ -46,10 +40,6 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The watched domain name [required]
-  IncidentManagerArn:
-    Type: String
-    Default: ''
-    Description: Systems Manager Incident Manager response plan ARN
   IncidentDurationInSeconds:
     Type: Number
     Default: 600
@@ -91,7 +81,6 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateIncident: !Not [ !Equals [ !Ref IncidentManagerArn, ''] ]
   CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -260,7 +249,7 @@ Resources:
       Name: !Ref CanaryName
       RuntimeVersion: syn-nodejs-puppeteer-10.0
       Schedule: 
-        DurationInSeconds: '0'
+        IncidentDurationInSeconds: '0'
         Expression: rate(5 minutes) 
       StartCanaryAfterCreation: true
       SuccessRetentionPeriod: 31
@@ -326,11 +315,7 @@ Resources:
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
           - !Ref SNSForAlertArn
-        - !If 
-          - CreateIncident
-          - !Ref IncidentManagerArn
-          - !Ref SNSForAlertArn
-      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。 *インシデントの発生を宣言* します。'
+      AlarmDescription: !Sub 'CloudWatch Synthetics による定期モニタリングで、${DomainName}${WatchedPagePath} への GET の *失敗率が上昇* しています。'
       AlarmName: !Sub Incident-${CanaryName}-Synthetics-AccessError
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1

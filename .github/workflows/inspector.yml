@@ -1,0 +1,39 @@
+name: Amazon Inspector Scan
+
+on:
+  pull_request:
+    types: opened
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        id: iam-role
+        uses: aws-actions/configure-aws-credentials@v4
+        continue-on-error: true
+        with:
+          role-to-assume: ${{ vars.AWS_INSPECTOR_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Amazon Inspector Scan
+        if: steps.iam-role.outcome == 'success'
+        uses: aws-actions/vulnerability-scan-github-action-for-amazon-inspector@v1
+        with:
+          artifact_type: repository
+          artifact_path: .
+
+      - name: Upload SARIF
+        if: steps.iam-role.outcome == 'success'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: inspector-results.sarif

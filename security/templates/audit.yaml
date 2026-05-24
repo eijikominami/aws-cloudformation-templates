@@ -69,6 +69,15 @@ Parameters:
       - production
       - test
       - development
+  GitHubCodeScanRepository:
+    Type: String
+    Default: ''
+    Description: GitHub owner/repo for OIDC trust (e.g. eijikominami/aws-cloudformation-templates)
+  LogicalName:
+    Type: String
+    Default: DefaultSecuritySettings
+    AllowedPattern: .+
+    Description: The custom prefix name
   SIEM:
     Type: String
     Default: DISABLED
@@ -129,6 +138,7 @@ Parameters:
 
 Conditions:
   CreateSIEM: !Equals [ !Ref SIEM, ENABLED ]
+  CreateGitHubCodeScan: !Not [ !Equals [ !Ref GitHubCodeScanRepository, '' ] ]
   CreateGuardDuty: !Or [ !Equals [ !Ref AmazonGuardDuty, ENABLED], !Equals [!Ref AmazonGuardDuty, NOTIFICATION_ONLY ] ]
   CreateGuardDutyEventBridgeOnly: !Equals [ !Ref AmazonGuardDuty, NOTIFICATION_ONLY ]
   CreateSecurityAgent: !Equals [ !Ref SecurityAgent, ENABLED ]
@@ -244,7 +254,7 @@ Resources:
           - CreateSNSForDeployment
           - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
           - !Ref SNSForDeploymentArn
-        LogicalName: !Ref AWS::StackName
+        LogicalName: !Ref LogicalName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
@@ -254,6 +264,46 @@ Resources:
             - Development
             - eijikominami-test
             - eijikominami
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # GitHub Actions OIDC
+  OIDCProviderForGitHubCodeScan:
+    Condition: CreateGitHubCodeScan
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      ClientIdList:
+        - sts.amazonaws.com
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      ThumbprintList:
+        - aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      Url: https://token.actions.githubusercontent.com
+  IAMRoleForGitHubCodeScan:
+    Condition: CreateGitHubCodeScan
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !GetAtt OIDCProviderForGitHubCodeScan.Arn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubCodeScanRepository}:*
+      Description: IAM role for GitHub Actions CI/CD workflows
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonInspector2ReadOnlyAccess
+      RoleName: !Sub ${LogicalName}-Inspector-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment

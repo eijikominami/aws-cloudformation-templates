@@ -146,6 +146,7 @@ You can provide optional parameters as follows:
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | The standard that you want to enable |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | CentralizedLoggingFirehoseRoleArns | CommaDelimitedList | | | List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role |
+| GitHubCodeScanRepository | String | | | GitHub owner/repo for OIDC trust (e.g. eijikominami/aws-cloudformation-templates) |
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | Enable or disable IAM Access Analyzer |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
 | LogArchiveAccountId | String | | | The id of the log archive account |

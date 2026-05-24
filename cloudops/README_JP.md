@@ -205,9 +205,6 @@ aws cloudformation deploy --template-file synthetics-heartbeat.yaml --stack-name
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
-| IncidentManagerArn | String | | | Systems Manager Incident Manager のレスポンスプラン ARN |
-| IncidentDurationInSeconds | Number | 600 | ○ | インシデントの基準となる時間 |
-| IncidentSuccessPercentThreshold | Number | 50 | ○ | インシデントの基準となるアクセス成功率（％） |
 | **CanaryName** | String | | ○ | カナリア名 |
 | **DomainName** | String | | ○ | スクリプトが監視するドメイン名 |
 | WatchedPagePath | String | /index.html | ○ | スクリプトが監視するページのパス |
