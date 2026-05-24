@@ -303,6 +303,15 @@ Resources:
       Description: IAM role for GitHub Actions CI/CD workflows
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonInspector2ReadOnlyAccess
+      Policies:
+        - PolicyName: InspectorScanSbom
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - inspector-scan:ScanSbom
+                Resource: '*'
       RoleName: !Sub ${LogicalName}-Inspector-${AWS::Region}
       Tags:
         - Key: environment
