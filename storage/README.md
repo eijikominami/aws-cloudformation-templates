@@ -51,7 +51,7 @@ You can provide optional parameters as follows.
 | CidrIp | String | 0.0.0.0/0 | ○ | The CIDR block for security group access |
 | FSxThroughput | Number | 8 | ○ | The throughput capacity (MB/s) - 8, 16, 32, or 64 |
 | PrimarySubnetAccess | String | | ○ | The subnet ID for the primary file system |
-| IngressCidrIp | String | | | Additional CIDR block for ingress access |
+| IngressCidrIp | String | | ○ | Additional CIDR block for ingress access |
 | StorageCapacity | Number | 32 | ○ | The storage capacity (GB) - minimum 32 GB |
 | SubnetIds | String | | ○ | Comma-separated list of subnet IDs |
 | **VPCId** | String | | ○ | The VPC ID where FSx will be deployed |

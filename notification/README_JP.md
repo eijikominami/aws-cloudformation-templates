@@ -140,6 +140,7 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | --- | --- | --- | --- | --- |
 | CloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | CloudTrailLogGroup | | | | ロググループを指定した場合、``Unauthorized API Calls`` イベントの詳細がSlackによって送信されます。 |
+| CrossAccountSubscriberAccountId | String | | | Alert SNS Topic へのクロスアカウント Subscribe を許可するアカウント ID |
 | Encrypt | String | DISABLED | ○ | ENABLEDを指定した場合、AWS KMS カスタムキーで SlackのHook URL を暗号化します。 |
 | **HookUrlForDeployment** | String | | | Slack デプロイチャンネルのHook URL | 
 | **HookUrlForAlert** | String | | | Slack アラートチャンネルのHook URL |

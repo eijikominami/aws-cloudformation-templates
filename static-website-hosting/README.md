@@ -123,8 +123,8 @@ You can provide optional parameters as follows.
 | CloudWatchAppicationSignals | ENABLED / DISABLED | ENABLED | | If it is ENABLED, Logging is enabled on **Internet Monitor** and **CloudWatch Synthetics**  |
 | CodeStarConnectionArn | String | | | The Amazon Resource Name (ARN) of the CodeStar connection |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
-| GitHubOwnerNameForWebsite | String | | | The GitHub owner name of the contents repository |
-| GitHubRepoNameForWebsite | String | | | The GitHub repository name of the contents repository |
+| GitHubOwnerNameForWebsite | String | | ○ | The GitHub owner name of the contents repository |
+| GitHubRepoNameForWebsite | String | | ○ | The GitHub repository name of the contents repository |
 | GitHubBranchNameForWebsite | String | | | The Branch name of GitHub for the contents repository |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |

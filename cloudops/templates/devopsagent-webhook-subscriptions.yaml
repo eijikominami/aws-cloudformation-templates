@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::LanguageExtensions
+Description: aws-cloudformation-templates/cloudops/devopsagent-webhook-subscriptions creates cross-account SNS Subscriptions for webhook forwarding.
+
+Parameters:
+  LambdaFunctionArn:
+    Type: String
+    Description: ARN of the WebhookForwarder Lambda function
+  MemberAccountIds:
+    Type: CommaDelimitedList
+    Description: List of MEMBER account IDs to subscribe from
+  SNSTopicName:
+    Type: String
+    Default: Alert-createdby-CICD
+    Description: Name of the SNS Alert topic in MEMBER accounts
+
+Resources:
+  Fn::ForEach::SNSSubscriptionForMember:
+    - AccountId
+    - !Ref MemberAccountIds
+    - SNSSubscriptionForWebhookForwarder${AccountId}:
+        Type: AWS::SNS::Subscription
+        Properties:
+          Endpoint: !Ref LambdaFunctionArn
+          Protocol: lambda
+          TopicArn: !Sub arn:aws:sns:${AWS::Region}:${AccountId}:${SNSTopicName}

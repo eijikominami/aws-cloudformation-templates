@@ -36,6 +36,7 @@
 | Amazon Macie | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalName=Macie) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Macie&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/macie.yaml&param_LogicalName=Macie) |
 | Amazon Security Lake | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SecurityLake&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/securitylake.yaml&param_LogicalName=SecurityLake) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SecurityLake&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/securitylake.yaml&param_LogicalName=SecurityLake) |
 | ロギング | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Logging&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/logging.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Logging&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/logging.yaml) |
+| Security Agent | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=SecurityAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/security-agent.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=SecurityAgent&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/security/security-agent.yaml) |
 
 ## アーキテクチャ
 
@@ -113,6 +114,15 @@ aws organizations register-delegated-administrator \
 
 SIEM on Open Search Service の構築後、 [こちらの手順のように](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/controltower_ja.md#log-archive-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%A7%E3%81%AE%E6%BA%96%E5%82%99) S3 バケットに **通知設定を追加** してください。また、必要に応じてパラメータの更新も行なってください。
 
+### Security Agent
+
+このテンプレートは、``AWS Security Agent`` を設定します。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| **AgentSpaceName** | String | security-agent-space | ○ | AWS Security Agent の Agent Space 名 |
+| VpcId | String | | | Security Agent スキャナーが実行される VPC の ID |
+
 ### Amazon EventBridge
 
 このテンプレートは、 ``AWS Health`` と　``AWS Trusted Advisor`` に関する  ``CloudWatchイベント`` を作成します。
@@ -140,26 +150,32 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
 | AWSConfig | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Config が有効化されます。 |
-| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた **自動修復機能** が有効化されます。 |
-| AmazonGuardDuty | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon GuardDuty が有効化されます。|
-| AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。|
+| AWSConfigAutoRemediation | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、SSM Automation と Lambda を用いた自動修復機能が有効化されます。 |
+| AmazonGuardDuty | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon GuardDuty が有効化されます。 |
+| AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Amazon Macie が有効化されます。 |
 | AWSSecurityHub | String | STANDARDS_ONLY | ○ | ENABLEDを指定した場合、AWS Security Hub が有効化されます。 |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | 有効化するセキュリティ標準 |
-| IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、 IAM Access Analyzer が有効化されます。 |
-| IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受けるIAMユーザのARN |
+| CentralizedLogBucketName | String | | | 集約ログ用の S3 バケット名 |
+| CentralizedLoggingFirehoseRoleArns | CommaDelimitedList | | | ソースアカウントでクロスアカウントロールを引き受ける IAM ロール ARN のリスト |
+| GitHubCodeScanRepository | String | | | OIDC 信頼対象の GitHub オーナー/リポジトリ名（例: eijikominami/aws-cloudformation-templates） |
+| IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、IAM Access Analyzer が有効化されます。 |
+| IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受ける IAM ユーザの ARN |
 | LogArchiveAccountId | String | | | ログアーカイブアカウントの ID |
 | OrganizationId | String | | | AWS Organizations の ID |
 | OrganizationsRootId | String | | | AWS Organizations のルート ID |
+| SecurityAgent | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Agent が有効化されます。 |
+| SecurityAgentVpcId | String | | conditional | Security Agent スキャナーが実行される VPC の ID |
 | SecurityOUId | String | | | セキュリティ OU の ID |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、SIEM が有効化されます。 |
-| SIEMControlTowerLogBucketNameList | String | | ※ | ログアーカイブアカウントの S3 ログバケット名。 **OpenSearch Service インストール後に指定。** |
-| SIEMControlTowerRoleArnForEsLoader | String | | ※ | aes-siem-es-loader が使用する IAM ロール名。 **OpenSearch Service インストール後に指定。** |
-| SIEMControlTowerSqsForLogBuckets | String | | ※ | ログアーカイブアカウントの SQS ARN。 **OpenSearch Service インストール後に指定。** |
-| SIEMEsLoaderServiceRoleArn | String | | | aes-siem-es-loader Lambda 関数の ARN。 **OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerLogBucketNameList | String | | ※ | ログアーカイブアカウントの S3 ログバケット名。**OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerRoleArnForEsLoader | String | | ※ | aes-siem-es-loader が使用する IAM ロール ARN。**OpenSearch Service インストール後に指定。** |
+| SIEMControlTowerSqsForLogBuckets | String | | ※ | ログアーカイブアカウントの SQS ARN。**OpenSearch Service インストール後に指定。** |
+| SIEMEsLoaderServiceRoleArn | String | | | aes-siem-es-loader Lambda 関数の ARN。**OpenSearch Service インストール後に指定。** |
 | SIEMGeoLite2LicenseKey | String | | | MaxMind が発行した GEO IP API のライセンスキー |
-| SIEMSecurityLakeExternalId | String | | ※ | Security Lake の外部 ID。 **OpenSearch Service インストール後に指定。** |
-| SIEMSecurityLakeRoleArn | String | | ※ | aes-siem-es-loader が使用する IAM ロール。 **OpenSearch Service インストール後に指定。** |
-| SIEMSecurityLakeSubscriberSqs | String | | ※ | Security Lake サブスクライバーの SQS ARN。 **OpenSearch Service インストール後に指定。** |
+| SIEMKmsKeyArn | String | | | SIEM の検出結果を暗号化する KMS キー ARN |
+| SIEMSecurityLakeExternalId | String | | ※ | Security Lake の外部 ID。**OpenSearch Service インストール後に指定。** |
+| SIEMSecurityLakeRoleArn | String | | ※ | aes-siem-es-loader が使用する IAM ロール。**OpenSearch Service インストール後に指定。** |
+| SIEMSecurityLakeSubscriberSqs | String | | ※ | Security Lake サブスクライバーの SQS ARN。**OpenSearch Service インストール後に指定。** |
 | SIEMEmail | String | | | SIEM に指定する E メールアドレス |
 
 ### マルチアカウント対応

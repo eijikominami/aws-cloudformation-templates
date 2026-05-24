@@ -76,7 +76,7 @@ If DNS resolution is not working:
 
 You can provide optional parameters as follows:
 
-| Name | Type | Default | Requied | Details | 
+| Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |

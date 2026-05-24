@@ -32,7 +32,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name VDI --capab
 
 You can provide optional parameters as follows:
 
-| Name | Type | Default | Requied | Details | 
+| Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | ActiveDirectoryAccountNameForAppStream | String | AppStreamAdmin | | The user name of the account | 
 | ActiveDirectoryAddresses | String | | | The IPv4 addresses of Active Directory | 

@@ -1,5 +1,6 @@
 import requests
 import json
+from urllib.parse import urlparse
  
 SUCCESS = "SUCCESS"
 FAILED = "FAILED"
@@ -29,6 +30,10 @@ def send(event, context, responseStatus, responseData, physicalResourceId=None, 
     }
  
     try:
+        parsed = urlparse(responseUrl)
+        if not (parsed.scheme == 'https' and parsed.hostname and parsed.hostname.endswith('.amazonaws.com')):
+            print(f"ERROR: Invalid CFN response URL, skipping: {responseUrl}")
+            return
         response = requests.put(responseUrl,
                                 data=json_responseBody,
                                 headers=headers)

@@ -79,6 +79,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
 | CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
+| CodeStarConnectionArn | String | | ○ | CodeStar 接続の ARN |
 | **DefaultSecuritySettings** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettings` スタックがデプロイされます。 |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリの所有者名** |
 | **GitHubRepoNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリ名** |

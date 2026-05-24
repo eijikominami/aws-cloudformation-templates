@@ -38,11 +38,11 @@ Parameters:
   GitHubOwnerName:
     Type: String
     AllowedPattern: .+
-    Description: The GitHub owner name
+    Description: The GitHub owner name [required]
   GitHubRepoName:
     Type: String
     AllowedPattern: .+
-    Description: The GitHub repository name
+    Description: The GitHub repository name [required]
   GitHubBranchName:
     Type: String
     Default: master

@@ -51,7 +51,7 @@ aws cloudformation deploy --template-file templates/fsx.yaml --stack-name FSx --
 | CidrIp | String | 0.0.0.0/0 | ○ | セキュリティグループアクセス用の CIDR ブロック |
 | FSxThroughput | Number | 8 | ○ | スループット容量（MB/s）- 8、16、32、または 64 |
 | PrimarySubnetAccess | String | | ○ | プライマリファイルシステム用のサブネット ID |
-| IngressCidrIp | String | | | 追加のイングレスアクセス用 CIDR ブロック |
+| IngressCidrIp | String | | ○ | 追加のイングレスアクセス用 CIDR ブロック |
 | StorageCapacity | Number | 32 | ○ | ストレージ容量（GB）- 最小 32 GB |
 | SubnetIds | String | | ○ | カンマ区切りのサブネット ID リスト |
 | **VPCId** | String | | ○ | FSx がデプロイされる VPC ID |

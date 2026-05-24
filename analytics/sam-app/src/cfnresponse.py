@@ -8,6 +8,7 @@
 from __future__ import print_function
 import urllib3
 import json
+from urllib.parse import urlparse
 
 SUCCESS = "SUCCESS"
 FAILED = "FAILED"
@@ -41,6 +42,10 @@ def send(event, context, responseStatus, responseData, physicalResourceId=None, 
     }
 
     try:
+        parsed = urlparse(responseUrl)
+        if not (parsed.scheme == 'https' and parsed.hostname and parsed.hostname.endswith('.amazonaws.com')):
+            print(f"ERROR: Invalid CFN response URL, skipping: {responseUrl}")
+            return
         response = http.request('PUT', responseUrl, headers=headers, body=json_responseBody)
         print("Status code:", response.status)
 
