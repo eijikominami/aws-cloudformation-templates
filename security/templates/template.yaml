@@ -12,6 +12,7 @@ Metadata:
           - SecurityOUId
           - OrganizationId
           - OrganizationsRootId
+          - GovernedRegions
       - Label:
           default: CloudTrail Configuration
         Parameters:
@@ -167,6 +168,10 @@ Parameters:
     Type: CommaDelimitedList
     Default: ''
     Description: List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role
+  GovernedRegions:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: The list of governed regions for this account (leave empty for all regions)
   IAMAccessAnalyzer:
     Type: String
     Default: ACCOUNT
@@ -356,6 +361,7 @@ Resources:
         OrganizationsRootId: !Ref OrganizationsRootId
         SecurityHubStandards: !Join [',', !Ref AWSSecurityHubStandards]
         SecurityHubType: !Ref AWSSecurityHub
+        FindingAggregatorRegions: !Join [',', !Ref GovernedRegions]
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

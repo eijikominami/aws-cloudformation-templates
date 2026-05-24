@@ -320,8 +320,8 @@ Resources:
       MetricName: UnauthorizedAPICalls
       Namespace: LogMetrics
       Period: 60
-      Statistic: Maximum
-      Threshold: 1
+      Statistic: Sum
+      Threshold: 10
       TreatMissingData: notBreaching
       Tags: 
         - Key: environment

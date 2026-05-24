@@ -14,6 +14,7 @@ Metadata:
           - SecurityHubStandards
           - DelegatedAdminAccountId
           - OrganizationsRootId
+          - FindingAggregatorRegions
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -40,6 +41,10 @@ Parameters:
     Type: String
     Default: ''
     Description: The AWS account identifier of the account to designate as the security account
+  FindingAggregatorRegions:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: The list of regions to aggregate findings from (leave empty for ALL_REGIONS)
   OrganizationsRootId:
     Type: String
     Default: ''
@@ -101,6 +106,7 @@ Conditions:
   CreatePolicyAssociation: !And [ !Not [ !Equals [ !Ref OrganizationsRootId, ''] ], !Equals [ !Ref DelegatedAdminAccountId, ''] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  SpecifyFindingAggregatorRegions: !Not [ !Equals [ !Select [ 0, !Ref FindingAggregatorRegions ], ''] ]
   CreateSecurityHub: !Or [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_HIGH ], !Equals [ !Ref SecurityHubType, STAMDARDS_ALERAM_MIDIUM ], !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ] ]
   CreateCloudWatchEventsForSecurityHubFindings: !Not [ !Equals [ !Ref SecurityHubType, STANDARDS_ONLY ] ]
   SendAllEvents: !And [ !Equals [ !Ref SecurityHubType, STANDARDS_ALERAM_ALL ], !Equals [ !Ref SecurityHubType, ALERAM_ALL ] ]
@@ -186,7 +192,14 @@ Resources:
     Condition: CreateFindingAggregator
     Type: AWS::SecurityHub::FindingAggregator
     Properties:
-      RegionLinkingMode: ALL_REGIONS
+      RegionLinkingMode: !If
+        - SpecifyFindingAggregatorRegions
+        - SPECIFIED_REGIONS
+        - ALL_REGIONS
+      Regions: !If
+        - SpecifyFindingAggregatorRegions
+        - !Ref FindingAggregatorRegions
+        - !Ref AWS::NoValue
   SecurityHubConfigurationPolicy:
     Condition: CreateOrganizationConfiguration
     DependsOn:

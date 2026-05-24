@@ -144,6 +144,7 @@ You can provide optional parameters as follows:
 | AmazonMacie | ENABLED / NOTIFICATION_ONLY / DISABLED | ENABLED | ○ | Enable or disable Amazon Macie |
 | AWSSecurityHub | String | STANDARDS_ONLY | ○ | Enable or disable AWS Security Hub |
 | AWSSecurityHubStandards | CommaDelimitedList | FSBP, CIS | ○ | The standard that you want to enable |
+| GovernedRegions | CommaDelimitedList | | | The list of governed regions for this account (leave empty for all regions) |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | CentralizedLoggingFirehoseRoleArns | CommaDelimitedList | | | List of IAM Role ARNs in Source Accounts that can assume the Cross-Account Role |
 | GitHubCodeScanRepository | String | | | GitHub owner/repo for OIDC trust (e.g. eijikominami/aws-cloudformation-templates) |
@@ -205,3 +206,6 @@ This template helps you to comply with the following items.
 | IAM.18 | Ensure a support role has been created to manage incidents with AWS Support | ○ | ○ | This template creates IAM Role for AWS Support |
 | IAM.22 | Ensure credentials unused for 45 days or greater are disabled | ○ | ○ | **Config** checks it and **Lambda** removes it automatically |
 | S3.17 | S3 buckets should have server-side encryption enabled | | | **Config** checks it and **SSM Automation** remediates the policy automatically |
+
+> [!NOTE]
+> **CloudWatch.2 (Unauthorized API Calls):** The detailed detection of unauthorized API calls is handled by a CloudWatch Logs Subscription Filter (`analyzeUnauthorizedApiCalls` Lambda in the [Notification](../notification) stack), which provides caller identity in notifications. Since the metric filter alarm cannot include caller details, its threshold is set to 10/min (Sum) instead of 1 to serve as a burst detector only, while maintaining Security Hub standards compliance.
