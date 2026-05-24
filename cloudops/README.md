@@ -101,8 +101,8 @@ The WebhookForwarder Lambda receives all events from the SNS Alert topic and for
 | Security Hub | Severity label = HIGH | HIGH | ○ |
 | GuardDuty | Severity >= 7 | HIGH | ○ |
 | GuardDuty | Severity >= 4 | MEDIUM | |
-| AWS Health | Event type category = issue | CRITICAL | ○ |
-| AWS Health | Event type category = scheduledChange | MEDIUM | |
+| AWS Health | Actionability = ACTION_REQUIRED | CRITICAL | ○ |
+| AWS Health | Actionability = ACTION_MAY_BE_REQUIRED | HIGH | ○ |
 | Cost Anomaly Detection | Anomaly score >= 0.7 | HIGH | ○ |
 | Cost Anomaly Detection | Anomaly score < 0.7 | MEDIUM | |
 | AutoScaling / EBS / SSM failure | Status = Failed or Timed Out | HIGH | ○ |

@@ -97,8 +97,8 @@ WebhookForwarder Lambda は SNS Alert トピックから全イベントを受信
 | Security Hub | Severity label = HIGH | HIGH | ○ |
 | GuardDuty | Severity >= 7 | HIGH | ○ |
 | GuardDuty | Severity >= 4 | MEDIUM | |
-| AWS Health | イベントカテゴリ = issue | CRITICAL | ○ |
-| AWS Health | イベントカテゴリ = scheduledChange | MEDIUM | |
+| AWS Health | Actionability = ACTION_REQUIRED | CRITICAL | ○ |
+| AWS Health | Actionability = ACTION_MAY_BE_REQUIRED | HIGH | ○ |
 | Cost Anomaly Detection | 異常スコア >= 0.7 | HIGH | ○ |
 | Cost Anomaly Detection | 異常スコア < 0.7 | MEDIUM | |
 | AutoScaling / EBS / SSM の失敗 | ステータス = Failed または Timed Out | HIGH | ○ |
