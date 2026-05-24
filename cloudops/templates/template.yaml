@@ -6,10 +6,6 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: CodeGuru Configuration
-        Parameters:
-          - CodeGuruTargetRepository
-      - Label:
           default: 'DevOps Agent Configuration'
         Parameters:
           - DevOpsAgent
@@ -58,10 +54,6 @@ Parameters:
       - ENABLED
       - DISABLED
     Description: Enable or disable Amazon CloudWatch Application Insights [required]
-  CodeGuruTargetRepository:
-    Type: String
-    Default: ''
-    Description: The GitHub owner name and repository name for AWS CodeGuru Reviewer [required]
   DevOpsAgent:
     Type: String
     Default: MEMBER
@@ -150,10 +142,6 @@ Conditions:
   CreateApplicationInsights: !Equals
     - !Ref ApplicationInsights
     - ENABLED
-  CreateCodeGuru: !Not
-    - !Equals 
-      - !Ref CodeGuruTargetRepository
-      - ''
   CreateDevOpsAgent: !Not
     - !Equals [ !Ref DevOpsAgent, DISABLED ]
   CreateSNSForAlert: !Equals
@@ -188,29 +176,6 @@ Resources:
         - Development
         - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/applicationinsights.yaml
         - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/applicationinsights.yaml
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  CodeGuru:
-    Condition: CreateCodeGuru
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      NotificationARNs:
-        - !If
-          - CreateSNSForDeployment
-          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
-          - !Ref SNSForDeploymentArn
-      Parameters:
-        CodeGuruTargetRepository: !Ref CodeGuruTargetRepository
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
-      TemplateURL: !If
-        - Development
-        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/cloudops/codeguru.yaml
-        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/cloudops/codeguru.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment
