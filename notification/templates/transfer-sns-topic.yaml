@@ -145,7 +145,7 @@ Resources:
       FunctionName: transferSNSTopic
       Handler: index.lambda_handler
 
-      MemorySize: 128
+      MemorySize: 256
       Role: !GetAtt IAMRoleForLambda.Arn
       Runtime: python3.13
       Tags:
