@@ -7,19 +7,27 @@
 
 ``AWSCloudFormationTemplates/analytics`` は、Google Analytics 4 連携および CloudFront アクセスログ分析を含む分析データ処理基盤を構築します。
 
+## 前提条件
+
+デプロイの前に以下を準備してください。
+
+- CloudFront アクセスログが格納された S3 バケット（CloudFront Logs 機能用）
+- API アクセスが有効な Google Analytics 4 プロパティ（Google Analytics 機能用）
+- Google Cloud Console で設定済みの OAuth 2.0 認証情報（Google Analytics 機能用）
+
 ## TL;DR
 
 以下のボタンをクリックすることで、CloudFormation をデプロイすることが可能です。
 
 | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) |
 
 個別のサービスをデプロイする場合は、以下のボタンをクリックしてください。
 
 | サービス | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
 | --- | --- | --- |
-| CloudFront Logs | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/cloudfront-logs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/cloudfront-logs.yaml) |
+| CloudFront Logs | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) |
 
 ## デプロイ
 
@@ -71,9 +79,3 @@ sam deploy --guided
 ### Google Analytics
 
 ``AWSCloudFormationTemplates/analytics/google-analytics`` は、AWS Glue Visual ETL を使用して Google Analytics 4 データ処理リソースを作成します。
-
-#### 前提条件
-
-- API アクセスが有効な Google Analytics 4 プロパティ
-- Analytics Reporting API が有効な Google Cloud Console プロジェクト
-- OAuth 2.0 認証情報（クライアント ID とクライアントシークレット）の設定

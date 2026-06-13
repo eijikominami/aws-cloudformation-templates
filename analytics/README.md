@@ -7,19 +7,27 @@ English / [**日本語**](README_JP.md)
 
 ``AWSCloudFormationTemplates/analytics`` creates analytics data processing infrastructure including Google Analytics 4 integration and CloudFront access log analysis.
 
+## Prerequisites
+
+Before deploying this template, ensure you have:
+
+- An S3 bucket with CloudFront access logs (for CloudFront Logs feature)
+- Google Analytics 4 property with API access enabled (for Google Analytics feature)
+- OAuth 2.0 credentials configured in Google Cloud Console (for Google Analytics feature)
+
 ## TL;DR
 
 If you just want to deploy the stack, click the button below.
 
 | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- |
-| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/template.yaml) |
+| [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) |
 
 If you want to deploy each service individually, click the button below.
 
 | Services | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- | --- |
-| CloudFront Logs | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/cloudfront-logs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/cloudfront-logs.yaml) |
+| CloudFront Logs | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) |
 
 ## Deployment
 
@@ -71,9 +79,3 @@ This template creates:
 ### Google Analytics
 
 ``AWSCloudFormationTemplates/analytics/google-analytics`` creates Google Analytics 4 data processing resources using AWS Glue Visual ETL.
-
-#### Prerequisites
-
-- Google Analytics 4 property with API access enabled
-- Google Cloud Console project with Analytics Reporting API enabled
-- OAuth 2.0 credentials (Client ID and Client Secret) configured
