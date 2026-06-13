@@ -116,6 +116,19 @@ Resources:
             Condition:
               StringEquals:
                 aws:SourceOrgID: !Ref OrganizationId
+          # S3 Replication
+          - Effect: Allow
+            Principal:
+              AWS: '*'
+            Action:
+              - s3:ReplicateObject
+              - s3:ReplicateDelete
+              - s3:ReplicateTags
+              - s3:ObjectOwnerOverrideToBucketOwner
+            Resource: !Sub arn:aws:s3:::${S3ForCentralizedLogging}/*
+            Condition:
+              StringEquals:
+                aws:PrincipalOrgID: !Ref OrganizationId
           # Firehose
           - !If
             - CreateBucketPolicyForFirehose

@@ -306,6 +306,47 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForS3Replication:
+    Condition: CreateS3ReplicationForArchive
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for S3 replication to the archive bucket.
+      Policies:
+        - PolicyName: S3Replication
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetReplicationConfiguration
+                  - s3:ListBucket
+                Resource: !Sub arn:aws:s3:::fluentbit-${AWS::Region}-${AWS::AccountId}
+              - Effect: Allow
+                Action:
+                  - s3:GetObjectVersionForReplication
+                  - s3:GetObjectVersionAcl
+                  - s3:GetObjectVersionTagging
+                Resource: !Sub arn:aws:s3:::fluentbit-${AWS::Region}-${AWS::AccountId}/*
+              - Effect: Allow
+                Action:
+                  - s3:ReplicateObject
+                  - s3:ReplicateDelete
+                  - s3:ReplicateTags
+                  - s3:ObjectOwnerOverrideToBucketOwner
+                Resource: !Sub arn:aws:s3:::${BucketNameForArchive}/*
+      RoleName: !Sub ${LogicalName}-S3Replication-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   # ELB
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
