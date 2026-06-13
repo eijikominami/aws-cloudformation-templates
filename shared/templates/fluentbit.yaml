@@ -193,6 +193,11 @@ Resources:
                   - ssmmessages:OpenControlChannel
                   - ssmmessages:OpenDataChannel
                 Resource: '*'
+              # Firehose
+              - Effect: Allow
+                Action:
+                  - firehose:PutRecordBatch
+                Resource: !Sub arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/FluentBit
       RoleName: !Sub ${LogicalName}-ECSTask-${AWS::Region}
       Tags:
         - Key: environment
