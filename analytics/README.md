@@ -5,14 +5,7 @@ English / [**日本語**](README_JP.md)
 ![GitHub](https://img.shields.io/github/license/eijikominami/aws-cloudformation-templates)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/eijikominami/aws-cloudformation-templates)
 
-``AWSCloudFormationTemplates/analytics`` creates AWS Glue resources for data analytics and ETL processing with Google Analytics 4 integration.
-
-## Prerequisites
-
-- Google Analytics 4 property with API access enabled
-- Google Cloud Console project with Analytics Reporting API enabled
-- OAuth 2.0 credentials (Client ID and Client Secret) configured for your application
-- Appropriate IAM permissions for AWS Glue, Secrets Manager, and S3 services
+``AWSCloudFormationTemplates/analytics`` creates analytics data processing infrastructure including Google Analytics 4 integration and CloudFront access log analysis.
 
 ## TL;DR
 
@@ -22,11 +15,11 @@ If you just want to deploy the stack, click the button below.
 | --- | --- |
 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/template.yaml) |
 
-## Architecture
+If you want to deploy each service individually, click the button below.
 
-The following sections describe the individual components of the architecture.
-
-![](../images/architecture-analytics.png)
+| Services | US East (Virginia) | Asia Pacific (Tokyo) |
+| --- | --- | --- |
+| CloudFront Logs | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/cloudfront-logs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/sam-app/cloudfront-logs.yaml) |
 
 ## Deployment
 
@@ -38,47 +31,49 @@ sam build
 sam deploy --guided
 ```
 
-You can provide parameters as follows.
+You can provide optional parameters as follows.
 
 | Name | Type | Default | Required | Details |
 | --- | --- | --- | --- | --- |
-| **LogicalName** | String | GoogleAnalytics | ○ | The custom prefix name for resources |
-| **GoogleAnalyticsPropertyId** | String | | ○ | The Google Analytics 4 Client ID |
-| **GoogleAnalyticsClientSecret** | String | | ○ | The client secret for Google Analytics 4 OAuth application |
-| **GoogleAnalyticsAccountId** | String | | ○ | The Google Analytics 4 Account ID |
-| **GoogleAnalyticsPropertyNumber** | String | | ○ | The Google Analytics 4 Property Number |
-| **TagKey** | String | createdby | ○ | Tag key for resource tagging |
-| **TagValue** | String | aws-cloudformation-templates | ○ | Tag value for resource tagging |
+| **CloudFrontLogDomainName** | String | | | Domain name of the CloudFront distribution |
+| **CloudFrontLogPrefix** | String | | | S3 prefix where CloudFront access logs are stored |
+| **CloudFrontLogSourceAccountId** | String | | | Source account ID for cross-account replication |
+| **CloudFrontLogSourceRoleName** | String | | | IAM role name in source account for replication |
+| **GoogleAnalyticsPropertyId** | String | | | Google Analytics 4 Property ID |
+| **GoogleAnalyticsAccountId** | String | | | Google Analytics 4 Account ID |
+| **GoogleAnalyticsClientSecret** | String | | | Google Analytics 4 OAuth2 Client Secret |
+| **GlueJobTimeout** | Number | 60 | | Glue Job timeout in minutes |
+| **GlueWorkerCount** | Number | 5 | | Number of Glue workers |
+| **LogicalName** | String | analytics | ○ | Custom prefix name for resources |
 
-## Troubleshooting
+### CloudFront Logs
 
-### Visual ETL Editor Not Showing Job
+``AWSCloudFormationTemplates/analytics/cloudfront-logs`` creates resources for analyzing CloudFront standard access logs using AWS Glue and Amazon Athena.
 
-If the Glue job doesn't appear in AWS Glue Studio Visual ETL editor:
+This template creates:
+- Glue table for CloudFront standard log format (33 fields, LazySimpleSerDe)
+- Glue Crawler for schema detection (on-demand)
+- Athena WorkGroup with dedicated query result location
+- Athena Named Queries for common analysis patterns (daily requests, status codes, real user access)
+- IAM role with least-privilege access for the Crawler
 
-1. Verify that the job has `CodeGenConfigurationNodes` in its definition
-2. Use AWS CLI to add Visual ETL metadata:
-   ```bash
-   aws glue get-job --job-name {LogicalName}-GA4-ETL-Job
-   ```
-3. If `CodeGenConfigurationNodes` is missing, update the job using AWS CLI
+| Name | Type | Default | Required | Details |
+| --- | --- | --- | --- | --- |
+| **AccessLogPrefix** | String | | ○ | S3 prefix where CloudFront access logs are stored |
+| **DomainName** | String | | ○ | Domain name of the CloudFront distribution |
+| **GlueDatabaseName** | String | | ○ | Name of the Glue Data Catalog database |
+| **LogicalName** | String | | ○ | Logical name for resource naming |
+| **QueryResultsBucketName** | String | | ○ | Name of the S3 bucket for Athena query results |
+| **RawDataBucketName** | String | | ○ | Name of the S3 bucket for raw data |
+| **SourceAccountId** | String | | | Source account ID for cross-account replication |
+| **SourceRoleName** | String | | | IAM role name in source account for replication |
 
-### OAuth Authentication Issues
+### Google Analytics
 
-If you encounter OAuth authentication errors:
+``AWSCloudFormationTemplates/analytics/google-analytics`` creates Google Analytics 4 data processing resources using AWS Glue Visual ETL.
 
-1. Verify that the Google Analytics Reporting API is enabled in Google Cloud Console
-2. Check that the OAuth 2.0 credentials are correctly configured
-3. Ensure the client secret is properly stored in AWS Secrets Manager
-4. Verify that the Google Analytics account has appropriate permissions
+#### Prerequisites
 
-### Glue Job Execution Failures
-
-If the Glue job fails to execute:
-
-1. Check CloudWatch logs for detailed error messages
-2. Verify that the Google Analytics connection is properly configured
-3. Ensure the specified Google Analytics account and property exist and are accessible
-4. Check IAM permissions for the Glue service role
-
-![](../images/architecture-analytics.png)
+- Google Analytics 4 property with API access enabled
+- Google Cloud Console project with Analytics Reporting API enabled
+- OAuth 2.0 credentials (Client ID and Client Secret) configured
