@@ -1,0 +1,277 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: aws-cloudformation-templates/analytics/cloudfront-logs creates CloudFront access log analysis resources.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'CloudFront Log Configuration'
+        Parameters:
+          - AccessLogPrefix
+          - DomainName
+          - RawDataBucketName
+      - Label:
+          default: 'Analytics Configuration'
+        Parameters:
+          - GlueDatabaseName
+          - QueryResultsBucketName
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  AccessLogPrefix:
+    Type: String
+    AllowedPattern: .+
+    Description: S3 prefix where CloudFront access logs are stored [required]
+  DomainName:
+    Type: String
+    AllowedPattern: .+
+    Description: Domain name of the CloudFront distribution [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  GlueDatabaseName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the Glue Data Catalog database [required]
+  LogicalName:
+    Type: String
+    AllowedPattern: .+
+    Description: Logical name for resource naming [required]
+  QueryResultsBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the S3 bucket for Athena query results [required]
+  RawDataBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the S3 bucket for raw data [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  # IAM
+  IAMRoleForGlueCrawler:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Glue Crawler in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: S3AccessForCrawler
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${RawDataBucketName}
+                  - !Sub arn:aws:s3:::${RawDataBucketName}/${AccessLogPrefix}*
+      RoleName: !Sub ${LogicalName}-GlueCrawler-CloudFrontLogs-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # Other Resources
+  AthenaNamedQueryForDailyRequests:
+    Type: AWS::Athena::NamedQuery
+    Properties:
+      Database: !Ref GlueDatabaseName
+      Description: Daily request count and total bytes for the last 30 days
+      Name: !Sub ${LogicalName}-daily-requests
+      QueryString: !Sub |
+        SELECT "date", COUNT(*) as request_count, SUM(sc_bytes) as total_bytes
+        FROM ${GlueDatabaseName}.cloudfront_access_logs
+        WHERE "date" >= current_date - interval '30' day
+        GROUP BY "date"
+        ORDER BY "date" DESC
+      WorkGroup: !Ref AthenaWorkGroupForCloudFrontLogs
+
+  AthenaNamedQueryForRealUsers:
+    Type: AWS::Athena::NamedQuery
+    Properties:
+      Database: !Ref GlueDatabaseName
+      Description: Real user access excluding CloudWatch Synthetics for the last 7 days
+      Name: !Sub ${LogicalName}-real-users
+      QueryString: !Sub |
+        SELECT "date", cs_uri_stem, c_ip, cs_user_agent
+        FROM ${GlueDatabaseName}.cloudfront_access_logs
+        WHERE cs_user_agent NOT LIKE '%CloudWatchSynthetics%'
+        AND "date" >= current_date - interval '7' day
+        ORDER BY "date" DESC, time DESC
+        LIMIT 100
+      WorkGroup: !Ref AthenaWorkGroupForCloudFrontLogs
+
+  AthenaNamedQueryForStatusCodes:
+    Type: AWS::Athena::NamedQuery
+    Properties:
+      Database: !Ref GlueDatabaseName
+      Description: HTTP status code distribution for the last 7 days
+      Name: !Sub ${LogicalName}-status-codes
+      QueryString: !Sub |
+        SELECT sc_status, COUNT(*) as count
+        FROM ${GlueDatabaseName}.cloudfront_access_logs
+        WHERE "date" >= current_date - interval '7' day
+        GROUP BY sc_status
+        ORDER BY count DESC
+      WorkGroup: !Ref AthenaWorkGroupForCloudFrontLogs
+
+  AthenaWorkGroupForCloudFrontLogs:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Description: !Sub WorkGroup for CloudFront access log analysis of ${DomainName}
+      Name: !Sub ${LogicalName}-cloudfront-logs
+      State: ENABLED
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub s3://${QueryResultsBucketName}/cloudfront-logs/
+
+  GlueCrawlerForCloudFrontLogs:
+    Type: AWS::Glue::Crawler
+    Properties:
+      DatabaseName: !Ref GlueDatabaseName
+      Description: !Sub Crawler for CloudFront access logs of ${DomainName}
+      Name: !Sub ${LogicalName}-cloudfront-access-logs
+      Role: !GetAtt IAMRoleForGlueCrawler.Arn
+      SchemaChangePolicy:
+        DeleteBehavior: LOG
+        UpdateBehavior: UPDATE_IN_DATABASE
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+      Targets:
+        S3Targets:
+          - Path: !Sub s3://${RawDataBucketName}/${AccessLogPrefix}
+
+  GlueTableForCloudFrontLogs:
+    Type: AWS::Glue::Table
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref GlueDatabaseName
+      TableInput:
+        Description: !Sub CloudFront standard access logs for ${DomainName}
+        Name: cloudfront_access_logs
+        Parameters:
+          classification: csv
+          skip.header.line.count: '2'
+        StorageDescriptor:
+          Columns:
+            - Name: date
+              Type: date
+            - Name: time
+              Type: string
+            - Name: x_edge_location
+              Type: string
+            - Name: sc_bytes
+              Type: bigint
+            - Name: c_ip
+              Type: string
+            - Name: cs_method
+              Type: string
+            - Name: cs_host
+              Type: string
+            - Name: cs_uri_stem
+              Type: string
+            - Name: sc_status
+              Type: int
+            - Name: cs_referrer
+              Type: string
+            - Name: cs_user_agent
+              Type: string
+            - Name: cs_uri_query
+              Type: string
+            - Name: cs_cookie
+              Type: string
+            - Name: x_edge_result_type
+              Type: string
+            - Name: x_edge_request_id
+              Type: string
+            - Name: x_host_header
+              Type: string
+            - Name: cs_protocol
+              Type: string
+            - Name: cs_bytes
+              Type: bigint
+            - Name: time_taken
+              Type: float
+            - Name: x_forwarded_for
+              Type: string
+            - Name: ssl_protocol
+              Type: string
+            - Name: ssl_cipher
+              Type: string
+            - Name: x_edge_response_result_type
+              Type: string
+            - Name: cs_protocol_version
+              Type: string
+            - Name: fle_status
+              Type: string
+            - Name: fle_encrypted_fields
+              Type: int
+            - Name: c_port
+              Type: int
+            - Name: time_to_first_byte
+              Type: float
+            - Name: x_edge_detailed_result_type
+              Type: string
+            - Name: sc_content_type
+              Type: string
+            - Name: sc_content_len
+              Type: bigint
+            - Name: sc_range_start
+              Type: bigint
+            - Name: sc_range_end
+              Type: bigint
+          InputFormat: org.apache.hadoop.mapred.TextInputFormat
+          Location: !Sub s3://${RawDataBucketName}/${AccessLogPrefix}
+          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          SerdeInfo:
+            Parameters:
+              field.delim: "\t"
+              serialization.format: "\t"
+            SerializationLibrary: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
+        TableType: EXTERNAL_TABLE
+
+Outputs:
+  AthenaWorkGroupName:
+    Description: Name of the Athena WorkGroup
+    Value: !Ref AthenaWorkGroupForCloudFrontLogs
+
+  GlueCrawlerName:
+    Description: Name of the Glue Crawler
+    Value: !Ref GlueCrawlerForCloudFrontLogs
+
+  GlueTableName:
+    Description: Name of the Glue table for CloudFront logs
+    Value: cloudfront_access_logs
