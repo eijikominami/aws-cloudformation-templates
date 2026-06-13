@@ -59,6 +59,7 @@ Resources:
       Description: A role required for Security Lake to access logs.
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonSecurityLakeMetastoreManager
+      Path: /service-role/
       RoleName: !Sub ${LogicalName}-SecurityLake-${AWS::Region}
       Tags:
         - Key: environment

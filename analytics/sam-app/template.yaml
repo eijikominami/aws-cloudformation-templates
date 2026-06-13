@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: aws-cloudformation-templates/analytics creates Google Analytics data processing infrastructure.
+Description: aws-cloudformation-templates/analytics creates analytics data processing infrastructure.
 
 Globals:
   Function:
@@ -14,14 +14,23 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: "Analytics Configuration"
+          default: "Glue Configuration"
+        Parameters:
+          - GlueJobTimeout
+          - GlueWorkerCount
+      - Label:
+          default: "Google Analytics Configuration"
         Parameters:
           - GoogleAnalyticsPropertyId
           - GoogleAnalyticsAccountId
           - GoogleAnalyticsClientSecret
-
-          - GlueJobTimeout
-          - GlueWorkerCount
+      - Label:
+          default: "CloudFront Log Analysis Configuration"
+        Parameters:
+          - CloudFrontLogDomainName
+          - CloudFrontLogPrefix
+          - CloudFrontLogSourceAccountId
+          - CloudFrontLogSourceRoleName
       - Label:
           default: "Notification Configuration"
         Parameters:
@@ -56,6 +65,22 @@ Parameters:
       - NOTICE
       - WARNING
     Description: The alarm level of CloudWatch alarms
+  CloudFrontLogDomainName:
+    Type: String
+    Default: ''
+    Description: Domain name of the CloudFront distribution for log analysis
+  CloudFrontLogPrefix:
+    Type: String
+    Default: ''
+    Description: S3 prefix where CloudFront access logs are stored
+  CloudFrontLogSourceAccountId:
+    Type: String
+    Default: ''
+    Description: Source account ID for cross-account log replication
+  CloudFrontLogSourceRoleName:
+    Type: String
+    Default: ''
+    Description: IAM role name in source account for replication
   Environment:
     Type: String
     Default: development
@@ -144,6 +169,7 @@ Parameters:
     Description: Enable scheduled execution of the Glue job at 4:00 AM JST (UTC+9) daily$'
 
 Conditions:
+  CreateGlueForCloudFrontLogs: !Not [!Equals [!Ref CloudFrontLogDomainName, '']]
   CreateSNSForAlert: !Equals [!Ref SNSForAlertArn, ""]
   CreateSNSForDeployment: !Equals [!Ref SNSForDeploymentArn, ""]
   HasGoogleAnalyticsConfig: !And
@@ -197,13 +223,27 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
 
-  # IAM Roles
-  # Note: 将来のオーケストレーション拡張時には以下のリソースを追加:
-  # - IAMRoleForStepFunctions (Step Functions実行用)
-  # - LambdaOrchestratorFunction (ワークフロー統制用)
-  # - StepFunctionsStateMachine (複数データソース統合用)
+  GlueForCloudFrontLogs:
+    Type: AWS::Serverless::Application
+    Condition: CreateGlueForCloudFrontLogs
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Location: ./cloudfront-logs.yaml
+      Parameters:
+        AccessLogPrefix: !Ref CloudFrontLogPrefix
+        LogicalName: !Ref LogicalName
+        DomainName: !Ref CloudFrontLogDomainName
+        RawDataBucketName: !Ref S3BucketForRawData
+        GlueDatabaseName: !Ref GlueDatabase
+        QueryResultsBucketName: !Ref S3BucketForQueryResults
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
 
-  # Other Resources (alphabetically grouped by logical relationship)
   # Glue Data Catalog Database
   GlueDatabase:
     Type: AWS::Glue::Database
@@ -300,6 +340,8 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+      VersioningConfiguration:
+        Status: Enabled
 
   S3BucketForScripts:
     UpdateReplacePolicy: Delete
@@ -321,6 +363,28 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+
+  S3BucketPolicyForRawData:
+    Condition: CreateGlueForCloudFrontLogs
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketForRawData
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowReplicationFromSource
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${CloudFrontLogSourceAccountId}:role/${CloudFrontLogSourceRoleName}
+            Action:
+              - s3:GetBucketVersioning
+              - s3:ObjectOwnerOverrideToBucketOwner
+              - s3:PutBucketVersioning
+              - s3:ReplicateDelete
+              - s3:ReplicateObject
+            Resource:
+              - !GetAtt S3BucketForRawData.Arn
+              - !Sub ${S3BucketForRawData.Arn}/*
 
   # SNS Topics
   SNSForAlert:
@@ -372,6 +436,12 @@ Outputs:
   # GoogleAnalyticsSchedulerName:
   #   Description: Name of the Google Analytics EventBridge Scheduler from child stack
   #   Value: !GetAtt GlueForGoogleAnalytics.Outputs.SchedulerName
+
+  # CloudFront Logs Stack Outputs
+  CloudFrontLogsStackId:
+    Condition: CreateGlueForCloudFrontLogs
+    Description: Stack ID of the CloudFront Logs child stack
+    Value: !Ref GlueForCloudFrontLogs
 
   # Core Infrastructure Outputs (for reference)
 

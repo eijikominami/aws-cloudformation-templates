@@ -478,11 +478,11 @@ Resources:
 
               # Health
               if source == 'aws.health':
-                  category = detail.get('eventTypeCategory', '')
-                  if category == 'issue':
+                  actionability = detail.get('actionability', '')
+                  if actionability == 'ACTION_REQUIRED':
                       priority = 'CRITICAL'
-                  elif category == 'scheduledChange':
-                      priority = 'MEDIUM'
+                  elif actionability == 'ACTION_MAY_BE_REQUIRED':
+                      priority = 'HIGH'
                   else:
                       priority = 'LOW'
                   desc_list = detail.get('eventDescription', [{}])
