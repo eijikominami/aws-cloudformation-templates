@@ -41,7 +41,7 @@ def send(event, context, responseStatus, responseData, physicalResourceId=None, 
         if not (parsed.scheme == 'https' and parsed.hostname and parsed.hostname.endswith('.amazonaws.com')):
             print(f"ERROR: Invalid CFN response URL, skipping: {responseUrl}")
             return
-        response = http.request('PUT', responseUrl, headers=headers, body=json_responseBody)
+        response = http.request('PUT', responseUrl, headers=headers, body=json_responseBody)  # CodeQL: not SSRF - URL is a CloudFormation-signed S3 presigned URL, validated above
         print("Status code:", response.status)
 
     except Exception as e:
