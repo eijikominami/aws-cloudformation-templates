@@ -23,12 +23,6 @@ If you just want to deploy the stack, click the button below.
 | --- | --- |
 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) |
 
-If you want to deploy each service individually, click the button below.
-
-| Services | US East (Virginia) | Asia Pacific (Tokyo) |
-| --- | --- | --- |
-| CloudFront Logs | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) |
-
 ## Deployment
 
 Execute the command to deploy with SAM CLI.
@@ -65,17 +59,15 @@ This template creates:
 - Athena Named Queries for common analysis patterns (daily requests, status codes, real user access)
 - IAM role with least-privilege access for the Crawler
 
-| Name | Type | Default | Required | Details |
-| --- | --- | --- | --- | --- |
-| **AccessLogPrefix** | String | | ○ | S3 prefix where CloudFront access logs are stored |
-| **DomainName** | String | | ○ | Domain name of the CloudFront distribution |
-| **GlueDatabaseName** | String | | ○ | Name of the Glue Data Catalog database |
-| **LogicalName** | String | | ○ | Logical name for resource naming |
-| **QueryResultsBucketName** | String | | ○ | Name of the S3 bucket for Athena query results |
-| **RawDataBucketName** | String | | ○ | Name of the S3 bucket for raw data |
-| **SourceAccountId** | String | | | Source account ID for cross-account replication |
-| **SourceRoleName** | String | | | IAM role name in source account for replication |
-
 ### Google Analytics
 
 ``AWSCloudFormationTemplates/analytics/google-analytics`` creates Google Analytics 4 data processing resources using AWS Glue Visual ETL.
+
+This template creates:
+- Glue Visual ETL Job for GA4 to S3 data ingestion (managed via Custom Resource)
+- Glue Connection for Google Analytics 4 (OAuth2 authentication)
+- Glue Table for GA4 core reports (Apache Iceberg format)
+- Secrets Manager secret for OAuth2 client credentials
+- Lambda function for Visual ETL Job lifecycle management
+- CloudWatch Alarms for Lambda errors, Glue job failures, and estimated charges
+- Glue Trigger for daily scheduled execution (optional, 4:00 AM JST)

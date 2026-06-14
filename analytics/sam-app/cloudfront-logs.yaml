@@ -1,9 +1,17 @@
 AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/analytics/cloudfront-logs creates CloudFront access log analysis resources.
 
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
+      - Label:
+          default: 'Analytics Configuration'
+        Parameters:
+          - GlueDatabaseName
+          - IcebergDataBucketName
+          - QueryResultsBucketName
+          - ScriptsBucketName
       - Label:
           default: 'CloudFront Log Configuration'
         Parameters:
@@ -11,10 +19,13 @@ Metadata:
           - DomainName
           - RawDataBucketName
       - Label:
-          default: 'Analytics Configuration'
+          default: 'Git Integration'
         Parameters:
-          - GlueDatabaseName
-          - QueryResultsBucketName
+          - GitRepository
+          - GitOwner
+          - GitBranch
+          - GitFolder
+          - GitToken
       - Label:
           default: 'Tag Configuration'
         Parameters:
@@ -32,21 +43,35 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: Domain name of the CloudFront distribution [required]
-  Environment:
+  GitBranch:
     Type: String
-    Default: production
-    AllowedValues:
-      - production
-      - test
-      - development
+    Default: main
+    Description: Git branch for Visual ETL job source control
+  GitFolder:
+    Type: String
+    Default: glue-jobs
+    Description: Folder path in Git repository for Visual ETL job storage
+  GitOwner:
+    Type: String
+    Default: ''
+    Description: Git repository owner/organization name (optional)
+  GitRepository:
+    Type: String
+    Default: ''
+    Description: Git repository URL for Visual ETL job source control (optional)
+  GitToken:
+    Type: String
+    NoEcho: true
+    Default: ''
+    Description: GitHub/GitLab personal access token for authentication (optional)
   GlueDatabaseName:
     Type: String
     AllowedPattern: .+
     Description: Name of the Glue Data Catalog database [required]
-  LogicalName:
+  IcebergDataBucketName:
     Type: String
-    AllowedPattern: .+
-    Description: Logical name for resource naming [required]
+    Default: ''
+    Description: Name of the S3 bucket for Iceberg data output
   QueryResultsBucketName:
     Type: String
     AllowedPattern: .+
@@ -55,6 +80,21 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: Name of the S3 bucket for raw data [required]
+  ScriptsBucketName:
+    Type: String
+    Default: ''
+    Description: Name of the S3 bucket for Glue scripts storage
+  LogicalName:
+    Type: String
+    AllowedPattern: .+
+    Description: Logical name for resource naming [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
   TagKey:
     Type: String
     Default: createdby
@@ -63,6 +103,9 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
+
+Conditions:
+  CreateVisualETLJob: !Not [!Equals [!Ref IcebergDataBucketName, '']]
 
 Resources:
   # IAM
@@ -92,6 +135,136 @@ Resources:
                   - !Sub arn:aws:s3:::${RawDataBucketName}
                   - !Sub arn:aws:s3:::${RawDataBucketName}/${AccessLogPrefix}*
       RoleName: !Sub ${LogicalName}-GlueCrawler-CloudFrontLogs-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  IAMRoleForGlueETL:
+    Condition: CreateVisualETLJob
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Glue ETL job in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${RawDataBucketName}
+                  - !Sub arn:aws:s3:::${RawDataBucketName}/${AccessLogPrefix}*
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${IcebergDataBucketName}
+                  - !Sub arn:aws:s3:::${IcebergDataBucketName}/*
+                  - !Sub arn:aws:s3:::${ScriptsBucketName}
+                  - !Sub arn:aws:s3:::${ScriptsBucketName}/*
+        - PolicyName: GlueDataCatalogAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetTable
+                  - glue:GetTables
+                  - glue:CreateTable
+                  - glue:UpdateTable
+                  - glue:DeleteTable
+                  - glue:GetPartition
+                  - glue:GetPartitions
+                  - glue:CreatePartition
+                  - glue:UpdatePartition
+                  - glue:DeletePartition
+                  - glue:BatchCreatePartition
+                  - glue:BatchDeletePartition
+                Resource:
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/${GlueDatabaseName}
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/${GlueDatabaseName}/*
+        - PolicyName: CloudWatchLogsAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/*
+      RoleName: !Sub ${LogicalName}-cloudfront-logs-glue-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  IAMRoleForVisualETLLambda:
+    Condition: CreateVisualETLJob
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Visual ETL Lambda in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+      Policies:
+        - PolicyName: GlueJobManagementPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:CreateJob
+                  - glue:UpdateJob
+                  - glue:DeleteJob
+                  - glue:GetJob
+                  - glue:TagResource
+                  - glue:UntagResource
+                Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-cloudfront-logs-to-iceberg
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt IAMRoleForGlueETL.Arn
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${ScriptsBucketName}
+                  - !Sub arn:aws:s3:::${ScriptsBucketName}/*
+      RoleName: !Sub ${LogicalName}-cloudfront-etl-lambda-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -263,6 +436,58 @@ Resources:
             SerializationLibrary: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
         TableType: EXTERNAL_TABLE
 
+  VisualETLJobForCloudFrontLogs:
+    Condition: CreateVisualETLJob
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceTimeout: 300
+      ServiceToken: !GetAtt VisualETLLambdaFunction.Arn
+      JobName: !Sub ${LogicalName}-cloudfront-logs-to-iceberg
+      RawDataBucketName: !Ref RawDataBucketName
+      AccessLogPrefix: !Ref AccessLogPrefix
+      IcebergDataBucketName: !Ref IcebergDataBucketName
+      DatabaseName: !Ref GlueDatabaseName
+      ScriptsBucketName: !Ref ScriptsBucketName
+      LogicalName: !Ref LogicalName
+      IAMRoleArn: !GetAtt IAMRoleForGlueETL.Arn
+      GitRepository: !Ref GitRepository
+      GitOwner: !Ref GitOwner
+      GitBranch: !Ref GitBranch
+      GitFolder: !Ref GitFolder
+      GitToken: !Ref GitToken
+
+  VisualETLLambdaFunction:
+    Condition: CreateVisualETLJob
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${LogicalName}-cloudfront-etl-handler
+      Description: Lambda function to manage CloudFront Logs Visual ETL Job via CloudFormation custom resources
+      CodeUri: ../src/lambda-functions/cloudfront-etl-handler/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Timeout: 900
+      MemorySize: 256
+      Role: !GetAtt IAMRoleForVisualETLLambda.Arn
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+      Tracing: Active
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+  VisualETLLambdaLogGroup:
+    Condition: CreateVisualETLJob
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${LogicalName}-cloudfront-etl-handler
+      RetentionInDays: 14
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
 Outputs:
   AthenaWorkGroupName:
     Description: Name of the Athena WorkGroup
@@ -275,3 +500,8 @@ Outputs:
   GlueTableName:
     Description: Name of the Glue table for CloudFront logs
     Value: cloudfront_access_logs
+
+  VisualETLJobName:
+    Condition: CreateVisualETLJob
+    Description: Name of the Visual ETL Job
+    Value: !Sub ${LogicalName}-cloudfront-logs-to-iceberg
