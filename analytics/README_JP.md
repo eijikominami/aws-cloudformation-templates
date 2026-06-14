@@ -23,12 +23,6 @@
 | --- | --- |
 | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/template.yaml) |
 
-個別のサービスをデプロイする場合は、以下のボタンをクリックしてください。
-
-| サービス | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
-| --- | --- | --- |
-| CloudFront Logs | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Analytics-CloudFrontLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/analytics/cloudfront-logs.yaml) |
-
 ## デプロイ
 
 SAM CLI を使用してデプロイします。
@@ -65,17 +59,15 @@ sam deploy --guided
 - 一般的な分析パターンの Athena Named Queries（日別リクエスト数、ステータスコード分布、実ユーザーアクセス）
 - Crawler 用の最小権限 IAM ロール
 
-| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
-| --- | --- | --- | --- | --- |
-| **AccessLogPrefix** | String | | ○ | CloudFront アクセスログが格納される S3 プレフィックス |
-| **DomainName** | String | | ○ | CloudFront ディストリビューションのドメイン名 |
-| **GlueDatabaseName** | String | | ○ | Glue Data Catalog データベース名 |
-| **LogicalName** | String | | ○ | リソース命名用の論理名 |
-| **QueryResultsBucketName** | String | | ○ | Athena クエリ結果用 S3 バケット名 |
-| **RawDataBucketName** | String | | ○ | Raw データ用 S3 バケット名 |
-| **SourceAccountId** | String | | | クロスアカウントレプリケーション元のアカウント ID |
-| **SourceRoleName** | String | | | レプリケーション元の IAM ロール名 |
-
 ### Google Analytics
 
 ``AWSCloudFormationTemplates/analytics/google-analytics`` は、AWS Glue Visual ETL を使用して Google Analytics 4 データ処理リソースを作成します。
+
+このテンプレートは以下を作成します:
+- GA4 から S3 へのデータ取り込み用 Glue Visual ETL Job（Custom Resource 経由で管理）
+- Google Analytics 4 用 Glue Connection（OAuth2 認証）
+- GA4 コアレポート用 Glue Table（Apache Iceberg 形式）
+- OAuth2 クライアント認証情報格納用 Secrets Manager シークレット
+- Visual ETL Job ライフサイクル管理用 Lambda 関数
+- Lambda エラー、Glue ジョブ失敗、推定請求額に対する CloudWatch Alarms
+- 日次スケジュール実行用 Glue Trigger（オプション、JST 4:00）

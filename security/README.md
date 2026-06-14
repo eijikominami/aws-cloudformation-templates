@@ -96,12 +96,20 @@ This action automatically turns on the Auto-enable Macie configuration so that M
 
 ### Logging
 
-This template builds ``Amazon Security Lake`` and [``SIEM on Open Search Service``](https://github.com/aws-samples/siem-on-amazon-opensearch-service/) using AWS CloudFormation StackSets.
+This template deploys a ``CentralizedLogging`` StackSet that creates a centralized S3 bucket and bucket policy in the Log Archive account for aggregating logs from across the organization.
 
-If you want to use Security Lake for an organization, you must use your Organizations management account to [designate a delegated Security Lake administrator](https://docs.aws.amazon.com/security-lake/latest/userguide/getting-started.html#initial-account-setup).
-If you integrates ``SIEM on Open Search Service`` with ``Security Lake``, [**change visibility timeout of SQS from 5 minutes to 10 minutes**](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/securitylake.md#enabling-and-configuring-security-lake).
+### Amazon Security Lake
 
-After setting up the SIEM on OpenSearch Service, **add a notification configuration to the S3 bucket** by following [these steps](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/controltower.md#preparation-with-your-log-archive-account). Additionally, update the CloudFormation parameters as needed.
+This template enables ``Amazon Security Lake``, configures log sources, and sets up a subscriber for SIEM integration.
+Before deploying, [**register the delegated Security Lake administrator**](https://docs.aws.amazon.com/security-lake/latest/userguide/getting-started.html#initial-account-setup). This template must be deployed directly in the delegated administrator account.
+
+| Name | Type | Default | Required | Details |
+| --- | --- | --- | --- | --- |
+| **AuditAccountId** | String | | | The Audit account ID where SIEM runs. Creates a subscriber when specified |
+| **LogicalName** | String | SecurityLake | ○ | Prefix for resource names |
+| Environment | String | production | | production / test / development |
+| TagKey | String | createdby | ○ | Tag key |
+| TagValue | String | aws-cloudformation-templates | ○ | Tag value |
 
 ### Security Agent
 

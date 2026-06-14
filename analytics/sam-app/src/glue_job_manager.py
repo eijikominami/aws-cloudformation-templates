@@ -101,4 +101,4 @@ def handler(event, context):
         print(f"Error occurred: {str(e)}")
         import traceback
         print(f"Traceback: {traceback.format_exc()}")
-        cfnresponse.send(event, context, cfnresponse.FAILED, {}, physical_resource_id, str(e))
+        cfnresponse.send(event, context, cfnresponse.FAILED, {}, physical_resource_id, reason=str(e))

@@ -140,6 +140,13 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   SubscriberForSIEM:
+    DependsOn:
+      - CloudTrailLog
+      - LambdaExecutionLog
+      - EKSAuditLog
+      - Route53Log
+      - SecurityHubLog
+      - VPCFlowLog
     Condition: CreateSubscriberForSIEM
     Type: AWS::SecurityLake::Subscriber
     Properties:

@@ -19,12 +19,6 @@ Metadata:
           - GlueJobTimeout
           - GlueWorkerCount
       - Label:
-          default: "Google Analytics Configuration"
-        Parameters:
-          - GoogleAnalyticsPropertyId
-          - GoogleAnalyticsAccountId
-          - GoogleAnalyticsClientSecret
-      - Label:
           default: "CloudFront Log Analysis Configuration"
         Parameters:
           - CloudFrontLogDomainName
@@ -32,11 +26,11 @@ Metadata:
           - CloudFrontLogSourceAccountId
           - CloudFrontLogSourceRoleName
       - Label:
-          default: "Notification Configuration"
+          default: "Google Analytics Configuration"
         Parameters:
-          - AlarmLevel
-          - SNSForAlertArn
-          - SNSForDeploymentArn
+          - GoogleAnalyticsPropertyId
+          - GoogleAnalyticsAccountId
+          - GoogleAnalyticsClientSecret
       - Label:
           default: "Git Integration Configuration"
         Parameters:
@@ -49,6 +43,12 @@ Metadata:
           default: "Schedule Configuration"
         Parameters:
           - ScheduleEnabled
+      - Label:
+          default: "Notification Configuration"
+        Parameters:
+          - AlarmLevel
+          - SNSForAlertArn
+          - SNSForDeploymentArn
       - Label:
           default: "Tag Configuration"
         Parameters:
@@ -81,14 +81,27 @@ Parameters:
     Type: String
     Default: ''
     Description: IAM role name in source account for replication
-  Environment:
+  GitRepository:
     Type: String
-    Default: development
-    AllowedValues:
-      - production
-      - test
-      - development
-    Description: The deployment environment
+    Default: ""
+    Description: Git repository URL for Visual ETL job source control (optional)
+  GitOwner:
+    Type: String
+    Default: ""
+    Description: Git repository owner/organization name (optional)
+  GitBranch:
+    Type: String
+    Default: main
+    Description: Git branch for Visual ETL job source control
+  GitFolder:
+    Type: String
+    Default: glue-jobs
+    Description: Folder path in Git repository for Visual ETL job storage
+  GitToken:
+    Type: String
+    NoEcho: true
+    Default: ""
+    Description: GitHub/GitLab personal access token for authentication (optional)
   GlueJobTimeout:
     Type: Number
     Default: 60
@@ -114,13 +127,13 @@ Parameters:
     Type: String
     Default: ""
     Description: The Google Analytics 4 Property ID (also used as Client ID)
-  LogicalName:
+  ScheduleEnabled:
     Type: String
-    Default: analytics
-    MinLength: 3
-    MaxLength: 50
-    AllowedPattern: "^[a-z][a-z0-9-]*[a-z0-9]$"
-    Description: The custom prefix name for resources [required]
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Enable scheduled execution of the Glue job at 4:00 AM JST (UTC+9) daily$'
   SNSForAlertArn:
     Type: String
     Default: ""
@@ -129,6 +142,21 @@ Parameters:
     Type: String
     Default: ""
     Description: The Amazon SNS topic ARN for deployment information
+  LogicalName:
+    Type: String
+    Default: analytics
+    MinLength: 3
+    MaxLength: 50
+    AllowedPattern: "^[a-z][a-z0-9-]*[a-z0-9]$"
+    Description: The custom prefix name for resources [required]
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues:
+      - production
+      - test
+      - development
+    Description: The deployment environment
   TagKey:
     Type: String
     Default: createdby
@@ -139,34 +167,6 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
     Description: The tag value for resource tagging
-  GitRepository:
-    Type: String
-    Default: ""
-    Description: Git repository URL for Visual ETL job source control (optional)
-  GitOwner:
-    Type: String
-    Default: ""
-    Description: Git repository owner/organization name (optional)
-  GitBranch:
-    Type: String
-    Default: main
-    Description: Git branch for Visual ETL job source control
-  GitFolder:
-    Type: String
-    Default: glue-jobs
-    Description: Folder path in Git repository for Visual ETL job storage
-  GitToken:
-    Type: String
-    NoEcho: true
-    Default: ""
-    Description: GitHub/GitLab personal access token for authentication (optional)
-  ScheduleEnabled:
-    Type: String
-    Default: "false"
-    AllowedValues:
-      - "true"
-      - "false"
-    Description: Enable scheduled execution of the Glue job at 4:00 AM JST (UTC+9) daily$'
 
 Conditions:
   CreateGlueForCloudFrontLogs: !Not [!Equals [!Ref CloudFrontLogDomainName, '']]
@@ -183,6 +183,34 @@ Conditions:
 
 Resources:
   # Nested Stacks
+  GlueForCloudFrontLogs:
+    Type: AWS::Serverless::Application
+    Condition: CreateGlueForCloudFrontLogs
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Location: ./cloudfront-logs.yaml
+      Parameters:
+        AccessLogPrefix: !Ref CloudFrontLogPrefix
+        DomainName: !Ref CloudFrontLogDomainName
+        Environment: !Ref Environment
+        GitBranch: !Ref GitBranch
+        GitFolder: !Ref GitFolder
+        GitOwner: !Ref GitOwner
+        GitRepository: !Ref GitRepository
+        GitToken: !Ref GitToken
+        GlueDatabaseName: !Ref GlueDatabase
+        IcebergDataBucketName: !Ref S3BucketForIcebergData
+        LogicalName: !Ref LogicalName
+        QueryResultsBucketName: !Ref S3BucketForQueryResults
+        RawDataBucketName: !Ref S3BucketForRawData
+        ScriptsBucketName: !Ref S3BucketForScripts
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+        
   GlueForGoogleAnalytics:
     Type: AWS::Serverless::Application
     Condition: HasGoogleAnalyticsConfig
@@ -219,27 +247,6 @@ Resources:
         GitFolder: !Ref GitFolder
         GitToken: !Ref GitToken
         ScheduleEnabled: !Ref ScheduleEnabled
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue
-
-  GlueForCloudFrontLogs:
-    Type: AWS::Serverless::Application
-    Condition: CreateGlueForCloudFrontLogs
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
-    Properties:
-      Location: ./cloudfront-logs.yaml
-      Parameters:
-        AccessLogPrefix: !Ref CloudFrontLogPrefix
-        LogicalName: !Ref LogicalName
-        DomainName: !Ref CloudFrontLogDomainName
-        RawDataBucketName: !Ref S3BucketForRawData
-        GlueDatabaseName: !Ref GlueDatabase
-        QueryResultsBucketName: !Ref S3BucketForQueryResults
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue

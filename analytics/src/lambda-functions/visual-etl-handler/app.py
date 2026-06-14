@@ -94,7 +94,7 @@ def lambda_handler(event, context):
         # Send failure response with consistent PhysicalResourceId
         cfnresponse.send(event, context, cfnresponse.FAILED, {
             "Error": str(e)
-        }, job_name)
+        }, job_name, reason=str(e))
 
 def handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn, account_id,
                  git_repository, git_owner, git_branch, git_folder, git_token):
