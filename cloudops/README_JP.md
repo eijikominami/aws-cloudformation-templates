@@ -130,7 +130,7 @@ SSM Explorer のクロスアカウントデータ集約を有効化するには�
 aws organizations enable-aws-service-access --service-principal opsdatasync.ssm.amazonaws.com
 ```
 
-### Default Host Management Configuration (DHMC)
+#### Default Host Management Configuration (DHMC)
 
 DHMC は CloudFormation で管理できないため、CloudOps スタックのデプロイ後に以下の手順で有効化してください。
 
@@ -142,7 +142,7 @@ aws ssm update-service-setting \
 
 IAM ロール `AWSSystemsManagerDefaultEC2InstanceManagementRole` は ssm.yaml が作成します。
 
-### Operational Insights (OpsInsights)
+#### Operational Insights (OpsInsights)
 
 OpsInsights は CloudFormation で管理できないため、API で有効化してください。
 
@@ -152,7 +152,7 @@ aws ssm update-service-setting \
   --setting-value Enabled
 ```
 
-### SSM Unified Console (Quick Setup)
+#### SSM Unified Console (Quick Setup)
 
 全アカウントに CloudOps スタックをデプロイした後、Quick Setup CLI で SSM Unified Console を組織全体に有効化してください。
 
@@ -181,13 +181,35 @@ aws ssm-quicksetup create-configuration-manager \
 
 委任管理者アカウントから実行すると Organization 全体がターゲットになります。
 
-## Amazon CloudWatch Internet Monitor
+### Amazon CloudWatch Internet Monitor
 
 このテンプレートは、``Amazon CloudWatch Internet Monitor`` を作成します。
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 | 
 | --- | --- | --- | --- | --- |
 | **ResourceNames** | String |  | ○ | モニターに追加するリソース |
+
+### DevOps Agent
+
+`devopsagent.yaml` テンプレートは PRIMARY モードで AgentSpace を作成し、MEMBER モードで IAM ロールを作成します。
+
+### 既知の制限事項
+
+クロスアカウント Association は CloudFormation および `associate_service` API では作成**できません**。以下のエラーが返されます。
+
+```
+AccessDeniedException: Cross-account pass role is not allowed.
+```
+
+これは IAM Trust Policy の問題ではなく、サービス側の制限です。MEMBER 側の IAM ロールには PRIMARY アカウントの `aws:SourceAccount` と `aws:SourceArn` が正しく設定されています。
+
+### 手動手順
+
+全アカウントに CloudOps スタックをデプロイした後、**AWS コンソール**からセカンダリクラウドソースを追加してください。
+
+1. DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
+2. 「セカンダリクラウドソースを追加」をクリック
+3. メンバーアカウント ID と既存のロール名を入力（ロールは CFn で作成済みのため新規作成不要）
 
 ## Amazon CloudWatch Synthetics
 
@@ -223,25 +245,3 @@ S3バケットは、ハートビートスクリプトが取得したスクリー
 
 このテンプレートは、CloudWatch のカスタムメトリクスとアラームを作成します。
 これらのアラームは、成功率が90%を下回ったときにトリガされます。
-
-## DevOps Agent
-
-`devopsagent.yaml` テンプレートは PRIMARY モードで AgentSpace を作成し、MEMBER モードで IAM ロールを作成します。
-
-### 既知の制限事項
-
-クロスアカウント Association は CloudFormation および `associate_service` API では作成**できません**。以下のエラーが返されます。
-
-```
-AccessDeniedException: Cross-account pass role is not allowed.
-```
-
-これは IAM Trust Policy の問題ではなく、サービス側の制限です。MEMBER 側の IAM ロールには PRIMARY アカウントの `aws:SourceAccount` と `aws:SourceArn` が正しく設定されています。
-
-### 手動手順
-
-全アカウントに CloudOps スタックをデプロイした後、**AWS コンソール**からセカンダリクラウドソースを追加してください。
-
-1. DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
-2. 「セカンダリクラウドソースを追加」をクリック
-3. メンバーアカウント ID と既存のロール名を入力（ロールは CFn で作成済みのため新規作成不要）

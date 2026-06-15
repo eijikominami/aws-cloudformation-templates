@@ -27,6 +27,10 @@ Metadata:
           - GitFolder
           - GitToken
       - Label:
+          default: 'Schedule Configuration'
+        Parameters:
+          - ScheduleEnabled
+      - Label:
           default: 'Tag Configuration'
         Parameters:
           - LogicalName
@@ -80,6 +84,13 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: Name of the S3 bucket for raw data [required]
+  ScheduleEnabled:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: Enable scheduled execution of the ETL job
   ScriptsBucketName:
     Type: String
     Default: ''
@@ -106,6 +117,7 @@ Parameters:
 
 Conditions:
   CreateVisualETLJob: !Not [!Equals [!Ref IcebergDataBucketName, '']]
+  IsScheduleEnabled: !Equals [!Ref ScheduleEnabled, 'true']
 
 Resources:
   # IAM
@@ -246,6 +258,7 @@ Resources:
                   - glue:GetJob
                   - glue:TagResource
                   - glue:UntagResource
+                  - glue:UpdateSourceControlFromJob
                 Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-cloudfront-logs-to-iceberg
               - Effect: Allow
                 Action:
@@ -436,6 +449,98 @@ Resources:
             SerializationLibrary: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
         TableType: EXTERNAL_TABLE
 
+  # Iceberg table created with empty schema. Schema is managed entirely by the
+  # Visual ETL job (EnableUpdateCatalog). Retain policies prevent CloudFormation
+  # from overwriting Iceberg metadata on subsequent deploys.
+  GlueTableForCloudFrontLogsIceberg:
+    Condition: CreateVisualETLJob
+    Type: AWS::Glue::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref GlueDatabaseName
+      TableInput:
+        Name: cloudfront_access_logs_iceberg
+        StorageDescriptor:
+          Columns:
+            - Name: date
+              Type: string
+            - Name: time
+              Type: string
+            - Name: x_edge_location
+              Type: string
+            - Name: sc_bytes
+              Type: bigint
+            - Name: c_ip
+              Type: string
+            - Name: cs_method
+              Type: string
+            - Name: cs_host
+              Type: string
+            - Name: cs_uri_stem
+              Type: string
+            - Name: sc_status
+              Type: int
+            - Name: cs_referrer
+              Type: string
+            - Name: cs_user_agent
+              Type: string
+            - Name: cs_uri_query
+              Type: string
+            - Name: cs_cookie
+              Type: string
+            - Name: x_edge_result_type
+              Type: string
+            - Name: x_edge_request_id
+              Type: string
+            - Name: x_host_header
+              Type: string
+            - Name: cs_protocol
+              Type: string
+            - Name: cs_bytes
+              Type: bigint
+            - Name: time_taken
+              Type: double
+            - Name: x_forwarded_for
+              Type: string
+            - Name: ssl_protocol
+              Type: string
+            - Name: ssl_cipher
+              Type: string
+            - Name: x_edge_response_result_type
+              Type: string
+            - Name: cs_protocol_version
+              Type: string
+            - Name: fle_status
+              Type: string
+            - Name: fle_encrypted_fields
+              Type: string
+            - Name: c_port
+              Type: int
+            - Name: time_to_first_byte
+              Type: double
+            - Name: x_edge_detailed_result_type
+              Type: string
+            - Name: sc_content_type
+              Type: string
+            - Name: sc_content_len
+              Type: bigint
+            - Name: sc_range_start
+              Type: string
+            - Name: sc_range_end
+              Type: string
+          Location: !Sub s3://${IcebergDataBucketName}/cloudfront_access_logs_iceberg/
+          InputFormat: org.apache.iceberg.mr.hive.HiveIcebergInputFormat
+          OutputFormat: org.apache.iceberg.mr.hive.HiveIcebergOutputFormat
+          SerdeInfo:
+            SerializationLibrary: org.apache.iceberg.mr.hive.HiveIcebergSerDe
+        TableType: EXTERNAL_TABLE
+      OpenTableFormatInput:
+        IcebergInput:
+          MetadataOperation: CREATE
+          Version: '2'
+
   VisualETLJobForCloudFrontLogs:
     Condition: CreateVisualETLJob
     Type: AWS::CloudFormation::CustomResource
@@ -447,6 +552,7 @@ Resources:
       AccessLogPrefix: !Ref AccessLogPrefix
       IcebergDataBucketName: !Ref IcebergDataBucketName
       DatabaseName: !Ref GlueDatabaseName
+      TargetTableName: cloudfront_access_logs_iceberg
       ScriptsBucketName: !Ref ScriptsBucketName
       LogicalName: !Ref LogicalName
       IAMRoleArn: !GetAtt IAMRoleForGlueETL.Arn
@@ -455,6 +561,7 @@ Resources:
       GitBranch: !Ref GitBranch
       GitFolder: !Ref GitFolder
       GitToken: !Ref GitToken
+      ForceUpdate: '2026-06-15T12:20'
 
   VisualETLLambdaFunction:
     Condition: CreateVisualETLJob
@@ -487,6 +594,18 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+
+  GlueTriggerForSchedule:
+    Condition: IsScheduleEnabled
+    Type: AWS::Glue::Trigger
+    Properties:
+      Actions:
+        - JobName: !Sub ${LogicalName}-cloudfront-logs-to-iceberg
+      Description: !Sub Scheduled trigger for ${LogicalName} CloudFront logs to Iceberg job
+      Name: !Sub ${LogicalName}-cloudfront-logs-to-iceberg-schedule
+      Schedule: "cron(0 19 * * ? *)"
+      StartOnCreation: true
+      Type: SCHEDULED
 
 Outputs:
   AthenaWorkGroupName:

@@ -6,25 +6,21 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: "Google Analytics Configuration"
+          default: 'Google Analytics Configuration'
         Parameters:
           - PropertyId
           - AccountId
+          - ClientId
           - ClientSecret
+          - RefreshToken
+          - AccessToken
       - Label:
-          default: "Glue Configuration"
+          default: 'Glue Configuration'
         Parameters:
           - GlueJobTimeout
           - GlueWorkerCount
       - Label:
-          default: "Tag Configuration"
-        Parameters:
-          - LogicalName
-          - Environment
-          - TagKey
-          - TagValue
-      - Label:
-          default: "Git Integration Configuration"
+          default: 'Git Integration Configuration'
         Parameters:
           - GitRepository
           - GitOwner
@@ -32,11 +28,11 @@ Metadata:
           - GitFolder
           - GitToken
       - Label:
-          default: "Schedule Configuration"
+          default: 'Schedule Configuration'
         Parameters:
           - ScheduleEnabled
       - Label:
-          default: "Parent Stack Resources"
+          default: 'Parent Stack Resources'
         Parameters:
           - RawDataBucketName
           - IcebergDataBucketName
@@ -44,8 +40,20 @@ Metadata:
           - QueryResultsBucketName
           - AlertTopicArn
           - GlueDatabaseName
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
 
 Parameters:
+  AccessToken:
+    Type: String
+    NoEcho: true
+    Default: ""
+    Description: Google Analytics 4 OAuth2 Access Token (optional - provide after OAuth flow)
   AccountId:
     Type: String
     Default: ""
@@ -53,19 +61,36 @@ Parameters:
   AlertTopicArn:
     Type: String
     Description: ARN of the SNS topic for alerts
+  ClientId:
+    Type: String
+    Default: ""
+    Description: Google OAuth2 Client Application ID (from Google Cloud Console)
   ClientSecret:
     Type: String
     NoEcho: true
     AllowedPattern: .+
-    Description: The Google Analytics 4 OAuth2 Client Secret [required]
-  Environment:
+    Description: The Google Analytics 4 OAuth2 Client Secret
+  GitBranch:
     Type: String
-    Default: development
-    AllowedValues:
-      - production
-      - test
-      - development
-    Description: The deployment environment
+    Default: main
+    Description: Git branch for Visual ETL job source control
+  GitFolder:
+    Type: String
+    Default: glue-jobs
+    Description: Folder path in Git repository for Visual ETL job storage
+  GitOwner:
+    Type: String
+    Default: ""
+    Description: Git repository owner/organization name (optional)
+  GitRepository:
+    Type: String
+    Default: ""
+    Description: Git repository URL for Visual ETL job source control (optional)
+  GitToken:
+    Type: String
+    NoEcho: true
+    Default: ""
+    Description: GitHub/GitLab personal access token for authentication (optional)
   GlueDatabaseName:
     Type: String
     Description: Name of the Glue Data Catalog database
@@ -84,23 +109,44 @@ Parameters:
   IcebergDataBucketName:
     Type: String
     Description: Name of the S3 bucket for Iceberg data storage
-  LogicalName:
-    Type: String
-    Description: Logical name for resource naming and cross-stack references [required]
-    MinLength: 1
   PropertyId:
     Type: String
     AllowedPattern: .+
-    Description: The Google Analytics 4 Property ID (also used as Client ID) [required]
+    Description: The Google Analytics 4 Property ID [required]
   QueryResultsBucketName:
     Type: String
     Description: Name of the S3 bucket for Athena query results
   RawDataBucketName:
     Type: String
     Description: Name of the S3 bucket for raw data staging
+  RefreshToken:
+    Type: String
+    NoEcho: true
+    Default: ""
+    Description: Google Analytics 4 OAuth2 Refresh Token (optional - provide after OAuth flow)
+  ScheduleEnabled:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Enable scheduled execution of the Glue job at 4:00 AM JST (UTC+9) daily
+
   ScriptsBucketName:
     Type: String
     Description: Name of the S3 bucket for Glue scripts storage
+  LogicalName:
+    Type: String
+    Description: Logical name for resource naming and cross-stack references [required]
+    MinLength: 1
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues:
+      - production
+      - test
+      - development
+    Description: The deployment environment
   TagKey:
     Type: String
     Default: createdby
@@ -111,37 +157,20 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
     Description: The tag value for resource tagging
-  GitRepository:
-    Type: String
-    Default: ""
-    Description: Git repository URL for Visual ETL job source control (optional)
-  GitOwner:
-    Type: String
-    Default: ""
-    Description: Git repository owner/organization name (optional)
-  GitBranch:
-    Type: String
-    Default: main
-    Description: Git branch for Visual ETL job source control
-  GitFolder:
-    Type: String
-    Default: glue-jobs
-    Description: Folder path in Git repository for Visual ETL job storage
-  GitToken:
-    Type: String
-    NoEcho: true
-    Default: ""
-    Description: GitHub/GitLab personal access token for authentication (optional)
-  ScheduleEnabled:
-    Type: String
-    Default: "false"
-    AllowedValues:
-      - "true"
-      - "false"
-    Description: Enable scheduled execution of the Glue job at 4:00 AM JST (UTC+9) daily
+Conditions:
+  HasGitRepository: !And
+    - !Not [!Equals [!Ref GitRepository, ""]]
+    - !Not [!Equals [!Ref GitOwner, ""]]
+    - !Not [!Equals [!Ref GitToken, ""]]
+  HasOAuthTokens: !And
+    - !Not [!Equals [!Ref RefreshToken, ""]]
+    - !Not [!Equals [!Ref AccessToken, ""]]
+  IsScheduleEnabled: !And
+    - !Equals [!Ref ScheduleEnabled, 'true']
+    - !Not [!Equals [!Ref RefreshToken, ""]]
+    - !Not [!Equals [!Ref AccessToken, ""]]
 
 Resources:
-  # IAM Roles
   IAMRoleForGlue:
     Type: AWS::IAM::Role
     Properties:
@@ -243,7 +272,8 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
 
-  IAMRoleForVisualETLLambda:
+
+  IAMRoleForLambda:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -268,13 +298,14 @@ Resources:
                   - glue:UpdateJob
                   - glue:DeleteJob
                   - glue:GetJob
-                Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-ga4-to-s3-ingestion-job
+                  - glue:UpdateSourceControlFromJob
+                Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-ga-to-iceberg
               - Effect: Allow
                 Action:
                   - glue:TagResource
                   - glue:UntagResource
                 Resource:
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-ga4-to-s3-ingestion-job
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-ga-to-iceberg
               - Effect: Allow
                 Action:
                   - iam:PassRole
@@ -292,8 +323,10 @@ Resources:
                 Resource:
                   - !Sub "arn:aws:s3:::${RawDataBucketName}/*"
                   - !Sub "arn:aws:s3:::${ScriptsBucketName}/*"
+                  - !Sub "arn:aws:s3:::aws-glue-assets-${AWS::AccountId}-${AWS::Region}/*"
                   - !Sub "arn:aws:s3:::${RawDataBucketName}"
                   - !Sub "arn:aws:s3:::${ScriptsBucketName}"
+                  - !Sub "arn:aws:s3:::aws-glue-assets-${AWS::AccountId}-${AWS::Region}"
       RoleName: !Sub ${LogicalName}-visual-etl-lambda-${AWS::Region}
       Tags:
         - Key: environment
@@ -303,25 +336,139 @@ Resources:
 
   # Other Resources (alphabetically ordered)
 
-  CloudWatchAlarmLambda:
-    Type: AWS::Serverless::Application
+
+  SecretsManagerSecretForGA4:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::SecretsManager::Secret
     Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
-        SemanticVersion: 2.2.25
-      Parameters:
-        CustomAlarmName: !Ref LogicalName
-        FunctionResouceName: !Ref VisualETLLambdaFunction
-        SNSTopicArn: !Ref AlertTopicArn
-        TimeoutMilliseconds: 810000
-        Environment: !Ref Environment
-        TagKey: !Ref TagKey
-        TagValue: !Ref TagValue
+      Description: Google Analytics 4 API authentication credentials
+      Name: !Sub ${LogicalName}/google-analytics
+      SecretString: !Sub |
+        {"REFRESH_TOKEN":"${RefreshToken}","USER_MANAGED_CLIENT_APPLICATION_CLIENT_SECRET":"${ClientSecret}","ACCESS_TOKEN":"${AccessToken}"}
+      Tags:
+        - Key: Name
+          Value: !Sub ${LogicalName}-google-analytics-secret-${AWS::Region}
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+
+  GlueConnectionForGA4:
+    Condition: HasOAuthTokens
+    Type: AWS::Glue::Connection
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      ConnectionInput:
+        AuthenticationConfiguration:
+          AuthenticationType: OAUTH2
+          OAuth2Properties:
+            OAuth2ClientApplication:
+              UserManagedClientApplicationClientId: !Ref ClientId
+            OAuth2GrantType: AUTHORIZATION_CODE
+            TokenUrl: "https://oauth2.googleapis.com/token"
+          SecretArn: !Ref SecretsManagerSecretForGA4
+        ConnectionProperties:
+          ROLE_ARN: !GetAtt IAMRoleForGlue.Arn
+        ConnectionType: GOOGLEANALYTICS4
+        Description: !Sub Connection to Google Analytics 4 created by ${AWS::StackName}
+        Name: !Sub Googleanalytics4 connection (${LogicalName})
+        ValidateCredentials: false
+
+
+  GlueTableForGA4CoreReports:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::Glue::Table
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref GlueDatabaseName
+      OpenTableFormatInput:
+        IcebergInput:
+          MetadataOperation: CREATE
+          Version: '2'
+      TableInput:
+        Name: ga_core_reports_iceberg
+        StorageDescriptor:
+          Columns: []
+          Location: !Sub "s3://${IcebergDataBucketName}/ga_core_reports_iceberg"
+          InputFormat: org.apache.iceberg.mr.hive.HiveIcebergInputFormat
+          OutputFormat: org.apache.iceberg.mr.hive.HiveIcebergOutputFormat
+          SerdeInfo:
+            SerializationLibrary: org.apache.iceberg.mr.hive.HiveIcebergSerDe
+        TableType: EXTERNAL_TABLE
+
+  GlueJobForGA4Ingestion:
+    Condition: HasOAuthTokens
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceTimeout: 300
+      ServiceToken: !GetAtt LambdaFunctionForVisualETL.Arn
+      JobName: !Sub ${LogicalName}-ga-to-iceberg
+      ConnectionName: !Ref GlueConnectionForGA4
+      IcebergDataBucket: !Ref IcebergDataBucketName
+      DatabaseName: !Ref GlueDatabaseName
+      ScriptsBucket: !Ref ScriptsBucketName
+      SourceTableName: ga_core_reports_iceberg
+      LogicalName: !Ref LogicalName
+      IAMRoleArn: !GetAtt IAMRoleForGlue.Arn
+      AccountId: !Ref AccountId
+      GitRepository: !Ref GitRepository
+      GitOwner: !Ref GitOwner
+      GitBranch: !Ref GitBranch
+      GitFolder: !Ref GitFolder
+      GitToken: !Ref GitToken
+      ForceUpdate: '2026-06-15T12:20'
+
+
+  GlueTriggerForSchedule:
+    Condition: IsScheduleEnabled
+    Type: AWS::Glue::Trigger
+    Properties:
+      Actions:
+        - JobName: !Sub ${LogicalName}-ga-to-iceberg
+      Description: !Sub Scheduled trigger for ${LogicalName} GA4 to S3 data ingestion job
+      Name: !Sub ${LogicalName}-ga-to-iceberg-schedule
+      Schedule: "cron(0 19 * * ? *)"
+      StartOnCreation: true
+      Type: SCHEDULED
+
+
+
+  LambdaFunctionForVisualETL:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${LogicalName}-ga-etl-handler
+      Description: Lambda function to manage Glue Visual ETL Jobs via CloudFormation custom resources
+      CodeUri: ../src/lambda-functions/ga-etl-handler/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Timeout: 900
+      MemorySize: 256
+      Role: !GetAtt IAMRoleForLambda.Arn
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+      Tracing: Active
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
 
-  CloudWatchAlarmEstimatedCharges:
+
+  LogGroupForVisualETL:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${LogicalName}-ga-etl-handler
+      RetentionInDays: 14
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+
+  CloudWatchAlarmForEstimatedCharges:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub ${LogicalName}-estimated-charges
@@ -345,7 +492,9 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
 
-  CloudWatchAlarmGlue:
+
+  CloudWatchAlarmForGlue:
+    Condition: HasOAuthTokens
     Type: AWS::Serverless::Application
     Properties:
       Location:
@@ -354,7 +503,7 @@ Resources:
       Parameters:
         AlarmLevel: WARNING
         CustomAlarmName: !Ref LogicalName
-        JobName: !Sub ${LogicalName}-ga4-to-s3-ingestion-job
+        JobName: !Sub ${LogicalName}-ga-to-iceberg
         SNSTopicArn: !Ref AlertTopicArn
         TimeoutMilliseconds: 3300000
         Environment: !Ref Environment
@@ -364,124 +513,28 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
 
-  GlueTableGA4CoreReports:
-    Type: AWS::Glue::Table
-    Properties:
-      DatabaseName: !Ref GlueDatabaseName
-      CatalogId: !Ref AWS::AccountId
-      TableInput:
-        Name: ga4_core_reports
-        StorageDescriptor:
-          Columns:
-            - Name: date
-              Type: date
-            - Name: activeusers
-              Type: string
-          Location: !Sub "s3://${IcebergDataBucketName}/ga4_core_reports/"
-          InputFormat: org.apache.iceberg.mr.hive.HiveIcebergInputFormat
-          OutputFormat: org.apache.iceberg.mr.hive.HiveIcebergOutputFormat
-          SerdeInfo:
-            SerializationLibrary: org.apache.iceberg.mr.hive.HiveIcebergSerDe
-        TableType: EXTERNAL_TABLE
-      OpenTableFormatInput:
-        IcebergInput:
-          MetadataOperation: CREATE
-          Version: "2"
+  # Iceberg table created with empty schema. Schema is managed entirely by the
+  # Visual ETL job (EnableUpdateCatalog). Retain policies prevent CloudFormation
+  # from overwriting Iceberg metadata on subsequent deploys.
 
-  GlueConnection:
-    Type: AWS::Glue::Connection
+  CloudWatchAlarmForLambda:
+    Type: AWS::Serverless::Application
     Properties:
-      CatalogId: !Ref AWS::AccountId
-      ConnectionInput:
-        AuthenticationConfiguration:
-          AuthenticationType: OAUTH2
-          OAuth2Properties:
-            OAuth2ClientApplication:
-              UserManagedClientApplicationClientId: !Ref PropertyId
-            OAuth2GrantType: AUTHORIZATION_CODE
-            TokenUrl: "https://oauth2.googleapis.com/token"
-          SecretArn: !Ref SecretsManager
-        ConnectionProperties:
-          ROLE_ARN: !GetAtt IAMRoleForGlue.Arn
-        ConnectionType: GOOGLEANALYTICS4
-        Description: !Sub Connection to Google Analytics 4 created by ${AWS::StackName}
-        Name: !Sub Googleanalytics4 connection (${LogicalName})
-        ValidateCredentials: false
-
-  SecretsManager:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: Google Analytics 4 API authentication credentials
-      Name: !Sub ${LogicalName}/google-analytics/${Environment}-v2
-      SecretString: !Sub '{"USER_MANAGED_CLIENT_APPLICATION_CLIENT_SECRET":"${ClientSecret}"}'
-      Tags:
-        - Key: Name
-          Value: !Sub ${LogicalName}-google-analytics-secret-${AWS::Region}
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-
-  VisualETLJobForGA4Ingestion:
-    Type: AWS::CloudFormation::CustomResource
-    Properties:
-      ServiceToken: !GetAtt VisualETLLambdaFunction.Arn
-      JobName: !Sub ${LogicalName}-ga4-to-s3-ingestion-job
-      ConnectionName: !Ref GlueConnection
-      IcebergDataBucket: !Ref IcebergDataBucketName
-      DatabaseName: !Ref GlueDatabaseName
-      ScriptsBucket: !Ref ScriptsBucketName
-      LogicalName: !Ref LogicalName
-      IAMRoleArn: !GetAtt IAMRoleForGlue.Arn
-      AccountId: !Ref AccountId
-      # Git Integration Settings
-      GitRepository: !Ref GitRepository
-      GitOwner: !Ref GitOwner
-      GitBranch: !Ref GitBranch
-      GitFolder: !Ref GitFolder
-      GitToken: !Ref GitToken
-
-  VisualETLLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${LogicalName}-visual-etl-handler
-      Description: Lambda function to manage Glue Visual ETL Jobs via CloudFormation custom resources
-      CodeUri: ../src/lambda-functions/visual-etl-handler/
-      Handler: app.lambda_handler
-      Runtime: python3.13
-      Timeout: 900
-      MemorySize: 256
-      Role: !GetAtt IAMRoleForVisualETLLambda.Arn
-      Environment:
-        Variables:
-          LOG_LEVEL: INFO
-      Tracing: Active
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-lambda
+        SemanticVersion: 2.2.25
+      Parameters:
+        CustomAlarmName: !Ref LogicalName
+        FunctionResouceName: !Ref LambdaFunctionForVisualETL
+        SNSTopicArn: !Ref AlertTopicArn
+        TimeoutMilliseconds: 810000
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
 
-  VisualETLLambdaLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub /aws/lambda/${LogicalName}-visual-etl-handler
-      RetentionInDays: 14
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-
-  GlueJobScheduleTrigger:
-    Type: AWS::Glue::Trigger
-    Condition: IsScheduleEnabled
-    Properties:
-      Name: !Sub ${LogicalName}-ga4-to-s3-ingestion-schedule
-      Type: SCHEDULED
-      Schedule: "cron(0 19 * * ? *)"
-      Actions:
-        - JobName: !Sub ${LogicalName}-ga4-to-s3-ingestion-job
-      StartOnCreation: true
-      Description: !Sub Scheduled trigger for ${LogicalName} GA4 to S3 data ingestion job
 
 Outputs:
   GlueRoleArn:
@@ -490,23 +543,21 @@ Outputs:
 
   SecretsManagerArn:
     Description: ARN of the Secrets Manager secret for Google Analytics credentials
-    Value: !Ref SecretsManager
-
-  GlueTableName:
-    Description: Name of the Glue Table for GA4 core reports
-    Value: !Ref GlueTableGA4CoreReports
+    Value: !Ref SecretsManagerSecretForGA4
 
   GlueConnectionName:
+    Condition: HasOAuthTokens
     Description: Name of the Google Analytics 4 Glue Connection
-    Value: !Ref GlueConnection
+    Value: !Ref GlueConnectionForGA4
 
   GA4IngestionJobName:
+    Condition: HasOAuthTokens
     Description: Name of the Google Analytics 4 to S3 data ingestion job
-    Value: !Sub ${LogicalName}-ga4-to-s3-ingestion-job
+    Value: !Sub ${LogicalName}-ga-to-iceberg
 
   VisualETLLambdaArn:
     Description: ARN of the Visual ETL Lambda function
-    Value: !GetAtt VisualETLLambdaFunction.Arn
+    Value: !GetAtt LambdaFunctionForVisualETL.Arn
 
   GA4IngestionGitIntegrationEnabled:
     Description: Whether Git integration is enabled for GA4 to S3 data ingestion job
@@ -514,11 +565,6 @@ Outputs:
       - HasGitRepository
       - "true"
       - "false"
-
-  GA4IngestionScheduleName:
-    Condition: IsScheduleEnabled
-    Description: Name of the scheduled trigger for GA4 to S3 data ingestion job
-    Value: !Ref GlueJobScheduleTrigger
 
   GA4IngestionScheduleEnabled:
     Description: Whether scheduled execution is enabled for GA4 to S3 data ingestion job
@@ -530,19 +576,23 @@ Outputs:
 
   CloudWatchAlarmLambdaStackId:
     Description: Stack ID of the Lambda CloudWatch Alarm stack
-    Value: !Ref CloudWatchAlarmLambda
+    Value: !Ref CloudWatchAlarmForLambda
 
   CloudWatchAlarmEstimatedChargesName:
     Description: Name of the CloudWatch Alarm for estimated charges
-    Value: !Ref CloudWatchAlarmEstimatedCharges
+    Value: !Ref CloudWatchAlarmForEstimatedCharges
 
   CloudWatchAlarmGlueStackId:
+    Condition: HasOAuthTokens
     Description: Stack ID of the Glue CloudWatch Alarm stack
-    Value: !Ref CloudWatchAlarmGlue
+    Value: !Ref CloudWatchAlarmForGlue
 
-Conditions:
-  HasGitRepository: !And
-    - !Not [!Equals [!Ref GitRepository, ""]]
-    - !Not [!Equals [!Ref GitOwner, ""]]
-    - !Not [!Equals [!Ref GitToken, ""]]
-  IsScheduleEnabled: !Equals [!Ref ScheduleEnabled, "true"]
+  GlueTableName:
+    Description: Name of the Glue Table for GA4 core reports
+    Value: !Ref GlueTableForGA4CoreReports
+
+  GA4IngestionScheduleName:
+    Condition: IsScheduleEnabled
+    Description: Name of the scheduled trigger for GA4 to S3 data ingestion job
+    Value: !Ref GlueTriggerForSchedule
+

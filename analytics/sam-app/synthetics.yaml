@@ -1,0 +1,385 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: aws-cloudformation-templates/analytics/synthetics creates CloudWatch Synthetics result analysis resources.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'Analytics Configuration'
+        Parameters:
+          - GlueDatabaseName
+          - IcebergDataBucketName
+          - QueryResultsBucketName
+          - ScriptsBucketName
+      - Label:
+          default: 'Synthetics Configuration'
+        Parameters:
+          - SyntheticsResultsBucketName
+          - SyntheticsResultsPrefix
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalName
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  GlueDatabaseName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the Glue Data Catalog database [required]
+  IcebergDataBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the S3 bucket for Iceberg data output [required]
+  QueryResultsBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the S3 bucket for Athena query results [required]
+  ScriptsBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the S3 bucket for Glue scripts storage [required]
+  ScheduleEnabled:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: Whether to enable scheduled execution of ETL jobs
+  SyntheticsResultsBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the S3 bucket where Synthetics stores results [required]
+  SyntheticsResultsPrefix:
+    Type: String
+    Default: canary/
+    Description: S3 prefix for Synthetics results
+  GitBranch:
+    Type: String
+    Default: ''
+    Description: Git branch for source control
+  GitFolder:
+    Type: String
+    Default: ''
+    Description: Folder path in Git repository
+  GitOwner:
+    Type: String
+    Default: ''
+    Description: Git repository owner
+  GitRepository:
+    Type: String
+    Default: ''
+    Description: Git repository name
+  GitToken:
+    Type: String
+    NoEcho: true
+    Default: ''
+    Description: Git personal access token
+  LogicalName:
+    Type: String
+    AllowedPattern: .+
+    Description: Logical name for resource naming [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  IsScheduleEnabled: !Equals [!Ref ScheduleEnabled, "true"]
+
+Resources:
+  # IAM
+  IAMRoleForGlueETL:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Glue ETL job (Synthetics) in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${SyntheticsResultsBucketName}
+                  - !Sub arn:aws:s3:::${SyntheticsResultsBucketName}/${SyntheticsResultsPrefix}*
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${IcebergDataBucketName}
+                  - !Sub arn:aws:s3:::${IcebergDataBucketName}/*
+                  - !Sub arn:aws:s3:::${ScriptsBucketName}
+                  - !Sub arn:aws:s3:::${ScriptsBucketName}/*
+        - PolicyName: GlueDataCatalogAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetTable
+                  - glue:GetTables
+                  - glue:CreateTable
+                  - glue:UpdateTable
+                  - glue:DeleteTable
+                  - glue:GetPartition
+                  - glue:GetPartitions
+                  - glue:CreatePartition
+                  - glue:UpdatePartition
+                  - glue:DeletePartition
+                  - glue:BatchCreatePartition
+                  - glue:BatchDeletePartition
+                Resource:
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/${GlueDatabaseName}
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/${GlueDatabaseName}/*
+        - PolicyName: CloudWatchLogsAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/*
+      RoleName: !Sub ${LogicalName}-synthetics-glue-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # Athena
+  AthenaNamedQueryForAvailability:
+    Type: AWS::Athena::NamedQuery
+    Properties:
+      Database: !Ref GlueDatabaseName
+      Description: Daily availability percentage per canary
+      Name: !Sub ${LogicalName}-synthetics-availability
+      QueryString: !Sub |
+        SELECT
+          canaryname,
+          cast(from_iso8601_timestamp(starttime) AS date) AS date,
+          count(*) AS total_runs,
+          sum(CASE WHEN executionstatus = 'SUCCEEDED' THEN 1 ELSE 0 END) AS successful_runs,
+          round(cast(sum(CASE WHEN executionstatus = 'SUCCEEDED' THEN 1 ELSE 0 END) AS double) / count(*) * 100, 2) AS availability_pct
+        FROM ${GlueDatabaseName}.synthetics_canary_iceberg
+        GROUP BY canaryname, cast(from_iso8601_timestamp(starttime) AS date)
+        ORDER BY date DESC, canaryname
+      WorkGroup: !Ref AthenaWorkGroupForSynthetics
+
+  AthenaNamedQueryForFailures:
+    Type: AWS::Athena::NamedQuery
+    Properties:
+      Database: !Ref GlueDatabaseName
+      Description: Failed Synthetics runs with error details
+      Name: !Sub ${LogicalName}-synthetics-failures
+      QueryString: !Sub |
+        SELECT
+          canaryname,
+          starttime,
+          executionerror,
+          customerscript.failurereason
+        FROM ${GlueDatabaseName}.synthetics_canary_iceberg
+        WHERE executionstatus = 'FAILED'
+        ORDER BY starttime DESC
+        LIMIT 50
+      WorkGroup: !Ref AthenaWorkGroupForSynthetics
+
+  AthenaNamedQueryForRecentResults:
+    Type: AWS::Athena::NamedQuery
+    Properties:
+      Database: !Ref GlueDatabaseName
+      Description: Recent Synthetics execution results with duration
+      Name: !Sub ${LogicalName}-synthetics-recent-results
+      QueryString: !Sub |
+        SELECT
+          canaryname,
+          executionstatus,
+          starttime,
+          date_diff('millisecond',
+            from_iso8601_timestamp(starttime),
+            from_iso8601_timestamp(endtime)) AS duration_ms,
+          customerscript.requests.failed AS failed_requests,
+          customerscript.requests._2xx AS success_2xx,
+          customerscript.requests._4xx AS client_errors_4xx,
+          customerscript.requests._5xx AS server_errors_5xx
+        FROM ${GlueDatabaseName}.synthetics_canary_iceberg
+        ORDER BY starttime DESC
+        LIMIT 100
+      WorkGroup: !Ref AthenaWorkGroupForSynthetics
+
+  AthenaWorkGroupForSynthetics:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Description: WorkGroup for CloudWatch Synthetics report analysis
+      Name: !Sub ${LogicalName}-synthetics
+      State: ENABLED
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub s3://${QueryResultsBucketName}/synthetics/
+
+  # Glue
+  CustomResourceForSyntheticsETL:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceTimeout: 300
+      ServiceToken: !GetAtt ServerlessFunctionForSyntheticsETL.Arn
+      JobName: !Sub ${LogicalName}-synthetics-to-iceberg
+      ScriptLocation: !Sub s3://${ScriptsBucketName}/glue-jobs/${LogicalName}-synthetics-to-iceberg.py
+      IcebergDataBucket: !Ref IcebergDataBucketName
+      DatabaseName: !Ref GlueDatabaseName
+      TableName: synthetics_canary_iceberg
+      SourcePath: !Sub s3://${SyntheticsResultsBucketName}/${SyntheticsResultsPrefix}
+      IAMRoleArn: !GetAtt IAMRoleForGlueETL.Arn
+      GitRepository: !Ref GitRepository
+      GitOwner: !Ref GitOwner
+      GitBranch: !Ref GitBranch
+      GitFolder: !Ref GitFolder
+      GitToken: !Ref GitToken
+      ForceUpdate: '2026-06-15T11:00'
+
+  GlueTriggerForSchedule:
+    Condition: IsScheduleEnabled
+    Type: AWS::Glue::Trigger
+    Properties:
+      Actions:
+        - JobName: !Sub ${LogicalName}-synthetics-to-iceberg
+      Description: !Sub Scheduled trigger for ${LogicalName} Synthetics ETL job
+      Name: !Sub ${LogicalName}-synthetics-to-iceberg-schedule
+      Schedule: "cron(0 19 * * ? *)"
+      StartOnCreation: true
+      Type: SCHEDULED
+
+  # NOTE: The Iceberg table `synthetics_canary_iceberg` is created and owned
+  # solely by the Glue job script (synthetics-to-iceberg.py, createOrReplace/create).
+  # A CFn-managed AWS::Glue::Table with MetadataOperation: CREATE was removed because
+  # it pre-registered a metadata_location whose physical metadata.json did not exist
+  # in S3, conflicting with the job and causing "Location does not exist" failures.
+
+  # Lambda for Synthetics ETL Custom Resource
+  IAMRoleForSyntheticsETLLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Synthetics ETL Lambda in ${AWS::StackName}
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+      Policies:
+        - PolicyName: GlueJobManagementPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:CreateJob
+                  - glue:UpdateJob
+                  - glue:DeleteJob
+                  - glue:GetJob
+                  - glue:UpdateSourceControlFromJob
+                Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-synthetics-to-iceberg
+              - Effect: Allow
+                Action:
+                  - glue:TagResource
+                  - glue:UntagResource
+                Resource:
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-synthetics-to-iceberg
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt IAMRoleForGlueETL.Arn
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${ScriptsBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${ScriptsBucketName}'
+                  - !Sub 'arn:aws:s3:::${IcebergDataBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${IcebergDataBucketName}'
+      RoleName: !Sub ${LogicalName}-synthetics-etl-lambda-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  ServerlessFunctionForSyntheticsETL:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../src/lambda-functions/synthetics-etl-handler/
+      Description: Lambda function to manage Synthetics Glue ETL Job via CloudFormation custom resources
+      FunctionName: !Sub ${LogicalName}-synthetics-etl-handler
+      Handler: app.lambda_handler
+      MemorySize: 256
+      Role: !GetAtt IAMRoleForSyntheticsETLLambda.Arn
+      Runtime: python3.13
+      Timeout: 900
+      Tracing: Active
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+  LogGroupForSyntheticsETL:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${LogicalName}-synthetics-etl-handler
+      RetentionInDays: 14
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

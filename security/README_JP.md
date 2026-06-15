@@ -101,7 +101,16 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 
 このテンプレートは ``CentralizedLogging`` StackSet をデプロイし、Log Archive アカウントに組織全体のログ集約用の S3 バケットとバケットポリシーを作成します。
 
-### Amazon Security Lake
+### Amazon EventBridge
+
+このテンプレートは、 ``AWS Health`` と　``AWS Trusted Advisor`` に関する  ``CloudWatchイベント`` を作成します。
+CloudWatchイベントは、Amazon SNS にこれらのイベントを転送します。
+
+### その他
+
+このテンプレートは、 ``Service-linked Role``、 ``IAM Role``、 ``S3 Bucket``、 ``Amazon SNS`` などのリソースも合わせて作成します。
+
+## Amazon Security Lake
 
 このテンプレートは、``Amazon Security Lake`` を有効化し、ログソースと SIEM 連携用のサブスクライバーを構成します。
 デプロイ前に、[**Security Lake の委任管理者を登録**](https://docs.aws.amazon.com/ja_jp/security-lake/latest/userguide/getting-started.html#initial-account-setup) してください。このテンプレートは委任管理者アカウントに直接デプロイする必要があります。
@@ -114,7 +123,7 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 | TagKey | String | createdby | ○ | タグキー |
 | TagValue | String | aws-cloudformation-templates | ○ | タグ値 |
 
-### Security Agent
+## Security Agent
 
 このテンプレートは、``AWS Security Agent`` を設定します。
 
@@ -122,15 +131,6 @@ S3バケットに蓄積されたログは、``AWS KMS`` 上で作成された ``
 | --- | --- | --- | --- | --- |
 | **AgentSpaceName** | String | security-agent-space | ○ | AWS Security Agent の Agent Space 名 |
 | VpcId | String | | | Security Agent スキャナーが実行される VPC の ID |
-
-### Amazon EventBridge
-
-このテンプレートは、 ``AWS Health`` と　``AWS Trusted Advisor`` に関する  ``CloudWatchイベント`` を作成します。
-CloudWatchイベントは、Amazon SNS にこれらのイベントを転送します。
-
-### その他
-
-このテンプレートは、 ``Service-linked Role``、 ``IAM Role``、 ``S3 Bucket``、 ``Amazon SNS`` などのリソースも合わせて作成します。
 
 ## デプロイ
 
