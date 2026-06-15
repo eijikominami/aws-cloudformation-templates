@@ -98,7 +98,16 @@ This action automatically turns on the Auto-enable Macie configuration so that M
 
 This template deploys a ``CentralizedLogging`` StackSet that creates a centralized S3 bucket and bucket policy in the Log Archive account for aggregating logs from across the organization.
 
-### Amazon Security Lake
+### Amazon EventBridge
+
+This template creates ``Amazon EventBridge`` for ``AWS Health`` and ``AWS Trusted Advisor``.
+EventBridge transfer its events to ``Amazon SNS``.
+
+### Other Resources
+
+This template creates some other resources, such as ``Service-linked Role``, ``IAM Role``, ``S3 Bucket``, ``Amazon SNS``, and so on.
+
+## Amazon Security Lake
 
 This template enables ``Amazon Security Lake``, configures log sources, and sets up a subscriber for SIEM integration.
 Before deploying, [**register the delegated Security Lake administrator**](https://docs.aws.amazon.com/security-lake/latest/userguide/getting-started.html#initial-account-setup). This template must be deployed directly in the delegated administrator account.
@@ -111,7 +120,7 @@ Before deploying, [**register the delegated Security Lake administrator**](https
 | TagKey | String | createdby | ○ | Tag key |
 | TagValue | String | aws-cloudformation-templates | ○ | Tag value |
 
-### Security Agent
+## Security Agent
 
 This template sets ``AWS Security Agent``.
 
@@ -119,15 +128,6 @@ This template sets ``AWS Security Agent``.
 | --- | --- | --- | --- | --- |
 | **AgentSpaceName** | String | security-agent-space | ○ | The name of the AWS Security Agent agent space |
 | VpcId | String | | | The VPC in which Security Agent scanner runs |
-
-### Amazon EventBridge
-
-This template creates ``Amazon EventBridge`` for ``AWS Health`` and ``AWS Trusted Advisor``.
-EventBridge transfer its events to ``Amazon SNS``.
-
-### Other Resources
-
-This template creates some other resources, such as ``Service-linked Role``, ``IAM Role``, ``S3 Bucket``, ``Amazon SNS``, and so on.
 
 ## Deployment
 

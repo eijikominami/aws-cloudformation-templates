@@ -355,7 +355,7 @@ Resources:
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:boto3-latest:1
       Role: !GetAtt IAMRoleForWebhookCustomResource.Arn
-      Runtime: python3.12
+      Runtime: python3.13
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -596,7 +596,7 @@ Resources:
       FunctionName: !Sub ${AgentSpaceName}-WebhookForwarder
       Handler: index.handler
       Role: !GetAtt IAMRoleForWebhookForwarder.Arn
-      Runtime: python3.12
+      Runtime: python3.13
       Tags:
         - Key: environment
           Value: !Ref Environment

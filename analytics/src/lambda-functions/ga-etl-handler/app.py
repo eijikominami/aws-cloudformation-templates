@@ -49,6 +49,7 @@ def lambda_handler(event, context):
         iceberg_data_bucket = properties['IcebergDataBucket']
         database_name = properties['DatabaseName']
         scripts_bucket = properties['ScriptsBucket']
+        source_table_name = properties['SourceTableName']
         logical_name = properties['LogicalName']
         iam_role_arn = properties['IAMRoleArn']
         account_id = properties['AccountId']
@@ -63,11 +64,11 @@ def lambda_handler(event, context):
         # Handle different request types
         if request_type == 'Create':
             response_data = handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name,
-                                        iam_role_arn, account_id,
+                                        iam_role_arn, account_id, source_table_name,
                                         git_repository, git_owner, git_branch, git_folder, git_token)
         elif request_type == 'Update':
             response_data = handle_update(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name,
-                                        iam_role_arn, account_id,
+                                        iam_role_arn, account_id, source_table_name,
                                         git_repository, git_owner, git_branch, git_folder, git_token)
         elif request_type == 'Delete':
             response_data = handle_delete(job_name)
@@ -96,7 +97,7 @@ def lambda_handler(event, context):
             "Error": str(e)
         }, job_name, reason=str(e))
 
-def handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn, account_id,
+def handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn, account_id, source_table_name,
                  git_repository, git_owner, git_branch, git_folder, git_token):
     """
     Handle CREATE operation for Visual ETL Job.
@@ -130,7 +131,7 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
     try:
         # Generate CodeGenConfigurationNodes for Visual ETL
         code_gen_nodes = generate_visual_etl_nodes(
-            connection_name, iceberg_data_bucket, database_name, account_id
+            connection_name, iceberg_data_bucket, database_name, account_id, source_table_name
         )
         
         # Prepare job creation parameters
@@ -140,7 +141,7 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
             'JobMode': 'VISUAL',  # Specify Visual ETL mode
             'Command': {
                 'Name': 'glueetl',
-                'ScriptLocation': f's3://{scripts_bucket}/glue-jobs/{logical_name}-ga4-to-s3-ingestion-job.py',
+                'ScriptLocation': f's3://{scripts_bucket}/glue-jobs/{logical_name}-ga4-to-iceberg.py',
                 'PythonVersion': '3'
             },
             'DefaultArguments': {
@@ -150,11 +151,13 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
                 '--enable-job-insights': 'true',
                 '--enable-observability-metrics': 'true',
                 '--job-language': 'python',
-                '--conf': 'spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions',
-                '--conf spark.sql.catalog.glue_catalog': 'org.apache.iceberg.spark.SparkCatalog',
-                '--conf spark.sql.catalog.glue_catalog.catalog-impl': 'org.apache.iceberg.aws.glue.GlueCatalog',
-                '--conf spark.sql.catalog.glue_catalog.io-impl': 'org.apache.iceberg.aws.s3.S3FileIO',
-                '--conf spark.sql.catalog.glue_catalog.warehouse': f's3://{scripts_bucket}/iceberg-warehouse/',
+                '--conf': (
+                    'spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions'
+                    ' --conf spark.sql.catalog.glue_catalog=org.apache.iceberg.spark.SparkCatalog'
+                    ' --conf spark.sql.catalog.glue_catalog.catalog-impl=org.apache.iceberg.aws.glue.GlueCatalog'
+                    f' --conf spark.sql.catalog.glue_catalog.io-impl=org.apache.iceberg.aws.s3.S3FileIO'
+                    f' --conf spark.sql.catalog.glue_catalog.warehouse=s3://{iceberg_data_bucket}/iceberg-warehouse/'
+                ),
                 '--datalake-formats': 'iceberg'
             },
             'Connections': {
@@ -170,7 +173,7 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
             'Tags': {
                 'Environment': 'production',
                 'Project': 'analytics-platform',
-                'Component': 'ga4-to-s3-ingestion'
+                'Component': 'ga4-to-iceberg'
             }
         }
         
@@ -203,11 +206,36 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
         # Wait for job creation to complete
         job_arn = wait_for_job_ready(job_name)
         
+        # Push to Git repository after job is ready
+        if is_git_integration_enabled(git_repository, git_owner, git_token):
+            glue_client.update_source_control_from_job(
+                JobName=job_name,
+                Provider='GITHUB',
+                RepositoryName=git_repository,
+                RepositoryOwner=git_owner,
+                BranchName=git_branch,
+                Folder=git_folder,
+                AuthStrategy='PERSONAL_ACCESS_TOKEN',
+                AuthToken=git_token
+            )
+            logger.info(json.dumps({"message": "Pushed job to Git repository", "job_name": job_name}))
+        
         logger.info(json.dumps({
             "message": "Visual ETL Job created successfully",
             "job_name": job_name,
             "job_arn": job_arn
         }))
+        
+        # Re-apply CodeGenConfigurationNodes via update_job to fix Glue API
+        # converting S3CatalogTarget to S3IcebergCatalogTarget (drops SchemaChangePolicy)
+        glue_client.update_job(
+            JobName=job_name,
+            JobUpdate={
+                'Role': iam_role_arn,
+                'Command': job_params['Command'],
+                'CodeGenConfigurationNodes': code_gen_nodes,
+            }
+        )
         
         return {
             "JobName": job_name,
@@ -235,7 +263,7 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
         else:
             raise Exception(f"Glue API error ({error_code}): {error_message}")
 
-def handle_update(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn, account_id,
+def handle_update(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn, account_id, source_table_name,
                  git_repository, git_owner, git_branch, git_folder, git_token):
     """
     Handle UPDATE operation for Visual ETL Job.
@@ -269,17 +297,27 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
         # Get current job configuration
         current_job = glue_client.get_job(JobName=job_name)
         
-        # Generate updated CodeGenConfigurationNodes
-        code_gen_nodes = generate_visual_etl_nodes(
-            connection_name, iceberg_data_bucket, database_name, account_id
-        )
-        
         # Update the job with new configuration
         job_update = {
             'JobMode': 'VISUAL',  # Ensure Visual ETL mode
             'Role': iam_role_arn,
             'Command': current_job['Job']['Command'],
-            'DefaultArguments': current_job['Job']['DefaultArguments'],
+            'CodeGenConfigurationNodes': _ensure_schema_change_policy(
+                current_job['Job'].get('CodeGenConfigurationNodes', {})
+            ),
+            'DefaultArguments': {
+                **current_job['Job']['DefaultArguments'],
+                '--conf': (
+                    'spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions'
+                    ' --conf spark.sql.catalog.glue_catalog=org.apache.iceberg.spark.SparkCatalog'
+                    ' --conf spark.sql.catalog.glue_catalog.catalog-impl=org.apache.iceberg.aws.glue.GlueCatalog'
+                    ' --conf spark.sql.catalog.glue_catalog.io-impl=org.apache.iceberg.aws.s3.S3FileIO'
+                    f' --conf spark.sql.catalog.glue_catalog.warehouse=s3://{iceberg_data_bucket}/iceberg-warehouse/'
+                ),
+                '--datalake-formats': 'iceberg',
+                '--enable-job-insights': 'true',
+                '--job-language': 'python'
+            },
             'Connections': {
                 'Connections': [connection_name]
             },
@@ -288,8 +326,7 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
             'GlueVersion': '5.0',
             'NumberOfWorkers': 10,
             'WorkerType': 'G.1X',
-            'ExecutionClass': 'STANDARD',
-            'CodeGenConfigurationNodes': code_gen_nodes
+            'ExecutionClass': 'STANDARD'
         }
         
         # Add or update Git integration if all required parameters are provided
@@ -308,11 +345,8 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
             }))
         else:
             logger.info(json.dumps({
-                "message": "Git integration disabled - required parameters not provided",
-                "job_name": job_name,
-                "has_repository": bool(git_repository),
-                "has_owner": bool(git_owner),
-                "has_token": bool(git_token)
+                "message": "Git integration disabled - skipping SourceControlDetails",
+                "job_name": job_name
             }))
         
         response = glue_client.update_job(
@@ -322,6 +356,20 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
         
         # Wait for job update to complete
         job_arn = wait_for_job_ready(job_name)
+        
+        # Push to Git repository after job is updated
+        if is_git_integration_enabled(git_repository, git_owner, git_token):
+            glue_client.update_source_control_from_job(
+                JobName=job_name,
+                Provider='GITHUB',
+                RepositoryName=git_repository,
+                RepositoryOwner=git_owner,
+                BranchName=git_branch,
+                Folder=git_folder,
+                AuthStrategy='PERSONAL_ACCESS_TOKEN',
+                AuthToken=git_token
+            )
+            logger.info(json.dumps({"message": "Pushed job to Git repository", "job_name": job_name}))
         
         logger.info(json.dumps({
             "message": "Visual ETL Job updated successfully",
@@ -347,7 +395,10 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
         }))
         
         if error_code == 'EntityNotFoundException':
-            raise Exception(f"Glue job '{job_name}' not found for update")
+            # Job doesn't exist yet, create it
+            return handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name,
+                                iam_role_arn, account_id, source_table_name,
+                                git_repository, git_owner, git_branch, git_folder, git_token)
         elif error_code == 'InvalidInputException':
             raise Exception(f"Invalid input for Glue job update: {error_message}")
         else:
@@ -356,77 +407,32 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
 def handle_delete(job_name):
     """
     Handle DELETE operation for Visual ETL Job.
-    
-    Note: Due to DeletionPolicy: Retain on the Custom Resource,
-    this function should not actually delete the job to prevent
-    accidental deletion during CloudFormation updates.
-    
-    Args:
-        job_name: Name of the Glue job to delete
-    
-    Returns:
-        dict: Response data confirming deletion (without actual deletion)
+    Deletes the Glue job. Called only when the CFn stack itself is deleted.
     """
-    
-    logger.info(json.dumps({
-        "message": "DELETE operation called for Visual ETL Job",
-        "job_name": job_name,
-        "action": "SKIPPED - DeletionPolicy: Retain protects this resource"
-    }))
-    
-    try:
-        # Check if job exists
-        try:
-            job = glue_client.get_job(JobName=job_name)
-            logger.info(json.dumps({
-                "message": "Visual ETL Job exists but will be retained",
-                "job_name": job_name,
-                "job_status": "RETAINED"
-            }))
-            
-            return {
-                "JobName": job_name,
-                "Status": "RETAINED",
-                "Message": "Job preserved due to DeletionPolicy: Retain"
-            }
-            
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'EntityNotFoundException':
-                logger.info(json.dumps({
-                    "message": "Job already deleted or does not exist",
-                    "job_name": job_name
-                }))
-                return {
-                    "JobName": job_name,
-                    "Status": "ALREADY_DELETED"
-                }
-            raise
-        
-    except ClientError as e:
-        error_code = e.response['Error']['Code']
-        error_message = e.response['Error']['Message']
-        
-        logger.error(json.dumps({
-            "message": "AWS Glue API error during job deletion check",
-            "error_code": error_code,
-            "error_message": error_message,
-            "job_name": job_name
-        }))
-        
-        if error_code == 'EntityNotFoundException':
-            return {
-                "JobName": job_name,
-                "Status": "ALREADY_DELETED"
-            }
-        else:
-            # Even on error, don't fail the CloudFormation operation
-            return {
-                "JobName": job_name,
-                "Status": "RETAINED",
-                "Message": f"Job preserved due to error: {error_message}"
-            }
+    logger.info(json.dumps({"message": "Deleting Visual ETL Job", "job_name": job_name}))
 
-def generate_visual_etl_nodes(connection_name, iceberg_data_bucket, database_name, account_id):
+    try:
+        glue_client.delete_job(JobName=job_name)
+        return {"JobName": job_name, "Status": "DELETED"}
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'EntityNotFoundException':
+            return {"JobName": job_name, "Status": "ALREADY_DELETED"}
+        raise
+
+
+def _ensure_schema_change_policy(nodes):
+    """Preserve existing nodes but ensure SchemaChangePolicy is present on target."""
+    for key, value in nodes.items():
+        for target_type in ('S3CatalogTarget', 'S3IcebergCatalogTarget'):
+            if target_type in value and 'SchemaChangePolicy' not in value[target_type]:
+                value[target_type]['SchemaChangePolicy'] = {
+                    'EnableUpdateCatalog': True,
+                    'UpdateBehavior': 'UPDATE_IN_DATABASE'
+                }
+    return nodes
+
+
+def generate_visual_etl_nodes(connection_name, iceberg_data_bucket, database_name, account_id, source_table_name):
     """
     Generate CodeGenConfigurationNodes for Visual ETL Job.
     
@@ -453,48 +459,41 @@ def generate_visual_etl_nodes(connection_name, iceberg_data_bucket, database_nam
                 "Data": {
                     "connectionName": connection_name,
                     "ENTITY_NAME": f"core-reports/accounts/{account_id}",
-                    "SELECTED_FIELDS": "date,activeusers",
+                    "SELECTED_FIELDS": "date,city,gender,userAgeBracket,deviceCategory,browser,firstUserDefaultChannelGroup,pageTitle,eventName,activeUsers,newUsers,sessions,screenPageViews,eventCount,totalRevenue",
                     "API_VERSION": "v1beta"
                 },
                 "OutputSchemas": [{
                     "Columns": [
-                        {"Name": "date", "Type": "date"},
-                        {"Name": "activeusers", "Type": "string"}
+                        {"Name": "date", "Type": "string"},
+                        {"Name": "city", "Type": "string"},
+                        {"Name": "gender", "Type": "string"},
+                        {"Name": "userAgeBracket", "Type": "string"},
+                        {"Name": "deviceCategory", "Type": "string"},
+                        {"Name": "browser", "Type": "string"},
+                        {"Name": "firstUserDefaultChannelGroup", "Type": "string"},
+                        {"Name": "pageTitle", "Type": "string"},
+                        {"Name": "eventName", "Type": "string"},
+                        {"Name": "activeUsers", "Type": "bigint"},
+                        {"Name": "newUsers", "Type": "bigint"},
+                        {"Name": "sessions", "Type": "bigint"},
+                        {"Name": "screenPageViews", "Type": "bigint"},
+                        {"Name": "eventCount", "Type": "bigint"},
+                        {"Name": "totalRevenue", "Type": "double"}
                     ]
                 }]
             }
         },
-        "node-transform": {
-            "ApplyMapping": {
-                "Name": "Change Schema",
-                "Inputs": ["node-source"],
-                "Mapping": [
-                    {
-                        "ToKey": "date",
-                        "FromPath": ["date"],
-                        "FromType": "date",
-                        "ToType": "date",
-                        "Dropped": False
-                    },
-                    {
-                        "ToKey": "activeusers", 
-                        "FromPath": ["activeusers"],
-                        "FromType": "string",
-                        "ToType": "string",
-                        "Dropped": False
-                    }
-                ]
-            }
-        },
+
         "node-target": {
-            "S3IcebergCatalogTarget": {
+            "S3CatalogTarget": {
                 "Name": "Amazon S3 (Iceberg)",
-                "Inputs": ["node-transform"],
-                "Table": "ga4_core_reports",
+                "Inputs": ["node-source"],
+                "Table": source_table_name,
                 "Database": database_name,
                 "PartitionKeys": [],
                 "SchemaChangePolicy": {
-                    "EnableUpdateCatalog": True
+                    "EnableUpdateCatalog": True,
+                    "UpdateBehavior": "UPDATE_IN_DATABASE"
                 }
             }
         }

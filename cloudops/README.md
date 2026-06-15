@@ -136,7 +136,7 @@ To enable cross-account data aggregation in SSM Explorer, run the following in t
 aws organizations enable-aws-service-access --service-principal opsdatasync.ssm.amazonaws.com
 ```
 
-### Default Host Management Configuration (DHMC)
+#### Default Host Management Configuration (DHMC)
 
 DHMC cannot be managed via CloudFormation (`AWS::SSM::ServiceSetting` is not a supported resource type). Enable it via API after deploying the CloudOps stack:
 
@@ -148,7 +148,7 @@ aws ssm update-service-setting \
 
 The IAM role `AWSSystemsManagerDefaultEC2InstanceManagementRole` is created by `ssm.yaml`.
 
-### Operational Insights (OpsInsights)
+#### Operational Insights (OpsInsights)
 
 OpsInsights cannot be managed via CloudFormation. Enable it via API:
 
@@ -158,7 +158,7 @@ aws ssm update-service-setting \
   --setting-value Enabled
 ```
 
-### SSM Unified Console (Quick Setup)
+#### SSM Unified Console (Quick Setup)
 
 After deploying the CloudOps stack to all accounts, enable the SSM Unified Console organization-wide via Quick Setup CLI:
 
@@ -187,13 +187,35 @@ Prerequisites (created by `ssm.yaml`):
 
 Run from the delegated admin account (CloudOps). The configuration targets the entire Organization.
 
-## Amazon CloudWatch Internet Monitor
+### Amazon CloudWatch Internet Monitor
 
 This template creates ``Amazon CloudWatch Internet Monitor``.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | **ResourceNames** | String |  | ○ | The resources that have been added for the monitor |
+
+### DevOps Agent (Cross-Account Association)
+
+The `devopsagent.yaml` template creates an AgentSpace in PRIMARY mode and IAM roles in MEMBER mode.
+
+### Known Limitation
+
+Cross-account associations **cannot** be created via CloudFormation or the `associate_service` API. Both return:
+
+```
+AccessDeniedException: Cross-account pass role is not allowed.
+```
+
+This is a service-side restriction (not an IAM Trust Policy issue). The MEMBER IAM roles are correctly configured with the PRIMARY account's `aws:SourceAccount` and `aws:SourceArn` in their trust policy.
+
+### Manual Step Required
+
+After deploying the CloudOps stack to all accounts, add secondary cloud sources via the **AWS Console**:
+
+1. Go to DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
+2. Click "Add secondary cloud source"
+3. Enter the member account ID and the existing role name (no need to create a new role — CFn already created it)
 
 ## Amazon CloudWatch Synthetics
 
@@ -229,27 +251,3 @@ The S3 bucket stores screenshots, HAR files, and logs from the hearbeat scripts.
 
 This template creates Amazon CloudWatch custom metrics and alarms.
 These alarms are trigged when the success rate is less than **90%**.
-
-## DevOps Agent (Cross-Account Association)
-
-The `devopsagent.yaml` template creates an AgentSpace in PRIMARY mode and IAM roles in MEMBER mode.
-
-### Known Limitation
-
-Cross-account associations **cannot** be created via CloudFormation or the `associate_service` API. Both return:
-
-```
-AccessDeniedException: Cross-account pass role is not allowed.
-```
-
-This is a service-side restriction (not an IAM Trust Policy issue). The MEMBER IAM roles are correctly configured with the PRIMARY account's `aws:SourceAccount` and `aws:SourceArn` in their trust policy.
-
-### Manual Step Required
-
-After deploying the CloudOps stack to all accounts, add secondary cloud sources via the **AWS Console**:
-
-1. Go to DevOps Agent → Agent Spaces → DefaultAgentSpace → Cloud sources
-2. Click "Add secondary cloud source"
-3. Enter the member account ID and the existing role name (no need to create a new role — CFn already created it)
-
-Role name for all accounts: `DefaultAgentSpace-AgentSpace-ap-northeast-1`

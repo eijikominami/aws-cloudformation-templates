@@ -500,7 +500,7 @@ Resources:
         - !Ref AWS::NoValue
       MemorySize: 128
       Role: !GetAtt IAMRoleForLambda.Arn
-      Runtime: python3.11
+      Runtime: python3.13
       Tags:
         - Key: environment
           Value: !Ref Environment
