@@ -107,7 +107,7 @@ Resources:
             Effect: Allow
             Principal:
               Service: securityagent.amazonaws.com
-      Description: !Sub App role for AWS Security Agent in ${AWS::StackName}
+      Description: !Sub A role required for AWS Security Agent App in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAgentWebAppPolicy
         - arn:aws:iam::aws:policy/service-role/AWSSecurityAgentWebAppPolicy
@@ -129,7 +129,7 @@ Resources:
             Effect: Allow
             Principal:
               Service: securityagent.amazonaws.com
-      Description: !Sub Service role for AWS Security Agent in ${AWS::StackName}
+      Description: !Sub A role required for AWS Security Agent Service in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/ReadOnlyAccess
       RoleName: !Sub securityagent-SecurityAgent-Service-${AWS::Region}
