@@ -393,6 +393,7 @@ Resources:
         ConsumerAccountIds: !Join
           - ','
           - !Ref QuickConsumerAccountIds
+        LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

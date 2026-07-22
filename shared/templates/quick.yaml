@@ -8,6 +8,7 @@ Metadata:
           default: 'Amazon Quick Configuration'
         Parameters:
           - ConsumerAccountIds
+          - LogicalName
       - Label:
           default: 'Tag Configuration'
         Parameters:
@@ -26,6 +27,11 @@ Parameters:
       - production
       - test
       - development
+  LogicalName:
+    Type: String
+    Default: Quick
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
   TagKey:
     Type: String
     Default: createdby
@@ -47,7 +53,7 @@ Resources:
             Principal:
               AWS: !Ref ConsumerAccountIds
             Action: sts:AssumeRole
-      Description: !Sub A role required for Amazon Quick anonymous embedding in ${AWS::StackName}
+      Description: !Sub IAM role for Amazon Quick anonymous embedding in ${LogicalName}
       Policies:
         - PolicyName: QuickAnonymousEmbedding
           PolicyDocument:
@@ -60,7 +66,7 @@ Resources:
                   - !Sub arn:aws:quicksight:*:${AWS::AccountId}:namespace/default
                   - !Sub arn:aws:quicksight:*:${AWS::AccountId}:dashboard/*
                   - !Sub arn:aws:quicksight:*:${AWS::AccountId}:topic/*
-      RoleName: QuickEmbeddingForCrossAccount
+      RoleName: !Sub ${LogicalName}-QuickEmbedding-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
