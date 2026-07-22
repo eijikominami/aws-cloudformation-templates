@@ -47,7 +47,7 @@ Resources:
             Principal:
               AWS: !Ref ConsumerAccountIds
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Amazon Quick anonymous embedding in ${AWS::StackName}
+      Description: !Sub A role required for Amazon Quick anonymous embedding in ${AWS::StackName}
       Policies:
         - PolicyName: QuickAnonymousEmbedding
           PolicyDocument:
@@ -60,7 +60,7 @@ Resources:
                   - !Sub arn:aws:quicksight:*:${AWS::AccountId}:namespace/default
                   - !Sub arn:aws:quicksight:*:${AWS::AccountId}:dashboard/*
                   - !Sub arn:aws:quicksight:*:${AWS::AccountId}:topic/*
-      RoleName: !Sub ${AWS::StackName}-QuickEmbeddingRole-${AWS::Region}
+      RoleName: QuickEmbeddingForCrossAccount
       Tags:
         - Key: environment
           Value: !Ref Environment
