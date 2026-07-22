@@ -46,7 +46,6 @@ Metadata:
       - Label: 
           default: 'Amazon Quick Configuration'
         Parameters:
-          - QuickForCrossAccount
           - QuickConsumerAccountIds
       - Label: 
           default: 'Notification Configuration'
@@ -66,13 +65,6 @@ Parameters:
     Type: String
     Default: ''
     Description: The AWS account id for log archive
-  QuickForCrossAccount:
-    Type: String
-    Default: DISABLED
-    AllowedValues:
-      - ENABLED
-      - DISABLED
-    Description: Whether to create Amazon Quick IAM roles for cross-account access
   ActiveDirectoryEdition:
     Type: String
     Default: Standard
@@ -219,7 +211,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateAmazonQuick: !Equals [ !Ref QuickForCrossAccount, ENABLED]
+  CreateAmazonQuick: !Not [ !Equals [ !Select [ 0, !Ref QuickConsumerAccountIds ], '' ] ]
   CreateFluentBitForSyslog: !Equals [ !Ref FluentBitForSyslog, ENABLED]
   CreateRoute53HostedZone: !Not [ !Equals [ !Ref DomainName, ''] ]
   CreateRoute53ResolverResolverRuleAssociation: !Not [ !Equals [ !Ref ResolverRuleId, '' ] ]

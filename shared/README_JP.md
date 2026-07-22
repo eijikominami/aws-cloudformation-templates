@@ -64,7 +64,6 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | FluentBitForSyslog | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、FluentBit が有効化されます |
 | IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |
 | QuickConsumerAccountIds | CommaDelimitedList | | conditional | Amazon Quick クロスアカウントアクセス用の AWS アカウント ID リスト |
-| QuickForCrossAccount | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、Amazon Quick の IAM ロールが作成されます |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockAz3 | String | 10.3.128.64/26 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |

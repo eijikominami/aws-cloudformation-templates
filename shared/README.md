@@ -64,7 +64,6 @@ You can provide optional parameters as follows.
 | FluentBitForSyslog | ENABLED / DISABLED | DISABLED | ○ | Enable or disable FluentBit for syslog |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
 | QuickConsumerAccountIds | CommaDelimitedList | | conditional | The list of AWS account IDs for Amazon Quick cross-account access |
-| QuickForCrossAccount | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Amazon Quick IAM roles |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |
 | SubnetPrivateCidrBlockAz3 | String | 10.3.128.64/26 | ○ | The private subnet CIDR block at AZ3 |
