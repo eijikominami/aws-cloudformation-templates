@@ -28,6 +28,7 @@ If you want to deploy each service individually, click the button below.
 
 | Services | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- | --- |
+| Amazon Quick (Cross-Account) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=AmazonQuick&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/quick.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AmazonQuick&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/quick.yaml) |
 | FluentBit (Syslog) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml)  | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml) |
 
 ## Architecture
@@ -60,8 +61,10 @@ You can provide optional parameters as follows.
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
 | DomainName | String | | | The private domain name which this VPC has |
-| FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Whether to enable FluentBit for collecting syslog format logs |
+| FluentBitForSyslog | ENABLED / DISABLED | DISABLED | ○ | Enable or disable FluentBit for syslog |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
+| QuickConsumerAccountIds | CommaDelimitedList | | conditional | The list of AWS account IDs for Amazon Quick cross-account access |
+| QuickForCrossAccount | ENABLED / DISABLED | DISABLED | ○ | Enable or disable Amazon Quick IAM roles |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |
 | SubnetPrivateCidrBlockAz3 | String | 10.3.128.64/26 | ○ | The private subnet CIDR block at AZ3 |
@@ -72,6 +75,14 @@ You can provide optional parameters as follows.
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | The VPC CIDR block |
+
+### Amazon Quick (Cross-Account)
+
+This template creates an IAM role for Amazon Quick cross-account embedding access. Consumer accounts can assume this role to generate anonymous embed URLs for dashboards and topics.
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| **ConsumerAccountIds** | CommaDelimitedList | | ○ | The list of AWS account IDs for cross-account access |
 
 ### Fluentbit
 

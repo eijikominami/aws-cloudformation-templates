@@ -44,6 +44,11 @@ Metadata:
           - AccountIdForArchive
           - BucketNameForArchive
       - Label: 
+          default: 'Amazon Quick Configuration'
+        Parameters:
+          - QuickForCrossAccount
+          - QuickConsumerAccountIds
+      - Label: 
           default: 'Notification Configuration'
         Parameters:
           - AlarmLevel
@@ -61,6 +66,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The AWS account id for log archive
+  QuickForCrossAccount:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether to create Amazon Quick IAM roles for cross-account access
   ActiveDirectoryEdition:
     Type: String
     Default: Standard
@@ -179,6 +191,10 @@ Parameters:
     Default: 10.3.0.0/16
     AllowedPattern: ^[0-9./]*$
     Description: The VPC CIDR block [required]
+  QuickConsumerAccountIds:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: The list of AWS account IDs that can assume the Amazon Quick embedding role
   SNSForAlertArn:
     Type: String
     Default: '' 
@@ -203,6 +219,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateAmazonQuick: !Equals [ !Ref QuickForCrossAccount, ENABLED]
   CreateFluentBitForSyslog: !Equals [ !Ref FluentBitForSyslog, ENABLED]
   CreateRoute53HostedZone: !Not [ !Equals [ !Ref DomainName, ''] ]
   CreateRoute53ResolverResolverRuleAssociation: !Not [ !Equals [ !Ref ResolverRuleId, '' ] ]
@@ -366,6 +383,31 @@ Resources:
         - Development
         - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/identity/identitycenter.yaml
         - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/identity/identitycenter.yaml
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AmazonQuick:
+    Condition: CreateAmazonQuick
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !If
+          - CreateSNSForDeployment
+          - !GetAtt SNSForDeployment.Outputs.SNSTopicArn
+          - !Ref SNSForDeploymentArn
+      Parameters:
+        ConsumerAccountIds: !Join
+          - ','
+          - !Ref QuickConsumerAccountIds
+        Environment: !Ref Environment
+        TagKey: !Ref TagKey
+        TagValue: !Ref TagValue
+      TemplateURL: !If
+        - Development
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/shared/quick.yaml
+        - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/shared/quick.yaml
       Tags:
         - Key: environment
           Value: !Ref Environment

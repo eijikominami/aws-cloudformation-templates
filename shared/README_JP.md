@@ -28,6 +28,7 @@
 
 | 作成されるAWSサービス | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
 | --- | --- | --- |
+| Amazon Quick (クロスアカウント) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=AmazonQuick&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/quick.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=AmazonQuick&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/quick.yaml) |
 | FluentBit (Syslog) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml)  | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=FluentBit&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/shared/fluentbit.yaml) |
 
 ## アーキテクチャ
@@ -60,8 +61,10 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
 | DomainName | String | | | ドメイン名 |
-| FluentBitForSyslog | ENABLED / DISABLED | true | ○ | Syslog フォーマットのログ収集ののための FluentBit を作成するかどうか |
+| FluentBitForSyslog | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、FluentBit が有効化されます |
 | IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |
+| QuickConsumerAccountIds | CommaDelimitedList | | conditional | Amazon Quick クロスアカウントアクセス用の AWS アカウント ID リスト |
+| QuickForCrossAccount | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、Amazon Quick の IAM ロールが作成されます |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockAz3 | String | 10.3.128.64/26 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |
@@ -72,6 +75,14 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | TransitGatewayId | String | | | Transit Gateway の ID |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGateway に転送する CIDR ブロック |
 | VPCCidrBlock | String | 10.3.0.0/16 | ○ | VPC の CIDR ブロック |
+
+### Amazon Quick (クロスアカウント)
+
+このテンプレートは、Amazon Quick のクロスアカウント埋め込みアクセス用 IAM ロールを作成します。コンシューマーアカウントがこのロールを assume し、ダッシュボードやトピックの匿名埋め込み URL を生成できます。
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| **ConsumerAccountIds** | CommaDelimitedList | | ○ | クロスアカウントアクセス用の AWS アカウント ID リスト |
 
 ### Fluentbit
 
