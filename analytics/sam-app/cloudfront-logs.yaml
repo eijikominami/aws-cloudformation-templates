@@ -131,7 +131,7 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Glue Crawler in ${AWS::StackName}
+      Description: !Sub A role required for Glue Crawler in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
@@ -164,7 +164,7 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Glue ETL job in ${AWS::StackName}
+      Description: !Sub A role required for Glue ETL job in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
@@ -241,7 +241,7 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Visual ETL Lambda in ${AWS::StackName}
+      Description: !Sub A role required for Visual ETL Lambda in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess

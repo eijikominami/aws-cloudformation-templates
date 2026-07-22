@@ -113,7 +113,7 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Glue ETL job (Synthetics) in ${AWS::StackName}
+      Description: !Sub A role required for Glue ETL job (Synthetics) in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
@@ -303,7 +303,7 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Synthetics ETL Lambda in ${AWS::StackName}
+      Description: !Sub A role required for Synthetics ETL Lambda in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
