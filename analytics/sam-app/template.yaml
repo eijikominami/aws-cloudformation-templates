@@ -484,27 +484,61 @@ Resources:
             Principal:
               AWS: !Ref QuickAccountId
             Action: sts:AssumeRole
+            Condition:
+              StringLike:
+                sts:ExternalId: !Sub arn:aws:quicksight:*:${QuickAccountId}:datasource/*
       Description: !Sub A role required for Amazon Quick cross-account Athena access in ${AWS::StackName}
       Policies:
         - PolicyName: AthenaGlueS3Access
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Sid: AthenaAccess
+              - Sid: AthenaAccountActions
                 Effect: Allow
                 Action:
-                  - athena:GetQueryExecution
-                  - athena:GetQueryResults
-                  - athena:GetWorkGroup
+                  - athena:GetCatalogs
+                  - athena:GetExecutionEngine
+                  - athena:GetExecutionEngines
+                  - athena:GetNamespace
+                  - athena:GetNamespaces
+                  - athena:GetTable
+                  - athena:GetTables
+                  - athena:ListDataCatalogs
+                  - athena:ListEngineVersions
                   - athena:ListWorkGroups
+                  - athena:RunQuery
+                Resource: '*'
+              - Sid: AthenaWorkgroupActions
+                Effect: Allow
+                Action:
+                  - athena:BatchGetQueryExecution
+                  - athena:CancelQueryExecution
+                  - athena:GetQueryExecution
+                  - athena:GetQueryExecutions
+                  - athena:GetQueryResults
+                  - athena:GetQueryResultsStream
+                  - athena:GetWorkGroup
+                  - athena:ListQueryExecutions
                   - athena:StartQueryExecution
                   - athena:StopQueryExecution
                 Resource:
-                  - !Sub arn:aws:athena:${AWS::Region}:${AWS::AccountId}:workgroup/${AthenaWorkGroup}
+                  - !Sub arn:aws:athena:${AWS::Region}:${AWS::AccountId}:workgroup/*
+              - Sid: AthenaDataCatalogActions
+                Effect: Allow
+                Action:
+                  - athena:GetDataCatalog
+                  - athena:GetDatabase
+                  - athena:GetTableMetadata
+                  - athena:ListDatabases
+                  - athena:ListTableMetadata
+                Resource:
+                  - !Sub arn:aws:athena:${AWS::Region}:${AWS::AccountId}:datacatalog/*
               - Sid: GlueAccess
                 Effect: Allow
                 Action:
                   - glue:BatchGetPartition
+                  - glue:GetCatalog
+                  - glue:GetCatalogs
                   - glue:GetDatabase
                   - glue:GetDatabases
                   - glue:GetPartition
@@ -513,14 +547,16 @@ Resources:
                   - glue:GetTables
                 Resource:
                   - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/${GlueDatabase}
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/${GlueDatabase}/*
-              - Sid: S3ReadAccess
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/*/*
+              - Sid: S3DataAccess
                 Effect: Allow
                 Action:
                   - s3:GetBucketLocation
                   - s3:GetObject
                   - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:ListMultipartUploadParts
                 Resource:
                   - !GetAtt S3BucketForIcebergData.Arn
                   - !Sub ${S3BucketForIcebergData.Arn}/*
@@ -529,9 +565,12 @@ Resources:
               - Sid: S3QueryResultsAccess
                 Effect: Allow
                 Action:
+                  - s3:AbortMultipartUpload
                   - s3:GetBucketLocation
                   - s3:GetObject
                   - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:ListMultipartUploadParts
                   - s3:PutObject
                 Resource:
                   - !GetAtt S3BucketForQueryResults.Arn
