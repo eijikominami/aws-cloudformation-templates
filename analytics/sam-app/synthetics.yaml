@@ -26,6 +26,10 @@ Metadata:
           - TagValue
 
 Parameters:
+  AthenaWorkGroupName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the Athena WorkGroup to use [required]
   GlueDatabaseName:
     Type: String
     AllowedPattern: .+
@@ -113,7 +117,7 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Glue ETL job (Synthetics) in ${AWS::StackName}
+      Description: !Sub A role required for Glue ETL job (Synthetics) in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
@@ -196,7 +200,7 @@ Resources:
         FROM ${GlueDatabaseName}.synthetics_canary_iceberg
         GROUP BY canaryname, cast(from_iso8601_timestamp(starttime) AS date)
         ORDER BY date DESC, canaryname
-      WorkGroup: !Ref AthenaWorkGroupForSynthetics
+      WorkGroup: !Ref AthenaWorkGroupName
 
   AthenaNamedQueryForFailures:
     Type: AWS::Athena::NamedQuery
@@ -214,7 +218,7 @@ Resources:
         WHERE executionstatus = 'FAILED'
         ORDER BY starttime DESC
         LIMIT 50
-      WorkGroup: !Ref AthenaWorkGroupForSynthetics
+      WorkGroup: !Ref AthenaWorkGroupName
 
   AthenaNamedQueryForRecentResults:
     Type: AWS::Athena::NamedQuery
@@ -237,22 +241,7 @@ Resources:
         FROM ${GlueDatabaseName}.synthetics_canary_iceberg
         ORDER BY starttime DESC
         LIMIT 100
-      WorkGroup: !Ref AthenaWorkGroupForSynthetics
-
-  AthenaWorkGroupForSynthetics:
-    Type: AWS::Athena::WorkGroup
-    Properties:
-      Description: WorkGroup for CloudWatch Synthetics report analysis
-      Name: !Sub ${LogicalName}-synthetics
-      State: ENABLED
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      WorkGroupConfiguration:
-        ResultConfiguration:
-          OutputLocation: !Sub s3://${QueryResultsBucketName}/synthetics/
+      WorkGroup: !Ref AthenaWorkGroupName
 
   # Glue
   CustomResourceForSyntheticsETL:
@@ -303,7 +292,7 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Synthetics ETL Lambda in ${AWS::StackName}
+      Description: !Sub A role required for Synthetics ETL Lambda in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess

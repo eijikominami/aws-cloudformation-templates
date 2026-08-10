@@ -107,7 +107,7 @@ Resources:
                   - CreateAgentSpace
                   - !Ref AWS::AccountId
                   - !Ref PrimaryAccountId
-      Description: !Sub IAM role for DevOps Agent Space in ${AWS::StackName}
+      Description: !Sub A role required for DevOps Agent Space in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AIDevOpsAgentAccessPolicy
       Policies:
@@ -160,7 +160,7 @@ Resources:
                 aws:SourceAccount: !Ref AWS::AccountId
               ArnLike:
                 aws:SourceArn: !Sub arn:aws:aidevops:${AWS::Region}:${AWS::AccountId}:agentspace/*
-      Description: !Sub IAM role for DevOps Agent Operator App in ${AWS::StackName}
+      Description: !Sub A role required for DevOps Agent Operator App in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AIDevOpsOperatorAppAccessPolicy
       RoleName: !Sub ${AgentSpaceName}-OperatorApp-${AWS::Region}
@@ -180,7 +180,7 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Webhook Custom Resource Lambda in ${AWS::StackName}
+      Description: !Sub A role required for Webhook Custom Resource Lambda in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
@@ -223,7 +223,7 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for DevOps Agent Webhook Forwarder Lambda in ${AWS::StackName}
+      Description: !Sub A role required for DevOps Agent Webhook Forwarder Lambda in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:

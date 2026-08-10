@@ -43,6 +43,10 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: S3 prefix where CloudFront access logs are stored [required]
+  AthenaWorkGroupName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the Athena WorkGroup to use [required]
   DomainName:
     Type: String
     AllowedPattern: .+
@@ -131,7 +135,7 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Glue Crawler in ${AWS::StackName}
+      Description: !Sub A role required for Glue Crawler in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
@@ -164,7 +168,7 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Glue ETL job in ${AWS::StackName}
+      Description: !Sub A role required for Glue ETL job in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
@@ -241,7 +245,7 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Visual ETL Lambda in ${AWS::StackName}
+      Description: !Sub A role required for Visual ETL Lambda in ${AWS::StackName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
@@ -297,7 +301,7 @@ Resources:
         WHERE "date" >= current_date - interval '30' day
         GROUP BY "date"
         ORDER BY "date" DESC
-      WorkGroup: !Ref AthenaWorkGroupForCloudFrontLogs
+      WorkGroup: !Ref AthenaWorkGroupName
 
   AthenaNamedQueryForRealUsers:
     Type: AWS::Athena::NamedQuery
@@ -312,7 +316,7 @@ Resources:
         AND "date" >= current_date - interval '7' day
         ORDER BY "date" DESC, time DESC
         LIMIT 100
-      WorkGroup: !Ref AthenaWorkGroupForCloudFrontLogs
+      WorkGroup: !Ref AthenaWorkGroupName
 
   AthenaNamedQueryForStatusCodes:
     Type: AWS::Athena::NamedQuery
@@ -326,22 +330,7 @@ Resources:
         WHERE "date" >= current_date - interval '7' day
         GROUP BY sc_status
         ORDER BY count DESC
-      WorkGroup: !Ref AthenaWorkGroupForCloudFrontLogs
-
-  AthenaWorkGroupForCloudFrontLogs:
-    Type: AWS::Athena::WorkGroup
-    Properties:
-      Description: !Sub WorkGroup for CloudFront access log analysis of ${DomainName}
-      Name: !Sub ${LogicalName}-cloudfront-logs
-      State: ENABLED
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-      WorkGroupConfiguration:
-        ResultConfiguration:
-          OutputLocation: !Sub s3://${QueryResultsBucketName}/cloudfront-logs/
+      WorkGroup: !Ref AthenaWorkGroupName
 
   GlueCrawlerForCloudFrontLogs:
     Type: AWS::Glue::Crawler
@@ -610,7 +599,7 @@ Resources:
 Outputs:
   AthenaWorkGroupName:
     Description: Name of the Athena WorkGroup
-    Value: !Ref AthenaWorkGroupForCloudFrontLogs
+    Value: !Ref AthenaWorkGroupName
 
   GlueCrawlerName:
     Description: Name of the Glue Crawler

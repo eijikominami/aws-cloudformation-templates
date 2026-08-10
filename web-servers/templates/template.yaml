@@ -61,6 +61,7 @@ Metadata:
           - CertificateManagerARN
           - DomainName
           - Route53HostedZoneId
+          - CertbotDnsChallenge
       - Label: 
           default: 'WAF Configuration'
         Parameters: 
@@ -145,6 +146,13 @@ Parameters:
     Type: String
     Default: ''
     Description: The centralize S3 bucket name for logging 
+  CertbotDnsChallenge:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the Route53 permissions that certbot on the EC2 instance needs to solve the dns-01 challenge [required]
   CertificateManagerARN:
     Default: ''
     Type: String
@@ -397,6 +405,7 @@ Conditions:
   CreatePrivateSubnets: !Or [ !And [ !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ], !Equals [ !Ref ComputeType, INSTANCE ] ], !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]]
   CreateEC2AndRoute53: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Equals [ !Ref ComputeType, INSTANCE ], !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
+  CreateRoute53AccessForCertbot: !And [ !Equals [ !Ref CertbotDnsChallenge, ENABLED ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -883,6 +892,24 @@ Resources:
                   - ec2:DescribeInstances
                   - ec2:CreateTags
                 Resource: '*'
+        # The permissions required by the certbot dns-route53 plugin.
+        # ListHostedZones and GetChange cannot be scoped to a resource, while
+        # ChangeResourceRecordSets is limited to the specified hosted zone.
+        - !If
+          - CreateRoute53AccessForCertbot
+          - PolicyName: Route53ForCertbot
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - route53:ListHostedZones
+                    - route53:GetChange
+                  Resource: '*'
+                - Effect: Allow
+                  Action: route53:ChangeResourceRecordSets
+                  Resource: !Sub arn:aws:route53:::hostedzone/${Route53HostedZoneId}
+          - !Ref AWS::NoValue
       RoleName: !Sub '${AWS::StackName}-AWSEC2Role-${AWS::Region}'
       Tags:
         - Key: environment

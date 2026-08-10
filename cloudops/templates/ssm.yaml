@@ -166,7 +166,7 @@ Resources:
                 aws:SourceAccount: !Ref AWS::AccountId
               ArnLike:
                 aws:SourceArn: !Sub arn:aws:ssm:*:${AWS::AccountId}:automation-execution/*
-      Description: !Sub IAM role for SSM Automation Execution in ${LogicalName}
+      Description: !Sub A role required for SSM Automation Execution in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
       Path: /
@@ -187,7 +187,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for SSM Explorer in ${LogicalName}
+      Description: !Sub A role required for SSM Explorer in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSSSMOpsInsightsServiceRolePolicy
       Policies:
@@ -219,7 +219,7 @@ Resources:
             Principal:
               Service: events.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for SSM OpsItems CloudWatch Events in ${LogicalName}
+      Description: !Sub A role required for SSM OpsItems CloudWatch Events in ${LogicalName}
       Policies:
         - PolicyName: SSMOpsItemsCWEPolicy
           PolicyDocument:
@@ -246,7 +246,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for DHMC in ${LogicalName}
+      Description: !Sub A role required for DHMC in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedEC2InstanceDefaultPolicy
       Path: /service-role/
@@ -267,7 +267,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for SSM Diagnosis in ${LogicalName}
+      Description: !Sub A role required for SSM Diagnosis in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWS-SSM-DiagnosisAdminPolicy
         - arn:aws:iam::aws:policy/AWS-SSM-Automation-DiagnosisBucketPolicy
@@ -288,7 +288,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for SSM Remediation in ${LogicalName}
+      Description: !Sub A role required for SSM Remediation in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWS-SSM-RemediationAdminPolicy
       RoleName: AWSSSMRemediationAdminRole
@@ -308,7 +308,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Quick Setup AREX in ${LogicalName}
+      Description: !Sub A role required for Quick Setup AREX in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSQuickSetupEnableAREXExecutionPolicy
       RoleName: AWS-QuickSetup-SSM-EnableAREX
@@ -330,7 +330,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Quick Setup DHMC in ${LogicalName}
+      Description: !Sub A role required for Quick Setup DHMC in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSQuickSetupEnableDHMCExecutionPolicy
       RoleName: AWS-QuickSetup-SSM-EnableDHMC
@@ -352,7 +352,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Quick Setup Explorer in ${LogicalName}
+      Description: !Sub A role required for Quick Setup Explorer in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSQuickSetupSSMManageResourcesExecutionPolicy
         - arn:aws:iam::aws:policy/AWSResourceExplorerServiceRolePolicy
@@ -375,7 +375,7 @@ Resources:
             Principal:
               Service: ssm.amazonaws.com
             Action: sts:AssumeRole
-      Description: !Sub IAM role for Quick Setup Instance Profile in ${LogicalName}
+      Description: !Sub A role required for Quick Setup Instance Profile in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSQuickSetupManagedInstanceProfileExecutionPolicy
       RoleName: AWS-QuickSetup-SSM-ManageInstanceProfile

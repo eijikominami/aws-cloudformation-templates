@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: aws-cloudformation-templates/shared/quick sets Amazon Quick IAM roles for cross-account access.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'Amazon Quick Configuration'
+        Parameters:
+          - ConsumerAccountIds
+          - LogicalName
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - Environment
+          - TagKey
+          - TagValue
+
+Parameters:
+  ConsumerAccountIds:
+    Type: CommaDelimitedList
+    Description: The list of AWS account IDs that can assume the embedding role for cross-account access [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  LogicalName:
+    Type: String
+    Default: Quick
+    AllowedPattern: .+
+    Description: The custom prefix name [required]
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Resources:
+  # IAM
+  IAMRoleForQuickEmbedding:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref ConsumerAccountIds
+            Action: sts:AssumeRole
+      Description: !Sub IAM role for Amazon Quick anonymous embedding in ${LogicalName}
+      Policies:
+        - PolicyName: QuickAnonymousEmbedding
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - quicksight:GenerateEmbedUrlForAnonymousUser
+                Resource:
+                  - !Sub arn:aws:quicksight:*:${AWS::AccountId}:namespace/default
+                  - !Sub arn:aws:quicksight:*:${AWS::AccountId}:dashboard/*
+                  - !Sub arn:aws:quicksight:*:${AWS::AccountId}:topic/*
+      RoleName: !Sub ${LogicalName}-QuickEmbedding-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+Outputs:
+  QuickEmbeddingRoleArn:
+    Description: The ARN of the Amazon Quick embedding role for cross-account access
+    Value: !GetAtt IAMRoleForQuickEmbedding.Arn

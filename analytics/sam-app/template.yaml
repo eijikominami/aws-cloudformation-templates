@@ -179,6 +179,10 @@ Parameters:
     MaxLength: 50
     AllowedPattern: "^[a-z][a-z0-9-]*[a-z0-9]$"
     Description: The custom prefix name for resources [required]
+  QuickAccountId:
+    Type: String
+    Default: ''
+    Description: AWS Account ID of the Amazon Quick account for cross-account Athena access
   Environment:
     Type: String
     Default: development
@@ -201,6 +205,7 @@ Parameters:
 Conditions:
   CreateGlueForCloudFrontLogs: !Not [!Equals [!Ref CloudFrontLogDomainName, '']]
   CreateGlueForSynthetics: !Not [!Equals [!Ref SyntheticsResultsBucketName, '']]
+  CreateQuickCrossAccountRole: !Not [!Equals [!Ref QuickAccountId, '']]
   CreateSNSForAlert: !Equals [!Ref SNSForAlertArn, ""]
   CreateSNSForDeployment: !Equals [!Ref SNSForDeploymentArn, ""]
   HasGoogleAnalyticsConfig: !And
@@ -223,6 +228,7 @@ Resources:
       Location: ./cloudfront-logs.yaml
       Parameters:
         AccessLogPrefix: !Ref CloudFrontLogPrefix
+        AthenaWorkGroupName: !Ref AthenaWorkGroup
         DomainName: !Ref CloudFrontLogDomainName
         Environment: !Ref Environment
         GitBranch: !Ref GitBranch
@@ -287,6 +293,7 @@ Resources:
     Properties:
       Location: ./synthetics.yaml
       Parameters:
+        AthenaWorkGroupName: !Ref AthenaWorkGroup
         GlueDatabaseName: !Ref GlueDatabase
         IcebergDataBucketName: !Ref S3BucketForIcebergData
         QueryResultsBucketName: !Ref S3BucketForQueryResults
@@ -449,6 +456,132 @@ Resources:
               - !GetAtt S3BucketForRawData.Arn
               - !Sub ${S3BucketForRawData.Arn}/*
 
+  # Athena
+  AthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Description: !Sub WorkGroup for ${LogicalName} analytics
+      Name: !Sub ${LogicalName}
+      State: ENABLED
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub s3://${S3BucketForQueryResults}/
+
+  # IAM Role for Quick cross-account access
+  IAMRoleForQuickCrossAccountAccess:
+    Condition: CreateQuickCrossAccountRole
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref QuickAccountId
+            Action: sts:AssumeRole
+            Condition:
+              StringLike:
+                sts:ExternalId: !Sub arn:aws:quicksight:*:${QuickAccountId}:datasource/*
+      Description: !Sub A role required for Amazon Quick cross-account Athena access in ${AWS::StackName}
+      Policies:
+        - PolicyName: AthenaGlueS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: AthenaAccountActions
+                Effect: Allow
+                Action:
+                  - athena:GetCatalogs
+                  - athena:GetExecutionEngine
+                  - athena:GetExecutionEngines
+                  - athena:GetNamespace
+                  - athena:GetNamespaces
+                  - athena:GetTable
+                  - athena:GetTables
+                  - athena:ListDataCatalogs
+                  - athena:ListEngineVersions
+                  - athena:ListWorkGroups
+                  - athena:RunQuery
+                Resource: '*'
+              - Sid: AthenaWorkgroupActions
+                Effect: Allow
+                Action:
+                  - athena:BatchGetQueryExecution
+                  - athena:CancelQueryExecution
+                  - athena:GetQueryExecution
+                  - athena:GetQueryExecutions
+                  - athena:GetQueryResults
+                  - athena:GetQueryResultsStream
+                  - athena:GetWorkGroup
+                  - athena:ListQueryExecutions
+                  - athena:StartQueryExecution
+                  - athena:StopQueryExecution
+                Resource:
+                  - !Sub arn:aws:athena:${AWS::Region}:${AWS::AccountId}:workgroup/*
+              - Sid: AthenaDataCatalogActions
+                Effect: Allow
+                Action:
+                  - athena:GetDataCatalog
+                  - athena:GetDatabase
+                  - athena:GetTableMetadata
+                  - athena:ListDatabases
+                  - athena:ListTableMetadata
+                Resource:
+                  - !Sub arn:aws:athena:${AWS::Region}:${AWS::AccountId}:datacatalog/*
+              - Sid: GlueAccess
+                Effect: Allow
+                Action:
+                  - glue:BatchGetPartition
+                  - glue:GetCatalog
+                  - glue:GetCatalogs
+                  - glue:GetDatabase
+                  - glue:GetDatabases
+                  - glue:GetPartition
+                  - glue:GetPartitions
+                  - glue:GetTable
+                  - glue:GetTables
+                Resource:
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/*/*
+              - Sid: S3DataAccess
+                Effect: Allow
+                Action:
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:ListMultipartUploadParts
+                Resource:
+                  - !GetAtt S3BucketForIcebergData.Arn
+                  - !Sub ${S3BucketForIcebergData.Arn}/*
+                  - !GetAtt S3BucketForRawData.Arn
+                  - !Sub ${S3BucketForRawData.Arn}/*
+              - Sid: S3QueryResultsAccess
+                Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:ListMultipartUploadParts
+                  - s3:PutObject
+                Resource:
+                  - !GetAtt S3BucketForQueryResults.Arn
+                  - !Sub ${S3BucketForQueryResults.Arn}/*
+      RoleName: !Sub ${LogicalName}-QuickCrossAccountAccess-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
   # SNS Topics
   SNSForAlert:
     Condition: CreateSNSForAlert
@@ -529,9 +662,18 @@ Outputs:
       - !GetAtt SNSForAlert.Outputs.SNSTopicArn
       - !Ref SNSForAlertArn
 
+  AthenaWorkGroupName:
+    Description: Name of the Athena WorkGroup
+    Value: !Ref AthenaWorkGroup
+
   GlueDatabaseName:
     Description: Name of the Glue Data Catalog database
     Value: !Ref GlueDatabase
+
+  QuickCrossAccountRoleArn:
+    Condition: CreateQuickCrossAccountRole
+    Description: ARN of the IAM role for Amazon Quick cross-account Athena access
+    Value: !GetAtt IAMRoleForQuickCrossAccountAccess.Arn
 
   GitIntegrationEnabled:
     Condition: HasGoogleAnalyticsConfig
