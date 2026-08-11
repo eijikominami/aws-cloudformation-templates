@@ -153,14 +153,19 @@ Resources:
       Code: 
         Handler: apiCanaryBlueprint.handler
         Script: !Sub |
-          const synthetics = require('Synthetics');
-          const log = require('SyntheticsLogger');
+          const synthetics = require('@aws/synthetics-puppeteer');
+          const log = require('@aws/synthetics-logger');
           const syntheticsConfiguration = synthetics.getConfiguration();
 
 
           const apiCanaryBlueprint = async function () {
 
+              // Step-level overrides are limited in syn-nodejs-puppeteer-11.0 and later
               syntheticsConfiguration.setConfig({
+                  includeRequestHeaders: false, // Enable if request headers should be displayed in HAR
+                  includeResponseHeaders: false, // Enable if response headers should be displayed in HAR
+                  includeRequestBody: false, // Enable if the request body should be displayed in HAR
+                  includeResponseBody: false, // Enable if the response body should be displayed in HAR
                   restrictedHeaders: [], // Value of these headers will be redacted from logs and reports
                   restrictedUrlParameters: [] // Values of these url parameters will be redacted from logs and reports
               });
@@ -199,10 +204,6 @@ Resources:
 
               // Set step config option for Verify ${EndpointHostName}
             let stepConfig1 = {
-                  includeRequestHeaders: false,
-                  includeResponseHeaders: false,
-                  includeRequestBody: false,
-                  includeResponseBody: false,
                   continueOnHttpStepFailure: true
               };
 
@@ -218,9 +219,9 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-10.0
+      RuntimeVersion: syn-nodejs-puppeteer-17.0
       Schedule: 
-        IncidentDurationInSeconds: '0'
+        DurationInSeconds: '0'
         Expression: rate(5 minutes) 
       StartCanaryAfterCreation: true
       SuccessRetentionPeriod: 31

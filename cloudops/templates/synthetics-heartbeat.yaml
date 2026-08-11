@@ -142,10 +142,10 @@ Resources:
         Handler: pageLoadBlueprint.handler
         Script: !Sub |
           const { URL } = require('url');
-          const synthetics = require('Synthetics');
-          const log = require('SyntheticsLogger');
+          const synthetics = require('@aws/synthetics-puppeteer');
+          const log = require('@aws/synthetics-logger');
           const syntheticsConfiguration = synthetics.getConfiguration();
-          const syntheticsLogHelper = require('SyntheticsLogHelper');
+          const syntheticsLogHelper = require('@aws/synthetics-log-helper');
 
           const loadBlueprint = async function () {
 
@@ -247,9 +247,9 @@ Resources:
       ExecutionRoleArn: !GetAtt IAMRoleForSynthetics.Arn
       FailureRetentionPeriod: 31
       Name: !Ref CanaryName
-      RuntimeVersion: syn-nodejs-puppeteer-10.0
+      RuntimeVersion: syn-nodejs-puppeteer-17.0
       Schedule: 
-        IncidentDurationInSeconds: '0'
+        DurationInSeconds: '0'
         Expression: rate(5 minutes) 
       StartCanaryAfterCreation: true
       SuccessRetentionPeriod: 31
