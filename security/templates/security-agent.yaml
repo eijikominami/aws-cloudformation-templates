@@ -100,10 +100,13 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Action: sts:AssumeRole
+          # sts:SetContext is required for WebApp user sign-in
+          - Action:
+              - sts:AssumeRole
+              - sts:SetContext
             Condition:
               StringEquals:
-                sts:ExternalId: !Sub operator-iam-${AWS::AccountId}
+                aws:SourceAccount: !Ref AWS::AccountId
             Effect: Allow
             Principal:
               Service: securityagent.amazonaws.com
