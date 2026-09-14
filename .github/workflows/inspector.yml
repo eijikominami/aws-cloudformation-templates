@@ -33,7 +33,7 @@ jobs:
           artifact_path: .
 
       - name: Upload SARIF
-        if: steps.iam-role.outcome == 'success'
+        if: steps.iam-role.outcome == 'success' && hashFiles('inspector-results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: inspector-results.sarif
