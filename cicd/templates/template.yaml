@@ -787,7 +787,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::global/templates/template.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "BudgetName": "Total", "Environment": "'
                       - !If
                         - Development
                         - development
