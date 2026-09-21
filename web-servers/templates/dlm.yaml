@@ -8,7 +8,6 @@ Metadata:
           default: 'Data Lifecycle Manager Configuration'
         Parameters: 
           - DailySnapshotScheduledAt
-          - PolicyType
           - SnapshotInterval
           - SnapshotRetainRule
           - SsmParameterNameForLatestImage
@@ -26,13 +25,6 @@ Parameters:
     Default: '17:00'
     AllowedPattern: ^[0-1][0-9]:[0-9][0-9]$
     Description: Daily Snapshot time (HH:MM) [required]
-  PolicyType:
-    Type: String
-    Default: EBS_SNAPSHOT_MANAGEMENT
-    AllowedValues:
-      - EBS_SNAPSHOT_MANAGEMENT
-      - IMAGE_MANAGEMENT
-    Description: EBS_SNAPSHOT_MANAGEMENT targets volumes and IMAGE_MANAGEMENT targets instances [required]
   SnapshotInterval:
     Type: Number
     Default: 24
@@ -76,17 +68,10 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateImagePolicy: !Equals
-    - !Ref PolicyType
-    - IMAGE_MANAGEMENT
-  RegisterLatestImage: !And
+  RegisterLatestImage: !Not
     - !Equals
-      - !Ref PolicyType
-      - IMAGE_MANAGEMENT
-    - !Not
-      - !Equals
-        - !Ref SsmParameterNameForLatestImage
-        - ''
+      - !Ref SsmParameterNameForLatestImage
+      - ''
 
 Resources:
   # IAM
@@ -118,32 +103,24 @@ Resources:
               - Effect: Allow
                 Action:
                   - ec2:CreateTags
-                Resource: !If
-                  - CreateImagePolicy
-                  - - 'arn:aws:ec2:*::snapshot/*'
-                    - 'arn:aws:ec2:*::image/*'
-                  - - 'arn:aws:ec2:*::snapshot/*'
-              - !If
-                - CreateImagePolicy
-                - Effect: Allow
-                  Action:
-                    - ec2:CopyImage
-                    - ec2:CreateImage
-                    - ec2:DeregisterImage
-                    - ec2:DescribeImageAttribute
-                    - ec2:DescribeImages
-                    - ec2:ModifyImageAttribute
-                    - ec2:ResetImageAttribute
-                  Resource: '*'
-                - !Ref AWS::NoValue
-              - !If
-                - CreateImagePolicy
-                - Effect: Allow
-                  Action:
-                    - ec2:DisableImageDeprecation
-                    - ec2:EnableImageDeprecation
-                  Resource: 'arn:aws:ec2:*::image/*'
-                - !Ref AWS::NoValue
+                Resource:
+                  - 'arn:aws:ec2:*::snapshot/*'
+                  - 'arn:aws:ec2:*::image/*'
+              - Effect: Allow
+                Action:
+                  - ec2:CopyImage
+                  - ec2:CreateImage
+                  - ec2:DeregisterImage
+                  - ec2:DescribeImageAttribute
+                  - ec2:DescribeImages
+                  - ec2:ModifyImageAttribute
+                  - ec2:ResetImageAttribute
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:DisableImageDeprecation
+                  - ec2:EnableImageDeprecation
+                Resource: 'arn:aws:ec2:*::image/*'
       RoleName: !Sub ${LogicalName}-DataLifecycleManager-${AWS::Region}
       Tags:
         - Key: environment
@@ -211,11 +188,9 @@ Resources:
       Description: Lifecycle Policy
       ExecutionRoleArn: !GetAtt IAMRoleForDLM.Arn
       PolicyDetails: 
-        PolicyType: !Ref PolicyType
-        ResourceTypes: !If
-          - CreateImagePolicy
-          - - INSTANCE
-          - - VOLUME
+        PolicyType: IMAGE_MANAGEMENT
+        ResourceTypes: 
+          - INSTANCE
         Schedules:
           - CopyTags: true
             CreateRule:
