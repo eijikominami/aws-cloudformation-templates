@@ -241,6 +241,7 @@ Resources:
         EC2ImageId: !Ref ActiveDirectoryEC2ImageId
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
+        Environment: !Ref Environment
         LogicalName: !Ref AWS::StackName
         LoggingBucketArn: !Sub arn:aws:s3:::${BucketNameForArchive}
         Name: !Ref ActiveDirectoryName
