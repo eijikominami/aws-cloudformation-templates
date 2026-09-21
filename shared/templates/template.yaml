@@ -8,6 +8,7 @@ Metadata:
       - Label: 
           default: 'Microsoft Active Directory Configuration'
         Parameters: 
+          - ActiveDirectoryEC2ImageId
           - ActiveDirectoryEdition
           - ActiveDirectoryEnableSso
           - ActiveDirectoryName
@@ -65,6 +66,11 @@ Parameters:
     Type: String
     Default: ''
     Description: The AWS account id for log archive
+  ActiveDirectoryEC2ImageId:
+    Type: String
+    Default: /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base
+    AllowedPattern: .+
+    Description: The SSM parameter name that holds the EC2 Image Id [required]
   ActiveDirectoryEdition:
     Type: String
     Default: Standard
@@ -232,6 +238,7 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         AlarmLevel: !Ref AlarmLevel
+        EC2ImageId: !Ref ActiveDirectoryEC2ImageId
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
         LogicalName: !Ref AWS::StackName

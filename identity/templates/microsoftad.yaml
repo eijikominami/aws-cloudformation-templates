@@ -540,6 +540,8 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         DailySnapshotScheduledAt: '17:00'
+        PolicyType: IMAGE_MANAGEMENT
+        SsmParameterNameForLatestImage: !Sub /${LogicalName}/ami/latest
         LogicalName: !Ref LogicalName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
