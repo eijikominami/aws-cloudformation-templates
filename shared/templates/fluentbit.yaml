@@ -8,6 +8,7 @@ Metadata:
       - Label: 
           default: 'FluentBit Configuration'
         Parameters: 
+          - AllowedCidrBlockForSyslog
           - AppPort
           - Cpu
           - CpuArchitecture
@@ -51,6 +52,11 @@ Parameters:
       - NOTICE
       - WARNING
     Description: The alarm level of CloudWatch alarms
+  AllowedCidrBlockForSyslog:
+    Type: String
+    Default: 0.0.0.0/0
+    AllowedPattern: ^[0-9./]*$
+    Description: The CIDR block allowed to send syslog to FluentBit [required]
   AppPort:
     Type: Number
     Default: 514
@@ -510,17 +516,17 @@ Resources:
         - CidrIp: 0.0.0.0/0
           IpProtocol: '-1'
       SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
+        - CidrIp: !Ref AllowedCidrBlockForSyslog
           Description: syslog
           FromPort: !Ref AppPort
           ToPort: !Ref AppPort
           IpProtocol: UDP
-        - CidrIp: 0.0.0.0/0
+        - CidrIp: !Ref VPCCidrBlock
           Description: healthcheck
           FromPort: 2020
           ToPort: 2020
           IpProtocol: TCP
-        - CidrIp: 0.0.0.0/0
+        - CidrIp: !Ref VPCCidrBlock
           Description: icmp
           FromPort: -1
           ToPort: -1

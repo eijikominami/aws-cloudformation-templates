@@ -43,6 +43,7 @@ Metadata:
         Parameters: 
           - FluentBitForSyslog
           - AccountIdForArchive
+          - AllowedCidrBlockForSyslog
           - BucketNameForArchive
       - Label: 
           default: 'Amazon Quick Configuration'
@@ -123,6 +124,11 @@ Parameters:
       - NOTICE
       - WARNING
     Description: The alarm level of CloudWatch alarms
+  AllowedCidrBlockForSyslog:
+    Type: String
+    Default: 0.0.0.0/0
+    AllowedPattern: ^[0-9./]*$
+    Description: The CIDR block allowed to send syslog to FluentBit [required]
   BucketNameForArchive:
     Type: String
     Default: ''
@@ -426,6 +432,7 @@ Resources:
       Parameters: 
         AccountIdForArchive: !Ref AccountIdForArchive
         AlarmLevel: !Ref AlarmLevel
+        AllowedCidrBlockForSyslog: !Ref AllowedCidrBlockForSyslog
         BucketNameForArchive: !Ref BucketNameForArchive
         CpuArchitecture: ARM64
         SubnetIdAz1: !GetAtt Az1.Outputs.PrivateSubnetId
