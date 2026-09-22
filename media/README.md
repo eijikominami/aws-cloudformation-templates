@@ -173,7 +173,7 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | ExpirationDate | Number | 1 | ○ |  The date objects to expire |
 | MaxAgeSeconds | Number | 30000 | ○ | The time in seconds that browser caches the preflight response |
-| UserAgent | String | | ○ | The secret key that 'User-Agent' header contains |
+| UserAgent | String | | | The secret key that 'User-Agent' header contains |
 
 ### MediaTailor
 

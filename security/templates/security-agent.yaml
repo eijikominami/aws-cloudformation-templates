@@ -101,10 +101,13 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Action: sts:AssumeRole
+          # sts:SetContext is required for WebApp user sign-in
+          - Action:
+              - sts:AssumeRole
+              - sts:SetContext
             Condition:
               StringEquals:
-                sts:ExternalId: !Sub operator-iam-${AWS::AccountId}
+                aws:SourceAccount: !Ref AWS::AccountId
             Effect: Allow
             Principal:
               Service: securityagent.amazonaws.com
@@ -127,13 +130,60 @@ Resources:
         Version: '2012-10-17'
         Statement:
           - Action: sts:AssumeRole
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:securityagent:${AWS::Region}:${AWS::AccountId}:agent-space/*
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
             Effect: Allow
             Principal:
               Service: securityagent.amazonaws.com
       Description: !Sub A role required for AWS Security Agent Service in ${AWS::StackName}
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/ReadOnlyAccess
+      # Allow AWS Security Agent to evaluate its own permissions, read test credentials and write execution logs.
+      Policies:
+        - PolicyName: SecurityAgentBase
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:SimulatePrincipalPolicy
+                Resource:
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/securityagent-SecurityAgent-Service-${AWS::Region}
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AgentSpaceName}*
+              - Effect: Allow
+                Action: logs:CreateLogGroup
+                Condition:
+                  StringEquals:
+                    aws:ResourceAccount: !Ref AWS::AccountId
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/securityagent/${AgentSpaceName}*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Condition:
+                  StringEquals:
+                    aws:ResourceAccount: !Ref AWS::AccountId
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/securityagent/${AgentSpaceName}*:log-stream:${AgentSpaceName}*
       RoleName: !Sub securityagent-SecurityAgent-Service-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+
+  # CloudWatch Logs
+  CloudWatchLogsGroupForSecurityAgent:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/securityagent/${AgentSpaceName}
+      RetentionInDays: 60
       Tags:
         - Key: environment
           Value: !Ref Environment
@@ -175,6 +225,12 @@ Resources:
     DependsOn: SecurityAgentApplication
     Type: AWS::SecurityAgent::AgentSpace
     Properties:
+      # These resources are shared by threat modeling, code review and penetration testing.
+      AwsResources:
+        IamRoles:
+          - !GetAtt IAMRoleForSecurityAgentService.Arn
+        LogGroups:
+          - !GetAtt CloudWatchLogsGroupForSecurityAgent.Arn
       Description: AWS Security Agent agent space
       Name: !Ref AgentSpaceName
       Tags:

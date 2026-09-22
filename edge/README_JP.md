@@ -48,6 +48,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** に **SSL証明書** が紐付けられます。 |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 追加メトリクスが有効化されます。 |
 | CloudFrontAdditionalName | String | | | AdditionalNameを指定した場合、**CloudFront** に **エイリアス名** が紐付けられます。 |
+| CloudFrontCompress | true or false | true | ○ | オブジェクトの自動圧縮の有効化フラグ |
 | CloudFrontDefaultRootObject | String | index.html | | CloudFront Viewer Protocol Policy |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
@@ -62,7 +63,7 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
-| **DomainName** | String | | ○ | The CNAME attached to CloudFront |
+| **DomainName** | String | | | The CNAME attached to CloudFront |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBucketName | String | | 条件付き | ログを格納するバケット名 |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |
@@ -164,4 +165,4 @@ PUT _template/custom_template
 | --- | --- | --- | --- | --- |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | Scope | REGIONAL or CLOUDFRONT | REGIONAL | ○ | CloudFrontかリージョン単位のリソースであるかの指定 |
-| **TargetResourceArn** | String | | ○ | Web ACL と関連付けるリソースのARN |
+| **TargetResourceArn** | String | | | Web ACL と関連付けるリソースのARN |

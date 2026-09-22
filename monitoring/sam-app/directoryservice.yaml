@@ -48,11 +48,11 @@ Parameters:
   DirectoryId:
     Type: String
     AllowedPattern: .+
-    Description: The id of the directory
+    Description: The id of the directory [required]
   DomainControllerIp:
     Type: String
     AllowedPattern: .+
-    Description: The IP of the domain controller   
+    Description: The IP of the domain controller [required]   
   SNSTopicArn:
     Type: String
     AllowedPattern: .+

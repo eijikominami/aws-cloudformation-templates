@@ -46,7 +46,7 @@ Parameters:
   WorkspacesBundleId:
     Type: String
     Default: wsb-7jspy3qyc
-    Description: The identifier of the bundle for the WorkSpace [required]
+    Description: The identifier of the bundle for the WorkSpace
   WorkspacesDeploy:
     Type: String
     Default: WORKSPACES
@@ -65,7 +65,7 @@ Parameters:
       - ALWAYS_ON
       - AUTO_STOP
       - MANUAL
-    Description: The identifier of the bundle for the WorkSpace [required]
+    Description: The identifier of the bundle for the WorkSpace
   WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes:
     Type: Number
     Default: 60
@@ -74,7 +74,7 @@ Parameters:
     Type: CommaDelimitedList
     Default: unknown
     AllowedPattern: .+
-    Description: The user name of the user for the WorkSpace [required]
+    Description: The user name of the user for the WorkSpace
   WorkspacesUserVolumeSizeGib:
     Type: Number
     Default: 100
@@ -139,7 +139,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-workspaces
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

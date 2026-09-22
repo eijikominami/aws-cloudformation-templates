@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Transform: AWS::Serverless-2016-10-31
+Transform: 
+  - AWS::LanguageExtensions
+  - AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/shared/fluentbit creates log servers on Amazon Elastic Container Service.
 
 Metadata: 
@@ -8,11 +10,14 @@ Metadata:
       - Label: 
           default: 'FluentBit Configuration'
         Parameters: 
+          - AllowedCidrBlockForSyslog
           - AppPort
           - Cpu
           - CpuArchitecture
           - DesiredCapacity
           - Memory
+          - NoIncomingRecordsAlarm
+          - NoIncomingRecordsPeriod
       - Label: 
           default: 'Network Configuration'
         Parameters:
@@ -50,7 +55,12 @@ Parameters:
     AllowedValues:
       - NOTICE
       - WARNING
-    Description: The alarm level of CloudWatch alarms
+    Description: The alarm level of CloudWatch alarms [required]
+  AllowedCidrBlockForSyslog:
+    Type: CommaDelimitedList
+    Default: 0.0.0.0/0
+    AllowedPattern: ^[0-9./]*$
+    Description: The list of CIDR blocks allowed to send syslog to FluentBit [required]
   AppPort:
     Type: Number
     Default: 514
@@ -79,6 +89,18 @@ Parameters:
     Type: String
     Default: 3072
     Description: The amount (in MiB) of memory to present to the container [required]
+  NoIncomingRecordsAlarm:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether an alarm is raised while no record reaches the Firehose stream
+  NoIncomingRecordsPeriod:
+    Type: Number
+    Default: 10800
+    MinValue: 60
+    Description: The number of seconds without any incoming record that is treated as a failure. It must be a multiple of 60 [required]
   SubnetIdAz1:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id at AZ1 [required]
@@ -139,7 +161,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -159,7 +181,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -354,6 +376,8 @@ Resources:
       LoadBalancerAttributes:
         - Key: deletion_protection.enabled
           Value: false
+        - Key: load_balancing.cross_zone.enabled
+          Value: true
       Name: !Sub elb-${LogicalName}
       Scheme: internal
       SecurityGroups:
@@ -510,17 +534,12 @@ Resources:
         - CidrIp: 0.0.0.0/0
           IpProtocol: '-1'
       SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
-          Description: syslog
-          FromPort: !Ref AppPort
-          ToPort: !Ref AppPort
-          IpProtocol: UDP
-        - CidrIp: 0.0.0.0/0
+        - CidrIp: !Ref VPCCidrBlock
           Description: healthcheck
           FromPort: 2020
           ToPort: 2020
           IpProtocol: TCP
-        - CidrIp: 0.0.0.0/0
+        - CidrIp: !Ref VPCCidrBlock
           Description: icmp
           FromPort: -1
           ToPort: -1
@@ -533,6 +552,18 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       VpcId: !Ref VPCId
+  'Fn::ForEach::SecurityGroupIngressForSyslog':
+    - CidrBlockForSyslog
+    - !Ref AllowedCidrBlockForSyslog
+    - 'SecurityGroupIngressForSyslog&{CidrBlockForSyslog}':
+        Type: AWS::EC2::SecurityGroupIngress
+        Properties:
+          CidrIp: !Ref CidrBlockForSyslog
+          Description: syslog
+          FromPort: !Ref AppPort
+          GroupId: !Ref SecurityGroupForFluentBit
+          IpProtocol: UDP
+          ToPort: !Ref AppPort
   SecurityGroupForEndpoint:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -739,7 +770,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ecs
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -764,7 +795,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-network-elb
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -799,7 +830,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -809,6 +840,8 @@ Resources:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName : !Ref AWS::StackName
         FirehoseStreamName: !Ref Firehose
+        NoIncomingRecordsAlarm: !Ref NoIncomingRecordsAlarm
+        NoIncomingRecordsPeriod: !Ref NoIncomingRecordsPeriod
         SNSTopicArn: !If 
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

@@ -20,12 +20,14 @@ Metadata:
           - EC2KeyName
           - EC2VolumeSize
           - EC2DailySnapshotScheduledAt
+          - SsmSecureStringAccess
       - Label: 
           default: 'Distribution Configuration'
         Parameters: 
           - CloudFrontDefaultTTL
           - CloudFrontMinimumTTL
           - CloudFrontMaximumTTL
+          - CloudFrontCompress
           - CloudFrontViewerProtocolPolicy
           - CloudFrontDefaultRootObject
           - CloudFrontAdditionalName
@@ -120,12 +122,12 @@ Parameters:
     AllowedValues:
       - NOTICE
       - WARNING
-    Description: The alarm level of CloudWatch alarms
+    Description: The alarm level of CloudWatch alarms [required]
   AutoScalingMaxSize:
     Type: Number
     Default: 1
     MinValue: 0
-    Description: AutoScaling Max Size [conditional]
+    Description: AutoScaling Max Size [conditional] [required]
   AutoScalingLoadBalancerType:
     Type: String
     Default: None
@@ -133,7 +135,7 @@ Parameters:
       - None
       - application
       - network  
-    Description: The autoScaling LoadBalancer Type [conditional]
+    Description: The autoScaling LoadBalancer Type [conditional] [required]
   BucketNameForAnalysis:
     Type: String
     Default: ''
@@ -172,6 +174,13 @@ Parameters:
     MinValue: 0
     Type: Number
     Description: CloudFront Maximum TTL [required]
+  CloudFrontCompress:
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+    Description: A flag that specifies whether automatic object compression is enabled [required]
   CloudFrontViewerProtocolPolicy:
     Type: String
     Default: redirect-to-https
@@ -223,12 +232,12 @@ Parameters:
       - INSTANCE
       - CONTAINER
       - APPRUNNER
-    Description: The category of computing platform [recuired]
+    Description: The category of computing platform [recuired] [required]
   DesiredCapacity:
     Type: Number
     Default: 1
     MinValue: 0
-    Description: AutoScaling Desired Capacity [conditional]
+    Description: AutoScaling Desired Capacity [conditional] [required]
   DockerFilePath:
     Type: String
     Default: ''
@@ -240,16 +249,16 @@ Parameters:
   EC2DailySnapshotScheduledAt:
     Type: String
     Default: '17:00'  
-    Description: Daily Snapshot time (HH:MM)
+    Description: Daily Snapshot time (HH:MM) [required]
   EC2ImageId:
     Type: AWS::EC2::Image::Id
     Default: ami-03dceaabddff8067e
     AllowedPattern: ^ami-.+$
-    Description: The EC2 Image Id [conditional]
+    Description: The EC2 Image Id [conditional] [required]
   EC2InstanceType:
     Type: String
     Default: t3.micro
-    Description: The EC2 Instance Type [conditional]
+    Description: The EC2 Instance Type [conditional] [required]
   EC2KeyName:
     Type: String
     Default: ''
@@ -258,7 +267,7 @@ Parameters:
     Type: Number
     Default: 8
     MinValue: 8
-    Description: EC2 Volume Size [conditional]
+    Description: EC2 Volume Size [conditional] [required]
   GitHubOwnerNameForArtifact:
     Type: String
     Default: '' 
@@ -300,21 +309,28 @@ Parameters:
     Type: String
     Default: ''
     Description: Route53 hosted zone id
+  SsmSecureStringAccess:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the KMS permission that the EC2 instance needs to read SecureString parameters from Parameter Store [required]
   SubnetPrivateCidrBlockForAz1:
     Type: String
     Default: 10.2.0.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ1
+    Description: The private subnet CIDR block at AZ1 [required]
   SubnetPrivateCidrBlockForAz2:
     Type: String
     Default: 10.2.2.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ2
+    Description: The private subnet CIDR block at AZ2 [required]
   SubnetPrivateCidrBlockForAz3:
     Type: String
     Default: 10.2.4.0/24
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ3
+    Description: The private subnet CIDR block at AZ3 [required]
   SubnetPublicCidrBlockForAz1:
     Type: String
     Default: 10.2.1.0/25
@@ -406,6 +422,7 @@ Conditions:
   CreateEC2AndRoute53: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Equals [ !Ref ComputeType, INSTANCE ], !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateRoute53AccessForCertbot: !And [ !Equals [ !Ref CertbotDnsChallenge, ENABLED ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ] ]
+  CreateSsmSecureStringAccess: !Equals [ !Ref SsmSecureStringAccess, ENABLED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -424,7 +441,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -473,7 +490,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -522,7 +539,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -699,6 +716,7 @@ Resources:
         CloudFrontDefaultTTL: !Ref CloudFrontDefaultTTL
         CloudFrontMinimumTTL: !Ref CloudFrontMinimumTTL
         CloudFrontMaximumTTL: !Ref CloudFrontMaximumTTL
+        CloudFrontCompress: !Ref CloudFrontCompress
         CloudFrontViewerProtocolPolicy: !Ref CloudFrontViewerProtocolPolicy
         CloudFrontDefaultRootObject: !Ref CloudFrontDefaultRootObject
         CloudFrontAdditionalName: !Ref CloudFrontAdditionalName
@@ -832,7 +850,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -849,7 +867,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -909,6 +927,24 @@ Resources:
                 - Effect: Allow
                   Action: route53:ChangeResourceRecordSets
                   Resource: !Sub arn:aws:route53:::hostedzone/${Route53HostedZoneId}
+          - !Ref AWS::NoValue
+        # The permission required to read SecureString parameters from Parameter
+        # Store. ssm:GetParameter comes from AmazonSSMManagedInstanceCore, while
+        # decrypting the value needs kms:Decrypt. The resource cannot be scoped
+        # because SecureString uses the AWS managed key, so the condition limits
+        # the permission to calls that go through Parameter Store.
+        - !If
+          - CreateSsmSecureStringAccess
+          - PolicyName: SsmSecureStringDecrypt
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action: kms:Decrypt
+                  Resource: '*'
+                  Condition:
+                    StringEquals:
+                      kms:ViaService: !Sub ssm.${AWS::Region}.amazonaws.com
           - !Ref AWS::NoValue
       RoleName: !Sub '${AWS::StackName}-AWSEC2Role-${AWS::Region}'
       Tags:
@@ -1401,7 +1437,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1426,7 +1462,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1455,7 +1491,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1592,7 +1628,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

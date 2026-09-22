@@ -49,27 +49,17 @@ def lambda_handler(event, context):
         iceberg_data_bucket = properties['IcebergDataBucket']
         database_name = properties['DatabaseName']
         scripts_bucket = properties['ScriptsBucket']
-        source_table_name = properties['SourceTableName']
         logical_name = properties['LogicalName']
         iam_role_arn = properties['IAMRoleArn']
-        account_id = properties['AccountId']
         
-        # Extract Git integration properties (optional)
-        git_repository = properties.get('GitRepository', '')
-        git_owner = properties.get('GitOwner', '')
-        git_branch = properties.get('GitBranch', 'main')
-        git_folder = properties.get('GitFolder', 'glue-jobs')
-        git_token = properties.get('GitToken', '')
         
         # Handle different request types
         if request_type == 'Create':
             response_data = handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name,
-                                        iam_role_arn, account_id, source_table_name,
-                                        git_repository, git_owner, git_branch, git_folder, git_token)
+                                        iam_role_arn)
         elif request_type == 'Update':
             response_data = handle_update(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name,
-                                        iam_role_arn, account_id, source_table_name,
-                                        git_repository, git_owner, git_branch, git_folder, git_token)
+                                        iam_role_arn)
         elif request_type == 'Delete':
             response_data = handle_delete(job_name)
         else:
@@ -97,8 +87,7 @@ def lambda_handler(event, context):
             "Error": str(e)
         }, job_name, reason=str(e))
 
-def handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn, account_id, source_table_name,
-                 git_repository, git_owner, git_branch, git_folder, git_token):
+def handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn):
     """
     Handle CREATE operation for Visual ETL Job.
     
@@ -111,12 +100,6 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
         logical_name: Logical name for resource naming
         iam_role_arn: IAM role ARN for job execution
         property_id: Google Analytics Property ID
-        account_id: Google Analytics Account ID
-        git_repository: Git repository URL (optional)
-        git_owner: Git repository owner (optional)
-        git_branch: Git branch name
-        git_folder: Git folder path
-        git_token: Git authentication token (optional)
     
     Returns:
         dict: Response data with job details
@@ -129,11 +112,6 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
     }))
     
     try:
-        # Generate CodeGenConfigurationNodes for Visual ETL
-        code_gen_nodes = generate_visual_etl_nodes(
-            connection_name, iceberg_data_bucket, database_name, account_id, source_table_name
-        )
-        
         # Prepare job creation parameters
         job_params = {
             'Name': job_name,
@@ -169,7 +147,6 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
             'NumberOfWorkers': 10,
             'WorkerType': 'G.1X',
             'ExecutionClass': 'STANDARD',
-            'CodeGenConfigurationNodes': code_gen_nodes,
             'Tags': {
                 'Environment': 'production',
                 'Project': 'analytics-platform',
@@ -177,65 +154,18 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
             }
         }
         
-        # Add Git integration if all required parameters are provided
-        if is_git_integration_enabled(git_repository, git_owner, git_token):
-            source_control_details = build_source_control_details(
-                git_repository, git_owner, git_branch, git_folder, git_token
-            )
-            job_params['SourceControlDetails'] = source_control_details
-            
-            logger.info(json.dumps({
-                "message": "Git integration enabled for Visual ETL Job",
-                "job_name": job_name,
-                "git_repository": git_repository,
-                "git_branch": git_branch,
-                "git_folder": git_folder
-            }))
-        else:
-            logger.info(json.dumps({
-                "message": "Git integration disabled - required parameters not provided",
-                "job_name": job_name,
-                "has_repository": bool(git_repository),
-                "has_owner": bool(git_owner),
-                "has_token": bool(git_token)
-            }))
-        
+
         # Create the Glue Visual ETL Job
         response = glue_client.create_job(**job_params)
         
         # Wait for job creation to complete
         job_arn = wait_for_job_ready(job_name)
         
-        # Push to Git repository after job is ready
-        if is_git_integration_enabled(git_repository, git_owner, git_token):
-            glue_client.update_source_control_from_job(
-                JobName=job_name,
-                Provider='GITHUB',
-                RepositoryName=git_repository,
-                RepositoryOwner=git_owner,
-                BranchName=git_branch,
-                Folder=git_folder,
-                AuthStrategy='PERSONAL_ACCESS_TOKEN',
-                AuthToken=git_token
-            )
-            logger.info(json.dumps({"message": "Pushed job to Git repository", "job_name": job_name}))
-        
         logger.info(json.dumps({
             "message": "Visual ETL Job created successfully",
             "job_name": job_name,
             "job_arn": job_arn
         }))
-        
-        # Re-apply CodeGenConfigurationNodes via update_job to fix Glue API
-        # converting S3CatalogTarget to S3IcebergCatalogTarget (drops SchemaChangePolicy)
-        glue_client.update_job(
-            JobName=job_name,
-            JobUpdate={
-                'Role': iam_role_arn,
-                'Command': job_params['Command'],
-                'CodeGenConfigurationNodes': code_gen_nodes,
-            }
-        )
         
         return {
             "JobName": job_name,
@@ -263,8 +193,7 @@ def handle_create(job_name, connection_name, iceberg_data_bucket, database_name,
         else:
             raise Exception(f"Glue API error ({error_code}): {error_message}")
 
-def handle_update(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn, account_id, source_table_name,
-                 git_repository, git_owner, git_branch, git_folder, git_token):
+def handle_update(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name, iam_role_arn):
     """
     Handle UPDATE operation for Visual ETL Job.
     
@@ -277,12 +206,6 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
         logical_name: Logical name for resource naming
         iam_role_arn: IAM role ARN for job execution
         property_id: Google Analytics Property ID
-        account_id: Google Analytics Account ID
-        git_repository: Git repository URL (optional)
-        git_owner: Git repository owner (optional)
-        git_branch: Git branch name
-        git_folder: Git folder path
-        git_token: Git authentication token (optional)
     
     Returns:
         dict: Response data with updated job details
@@ -297,14 +220,11 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
         # Get current job configuration
         current_job = glue_client.get_job(JobName=job_name)
         
-        # Update the job with new configuration
+        # CodeGenConfigurationNodes is left out so a deployment cannot overwrite the flow
         job_update = {
             'JobMode': 'VISUAL',  # Ensure Visual ETL mode
             'Role': iam_role_arn,
             'Command': current_job['Job']['Command'],
-            'CodeGenConfigurationNodes': _ensure_schema_change_policy(
-                current_job['Job'].get('CodeGenConfigurationNodes', {})
-            ),
             'DefaultArguments': {
                 **current_job['Job']['DefaultArguments'],
                 '--conf': (
@@ -329,26 +249,7 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
             'ExecutionClass': 'STANDARD'
         }
         
-        # Add or update Git integration if all required parameters are provided
-        if is_git_integration_enabled(git_repository, git_owner, git_token):
-            source_control_details = build_source_control_details(
-                git_repository, git_owner, git_branch, git_folder, git_token
-            )
-            job_update['SourceControlDetails'] = source_control_details
-            
-            logger.info(json.dumps({
-                "message": "Git integration updated for Visual ETL Job",
-                "job_name": job_name,
-                "git_repository": git_repository,
-                "git_branch": git_branch,
-                "git_folder": git_folder
-            }))
-        else:
-            logger.info(json.dumps({
-                "message": "Git integration disabled - skipping SourceControlDetails",
-                "job_name": job_name
-            }))
-        
+
         response = glue_client.update_job(
             JobName=job_name,
             JobUpdate=job_update
@@ -356,20 +257,6 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
         
         # Wait for job update to complete
         job_arn = wait_for_job_ready(job_name)
-        
-        # Push to Git repository after job is updated
-        if is_git_integration_enabled(git_repository, git_owner, git_token):
-            glue_client.update_source_control_from_job(
-                JobName=job_name,
-                Provider='GITHUB',
-                RepositoryName=git_repository,
-                RepositoryOwner=git_owner,
-                BranchName=git_branch,
-                Folder=git_folder,
-                AuthStrategy='PERSONAL_ACCESS_TOKEN',
-                AuthToken=git_token
-            )
-            logger.info(json.dumps({"message": "Pushed job to Git repository", "job_name": job_name}))
         
         logger.info(json.dumps({
             "message": "Visual ETL Job updated successfully",
@@ -397,8 +284,7 @@ def handle_update(job_name, connection_name, iceberg_data_bucket, database_name,
         if error_code == 'EntityNotFoundException':
             # Job doesn't exist yet, create it
             return handle_create(job_name, connection_name, iceberg_data_bucket, database_name, scripts_bucket, logical_name,
-                                iam_role_arn, account_id, source_table_name,
-                                git_repository, git_owner, git_branch, git_folder, git_token)
+                                iam_role_arn)
         elif error_code == 'InvalidInputException':
             raise Exception(f"Invalid input for Glue job update: {error_message}")
         else:
@@ -419,85 +305,6 @@ def handle_delete(job_name):
             return {"JobName": job_name, "Status": "ALREADY_DELETED"}
         raise
 
-
-def _ensure_schema_change_policy(nodes):
-    """Preserve existing nodes but ensure SchemaChangePolicy is present on target."""
-    for key, value in nodes.items():
-        for target_type in ('S3CatalogTarget', 'S3IcebergCatalogTarget'):
-            if target_type in value and 'SchemaChangePolicy' not in value[target_type]:
-                value[target_type]['SchemaChangePolicy'] = {
-                    'EnableUpdateCatalog': True,
-                    'UpdateBehavior': 'UPDATE_IN_DATABASE'
-                }
-    return nodes
-
-
-def generate_visual_etl_nodes(connection_name, iceberg_data_bucket, database_name, account_id, source_table_name):
-    """
-    Generate CodeGenConfigurationNodes for Visual ETL Job.
-    
-    This creates a Visual ETL flow with:
-    1. Google Analytics 4 data source
-    2. Schema transformation (Apply Mapping)
-    3. S3 Parquet target
-    
-    Args:
-        connection_name: Name of the Google Analytics 4 connection
-        iceberg_data_bucket: S3 bucket for Iceberg output
-        database_name: Glue Data Catalog database name
-        account_id: Google Analytics Account ID
-    
-    Returns:
-        dict: CodeGenConfigurationNodes configuration
-    """
-    
-    return {
-        "node-source": {
-            "ConnectorDataSource": {
-                "Name": "Google Analytics 4",
-                "ConnectionType": "googleanalytics4",
-                "Data": {
-                    "connectionName": connection_name,
-                    "ENTITY_NAME": f"core-reports/accounts/{account_id}",
-                    "SELECTED_FIELDS": "date,city,gender,userAgeBracket,deviceCategory,browser,firstUserDefaultChannelGroup,pageTitle,eventName,activeUsers,newUsers,sessions,screenPageViews,eventCount,totalRevenue",
-                    "API_VERSION": "v1beta"
-                },
-                "OutputSchemas": [{
-                    "Columns": [
-                        {"Name": "date", "Type": "string"},
-                        {"Name": "city", "Type": "string"},
-                        {"Name": "gender", "Type": "string"},
-                        {"Name": "userAgeBracket", "Type": "string"},
-                        {"Name": "deviceCategory", "Type": "string"},
-                        {"Name": "browser", "Type": "string"},
-                        {"Name": "firstUserDefaultChannelGroup", "Type": "string"},
-                        {"Name": "pageTitle", "Type": "string"},
-                        {"Name": "eventName", "Type": "string"},
-                        {"Name": "activeUsers", "Type": "bigint"},
-                        {"Name": "newUsers", "Type": "bigint"},
-                        {"Name": "sessions", "Type": "bigint"},
-                        {"Name": "screenPageViews", "Type": "bigint"},
-                        {"Name": "eventCount", "Type": "bigint"},
-                        {"Name": "totalRevenue", "Type": "double"}
-                    ]
-                }]
-            }
-        },
-
-        "node-target": {
-            "S3CatalogTarget": {
-                "Name": "Amazon S3 (Iceberg)",
-                "Inputs": ["node-source"],
-                "Table": source_table_name,
-                "Database": database_name,
-                "PartitionKeys": [],
-                "SchemaChangePolicy": {
-                    "EnableUpdateCatalog": True,
-                    "UpdateBehavior": "UPDATE_IN_DATABASE"
-                }
-            }
-        }
-    }
 
 def wait_for_job_ready(job_name, max_wait_time=300, poll_interval=10):
     """
@@ -586,81 +393,3 @@ def wait_for_job_deleted(job_name, max_wait_time=300, poll_interval=10):
                 raise
     
     raise Exception(f"Job '{job_name}' was not deleted within {max_wait_time} seconds")
-
-def is_git_integration_enabled(git_repository, git_owner, git_token):
-    """
-    Check if Git integration should be enabled based on provided parameters.
-    
-    Args:
-        git_repository: Git repository URL
-        git_owner: Git repository owner
-        git_token: Git authentication token
-    
-    Returns:
-        bool: True if all required Git parameters are provided, False otherwise
-    """
-    
-    # All required parameters must be non-empty strings
-    required_params = [git_repository, git_owner, git_token]
-    
-    # Check if all required parameters are provided and non-empty
-    git_enabled = all(param and param.strip() for param in required_params)
-    
-    logger.info(json.dumps({
-        "message": "Git integration eligibility check",
-        "git_enabled": git_enabled,
-        "has_repository": bool(git_repository and git_repository.strip()),
-        "has_owner": bool(git_owner and git_owner.strip()),
-        "has_token": bool(git_token and git_token.strip())
-    }))
-    
-    return git_enabled
-
-def build_source_control_details(git_repository, git_owner, git_branch, git_folder, git_token):
-    """
-    Build SourceControlDetails configuration for Git integration.
-    
-    Args:
-        git_repository: Git repository URL
-        git_owner: Git repository owner
-        git_branch: Git branch name
-        git_folder: Git folder path
-        git_token: Git authentication token
-    
-    Returns:
-        dict: SourceControlDetails configuration
-    """
-    
-    # Determine provider based on repository URL
-    provider = 'GITHUB'  # Default to GitHub
-    if 'gitlab' in git_repository.lower():
-        provider = 'GITLAB'
-    elif 'codecommit' in git_repository.lower():
-        provider = 'AWS_CODE_COMMIT'
-    elif 'bitbucket' in git_repository.lower():
-        provider = 'BITBUCKET'
-    
-    source_control_details = {
-        'Provider': provider,
-        'Repository': git_repository,
-        'Branch': git_branch,
-        'Folder': git_folder,
-        'AuthStrategy': 'PERSONAL_ACCESS_TOKEN',
-        'AuthToken': git_token
-    }
-    
-    # Add owner for non-CodeCommit providers
-    if provider != 'AWS_CODE_COMMIT' and git_owner:
-        source_control_details['Owner'] = git_owner
-    
-    logger.info(json.dumps({
-        "message": "Built SourceControlDetails configuration",
-        "provider": provider,
-        "repository": git_repository,
-        "branch": git_branch,
-        "folder": git_folder,
-        "has_owner": bool(git_owner),
-        "has_token": bool(git_token)
-    }))
-    
-    return source_control_details

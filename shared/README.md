@@ -50,6 +50,7 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 | AccountIdForArchive | String | | | The AWS account id for log archive |
+| ActiveDirectoryEC2ImageId | String | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | The SSM parameter name that holds the EC2 Image Id |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
 | **ActiveDirectoryName** | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
@@ -59,10 +60,18 @@ You can provide optional parameters as follows.
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.64/26 | ○ | The public subnet CIDR block at AZ2 |
 | ActiveDirectorySubnetCidrBlockForAz3 | String | 10.3.128.64/26 | ○ | The public subnet CIDR block at AZ3 |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
+| AllowedCidrBlockForSyslog | CommaDelimitedList | 0.0.0.0/0 | ○ | The list of CIDR blocks allowed to send syslog to FluentBit |
 | BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |
 | DomainName | String | | | The private domain name which this VPC has |
 | FluentBitForSyslog | ENABLED / DISABLED | DISABLED | ○ | Enable or disable FluentBit for syslog |
+| IdentityCenterAdministratorGroupId | String | | | The identity store group id that receives administrator access |
+| IdentityCenterAdministratorTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | The account ids that administrator access is assigned to |
 | IdentityCenterArn | String | | | The ARN of the IAM Identity Center instance under which the operation will be executed |
+| IdentityCenterManagementAccountId | String | | | The management account id that organizations and service catalog access is assigned to |
+| IdentityCenterReadOnlyGroupId | String | | | The identity store group id that receives read only access |
+| IdentityCenterReadOnlyTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | The account ids that read only access is assigned to |
+| NoIncomingRecordsAlarm | ENABLED / DISABLED | ENABLED | | Whether an alarm is raised while no record reaches the FluentBit Firehose stream |
+| NoIncomingRecordsPeriod | Number | 10800 | ○ | The number of seconds without any incoming record that is treated as a failure. It must be a multiple of 60 |
 | QuickConsumerAccountIds | CommaDelimitedList | | conditional | The list of AWS account IDs for Amazon Quick cross-account access |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | The private subnet CIDR block at AZ2 |

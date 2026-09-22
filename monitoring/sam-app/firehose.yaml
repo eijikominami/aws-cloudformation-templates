@@ -30,6 +30,18 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The Firehose stream name [required]
+  NoIncomingRecordsAlarm:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether an alarm is raised while no record reaches the stream
+  NoIncomingRecordsPeriod:
+    Type: Number
+    Default: 10800
+    MinValue: 60
+    Description: The number of seconds without any incoming record that is treated as a failure. It must be a multiple of 60 [required]
   OldestRecordAge:
     Type: Number
     Default: 120
@@ -57,6 +69,7 @@ Parameters:
 
 Conditions:
   CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+  CreateNoIncomingRecordsAlarm: !Equals [ !Ref NoIncomingRecordsAlarm, ENABLED ]
   CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
 
 Resources:
@@ -176,6 +189,37 @@ Resources:
       Statistic: Sum
       Threshold: 1
       TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AlarmFirehoseNoIncomingRecords:
+    Condition: CreateNoIncomingRecordsAlarm
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*Firehose* (${FirehoseStreamName}) に *レコードが届いていません* 。送信元からストリームまでの経路が停止している可能性があります。このメトリクスの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-Firehose-${FirehoseStreamName}-No-Incoming-Records
+        - !Sub Warning-Firehose-${FirehoseStreamName}-No-Incoming-Records
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DeliveryStreamName
+          Value: !Ref FirehoseStreamName
+      EvaluationPeriods: 1
+      MetricName: IncomingRecords
+      Namespace: AWS/Firehose
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: !Ref NoIncomingRecordsPeriod
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: breaching
       Tags: 
         - Key: environment
           Value: !Ref Environment

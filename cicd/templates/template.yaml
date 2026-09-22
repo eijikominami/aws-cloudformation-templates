@@ -62,7 +62,7 @@ Parameters:
     AllowedValues:
       - NOTICE
       - WARNING
-    Description: The alarm level of CloudWatch alarms
+    Description: The alarm level of CloudWatch alarms [required]
   ArtifactBucketInVirginia:
     Type: String
     Default: ''  
@@ -219,7 +219,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -240,7 +240,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -255,7 +255,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -787,7 +787,7 @@ Resources:
                   TemplatePath: Source_CloudFormationTemplatesArtifact::global/templates/template.yaml
                   ParameterOverrides: !Join 
                     - ''
-                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "BudgetName": "Total-#{codepipeline.PipelineExecutionId}", "Environment": "'
+                    - - !Sub '{"AlarmLevel": "${AlarmLevel}", "CentralizedLogBucketName": "${CentralizedLogBucketName}", "BudgetName": "Total", "Environment": "'
                       - !If
                         - Development
                         - development
@@ -1205,7 +1205,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1236,7 +1236,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-codebuild
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1267,7 +1267,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

@@ -40,8 +40,13 @@ aws cloudformation deploy --template-file templates/identitycenter.yaml --stack-
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
+| AdministratorGroupId | String | | | 管理者権限を付与する Identity Store のグループ ID |
+| AdministratorTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | 管理者権限を付与する AWS アカウント ID |
 | DefaultSessionDuration | String | PT12H | ○ | ISO-8601 におけるアプリケーションユーザーのセッション有効期間 |
 | InstanceArn | String |  |  | IAM Identity Center の ARN |
+| ManagementAccountId | String |  |  | Organizations と Service Catalog の権限を付与する管理アカウントの ID |
+| ReadOnlyGroupId | String |  |  | 参照権限を付与する Identity Store のグループ ID |
+| ReadOnlyTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | 参照権限を付与する AWS アカウント ID |
 
 ## AWS Managed Microsoft AD
 
@@ -67,9 +72,9 @@ aws cloudformation deploy --template-file templates/microsoftad.yaml --stack-nam
 | Password | String | Password1+ | ○ | Admin ユーザーのパスワード |
 | **ShortName** | String | CORP | ○ | NetBIOS 名 |
 | SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/24 | ○ | AZ1 にあるプライベートサブネットの CIDR ブロック |
-| SubnetPrivateIdForAz1 | String | | ○ | AZ1 のプライベートサブネット ID |
+| SubnetPrivateIdForAz1 | String | | conditional | AZ1 のプライベートサブネット ID |
 | SubnetPrivateCidrBlockForAz2 | String | 10.3.4.0/24 | ○ | AZ2 にあるプライベートサブネットの CIDR ブロック |
-| SubnetPrivateIdForAz2 | String | | ○ | AZ2 のプライベートサブネット ID |
+| SubnetPrivateIdForAz2 | String | | conditional | AZ2 のプライベートサブネット ID |
 | SubnetPrivateCidrBlockForAz3 | String | 10.3.8.0/24 | 条件付き | AZ3 にあるプライベートサブネットの CIDR ブロック |
 | SubnetPrivateIdForAz3 | String | | 条件付き | AZ3 のプライベートサブネット ID |
 | VPCId | String | | ○ | VPC ID |

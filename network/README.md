@@ -81,14 +81,14 @@ You can provide optional parameters as follows:
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | CustomerGatewayOutsideIpAddress | String | | |  The Internet-routable IP address for the customer gateway's outside interface |
-| DnsIpAz1 | String | 10.0.8.53 | | The IPv4 address that you want to use for DNS queries |
-| DnsIpAz2 | String | 10.0.10.53 | | The IPv4 address that you want to use for DNS queries |
-| DnsIpAz3 | String | 10.0.12.53 | | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz1 | String | 10.0.8.53 | ○ | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz2 | String | 10.0.10.53 | ○ | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz3 | String | 10.0.12.53 | ○ | The IPv4 address that you want to use for DNS queries |
 | DomainName | String | | | The name of the domain |
 | FirewallCidrBlockForEgressAz1 | String | 10.0.0.128/26 | | The firewall subnet CIDR block for Egress at AZ1 |
 | FirewallCidrBlockForEgressAz2 | String | 10.0.2.128/26 | | The firewall subnet CIDR block for Egress at AZ2 | 
 | FirewallCidrBlockForEgressAz3 | String | 10.0.4.128/26 | | The firewall subnet CIDR block for Egress at AZ3 |
-| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network | 
+| HomeNetworkCidr | String | 10.0.0.0/8 | | The CIDR of your home network | 
 | OnpremDnsIp | String | | | One IPv4 address that you want to forward DNS queries to |
 | OrganizationId | String | | | The Organizations ID |
 | PrivateCidrBlockForDNSAz1 | String | 10.0.8.0/24 | ○ | The private subnet CIDR block for DNS at AZ1 |
@@ -124,8 +124,8 @@ This template configures ``Availability Zone``.
 | InternetGatewayId | String | | | The Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable NetworkAddressTranslation (NAT) |
 | NetworkLoadBalancer | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable Network LoadBalaner |
-| SubnetPrivateCidrBlock | String | 10.0.0.0/24 | ○ | The Private subnet CIDR block |
-| SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | The Public subnet CIDR block |
+| SubnetPrivateCidrBlock | String | 10.0.0.0/24 | | The Private subnet CIDR block |
+| SubnetPublicCidrBlock | String | 10.0.0.0/24 | | The Public subnet CIDR block |
 | SubnetTransitCidrBlock | String | | | The transit subnet CIDR block |
 | SubnetFirewallCidrBlock | String | | | The firewall subnet CIDR block |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | The VPC id  |
@@ -138,7 +138,7 @@ This template configures ``Egress Central VPC``.
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
-| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network | 
+| HomeNetworkCidr | String | 10.0.0.0/8 | | The CIDR of your home network | 
 | ResolverInboundRuleId | String |  |  | The ID of the Resolver inbound rule that you associated with the VPC that is specified by VPCId| 
 | ResolverOutboundRuleId | String |  |  | The ID of the Resolver outbound rule that you associated with the VPC that is specified by VPCId | 
 | SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | The firewall subnet CIDR block at AZ1 | 
@@ -190,8 +190,8 @@ This template configures ``Network Firewall``.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
-| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | The CIDR of your home network | 
-| SubnetIdAz1 | String | | | The firewall subnet id in AZ1 |
+| HomeNetworkCidr | String | 10.0.0.0/8 | | The CIDR of your home network | 
+| SubnetIdAz1 | String | | ○ | The firewall subnet id in AZ1 |
 | SubnetIdAz2 | String | | | The firewall subnet id in AZ2 |
 | SubnetIdAz3 | String | | | The firewall subnet id in AZ3 |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | The VPC id  |
@@ -203,9 +203,9 @@ This template configures ``Route 53 Resolver``.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
-| DnsIpAz1 | String | 10.0.8.53 | | The IPv4 address that you want to use for DNS queries |
-| DnsIpAz2 | String | 10.0.10.53 | | The IPv4 address that you want to use for DNS queries |
-| DnsIpAz3 | String | 10.0.12.53 | | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz1 | String | 10.0.8.53 | ○ | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz2 | String | 10.0.10.53 | ○ | The IPv4 address that you want to use for DNS queries |
+| DnsIpAz3 | String | 10.0.12.53 | ○ | The IPv4 address that you want to use for DNS queries |
 | DomainName | String | | | The name of the domain |
 | OnpremDnsIp | String | | | One IPv4 address that you want to forward DNS queries to |
 | PrincipalsToAssociateWithRoute53ResolverRule | String | | | Specifies a list of one or more principals to associate with Route 53 Resolver Rule |
@@ -240,7 +240,7 @@ This template configures ``Site-to-Site VPN``.
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
-| **CustomerGatewayOutsideIpAddress** | String | | ○ | The Internet-routable IP address for the customer gateway's outside interface |
+| **CustomerGatewayOutsideIpAddress** | String | | | The Internet-routable IP address for the customer gateway's outside interface |
 | StaticRoutesOnly | true or false | false | ○ | Indicates whether the VPN connection uses static routes only |
 | TransitGatewayId | String | | ○ | The ID of the transit gateway associated with the VPN connection | 
 

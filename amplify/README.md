@@ -43,9 +43,4 @@ You can provide parameters as follows:
 | AmplifyConsoleAppId | String |  | | **You can provide this parameter after your first deployment** |
 | **DomainName** | String | | ○ | The custom domain name for your Amplify Console application |
 | **RepositoryName** | String | | ○ | The repository name on CodeCommit |
-| SNSForAlertArn | String | | | The Amazon SNS topic ARN for alert |
-| SNSForDeploymentArn | String | | | The Amazon SNS topic ARN for deployment information |
-| Environment | production / test / development | production | ○ | The environment type |
-| **TagKey** | String | createdby | ○ | Tag key for resource tagging |
-| **TagValue** | String | aws-cloudformation-templates | ○ | Tag value for resource tagging |
 

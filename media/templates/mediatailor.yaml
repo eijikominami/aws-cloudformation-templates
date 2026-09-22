@@ -30,17 +30,17 @@ Parameters:
   CdnContentSegmentUrlPrefix:
     Type: String
     Default: ''
-    Description: "A content delivery network (CDN) to cache content segments, so that content requests don’t always have to go to the origin server."   
+    Description: "A content delivery network (CDN) to cache content segments, so that content requests don’t always have to go to the origin server. [required]"   
   MaxDurationSeconds:
     Type: Number
     Default: 120
     MinValue: 0
-    Description: The maximum allowed duration for the pre-roll ad avail  
+    Description: The maximum allowed duration for the pre-roll ad avail [required]  
   PersonalizationThresholdSeconds:
     Type: Number
     Default: 8
     MinValue: 0
-    Description: Defines the maximum duration of underfilled ad time (in seconds) allowed in an ad break 
+    Description: Defines the maximum duration of underfilled ad time (in seconds) allowed in an ad break [required] 
   SlateAdUrl: 
     Type: String
     Default: ''

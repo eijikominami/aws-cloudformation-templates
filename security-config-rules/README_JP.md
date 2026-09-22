@@ -69,5 +69,5 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name DefaultSecu
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、Lambda を用いた **自動修復機能** が有効化されます。 |
-| RequiredTagKey | String | createdby | ○ | AWS Config は、このタグの無い AWS リソースを削除します。 |
-| RequiredTagValue | String | aws-cloudformation-templates | ○ | AWS Config は、このタグの無い AWS リソースを削除します。 |
+| RequiredTagKey | String | createdby | | AWS Config は、このタグの無い AWS リソースを削除します。 |
+| RequiredTagValue | String | aws-cloudformation-templates | | AWS Config は、このタグの無い AWS リソースを削除します。 |

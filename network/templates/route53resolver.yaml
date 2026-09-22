@@ -43,19 +43,19 @@ Parameters:
     AllowedValues:
       - NOTICE
       - WARNING
-    Description: The alarm level of CloudWatch alarms
+    Description: The alarm level of CloudWatch alarms [required]
   DnsIpAz1:
     Type: String
     AllowedPattern: ^[0-9./]*$
-    Description: The IPv4 address that you want to use for DNS queries
+    Description: The IPv4 address that you want to use for DNS queries [required]
   DnsIpAz2:
     Type: String
     AllowedPattern: ^[0-9./]*$
-    Description: The IPv4 address that you want to use for DNS queries
+    Description: The IPv4 address that you want to use for DNS queries [required]
   DnsIpAz3:
     Type: String
     AllowedPattern: ^[0-9./]*$
-    Description: The IPv4 address that you want to use for DNS queries
+    Description: The IPv4 address that you want to use for DNS queries [required]
   DomainName:
     Type: String
     Default: ''
@@ -149,7 +149,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -183,7 +183,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -217,7 +217,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -252,7 +252,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -269,7 +269,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Deployment-createdby-${LogicalName}
       Tags:
@@ -581,7 +581,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-route53-resolver
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:
@@ -599,7 +599,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-route53-resolver
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

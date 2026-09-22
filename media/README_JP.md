@@ -173,7 +173,7 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | --- | --- | --- | --- | --- |
 | ExpirationDate | Number | 1 | ○ | 有効期限（日） |
 | MaxAgeSeconds | Number | 30000 | ○ | ブラウザキャッシュのプリフライト時間 |
-| UserAgent | String | | ○ | ユーザエージェント |
+| UserAgent | String | | | ユーザエージェント |
 
 ### MediaTailor
 

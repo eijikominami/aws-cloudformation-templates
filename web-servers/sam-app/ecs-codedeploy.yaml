@@ -83,7 +83,7 @@ Parameters:
   SiteUrl:
     Type: String
     AllowedPattern: .+
-    Description: URL of the application Site to be tested after deployment
+    Description: URL of the application Site to be tested after deployment [required]
   SNSForDeploymentArn:
     Type: String
     Default: '' 
