@@ -146,7 +146,6 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
-  CreateNoIncomingRecordsAlarm: !Equals [ !Ref NoIncomingRecordsAlarm, ENABLED]
   CreateS3ReplicationForArchive: !And [ !Not [ !Equals [ !Ref AccountIdForArchive, ''] ], !Not [ !Equals [ !Ref BucketNameForArchive, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -832,6 +831,8 @@ Resources:
         AlarmLevel: !Ref AlarmLevel
         CustomAlarmName : !Ref AWS::StackName
         FirehoseStreamName: !Ref Firehose
+        NoIncomingRecordsAlarm: !Ref NoIncomingRecordsAlarm
+        NoIncomingRecordsPeriod: !Ref NoIncomingRecordsPeriod
         SNSTopicArn: !If 
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -842,40 +843,6 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
-  CloudWatchAlarmFirehoseNoIncomingRecords:
-    Condition: CreateNoIncomingRecordsAlarm
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      ActionsEnabled: true
-      AlarmActions:
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      AlarmDescription: !Sub '*Firehose* (${Firehose}) に *レコードが届いていません* 。送信元から FluentBit までの経路が停止している可能性があります。このメトリクスの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
-      AlarmName: !Sub Warning-${AWS::StackName}-Firehose-${Firehose}-No-Incoming-Records
-      ComparisonOperator: LessThanThreshold
-      DatapointsToAlarm: 1
-      Dimensions:
-        - Name: DeliveryStreamName
-          Value: !Ref Firehose
-      EvaluationPeriods: 1
-      MetricName: IncomingRecords
-      Namespace: AWS/Firehose
-      OKActions:
-        - !If
-          - CreateSNSForAlert
-          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
-          - !Ref SNSForAlertArn
-      Period: !Ref NoIncomingRecordsPeriod
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: breaching
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   CloudWatchLogsGroupForFirehose:
     Type: AWS::Logs::LogGroup
     Properties:
