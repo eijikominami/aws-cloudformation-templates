@@ -45,6 +45,8 @@ Metadata:
           - AccountIdForArchive
           - AllowedCidrBlockForSyslog
           - BucketNameForArchive
+          - NoIncomingRecordsAlarm
+          - NoIncomingRecordsPeriod
       - Label: 
           default: 'Amazon Quick Configuration'
         Parameters:
@@ -148,6 +150,18 @@ Parameters:
     Type: String
     Default: ''
     Description: The ARN of the IAM Identity Center instance under which the operation will be executed
+  NoIncomingRecordsAlarm:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether an alarm is raised while no record reaches the FluentBit Firehose stream
+  NoIncomingRecordsPeriod:
+    Type: Number
+    Default: 10800
+    MinValue: 60
+    Description: The number of seconds without any incoming record that is treated as a failure. It must be a multiple of 60 [required]
   SubnetPrivateCidrBlockAz1:
     Type: String
     Default: 10.3.0.64/26
@@ -435,6 +449,8 @@ Resources:
         AllowedCidrBlockForSyslog: !Ref AllowedCidrBlockForSyslog
         BucketNameForArchive: !Ref BucketNameForArchive
         CpuArchitecture: ARM64
+        NoIncomingRecordsAlarm: !Ref NoIncomingRecordsAlarm
+        NoIncomingRecordsPeriod: !Ref NoIncomingRecordsPeriod
         SubnetIdAz1: !GetAtt Az1.Outputs.PrivateSubnetId
         SubnetIdAz2: !GetAtt Az2.Outputs.PrivateSubnetId
         SubnetIdAz3: !GetAtt Az3.Outputs.PrivateSubnetId

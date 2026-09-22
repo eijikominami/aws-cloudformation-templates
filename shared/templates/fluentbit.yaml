@@ -14,6 +14,8 @@ Metadata:
           - CpuArchitecture
           - DesiredCapacity
           - Memory
+          - NoIncomingRecordsAlarm
+          - NoIncomingRecordsPeriod
       - Label: 
           default: 'Network Configuration'
         Parameters:
@@ -85,6 +87,18 @@ Parameters:
     Type: String
     Default: 3072
     Description: The amount (in MiB) of memory to present to the container [required]
+  NoIncomingRecordsAlarm:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether an alarm is raised while no record reaches the Firehose stream
+  NoIncomingRecordsPeriod:
+    Type: Number
+    Default: 10800
+    MinValue: 60
+    Description: The number of seconds without any incoming record that is treated as a failure. It must be a multiple of 60 [required]
   SubnetIdAz1:
     Type: AWS::EC2::Subnet::Id
     Description: The subnet id at AZ1 [required]
@@ -132,6 +146,7 @@ Parameters:
     AllowedPattern: .+
 
 Conditions:
+  CreateNoIncomingRecordsAlarm: !Equals [ !Ref NoIncomingRecordsAlarm, ENABLED]
   CreateS3ReplicationForArchive: !And [ !Not [ !Equals [ !Ref AccountIdForArchive, ''] ], !Not [ !Equals [ !Ref BucketNameForArchive, ''] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
@@ -827,6 +842,40 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue
+  CloudWatchAlarmFirehoseNoIncomingRecords:
+    Condition: CreateNoIncomingRecordsAlarm
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      AlarmDescription: !Sub '*Firehose* (${Firehose}) に *レコードが届いていません* 。送信元から FluentBit までの経路が停止している可能性があります。このメトリクスの詳細は、<https://docs.aws.amazon.com/ja_jp/firehose/latest/dev/monitoring-with-cloudwatch-metrics.html|CloudWatch メトリクスによる Amazon Data Firehose のモニタリング> をご覧ください。'
+      AlarmName: !Sub Warning-${AWS::StackName}-Firehose-${Firehose}-No-Incoming-Records
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: DeliveryStreamName
+          Value: !Ref Firehose
+      EvaluationPeriods: 1
+      MetricName: IncomingRecords
+      Namespace: AWS/Firehose
+      OKActions:
+        - !If
+          - CreateSNSForAlert
+          - !GetAtt SNSForAlert.Outputs.SNSTopicArn
+          - !Ref SNSForAlertArn
+      Period: !Ref NoIncomingRecordsPeriod
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: breaching
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchLogsGroupForFirehose:
     Type: AWS::Logs::LogGroup
     Properties:
