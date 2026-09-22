@@ -8,6 +8,7 @@ Metadata:
       - Label: 
           default: 'Microsoft Active Directory Configuration'
         Parameters: 
+          - ActiveDirectoryEC2ImageId
           - ActiveDirectoryEdition
           - ActiveDirectoryEnableSso
           - ActiveDirectoryName
@@ -37,12 +38,20 @@ Metadata:
           default: 'Identity Center Configuration'
         Parameters: 
           - IdentityCenterArn
+          - IdentityCenterAdministratorGroupId
+          - IdentityCenterReadOnlyGroupId
+          - IdentityCenterAdministratorTargetAccountIds
+          - IdentityCenterReadOnlyTargetAccountIds
+          - IdentityCenterManagementAccountId
       - Label: 
           default: 'FluentBit Configuration'
         Parameters: 
           - FluentBitForSyslog
           - AccountIdForArchive
+          - AllowedCidrBlockForSyslog
           - BucketNameForArchive
+          - NoIncomingRecordsAlarm
+          - NoIncomingRecordsPeriod
       - Label: 
           default: 'Amazon Quick Configuration'
         Parameters:
@@ -65,6 +74,11 @@ Parameters:
     Type: String
     Default: ''
     Description: The AWS account id for log archive
+  ActiveDirectoryEC2ImageId:
+    Type: String
+    Default: /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base
+    AllowedPattern: .+
+    Description: The SSM parameter name that holds the EC2 Image Id [required]
   ActiveDirectoryEdition:
     Type: String
     Default: Standard
@@ -116,7 +130,12 @@ Parameters:
     AllowedValues:
       - NOTICE
       - WARNING
-    Description: The alarm level of CloudWatch alarms
+    Description: The alarm level of CloudWatch alarms [required]
+  AllowedCidrBlockForSyslog:
+    Type: CommaDelimitedList
+    Default: 0.0.0.0/0
+    AllowedPattern: ^[0-9./]*$
+    Description: The list of CIDR blocks allowed to send syslog to FluentBit [required]
   BucketNameForArchive:
     Type: String
     Default: ''
@@ -131,41 +150,75 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
-    Description: Whether to enable FluentBit for collecting syslog format logs
+    Description: Whether to enable FluentBit for collecting syslog format logs [required]
   IdentityCenterArn:
     Type: String
     Default: ''
     Description: The ARN of the IAM Identity Center instance under which the operation will be executed
+  IdentityCenterAdministratorGroupId:
+    Type: String
+    Default: ''
+    Description: The identity store group id that receives administrator access
+  IdentityCenterReadOnlyGroupId:
+    Type: String
+    Default: ''
+    Description: The identity store group id that receives read only access
+  IdentityCenterAdministratorTargetAccountIds:
+    Type: CommaDelimitedList
+    Default: '000000000000'
+    AllowedPattern: \d{12}
+    Description: The account ids that administrator access is assigned to
+  IdentityCenterReadOnlyTargetAccountIds:
+    Type: CommaDelimitedList
+    Default: '000000000000'
+    AllowedPattern: \d{12}
+    Description: The account ids that read only access is assigned to
+  IdentityCenterManagementAccountId:
+    Type: String
+    Default: ''
+    Description: The management account id that organizations and service catalog access is assigned to
+  NoIncomingRecordsAlarm:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether an alarm is raised while no record reaches the FluentBit Firehose stream
+  NoIncomingRecordsPeriod:
+    Type: Number
+    Default: 10800
+    MinValue: 60
+    Description: The number of seconds without any incoming record that is treated as a failure. It must be a multiple of 60 [required]
   SubnetPrivateCidrBlockAz1:
     Type: String
     Default: 10.3.0.64/26
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ1
+    Description: The private subnet CIDR block at AZ1 [required]
   SubnetPrivateCidrBlockAz2:
     Type: String
     Default: 10.3.64.64/26
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ2
+    Description: The private subnet CIDR block at AZ2 [required]
   SubnetPrivateCidrBlockAz3:
     Type: String
     Default: 10.3.138.64/26
     AllowedPattern: ^[0-9./]*$
-    Description: The private subnet CIDR block at AZ3
+    Description: The private subnet CIDR block at AZ3 [required]
   SubnetTransitCidrBlockAz1:
     Type: String
     Default: 10.3.0.128/26
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block at AZ1
+    Description: The transit subnet CIDR block at AZ1 [required]
   SubnetTransitCidrBlockAz2:
     Type: String
     Default: 10.3.64.128/26
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block at AZ2
+    Description: The transit subnet CIDR block at AZ2 [required]
   SubnetTransitCidrBlockAz3:
     Type: String
     Default: 10.3.138.128/26
     AllowedPattern: ^[0-9./]*$
-    Description: The transit subnet CIDR block at AZ3
+    Description: The transit subnet CIDR block at AZ3 [required]
   ResolverRuleId:
     Type: String
     Default: ''
@@ -232,8 +285,10 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters: 
         AlarmLevel: !Ref AlarmLevel
+        EC2ImageId: !Ref ActiveDirectoryEC2ImageId
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
+        Environment: !Ref Environment
         LogicalName: !Ref AWS::StackName
         LoggingBucketArn: !Sub arn:aws:s3:::${BucketNameForArchive}
         Name: !Ref ActiveDirectoryName
@@ -259,7 +314,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -293,7 +348,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -327,7 +382,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -367,6 +422,11 @@ Resources:
       Parameters: 
         DefaultSessionDuration: PT12H
         InstanceArn: !Ref IdentityCenterArn
+        AdministratorGroupId: !Ref IdentityCenterAdministratorGroupId
+        ReadOnlyGroupId: !Ref IdentityCenterReadOnlyGroupId
+        AdministratorTargetAccountIds: !Join [ ',', !Ref IdentityCenterAdministratorTargetAccountIds ]
+        ReadOnlyTargetAccountIds: !Join [ ',', !Ref IdentityCenterReadOnlyTargetAccountIds ]
+        ManagementAccountId: !Ref IdentityCenterManagementAccountId
         LogicalName: !Ref AWS::StackName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -418,8 +478,13 @@ Resources:
       Parameters: 
         AccountIdForArchive: !Ref AccountIdForArchive
         AlarmLevel: !Ref AlarmLevel
+        AllowedCidrBlockForSyslog: !Join
+          - ','
+          - !Ref AllowedCidrBlockForSyslog
         BucketNameForArchive: !Ref BucketNameForArchive
         CpuArchitecture: ARM64
+        NoIncomingRecordsAlarm: !Ref NoIncomingRecordsAlarm
+        NoIncomingRecordsPeriod: !Ref NoIncomingRecordsPeriod
         SubnetIdAz1: !GetAtt Az1.Outputs.PrivateSubnetId
         SubnetIdAz2: !GetAtt Az2.Outputs.PrivateSubnetId
         SubnetIdAz3: !GetAtt Az3.Outputs.PrivateSubnetId
@@ -451,7 +516,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -468,7 +533,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -837,7 +902,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -862,7 +927,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -889,7 +954,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -916,7 +981,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -943,7 +1008,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -970,7 +1035,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-privateendpoints
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

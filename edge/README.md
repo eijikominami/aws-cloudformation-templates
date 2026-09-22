@@ -48,11 +48,12 @@ This template creates ``CloudFront`` distribution.
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | Enable or disable CloudFront additional metrics |
 | CloudFrontAdditionalName | String | | | If it's NOT empty, **Alias name** is set on **CloudFront** |
+| CloudFrontCompress | true or false | true | ○ | A flag that specifies whether automatic object compression is enabled |
 | CloudFrontDefaultRootObject | String | index.html | | CloudFront Viewer Protocol Policy |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
-| CloudFrontOriginAccessControlId | String | | Conditional | The origin access control |
+| CloudFrontOriginAccessControlId | String | | conditional | The origin access control |
 | **CloudFrontOriginDomainName** | String | | ○ | The origin domain | 
 | CloudFrontOriginShield | true or false | false | ○ | A flag that specifies whether Origin Shield is enabled |
 | CloudFrontOriginType | S3 or NOT_S3 | S3 | ○ | The Origin Type | 
@@ -62,9 +63,9 @@ This template creates ``CloudFront`` distribution.
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
-| **DomainName** | String | | ○ | The CNAME attached to CloudFront |
+| **DomainName** | String | | | The CNAME attached to CloudFront |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
-| LogBucketName | String | | Conditional | The custom S3 bucket name for access logging |
+| LogBucketName | String | | conditional | The custom S3 bucket name for access logging |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
 | RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
@@ -164,4 +165,4 @@ This template sets ``AWS WAF``.
 | --- | --- | --- | --- | --- |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | Scope | REGIONAL or CLOUDFRONT | REGIONAL | ○ | Specifies whether this is for an Amazon CloudFront distribution or for a regional application |
-| **TargetResourceArn** | String | | ○ | The ARN of the resource to associate with the web ACL |
+| **TargetResourceArn** | String | | | The ARN of the resource to associate with the web ACL |

@@ -61,7 +61,7 @@ Parameters:
   ImageBuilderImageName:
     Type: String
     Default: ''
-    Description: The name of the image used to create the fleet [required]
+    Description: The name of the image used to create the fleet
   ImageName:
     Type: String
     Default: AppStream-WinServer2019-01-26-2024
@@ -351,7 +351,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-appstream
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

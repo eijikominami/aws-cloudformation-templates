@@ -26,7 +26,7 @@ Parameters:
   SourceARN:
     Type: String
     AllowedPattern: .+
-    Description: The source ARN 
+    Description: The source ARN [required] 
   SNSTopicArn:
     Type: String
     AllowedPattern: .+

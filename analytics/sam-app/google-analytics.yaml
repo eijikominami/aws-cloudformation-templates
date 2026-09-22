@@ -8,35 +8,19 @@ Metadata:
       - Label:
           default: 'Google Analytics Configuration'
         Parameters:
-          - PropertyId
-          - AccountId
           - ClientId
           - ClientSecret
           - RefreshToken
           - AccessToken
-      - Label:
-          default: 'Glue Configuration'
-        Parameters:
-          - GlueJobTimeout
-          - GlueWorkerCount
-      - Label:
-          default: 'Git Integration Configuration'
-        Parameters:
-          - GitRepository
-          - GitOwner
-          - GitBranch
-          - GitFolder
-          - GitToken
-      - Label:
-          default: 'Schedule Configuration'
-        Parameters:
-          - ScheduleEnabled
       - Label:
           default: 'Parent Stack Resources'
         Parameters:
           - RawDataBucketName
           - IcebergDataBucketName
           - ScriptsBucketName
+          - TableBucketArn
+          - TableBucketName
+          - TableNamespace
           - QueryResultsBucketName
           - AlertTopicArn
           - GlueDatabaseName
@@ -54,13 +38,9 @@ Parameters:
     NoEcho: true
     Default: ""
     Description: Google Analytics 4 OAuth2 Access Token (optional - provide after OAuth flow)
-  AccountId:
-    Type: String
-    Default: ""
-    Description: Google Analytics 4 Account ID
   AlertTopicArn:
     Type: String
-    Description: ARN of the SNS topic for alerts
+    Description: ARN of the SNS topic for alerts [required]
   ClientId:
     Type: String
     Default: ""
@@ -69,72 +49,39 @@ Parameters:
     Type: String
     NoEcho: true
     AllowedPattern: .+
-    Description: The Google Analytics 4 OAuth2 Client Secret
-  GitBranch:
-    Type: String
-    Default: main
-    Description: Git branch for Visual ETL job source control
-  GitFolder:
-    Type: String
-    Default: glue-jobs
-    Description: Folder path in Git repository for Visual ETL job storage
-  GitOwner:
-    Type: String
-    Default: ""
-    Description: Git repository owner/organization name (optional)
-  GitRepository:
-    Type: String
-    Default: ""
-    Description: Git repository URL for Visual ETL job source control (optional)
-  GitToken:
-    Type: String
-    NoEcho: true
-    Default: ""
-    Description: GitHub/GitLab personal access token for authentication (optional)
+    Description: The Google Analytics 4 OAuth2 Client Secret [required]
   GlueDatabaseName:
     Type: String
-    Description: Name of the Glue Data Catalog database
-  GlueJobTimeout:
-    Type: Number
-    Default: 60
-    MinValue: 1
-    MaxValue: 2880
-    Description: Glue Job timeout in minutes
-  GlueWorkerCount:
-    Type: Number
-    Default: 5
-    MinValue: 2
-    MaxValue: 100
-    Description: Number of Glue workers
+    Description: Name of the Glue Data Catalog database [required]
   IcebergDataBucketName:
     Type: String
-    Description: Name of the S3 bucket for Iceberg data storage
-  PropertyId:
-    Type: String
-    AllowedPattern: .+
-    Description: The Google Analytics 4 Property ID [required]
+    Description: Name of the S3 bucket for Iceberg data storage [required]
   QueryResultsBucketName:
     Type: String
-    Description: Name of the S3 bucket for Athena query results
+    Description: Name of the S3 bucket for Athena query results [required]
   RawDataBucketName:
     Type: String
-    Description: Name of the S3 bucket for raw data staging
+    Description: Name of the S3 bucket for raw data staging [required]
   RefreshToken:
     Type: String
     NoEcho: true
     Default: ""
     Description: Google Analytics 4 OAuth2 Refresh Token (optional - provide after OAuth flow)
-  ScheduleEnabled:
-    Type: String
-    Default: "false"
-    AllowedValues:
-      - "true"
-      - "false"
-    Description: Enable scheduled execution of the Glue job at 4:00 AM JST (UTC+9) daily
-
   ScriptsBucketName:
     Type: String
-    Description: Name of the S3 bucket for Glue scripts storage
+    Description: Name of the S3 bucket for Glue scripts storage [required]
+  TableBucketArn:
+    Type: String
+    AllowedPattern: .+
+    Description: ARN of the S3 table bucket holding the Iceberg tables [required]
+  TableBucketName:
+    Type: String
+    AllowedPattern: .+
+    Description: Name of the S3 table bucket holding the Iceberg tables [required]
+  TableNamespace:
+    Type: String
+    AllowedPattern: .+
+    Description: Namespace within the S3 table bucket [required]
   LogicalName:
     Type: String
     Description: Logical name for resource naming and cross-stack references [required]
@@ -158,18 +105,9 @@ Parameters:
     AllowedPattern: .+
     Description: The tag value for resource tagging
 Conditions:
-  HasGitRepository: !And
-    - !Not [!Equals [!Ref GitRepository, ""]]
-    - !Not [!Equals [!Ref GitOwner, ""]]
-    - !Not [!Equals [!Ref GitToken, ""]]
   HasOAuthTokens: !And
     - !Not [!Equals [!Ref RefreshToken, ""]]
     - !Not [!Equals [!Ref AccessToken, ""]]
-  IsScheduleEnabled: !And
-    - !Equals [!Ref ScheduleEnabled, 'true']
-    - !Not [!Equals [!Ref RefreshToken, ""]]
-    - !Not [!Equals [!Ref AccessToken, ""]]
-
 Resources:
   IAMRoleForGlue:
     Type: AWS::IAM::Role
@@ -253,6 +191,26 @@ Resources:
                   - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
                   - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/${LogicalName}*
                   - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/${LogicalName}*/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog/s3tablescatalog
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog/s3tablescatalog/${TableBucketName}
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/s3tablescatalog/${TableBucketName}/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/s3tablescatalog/${TableBucketName}/*
+              - Effect: Allow
+                Action:
+                  - s3tables:GetTableBucket
+                  - s3tables:GetNamespace
+                  - s3tables:CreateNamespace
+                  - s3tables:ListNamespaces
+                  - s3tables:GetTable
+                  - s3tables:ListTables
+                  - s3tables:CreateTable
+                  - s3tables:UpdateTableMetadataLocation
+                  - s3tables:GetTableMetadataLocation
+                  - s3tables:GetTableData
+                  - s3tables:PutTableData
+                Resource:
+                  - !Ref TableBucketArn
+                  - !Sub ${TableBucketArn}/table/*
         - PolicyName: CloudWatchLogsAccessPolicy
           PolicyDocument:
             Version: "2012-10-17"
@@ -298,7 +256,6 @@ Resources:
                   - glue:UpdateJob
                   - glue:DeleteJob
                   - glue:GetJob
-                  - glue:UpdateSourceControlFromJob
                 Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${LogicalName}-ga-to-iceberg
               - Effect: Allow
                 Action:
@@ -377,27 +334,20 @@ Resources:
         ValidateCredentials: false
 
 
-  GlueTableForGA4CoreReports:
+  S3TableForGA4CoreReports:
+    Type: AWS::S3Tables::Table
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
-    Type: AWS::Glue::Table
     Properties:
-      CatalogId: !Ref AWS::AccountId
-      DatabaseName: !Ref GlueDatabaseName
-      OpenTableFormatInput:
-        IcebergInput:
-          MetadataOperation: CREATE
-          Version: '2'
-      TableInput:
-        Name: ga_core_reports_iceberg
-        StorageDescriptor:
-          Columns: []
-          Location: !Sub "s3://${IcebergDataBucketName}/ga_core_reports_iceberg"
-          InputFormat: org.apache.iceberg.mr.hive.HiveIcebergInputFormat
-          OutputFormat: org.apache.iceberg.mr.hive.HiveIcebergOutputFormat
-          SerdeInfo:
-            SerializationLibrary: org.apache.iceberg.mr.hive.HiveIcebergSerDe
-        TableType: EXTERNAL_TABLE
+      TableBucketARN: !Ref TableBucketArn
+      Namespace: !Ref TableNamespace
+      TableName: ga_core_reports_iceberg
+      OpenTableFormat: ICEBERG
+      WithoutMetadata: 'Yes'
+      Compaction:
+        Status: enabled
+      SnapshotManagement:
+        Status: enabled
 
   GlueJobForGA4Ingestion:
     Condition: HasOAuthTokens
@@ -410,20 +360,11 @@ Resources:
       IcebergDataBucket: !Ref IcebergDataBucketName
       DatabaseName: !Ref GlueDatabaseName
       ScriptsBucket: !Ref ScriptsBucketName
-      SourceTableName: ga_core_reports_iceberg
       LogicalName: !Ref LogicalName
       IAMRoleArn: !GetAtt IAMRoleForGlue.Arn
-      AccountId: !Ref AccountId
-      GitRepository: !Ref GitRepository
-      GitOwner: !Ref GitOwner
-      GitBranch: !Ref GitBranch
-      GitFolder: !Ref GitFolder
-      GitToken: !Ref GitToken
-      ForceUpdate: '2026-06-15T12:20'
 
 
   GlueTriggerForSchedule:
-    Condition: IsScheduleEnabled
     Type: AWS::Glue::Trigger
     Properties:
       Actions:
@@ -433,7 +374,6 @@ Resources:
       Schedule: "cron(0 19 * * ? *)"
       StartOnCreation: true
       Type: SCHEDULED
-
 
 
   LambdaFunctionForVisualETL:
@@ -513,9 +453,6 @@ Resources:
         environment: !Ref Environment
         createdby: !Ref TagValue
 
-  # Iceberg table created with empty schema. Schema is managed entirely by the
-  # Visual ETL job (EnableUpdateCatalog). Retain policies prevent CloudFormation
-  # from overwriting Iceberg metadata on subsequent deploys.
 
   CloudWatchAlarmForLambda:
     Type: AWS::Serverless::Application
@@ -559,17 +496,6 @@ Outputs:
     Description: ARN of the Visual ETL Lambda function
     Value: !GetAtt LambdaFunctionForVisualETL.Arn
 
-  GA4IngestionGitIntegrationEnabled:
-    Description: Whether Git integration is enabled for GA4 to S3 data ingestion job
-    Value: !If
-      - HasGitRepository
-      - "true"
-      - "false"
-
-  GA4IngestionScheduleEnabled:
-    Description: Whether scheduled execution is enabled for GA4 to S3 data ingestion job
-    Value: !Ref ScheduleEnabled
-
   GA4IngestionScheduleExpression:
     Description: Cron expression for GA4 to S3 data ingestion schedule (4:00 AM JST / 19:00 UTC)
     Value: "cron(0 19 * * ? *)"
@@ -587,12 +513,11 @@ Outputs:
     Description: Stack ID of the Glue CloudWatch Alarm stack
     Value: !Ref CloudWatchAlarmForGlue
 
-  GlueTableName:
-    Description: Name of the Glue Table for GA4 core reports
-    Value: !Ref GlueTableForGA4CoreReports
+  S3TableName:
+    Description: Name of the S3 table holding the GA4 core reports
+    Value: !Ref S3TableForGA4CoreReports
 
   GA4IngestionScheduleName:
-    Condition: IsScheduleEnabled
     Description: Name of the scheduled trigger for GA4 to S3 data ingestion job
     Value: !Ref GlueTriggerForSchedule
 

@@ -53,7 +53,7 @@ Parameters:
       - ENABLED
       - NOTIFICATION_ONLY
       - DISABLED
-    Description: ENABLED creates a detector. NOTIFICATION_ONLY assumes detector exists (e.g. via Organizations delegated admin) and only sets up EventBridge notifications. DISABLED skips GuardDuty entirely.
+    Description: ENABLED creates a detector. NOTIFICATION_ONLY assumes detector exists (e.g. via Organizations delegated admin) and only sets up EventBridge notifications. DISABLED skips GuardDuty entirely. [required]
   AmazonGuardDutyFindingsDestinationBucketArn:
     Type: String
     Default: ''
@@ -77,14 +77,14 @@ Parameters:
     Type: String
     Default: DefaultSecuritySettings
     AllowedPattern: .+
-    Description: The custom prefix name
+    Description: The custom prefix name [required]
   SIEM:
     Type: String
     Default: DISABLED
     AllowedValues:
       - ENABLED
       - DISABLED
-    Description: Enable or disable SIEM on Amazon OpenSearch Service
+    Description: Enable or disable SIEM on Amazon OpenSearch Service [required]
   SIEMControlTowerLogBucketNameList:
     Type: String
     Default: ''
@@ -116,7 +116,7 @@ Parameters:
     AllowedValues:
       - ENABLED
       - DISABLED
-    Description: Enable or disable AWS Security Agent
+    Description: Enable or disable AWS Security Agent [required]
   SecurityAgentVpcId:
     Type: String
     Default: ''
@@ -154,7 +154,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -166,7 +166,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

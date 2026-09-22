@@ -33,7 +33,7 @@ Parameters:
   TargetResourceArn:
     Type: String
     Default: ''
-    Description: The ARN of the resource to associate with the web ACL [required] 
+    Description: The ARN of the resource to associate with the web ACL 
   LogicalName:
     Type: String
     Default: WebServers

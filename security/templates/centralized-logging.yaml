@@ -24,7 +24,7 @@ Parameters:
   OrganizationId:
     Type: String
     Default: .+   
-    Description: The root id of AWS Organizations [required]
+    Description: The root id of AWS Organizations
   Environment:
     Type: String
     Default: production

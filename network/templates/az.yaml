@@ -48,7 +48,7 @@ Parameters:
     AllowedValues:
       - NOTICE
       - WARNING
-    Description: The alarm level of CloudWatch alarms
+    Description: The alarm level of CloudWatch alarms [required]
   AvailabilityZone:
     Type: AWS::EC2::AvailabilityZone::Name
     AllowedPattern: .+
@@ -323,7 +323,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-natgateway
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

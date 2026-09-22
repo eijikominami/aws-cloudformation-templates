@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Transform: AWS::Serverless-2016-10-31
+Transform: 
+  - AWS::LanguageExtensions
+  - AWS::Serverless-2016-10-31
 Description: aws-cloudformation-templates/identity/microsoftad sets AWS IAM Identity Center.
 Metadata: 
   AWS::CloudFormation::Interface:
@@ -9,6 +11,14 @@ Metadata:
         Parameters:
           - DefaultSessionDuration 
           - InstanceArn
+      - Label: 
+          default: 'Account Assignment Configuration'
+        Parameters:
+          - AdministratorGroupId
+          - ReadOnlyGroupId
+          - AdministratorTargetAccountIds
+          - ReadOnlyTargetAccountIds
+          - ManagementAccountId
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -29,6 +39,28 @@ Parameters:
     Type: String
     Default: ''
     Description: The ARN of the IAM Identity Center instance under which the operation will be executed
+  AdministratorGroupId:
+    Type: String
+    Default: ''
+    Description: The identity store group id that receives administrator access
+  ReadOnlyGroupId:
+    Type: String
+    Default: ''
+    Description: The identity store group id that receives read only access
+  AdministratorTargetAccountIds:
+    Type: CommaDelimitedList
+    Default: '000000000000'
+    AllowedPattern: \d{12}
+    Description: The account ids that administrator access is assigned to
+  ReadOnlyTargetAccountIds:
+    Type: CommaDelimitedList
+    Default: '000000000000'
+    AllowedPattern: \d{12}
+    Description: The account ids that read only access is assigned to
+  ManagementAccountId:
+    Type: String
+    Default: ''
+    Description: The management account id that organizations and service catalog access is assigned to
   LogicalName:
     Type: String
     Default: IdentityCenter
@@ -51,6 +83,10 @@ Parameters:
 
 Conditions:
   CreatePermissionSet: !Not [ !Equals [ !Ref InstanceArn, ''] ]
+  CreateAdministratorAssignment: !And [ !Not [ !Equals [ !Ref InstanceArn, ''] ], !Not [ !Equals [ !Ref AdministratorGroupId, ''] ], !Not [ !Equals [ !Join [ '', !Ref AdministratorTargetAccountIds ], '000000000000'] ] ]
+  CreateReadOnlyAssignment: !And [ !Not [ !Equals [ !Ref InstanceArn, ''] ], !Not [ !Equals [ !Ref ReadOnlyGroupId, ''] ], !Not [ !Equals [ !Join [ '', !Ref ReadOnlyTargetAccountIds ], '000000000000'] ] ]
+  CreateAssignmentForManagementAccount: !And [ !Not [ !Equals [ !Ref InstanceArn, ''] ], !Not [ !Equals [ !Ref AdministratorGroupId, ''] ], !Not [ !Equals [ !Ref ManagementAccountId, ''] ] ]
+  CreateReadOnlyAssignmentForManagementAccount: !And [ !Not [ !Equals [ !Ref InstanceArn, ''] ], !Not [ !Equals [ !Ref ReadOnlyGroupId, ''] ], !Not [ !Equals [ !Ref ManagementAccountId, ''] ] ]
 
 Resources:
   AdministratorAccess:
@@ -113,3 +149,91 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  CatalogAdminAccess:
+    Condition: CreatePermissionSet
+    Type: AWS::SSO::PermissionSet
+    Properties: 
+      Description: !Sub Provides full access to AWS Service Catalog administrator capabilities created by ${AWS::StackName}
+      InstanceArn: !Ref InstanceArn
+      ManagedPolicies: 
+        - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
+      Name: !Sub ${LogicalName}CatalogAdmin
+      SessionDuration: !Ref DefaultSessionDuration
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  CatalogEndUserAccess:
+    Condition: CreatePermissionSet
+    Type: AWS::SSO::PermissionSet
+    Properties: 
+      Description: !Sub Provides full access to AWS Service Catalog end user capabilities created by ${AWS::StackName}
+      InstanceArn: !Ref InstanceArn
+      ManagedPolicies: 
+        - arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess
+      Name: !Sub ${LogicalName}CatalogEndUser
+      SessionDuration: !Ref DefaultSessionDuration
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # Account Assignments
+  Fn::ForEach::AssignmentForAdministrator:
+    - AccountId
+    - !Ref AdministratorTargetAccountIds
+    - AssignmentForAdministrator${AccountId}:
+        Type: AWS::SSO::Assignment
+        # Conditions must be the second property listed, or later. Stack creation will fail if Conditions is the first property listed within the template fragment parameter of Fn::ForEach.
+        Condition: CreateAdministratorAssignment
+        Properties: 
+          InstanceArn: !Ref InstanceArn
+          PermissionSetArn: !GetAtt AdministratorAccess.PermissionSetArn
+          PrincipalId: !Ref AdministratorGroupId
+          PrincipalType: GROUP
+          TargetId: !Ref AccountId
+          TargetType: AWS_ACCOUNT
+  Fn::ForEach::AssignmentForReadOnly:
+    - AccountId
+    - !Ref ReadOnlyTargetAccountIds
+    - AssignmentForReadOnly${AccountId}:
+        Type: AWS::SSO::Assignment
+        Condition: CreateReadOnlyAssignment
+        Properties: 
+          InstanceArn: !Ref InstanceArn
+          PermissionSetArn: !GetAtt ReadOnlyAccess.PermissionSetArn
+          PrincipalId: !Ref ReadOnlyGroupId
+          PrincipalType: GROUP
+          TargetId: !Ref AccountId
+          TargetType: AWS_ACCOUNT
+  AssignmentForOrganizationsFull:
+    Condition: CreateAssignmentForManagementAccount
+    Type: AWS::SSO::Assignment
+    Properties: 
+      InstanceArn: !Ref InstanceArn
+      PermissionSetArn: !GetAtt OrganizationsFullAccess.PermissionSetArn
+      PrincipalId: !Ref AdministratorGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref ManagementAccountId
+      TargetType: AWS_ACCOUNT
+  AssignmentForCatalogAdmin:
+    Condition: CreateAssignmentForManagementAccount
+    Type: AWS::SSO::Assignment
+    Properties: 
+      InstanceArn: !Ref InstanceArn
+      PermissionSetArn: !GetAtt CatalogAdminAccess.PermissionSetArn
+      PrincipalId: !Ref AdministratorGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref ManagementAccountId
+      TargetType: AWS_ACCOUNT
+  AssignmentForCatalogEndUser:
+    Condition: CreateReadOnlyAssignmentForManagementAccount
+    Type: AWS::SSO::Assignment
+    Properties: 
+      InstanceArn: !Ref InstanceArn
+      PermissionSetArn: !GetAtt CatalogEndUserAccess.PermissionSetArn
+      PrincipalId: !Ref ReadOnlyGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref ManagementAccountId
+      TargetType: AWS_ACCOUNT

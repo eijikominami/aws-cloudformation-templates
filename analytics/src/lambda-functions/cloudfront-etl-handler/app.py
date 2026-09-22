@@ -30,31 +30,20 @@ def lambda_handler(event, context):
         properties = event['ResourceProperties']
 
         job_name = properties['JobName']
-        raw_data_bucket = properties['RawDataBucketName']
-        access_log_prefix = properties['AccessLogPrefix']
         iceberg_data_bucket = properties['IcebergDataBucketName']
-        database_name = properties['DatabaseName']
-        target_table_name = properties['TargetTableName']
         scripts_bucket = properties['ScriptsBucketName']
         logical_name = properties['LogicalName']
         iam_role_arn = properties['IAMRoleArn']
 
-        git_repository = properties.get('GitRepository', '')
-        git_owner = properties.get('GitOwner', '')
-        git_branch = properties.get('GitBranch', 'main')
-        git_folder = properties.get('GitFolder', 'glue-jobs')
-        git_token = properties.get('GitToken', '')
 
         if request_type == 'Create':
             response_data = handle_create(
-                job_name, raw_data_bucket, access_log_prefix, iceberg_data_bucket,
-                database_name, target_table_name, scripts_bucket, logical_name, iam_role_arn,
-                git_repository, git_owner, git_branch, git_folder, git_token)
+                job_name, iceberg_data_bucket,
+                scripts_bucket, logical_name, iam_role_arn)
         elif request_type == 'Update':
             response_data = handle_update(
-                job_name, raw_data_bucket, access_log_prefix, iceberg_data_bucket,
-                database_name, target_table_name, scripts_bucket, logical_name, iam_role_arn,
-                git_repository, git_owner, git_branch, git_folder, git_token)
+                job_name, iceberg_data_bucket,
+                scripts_bucket, logical_name, iam_role_arn)
         elif request_type == 'Delete':
             response_data = handle_delete(job_name)
         else:
@@ -71,12 +60,9 @@ def lambda_handler(event, context):
         cfnresponse.send(event, context, cfnresponse.FAILED, {"Error": str(e)}, job_name, reason=str(e))
 
 
-def handle_create(job_name, raw_data_bucket, access_log_prefix, iceberg_data_bucket,
-                  database_name, target_table_name, scripts_bucket, logical_name, iam_role_arn,
-                  git_repository, git_owner, git_branch, git_folder, git_token):
+def handle_create(job_name, iceberg_data_bucket,
+                  scripts_bucket, logical_name, iam_role_arn):
     logger.info(json.dumps({"message": "Creating Visual ETL Job", "job_name": job_name}))
-
-    code_gen_nodes = generate_visual_etl_nodes(raw_data_bucket, access_log_prefix, database_name, target_table_name)
 
     job_params = {
         'Name': job_name,
@@ -109,38 +95,20 @@ def handle_create(job_name, raw_data_bucket, access_log_prefix, iceberg_data_buc
         'NumberOfWorkers': 2,
         'WorkerType': 'G.1X',
         'ExecutionClass': 'STANDARD',
-        'CodeGenConfigurationNodes': code_gen_nodes,
         'Tags': {
             'environment': 'production',
             'createdby': 'aws-cloudformation-templates'
         }
     }
 
-    if is_git_integration_enabled(git_repository, git_owner, git_token):
-        job_params['SourceControlDetails'] = build_source_control_details(
-            git_repository, git_owner, git_branch, git_folder, git_token)
-
     glue_client.create_job(**job_params)
     job_arn = wait_for_job_ready(job_name)
-
-    if is_git_integration_enabled(git_repository, git_owner, git_token):
-        glue_client.update_source_control_from_job(
-            JobName=job_name,
-            Provider='GITHUB',
-            RepositoryName=git_repository,
-            RepositoryOwner=git_owner,
-            BranchName=git_branch,
-            Folder=git_folder,
-            AuthStrategy='PERSONAL_ACCESS_TOKEN',
-            AuthToken=git_token
-        )
 
     return {"JobName": job_name, "JobArn": job_arn, "Status": "CREATED"}
 
 
-def handle_update(job_name, raw_data_bucket, access_log_prefix, iceberg_data_bucket,
-                  database_name, target_table_name, scripts_bucket, logical_name, iam_role_arn,
-                  git_repository, git_owner, git_branch, git_folder, git_token):
+def handle_update(job_name, iceberg_data_bucket,
+                  scripts_bucket, logical_name, iam_role_arn):
     logger.info(json.dumps({"message": "Updating Visual ETL Job", "job_name": job_name}))
 
     try:
@@ -148,17 +116,15 @@ def handle_update(job_name, raw_data_bucket, access_log_prefix, iceberg_data_buc
     except ClientError as e:
         if e.response['Error']['Code'] == 'EntityNotFoundException':
             return handle_create(
-                job_name, raw_data_bucket, access_log_prefix, iceberg_data_bucket,
-                database_name, target_table_name, scripts_bucket, logical_name, iam_role_arn,
-                git_repository, git_owner, git_branch, git_folder, git_token)
+                job_name, iceberg_data_bucket,
+                scripts_bucket, logical_name, iam_role_arn)
         raise
 
+    # CodeGenConfigurationNodes is left out so a deployment cannot overwrite the flow
     job_update = {
         'JobMode': 'VISUAL',
         'Role': iam_role_arn,
         'Command': current_job['Job']['Command'],
-        'CodeGenConfigurationNodes': generate_visual_etl_nodes(
-            raw_data_bucket, access_log_prefix, database_name, target_table_name),
         'DefaultArguments': {
             **current_job['Job']['DefaultArguments'],
             '--conf': (
@@ -180,24 +146,8 @@ def handle_update(job_name, raw_data_bucket, access_log_prefix, iceberg_data_buc
         'ExecutionClass': 'STANDARD'
     }
 
-    if is_git_integration_enabled(git_repository, git_owner, git_token):
-        job_update['SourceControlDetails'] = build_source_control_details(
-            git_repository, git_owner, git_branch, git_folder, git_token)
-
     glue_client.update_job(JobName=job_name, JobUpdate=job_update)
     job_arn = wait_for_job_ready(job_name)
-
-    if is_git_integration_enabled(git_repository, git_owner, git_token):
-        glue_client.update_source_control_from_job(
-            JobName=job_name,
-            Provider='GITHUB',
-            RepositoryName=git_repository,
-            RepositoryOwner=git_owner,
-            BranchName=git_branch,
-            Folder=git_folder,
-            AuthStrategy='PERSONAL_ACCESS_TOKEN',
-            AuthToken=git_token
-        )
 
     return {"JobName": job_name, "JobArn": job_arn, "Status": "UPDATED"}
 
@@ -213,34 +163,6 @@ def handle_delete(job_name):
         raise
 
 
-def generate_visual_etl_nodes(raw_data_bucket, access_log_prefix, database_name, target_table_name):
-    return {
-        "node-source": {
-            "S3CsvSource": {
-                "Name": "CloudFront Logs",
-                "Paths": [f"s3://{raw_data_bucket}/{access_log_prefix}"],
-                "Separator": "tab",
-                "QuoteChar": "quote",
-                "WithHeader": False,
-                "Recurse": True
-            }
-        },
-        "node-target": {
-            "S3CatalogTarget": {
-                "Name": "Iceberg Table",
-                "Inputs": ["node-source"],
-                "Table": target_table_name,
-                "Database": database_name,
-                "PartitionKeys": [["date"]],
-                "SchemaChangePolicy": {
-                    "EnableUpdateCatalog": True,
-                    "UpdateBehavior": "UPDATE_IN_DATABASE"
-                }
-            }
-        }
-    }
-
-
 def wait_for_job_ready(job_name, max_wait_time=120, poll_interval=5):
     start_time = time.time()
     while time.time() - start_time < max_wait_time:
@@ -253,31 +175,3 @@ def wait_for_job_ready(job_name, max_wait_time=120, poll_interval=5):
             else:
                 raise
     raise Exception(f"Job '{job_name}' did not become ready within {max_wait_time} seconds")
-
-
-def is_git_integration_enabled(git_repository, git_owner, git_token):
-    return all(p and p.strip() for p in [git_repository, git_owner, git_token])
-
-
-def build_source_control_details(git_repository, git_owner, git_branch, git_folder, git_token):
-    provider = 'GITHUB'
-    if 'gitlab' in git_repository.lower():
-        provider = 'GITLAB'
-    elif 'codecommit' in git_repository.lower():
-        provider = 'AWS_CODE_COMMIT'
-    elif 'bitbucket' in git_repository.lower():
-        provider = 'BITBUCKET'
-
-    details = {
-        'Provider': provider,
-        'Repository': git_repository,
-        'Branch': git_branch,
-        'Folder': git_folder,
-        'AuthStrategy': 'PERSONAL_ACCESS_TOKEN',
-        'AuthToken': git_token
-    }
-
-    if provider != 'AWS_CODE_COMMIT' and git_owner:
-        details['Owner'] = git_owner
-
-    return details

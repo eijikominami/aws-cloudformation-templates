@@ -36,7 +36,7 @@ Parameters:
   OrganizationId:
     Type: String
     Default: .+
-    Description: The root id of AWS Organizations [required]
+    Description: The root id of AWS Organizations
   SecurityOUId:
     Type: String
     AllowedPattern: .+  
@@ -55,7 +55,7 @@ Parameters:
   SIEMEmail:
     Type: String
     Default: ''
-    Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to [required]
+    Description:  The email as SNS topic, where Amazon OpenSearch Service will send alerts to
   CentralizedLoggingFirehoseRoleArns:
     Type: CommaDelimitedList
     Default: ''

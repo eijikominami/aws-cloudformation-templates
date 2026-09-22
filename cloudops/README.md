@@ -69,7 +69,6 @@ This template sets ``Amazon CloudWatch Application Insight``.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
 
 ### DevOps Agent
 
@@ -82,10 +81,9 @@ This template creates ``AWS DevOps Agent`` Agent Space, IAM roles, and AWS accou
 | --- | --- | --- | --- | --- |
 | **AgentSpaceName** | String | DefaultAgentSpace | ○ | The name of the Agent Space |
 | AgentSpaceId | String | | conditional | AgentSpace ID from the PRIMARY account |
-| MemberAccountIds | CommaDelimitedList | | | Comma-separated list of MEMBER account IDs for cross-account webhook forwarding |
+| MemberAccountIds | CommaDelimitedList | | ○ | Comma-separated list of MEMBER account IDs for cross-account webhook forwarding |
 | Mode | PRIMARY / MEMBER | PRIMARY | ○ | PRIMARY creates AgentSpace, MEMBER creates IAM roles only |
 | PrimaryAccountId | String | | conditional | Account ID of the PRIMARY account that owns the AgentSpace |
-| SNSForAlertArn | String | | | The Amazon SNS topic ARN for alert |
 | WebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | Minimum priority level to forward to DevOps Agent |
 
 #### Webhook Forwarder Priority Filtering
@@ -115,7 +113,6 @@ This template sets a notification channel of ``AWS DevOps Guru``.
 
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
-| **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
 
 ### Systems Manager
 

@@ -29,7 +29,7 @@
 | 作成されるAWSサービス | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
 | --- | --- | --- |
 | Data Lifecycle Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DataLifecycleManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/dlm.yaml&param_LogicalName=DataLifecycleManager) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DataLifecycleManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/dlm.yaml&param_LogicalName=DataLifecycleManager) |
-| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
+| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=WAF&templateURL=https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
 
 ## アーキテクチャ
 
@@ -59,6 +59,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | BucketNameForArtifact | String | | | アーティファクトを保存する S3 バケット名 |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | CertificateManagerARN | String | | | ARNを指定した場合、**CloudFront** もしくは **Elastic Load Balancer** に **SSL証明書** が紐付けられます。 |
+| CloudFrontCompress | true or false | true | ○ | オブジェクトの自動圧縮の有効化フラグ |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | |
 | CloudFrontMinimumTTL | Number | 0 | ○ | |
 | CloudFrontMaximumTTL |  Number | 31536000 | ○ | |
@@ -72,7 +73,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | CodeStarConnectionArn | String | | | CodeStar connection の ARN |
 | ComputeType | INSTANCE / CONTAINER / APPRUNNER | INSTANCE | ○ | コンピュート基盤 |
 | DesiredCapacity | Number | 1 | ○ | | 
-| DockerFilePath | String | | | Dockerfile のパス | 
+| DockerFilePath | String | | ○ | Dockerfile のパス | 
 | DomainName | String | | | ドメイン名 | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | スナップショット作成時刻 (UTC) |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
@@ -88,6 +89,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、ログ機能が有効化されます。 |
 | LogGroupNameTransferredToS3 | String | | | S3 にログを転送する CloudWatch Log Group 名 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
+| **SsmSecureStringAccess** | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、EC2 インスタンスが Parameter Store の SecureString を復号できます。 |
 | SubnetPrivateCidrBlockForAz1 | String | 10.1.0.0/24 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockForAz2 | String | 10.1.2.0/24 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockForAz3 | String | 10.1.4.0/24 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |

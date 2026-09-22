@@ -58,7 +58,7 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name G
 | **ACMDomainName** | String | | | ドメイン名を指定した場合、**SSL証明書**が作成されます。 |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | BillingAlertThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
-| BudgetName | String | Total | ○ | 予算名。 ``BillingAlertThreshold`` を変更する場合は、この値も変更してください。 |
+| BudgetName | String | Total | ○ | 予算名。 ``AWSCloudFormationTemplates/cicd`` からデプロイする場合、この値は ``Total`` に固定されます。 |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | CloudFrontErrorRateThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |
 | CloudFrontErrorRequestPerMinuteThreshold | Number | 0 | ○ | 0以外の値を指定した場合、**CloudWatchアラーム**が作成されます。 |

@@ -14,11 +14,6 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: 'Glue Configuration'
-        Parameters:
-          - GlueJobTimeout
-          - GlueWorkerCount
-      - Label:
           default: 'CloudFront Log Analysis Configuration'
         Parameters:
           - CloudFrontLogDomainName
@@ -28,33 +23,18 @@ Metadata:
       - Label:
           default: 'CloudWatch Synthetics Configuration'
         Parameters:
-          - SyntheticsResultsBucketName
-          - SyntheticsResultsPrefix
+          - SyntheticsSourcePaths
+          - SyntheticsLookbackDays
       - Label:
           default: 'Google Analytics Configuration'
         Parameters:
-          - GoogleAnalyticsPropertyId
-          - GoogleAnalyticsAccountId
           - GoogleAnalyticsClientId
           - GoogleAnalyticsClientSecret
           - GoogleAnalyticsRefreshToken
           - GoogleAnalyticsAccessToken
       - Label:
-          default: 'Git Integration Configuration'
-        Parameters:
-          - GitRepository
-          - GitOwner
-          - GitBranch
-          - GitFolder
-          - GitToken
-      - Label:
-          default: 'Schedule Configuration'
-        Parameters:
-          - ScheduleEnabled
-      - Label:
           default: 'Notification Configuration'
         Parameters:
-          - AlarmLevel
           - SNSForAlertArn
           - SNSForDeploymentArn
       - Label:
@@ -66,13 +46,6 @@ Metadata:
           - TagValue
 
 Parameters:
-  AlarmLevel:
-    Type: String
-    Default: NOTICE
-    AllowedValues:
-      - NOTICE
-      - WARNING
-    Description: The alarm level of CloudWatch alarms
   CloudFrontLogDomainName:
     Type: String
     Default: ''
@@ -89,43 +62,6 @@ Parameters:
     Type: String
     Default: ''
     Description: IAM role name in source account for replication
-  GitBranch:
-    Type: String
-    Default: main
-    Description: Git branch for Visual ETL job source control
-  GitFolder:
-    Type: String
-    Default: glue-jobs
-    Description: Folder path in Git repository for Visual ETL job storage
-  GitOwner:
-    Type: String
-    Default: ""
-    Description: Git repository owner/organization name (optional)
-  GitRepository:
-    Type: String
-    Default: ""
-    Description: Git repository URL for Visual ETL job source control (optional)
-  GitToken:
-    Type: String
-    NoEcho: true
-    Default: ""
-    Description: GitHub/GitLab personal access token for authentication (optional)
-  GlueJobTimeout:
-    Type: Number
-    Default: 60
-    MinValue: 1
-    MaxValue: 2880
-    Description: Google Analytics Glue Job timeout in minutes
-  GlueWorkerCount:
-    Type: Number
-    Default: 5
-    MinValue: 2
-    MaxValue: 100
-    Description: Number of Glue workers for Google Analytics processing
-  GoogleAnalyticsAccountId:
-    Type: String
-    Default: ""
-    Description: Google Analytics 4 Account ID
   GoogleAnalyticsAccessToken:
     Type: String
     NoEcho: true
@@ -140,22 +76,11 @@ Parameters:
     NoEcho: true
     Default: ""
     Description: The Google Analytics 4 OAuth2 Client Secret
-  GoogleAnalyticsPropertyId:
-    Type: String
-    Default: ""
-    Description: The Google Analytics 4 Property ID (also used as Client ID)
   GoogleAnalyticsRefreshToken:
     Type: String
     NoEcho: true
     Default: ""
     Description: The Google Analytics 4 OAuth2 Refresh Token
-  ScheduleEnabled:
-    Type: String
-    Default: "false"
-    AllowedValues:
-      - "true"
-      - "false"
-    Description: Enable scheduled execution of the Glue job at 4:00 AM JST (UTC+9) daily$'
   SNSForAlertArn:
     Type: String
     Default: ""
@@ -164,14 +89,15 @@ Parameters:
     Type: String
     Default: ""
     Description: The Amazon SNS topic ARN for deployment information
-  SyntheticsResultsBucketName:
+  SyntheticsSourcePaths:
     Type: String
     Default: ''
-    Description: Name of the S3 bucket where CloudWatch Synthetics stores results
-  SyntheticsResultsPrefix:
-    Type: String
-    Default: canary/
-    Description: S3 prefix for Synthetics results
+    Description: Comma-separated S3 paths holding Synthetics reports, one per Canary artifact bucket
+  SyntheticsLookbackDays:
+    Type: Number
+    Default: 3
+    MinValue: 1
+    Description: Days of report folders each Synthetics run reads. Raise it for a backfill, which is processed in batches
   LogicalName:
     Type: String
     Default: analytics
@@ -204,19 +130,11 @@ Parameters:
 
 Conditions:
   CreateGlueForCloudFrontLogs: !Not [!Equals [!Ref CloudFrontLogDomainName, '']]
-  CreateGlueForSynthetics: !Not [!Equals [!Ref SyntheticsResultsBucketName, '']]
+  CreateGlueForSynthetics: !Not [!Equals [!Ref SyntheticsSourcePaths, '']]
   CreateQuickCrossAccountRole: !Not [!Equals [!Ref QuickAccountId, '']]
   CreateSNSForAlert: !Equals [!Ref SNSForAlertArn, ""]
   CreateSNSForDeployment: !Equals [!Ref SNSForDeploymentArn, ""]
-  HasGoogleAnalyticsConfig: !And
-    - !Not [!Equals [!Ref GoogleAnalyticsPropertyId, ""]]
-    - !Not [!Equals [!Ref GoogleAnalyticsAccountId, ""]]
-    - !Not [!Equals [!Ref GoogleAnalyticsClientSecret, ""]]
-  HasGitIntegration: !And
-    - !Not [!Equals [!Ref GitRepository, ""]]
-    - !Not [!Equals [!Ref GitOwner, ""]]
-    - !Not [!Equals [!Ref GitToken, ""]]
-
+  HasGoogleAnalyticsConfig: !Not [!Equals [!Ref GoogleAnalyticsClientSecret, ""]]
 Resources:
   # Nested Stacks
   GlueForCloudFrontLogs:
@@ -231,18 +149,15 @@ Resources:
         AthenaWorkGroupName: !Ref AthenaWorkGroup
         DomainName: !Ref CloudFrontLogDomainName
         Environment: !Ref Environment
-        GitBranch: !Ref GitBranch
-        GitFolder: !Ref GitFolder
-        GitOwner: !Ref GitOwner
-        GitRepository: !Ref GitRepository
-        GitToken: !Ref GitToken
         GlueDatabaseName: !Ref GlueDatabase
         IcebergDataBucketName: !Ref S3BucketForIcebergData
+        TableBucketArn: !GetAtt S3TableBucket.TableBucketARN
+        TableBucketName: !Sub ${LogicalName}-tables-${AWS::Region}-${AWS::AccountId}
+        TableNamespace: !Sub ${LogicalName}_db
         LogicalName: !Ref LogicalName
         QueryResultsBucketName: !Ref S3BucketForQueryResults
         RawDataBucketName: !Ref S3BucketForRawData
         ScriptsBucketName: !Ref S3BucketForScripts
-        ScheduleEnabled: !Ref ScheduleEnabled
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue
       Tags:
@@ -258,25 +173,18 @@ Resources:
       Location: ./google-analytics.yaml
       Parameters:
         AccessToken: !Ref GoogleAnalyticsAccessToken
-        AccountId: !Ref GoogleAnalyticsAccountId
         AlertTopicArn: !Ref SNSForAlertArn
         ClientId: !Ref GoogleAnalyticsClientId
         ClientSecret: !Ref GoogleAnalyticsClientSecret
-        GitBranch: !Ref GitBranch
-        GitFolder: !Ref GitFolder
-        GitOwner: !Ref GitOwner
-        GitRepository: !Ref GitRepository
-        GitToken: !Ref GitToken
         GlueDatabaseName: !Ref GlueDatabase
-        GlueJobTimeout: !Ref GlueJobTimeout
-        GlueWorkerCount: !Ref GlueWorkerCount
         IcebergDataBucketName: !Ref S3BucketForIcebergData
+        TableBucketArn: !GetAtt S3TableBucket.TableBucketARN
+        TableBucketName: !Sub ${LogicalName}-tables-${AWS::Region}-${AWS::AccountId}
+        TableNamespace: !Sub ${LogicalName}_db
         LogicalName: !Ref LogicalName
-        PropertyId: !Ref GoogleAnalyticsPropertyId
         QueryResultsBucketName: !Ref S3BucketForQueryResults
         RawDataBucketName: !Ref S3BucketForRawData
         RefreshToken: !Ref GoogleAnalyticsRefreshToken
-        ScheduleEnabled: !Ref ScheduleEnabled
         ScriptsBucketName: !Ref S3BucketForScripts
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -296,16 +204,13 @@ Resources:
         AthenaWorkGroupName: !Ref AthenaWorkGroup
         GlueDatabaseName: !Ref GlueDatabase
         IcebergDataBucketName: !Ref S3BucketForIcebergData
+        TableBucketArn: !GetAtt S3TableBucket.TableBucketARN
+        TableBucketName: !Sub ${LogicalName}-tables-${AWS::Region}-${AWS::AccountId}
+        TableNamespace: !Sub ${LogicalName}_db
         QueryResultsBucketName: !Ref S3BucketForQueryResults
         ScriptsBucketName: !Ref S3BucketForScripts
-        SyntheticsResultsBucketName: !Ref SyntheticsResultsBucketName
-        ScheduleEnabled: !Ref ScheduleEnabled
-        SyntheticsResultsPrefix: !Ref SyntheticsResultsPrefix
-        GitBranch: !Ref GitBranch
-        GitFolder: !Ref GitFolder
-        GitOwner: !Ref GitOwner
-        GitRepository: !Ref GitRepository
-        GitToken: !Ref GitToken
+        SyntheticsSourcePaths: !Ref SyntheticsSourcePaths
+        SyntheticsLookbackDays: !Ref SyntheticsLookbackDays
         LogicalName: !Ref LogicalName
         Environment: !Ref Environment
         TagKey: !Ref TagKey
@@ -322,6 +227,33 @@ Resources:
       DatabaseInput:
         Name: !Sub ${LogicalName}_db
         Description: !Sub Database for ${LogicalName} analytics platform
+
+  # S3 Tables
+  S3TableBucket:
+    Type: AWS::S3Tables::TableBucket
+    Properties:
+      TableBucketName: !Sub ${LogicalName}-tables-${AWS::Region}-${AWS::AccountId}
+
+  GlueCatalogForS3Tables:
+    Type: AWS::Glue::Catalog
+    Properties:
+      Name: s3tablescatalog
+      Description: !Sub Federated catalog exposing S3 table buckets to analytics services for ${LogicalName}
+      FederatedCatalog:
+        ConnectionName: aws:s3tables
+        Identifier: !Sub arn:aws:s3tables:${AWS::Region}:${AWS::AccountId}:bucket/*
+      # IAM alone governs access; Lake Formation grants are not used here.
+      CreateDatabaseDefaultPermissions:
+        - Principal:
+            DataLakePrincipalIdentifier: IAM_ALLOWED_PRINCIPALS
+          Permissions:
+            - ALL
+      CreateTableDefaultPermissions:
+        - Principal:
+            DataLakePrincipalIdentifier: IAM_ALLOWED_PRINCIPALS
+          Permissions:
+            - ALL
+      AllowFullTableExternalDataAccess: 'True'
 
   # S3 Buckets
   S3BucketForIcebergData:
@@ -591,7 +523,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -610,7 +542,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.25
+        SemanticVersion: 2.2.26
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -674,11 +606,3 @@ Outputs:
     Condition: CreateQuickCrossAccountRole
     Description: ARN of the IAM role for Amazon Quick cross-account Athena access
     Value: !GetAtt IAMRoleForQuickCrossAccountAccess.Arn
-
-  GitIntegrationEnabled:
-    Condition: HasGoogleAnalyticsConfig
-    Description: Whether Git integration is enabled for Visual ETL Job
-    Value: !If
-      - HasGitIntegration
-      - "true"
-      - "false"

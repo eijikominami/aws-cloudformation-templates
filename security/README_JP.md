@@ -115,13 +115,30 @@ CloudWatchイベントは、Amazon SNS にこれらのイベントを転送し�
 このテンプレートは、``Amazon Security Lake`` を有効化し、ログソースと SIEM 連携用のサブスクライバーを構成します。
 デプロイ前に、[**Security Lake の委任管理者を登録**](https://docs.aws.amazon.com/ja_jp/security-lake/latest/userguide/getting-started.html#initial-account-setup) してください。このテンプレートは委任管理者アカウントに直接デプロイする必要があります。
 
+データレイクは ``CLOUD_TRAIL_MGMT`` ``LAMBDA_EXECUTION`` ``EKS_AUDIT`` ``ROUTE53`` ``SH_FINDINGS`` ``VPC_FLOW`` を収集します。
+サブスクライバーが受け取るのは ``LAMBDA_EXECUTION`` ``EKS_AUDIT`` ``ROUTE53`` ``VPC_FLOW`` のみです。CloudTrail と Security Hub の検出結果は、SIEM が集約ログバケットから直接取り込むため除外しています。
+
+``AWS::SecurityLake::SubscriberNotification`` はサブスクライバーのキューを可視性タイムアウト 300 秒で管理します。
+
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **AuditAccountId** | String | | | SIEM が稼働する Audit アカウントの ID。指定するとサブスクライバーを作成 |
+| **AuditAccountId** | String | | ○ | SIEM が稼働する Audit アカウントの ID。指定するとサブスクライバーを作成 |
 | **LogicalName** | String | SecurityLake | ○ | リソース名のプレフィックス |
-| Environment | String | production | | production / test / development |
-| TagKey | String | createdby | ○ | タグキー |
-| TagValue | String | aws-cloudformation-templates | ○ | タグ値 |
+
+## SIEM on Amazon OpenSearch Service
+
+``Amazon GuardDuty`` と ``Amazon Inspector`` の検出結果は ``Amazon EventBridge`` 経由で集約ログバケットに届きますが、そのオブジェクトキーとペイロードは [SIEM on Amazon OpenSearch Service](https://github.com/aws-samples/siem-on-amazon-opensearch-service) が期待する形式と異なるため、設定を加えるまで取り込まれません。``AWS Security Hub`` は対応不要です。
+
+GuardDuty については、[user.ini](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/configure_siem.md) のログ種別パターンに EventBridge のキーを追加し、``aes-siem-es-loader`` に Lambda レイヤーとして適用します。
+
+```ini
+[guardduty]
+s3_key = /GuardDuty/|GuardDuty_Finding
+```
+
+Inspector については、``log-aws-inspector-*`` に対して EventBridge のタイムスタンプ形式を受け付ける [インデックステンプレート](https://opensearch.org/docs/latest/im-plugin/index-templates/) を SIEM のテンプレートより高い priority で登録し、既存インデックスを削除して新しいマッピングを反映させます。テンプレートの登録にはデータアクセスポリシーで ``aoss:CreateCollectionItems`` が必要です。説明が ``Created By SIEM Solution. DO NOT EDIT`` のポリシーは SIEM スタックが元に戻すため編集しません。
+
+どちらも設定後に届いたオブジェクトに対して有効になります。バケットに既にあるオブジェクトは、バケット通知が再度発火しないと取り込まれません。同じオブジェクトを自身のコピーで上書きすると通知が発火します。
 
 ## Security Agent
 
@@ -145,7 +162,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
-| AuditAccountId | String | | | 監査アカウントの ID |
+| AuditAccountId | String | | ○ | 監査アカウントの ID |
 | AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS CloudTrail が有効化されます。 |
 | AWSCloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、CloudTrail の証跡の作成が有効化されます。 |
@@ -161,12 +178,12 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | GitHubCodeScanRepository | String | | | OIDC 信頼対象の GitHub オーナー/リポジトリ名（例: eijikominami/aws-cloudformation-templates） |
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | ACCOUNT もしくは ORGANIZATION を指定した場合、IAM Access Analyzer が有効化されます。 |
 | IAMUserArnToAssumeAWSSupportRole | String | | | AWS Support ロールを引き受ける IAM ユーザの ARN |
-| LogArchiveAccountId | String | | | ログアーカイブアカウントの ID |
+| LogArchiveAccountId | String | | ○ | ログアーカイブアカウントの ID |
 | OrganizationId | String | | | AWS Organizations の ID |
 | OrganizationsRootId | String | | | AWS Organizations のルート ID |
 | SecurityAgent | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Security Agent が有効化されます。 |
 | SecurityAgentVpcId | String | | conditional | Security Agent スキャナーが実行される VPC の ID |
-| SecurityOUId | String | | | セキュリティ OU の ID |
+| SecurityOUId | String | | ○ | セキュリティ OU の ID |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、SIEM が有効化されます。 |
 | SIEMControlTowerLogBucketNameList | String | | ※ | ログアーカイブアカウントの S3 ログバケット名。**OpenSearch Service インストール後に指定。** |
 | SIEMControlTowerRoleArnForEsLoader | String | | ※ | aes-siem-es-loader が使用する IAM ロール ARN。**OpenSearch Service インストール後に指定。** |

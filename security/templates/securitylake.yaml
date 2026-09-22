@@ -20,7 +20,7 @@ Parameters:
   AuditAccountId:
     Type: String
     Default: ''  
-    Description: The id of the audit account [required]
+    Description: The id of the audit account
   LogicalName: 
     Type: String
     Default: SecurityLake
@@ -153,10 +153,8 @@ Resources:
       AccessTypes: 
         - S3
       DataLakeArn: !GetAtt DataLake.Arn
+      # CLOUD_TRAIL_MGMT and SH_FINDINGS are excluded because SIEM already ingests them natively.
       Sources: 
-        - AwsLogSource: 
-            SourceName: CLOUD_TRAIL_MGMT
-            SourceVersion: 2.0
         - AwsLogSource: 
             SourceName: LAMBDA_EXECUTION
             SourceVersion: 2.0
@@ -165,9 +163,6 @@ Resources:
             SourceVersion: 2.0
         - AwsLogSource: 
             SourceName: ROUTE53
-            SourceVersion: 2.0
-        - AwsLogSource: 
-            SourceName: SH_FINDINGS
             SourceVersion: 2.0
         - AwsLogSource: 
             SourceName: VPC_FLOW

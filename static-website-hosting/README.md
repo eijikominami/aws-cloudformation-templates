@@ -32,7 +32,7 @@ If you want to deploy each service individually, click the button below.
 | --- | --- | --- |
 | Synthetics | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=Synthetics&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/cloudops/synthetics-heartbeat.yaml) |
 | Real-time Dashboard | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=RealtimeLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/edge/realtime-dashboard.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=RealtimeLogs&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/edge/realtime-dashboard.yaml) |
-| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
+| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=WAF&templateURL=https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
 
 ## Architecture
 
@@ -109,6 +109,7 @@ You can provide optional parameters as follows.
 | BucketNameForArtifact | String | | | The bucket name artifact art stored |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** |
 | CloudFrontAdditionalMetrics | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, additional metrics is enabled |
+| CloudFrontCompress | true or false | true | ○ | A flag that specifies whether automatic object compression is enabled |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
@@ -123,8 +124,8 @@ You can provide optional parameters as follows.
 | CloudWatchAppicationSignals | ENABLED / DISABLED | ENABLED | | If it is ENABLED, Logging is enabled on **Internet Monitor** and **CloudWatch Synthetics**  |
 | CodeStarConnectionArn | String | | | The Amazon Resource Name (ARN) of the CodeStar connection |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
-| GitHubOwnerNameForWebsite | String | | ○ | The GitHub owner name of the contents repository |
-| GitHubRepoNameForWebsite | String | | ○ | The GitHub repository name of the contents repository |
+| GitHubOwnerNameForWebsite | String | | | The GitHub owner name of the contents repository |
+| GitHubRepoNameForWebsite | String | | | The GitHub repository name of the contents repository |
 | GitHubBranchNameForWebsite | String | | | The Branch name of GitHub for the contents repository |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |

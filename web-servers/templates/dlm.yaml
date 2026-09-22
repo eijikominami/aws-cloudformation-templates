@@ -10,6 +10,7 @@ Metadata:
           - DailySnapshotScheduledAt
           - SnapshotInterval
           - SnapshotRetainRule
+          - SsmParameterNameForLatestImage
       - Label: 
           default: 'Tag Configuration'
         Parameters:
@@ -41,6 +42,10 @@ Parameters:
     Default: 7
     MinValue: 1
     Description: The number of snapshots to retain for each volume [required]
+  SsmParameterNameForLatestImage:
+    Type: String
+    Default: ''
+    Description: The SSM parameter name that the latest AMI Id is written to. IMAGE_MANAGEMENT only
   LogicalName:
     Type: String
     Default: WebServers
@@ -61,6 +66,12 @@ Parameters:
     Type: String
     Default: aws-cloudformation-templates
     AllowedPattern: .+
+
+Conditions:
+  RegisterLatestImage: !Not
+    - !Equals
+      - !Ref SsmParameterNameForLatestImage
+      - ''
 
 Resources:
   # IAM
@@ -92,13 +103,84 @@ Resources:
               - Effect: Allow
                 Action:
                   - ec2:CreateTags
-                Resource: 'arn:aws:ec2:*::snapshot/*'
+                Resource:
+                  - 'arn:aws:ec2:*::snapshot/*'
+                  - 'arn:aws:ec2:*::image/*'
+              - Effect: Allow
+                Action:
+                  - ec2:CopyImage
+                  - ec2:CreateImage
+                  - ec2:DeregisterImage
+                  - ec2:DescribeImageAttribute
+                  - ec2:DescribeImages
+                  - ec2:ModifyImageAttribute
+                  - ec2:ResetImageAttribute
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:DisableImageDeprecation
+                  - ec2:EnableImageDeprecation
+                Resource: 'arn:aws:ec2:*::image/*'
       RoleName: !Sub ${LogicalName}-DataLifecycleManager-${AWS::Region}
       Tags:
         - Key: environment
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  IAMRoleForRegisterLatestImage:
+    Condition: RegisterLatestImage
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Description: A role required for registering the latest AMI Id.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+      Policies:
+        - PolicyName: RegisterLatestImage
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeImages
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:PutParameter
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${SsmParameterNameForLatestImage}
+      RoleName: !Sub ${LogicalName}-RegisterLatestImage-${AWS::Region}
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  # CloudWatch Events
+  CloudWatchEventsForRegisterLatestImage:
+    Condition: RegisterLatestImage
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Invokes the function that registers the latest AMI Id when an AMI becomes available.
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type:
+          - EC2 AMI State Change
+        detail:
+          State:
+            - available
+      Name: !Sub ${LogicalName}-RegisterLatestImage-${AWS::Region}
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt LambdaFunctionForRegisterLatestImage.Arn
+          Id: RegisterLatestImage
   # DLM
   DataLifecycleManager:
     Type: AWS::DLM::LifecyclePolicy
@@ -106,8 +188,9 @@ Resources:
       Description: Lifecycle Policy
       ExecutionRoleArn: !GetAtt IAMRoleForDLM.Arn
       PolicyDetails: 
+        PolicyType: IMAGE_MANAGEMENT
         ResourceTypes: 
-          - VOLUME
+          - INSTANCE
         Schedules:
           - CopyTags: true
             CreateRule:
@@ -131,3 +214,66 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
       State: ENABLED
+  # Lambda
+  LambdaFunctionForRegisterLatestImage:
+    Condition: RegisterLatestImage
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - arm64
+      Code:
+        ZipFile: |
+          import os
+          import boto3
+          from botocore.exceptions import ClientError
+
+          POLICY_TAG_KEY = 'aws:dlm:lifecycle-policy-id'
+
+          def lambda_handler(event, context):
+              image_id = (event.get('detail') or {}).get('ImageId')
+              if not image_id:
+                  return {'updated': False, 'reason': 'no ImageId in event'}
+              policy_id = os.environ['DLM_POLICY_ID']
+              try:
+                  images = boto3.client('ec2').describe_images(ImageIds=[image_id])['Images']
+              except ClientError as e:
+                  return {'updated': False, 'reason': str(e)}
+              if not images:
+                  return {'updated': False, 'reason': 'image not found'}
+              tags = {t['Key']: t['Value'] for t in images[0].get('Tags', [])}
+              if tags.get(POLICY_TAG_KEY) != policy_id:
+                  return {'updated': False, 'reason': 'not created by this policy'}
+              boto3.client('ssm').put_parameter(
+                  Name=os.environ['SSM_PARAMETER_NAME'],
+                  Value=image_id,
+                  Type='String',
+                  DataType='aws:ec2:image',
+                  Overwrite=True,
+              )
+              return {'updated': True, 'imageId': image_id}
+      Description: Registers the latest AMI Id created by DLM into SSM Parameter Store.
+      Environment:
+        Variables:
+          DLM_POLICY_ID: !Ref DataLifecycleManager
+          SSM_PARAMETER_NAME: !Ref SsmParameterNameForLatestImage
+      FunctionName: !Sub ${LogicalName}-RegisterLatestImage-${AWS::Region}
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt IAMRoleForRegisterLatestImage.Arn
+      Runtime: python3.13
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      Timeout: 30
+      TracingConfig:
+        Mode: Active
+  LambdaPermissionForRegisterLatestImage:
+    Condition: RegisterLatestImage
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt LambdaFunctionForRegisterLatestImage.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt CloudWatchEventsForRegisterLatestImage.Arn

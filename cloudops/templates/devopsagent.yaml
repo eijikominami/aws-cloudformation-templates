@@ -32,7 +32,7 @@ Parameters:
   AgentSpaceName:
     Type: String
     Default: DefaultAgentSpace
-    Description: The name of the DevOps Agent Space
+    Description: The name of the DevOps Agent Space [required]
   Environment:
     Type: String
     Default: production
@@ -50,7 +50,7 @@ Parameters:
     AllowedValues:
       - PRIMARY
       - MEMBER
-    Description: PRIMARY creates AgentSpace. MEMBER creates IAM roles only for cross-account access.
+    Description: PRIMARY creates AgentSpace. MEMBER creates IAM roles only for cross-account access. [required]
   PrimaryAccountId:
     Type: String
     Default: ''

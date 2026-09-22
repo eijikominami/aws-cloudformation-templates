@@ -5,10 +5,10 @@ Description: aws-cloudformation-templates/cloudops/devopsagent-webhook-subscript
 Parameters:
   LambdaFunctionArn:
     Type: String
-    Description: ARN of the WebhookForwarder Lambda function
+    Description: ARN of the WebhookForwarder Lambda function [required]
   MemberAccountIds:
     Type: CommaDelimitedList
-    Description: List of MEMBER account IDs to subscribe from
+    Description: List of MEMBER account IDs to subscribe from [required]
   SNSTopicName:
     Type: String
     Default: Alert-createdby-CICD

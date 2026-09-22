@@ -66,14 +66,14 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabiliti
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
 | CustomerGatewayOutsideIpAddress | String | | | インターネットから疎通可能なカスタマーゲートウェイアドレス |
-| DnsIpAz1 | String | 10.0.8.53 | | Route53 に割り当てる IP アドレス |
-| DnsIpAz2 | String | 10.0.10.53 | | Route53 に割り当てる IP アドレス |
-| DnsIpAz3 | String | 10.0.12.53 | | Route53 に割り当てる IP アドレス |
+| DnsIpAz1 | String | 10.0.8.53 | ○ | Route53 に割り当てる IP アドレス |
+| DnsIpAz2 | String | 10.0.10.53 | ○ | Route53 に割り当てる IP アドレス |
+| DnsIpAz3 | String | 10.0.12.53 | ○ | Route53 に割り当てる IP アドレス |
 | DomainName | String | | | ドメイン名 |
 | FirewallCidrBlockForEgressAz1 | String | 10.0.0.128/26 | | AZ1 の Egress VPC Firewall サブネットの CIDR ブロック | 
 | FirewallCidrBlockForEgressAz2 | String | 10.0.2.128/26 | | AZ2 の Egress VPC Firewall サブネットの CIDR ブロック | 
 | FirewallCidrBlockForEgressAz3 | String | 10.0.4.128/26 | | AZ3 の Egress VPC Firewall サブネットの CIDR ブロック | 
-| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
+| HomeNetworkCidr | String | 10.0.0.0/8 | | 管理するネットワークの CIDR | 
 | OnpremDnsIp | String | | | DNS クエリを転送するオンプレミスのIPアドレス |
 | OrganizationId | String | | | AWS Organizations の ID |
 | PrivateCidrBlockForDNSAz1 | String | 10.0.8.0/24 | ○ | AZ1 の DNS VPC Private サブネットの CIDR ブロック |
@@ -108,10 +108,10 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | **AvailabilityZone** | AWS::EC2::AvailabilityZone::Name | | ○ | AZ名 |
 | InternetGatewayId | String | | | Internet Gateway Id |
-| NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| | NAT Gateway を作成するかどうか |
-| NetworkLoadBalancer | ENABLED / DISABLED | DISABLED　| | NetworkLoadBalancer を作成するかどうか |
-| SubnetPrivateCidrBlock | String | 10.0.0.0/24 | ○ | プライベートサブネットのCIDRブロック |
-| SubnetPublicCidrBlock | String | 10.0.0.0/24 | ○ | パブリックサブネットのCIDRブロック |
+| NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| ○ | NAT Gateway を作成するかどうか |
+| NetworkLoadBalancer | ENABLED / DISABLED | DISABLED　| ○ | NetworkLoadBalancer を作成するかどうか |
+| SubnetPrivateCidrBlock | String | 10.0.0.0/24 | | プライベートサブネットのCIDRブロック |
+| SubnetPublicCidrBlock | String | 10.0.0.0/24 | | パブリックサブネットのCIDRブロック |
 | SubnetTransitCidrBlock | String | | | トランジットサブネットのCIDRブロック |
 | SubnetFirewallCidrBlock | String | | | Firewall サブネットのCIDRブロック |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | VPC id  |
@@ -124,7 +124,7 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
-| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
+| HomeNetworkCidr | String | 10.0.0.0/8 | | 管理するネットワークの CIDR | 
 | ResolverInboundRuleId | String |  |  | VPC に紐づけられたリゾルバーインバウンド ID | 
 | ResolverOutboundRuleId | String |  |  | VPC に紐づけられたリゾルバーアウトバンド ID | 
 | SubnetFirewallCidrBlockForAz1 | String | 10.0.0.128/26 | ○ | AZ1 の Firewall サブネットの CIDR ブロック | 
@@ -176,8 +176,8 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
-| HomeNetworkCidr | String | 10.0.0.0/8 | ○ | 管理するネットワークの CIDR | 
-| SubnetIdAz1 | String | | | The firewall subnet id in AZ1 |
+| HomeNetworkCidr | String | 10.0.0.0/8 | | 管理するネットワークの CIDR | 
+| SubnetIdAz1 | String | | ○ | The firewall subnet id in AZ1 |
 | SubnetIdAz2 | String | | | The firewall subnet id in AZ2 |
 | SubnetIdAz3 | String | | | The firewall subnet id in AZ3 |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | VPC id  |
@@ -189,9 +189,9 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
-| DnsIpAz1 | String | 10.0.8.53 | | Route53 に割り当てる IP アドレス |
-| DnsIpAz2 | String | 10.0.10.53 | | Route53 に割り当てる IP アドレス |
-| DnsIpAz3 | String | 10.0.12.53 | | Route53 に割り当てる IP アドレス |
+| DnsIpAz1 | String | 10.0.8.53 | ○ | Route53 に割り当てる IP アドレス |
+| DnsIpAz2 | String | 10.0.10.53 | ○ | Route53 に割り当てる IP アドレス |
+| DnsIpAz3 | String | 10.0.12.53 | ○ | Route53 に割り当てる IP アドレス |
 | DomainName | String | | | ドメイン名 |
 | OnpremDnsIp | String | | | DNS クエリを転送するオンプレミスのIPアドレス |
 | PrincipalsToAssociateWithRoute53ResolverRule | String | | | Route 53 に関連付ける 1 つ以上のプリンシパルのリスト |
@@ -226,7 +226,7 @@ Network アカウントで、参加している各アカウントのホストゾ
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **CustomerGatewayOutsideIpAddress** | String | | ○ | インターネットルーティング可能なカスタマーゲートウェイのIPアドレス |
+| **CustomerGatewayOutsideIpAddress** | String | | | インターネットルーティング可能なカスタマーゲートウェイのIPアドレス |
 | StaticRoutesOnly | true or false | false | ○ | 静的ルーティングかどうかの設定 |
 | TransitGatewayId | String | | ○ | Transit Gateway ID | 
 

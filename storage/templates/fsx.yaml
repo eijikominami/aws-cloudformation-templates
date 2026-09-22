@@ -35,7 +35,7 @@ Parameters:
     AllowedValues:
       - SINGLE_AZ_2
       - MULTI_AZ_1
-    Description: Specifies the file system deployment type
+    Description: Specifies the file system deployment type [required]
   CidrIp:
     Type: String
     Default: 0.0.0.0/0
@@ -67,7 +67,7 @@ Parameters:
   StorageCapacity:
     Type: String
     Default: 1024
-    Description: Sets the storage capacity of the file system that you're creating
+    Description: Sets the storage capacity of the file system that you're creating [required]
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     Description: Specifies the IDs of the subnets that the file system will be accessible from [required]

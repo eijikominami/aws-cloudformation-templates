@@ -57,7 +57,7 @@ You can provide optional parameters as follows.
 | **ACMDomainName** | String | | | If it's NOT empty, **SSL certification** is created |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | BillingAlertThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created |
-| BudgetName | String | Total | ○ | The budget name. When ``BillingAlertThreshold`` is changed, **this value also must be changed**  |
+| BudgetName | String | Total | ○ | The budget name. When this template is deployed by ``AWSCloudFormationTemplates/cicd``, this value is fixed to ``Total`` |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | CloudFrontErrorRateThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created |
 | CloudFrontBytesDownloadedPerMinuteThreshold | Number | 0 | ○ | If it's NOT ZERO, **CloudWatch Alarm** is created |

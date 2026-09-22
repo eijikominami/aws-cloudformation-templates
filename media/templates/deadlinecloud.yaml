@@ -28,13 +28,13 @@ Parameters:
     Default: 10
     MinValue: 0
     MaxValue: 2147483647
-    Description: The maximum number of workers specified in the fleet [requierd]
+    Description: The maximum number of workers specified in the fleet [requierd] [required]
   MinWorkerCount:
     Type: Number
     Default: 0
     MinValue: 0
     MaxValue: 2147483647
-    Description: The minimum number of workers in the fleet [requierd]
+    Description: The minimum number of workers in the fleet [requierd] [required]
   Environment:
     Type: String
     Default: production

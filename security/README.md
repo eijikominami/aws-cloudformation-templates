@@ -112,13 +112,30 @@ This template creates some other resources, such as ``Service-linked Role``, ``I
 This template enables ``Amazon Security Lake``, configures log sources, and sets up a subscriber for SIEM integration.
 Before deploying, [**register the delegated Security Lake administrator**](https://docs.aws.amazon.com/security-lake/latest/userguide/getting-started.html#initial-account-setup). This template must be deployed directly in the delegated administrator account.
 
+The data lake collects ``CLOUD_TRAIL_MGMT``, ``LAMBDA_EXECUTION``, ``EKS_AUDIT``, ``ROUTE53``, ``SH_FINDINGS`` and ``VPC_FLOW``.
+The subscriber receives only ``LAMBDA_EXECUTION``, ``EKS_AUDIT``, ``ROUTE53`` and ``VPC_FLOW``, because SIEM already ingests CloudTrail and Security Hub findings natively from the centralized log buckets.
+
+``AWS::SecurityLake::SubscriberNotification`` reconciles the subscriber queue at a visibility timeout of 300 seconds.
+
 | Name | Type | Default | Required | Details |
 | --- | --- | --- | --- | --- |
-| **AuditAccountId** | String | | | The Audit account ID where SIEM runs. Creates a subscriber when specified |
+| **AuditAccountId** | String | | ○ | The Audit account ID where SIEM runs. Creates a subscriber when specified |
 | **LogicalName** | String | SecurityLake | ○ | Prefix for resource names |
-| Environment | String | production | | production / test / development |
-| TagKey | String | createdby | ○ | Tag key |
-| TagValue | String | aws-cloudformation-templates | ○ | Tag value |
+
+## SIEM on Amazon OpenSearch Service
+
+Findings from ``Amazon GuardDuty`` and ``Amazon Inspector`` reach the centralized log bucket through ``Amazon EventBridge``, whose object keys and payloads differ from what [SIEM on Amazon OpenSearch Service](https://github.com/aws-samples/siem-on-amazon-opensearch-service) expects, so neither is ingested until it is told about them. ``AWS Security Hub`` needs nothing.
+
+For GuardDuty, add its EventBridge key to the log type patterns in [user.ini](https://github.com/aws-samples/siem-on-amazon-opensearch-service/blob/main/docs/configure_siem.md) and attach the file to ``aes-siem-es-loader`` as a Lambda layer:
+
+```ini
+[guardduty]
+s3_key = /GuardDuty/|GuardDuty_Finding
+```
+
+For Inspector, register an [index template](https://opensearch.org/docs/latest/im-plugin/index-templates/) for ``log-aws-inspector-*`` that accepts the EventBridge timestamp format, at a priority above the SIEM template, then delete the existing index so the new mapping takes effect. Writing a template needs ``aoss:CreateCollectionItems`` in a data access policy; leave the policies described as ``Created By SIEM Solution. DO NOT EDIT`` alone, because the SIEM stack reverts them.
+
+Both changes take effect for objects delivered after them. Objects already in the bucket are only ingested if the bucket notification fires again, which overwriting an object with a copy of itself does.
 
 ## Security Agent
 
@@ -142,7 +159,7 @@ You can provide optional parameters as follows:
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
-| AuditAccountId | String | | | The id of the audit account |
+| AuditAccountId | String | | ○ | The id of the audit account |
 | AWSCloudTrail | ENABLED / CREATED_BY_CONTROL_TOWER / DISABLED | ENABLED | ○ | Enable or disable AWS CloudTrail |
 | AWSCloudTrailAdditionalFilters | String | | | Additional expression of CloudWatch Logs metric filters |
 | AWSCloudTrailS3Trail | ENABLED / DISABLED | ENABLED | ○ | Enable or disable CloudTrail trail |
@@ -158,12 +175,12 @@ You can provide optional parameters as follows:
 | GitHubCodeScanRepository | String | | | GitHub owner/repo for OIDC trust (e.g. eijikominami/aws-cloudformation-templates) |
 | IAMAccessAnalyzer | String | ACCOUNT | ○ | Enable or disable IAM Access Analyzer |
 | IAMUserArnToAssumeAWSSupportRole | String | | | IAM User ARN to assume AWS Support role |
-| LogArchiveAccountId | String | | | The id of the log archive account |
+| LogArchiveAccountId | String | | ○ | The id of the log archive account |
 | OrganizationId | String | | | The Organizations ID |
 | OrganizationsRootId | String | | | The root id of AWS Organizations |
 | SecurityAgent | ENABLED / DISABLED | ENABLED | ○ | Enable or disable AWS Security Agent |
 | SecurityAgentVpcId | String | | conditional | The VPC in which Security Agent scanner runs |
-| SecurityOUId | String | | | The id of the security OU |
+| SecurityOUId | String | | ○ | The id of the security OU |
 | SIEM | ENABLED / DISABLED | DISABLED | ○ | Enable or disable SIEM environment |
 | SIEMControlTowerLogBucketNameList | String | | ※ | The S3 log bucket names in the Log Archive account. **Specify after installing OpenSearch Service.** |
 | SIEMControlTowerRoleArnForEsLoader | String | | ※ | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |

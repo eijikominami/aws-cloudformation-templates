@@ -50,6 +50,7 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | AccountIdForArchive | String | | | ログアーカイブアカウント ID |
+| ActiveDirectoryEC2ImageId | String | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | EC2 イメージ ID を保持する SSM パラメータ名 |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | Microsoft Active Directory を作成する AWS Directory Service のエディション |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Microsoft Active Directory を用いて SSO を有効化するかどうか |
 | ActiveDirectoryName | String | corp.example.com | ○ | AWS Managed Microsoft AD directory の　FQDN |
@@ -59,10 +60,18 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.64.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
 | ActiveDirectorySubnetCidrBlockForAz3 | String | 10.1.64.128/26 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
+| AllowedCidrBlockForSyslog | CommaDelimitedList | 0.0.0.0/0 | ○ | FluentBit への syslog 送信を許可する CIDR ブロックのリスト |
 | BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
 | DomainName | String | | | ドメイン名 |
 | FluentBitForSyslog | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、FluentBit が有効化されます |
+| IdentityCenterAdministratorGroupId | String | | | 管理者権限を付与する Identity Store のグループ ID |
+| IdentityCenterAdministratorTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | 管理者権限を付与する AWS アカウント ID |
 | IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |
+| IdentityCenterManagementAccountId | String | | | Organizations と Service Catalog の権限を付与する管理アカウントの ID |
+| IdentityCenterReadOnlyGroupId | String | | | 参照権限を付与する Identity Store のグループ ID |
+| IdentityCenterReadOnlyTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | 参照権限を付与する AWS アカウント ID |
+| NoIncomingRecordsAlarm | ENABLED / DISABLED | ENABLED | | FluentBit の Firehose ストリームにレコードが届かない場合にアラームを発報するかどうか |
+| NoIncomingRecordsPeriod | Number | 10800 | ○ | レコードが届かない状態を異常と判定するまでの秒数。60 の倍数を指定します |
 | QuickConsumerAccountIds | CommaDelimitedList | | conditional | Amazon Quick クロスアカウントアクセス用の AWS アカウント ID リスト |
 | SubnetPrivateCidrBlockAz1 | String | 10.3.0.64/26 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
 | SubnetPrivateCidrBlockAz2 | String | 10.3.64.64/26 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |

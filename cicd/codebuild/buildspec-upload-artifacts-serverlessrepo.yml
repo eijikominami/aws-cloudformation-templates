@@ -72,6 +72,7 @@ phases:
           monitoring/sam-app/network-elb.yaml \
           monitoring/sam-app/privateendpoints.yaml \
           monitoring/sam-app/route53-resolver.yaml \
+          monitoring/sam-app/siem.yaml \
           monitoring/sam-app/sns.yaml \
           monitoring/sam-app/ssm-command.yaml \
           monitoring/sam-app/transitgateway.yaml \

@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: CloudWatch alarm for SIEM on Amazon OpenSearch Service
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: cloudwatch-alarm-about-siem
+    Description: Create Amazon CloudWatch Alarm about SIEM on Amazon OpenSearch Service.
+    Author: Eiji KOMINAMI
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://eijikominami-test/LICENSE
+    ReadmeUrl: s3://eijikominami-test/readme/cloudwatch-alarm-about-siem.md
+    Labels: []
+    HomePageUrl: https://github.com/eijikominami/aws-cloudformation-templates
+    SourceCodeUrl: https://github.com/eijikominami/aws-cloudformation-templates
+
+Parameters:
+  AlarmLevel:
+    Type: String
+    Default: NOTICE
+    AllowedValues:
+      - NOTICE
+      - WARNING
+    Description: The alarm level of CloudWatch alarms
+  CustomAlarmName:
+    Type: String
+    Default: ''
+    Description: The custom Alram name
+  EsLoaderFunctionName:
+    Type: String
+    Default: aes-siem-es-loader
+    AllowedPattern: .+
+    Description: The name of the es-loader function [required]
+  ErrorLogLoadCountPeriod:
+    Type: Number
+    Default: 3600
+    MinValue: 60
+    Description: The number of seconds over which failed log loads are summed. It must be a multiple of 60 [required]
+  ErrorLogLoadCountThreshold:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    Description: The number of failed log loads that is treated as a failure [required]
+  NoLogLoadAlarm:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether an alarm is raised while no log reaches OpenSearch Service
+  NoLogLoadPeriod:
+    Type: Number
+    Default: 10800
+    MinValue: 60
+    Description: The number of seconds without any loaded log that is treated as a failure. It must be a multiple of 60 [required]
+  SNSTopicArn:
+    Type: String
+    AllowedPattern: .+
+    Description: The SNS topic ARN [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagKey:
+    Type: String
+    Default: createdby
+    AllowedPattern: .+
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  CreateCustomAlarmName: !Not [ !Equals [ !Ref CustomAlarmName, '' ] ]
+  CreateNoLogLoadAlarm: !Equals [ !Ref NoLogLoadAlarm, ENABLED ]
+  CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
+
+Resources:
+  AlarmSIEMErrorLogLoadCount:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*SIEM* で *ログの取り込みに失敗* しています。インデックスのフィールド数上限、マッピングの不一致、または S3 からの読み取り権限が原因である可能性があります。このメトリクスの詳細は、<https://aws-samples.github.io/siem-on-amazon-opensearch-service/|SIEM on Amazon OpenSearch Service> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-SIEM-Error-Log-Load-Count
+        - Warning-SIEM-Error-Log-Load-Count
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      Metrics:
+        - Id: errors
+          Expression: !Sub SUM(SEARCH('{SIEM,logtype,service} MetricName="ErrorLogLoadCount"', 'Sum', ${ErrorLogLoadCountPeriod}))
+          Label: ErrorLogLoadCount
+          ReturnData: true
+      OKActions:
+        - !Ref SNSTopicArn
+      Threshold: !Ref ErrorLogLoadCountThreshold
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AlarmSIEMNoLogLoad:
+    Condition: CreateNoLogLoadAlarm
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: '*SIEM* に *ログが取り込まれていません* 。ログの送信元から OpenSearch Service までの経路が停止している可能性があります。このメトリクスの詳細は、<https://aws-samples.github.io/siem-on-amazon-opensearch-service/|SIEM on Amazon OpenSearch Service> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Warning-${CustomAlarmName}-SIEM-No-Log-Load
+        - Warning-SIEM-No-Log-Load
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      Metrics:
+        - Id: loaded
+          Expression: !Sub SUM(SEARCH('{SIEM,logtype,service} MetricName="SuccessLogLoadCount"', 'Sum', ${NoLogLoadPeriod}))
+          Label: SuccessLogLoadCount
+          ReturnData: true
+      OKActions:
+        - !Ref SNSTopicArn
+      Threshold: 1
+      TreatMissingData: breaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+  AlarmSIEMEsLoaderThrottles:
+    Condition: CreateNoticeAlarm
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref SNSTopicArn
+      AlarmDescription: !Sub '*SIEM* の *es-loader* (${EsLoaderFunctionName}) が *スロットリング* されています。同時実行数の予約が不足しており、ログの取り込みが遅延している可能性があります。このメトリクスの詳細は、<https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/monitoring-metrics.html|AWS Lambda 関数のメトリクスの使用> をご覧ください。'
+      AlarmName: !If
+        - CreateCustomAlarmName
+        - !Sub Notice-${CustomAlarmName}-SIEM-EsLoader-Throttles
+        - Notice-SIEM-EsLoader-Throttles
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref EsLoaderFunctionName
+      EvaluationPeriods: 1
+      MetricName: Throttles
+      Namespace: AWS/Lambda
+      OKActions:
+        - !Ref SNSTopicArn
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags: 
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue

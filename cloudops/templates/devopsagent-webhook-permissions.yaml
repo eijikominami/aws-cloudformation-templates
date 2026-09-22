@@ -5,10 +5,10 @@ Description: aws-cloudformation-templates/cloudops/devopsagent-webhook-permissio
 Parameters:
   LambdaFunctionArn:
     Type: String
-    Description: ARN of the WebhookForwarder Lambda function
+    Description: ARN of the WebhookForwarder Lambda function [required]
   MemberAccountIds:
     Type: CommaDelimitedList
-    Description: List of MEMBER account IDs to allow SNS invoke from
+    Description: List of MEMBER account IDs to allow SNS invoke from [required]
   SNSTopicName:
     Type: String
     Default: Alert-createdby-CICD

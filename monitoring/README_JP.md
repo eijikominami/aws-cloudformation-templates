@@ -73,7 +73,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/acm.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/acm.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/acm.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -137,7 +138,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/amplify.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/amplify.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/amplify.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -212,7 +214,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/apigateway.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/apigateway.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/apigateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -278,7 +281,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appflow.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appflow.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/appflow.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -341,7 +345,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/application-elb.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/application-elb.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/application-elb.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -404,7 +409,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/appstream.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/appstream.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -468,7 +474,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/codebuild.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/codebuild.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/codebuild.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -531,7 +538,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/config.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/config.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/config.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -594,7 +602,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/directoryservice.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/directoryservice.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -657,7 +666,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/dynamodb-throttle.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -718,7 +728,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/dynamodb.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/dynamodb.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -780,7 +791,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/ec2.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -843,7 +855,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/ec2-cwagent.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -910,7 +923,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ecs.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/ecs.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -990,7 +1004,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elasticsearch.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elasticsearch.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/elasticsearch.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1059,7 +1074,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/elementallink.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/elementallink.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1124,7 +1140,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/events.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/events.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/events.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1195,7 +1212,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/kinesis.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1267,7 +1285,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/kinesis-data-firehose.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1337,7 +1356,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/glue.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/glue.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/glue.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1406,7 +1426,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/lambda.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/lambda.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/lambda.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1481,7 +1502,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1556,7 +1578,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/mediaconnect-source.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1624,7 +1647,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconvert.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediaconvert.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/mediaconvert.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1692,7 +1716,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/medialive.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/medialive.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/medialive.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1758,7 +1783,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediastore.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/mediastore.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/mediastore.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1821,7 +1847,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/natgateway.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/natgateway.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/natgateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1884,7 +1911,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/route53-resolver.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/route53-resolver.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/route53-resolver.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -1899,6 +1927,90 @@ Properties:
   Parameters: 
     CustomAlarmName : String
     EndpointId: String
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: Map
+  TimeoutInMinutes: Integer
+```
+
+## SIEM on Amazon OpenSearch Service
+
+このテンプレートは、以下のアラームを作成します。
+
+| ネームスペース | メトリクス | ディメンション | 閾値 |
+| --- | --- | --- | --- |
+| SIEM | **ErrorLogLoadCount** | すべての `logtype` の合計 | `ErrorLogLoadCountThreshold` |
+| SIEM | **SuccessLogLoadCount** | すべての `logtype` の合計 | <1 |
+| AWS/Lambda | **Throttles** | `EsLoaderFunctionName` | 1時間に1回以上 |
+
+`ErrorLogLoadCount` は、es-loader が読み込んだものの OpenSearch Service が拒否したログを検知します。Lambda のエラーメトリクスには現れないため、これがないと取り込み漏れに気づけません。
+
+## パラメータ
+
+以下のパラメータを指定できます。
+
+| パラメータ | タイプ | デフォルト値 | 必須 | 内容 | 
+| --- | --- | --- | --- | --- |
+| `AlarmLevel` | NOTICE/WARNING | NOTICE | | CloudWatch アラームのアラームレベル |
+| `CustomAlarmName` | String | | | カスタムアラーム名 |
+| `EsLoaderFunctionName` | String | aes-siem-es-loader | ○ | es-loader 関数の名前 |
+| `ErrorLogLoadCountPeriod` | Number | 3600 | ○ | 取り込み失敗を合計する秒数 |
+| `ErrorLogLoadCountThreshold` | Number | 1 | ○ | 異常と判定する取り込み失敗件数 |
+| `NoLogLoadAlarm` | ENABLED/DISABLED | DISABLED | | ログが取り込まれていないときにアラームを発報するか |
+| `NoLogLoadPeriod` | Number | 10800 | ○ | 異常と判定する無音の秒数 |
+| `SNSTopicArn` | String | | ○ | SNSトピックのARN |
+| `Environment` | String | production | | `environment` タグの値 |
+| `TagKey` | String | createdby | | タグキー |
+| `TagValue` | String | aws-cloudformation-templates | | タグの値 |
+
+### 構文
+
+このリソースを AWS CloudFormation テンプレートで宣言するには、以下の構文を使用します。
+
+```yaml
+Type: AWS::CloudFormation::Stack
+Properties: 
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel: !Ref AlarmLevel
+    CustomAlarmName : String
+    EsLoaderFunctionName: String
+    ErrorLogLoadCountPeriod: Integer
+    ErrorLogLoadCountThreshold: Integer
+    NoLogLoadAlarm: String
+    NoLogLoadPeriod: Integer
+    SNSTopicArn : String
+    Environment: String
+    TagKey: String
+    TagValue: String
+  Tags: 
+    - Tag
+  TemplateURL: !If
+    - Development
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/siem.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/siem.yaml
+  TimeoutInMinutes: Integer
+```
+
+```yaml
+Type: AWS::Serverless::Application
+Properties:
+  Location:
+    ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-siem
+    SemanticVersion: 2.2.25
+  NotificationARNs: 
+    - String
+  Parameters: 
+    AlarmLevel: !Ref AlarmLevel
+    CustomAlarmName : String
+    EsLoaderFunctionName: String
+    ErrorLogLoadCountPeriod: Integer
+    ErrorLogLoadCountThreshold: Integer
+    NoLogLoadAlarm: String
+    NoLogLoadPeriod: Integer
     SNSTopicArn : String
     Environment: String
     TagKey: String
@@ -1946,7 +2058,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/sns.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/sns.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/sns.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -2009,7 +2122,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ssm-command.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/ssm-command.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/ssm-command.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -2070,7 +2184,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/transitgateway.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -2134,7 +2249,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/transitgateway-attachment.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -2205,7 +2321,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/privateendpoint.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/privateendpoint.yaml
   TimeoutInMinutes: Integer
 ```
 
@@ -2272,7 +2389,8 @@ Properties:
     - Tag
   TemplateURL: !If
     - Development
-    - https://s3.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami-test/aws-cloudformation-templates/monitoring/workspaces.yaml
+    - https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/monitoring/workspaces.yaml
   TimeoutInMinutes: Integer
 ```
 

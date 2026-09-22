@@ -38,8 +38,13 @@ aws cloudformation deploy --template-file templates/identitycenter.yaml --stack-
 
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
+| AdministratorGroupId | String | | | The identity store group id that receives administrator access |
+| AdministratorTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | The account ids that administrator access is assigned to |
 | DefaultSessionDuration | String | PT12H | ○ | The length of time that the application user sessions are valid for in the ISO-8601 standard |
 | InstanceArn | String |  |  | The ARN of the IAM Identity Center instance under which the operation will be executed |
+| ManagementAccountId | String |  |  | The management account id that organizations and service catalog access is assigned to |
+| ReadOnlyGroupId | String |  |  | The identity store group id that receives read only access |
+| ReadOnlyTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | The account ids that read only access is assigned to |
 
 ## AWS Managed Microsoft AD
 

@@ -40,7 +40,7 @@ Parameters:
     AllowedValues:
       - NOTICE
       - WARNING
-    Description: The alarm level of CloudWatch alarms
+    Description: The alarm level of CloudWatch alarms [required]
   CloudTrailInsights:
     Type: String
     Default: DISABLED

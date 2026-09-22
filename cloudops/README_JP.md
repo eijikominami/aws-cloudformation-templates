@@ -65,7 +65,6 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **SNSForAlertArn** | String | | ○ | The ARN of an Amazon SNS topic |
 
 ### DevOps Agent
 
@@ -78,10 +77,9 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | --- | --- | --- | --- | --- |
 | **AgentSpaceName** | String | DefaultAgentSpace | ○ | Agent Space の名前 |
 | AgentSpaceId | String | | conditional | PRIMARY アカウントの AgentSpace ID |
-| MemberAccountIds | CommaDelimitedList | | | MEMBER アカウント ID のカンマ区切りリスト |
+| MemberAccountIds | CommaDelimitedList | | ○ | MEMBER アカウント ID のカンマ区切りリスト |
 | Mode | PRIMARY / MEMBER | PRIMARY | ○ | PRIMARY は AgentSpace を作成、MEMBER は IAM ロールのみ作成 |
 | PrimaryAccountId | String | | conditional | AgentSpace を所有する PRIMARY アカウントの ID |
-| SNSForAlertArn | String | | | SNS トピックの ARN |
 | WebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | DevOps Agent に転送する最低優先度 |
 
 #### Webhook Forwarder の優先度フィルタ
@@ -111,7 +109,6 @@ WebhookForwarder Lambda は SNS Alert トピックから全イベントを受信
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| **SNSForAlertArn** | String | | ○ | SNSトピックのARN |
 
 ### Systems Manager
 

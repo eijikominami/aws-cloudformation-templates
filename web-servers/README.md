@@ -29,7 +29,7 @@ If you want to deploy each service individually, click the buttons below.
 | Services | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- | --- |
 | Data Lifecycle Manager | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DataLifecycleManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/dlm.yaml&param_LogicalName=DataLifecycleManager) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DataLifecycleManager&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/web-servers/dlm.yaml&param_LogicalName=DataLifecycleManager) |
-| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
+| WAF | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=WAF&templateURL=https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) | [![cloudformation-launch-stack](https://raw.githubusercontent.com/eijikominami/aws-cloudformation-templates/master/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=WAF&templateURL=https://s3-ap-northeast-1.amazonaws.com/eijikominami/aws-cloudformation-templates/edge/waf.yaml) |
 
 ## Architecture
 
@@ -50,7 +50,7 @@ You can provide optional parameters as follows.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | AccountIdForAnalysis | String | | | The AWS account id for log analysis |
-| ACMValidationMethod | String | DNS | Conditional | The validation method that you own or control the domain |
+| ACMValidationMethod | String | DNS | conditional | The validation method that you own or control the domain |
 | ACMDomainName | String | | | The domain name created by Certification Manager |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AutoScalingMaxSize | Number | 1 | ○ | |
@@ -59,6 +59,7 @@ You can provide optional parameters as follows.
 | BucketNameForArtifact | String | | | The bucket name artifact art stored |
 | CentralizedLogBucketName | String | | | The centralize S3 bucket name for logging |
 | CertificateManagerARN | String | | | If it's NOT empty, **SSL Certification** is associated with **CloudFront** or **Elastic Load Balancer** |
+| CloudFrontCompress | true or false | true | ○ | A flag that specifies whether automatic object compression is enabled |
 | CloudFrontDefaultTTL | Number | 86400 | ○ | CloudFront Default TTL |
 | CloudFrontMinimumTTL | Number | 0 | ○ | CloudFront Minimum TTL |
 | CloudFrontMaximumTTL | Number | 31536000 | ○ | CloudFront Maximum TTL |
@@ -72,7 +73,7 @@ You can provide optional parameters as follows.
 | CodeStarConnectionArn | String | | | The Amazon Resource Name (ARN) of the CodeStar connection |
 | ComputeType | INSTANCE / CONTAINER / APPRUNNER | INSTANCE | ○ | The category of computing platform |
 | DesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created | 
-| DockerFilePath | String | | | The path of Dockerfile | 
+| DockerFilePath | String | | ○ | The path of Dockerfile | 
 | DomainName | String | | | Domain name | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
@@ -88,6 +89,7 @@ You can provide optional parameters as follows.
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled |
 | LogGroupNameTransferredToS3 | String | | | The log group name transfferd to an S3 bucket |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
+| **SsmSecureStringAccess** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, the EC2 instance can decrypt SecureString parameters in Parameter Store |
 | SubnetPrivateCidrBlockForAz1 | String | 10.1.0.0/24 | ○ | Private subnet of AZ1 |
 | SubnetPrivateCidrBlockForAz2 | String | 10.1.2.0/24 | ○ | Private subnet of AZ2 |
 | SubnetPrivateCidrBlockForAz3 | String | 10.1.4.0/24 | ○ | Private subnet of AZ3 |
