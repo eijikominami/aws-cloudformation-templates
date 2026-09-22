@@ -360,6 +360,8 @@ Resources:
       LoadBalancerAttributes:
         - Key: deletion_protection.enabled
           Value: false
+        - Key: load_balancing.cross_zone.enabled
+          Value: true
       Name: !Sub elb-${LogicalName}
       Scheme: internal
       SecurityGroups:
