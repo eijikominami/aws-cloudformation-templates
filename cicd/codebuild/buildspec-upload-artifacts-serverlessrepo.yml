@@ -145,6 +145,7 @@ phases:
           cloudwatch-alarm-about-network-elb \
           cloudwatch-alarm-about-privateendpoints \
           cloudwatch-alarm-about-route53-resolver \
+          cloudwatch-alarm-about-siem \
           cloudwatch-alarm-about-sns \
           cloudwatch-alarm-about-ssm-command \
           cloudwatch-alarm-about-transitgateway \

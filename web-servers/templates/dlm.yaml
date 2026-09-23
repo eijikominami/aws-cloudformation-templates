@@ -8,7 +8,6 @@ Metadata:
           default: 'Data Lifecycle Manager Configuration'
         Parameters: 
           - DailySnapshotScheduledAt
-          - SnapshotInterval
           - SnapshotRetainRule
           - SsmParameterNameForLatestImage
       - Label: 
@@ -25,18 +24,6 @@ Parameters:
     Default: '17:00'
     AllowedPattern: ^[0-1][0-9]:[0-9][0-9]$
     Description: Daily Snapshot time (HH:MM) [required]
-  SnapshotInterval:
-    Type: Number
-    Default: 24
-    AllowedValues:
-      - 2
-      - 3
-      - 4 
-      - 6
-      - 8
-      - 12
-      - 24
-    Description: The interval between snapshots [required]
   SnapshotRetainRule:
     Type: Number
     Default: 7
@@ -194,11 +181,19 @@ Resources:
         Schedules:
           - CopyTags: true
             CreateRule:
-              Interval: !Ref SnapshotInterval
-              IntervalUnit: HOURS
-              Times:
-                - !Ref DailySnapshotScheduledAt
-            Name: Daily Snapshots
+              CronExpression: !Sub
+                - cron(${Minute} ${Hour} ? * MON *)
+                - Hour: !Select
+                    - 0
+                    - !Split
+                      - ':'
+                      - !Ref DailySnapshotScheduledAt
+                  Minute: !Select
+                    - 1
+                    - !Split
+                      - ':'
+                      - !Ref DailySnapshotScheduledAt
+            Name: Weekly Images
             RetainRule:
               Count: !Ref SnapshotRetainRule
         TargetTags: 

@@ -49,9 +49,9 @@ aws cloudformation deploy --template-file templates/fsx.yaml --stack-name FSx --
 | **ActiveDirectoryId** | String | | ○ | 既存の AWS Managed Microsoft Active Directory インスタンスの ID |
 | AZDeploymentMode | SINGLE_AZ_2 / MULTI_AZ_1 | SINGLE_AZ_2 | ○ | ファイルシステムのデプロイタイプ |
 | CidrIp | String | 0.0.0.0/0 | ○ | セキュリティグループアクセス用の CIDR ブロック |
-| FSxThroughput | Number | 8 | ○ | スループット容量（MB/s）- 8、16、32、または 64 |
+| FSxThroughput | Number | | ○ | スループット容量（MB/s）- 8、16、32、64、128 または 256 |
 | PrimarySubnetAccess | String | | ○ | プライマリファイルシステム用のサブネット ID |
 | IngressCidrIp | String | | ○ | 追加のイングレスアクセス用 CIDR ブロック |
-| StorageCapacity | Number | 32 | ○ | ストレージ容量（GB）- 最小 32 GB |
+| StorageCapacity | Number | 1024 | ○ | ストレージ容量（GB）- 最小 32 GB |
 | SubnetIds | String | | ○ | カンマ区切りのサブネット ID リスト |
 | **VPCId** | String | | ○ | FSx がデプロイされる VPC ID |

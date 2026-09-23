@@ -71,11 +71,11 @@ aws cloudformation deploy --template-file templates/microsoftad.yaml --stack-nam
 | **Name** | String | corp.example.com | ○ | ドメイン名 |
 | Password | String | Password1+ | ○ | Admin ユーザーのパスワード |
 | **ShortName** | String | CORP | ○ | NetBIOS 名 |
-| SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/24 | ○ | AZ1 にあるプライベートサブネットの CIDR ブロック |
-| SubnetPrivateIdForAz1 | String | | conditional | AZ1 のプライベートサブネット ID |
-| SubnetPrivateCidrBlockForAz2 | String | 10.3.4.0/24 | ○ | AZ2 にあるプライベートサブネットの CIDR ブロック |
-| SubnetPrivateIdForAz2 | String | | conditional | AZ2 のプライベートサブネット ID |
-| SubnetPrivateCidrBlockForAz3 | String | 10.3.8.0/24 | 条件付き | AZ3 にあるプライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | AZ1 にあるプライベートサブネットの CIDR ブロック |
+| SubnetPrivateIdForAz1 | String | | 条件付き | AZ1 のプライベートサブネット ID |
+| SubnetPrivateCidrBlockForAz2 | String | 10.3.64.0/26 | ○ | AZ2 にあるプライベートサブネットの CIDR ブロック |
+| SubnetPrivateIdForAz2 | String | | 条件付き | AZ2 のプライベートサブネット ID |
+| SubnetPrivateCidrBlockForAz3 | String | 10.3.128.0/26 | 条件付き | AZ3 にあるプライベートサブネットの CIDR ブロック |
 | SubnetPrivateIdForAz3 | String | | 条件付き | AZ3 のプライベートサブネット ID |
 | VPCId | String | | ○ | VPC ID |
 

@@ -63,12 +63,12 @@ This template creates ``CloudFront`` distribution.
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
-| **DomainName** | String | | | The CNAME attached to CloudFront |
+| **DomainName** | String | | conditional | The CNAME attached to CloudFront |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
 | LogBucketName | String | | conditional | The custom S3 bucket name for access logging |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
-| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
-| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.search | ○ | The instance type of OpenSearch Service |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.search | ○ | The master type of OpenSearch Service |
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
@@ -77,8 +77,8 @@ This template creates ``CloudFront`` distribution.
 | **RealtimeDashboardState** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
-| RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
-| RealtimeKinesisNumberOfPutRecordThreshold | Number | | | The threshold of PutRecord API calls |
+| RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
+| RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | | The threshold of PutRecord API calls |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3** |
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |
@@ -93,12 +93,12 @@ This template creates an environment about CloudFront realtime dashboard.
 | --- | --- | --- | --- | --- |
 | ElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
 | ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | The domain name of ElasticSearch Service |
-| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
-| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
+| ElasticSearchInstanceType | String | r5.large.search | ○ | The instance type of OpenSearch Service |
+| ElasticSearchMasterType | String | r5.large.search | ○ | The master type of OpenSearch Service |
 | ElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
 | ElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
-| ElasticsearchVersion | String | 7.8 | ○ | The version of OpenSearch Service |
+| ElasticsearchVersion | String | OpenSearch_2.13 | ○ | The version of OpenSearch Service |
 | SamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | KinesisFirehoseStreamNameSuffix | String | default | ○ | The suffix of the Kinesis Firehose stream |
 | KinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |

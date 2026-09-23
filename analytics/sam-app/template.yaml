@@ -140,6 +140,7 @@ Resources:
   GlueForCloudFrontLogs:
     Condition: CreateGlueForCloudFrontLogs
     Type: AWS::Serverless::Application
+    DependsOn: S3TableNamespace
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
@@ -167,6 +168,7 @@ Resources:
   GlueForGoogleAnalytics:
     Condition: HasGoogleAnalyticsConfig
     Type: AWS::Serverless::Application
+    DependsOn: S3TableNamespace
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
@@ -196,6 +198,7 @@ Resources:
   GlueForSynthetics:
     Condition: CreateGlueForSynthetics
     Type: AWS::Serverless::Application
+    DependsOn: S3TableNamespace
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
@@ -233,6 +236,12 @@ Resources:
     Type: AWS::S3Tables::TableBucket
     Properties:
       TableBucketName: !Sub ${LogicalName}-tables-${AWS::Region}-${AWS::AccountId}
+
+  S3TableNamespace:
+    Type: AWS::S3Tables::Namespace
+    Properties:
+      Namespace: !Sub ${LogicalName}_db
+      TableBucketARN: !GetAtt S3TableBucket.TableBucketARN
 
   GlueCatalogForS3Tables:
     Type: AWS::Glue::Catalog
@@ -523,7 +532,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -542,7 +551,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

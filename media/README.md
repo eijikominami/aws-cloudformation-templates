@@ -69,28 +69,28 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | DestinationIpAddressOrEntitlementArn1 | String | | | The IP address or the ARN of the the distination |
 | DestinationPort1 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol1 | String | | | The protocol that is used by the distination |
+| DestinationProtocol1 | String | NONE | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn2 | String | | | The IP address or the ARN of the the distination |
 | DestinationPort2 | String | 5002 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol2 | String | | | The protocol that is used by the distination |
+| DestinationProtocol2 | String | NONE | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn3 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort3 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol4 | String | | | The protocol that is used by the distination |
+| DestinationPort3 | String | 5003 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol4 | String | NONE | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn1 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort4 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol4 | String | | | The protocol that is used by the distination |
+| DestinationPort4 | String | 5004 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol4 | String | NONE | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn5 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort5 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol5 | String | | | The protocol that is used by the distination |
+| DestinationPort5 | String | 5005 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol5 | String | NONE | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn6 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort6 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol6 | String | | | The protocol that is used by the distination |
+| DestinationPort6 | String | 5006 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol6 | String | NONE | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn7 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort7 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol7 | String | | | The protocol that is used by the distination |
+| DestinationPort7 | String | 5007 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol7 | String | NONE | | The protocol that is used by the distination |
 | DestinationIpAddressOrEntitlementArn8 | String | | | The IP address or the ARN of the the distination |
-| DestinationPort8 | String | 5001 | | The port to use when MediaConnect distributes content to the output |
-| DestinationProtocol8 | String | | | The protocol that is used by the distination |
+| DestinationPort8 | String | 5008 | | The port to use when MediaConnect distributes content to the output |
+| DestinationProtocol8 | String | NONE | | The protocol that is used by the distination |
 | FujitsuQoSSenderControlPort | Number | 9900 | | The port that the flow uses to send outbound requests to initiate connection with the sender |
 | IngestPort | Number | 9177 | | The port that the flow listens on for incoming content |
 | InputAllowedCidr | String | 0.0.0.0/0 | | The range of IP addresses that are allowed to contribute content to your source |
@@ -108,7 +108,7 @@ You can provide optional parameters as follows.
 | DestinationIpAddressOrEntitlementArn | String | | srt-caller, zixi-push, rist, rtp-fec, rtp |  The IP address or the ARN of the the distination |
 | **FlowArn** | String | | ○ | The Amazon Resource Name (ARN) of the flow this output is attached to |
 | MinLatency | Number | 100 | srt-listener, srt-caller | The minimum latency in milliseconds for SRT-based streams |
-| **Name** | String | | ○ | The name of the VPC interface |
+| **Name** | String | Default | ○ | The name of the VPC interface |
 | Port | Number | 9177 | fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp | The port to use when MediaConnect distributes content to the output |
 | Protocol | String | srt-listener | ○ | The protocol that is used by the source |
 
@@ -143,16 +143,16 @@ You can provide optional parameters as follows.
 | HlsBucket | String | | | The S3 bucket Name HLS files are sent |
 | InputType | String | RTMP | ○ | Input type |
 | InputStreamKey | String | stream | | A unique name for the location the RTMP stream is being pushed to |
-| InputVodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
+| VodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
 | InputWhitelistRules | String | 0.0.0.0/0 | ○ | A list of one or more IPv4 CIDR addresses to allow |
 | MediaPackageChannelId | String | | | The MediaPackage channel id |
 | MediaStoreEndpoint | String | | | The endpoint of MediaStore |
 | OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | Output type |
 | OutputHlsBucket | String | | The S3 bucket Name HLS files are sent |
 | OutputRtmpRtpUrl1 | String | | | The rtmp url a stream sends to |
-| OutputRtmpStreamName1 | String | | | The rtmp stream name a stream sends to |
+| OutputRtmpStreamKey1 | String | | | The rtmp stream name a stream sends to |
 | OutputRtmpRtpUrl2 | String | | | The rtmp url a stream sends to |
-| OutputRtmpStreamName2 | String | | | The rtmp stream name a stream sends to |
+| OutputRtmpStreamKey2 | String | | | The rtmp stream name a stream sends to |
 | VideoBitrate | Number | 2200000 | ○ | Average video bitrate in bits/second |
 | Width | Number | 960 | ○ | Output video width, in pixels |
 

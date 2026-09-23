@@ -75,33 +75,34 @@ You can provide optional parameters as follows.
 | DesiredCapacity | Number | 1 | ○ | If it's NOT Disabled, AutoScalingGroup and Network Load Balancer are created | 
 | DockerFilePath | String | | ○ | The path of Dockerfile | 
 | DomainName | String | | | Domain name | 
-| EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of daily snapshot. (UTC) |
-| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of the weekly image creation. (UTC) |
+| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | ami-03dceaabddff8067e | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
 | EC2PatchingAt | Number | 3 | ○ | Starting time of patching process |
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set |
+| EC2NetworkInterface | String | PINNED | ○ | `PINNED` keeps the private IP address on a dedicated interface, but the instance cannot be replaced while it runs. `MANAGED` lets CloudFormation replace the instance and moves the **Elastic IP address** to the new one |
 | EC2VolumeSize | Number | 8 | ○ | |
 | GitHubOwnerNameForArtifact | String | | | The GitHub owner name of the artifact repository |
 | GitHubRepoNameForArtifact | String | | | The GitHub repository name of the artifact repository |
-| GitHubBranchNameForArtifact | String | | | The Branch name of GitHub for the artifact repository |
-| GitHubBranchNameForBuildSpec | String | | | The Branch name of GitHub for Buildspec |
+| GitHubBranchNameForArtifact | String | master | | The Branch name of GitHub for the artifact repository |
+| GitHubBranchNameForBuildSpec | String | master | | The Branch name of GitHub for Buildspec |
 | **GlobalInfrastructure** | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | NONE | ○ | Enable or disable CloudFront, Global Accelerator |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled |
 | LogGroupNameTransferredToS3 | String | | | The log group name transfferd to an S3 bucket |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
 | **SsmSecureStringAccess** | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, the EC2 instance can decrypt SecureString parameters in Parameter Store |
-| SubnetPrivateCidrBlockForAz1 | String | 10.1.0.0/24 | ○ | Private subnet of AZ1 |
-| SubnetPrivateCidrBlockForAz2 | String | 10.1.2.0/24 | ○ | Private subnet of AZ2 |
-| SubnetPrivateCidrBlockForAz3 | String | 10.1.4.0/24 | ○ | Private subnet of AZ3 |
-| SubnetPublicCidrBlockForAz1 | String | 10.1.1.0/25 | ○ | Public subnet of AZ1 |
-| SubnetPublicCidrBlockForAz2 | String | 10.1.3.0/25 | ○ | Public subnet of AZ2 |
-| SubnetPublicCidrBlockForAz3 | String | 10.1.5.0/25 | ○ | Public subnet of AZ3 |
-| SubnetTransitCidrBlockForAz1 | String | 10.1.1.128/25 | ○ | Transit subnet of AZ1 |
-| SubnetTransitCidrBlockForAz2 | String | 10.1.3.128/25 | ○ | Transit subnet of AZ2 |
-| SubnetTransitCidrBlockForAz3 | String | 10.1.5.128/25 | ○ | Transit subnet of AZ3 |
+| SubnetPrivateCidrBlockForAz1 | String | 10.2.0.0/24 | ○ | Private subnet of AZ1 |
+| SubnetPrivateCidrBlockForAz2 | String | 10.2.2.0/24 | ○ | Private subnet of AZ2 |
+| SubnetPrivateCidrBlockForAz3 | String | 10.2.4.0/24 | ○ | Private subnet of AZ3 |
+| SubnetPublicCidrBlockForAz1 | String | 10.2.1.0/25 | ○ | Public subnet of AZ1 |
+| SubnetPublicCidrBlockForAz2 | String | 10.2.3.0/25 | ○ | Public subnet of AZ2 |
+| SubnetPublicCidrBlockForAz3 | String | 10.2.5.0/25 | ○ | Public subnet of AZ3 |
+| SubnetTransitCidrBlockAz1 | String | 10.2.1.128/25 | ○ | Transit subnet of AZ1 |
+| SubnetTransitCidrBlockAz2 | String | 10.2.3.128/25 | ○ | Transit subnet of AZ2 |
+| SubnetTransitCidrBlockAz3 | String | 10.2.5.128/25 | ○ | Transit subnet of AZ3 |
 | TransitGatewayId | String | | | The ID of a transit gateway |
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
-| VPCCidrBlock | String | 10.1.0.0/21 | ○ | The VPC CIDR block |
+| VPCCidrBlock | String | 10.2.0.0/21 | ○ | The VPC CIDR block |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | If **Disabled** is set, AWS WAF does NOT created |
 | WebACLArnForCloudFront | String | | | Web ACL ARN for CloudFront |
 

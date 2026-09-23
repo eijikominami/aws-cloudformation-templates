@@ -77,23 +77,23 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | ArtifactBucketInVirginia | String | | | Amazon S3 アーティファクトバケット（us-east-1） |
 | CentralizedLogBucketName | String | | | 集約ログバケット名 |
-| **CloudOps** | ENABLED / INCIDENT_MANAGER_DISABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
-| CodeBuildImageName | String | aws/codebuild/amazonlinux2-x86_64-standard:3.0 | ○ | |
+| **CloudOps** | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、`CloudOps` スタックがデプロイされます。 |
+| CodeBuildImageName | String | aws/codebuild/amazonlinux-aarch64-standard:3.0 | ○ | |
 | CodeStarConnectionArn | String | | ○ | CodeStar 接続の ARN |
-| **DefaultSecuritySettings** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettings` スタックがデプロイされます。 |
+| **DefaultSecuritySettings** | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、`DefaultSecuritySettings` スタックがデプロイされます。 |
 | **GitHubOwnerNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリの所有者名** |
 | **GitHubRepoNameForTemplateConfiguration** | String | | | TemplateConfigurationファイルが置かれている **GitHubリポジトリ名** |
 | GitHubBranchName | String | master | ○ | CloudFormationテンプレートが置かれているリポジトリのステージ名 |
 | **GlobalSettings** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`GlobalSettings` スタックがデプロイされます。 |
 | ManagementAccountId | String | | | 管理アカウントの AWS ID |
 | **Network** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Network` スタックがデプロイされます。 |
-| **Notification** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |
+| **Notification** | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、`Notification` スタックがデプロイされます。 |
 | OrganizationsRootId | String | | | AWS Organizations のルート ID |
 | **SharedServices** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`SharedServices` スタックがデプロイされます。 |
 | **StaticWebsiteHosting** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`StaticWebsiteHosting` スタックがデプロイされます。 |
 | TemplateConfigurationBasePath | String | | | 設定プロパティのあるディレクトリのパス |
 | **UploadArtifacts** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`UploadArtifacts` スタックがデプロイされます。 |
-| **WebServers** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |
+| **WebServers** | INSTANCE / CONTAINER / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、`WebServers` スタックがデプロイされます。 |
 
 ## Serverless Application Repository 統合
 

@@ -134,15 +134,29 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  ReadOnlyAccess:
+  QuickWorkspacesAccess:
     Condition: CreatePermissionSet
     Type: AWS::SSO::PermissionSet
     Properties: 
-      Description: !Sub This policy grants permissions to view resources and basic metadata across all AWS services created by ${AWS::StackName}
+      Description: !Sub Provides end user access to Amazon Quick and Amazon WorkSpaces only created by ${AWS::StackName}
+      InlinePolicy:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - quicksight:Describe*
+              - quicksight:Get*
+              - quicksight:List*
+              - quicksight:Search*
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - workspaces:Describe*
+            Resource: '*'
       InstanceArn: !Ref InstanceArn
       ManagedPolicies: 
-        - arn:aws:iam::aws:policy/job-function/ViewOnlyAccess
-      Name: !Sub ${LogicalName}ReadOnly
+        - arn:aws:iam::aws:policy/AmazonWorkSpacesSelfServiceAccess
+      Name: !Sub ${LogicalName}QuickWorkspaces
       SessionDuration: !Ref DefaultSessionDuration
       Tags: 
         - Key: environment
@@ -202,7 +216,7 @@ Resources:
         Condition: CreateReadOnlyAssignment
         Properties: 
           InstanceArn: !Ref InstanceArn
-          PermissionSetArn: !GetAtt ReadOnlyAccess.PermissionSetArn
+          PermissionSetArn: !GetAtt QuickWorkspacesAccess.PermissionSetArn
           PrincipalId: !Ref ReadOnlyGroupId
           PrincipalType: GROUP
           TargetId: !Ref AccountId

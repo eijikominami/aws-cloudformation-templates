@@ -17,6 +17,33 @@ from urllib.error import URLError, HTTPError
 logger = Logger()
 tracer = Tracer()
 
+# The alarm definition, the account id and the region name never change while a
+# container lives, but sendSNSMessage is called once per log event. Looking them
+# up every time throttles the DescribeAlarms API, so they are cached here.
+_cache = {}
+
+
+def getAlarm():
+    if 'alarm' not in _cache:
+        _cache['alarm'] = boto3.client('cloudwatch').describe_alarms(
+            AlarmNames=[os.environ['ALARM_NAME']])['MetricAlarms'][0]
+    return _cache['alarm']
+
+
+def getAccountId():
+    if 'account_id' not in _cache:
+        _cache['account_id'] = boto3.client('sts').get_caller_identity()['Account']
+    return _cache['account_id']
+
+
+def getRegionName():
+    if 'region' not in _cache:
+        region = boto3.session.Session().region_name
+        _cache['region'] = boto3.client('ssm').get_parameters(
+            Names=['/aws/service/global-infrastructure/regions/' + region + '/longName']
+        )['Parameters'][0]['Value']
+    return _cache['region']
+
 @logger.inject_lambda_context(log_event=True)
 @tracer.capture_lambda_handler
 def lambda_handler(event, context):
@@ -140,15 +167,12 @@ def sendSlackMessage(hook_url, message):
 def sendSNSMessage(message):
     
     sns = boto3.client('sns')
-    sts = boto3.client('sts')
-    ssm = boto3.client('ssm')
-    cloudwatch = boto3.client('cloudwatch')
-    
+
     if os.environ['ALARM_NAME'] is None or os.environ['SNS_TOPIC_ARN'] is None:
         logger.warning("Hook url or message is empty.")
         return False
     else:    
-        alarm = cloudwatch.describe_alarms(AlarmNames=[os.environ['ALARM_NAME']])['MetricAlarms'][0]
+        alarm = getAlarm()
         now = datetime.datetime.now()
         
         resources = ''
@@ -178,11 +202,11 @@ def sendSNSMessage(message):
         if 'sessionContext' in message['userIdentity'] and 'sessionIssuer' in message['userIdentity']['sessionContext'] and 'arn' in message['userIdentity']['sessionContext']['sessionIssuer']:
             permissions = message['userIdentity']['sessionContext']['sessionIssuer']['arn']
         # Region
-        region = ssm.get_parameters(Names = ['/aws/service/global-infrastructure/regions/' + boto3.session.Session().region_name + '/longName'])['Parameters'][0]['Value']
+        region = getRegionName()
         formatted_message = {
             'AlarmName': alarm['AlarmName'] if 'AlarmArn' in alarm else '',
             'AlarmDescription': '*CloudTrail* が *不正なAPIコールを検知* しました。詳細は以下の通りです。 User: *' + user + '* | Permission: *' + permissions + '* | Resource: *'+ resources + '* | Event Name: *' + message['eventName'] + '* | Error: *' + error + '*' ,
-            'AWSAccountId': sts.get_caller_identity()['Account'],
+            'AWSAccountId': getAccountId(),
             'AlarmConfigurationUpdatedTimestamp': now.strftime('%Y-%m-%dT%H:%M:%S.000+0000'),
             'NewStateValue': 'ALARM',
             'NewStateReason': '*CloudTrail* が *不正なAPIコールを検知* しました。詳細は以下の通りです。 User: *' + user + '* | Permission: *' + permissions + '* | Resource: *'+ resources + '* | Event Name: *' + message['eventName'] + '* | Error: *' + error + '*' ,

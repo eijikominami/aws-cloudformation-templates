@@ -54,7 +54,7 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name V
 
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
-| ActiveDirectoryAccountNameForAppStream | String | AppStreamAdmin | | Active Directory のユーザ名 | 
+| ActiveDirectoryAccountNameForAppStream | String | appstream | | Active Directory のユーザ名 | 
 | ActiveDirectoryAddresses | String | | | Active Directory の IP アドレス | 
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | 条件付き |  Active Directory のエディション  |
 | ActiveDirectoryEnableSso  | true / false | true | 条件付き | Active Directory で SSO を有効にするかどうか |
@@ -65,7 +65,7 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name V
 | ActiveDirectoryIdForWorkspaces | String | | 条件付き | WorkSpaces で使用する Active Directory ID |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AppStreamImageBuilderImageName | String | | | AppStream Image Builder で使用するイメージ名 |
-| AppStreamImageName | String | | | AppStream で使用するイメージ名 |
+| AppStreamImageName | String | AppStream-WinServer2019-01-26-2024 | | AppStream で使用するイメージ名 |
 | ComputeTypeName | GRAPHICS / GRAPHICSPRO / PERFORMANCE / POWER / POWERPRO / STANDARD / VALUE | PERFORMANCE | ○ | コンピュートタイプ |
 | FSxDeploymentMode | NONE / SINGLE_AZ_2 / MULTI_AZ_1 | SINGLE_AZ_2 | ○ | FSx のデプロイモード |
 | FSxIngressCidrIp | String | 0.0.0.0/0 | | FSx へアクセスが可能なアドレス範囲 |
@@ -74,20 +74,23 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name V
 | OrganizationalUnitDistinguishedNamesForAppStream | CommaDelimitedList | OU=EXAMPLE,DC=example,DC=com | | AppStream で使用する OU の distinguished names |
 | SamlMetadataDocument | String | | | IdP が作成した SAML メタデータ XML |
 | **Service** | WORKSPACES / APPSTREAM / VPC_ONLY | WORKSPACES | ○ | 構築する AWS サービス |
-| SubnetPrivateCidrBlockForAz1 | String | 10.2.8.0/23 | ○ | AZ1 のプライベートサブネットの CIDR ブロック |
-| SubnetPrivateCidrBlockForAz2 | String | 10.2.12.0/23 | ○ | AZ2 のプライベートサブネットの CIDR ブロック |
-| SubnetPublicCidrBlockForAz1 | String | 10.2.10.0/24 | ○ | AZ1 のパブリックサブネットの CIDR ブロック |
-| SubnetPublicCidrBlockForAz2 | String | 10.2.14.0/24 | ○ | AZ2 のパブリックサブネットの CIDR ブロック |
-| SubnetTransitCidrBlockAz1 | String | 10.2.11.0/24 | ○ | AZ1 の Transit サブネットの CIDR ブロック |
-| SubnetTransitCidrBlockAz2 | String | 10.2.15.0/24 | ○ | AZ2 の Transit サブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz1 | String | 10.2.8.0/24 | ○ | AZ1 のプライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz2 | String | 10.2.10.0/24 | ○ | AZ2 のプライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz3 | String | 10.2.12.0/24 | ○ | AZ3 のプライベートサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz1 | String | 10.2.9.0/25 | ○ | AZ1 のパブリックサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz2 | String | 10.2.11.0/25 | ○ | AZ2 のパブリックサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz3 | String | 10.2.13.0/25 | ○ | AZ3 のパブリックサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz1 | String | 10.2.9.128/25 | ○ | AZ1 の Transit サブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz2 | String | 10.2.11.128/25 | ○ | AZ2 の Transit サブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz3 | String | 10.2.13.128/25 | ○ | AZ3 の Transit サブネットの CIDR ブロック |
 | TransitGatewayId | String | | | Transit Gateway ID |
 | TransitGatewayDestinationCidrBlock | String | 0.0.0.0/0 | | Transit Gateway に転送するサブネットの CIDR ブロック |
 | VPCCidrBlock | String | 10.2.8.0/21 | ○ | VPC の CIDR ブロック |
-| WorkspacesBundleId | String | wsb-w94f3tgkh | | WorkSpaces のバンドル ID |
+| WorkspacesBundleId | String | wsb-7jspy3qyc | | WorkSpaces のバンドル ID |
 | WorkspacesRootVolumeSizeGib | Number | 80 | ○ | WorkSpaces のルートボリュームのサイズ |
 | WorkspacesRunningMode | ALWAYS_ON / AUTO_STOP / MANUAL | AUTO_STOP | | WorkSpaces の Running Mode |
 | WorkspacesWorkspacesRunningModeAutoStopTimeoutInMinutes | Number | 60 | ○ | WorkSpaces が自動的に停止するまでの時間 |
-| WorkspacesUserNames | CommaDelimitedList | | | ○ | WorkSpaces のプレイアウトユーザー名 |
+| WorkspacesUserNames | CommaDelimitedList | unknown | | ○ | WorkSpaces のプレイアウトユーザー名 |
 | WorkspacesUserVolumeSizeGib | Number | 100 | ○ | WorkSpaces のユーザーボリュームのサイズ |
 
 AppStream で Active Directory を使用する場合には、[**Active Directory 上で権限の設定を行う**](https://docs.aws.amazon.com/ja_jp/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions)必要があります。

@@ -188,6 +188,7 @@ You can provide optional parameters as follows:
 | SIEMEsLoaderServiceRoleArn | String | | | The ARN of lambda function aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
 | SIEMGeoLite2LicenseKey | String | | | The license key from MaxMind to enrich geoip location |
 | SIEMKmsKeyArn | String | | | The KMS key ARN for SIEM to encrypt findings |
+| SIEMNoLogLoadAlarm | ENABLED / DISABLED | DISABLED | | Whether an alarm is raised while no log reaches SIEM |
 | SIEMSecurityLakeExternalId | String | | ※ | The Security Lake external ID for cross account. **Specify after installing OpenSearch Service.** |
 | SIEMSecurityLakeRoleArn | String | | ※ | The IAM Role ARN to be assumed by aes-siem-es-loader. **Specify after installing OpenSearch Service.** |
 | SIEMSecurityLakeSubscriberSqs | String | | ※ | The SQS ARN of Security Lake Subscriber. **Specify after installing OpenSearch Service.** |

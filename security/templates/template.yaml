@@ -47,6 +47,7 @@ Metadata:
           - SIEMSecurityLakeExternalId
           - SIEMSecurityLakeRoleArn
           - SIEMSecurityLakeSubscriberSqs
+          - SIEMNoLogLoadAlarm
           - SIEMEmail
       - Label:
           default: 'Security Agent Configuration'
@@ -258,6 +259,13 @@ Parameters:
     Type: String
     Default: ''    
     Description: The SQS ARN of Security Lake Subscriber
+  SIEMNoLogLoadAlarm:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether an alarm is raised while no log reaches SIEM
   SIEMEmail:
     Type: String
     Default: '' 
@@ -585,6 +593,7 @@ Resources:
         SIEMSecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
         SIEMSecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
         SIEMSecurityLakeRoleArn: !Ref SIEMSecurityLakeRoleArn
+        SIEMNoLogLoadAlarm: !Ref SIEMNoLogLoadAlarm
         SIEMEmail: !Ref SIEMEmail
         SecurityAgent: !Ref SecurityAgent
         SecurityAgentVpcId: !Ref SecurityAgentVpcId
@@ -614,7 +623,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -631,7 +640,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -903,7 +912,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -949,7 +958,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment

@@ -67,15 +67,15 @@ Parameters:
     Description: The VPC CIDR block of source servers [required]
   SubnetCidrBlockAz1:
     Type: String
-    Default: 10.0.0.0/24
+    Default: 10.0.16.0/24
     Description: The subnet CIDR block
   SubnetCidrBlockAz2:
     Type: String
-    Default: 10.0.1.0/24
+    Default: 10.0.17.0/24
     Description: The subnet CIDR block
   SubnetCidrBlockAz3:
     Type: String
-    Default: 10.0.2.0/24
+    Default: 10.0.18.0/24
     Description: The subnet CIDR block
   SubnetIdAz1:
     Type: String
@@ -91,7 +91,7 @@ Parameters:
     Description: The private subnet Id
   VPCCidrBlock:
     Type: String
-    Default: 10.0.0.0/22
+    Default: 10.0.16.0/22
     AllowedPattern: ^[0-9./]*$
     Description: The VPC CIDR block [required]
   VPCId:
@@ -141,7 +141,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -176,7 +176,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -211,7 +211,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -246,7 +246,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -263,7 +263,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
