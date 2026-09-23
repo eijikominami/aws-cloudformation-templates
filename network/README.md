@@ -98,14 +98,16 @@ You can provide optional parameters as follows:
 | PublicCidrBlockForEgressAz2 | String | 10.0.2.0/26 | ○ | The public subnet CIDR block for Egress at AZ2 | 
 | PublicCidrBlockForEgressAz3 | String | 10.0.4.0/26 | ○ | The public subnet CIDR block for Egress at AZ3 | 
 | TransitCidrBlockForEgressAz1 | String | 10.0.0.64/26 | ○ | The transit subnet CIDR block for Egress at AZ1 | 
-| TransitCidrBlockForEgressAz2 | String | 10.0.4.64/26 | ○ | The transit subnet CIDR block for Egress at AZ2 | 
+| TransitCidrBlockForEgressAz2 | String | 10.0.2.64/26 | ○ | The transit subnet CIDR block for Egress at AZ2 | 
 | TransitCidrBlockForDNSAz1 | String | 10.0.11.0/24 | ○ | The transit subnet CIDR block for DNS at AZ1 | 
 | TransitCidrBlockForDNSAz2 | String | 10.0.13.0/24 | ○ | The transit subnet CIDR block for DNS at AZ2 | 
 | TransitCidrBlockForDNSAz3 | String | 10.0.15.0/24 | ○ | The transit subnet CIDR block for DNS at AZ3 | 
 | TransitGatewayDefaultRouteTableId | String | | | The id of the default Transit Gateway Route Table | 
 | TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway | 
 | VPCCidrBlockForEgress | String | 10.0.0.0/21 | ○ | The Egress VPC CIDR block | 
-| VPCCidrBlockForDNS | String | 10.0.0.0/21 | ○ | The DNS VPC CIDR block | 
+| VPCCidrBlockForDNS | String | 10.0.8.0/21 | ○ | The DNS VPC CIDR block | 
+| VPNTunnelLogs | ENABLED / DISABLED | DISABLED | | Whether IKE and BGP activity is logged to CloudWatch Logs |
+| VPNTunnelLogRetentionInDays | Number | 30 | | The number of days to retain the VPN tunnel logs |
 
 `TransitGatewayDefaultRouteTableId` is enabled after creating  Transit Gateway.
 
@@ -124,8 +126,8 @@ This template configures ``Availability Zone``.
 | InternetGatewayId | String | | | The Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable NetworkAddressTranslation (NAT) |
 | NetworkLoadBalancer | ENABLED / DISABLED | DISABLED　| ○ | Enable or disable Network LoadBalaner |
-| SubnetPrivateCidrBlock | String | 10.0.0.0/24 | | The Private subnet CIDR block |
-| SubnetPublicCidrBlock | String | 10.0.0.0/24 | | The Public subnet CIDR block |
+| SubnetPrivateCidrBlock | String | | | The Private subnet CIDR block |
+| SubnetPublicCidrBlock | String | | | The Public subnet CIDR block |
 | SubnetTransitCidrBlock | String | | | The transit subnet CIDR block |
 | SubnetFirewallCidrBlock | String | | | The firewall subnet CIDR block |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | The VPC id  |
@@ -168,7 +170,7 @@ This template configures ``Global Accelerator``.
 | HealthCheckPath | String | / | | If the protocol is HTTP/S, then this value provides the ping path that Global Accelerator uses for the destination on the endpoints for health checks |
 | HealthCheckPort | Number | 80 | | The port that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
 | HealthCheckProtocol | TCP / HTTP / HTTPS | TCP | | The protocol that Global Accelerator uses to perform health checks on endpoints that are part of this endpoint group |
-| IpAddressType | IPV6 / IPV4 | IPV4 | | The IP address type that an accelerator supports |
+| IpAddressType | DUAL_STACK / IPV4 | IPV4 | | The IP address type that an accelerator supports |
 | Name | String | Default | | The name of the accelerator |
 | Protocol | TCP / UDP | TCP | | The protocol for the connections from clients to the accelerator |
 | ThresholdCount | Number | 3 | | The number of consecutive health checks required to set the state of a healthy endpoint to unhealthy, or to set an unhealthy endpoint to healthy |
@@ -181,7 +183,7 @@ This template configures ``IP Address Manager (IPAM)``.
 | Name | Type | Default | Required | Details | 
 | --- | --- | --- | --- | --- |
 | PrincipalsToAssociateWithIPAM | String | | | Specifies a list of one or more principals to associate with IPAM |
-| ProvisionedCidrs | String | 10.0.0.0/8 | ○ | The CIDR of your home network  |
+| ProvisionedCidrs | String | 10.0.0.0/9 | ○ | The CIDR of your home network  |
 
 ### Network Firewall
 
@@ -243,5 +245,7 @@ This template configures ``Site-to-Site VPN``.
 | **CustomerGatewayOutsideIpAddress** | String | | | The Internet-routable IP address for the customer gateway's outside interface |
 | StaticRoutesOnly | true or false | false | ○ | Indicates whether the VPN connection uses static routes only |
 | TransitGatewayId | String | | ○ | The ID of the transit gateway associated with the VPN connection | 
+| TunnelLogs | ENABLED / DISABLED | DISABLED | | Whether IKE and BGP activity is logged to CloudWatch Logs |
+| TunnelLogRetentionInDays | Number | 30 | ○ | The number of days to retain the VPN tunnel logs |
 
 After creating a Transit Gateway attachment, **add Transit Gateway route to a customer network manually**.

@@ -18,6 +18,7 @@ Metadata:
           - EC2ImageId
           - EC2InstanceType
           - EC2KeyName
+          - EC2NetworkInterface
           - EC2VolumeSize
           - EC2DailySnapshotScheduledAt
           - SsmSecureStringAccess
@@ -255,6 +256,13 @@ Parameters:
     Default: ami-03dceaabddff8067e
     AllowedPattern: ^ami-.+$
     Description: The EC2 Image Id [conditional] [required]
+  EC2NetworkInterface:
+    Type: String
+    Default: PINNED
+    AllowedValues:
+      - PINNED
+      - MANAGED
+    Description: PINNED attaches a dedicated network interface, which keeps the private IP address but prevents the instance from being replaced while it runs. MANAGED lets the instance own its interface, so CloudFormation can replace it, and moves the Elastic IP address to the new instance [required]
   EC2InstanceType:
     Type: String
     Default: t3.micro
@@ -423,6 +431,7 @@ Conditions:
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateRoute53AccessForCertbot: !And [ !Equals [ !Ref CertbotDnsChallenge, ENABLED ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ] ]
   CreateSsmSecureStringAccess: !Equals [ !Ref SsmSecureStringAccess, ENABLED ]
+  PinEC2NetworkInterface: !Equals [ !Ref EC2NetworkInterface, PINNED ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
   CreateTransitGateway: !And [ !Not [ !Equals [ !Ref TransitGatewayId, '' ] ], !Not [ !Equals [ !Ref TransitGatewayDestinationCidrBlock, '' ] ] ]
@@ -441,7 +450,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -490,7 +499,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -539,7 +548,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/availability-zone
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -850,7 +859,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -867,7 +876,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -1267,6 +1276,7 @@ Resources:
         - Key: !Ref TagKey
           Value: !Ref TagValue
   ENIForEC2:
+    Condition: PinEC2NetworkInterface
     Type: AWS::EC2::NetworkInterface
     Properties:
       GroupSet:
@@ -1284,7 +1294,15 @@ Resources:
     Type: AWS::EC2::EIPAssociation
     Properties: 
       AllocationId: !GetAtt EIPForEC2Instance.AllocationId
-      NetworkInterfaceId: !Ref ENIForEC2
+      # MANAGED では新しいインスタンスが作られた後に関連付けが移る
+      InstanceId: !If
+        - PinEC2NetworkInterface
+        - !Ref AWS::NoValue
+        - !Ref EC2
+      NetworkInterfaceId: !If
+        - PinEC2NetworkInterface
+        - !Ref ENIForEC2
+        - !Ref AWS::NoValue
   # Route53
   Route53RecordSet:
     Condition: CreateEC2AndRoute53
@@ -1319,9 +1337,21 @@ Resources:
         - !Ref EC2KeyName
         - !Ref AWS::NoValue
       Monitoring: true
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref ENIForEC2
+      # PINNED は ENIForEC2 を device 0 に付ける。稼働中は外せないため置換できない
+      # MANAGED はインスタンスが自分の interface を持つため置換できる
+      NetworkInterfaces: !If
+        - PinEC2NetworkInterface
+        - - DeviceIndex: 0
+            NetworkInterfaceId: !Ref ENIForEC2
+        - !Ref AWS::NoValue
+      SecurityGroupIds: !If
+        - PinEC2NetworkInterface
+        - !Ref AWS::NoValue
+        - - !Ref SecurityGroupWeb
+      SubnetId: !If
+        - PinEC2NetworkInterface
+        - !Ref AWS::NoValue
+        - !GetAtt Az1.Outputs.PublicSubnetId
       UserData: !Base64
         Fn::Join:
           - ''
@@ -1437,7 +1467,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1462,7 +1492,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ec2-cwagent
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1491,7 +1521,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-transitgateway-attachment
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -1628,7 +1658,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-kinesis-data-firehose
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

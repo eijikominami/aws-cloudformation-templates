@@ -141,10 +141,10 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | CloudTrailAdditionalFilters | String | | | 追加の CloudWatch Logs メトリクスフィルター |
 | CloudTrailLogGroup | | | | ロググループを指定した場合、``Unauthorized API Calls`` イベントの詳細がSlackによって送信されます。 |
 | CrossAccountSubscriberAccountId | String | | | Alert SNS Topic へのクロスアカウント Subscribe を許可するアカウント ID |
-| Encrypt | String | DISABLED | ○ | ENABLEDを指定した場合、AWS KMS カスタムキーで SlackのHook URL を暗号化します。 |
+| Encrypt | String | false | ○ | ENABLEDを指定した場合、AWS KMS カスタムキーで SlackのHook URL を暗号化します。 |
 | **HookUrlForDeployment** | String | | | Slack デプロイチャンネルのHook URL | 
 | **HookUrlForAlert** | String | | | Slack アラートチャンネルのHook URL |
-| **SlackWorkspaceId** | String | | | Slackのワークスペース名 | 
+| **SlackWorkspaceId** | String | | ○ | Slackのワークスペース名 | 
 | **SlackChannelIdForDeployment** | String | | | Slack デプロイチャンネルのID |
 | **SlackChannelIdForAlert** | String | | | Slack アラートチャンネルのID | 
 | AutoScalingEventsRule | ENABLED / ERROR_ONLY / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AutoScaling に関するイベントルールを作成します。  |
@@ -158,7 +158,7 @@ aws cloudformation deploy --template-file packaged.yaml --stack-name Notificatio
 | SupportEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、AWS Suport に関するイベントルールを作成します。 |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ |ENABLEDを指定した場合、Tag Events に関するイベントルールを作成します。 |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、Trusted Advisor に関するイベントルールを作成します。 |
-| UnauthorizedApiCallsCloudWatchAlarmName | String | | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
+| UnauthorizedApiCallsCloudWatchAlarmName | String | Notice-DefaultSecuritySettings-CloudTrail-Unauthorized-API-Calls | ○ | 認証されていない API コールを通知する CloudWatch アラーム名 |
 | SNSForCICDArn | String | | | CI/CD用 Amazon SNS トピックの ARN | 
 ブルシューティング
 

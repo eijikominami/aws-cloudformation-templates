@@ -63,12 +63,12 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
-| **DomainName** | String | | | The CNAME attached to CloudFront |
+| **DomainName** | String | | 条件付き | The CNAME attached to CloudFront |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | LogBucketName | String | | 条件付き | ログを格納するバケット名 |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |
-| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | OpenSearch Service のインスタンスタイプ |
-| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | OpenSearch Service のマスタータイプ |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.search | ○ | OpenSearch Service のインスタンスタイプ |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.search | ○ | OpenSearch Service のマスタータイプ |
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | OpenSearch Service の生存時間 |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | OpenSearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | OpenSearch Service のパスワード |
@@ -77,8 +77,8 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | **RealtimeDashboardState** | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
-| RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
-| RealtimeKinesisNumberOfPutRecordThreshold | Number | | | PutRecord の API コールの閾値 |
+| RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
+| RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | | PutRecord の API コールの閾値 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
@@ -94,11 +94,11 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | ElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |
 | ElasticSearchDomainName | String | cloudfront-realtime-logs | ○ | OpenSearch Service のドメイン名 |
 | ElasticSearchLifetime | Number | 1 | ○ | OpenSearch Service の生存時間 |
-| ElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | OpenSearch Service のインスタンスタイプ |
-| ElasticSearchMasterType | String | r5.large.elasticsearch | ○ | OpenSearch Service のマスタータイプ |
+| ElasticSearchInstanceType | String | r5.large.search | ○ | OpenSearch Service のインスタンスタイプ |
+| ElasticSearchMasterType | String | r5.large.search | ○ | OpenSearch Service のマスタータイプ |
 | ElasticSearchMasterUserName | String | root | ○ | OpenSearch Service のユーザ名 |
 | ElasticSearchMasterUserPassword | String | Password1+ | ○ | OpenSearch Service のパスワード |
-| ElasticsearchVersion | String | 7.8 | ○ | OpenSearch Service のバージョン |
+| ElasticsearchVersion | String | OpenSearch_2.13 | ○ | OpenSearch Service のバージョン |
 | SamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | KinesisFirehoseStreamNameSuffix | String | default | ○ | Kinesis Firehose ストリーム名の接尾辞 |
 | KinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |

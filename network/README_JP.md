@@ -92,6 +92,8 @@ aws cloudformation deploy --template-file vpn.yaml --stack-name VPN --capabiliti
 | TransitGatewayDestinationCidrBlock | String | | | Transit Gateway に転送するサブネットの CIDR ブロック | 
 | VPCCidrBlockForEgress | String | 10.0.0.0/21 | ○ | Egress VPC の CIDR ブロック | 
 | VPCCidrBlockForDNS | String | 10.0.8.0/21 | ○ | DNS VPC の CIDR ブロック | 
+| VPNTunnelLogs | ENABLED / DISABLED | DISABLED | | IKE と BGP の動作を CloudWatch Logs に記録するかどうか |
+| VPNTunnelLogRetentionInDays | Number | 30 | | VPN トンネルログの保持日数 |
 
 `TransitGatewayDefaultRouteTableId` は、 Transit Gateway 作成後に入力可能です。
 
@@ -110,8 +112,8 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | InternetGatewayId | String | | | Internet Gateway Id |
 | NetworkAddressTranslation | ENABLED / DISABLED | DISABLED　| ○ | NAT Gateway を作成するかどうか |
 | NetworkLoadBalancer | ENABLED / DISABLED | DISABLED　| ○ | NetworkLoadBalancer を作成するかどうか |
-| SubnetPrivateCidrBlock | String | 10.0.0.0/24 | | プライベートサブネットのCIDRブロック |
-| SubnetPublicCidrBlock | String | 10.0.0.0/24 | | パブリックサブネットのCIDRブロック |
+| SubnetPrivateCidrBlock | String | | | プライベートサブネットのCIDRブロック |
+| SubnetPublicCidrBlock | String | | | パブリックサブネットのCIDRブロック |
 | SubnetTransitCidrBlock | String | | | トランジットサブネットのCIDRブロック |
 | SubnetFirewallCidrBlock | String | | | Firewall サブネットのCIDRブロック |
 | **VPCId** | AWS::EC2::VPC::Id | | ○ | VPC id  |
@@ -154,7 +156,7 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | HealthCheckPath | String | / | | HTTP、HTTPSの場合のヘルスチェックパス |
 | HealthCheckPort | Number | 80 | | エンドポイントへのヘルスチェックポート |
 | HealthCheckProtocol | TCP / HTTP / HTTPS | TCP | |エンドポイントへのヘルスチェックプロトコル |
-| IpAddressType | IPV6 / IPV4 | IPV4 | | サポートするIPアドレスタイプ |
+| IpAddressType | DUAL_STACK / IPV4 | IPV4 | | サポートするIPアドレスタイプ |
 | Name | String | Default | | アクセラレータの名前 |
 | Protocol | TCP / UDP | TCP | | クライアントがアクセラレータにアクセスするプロトコル |
 | ThresholdCount | Number | 3 | | 正常もしくは異常と判断するヘルスチェックの数 |
@@ -167,7 +169,7 @@ Amazon Transit Gateway や Amazon VPC IP Address Manager (IPAM) を `Network` �
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 | PrincipalsToAssociateWithIPAM | String | | | IPAM に関連付ける 1 つ以上のプリンシパルのリスト |
-| ProvisionedCidrs | String | 10.0.0.0/8 | ○ | IPAM に指定する CIDR |
+| ProvisionedCidrs | String | 10.0.0.0/9 | ○ | IPAM に指定する CIDR |
 
 ### Network Firewall
 
@@ -229,5 +231,7 @@ Network アカウントで、参加している各アカウントのホストゾ
 | **CustomerGatewayOutsideIpAddress** | String | | | インターネットルーティング可能なカスタマーゲートウェイのIPアドレス |
 | StaticRoutesOnly | true or false | false | ○ | 静的ルーティングかどうかの設定 |
 | TransitGatewayId | String | | ○ | Transit Gateway ID | 
+| TunnelLogs | ENABLED / DISABLED | DISABLED | | IKE と BGP の動作を CloudWatch Logs に記録するかどうか |
+| TunnelLogRetentionInDays | Number | 30 | ○ | VPN トンネルログの保持日数 |
 
 Transit Gateway アタッチメント作成後、 **カスタマーネットワーク行きの Transit Gateway ルートを手動で追加する必要があります** 。

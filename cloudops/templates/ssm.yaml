@@ -103,7 +103,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -120,7 +120,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -862,7 +862,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -908,7 +908,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -957,7 +957,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -999,7 +999,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-events
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1025,7 +1025,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-ssm-command
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -1273,16 +1273,3 @@ Resources:
           S3Buckets:
             - BucketName: !Sub ssm-gui-connect-recordings-${AWS::AccountId}-${AWS::Region}
               BucketOwner: !Ref AWS::AccountId
-  # Lifecycle Automation
-  SSMQuickSetupLifecycleAutomation:
-    Condition: CreateResource
-    Type: AWS::SSMQuickSetup::LifecycleAutomation
-    Properties:
-      AutomationDocument: AWS-RunPatchBaseline
-      AutomationParameters:
-        Operation:
-          - Install
-      ResourceKey: !Sub ${LogicalName}-lifecycle
-      Tags:
-        environment: !Ref Environment
-        createdby: !Ref TagValue

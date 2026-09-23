@@ -69,5 +69,5 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AWSConfigAutoRemediation | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, **AWSConfigAutoRemediation** by SSM Automation and Lambda are enabled |
-| RequiredTagKey | String | createdby | | AWS Config removes AWSnresouces without this tag |
-| RequiredTagValue | String | aws-cloudformation-templates | | AWS Config removes AWS resources without this tag |
+| RequiredTagKey | String | | | AWS Config removes AWSnresouces without this tag |
+| RequiredTagValue | String | | | AWS Config removes AWS resources without this tag |

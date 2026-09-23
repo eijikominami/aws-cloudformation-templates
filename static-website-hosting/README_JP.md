@@ -123,16 +123,16 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | CloudFront403ErrorResponsePagePath | String | | | エラーコード403のページパス |
 | CloudFront404ErrorResponsePagePath | String | | | エラーコード404のページパス |
 | CloudFront500ErrorResponsePagePath | String | | | エラーコード500のページパス |
-| CloudWatchAppicationSignals | ENABLED / DISABLED | ENABLED | | ENABLEDを指定した場合、**Internet Monitor** と **CloudWatch Synthetics** が有効化されます。
+| CloudWatchAppicationSignals | ENABLED / DISABLED | DISABLED | | ENABLEDを指定した場合、**Internet Monitor** と **CloudWatch Synthetics** が有効化されます。
 | CodeStarConnectionArn | String | | | CodeStar connection の ARN |
 | **DomainName** | String | | ○ | ドメイン名 |
 | GitHubOwnerNameForWebsite | String | | | コンテンツリポジトリの GitHub オーナー名 |
 | GitHubRepoNameForWebsite | String | | | コンテンツリポジトリの GitHub リポジトリ名 |
-| GitHubBranchNameForWebsite | String | | | コンテンツリポジトリの GitHub ブランチ名 |
+| GitHubBranchNameForWebsite | String | master | | コンテンツリポジトリの GitHub ブランチ名 |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、**CloudFront** と **S3** のログ機能が有効化されます。 |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | OpenSearch Service のボリュームサイズ（GB） |
-| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | OpenSearch Service のインスタンスタイプ |
-| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | OpenSearch Service のマスタータイプ |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.search | ○ | OpenSearch Service のインスタンスタイプ |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.search | ○ | OpenSearch Service のマスタータイプ |
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | OpenSearch Service の生存時間 |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | OpenSearch Service のユーザ名 |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | OpenSearch Service のパスワード |
@@ -140,7 +140,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name StaticWebsi
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | ENABLEDを指定した場合、 **Real-time Dashboard** が有効化されます。|
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | CloudFrontから送信するログのサンプリングレート |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | Kinesisのシャード数 |
-| RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
+| RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
 | SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |

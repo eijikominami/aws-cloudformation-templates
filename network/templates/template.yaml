@@ -34,6 +34,8 @@ Metadata:
           default: 'VPN Configuration'
         Parameters: 
           - CustomerGatewayOutsideIpAddress
+          - VPNTunnelLogs
+          - VPNTunnelLogRetentionInDays
       - Label: 
           default: 'IPAM Configuration'
         Parameters: 
@@ -84,6 +86,18 @@ Parameters:
     Type: String
     Default: ''
     Description: The Internet-routable IP address for the customer gateway's outside interface
+  VPNTunnelLogs:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether IKE and BGP activity is logged to CloudWatch Logs
+  VPNTunnelLogRetentionInDays:
+    Type: Number
+    Default: 30
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096, 1827, 2192, 2557, 2922, 3288, 3653]
+    Description: The number of days to retain the VPN tunnel logs
   DnsIpAz1:
     Type: String
     Default: 10.0.8.53
@@ -375,6 +389,8 @@ Resources:
       Parameters:
         CustomerGatewayOutsideIpAddress: !Ref CustomerGatewayOutsideIpAddress
         TransitGatewayId: !GetAtt TransitGateway.Outputs.TransitGatewayId
+        TunnelLogs: !Ref VPNTunnelLogs
+        TunnelLogRetentionInDays: !Ref VPNTunnelLogRetentionInDays
         SNSForAlertArn: !If
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn
@@ -449,7 +465,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -466,7 +482,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:

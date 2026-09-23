@@ -47,13 +47,13 @@ You can provide optional parameters as follows.
 | DnsIpAz2 | String | 10.0.1.53 | | The IPv4 address that you want to use for DNS queries | 
 | DnsIpAz3 | String | 10.0.2.53 | | The IPv4 address that you want to use for DNS queries | 
 | **SourceCidrBlock** | String | 0.0.0.0/0 | ○ | The VPC CIDR block of source servers |
-| SubnetCidrBlockAz1 | String | 10.0.0.0/24 | | The subnet CIDR block |
-| SubnetCidrBlockAz2 | String | 10.0.1.0/24 | | The subnet CIDR block |
-| SubnetCidrBlockAz3 | String | 10.0.2.0/24 | | The subnet CIDR block |
+| SubnetCidrBlockAz1 | String | 10.0.16.0/24 | | The subnet CIDR block |
+| SubnetCidrBlockAz2 | String | 10.0.17.0/24 | | The subnet CIDR block |
+| SubnetCidrBlockAz3 | String | 10.0.18.0/24 | | The subnet CIDR block |
 | SubnetIdAz1 | String | | | The private subnet Id |
 | SubnetIdAz2 | String | | | The private subnet Id |
 | SubnetIdAz3 | String | | | The private subnet Id |
-| **VPCCidrBlock** | String | 10.0.0.0/22 | ○ | The VPC CIDR block |
+| **VPCCidrBlock** | String | 10.0.16.0/22 | ○ | The VPC CIDR block |
 | VPCId | String | | | The VPC Id |
 
 ## Troubleshooting

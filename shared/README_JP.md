@@ -56,14 +56,14 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | ActiveDirectoryName | String | corp.example.com | ○ | AWS Managed Microsoft AD directory の　FQDN |
 | ActiveDirectoryPassword | String | Password1+ | ○ | 管理者権限を有する Admin ユーザのパスワード |
 | ActiveDirectoryShortName | String | CORP | ○ | NetBIOS 名 |
-| ActiveDirectorySubnetCidrBlockForAz1 | String | 10.1.0.64/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
-| ActiveDirectorySubnetCidrBlockForAz2 | String | 10.1.64.64/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
-| ActiveDirectorySubnetCidrBlockForAz3 | String | 10.1.64.128/26 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
+| ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
+| ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.0/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| ActiveDirectorySubnetCidrBlockForAz3 | String | 10.3.128.0/26 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AllowedCidrBlockForSyslog | CommaDelimitedList | 0.0.0.0/0 | ○ | FluentBit への syslog 送信を許可する CIDR ブロックのリスト |
 | BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |
 | DomainName | String | | | ドメイン名 |
-| FluentBitForSyslog | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、FluentBit が有効化されます |
+| FluentBitForSyslog | ENABLED / DISABLED | ENABLED | ○ | ENABLED を指定した場合、FluentBit が有効化されます |
 | IdentityCenterAdministratorGroupId | String | | | 管理者権限を付与する Identity Store のグループ ID |
 | IdentityCenterAdministratorTargetAccountIds | CommaDelimitedList | 000000000000 | conditional | 管理者権限を付与する AWS アカウント ID |
 | IdentityCenterArn | String | | | AWS IAM Identity Center の ARN |

@@ -11,6 +11,8 @@ Metadata:
           - CustomerGatewayOutsideIpAddress
           - StaticRoutesOnly
           - TransitGatewayId
+          - TunnelLogs
+          - TunnelLogRetentionInDays
       - Label: 
           default: 'Notofication Configuration'
         Parameters:
@@ -36,6 +38,18 @@ Parameters:
       - true
       - false
     Description: Indicates whether the VPN connection uses static routes only [required] 
+  TunnelLogRetentionInDays:
+    Type: Number
+    Default: 30
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096, 1827, 2192, 2557, 2922, 3288, 3653]
+    Description: The number of days to retain the VPN tunnel logs [required]
+  TunnelLogs:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Whether IKE and BGP activity is logged to CloudWatch Logs
   TransitGatewayId:
     Type: String
     AllowedPattern: .+
@@ -69,6 +83,9 @@ Parameters:
     Default: aws-cloudformation-templates
     AllowedPattern: .+
 
+Conditions:
+  CreateTunnelLogs: !Equals [ !Ref TunnelLogs, ENABLED ]
+
 Resources:
   CustomerGateway:
     Type: AWS::EC2::CustomerGateway
@@ -97,12 +114,45 @@ Resources:
           Value: !Ref TagValue
       TransitGatewayId: !Ref TransitGatewayId
       Type: ipsec.1
+      # Both tunnels are logged. The three VPN metrics only report that a tunnel is
+      # down, not why, so IKE and BGP logs are the only way to tell the cause.
+      VpnTunnelOptionsSpecifications: !If
+        - CreateTunnelLogs
+        - - LogOptions:
+              CloudwatchLogOptions:
+                BgpLogEnabled: true
+                BgpLogGroupArn: !GetAtt LogGroupForTunnel.Arn
+                BgpLogOutputFormat: json
+                LogEnabled: true
+                LogGroupArn: !GetAtt LogGroupForTunnel.Arn
+                LogOutputFormat: json
+          - LogOptions:
+              CloudwatchLogOptions:
+                BgpLogEnabled: true
+                BgpLogGroupArn: !GetAtt LogGroupForTunnel.Arn
+                BgpLogOutputFormat: json
+                LogEnabled: true
+                LogGroupArn: !GetAtt LogGroupForTunnel.Arn
+                LogOutputFormat: json
+        - !Ref AWS::NoValue
+  # The log group name must start with /aws/vendedlogs/ for the VPN service to write to it.
+  LogGroupForTunnel:
+    Condition: CreateTunnelLogs
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/vendedlogs/vpn/${LogicalName}-${AWS::Region}
+      RetentionInDays: !Ref TunnelLogRetentionInDays
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
   CloudWatchAlarmVPN:
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-vpn
-        SemanticVersion: 2.2.26
+        SemanticVersion: 2.2.27
       NotificationARNs: 
         - !Ref SNSForDeploymentArn
       Parameters:

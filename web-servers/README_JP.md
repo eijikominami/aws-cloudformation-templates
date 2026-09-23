@@ -75,33 +75,34 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | DesiredCapacity | Number | 1 | ○ | | 
 | DockerFilePath | String | | ○ | Dockerfile のパス | 
 | DomainName | String | | | ドメイン名 | 
-| EC2DailySnapshotScheduledAt | String | 17:00 | ○ | スナップショット作成時刻 (UTC) |
-| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64 | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2DailySnapshotScheduledAt | String | 17:00 | ○ | 週次の AMI 作成時刻 (UTC) |
+| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | ami-03dceaabddff8067e | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
 | EC2PatchingAt | Number | 3 | ○ | パッチ処理を開始する時刻 |
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
+| EC2NetworkInterface | String | PINNED | ○ | `PINNED` は専用のネットワークインターフェイスにプライベート IP アドレスを固定しますが、インスタンスの稼働中は置換できません。`MANAGED` はインスタンスにインターフェイスを持たせ、CloudFormation による置換を可能にし、 **Elastic IP アドレス** を新しいインスタンスへ移します。 |
 | EC2VolumeSize | Number | 8 | ○ | |
 | GitHubOwnerNameForArtifact | String | | | Artifact の GitHub オーナー名 |
 | GitHubRepoNameForArtifact | String | | | Artifact の GitHub リポジトリ名 |
-| GitHubBranchNameForArtifact | String | | | Artifact の GitHub ブランチ名 |
-| GitHubBranchNameForBuildSpec | String | | | BuildSpec の GitHub ブランチ名 |
+| GitHubBranchNameForArtifact | String | master | | Artifact の GitHub ブランチ名 |
+| GitHubBranchNameForBuildSpec | String | master | | BuildSpec の GitHub ブランチ名 |
 | **GlobalInfrastructure** | NONE / CLOUDFRONT / GLOBAL_ACCELERATOR | NONE | ○ | CloudFront や Global Accelerator を有効にするかどうか |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | ENABLEDを指定した場合、ログ機能が有効化されます。 |
 | LogGroupNameTransferredToS3 | String | | | S3 にログを転送する CloudWatch Log Group 名 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
 | **SsmSecureStringAccess** | ENABLED / DISABLED | DISABLED | ○ | ENABLED を指定した場合、EC2 インスタンスが Parameter Store の SecureString を復号できます。 |
-| SubnetPrivateCidrBlockForAz1 | String | 10.1.0.0/24 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
-| SubnetPrivateCidrBlockForAz2 | String | 10.1.2.0/24 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
-| SubnetPrivateCidrBlockForAz3 | String | 10.1.4.0/24 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |
-| SubnetPublicCidrBlockForAz1 | String | 10.1.1.0/25 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
-| SubnetPublicCidrBlockForAz2 | String | 10.1.3.0/25 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
-| SubnetPublicCidrBlockForAz3 | String | 10.1.5.0/25 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
-| SubnetTransitCidrBlockForAz1 | String | 10.1.1.128/25 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
-| SubnetTransitCidrBlockForAz2 | String | 10.1.3.128/25 | ○ | AZ2 の トランジットサブネットの CIDR ブロック |
-| SubnetTransitCidrBlockForAz3 | String | 10.1.5.128/25 | ○ | AZ3 の トランジットサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz1 | String | 10.2.0.0/24 | ○ | AZ1 の プライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz2 | String | 10.2.2.0/24 | ○ | AZ2 の プライベートサブネットの CIDR ブロック |
+| SubnetPrivateCidrBlockForAz3 | String | 10.2.4.0/24 | ○ | AZ3 の プライベートサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz1 | String | 10.2.1.0/25 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz2 | String | 10.2.3.0/25 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
+| SubnetPublicCidrBlockForAz3 | String | 10.2.5.0/25 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz1 | String | 10.2.1.128/25 | ○ | AZ1 の トランジットサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz2 | String | 10.2.3.128/25 | ○ | AZ2 の トランジットサブネットの CIDR ブロック |
+| SubnetTransitCidrBlockAz3 | String | 10.2.5.128/25 | ○ | AZ3 の トランジットサブネットの CIDR ブロック |
 | TransitGatewayId | String | | | Transit Gateway の Id |
 | TransitGatewayDestinationCidrBlock | String | | | TransitGatewayに転送するアドレス範囲 |
-| VPCCidrBlock | String | 10.1.0.0/21 | ○ | VPC の CIDR ブロック |
+| VPCCidrBlock | String | 10.2.0.0/21 | ○ | VPC の CIDR ブロック |
 | WebACL | ENABLED / DISABLED | DISABLED | ○ | DISABLED に設定された場合、AWS WAFは作成されません。 |
 | WebACLArnForCloudFront | String | | | CloudFrontにアタッチするWAFのARN |
 

@@ -79,6 +79,18 @@ Conditions:
   CreateNoticeAlarm: !Not [ !Equals [ !Ref AlarmLevel, WARNING ] ]
 
 Resources:
+  # SEARCH expressions are rejected by metric alarms, and ErrorLogLoadCount only
+  # exists per logtype, so a log metric filter is what catches a failure in any
+  # logtype -- including ones that do not exist yet.
+  MetricFilterErrorLogLoad:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      FilterPattern: '"NOT loaded into OpenSearch Service"'
+      LogGroupName: !Sub /aws/lambda/${EsLoaderFunctionName}
+      MetricTransformations:
+        - MetricName: !Sub ${EsLoaderFunctionName}-ErrorLogLoad
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
   AlarmSIEMErrorLogLoadCount:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -93,13 +105,12 @@ Resources:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      Metrics:
-        - Id: errors
-          Expression: !Sub SUM(SEARCH('{SIEM,logtype,service} MetricName="ErrorLogLoadCount"', 'Sum', ${ErrorLogLoadCountPeriod}))
-          Label: ErrorLogLoadCount
-          ReturnData: true
+      MetricName: !Sub ${EsLoaderFunctionName}-ErrorLogLoad
+      Namespace: LogMetrics
       OKActions:
         - !Ref SNSTopicArn
+      Period: !Ref ErrorLogLoadCountPeriod
+      Statistic: Sum
       Threshold: !Ref ErrorLogLoadCountThreshold
       TreatMissingData: notBreaching
       Tags: 
@@ -107,6 +118,16 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
+  MetricFilterLogLoad:
+    Condition: CreateNoLogLoadAlarm
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      FilterPattern: '"logs were loaded into OpenSearch Service"'
+      LogGroupName: !Sub /aws/lambda/${EsLoaderFunctionName}
+      MetricTransformations:
+        - MetricName: !Sub ${EsLoaderFunctionName}-LogLoad
+          MetricNamespace: LogMetrics
+          MetricValue: '1'
   AlarmSIEMNoLogLoad:
     Condition: CreateNoLogLoadAlarm
     Type: AWS::CloudWatch::Alarm
@@ -122,13 +143,12 @@ Resources:
       ComparisonOperator: LessThanThreshold
       DatapointsToAlarm: 1
       EvaluationPeriods: 1
-      Metrics:
-        - Id: loaded
-          Expression: !Sub SUM(SEARCH('{SIEM,logtype,service} MetricName="SuccessLogLoadCount"', 'Sum', ${NoLogLoadPeriod}))
-          Label: SuccessLogLoadCount
-          ReturnData: true
+      MetricName: !Sub ${EsLoaderFunctionName}-LogLoad
+      Namespace: LogMetrics
       OKActions:
         - !Ref SNSTopicArn
+      Period: !Ref NoLogLoadPeriod
+      Statistic: Sum
       Threshold: 1
       TreatMissingData: breaching
       Tags: 

@@ -47,11 +47,11 @@ aws cloudformation deploy --template-file templates/mgn.yaml --stack-name MGN --
 | DnsIpAz2 | String | 10.0.1.53 | | Route53 に割り当てる IP アドレス | 
 | DnsIpAz3 | String | 10.0.2.53 | | Route53 に割り当てる IP アドレス | 
 | **SourceCidrBlock** | String | 0.0.0.0/0 | ○ | ソースサーバーの CIDR ブロック |
-| SubnetCidrBlockAz1 | String | 10.0.0.0/24 | | AZ1 の CIDR ブロック |
-| SubnetCidrBlockAz2 | String | 10.0.1.0/24 | | AZ2 の CIDR ブロック |
-| SubnetCidrBlockAz3 | String | 10.0.2.0/24 | | AZ3 の CIDR ブロック |
+| SubnetCidrBlockAz1 | String | 10.0.16.0/24 | | AZ1 の CIDR ブロック |
+| SubnetCidrBlockAz2 | String | 10.0.17.0/24 | | AZ2 の CIDR ブロック |
+| SubnetCidrBlockAz3 | String | 10.0.18.0/24 | | AZ3 の CIDR ブロック |
 | SubnetIdAz1 | String | | | AZ1 のサブネット ID |
 | SubnetIdAz2 | String | | | AZ2 のサブネット ID |
 | SubnetIdAz3 | String | | | AZ3 のサブネット ID |
-| **VPCCidrBlock** | String | 10.0.0.0/22 | ○ | VPC の CIDR ブロック |
+| **VPCCidrBlock** | String | 10.0.16.0/22 | ○ | VPC の CIDR ブロック |
 | VPCId | String | | | VPC ID |

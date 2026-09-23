@@ -121,16 +121,16 @@ You can provide optional parameters as follows.
 | CloudFront403ErrorResponsePagePath | String | | | The path to the 403 custom error page |
 | CloudFront404ErrorResponsePagePath | String | | | The path to the 404 custom error page |
 | CloudFront500ErrorResponsePagePath | String | | | The path to the 500 custom error page |
-| CloudWatchAppicationSignals | ENABLED / DISABLED | ENABLED | | If it is ENABLED, Logging is enabled on **Internet Monitor** and **CloudWatch Synthetics**  |
+| CloudWatchAppicationSignals | ENABLED / DISABLED | DISABLED | | If it is ENABLED, Logging is enabled on **Internet Monitor** and **CloudWatch Synthetics**  |
 | CodeStarConnectionArn | String | | | The Amazon Resource Name (ARN) of the CodeStar connection |
 | **DomainName** | String | | ○ | The CNAME attached to CloudFront |
 | GitHubOwnerNameForWebsite | String | | | The GitHub owner name of the contents repository |
 | GitHubRepoNameForWebsite | String | | | The GitHub repository name of the contents repository |
-| GitHubBranchNameForWebsite | String | | | The Branch name of GitHub for the contents repository |
+| GitHubBranchNameForWebsite | String | master | | The Branch name of GitHub for the contents repository |
 | Logging | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, Logging is enabled on **CloudFront** and **S3** |
 | RealtimeDashboardElasticSearchVolumeSize | Number | 10 | ○ | The volume size (GB) of ElasticSearch Service |
-| RealtimeDashboardElasticSearchInstanceType | String | r5.large.elasticsearch | ○ | The instance type of OpenSearch Service |
-| RealtimeDashboardElasticSearchMasterType | String | r5.large.elasticsearch | ○ | The master type of OpenSearch Service |
+| RealtimeDashboardElasticSearchInstanceType | String | r5.large.search | ○ | The instance type of OpenSearch Service |
+| RealtimeDashboardElasticSearchMasterType | String | r5.large.search | ○ | The master type of OpenSearch Service |
 | RealtimeDashboardElasticSearchLifetime | Number | 1 | ○ | The lifetime (hour) of ElasticSearch Service |
 | RealtimeDashboardElasticSearchMasterUserName | String | root | ○ | The user name of OpenSearch Service |
 | RealtimeDashboardElasticSearchMasterUserPassword | String | Password1+ | ○ | The password of OpenSearch Service |
@@ -138,7 +138,7 @@ You can provide optional parameters as follows.
 | RealtimeDashboardState | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Real-time Dashboard is enabled |
 | RealtimeDashboardSamplingRate | Number | 100 | ○ | The sampling rate of logs sent by CloudFront |
 | RealtimeDashboardKinesisShardCount | Number | 1 | ○ | The shard count of Kinesis |
-| RealtimeDashboardKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
+| RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
 | S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3** |
 | SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |

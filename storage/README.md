@@ -49,9 +49,9 @@ You can provide optional parameters as follows.
 | **ActiveDirectoryId** | String | | ○ | The ID for an existing AWS Managed Microsoft Active Directory instance |
 | AZDeploymentMode | SINGLE_AZ_2 / MULTI_AZ_1 | SINGLE_AZ_2 | ○ | Specifies the file system deployment type |
 | CidrIp | String | 0.0.0.0/0 | ○ | The CIDR block for security group access |
-| FSxThroughput | Number | 8 | ○ | The throughput capacity (MB/s) - 8, 16, 32, or 64 |
+| FSxThroughput | Number | | ○ | The throughput capacity (MB/s) - 8, 16, 32, 64, 128 or 256 |
 | PrimarySubnetAccess | String | | ○ | The subnet ID for the primary file system |
 | IngressCidrIp | String | | ○ | Additional CIDR block for ingress access |
-| StorageCapacity | Number | 32 | ○ | The storage capacity (GB) - minimum 32 GB |
+| StorageCapacity | Number | 1024 | ○ | The storage capacity (GB) - minimum 32 GB |
 | SubnetIds | String | | ○ | Comma-separated list of subnet IDs |
 | **VPCId** | String | | ○ | The VPC ID where FSx will be deployed |

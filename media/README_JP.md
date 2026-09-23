@@ -69,28 +69,28 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | --- | --- | --- | --- | --- |
 | DestinationIpAddressOrEntitlementArn1 | String | | | 送信先のIPアドレスもしくはARN |
 | DestinationPort1 | String | 5001 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol1 | String | | | 送信に用いるプロトコル |
+| DestinationProtocol1 | String | NONE | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn2 | String | | | 送信先のIPアドレスもしくはARN |
 | DestinationPort2 | String | 5002 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol2 | String | | | 送信に用いるプロトコル |
+| DestinationProtocol2 | String | NONE | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn3 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort3 | String | 5001 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol4 | String | | | 送信に用いるプロトコル |
+| DestinationPort3 | String | 5003 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol4 | String | NONE | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn1 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort4 | String | 5001 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol4 | String | | | 送信に用いるプロトコル |
+| DestinationPort4 | String | 5004 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol4 | String | NONE | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn5 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort5 | String | 5001 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol5 | String | | | 送信に用いるプロトコル |
+| DestinationPort5 | String | 5005 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol5 | String | NONE | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn6 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort6 | String | 5001 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol6 | String | | | 送信に用いるプロトコル |
+| DestinationPort6 | String | 5006 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol6 | String | NONE | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn7 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort7 | String | 5001 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol7 | String | | | 送信に用いるプロトコル |
+| DestinationPort7 | String | 5007 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol7 | String | NONE | | 送信に用いるプロトコル |
 | DestinationIpAddressOrEntitlementArn8 | String | | | 送信先のIPアドレスもしくはARN |
-| DestinationPort8 | String | 5001 | | MediaConnectが送信に用いるポート |
-| DestinationProtocol8 | String | | | 送信に用いるプロトコル |
+| DestinationPort8 | String | 5008 | | MediaConnectが送信に用いるポート |
+| DestinationProtocol8 | String | NONE | | 送信に用いるプロトコル |
 | FujitsuQoSSenderControlPort | Number | 9900 | | 送信リクエストを行う際に用いるポート |
 | IngestPort | Number | 9177 | | 受信ポート |
 | InputAllowedCidr | String | 0.0.0.0/0 | | 送信元のIPアドレスの範囲 |
@@ -108,7 +108,7 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | DestinationIpAddressOrEntitlementArn | String | | srt-caller, zixi-push, rist, rtp-fec, rtp | 配信先の IP アドレスか ARN |
 | **FlowArn** | String | | ○ | この出力が関連づけられているフローの ARN |
 | MinLatency | Number | 100 | srt-listener, srt-caller | 最小レイテンシー（ミリ秒） |
-| **Name** | String | | ○ | VPC インタフェースの名前 |
+| **Name** | String | Default | ○ | VPC インタフェースの名前 |
 | Port | Number | 9177 | fujitsu-qos, srt-listener, srt-caller, zixi-push, rist, rtp-fec, rtp | コンテンツを配信する際に使用するポート番号 |
 | Protocol | String | srt-listener | ○ | 送信元が使用するプロトコル |
 
@@ -149,9 +149,9 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | OutputType | S3, MEDIA_PACKAGE, MEDIA_STORE, RTMP, RTP | RTMP | ○ | 出力先のタイプ |
 | OutputHlsBucket | String | | HLS ファイルの送信先バケット名 |
 | OutputRtmpRtpUrl1 | String | | | 出力先のRTMP URL1 |
-| OutputRtmpStreamName1 | String | | | 出力先のRTMPストリーム名1 |
+| OutputRtmpStreamKey1 | String | | | 出力先のRTMPストリーム名1 |
 | OutputRtmpRtpUrl2 | String | | | 出力先のRTMP URL2 |
-| OutputRtmpStreamName2 | String | | | 出力先のRTMPストリーム名2 |
+| OutputRtmpStreamKey2 | String | | | 出力先のRTMPストリーム名2 |
 | VideoBitrate | Number | 2200000 | ○ | ビデオビットレート(bps) |
 | VodSourceBucket | String | | | VODのソースバケット名 |
 | Width | Number | 960 | ○ | ビデオの幅（px） |

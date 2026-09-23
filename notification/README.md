@@ -141,10 +141,10 @@ You can provide optional parameters as follows.
 | CloudTrailAdditionalFilters | String | | | Additional expression of CloudWatch Logs metric filters |
 | CloudTrailLogGroup | | | | If it is not empty, Slack sends details about ``Unauthorized API Calls`` logs |
 | CrossAccountSubscriberAccountId | String | | | Account ID allowed to subscribe to the Alert SNS topic (for cross-account webhook forwarding) |
-| Encrypt | ENABLED / DISABLED | DISABLED | ○ | If it is ENABLED, Slack hook urls are encrypted by an AWS KMS Custom key |
+| Encrypt | ENABLED / DISABLED | false | ○ | If it is ENABLED, Slack hook urls are encrypted by an AWS KMS Custom key |
 | **HookUrlForDeployment** | String | | | Slack Hook Url for deployment information | 
 | **HookUrlForAlert** | String | | | Slack Hook Url for alert |
-| **SlackWorkspaceId** | String | | | Slack Workspace Name | 
+| **SlackWorkspaceId** | String | | ○ | Slack Workspace Name | 
 | **SlackChannelIdForDeployment** | String | | | Slack Channel Id for deployment information |
 | **SlackChannelIdForAlert** | String | | | Slack Channel Id for alert |
 | AutoScalingEventsRule | ENABLED / ERROR_ONLY / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about AutoScaling is enabled |
@@ -158,7 +158,7 @@ You can provide optional parameters as follows.
 | SupportEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about AWS Support is enabled |
 | TagEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Tag Events is enabled |
 | TrustedAdvisorEventsRule | ENABLED / DISABLED | ENABLED | ○ | If it is ENABLED, the events rule about Trusted Advisor is enabled |
-| UnauthorizedApiCallsCloudWatchAlarmName | String | | ○ | The CloudWatch Alarm name to notify unauthorized API calls |
+| UnauthorizedApiCallsCloudWatchAlarmName | String | Notice-DefaultSecuritySettings-CloudTrail-Unauthorized-API-Calls | ○ | The CloudWatch Alarm name to notify unauthorized API calls |
 ## Troubleshooting
 
 ### AWS Chatbot Issues

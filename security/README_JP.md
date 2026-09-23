@@ -191,6 +191,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name DefaultSecu
 | SIEMEsLoaderServiceRoleArn | String | | | aes-siem-es-loader Lambda 関数の ARN。**OpenSearch Service インストール後に指定。** |
 | SIEMGeoLite2LicenseKey | String | | | MaxMind が発行した GEO IP API のライセンスキー |
 | SIEMKmsKeyArn | String | | | SIEM の検出結果を暗号化する KMS キー ARN |
+| SIEMNoLogLoadAlarm | ENABLED / DISABLED | DISABLED | | SIEM にログが届かない状態でアラームを発報するかどうか |
 | SIEMSecurityLakeExternalId | String | | ※ | Security Lake の外部 ID。**OpenSearch Service インストール後に指定。** |
 | SIEMSecurityLakeRoleArn | String | | ※ | aes-siem-es-loader が使用する IAM ロール。**OpenSearch Service インストール後に指定。** |
 | SIEMSecurityLakeSubscriberSqs | String | | ※ | Security Lake サブスクライバーの SQS ARN。**OpenSearch Service インストール後に指定。** |
