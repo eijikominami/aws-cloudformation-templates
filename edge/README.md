@@ -80,8 +80,6 @@ This template creates ``CloudFront`` distribution.
 | RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | The threshold of PutRecord API calls |
 | RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | | The threshold of PutRecord API calls |
 | Route53HostedZoneId | String | | | Route53 hosted zone id |
-| S3DestinationBucketArnOfCrossRegionReplication | String | | | If it's NOT empty, Cross region replication is enabled on **S3** |
-| SyntheticsCanaryName | String | | | If it's NOT empty, CloudWatch Synthetics is enabled |
 | UserAgent | String | | | The secret key that 'User-Agent' header contains | 
 | WebACLArn | String | | | The ARN of Web ACL |
 
