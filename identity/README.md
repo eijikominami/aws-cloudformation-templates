@@ -69,13 +69,12 @@ You can provide optional parameters as follows.
 | **Name** | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
 | Password | String | Password1+ | ○ | The password for the default administrative user named Admin |
 | **ShortName** | String | CORP | ○ | The NetBIOS name for your domain |
-| SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/26 | conditional | The private subnet CIDR block at AZ1 |
+| SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateIdForAz1 | String | | conditional | The private subnet id at AZ1 |
-| SubnetPrivateCidrBlockForAz2 | String | 10.3.64.0/26 | conditional | The private subnet CIDR block at AZ2 |
+| SubnetPrivateCidrBlockForAz2 | String | 10.3.64.0/26 | ○ | The private subnet CIDR block at AZ2 |
 | SubnetPrivateIdForAz2 | String | | conditional | The private subnet id at AZ2 |
 | SubnetPrivateCidrBlockForAz3 | String | 10.3.128.0/26 | conditional | The private subnet CIDR block at AZ3 |
 | SubnetPrivateIdForAz3 | String | | conditional | The private subnet id at AZ3 |
-| TransitGatewayDestinationCidrBlock | String | | | The IPv4 CIDR block forward to TransitGateway |
 | VPCId | String | | ○ | The VPC id |
 
 ### Installing the Active Directory administration tools

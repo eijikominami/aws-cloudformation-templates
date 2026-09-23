@@ -80,8 +80,6 @@ aws cloudformation deploy --template-file waf.yaml --stack-name WAF --capabiliti
 | RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | ○ | PutRecord のAPIコールの閾値 |
 | RealtimeKinesisNumberOfPutRecordThreshold | Number | 12000000 | | PutRecord の API コールの閾値 |
 | Route53HostedZoneId | String | | | Route53のホストゾーンID |
-| S3DestinationBucketArnOfCrossRegionReplication | String | | | ARNを指定した場合、**S3** に **クロスリージョンレプリケーション** が設定されます。 |
-| SyntheticsCanaryName | String | | | SyntheticsCanaryNameを指定した場合、 **CloudWatch Synthetics** が有効化されます。 |
 | UserAgent | String | | | 'User-Agent' ヘッダが含む秘密鍵 | 
 | WebACLArn | String | | | WebACL のARN |
 

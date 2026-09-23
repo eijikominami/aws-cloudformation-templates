@@ -78,9 +78,8 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | 週次の AMI 作成時刻 (UTC) |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | ami-03dceaabddff8067e | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
-| EC2PatchingAt | Number | 3 | ○ | パッチ処理を開始する時刻 |
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
-| EC2NetworkInterface | String | PINNED | ○ | `PINNED` は専用のネットワークインターフェイスにプライベート IP アドレスを固定しますが、インスタンスの稼働中は置換できません。`MANAGED` はインスタンスにインターフェイスを持たせ、CloudFormation による置換を可能にし、 **Elastic IP アドレス** を新しいインスタンスへ移します。 |
+| EC2NetworkInterface | String | MANAGED | ○ | `PINNED` は専用のネットワークインターフェイスにプライベート IP アドレスを固定しますが、インスタンスの稼働中は置換できません。`MANAGED` はインスタンスにインターフェイスを持たせ、CloudFormation による置換を可能にし、 **Elastic IP アドレス** を新しいインスタンスへ移します。 |
 | EC2VolumeSize | Number | 8 | ○ | |
 | GitHubOwnerNameForArtifact | String | | | Artifact の GitHub オーナー名 |
 | GitHubRepoNameForArtifact | String | | | Artifact の GitHub リポジトリ名 |

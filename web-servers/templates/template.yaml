@@ -258,7 +258,7 @@ Parameters:
     Description: The EC2 Image Id [conditional] [required]
   EC2NetworkInterface:
     Type: String
-    Default: PINNED
+    Default: MANAGED
     AllowedValues:
       - PINNED
       - MANAGED
@@ -1294,7 +1294,7 @@ Resources:
     Type: AWS::EC2::EIPAssociation
     Properties: 
       AllocationId: !GetAtt EIPForEC2Instance.AllocationId
-      # MANAGED では新しいインスタンスが作られた後に関連付けが移る
+      # MANAGED moves the association after the replacement instance is created
       InstanceId: !If
         - PinEC2NetworkInterface
         - !Ref AWS::NoValue
@@ -1337,8 +1337,13 @@ Resources:
         - !Ref EC2KeyName
         - !Ref AWS::NoValue
       Monitoring: true
-      # PINNED は ENIForEC2 を device 0 に付ける。稼働中は外せないため置換できない
-      # MANAGED はインスタンスが自分の interface を持つため置換できる
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpPutResponseHopLimit: 1
+        HttpTokens: required
+      # PINNED attaches ENIForEC2 at device 0, which a running instance cannot
+      # release, so the instance cannot be replaced. MANAGED lets the instance
+      # own its interface and be replaced
       NetworkInterfaces: !If
         - PinEC2NetworkInterface
         - - DeviceIndex: 0
@@ -1358,12 +1363,16 @@ Resources:
           - - |
               #!/bin/sh
             - >
-              AWS_AVAIL_ZONE=$(curl
+              TOKEN=$(curl -sX PUT
+              "http://169.254.169.254/latest/api/token" -H
+              "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+            - >
+              AWS_AVAIL_ZONE=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN"
               http://169.254.169.254/latest/meta-data/placement/availability-zone)
             - |
               AWS_REGION=${AWS_AVAIL_ZONE::-1}
             - >
-              AWS_INSTANCE_ID=$(curl
+              AWS_INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN"
               http://169.254.169.254/latest/meta-data/instance-id)
             - >
               ROOT_VOLUME_IDS=$(aws ec2 describe-instances --region $AWS_REGION

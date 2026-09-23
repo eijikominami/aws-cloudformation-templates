@@ -122,7 +122,7 @@ Resources:
     Condition: CreateNoLogLoadAlarm
     Type: AWS::Logs::MetricFilter
     Properties:
-      FilterPattern: '"logs were loaded into OpenSearch Service"'
+      FilterPattern: '"All logs were loaded into OpenSearch Service"'
       LogGroupName: !Sub /aws/lambda/${EsLoaderFunctionName}
       MetricTransformations:
         - MetricName: !Sub ${EsLoaderFunctionName}-LogLoad

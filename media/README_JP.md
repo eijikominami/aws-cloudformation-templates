@@ -140,7 +140,6 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | H264Profile | String | HIGH | ○ | H.264プロファイル |
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264レベル |
 | Height | Number | 540 | ○ | ビデオの高さ（px）|
-| HlsBucket | String | | | HLSファイルの送信バケット名 |
 | InputType | String | RTMP | ○ | 入力タイプ |
 | InputStreamKey | String | stream | | ストリームキー |
 | InputWhitelistRules | String | 0.0.0.0/0 | ○ | 許可するIPアドレス範囲 |

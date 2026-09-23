@@ -78,9 +78,8 @@ You can provide optional parameters as follows.
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of the weekly image creation. (UTC) |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | ami-03dceaabddff8067e | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
-| EC2PatchingAt | Number | 3 | ○ | Starting time of patching process |
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set |
-| EC2NetworkInterface | String | PINNED | ○ | `PINNED` keeps the private IP address on a dedicated interface, but the instance cannot be replaced while it runs. `MANAGED` lets CloudFormation replace the instance and moves the **Elastic IP address** to the new one |
+| EC2NetworkInterface | String | MANAGED | ○ | `PINNED` keeps the private IP address on a dedicated interface, but the instance cannot be replaced while it runs. `MANAGED` lets CloudFormation replace the instance and moves the **Elastic IP address** to the new one |
 | EC2VolumeSize | Number | 8 | ○ | |
 | GitHubOwnerNameForArtifact | String | | | The GitHub owner name of the artifact repository |
 | GitHubRepoNameForArtifact | String | | | The GitHub repository name of the artifact repository |
