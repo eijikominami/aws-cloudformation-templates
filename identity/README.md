@@ -73,8 +73,6 @@ You can provide optional parameters as follows.
 | SubnetPrivateIdForAz1 | String | | conditional | The private subnet id at AZ1 |
 | SubnetPrivateCidrBlockForAz2 | String | 10.3.64.0/26 | ○ | The private subnet CIDR block at AZ2 |
 | SubnetPrivateIdForAz2 | String | | conditional | The private subnet id at AZ2 |
-| SubnetPrivateCidrBlockForAz3 | String | 10.3.128.0/26 | conditional | The private subnet CIDR block at AZ3 |
-| SubnetPrivateIdForAz3 | String | | conditional | The private subnet id at AZ3 |
 | VPCId | String | | ○ | The VPC id |
 
 ### Installing the Active Directory administration tools
@@ -84,6 +82,16 @@ After deploying this template, [install the Active Directory Administration Tool
 ### Storing Security Event Logs in Amazon CloudWatch Logs and Amazon S3
 
 To store domain controller security event logs in Amazon CloudWatch Logs and Amazon S3, you need to manually enable the log forwarding feature through the AWS Management Console. This configuration allows you to forward security events from your domain controllers for monitoring and audit purposes.
+
+### Replacing the management instance from the latest AMI
+
+This template creates a nested Data Lifecycle Manager stack that builds an AMI from the management instance. The policy is an `IMAGE_MANAGEMENT` policy over instances that carry the `Environment` tag and the `TagKey` and `TagValue` pair, and it runs weekly. When an AMI becomes available, an EventBridge rule named `<LogicalName>-RegisterLatestImage-<region>` invokes a function that writes the id of that AMI to the SSM parameter `/<LogicalName>/ami/latest`.
+
+`EC2ImageId` defaults to the AMI that AWS publishes, so the parameter is written but never read. Pointing `EC2ImageId` at `/<LogicalName>/ami/latest` makes the management instance start from the newest AMI instead, and the next stack update then replaces the instance whenever that parameter has changed.
+
+Software installed on the management instance by hand therefore survives a replacement only when it was installed before the AMI was built. Installing software and then updating the stack before the weekly schedule has run replaces the instance from an older AMI, and the software is no longer present. Build an AMI and update the parameter as soon as an installation finishes.
+
+The root volume is deleted on termination, so a replaced instance keeps nothing of its own. Two signs tell whether the new instance started from an AMI that already carried the software: the Windows computer name is the same as before, and the event log holds records that predate the launch time of the instance.
 
 ## Troubleshooting
 
@@ -95,6 +103,36 @@ If IAM Identity Center is not working properly:
 2. Check that the Identity Center instance is properly configured in your region
 3. Ensure that permission sets are correctly assigned to users and groups
 4. Verify that external identity providers are properly configured if using SAML
+
+#### Changing the identity source deletes every user, group and assignment
+
+Changing the identity source between Active Directory and an external identity provider deletes every user, every group and every account assignment in the instance. CloudTrail records a `DisassociateProfile` event with `allAssignmentsDeleted` set to true for each one. Record the group ids of the identity store before the change, because the assignments this template creates reference them through `AdministratorGroupId` and `ReadOnlyGroupId`.
+
+#### An account assignment cannot be updated in place
+
+`AWS::SSO::Assignment` declares every property as create-only and has no update handler, so any change replaces the resource. An assignment that already exists outside the stack makes the create fail with `ConflictException`. Delete the existing assignment before the first deployment that manages it.
+
+The same applies to the `Name` of `AWS::SSO::PermissionSet`. Renaming a permission set replaces it, which also deletes every assignment that references it.
+
+#### A delegated administrator cannot assign access to the management account
+
+An account that is the delegated administrator for `sso.amazonaws.com` cannot create an assignment that targets the Organizations management account. The call fails with an explicit deny in a resource-based policy that no IAM policy can override, and deleting an assignment on a permission set that Control Tower created is refused in the same way. Run both from the management account.
+
+Leave `ManagementAccountId` empty when the stack runs in a delegated administrator account. The resources for the management account are then not created.
+
+#### A user without a first and last name fails to provision
+
+The SCIM endpoint of IAM Identity Center requires the `name` attribute and answers `400` with `name: The attribute name is required` when it is absent. Microsoft Entra ID builds that attribute from `givenName` and `surname`, so a directory account that has neither is never created. The default administrative account of AWS Managed Microsoft AD is one of them.
+
+The provisioning job retries such an entry every cycle without ever succeeding. The failure is scoped to the entry, so `countSuccessiveCompleteFailures` stays at zero and the job is not quarantined, but the log fills with the same error. Remove the account from the groups that are assigned to the enterprise application instead of giving it a name.
+
+#### An identity store user cannot be created by CloudFormation
+
+`AWS::IdentityStore::Group` and `AWS::IdentityStore::GroupMembership` exist, but there is no resource for a user. When an external identity provider provisions users through SCIM, the groups and the memberships are also owned by that provider, so declaring them here creates two owners for the same object.
+
+#### An AWS managed application cannot be created by CloudFormation
+
+`AWS::SSO::Application` only supports OAuth 2.0 customer managed applications. It cannot create the applications that AWS services register themselves, such as Amazon Quick or Amazon CodeCatalyst, and it cannot create a SAML 2.0 customer managed application. `AWS::SSO::ApplicationAssignment` can still assign principals to an application that already exists, but its ARN has to be supplied as a parameter because nothing in the template creates it.
 
 ### Managed Microsoft AD Issues
 

@@ -58,7 +58,6 @@ You can provide optional parameters as follows.
 | **ActiveDirectoryShortName** | String | CORP | ○ | The NetBIOS name for your domain |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.0/26 | ○ | The public subnet CIDR block at AZ2 |
-| ActiveDirectorySubnetCidrBlockForAz3 | String | 10.3.128.0/26 | ○ | The public subnet CIDR block at AZ3 |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | AllowedCidrBlockForSyslog | CommaDelimitedList | 0.0.0.0/0 | ○ | The list of CIDR blocks allowed to send syslog to FluentBit |
 | BucketNameForArchive | String | | | The Amazon S3 bucket name for log archive |

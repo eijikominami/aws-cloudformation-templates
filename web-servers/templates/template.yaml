@@ -21,6 +21,8 @@ Metadata:
           - EC2NetworkInterface
           - EC2VolumeSize
           - EC2DailySnapshotScheduledAt
+          - EC2DiskUsedPercentThreshold
+          - EC2MemUsedPercentThreshold
           - SsmSecureStringAccess
       - Label: 
           default: 'Distribution Configuration'
@@ -251,6 +253,12 @@ Parameters:
     Type: String
     Default: '17:00'  
     Description: Daily Snapshot time (HH:MM) [required]
+  EC2DiskUsedPercentThreshold:
+    Type: Number
+    Default: 90
+    MinValue: 0
+    MaxValue: 100
+    Description: The threshold of the disk used percent alarm [conditional] [required]
   EC2ImageId:
     Type: AWS::EC2::Image::Id
     Default: ami-03dceaabddff8067e
@@ -271,6 +279,12 @@ Parameters:
     Type: String
     Default: ''
     Description: The name of an existing EC2 KeyPair to enable SSH access to the instance
+  EC2MemUsedPercentThreshold:
+    Type: Number
+    Default: 90
+    MinValue: 0
+    MaxValue: 100
+    Description: The threshold of the memory used percent alarm. The OOM killer can fire below 90 percent because this metric excludes the page cache [conditional] [required]
   EC2VolumeSize:
     Type: Number
     Default: 8
@@ -427,7 +441,6 @@ Conditions:
   CreateGlobalAccelerator: !Equals [ !Ref GlobalInfrastructure, GLOBAL_ACCELERATOR ]
   CreateNetworkLoadBalancer: !Equals [ !Ref AutoScalingLoadBalancerType, network ] 
   CreatePrivateSubnets: !Or [ !And [ !Not [ !Equals [ !Ref AutoScalingLoadBalancerType, None ] ], !Equals [ !Ref ComputeType, INSTANCE ] ], !And [ !Equals [ !Ref ComputeType, CONTAINER], !Not [ !Equals [ !Ref GitHubOwnerNameForArtifact, '' ] ], !Not [ !Equals [ !Ref GitHubRepoNameForArtifact, '' ] ] ]]
-  CreateEC2AndRoute53: !And [ !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Equals [ !Ref ComputeType, INSTANCE ], !Equals [ !Ref GlobalInfrastructure, CLOUDFRONT ], !Equals [ !Ref AutoScalingLoadBalancerType, None ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ], !Not [ !Equals [ !Ref DomainName, ''] ] ]
   CreateS3ReplicationForAnalysis: !And [ !Not [ !Equals [ !Ref AccountIdForAnalysis, ''] ], !Not [ !Equals [ !Ref BucketNameForAnalysis, ''] ]]
   CreateRoute53AccessForCertbot: !And [ !Equals [ !Ref CertbotDnsChallenge, ENABLED ], !Not [ !Equals [ !Ref Route53HostedZoneId, ''] ] ]
   CreateSsmSecureStringAccess: !Equals [ !Ref SsmSecureStringAccess, ENABLED ]
@@ -1303,18 +1316,6 @@ Resources:
         - PinEC2NetworkInterface
         - !Ref ENIForEC2
         - !Ref AWS::NoValue
-  # Route53
-  Route53RecordSet:
-    Condition: CreateEC2AndRoute53
-    Type: AWS::Route53::RecordSet
-    Properties:
-      Comment: !Ref DomainName
-      HostedZoneId: !Ref Route53HostedZoneId
-      Name: !Ref DomainName
-      ResourceRecords: 
-        - !Ref EIPForEC2Instance
-      TTL: 600
-      Type: A
   # EC2
   EC2:
     Condition: CreateEC2
@@ -1509,11 +1510,11 @@ Resources:
           - !Ref SNSForDeploymentArn
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
-        DiskUsedPercentThreshold: 90
+        DiskUsedPercentThreshold: !Ref EC2DiskUsedPercentThreshold
         ImageId: !Ref EC2ImageId
         InstanceId: !Ref EC2
         InstanceType: !Ref EC2InstanceType
-        MemUsedPercentThreshold: 90
+        MemUsedPercentThreshold: !Ref EC2MemUsedPercentThreshold
         SNSTopicArn: !If 
           - CreateSNSForAlert
           - !GetAtt SNSForAlert.Outputs.SNSTopicArn

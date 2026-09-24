@@ -44,6 +44,11 @@ If you deploy ``Global Settings Template``, create an ``S3 artifact bucket`` in 
 ```bash
 aws s3api create-bucket --bucket my-bucket --region us-east-1
 ```
+
+This template does not create the bucket. The ``GlobalSettings`` deploy stage is generated only when ``GlobalSettings`` is ``ENABLED`` and ``ArtifactBucketInVirginia`` is not empty, so enabling ``GlobalSettings`` without the bucket name has no effect.
+
+Configure the bucket with SSE-S3 (AES256) encryption, all four public access block settings enabled, and a lifecycle rule that expires objects after 7 days.
+
 ### Set up template configuration files (Optional)
 
 If you use [Template Configuration File](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab1c13c17c13), upload your configuration files to your GitHub repository with the following file names and specify `GitHubOwnerNameForTemplateConfiguration`, `GitHubOwnerNameForTemplateConfiguration` and `GitHubRepoNameForTemplateConfiguration` in your deployment.
@@ -125,3 +130,11 @@ The build process is defined in: `codebuild/buildspec-upload-artifacts-serverles
 
 For detailed instructions on creating and publishing SAM templates to Serverless Application Repository, see:
 - [Monitoring Templates Contributing Guide](../monitoring/CONTRIBUTING.md)
+
+## Known Issues
+
+### A push starts the pipeline and the artifact upload at the same time
+
+A push to the template branch starts two things at once: the `DefaultSettings` pipeline, through its source connection, and the `UploadArtifacts` CodeBuild project, through its webhook. The pipeline's `DeployInfrastructure` stage deploys the stacks at run order 1 while that CodeBuild is still copying the nested templates to the artifact bucket, so a stack whose nested template has not arrived yet fails with `S3 object does not exist ... Error: NoSuchKey`. The `GlobalSettings` and `Notification` stacks are the ones at run order 1, and they are the ones that fail.
+
+Nothing is wrong with the templates when this happens. Wait for the `UploadArtifacts` build to finish and start the pipeline again; the second run reads the templates the first one was still writing. `UploadArtifacts` also appears inside the pipeline at run order 2, but that action deploys the stack rather than performing the copy, so it does not order the copy ahead of the stacks that need it.

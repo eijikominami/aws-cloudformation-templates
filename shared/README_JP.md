@@ -58,7 +58,6 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | ActiveDirectoryShortName | String | CORP | ○ | NetBIOS 名 |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | AZ1 の パブリックサブネットの CIDR ブロック |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.0/26 | ○ | AZ2 の パブリックサブネットの CIDR ブロック |
-| ActiveDirectorySubnetCidrBlockForAz3 | String | 10.3.128.0/26 | ○ | AZ3 の パブリックサブネットの CIDR ブロック |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | AllowedCidrBlockForSyslog | CommaDelimitedList | 0.0.0.0/0 | ○ | FluentBit への syslog 送信を許可する CIDR ブロックのリスト |
 | BucketNameForArchive | String | | | ログアーカイブ用の S3 バケット名 |

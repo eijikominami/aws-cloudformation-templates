@@ -76,9 +76,11 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 | DockerFilePath | String | | ○ | Dockerfile のパス | 
 | DomainName | String | | | ドメイン名 | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | 週次の AMI 作成時刻 (UTC) |
-| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | ami-03dceaabddff8067e | ○ | Amazon Linux 2 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2DiskUsedPercentThreshold | Number | 90 | ○ | **ディスク使用率** アラームのしきい値 |
+| EC2ImageId | AWS::EC2::Image::Id | ami-03dceaabddff8067e | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
 | EC2KeyName | String | | | 値が指定されない場合は、 **SSHキー** は設定されません。 |
+| EC2MemUsedPercentThreshold | Number | 90 | ○ | **メモリ使用率** アラームのしきい値。このメトリクスはページキャッシュを含まないため、メモリの少ないホストでは 90 に達する前に **OOM killer** が動作します。 |
 | EC2NetworkInterface | String | MANAGED | ○ | `PINNED` は専用のネットワークインターフェイスにプライベート IP アドレスを固定しますが、インスタンスの稼働中は置換できません。`MANAGED` はインスタンスにインターフェイスを持たせ、CloudFormation による置換を可能にし、 **Elastic IP アドレス** を新しいインスタンスへ移します。 |
 | EC2VolumeSize | Number | 8 | ○ | |
 | GitHubOwnerNameForArtifact | String | | | Artifact の GitHub オーナー名 |
@@ -110,3 +112,26 @@ aws cloudformation deploy --template-file template.yaml --stack-name WebServers 
 ### SSM State Manager の問題
 
 `AWS-GatherSoftwareInventory` を含む SSM State Manager の関連付けが既に存在する場合、このテンプレートは失敗します。`IgnoreResourceConflicts` オプションを ENABLED に設定してこのテンプレートを実行してください。
+
+### Data Lifecycle Manager のポリシータイプの問題
+
+CloudFormation は `PolicyType` を **Update requires: No interruption** と記載していますが、Amazon Data Lifecycle Manager は既存のポリシーに対するポリシータイプの変更を拒否します。この値を変更するスタック更新は `The following parameter(s) cannot be updated: PolicyType` で失敗し、ロールバックも失敗してネストスタックの全階層が `UPDATE_ROLLBACK_FAILED` のまま残ることがあります。
+
+ポリシータイプを変更する場合は、先にポリシーを削除し、次の更新で作り直してください。ロールバックが止まった場合は、ルートスタックに対して `continue-update-rollback` を実行し、ネストスタックを論理 ID のパスではなく物理名で指定してください。
+
+```bash
+aws cloudformation continue-update-rollback --stack-name ROOT_STACK \
+  --resources-to-skip PHYSICAL_NESTED_STACK_NAME.DataLifecycleManager
+```
+
+### Data Lifecycle Manager のスケジュールの問題
+
+作成ルールの `IntervalUnit` は `HOURS` のみを受け付け、`Interval` は 1、2、3、4、6、8、12、24 のみを受け付けます。1 日より長い間隔を指定する場合は `CronExpression` を使用してください。このテンプレートは `EC2DailySnapshotScheduledAt` と月曜固定の曜日から cron 式を組み立てます。
+
+### ネットワークインターフェイスモードの問題
+
+`PINNED` は `ENIForEC2` をデバイスインデックス 0 にアタッチしますが、稼働中のインスタンスからそのインデックスのインターフェイスは外せません。CloudFormation はリソースを置換する際、旧リソースを削除する前に新リソースを作成するため、`PINNED` での置換は生存中のインスタンスが保持し続けているインターフェイスを要求して `Interface: [eni-...] in use.` で失敗します。インターフェイス自体もモードに応じた条件付きリソースなので、同じ更新がアタッチ中のそれを削除しようとします。
+
+すべての変更が置換を伴うわけではありません。`UserData` は **Some interruptions** と定義されており、ルートボリュームが EBS の場合 CloudFormation はインスタンスを置換せず再起動します。置換になるのはルートボリュームがインスタンスストアの場合だけです。`MetadataOptions` は中断すら伴いません。`PINNED` が更新を妨げると判断する前に、変更するプロパティの更新挙動を確認してください。
+
+稼働中のスタックを `PINNED` から `MANAGED` へ移すとインスタンスが置換されるため、既定値を変更する前にテンプレート設定ファイルへモードを明記してください。何も渡していないスタックは既定値に依存しているため、既定値を変更すると次回のデプロイでインスタンスが動きます。

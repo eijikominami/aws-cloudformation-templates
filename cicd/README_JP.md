@@ -45,6 +45,10 @@
 aws s3api create-bucket --bucket my-bucket --region us-east-1
 ```
 
+このバケットはテンプレートでは作成されません。``GlobalSettings`` デプロイステージは ``GlobalSettings`` が ``ENABLED`` であり、かつ ``ArtifactBucketInVirginia`` が空でない場合にのみ生成されるため、バケット名を指定せずに ``GlobalSettings`` を有効化しても何も起きません。
+
+バケットには SSE-S3 (AES256) による暗号化、パブリックアクセスブロックの 4 項目すべて、7 日でオブジェクトを失効させるライフサイクルルールを設定してください。
+
 ### テンプレート設定ファイルの作成 (オプション)
 
 [テンプレート設定ファイル](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab1c13c17c13) を使用する場合は、GitHubリポジトリに以下に示す命名規則で Configuration File をアップロードした上で、CloudFormationを実行する際に `GitHubOwnerNameForTemplateConfiguration` パラメータ、`GitHubOwnerNameForTemplateConfiguration` パラメータと `GitHubRepoNameForTemplateConfiguration` パラメータを指定してください。
@@ -126,3 +130,11 @@ git push origin monitoring-glue-v1.0.0-rc
 
 SAM テンプレートを作成して Serverless Application Repository に公開する詳細な手順については、以下を参照してください：
 - [Monitoring テンプレート開発者ガイド](../monitoring/CONTRIBUTING.md)
+
+## 既知の問題
+
+### push がパイプラインとアーティファクトのアップロードを同時に起動する
+
+テンプレートのブランチへ push すると、ソース接続経由で `DefaultSettings` パイプラインが、Webhook 経由で `UploadArtifacts` の CodeBuild プロジェクトが、同時に起動します。パイプラインの `DeployInfrastructure` ステージは実行順 1 のスタックをデプロイしますが、その時点で CodeBuild はまだネストされたテンプレートをアーティファクトバケットへコピーしている途中です。そのため、テンプレートが到着していないスタックは `S3 object does not exist ... Error: NoSuchKey` で失敗します。実行順 1 にあるのは `GlobalSettings` と `Notification` で、失敗するのはこの 2 つです。
+
+この失敗はテンプレートの不具合ではありません。`UploadArtifacts` のビルドが完了するのを待ってパイプラインを再実行すると、1 回目が書き込み中だったテンプレートを 2 回目が読み取ります。`UploadArtifacts` はパイプラインの実行順 2 にも現れますが、そのアクションはスタックをデプロイするだけでコピーは行わないため、コピーを必要とするスタックより前に順序付ける役割は果たしません。
