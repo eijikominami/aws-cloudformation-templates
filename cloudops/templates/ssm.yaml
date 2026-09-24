@@ -189,7 +189,7 @@ Resources:
             Action: sts:AssumeRole
       Description: !Sub A role required for SSM Explorer in ${LogicalName}
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSSSMOpsInsightsServiceRolePolicy
+        - arn:aws:iam::aws:policy/aws-service-role/AWSSSMOpsInsightsServiceRolePolicy
       Policies:
         - PolicyName: SSMExplorerServiceRolePolicy
           PolicyDocument:
@@ -256,47 +256,6 @@ Resources:
           Value: !Ref Environment
         - Key: !Ref TagKey
           Value: !Ref TagValue
-  IAMRoleForDiagnosis:
-    Condition: CreateResource
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ssm.amazonaws.com
-            Action: sts:AssumeRole
-      Description: !Sub A role required for SSM Diagnosis in ${LogicalName}
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWS-SSM-DiagnosisAdminPolicy
-        - arn:aws:iam::aws:policy/AWS-SSM-Automation-DiagnosisBucketPolicy
-      RoleName: AWSSSMDiagnosisAdminRole
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
-  IAMRoleForRemediation:
-    Condition: CreateResource
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ssm.amazonaws.com
-            Action: sts:AssumeRole
-      Description: !Sub A role required for SSM Remediation in ${LogicalName}
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWS-SSM-RemediationAdminPolicy
-      RoleName: AWSSSMRemediationAdminRole
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   IAMRoleForQuickSetupAREX:
     Condition: CreateResource
     Type: AWS::IAM::Role
@@ -355,7 +314,7 @@ Resources:
       Description: !Sub A role required for Quick Setup Explorer in ${LogicalName}
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSQuickSetupSSMManageResourcesExecutionPolicy
-        - arn:aws:iam::aws:policy/AWSResourceExplorerServiceRolePolicy
+        - arn:aws:iam::aws:policy/aws-service-role/AWSResourceExplorerServiceRolePolicy
       RoleName: AWS-QuickSetup-SSM-RoleForEnablingExplorer
       Tags:
         - Key: QuickSetupDocument
