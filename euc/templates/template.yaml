@@ -478,7 +478,6 @@ Resources:
         ShortName: !Ref ActiveDirectoryShortName
         SubnetPrivateIdForAz1: !GetAtt Az1.Outputs.PrivateSubnetId
         SubnetPrivateIdForAz2: !GetAtt Az2.Outputs.PrivateSubnetId
-        SubnetPrivateIdForAz3: !GetAtt Az3.Outputs.PrivateSubnetId
         VPCId: !Ref VPC
         TagKey: !Ref TagKey
         TagValue: !Ref TagValue

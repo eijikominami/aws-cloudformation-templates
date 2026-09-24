@@ -76,9 +76,11 @@ You can provide optional parameters as follows.
 | DockerFilePath | String | | ○ | The path of Dockerfile | 
 | DomainName | String | | | Domain name | 
 | EC2DailySnapshotScheduledAt | String | 17:00 | ○ | Starting time of the weekly image creation. (UTC) |
-| EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | ami-03dceaabddff8067e | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
+| EC2DiskUsedPercentThreshold | Number | 90 | ○ | The threshold of the **disk used percent** alarm |
+| EC2ImageId | AWS::EC2::Image::Id | ami-03dceaabddff8067e | ○ | Amazon Linux 2023 AMI (HVM), SSD Volume Type (64bit x86) |
 | EC2InstanceType | String | t3.micro | ○ | | 
 | EC2KeyName | String | | |  If it's empty, **SSH key** will NOT be set |
+| EC2MemUsedPercentThreshold | Number | 90 | ○ | The threshold of the **memory used percent** alarm. This metric excludes the page cache, so the **OOM killer** can fire below 90 on a host with little memory |
 | EC2NetworkInterface | String | MANAGED | ○ | `PINNED` keeps the private IP address on a dedicated interface, but the instance cannot be replaced while it runs. `MANAGED` lets CloudFormation replace the instance and moves the **Elastic IP address** to the new one |
 | EC2VolumeSize | Number | 8 | ○ | |
 | GitHubOwnerNameForArtifact | String | | | The GitHub owner name of the artifact repository |
@@ -111,3 +113,26 @@ You can provide optional parameters as follows.
 ### SSM State Manager Issues
 
 If `SSM State Manager Association` already has `AWS-GatherSoftwareInventory`, the template will **fail**. Deploy this template with the `IgnoreResourceConflicts` option enabled.
+
+### Data Lifecycle Manager Policy Type Issues
+
+Amazon Data Lifecycle Manager rejects a change to `PolicyType` on a policy that already exists, even though CloudFormation documents the property as **Update requires: No interruption**. A stack update that changes it fails with `The following parameter(s) cannot be updated: PolicyType`, and the rollback can also fail and leave every level of the nested stack in `UPDATE_ROLLBACK_FAILED`.
+
+To change the policy type, delete the policy first and create it again in a second update. To resolve a stuck rollback, call `continue-update-rollback` on the **root** stack and name the nested stack by its **physical** name, not by the path of logical ids.
+
+```bash
+aws cloudformation continue-update-rollback --stack-name ROOT_STACK \
+  --resources-to-skip PHYSICAL_NESTED_STACK_NAME.DataLifecycleManager
+```
+
+### Data Lifecycle Manager Schedule Issues
+
+The `IntervalUnit` of a create rule only accepts `HOURS`, and `Interval` only accepts 1, 2, 3, 4, 6, 8, 12 and 24. A schedule longer than a day needs a `CronExpression` instead. This template builds the expression from `EC2DailySnapshotScheduledAt` and a fixed day of Monday.
+
+### Network Interface Mode Issues
+
+`PINNED` attaches `ENIForEC2` at device index 0, and a running instance cannot release the interface at that index. CloudFormation replaces a resource by creating the new one before deleting the old one, so a replacement under `PINNED` asks for an interface the surviving instance still holds and fails with `Interface: [eni-...] in use.`. The interface is also conditional on the mode, so the same update tries to delete it while it is attached.
+
+Not every change replaces the instance. `UserData` is documented as **Some interruptions**: CloudFormation restarts an instance on an EBS root volume rather than replacing it, and only an instance store root volume forces a replacement. `MetadataOptions` needs no interruption at all. Read the update behaviour of the property you are changing before assuming `PINNED` blocks the update.
+
+Moving a running stack from `PINNED` to `MANAGED` replaces the instance, so state the mode in the template configuration file before changing the default. A stack that passes nothing depends on the default, and changing the default then moves the instance on the next deployment.

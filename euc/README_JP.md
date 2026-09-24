@@ -94,3 +94,13 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name V
 | WorkspacesUserVolumeSizeGib | Number | 100 | ○ | WorkSpaces のユーザーボリュームのサイズ |
 
 AppStream で Active Directory を使用する場合には、[**Active Directory 上で権限の設定を行う**](https://docs.aws.amazon.com/ja_jp/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions)必要があります。
+
+### 環境の削除
+
+スタックを削除するだけでは `DELETE_FAILED` になります。WorkSpace と AD Connector がプライベートサブネット上にネットワークインターフェイスを持ち、それが残っている間はサブネットを削除できません。以下の順序で削除します。
+
+1. すべての WorkSpace を削除し、`TERMINATED` になるまで待つ
+2. WorkSpaces からディレクトリの登録を解除する
+3. AD Connector を削除する。AD Connector は作成時のサブネットに紐付き変更できないため、更新ではなく再作成になります。AD Connector が参照する AWS Managed Microsoft AD は別のディレクトリであり、影響を受けません
+4. スタックを削除する。FSx for Windows File Server は最終バックアップを作成するため数十分かかります
+5. ディレクトリ登録時に WorkSpaces が作成し CloudFormation が管理していないセキュリティグループ `d-xxxx_workspacesMembers` を削除し、スタックを再度削除する

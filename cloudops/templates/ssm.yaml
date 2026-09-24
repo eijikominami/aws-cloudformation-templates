@@ -1262,14 +1262,3 @@ Resources:
           Type: AWSQuickSetupType-SSMHostMgmt
       Description: !Sub Host Management created by ${LogicalName}
       Name: HostManagement
-  # GUI Connect Preferences (RDP session recording)
-  SSMGuiConnectPreferences:
-    Condition: CreateResource
-    Type: AWS::SSMGuiConnect::Preferences
-    Properties:
-      ConnectionRecordingPreferences:
-        KMSKeyArn: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/ssm-gui-connect
-        RecordingDestinations:
-          S3Buckets:
-            - BucketName: !Sub ssm-gui-connect-recordings-${AWS::AccountId}-${AWS::Region}
-              BucketOwner: !Ref AWS::AccountId

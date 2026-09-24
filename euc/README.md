@@ -74,3 +74,13 @@ You can provide optional parameters as follows:
 | WorkspacesUserVolumeSizeGib | Number | 100 | ○ | The size of the user storage |
 
 If you use your existing Active Directory on AppStreams, [**you need to set up permissions on it**](https://docs.aws.amazon.com/appstream2/latest/developerguide/active-directory-admin.html#active-directory-permissions).
+
+### Deleting the environment
+
+Deleting the stack alone leaves it in `DELETE_FAILED`. The WorkSpace and the AD connector hold network interfaces in the private subnets, and a subnet cannot be deleted while one remains. Delete in this order.
+
+1. Terminate every WorkSpace and wait for it to reach `TERMINATED`
+2. Deregister the directory from WorkSpaces
+3. Delete the AD connector. It is bound to the subnets it was created with and cannot be moved, so it is recreated rather than updated. A Managed Microsoft AD that the connector points at is a separate directory and is not affected
+4. Delete the stack. An FSx for Windows File Server takes tens of minutes because it writes a final backup first
+5. Delete the security group named `d-xxxx_workspacesMembers`, which WorkSpaces created when the directory was registered and CloudFormation does not manage, then delete the stack again
