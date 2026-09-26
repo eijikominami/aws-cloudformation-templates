@@ -517,7 +517,10 @@ Resources:
       Name: AWS-EnableExplorer
       Parameters:
           AutomationAssumeRole:
-            - !Sub arn:aws:iam::${AWS::AccountId}:role/AWSSystemsManagerEnableExplorerRole
+            - !If
+              - CreateResource
+              - !GetAtt IAMRoleForExplorer.Arn
+              - !Sub arn:aws:iam::${AWS::AccountId}:role/AWSSystemsManagerEnableExplorerRole
   ResourceDataSync:
     Condition: CreateResourceDataSync
     Type: AWS::SSM::ResourceDataSync
