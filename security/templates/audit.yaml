@@ -340,12 +340,6 @@ Resources:
                 Action:
                   - inspector-scan:ScanSbom
                 Resource: '*'
-              # The scan action pulls its base image from Amazon ECR Public, where anonymous pulls are rate limited.
-              - Effect: Allow
-                Action:
-                  - ecr-public:GetAuthorizationToken
-                  - sts:GetServiceBearerToken
-                Resource: '*'
       RoleName: !Sub ${LogicalName}-Inspector-${AWS::Region}
       Tags:
         - Key: environment
