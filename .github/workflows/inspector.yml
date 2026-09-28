@@ -3,11 +3,11 @@ name: Amazon Inspector Scan
 on:
   pull_request:
     types: opened
+  workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
-  security-events: write
 
 jobs:
   scan:
@@ -25,23 +25,45 @@ jobs:
           role-to-assume: ${{ vars.AWS_INSPECTOR_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      # The scan action is a container action whose base image lives on Amazon ECR Public,
-      # where anonymous pulls share a quota across all runners and return 429 once it is spent.
-      # Failing to log in leaves the pull anonymous, which is what it was before, so it is not fatal.
-      - name: Log in to Amazon ECR Public
+      # Installed outside the workspace so the generator does not inventory itself.
+      - name: Install Amazon Inspector SBOM Generator
         if: steps.iam-role.outcome == 'success'
-        continue-on-error: true
-        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+        run: |
+          curl -sSfL -o "${RUNNER_TEMP}/sbomgen.zip" https://amazon-inspector-sbomgen.s3.amazonaws.com/latest/linux/amd64/inspector-sbomgen.zip
+          unzip -qo "${RUNNER_TEMP}/sbomgen.zip" -d "${RUNNER_TEMP}/sbomgen"
+          sudo install -m 0755 "$(find "${RUNNER_TEMP}/sbomgen" -type f -name inspector-sbomgen)" /usr/local/bin/inspector-sbomgen
+          inspector-sbomgen --version
 
       - name: Amazon Inspector Scan
         if: steps.iam-role.outcome == 'success'
-        uses: aws-actions/vulnerability-scan-github-action-for-amazon-inspector@v1
-        with:
-          artifact_type: repository
-          artifact_path: .
+        run: |
+          inspector-sbomgen directory --path . -o "${RUNNER_TEMP}/sbom.json"
+          aws inspector-scan scan-sbom --sbom "file://${RUNNER_TEMP}/sbom.json" --output-format CYCLONE_DX_1_5 > "${RUNNER_TEMP}/scan.json"
 
-      - name: Upload SARIF
-        if: steps.iam-role.outcome == 'success' && hashFiles('inspector-results.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: inspector-results.sarif
+          # Inspector reports its own severity tally in sbom.metadata.properties.
+          count() {
+            jq -r --arg name "amazon:inspector:sbom_scanner:$1_vulnerabilities" \
+              '[.sbom.metadata.properties[]? | select(.name == $name) | .value] | first // "0"' "${RUNNER_TEMP}/scan.json"
+          }
+          critical=$(count critical)
+          high=$(count high)
+          medium=$(count medium)
+          low=$(count low)
+          other=$(count other)
+
+          {
+            echo '| Severity | Count |'
+            echo '| --- | --- |'
+            echo "| Critical | ${critical} |"
+            echo "| High | ${high} |"
+            echo "| Medium | ${medium} |"
+            echo "| Low | ${low} |"
+            echo "| Other | ${other} |"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          jq -r '.sbom.vulnerabilities[]? | "\(.id)\t\([.ratings[]?.severity] | unique | join(","))\t\([.affects[]?.ref] | join(" "))"' "${RUNNER_TEMP}/scan.json"
+
+          if [ "${critical}" -gt 0 ] || [ "${high}" -gt 0 ]; then
+            echo "::error::Amazon Inspector found ${critical} critical and ${high} high severity vulnerabilities."
+            exit 1
+          fi
