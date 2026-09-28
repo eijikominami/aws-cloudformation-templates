@@ -25,6 +25,14 @@ jobs:
           role-to-assume: ${{ vars.AWS_INSPECTOR_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      # The scan action is a container action whose base image lives on Amazon ECR Public,
+      # where anonymous pulls share a quota across all runners and return 429 once it is spent.
+      # Failing to log in leaves the pull anonymous, which is what it was before, so it is not fatal.
+      - name: Log in to Amazon ECR Public
+        if: steps.iam-role.outcome == 'success'
+        continue-on-error: true
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+
       - name: Amazon Inspector Scan
         if: steps.iam-role.outcome == 'success'
         uses: aws-actions/vulnerability-scan-github-action-for-amazon-inspector@v1

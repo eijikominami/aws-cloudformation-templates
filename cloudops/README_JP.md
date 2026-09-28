@@ -110,6 +110,10 @@ WebhookForwarder Lambda は SNS Alert トピックから全イベントを受信
 | 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
 | --- | --- | --- | --- | --- |
 
+### Resource Explorer
+
+``AGGREGATOR`` のインデックスは同一アカウントの他リージョンの ``LOCAL`` インデックスから複製を受けるため、複数のリージョンにインデックスを持つアカウントでのみ選択してください。``ResourceExplorerIndexType`` を変更すると ``UpdateIndexType`` が呼ばれ、この API はインデックスごとに 24 時間に 1 回しか実行できません。
+
 ### Systems Manager
 
 このテンプレートは、``AWS Systems Manager`` を作成します。

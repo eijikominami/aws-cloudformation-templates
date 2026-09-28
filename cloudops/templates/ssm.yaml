@@ -1005,18 +1005,6 @@ Resources:
       Tags:
         environment: !Ref Environment
         createdby: !Ref TagValue  # Unified Console - Default Host Management Configuration
-  S3BucketForDiagnosis:
-    Condition: CreateResource
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      BucketName: !Sub ssm-diagnosis-${AWS::AccountId}-${AWS::Region}
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: !Ref TagKey
-          Value: !Ref TagValue
   # Quick Setup Configuration Managers (delegated admin only)
   SSMQuickSetupForUnifiedConsole:
     Condition: CreateQuickSetup
