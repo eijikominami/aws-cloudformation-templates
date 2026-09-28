@@ -114,6 +114,10 @@ This template sets a notification channel of ``AWS DevOps Guru``.
 | Name | Type | Default | Required | Details |  
 | --- | --- | --- | --- | --- |
 
+### Resource Explorer
+
+An ``AGGREGATOR`` index replicates from the ``LOCAL`` indexes of the other regions in the same account, so select it only for an account indexed in more than one region. Changing ``ResourceExplorerIndexType`` calls ``UpdateIndexType``, which Resource Explorer allows once per 24 hours per index.
+
 ### Systems Manager
 
 This template sets ``AWS Systems Manager``.
