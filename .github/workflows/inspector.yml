@@ -18,16 +18,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        id: iam-role
         uses: aws-actions/configure-aws-credentials@v4
-        continue-on-error: true
         with:
           role-to-assume: ${{ vars.AWS_INSPECTOR_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       # Installed outside the workspace so the generator does not inventory itself.
       - name: Install Amazon Inspector SBOM Generator
-        if: steps.iam-role.outcome == 'success'
         run: |
           curl -sSfL -o "${RUNNER_TEMP}/sbomgen.zip" https://amazon-inspector-sbomgen.s3.amazonaws.com/latest/linux/amd64/inspector-sbomgen.zip
           unzip -qo "${RUNNER_TEMP}/sbomgen.zip" -d "${RUNNER_TEMP}/sbomgen"
@@ -35,7 +32,6 @@ jobs:
           inspector-sbomgen --version
 
       - name: Amazon Inspector Scan
-        if: steps.iam-role.outcome == 'success'
         run: |
           inspector-sbomgen directory --path . -o "${RUNNER_TEMP}/sbom.json"
           aws inspector-scan scan-sbom --sbom "file://${RUNNER_TEMP}/sbom.json" --output-format CYCLONE_DX_1_5 > "${RUNNER_TEMP}/scan.json"
