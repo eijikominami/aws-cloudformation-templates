@@ -1401,6 +1401,7 @@ Properties:
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | メトリックフィルタパターン | 
 | `SNSTopicArn` | String | | ○ | SNSトピックのARN |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | 実行時間の閾値 |
+| `TreatMissingData` | breaching/notBreaching/ignore/missing | notBreaching | | データが存在しない期間のアラームの扱い |
 | `Environment` | String | production | | `environment` タグの値 |
 | `TagKey` | String | createdby | | タグキー |
 | `TagValue` | String | aws-cloudformation-templates | | タグ値 |
@@ -1419,6 +1420,7 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+    TreatMissingData: String
     Environment: String
     TagKey: String
     TagValue: String
@@ -1444,6 +1446,7 @@ Properties:
     FunctionResouceName: String
     SNSTopicArn : String
     TimeoutMilliseconds: Integer
+    TreatMissingData: String
     Environment: String
     TagKey: String
     TagValue: String

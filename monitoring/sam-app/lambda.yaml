@@ -34,6 +34,15 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS topic ARN [required]
+  TreatMissingData:
+    Type: String
+    Default: notBreaching
+    AllowedValues:
+      - breaching
+      - notBreaching
+      - ignore
+      - missing
+    Description: How the alarms treat periods with no data
   FunctionResouceName:
     Type: String
     AllowedPattern: .+
@@ -91,7 +100,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -128,7 +137,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -161,7 +170,7 @@ Resources:
       Period: 60
       Statistic: Maximum
       Threshold: !Ref TimeoutMilliseconds
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -193,7 +202,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment
