@@ -36,7 +36,7 @@ Parameters:
     Description: The SNS topic ARN [required]
   TreatMissingData:
     Type: String
-    Default: notBreaching
+    Default: ignore
     AllowedValues:
       - breaching
       - notBreaching
@@ -113,7 +113,8 @@ Resources:
       FilterPattern: !Ref MetricFilterPattern
       LogGroupName: !Sub /aws/lambda/${FunctionResouceName}
       MetricTransformations:
-        - MetricName: !Sub ${FunctionResouceName}-ErrorLog
+        - DefaultValue: 0
+          MetricName: !Sub ${FunctionResouceName}-ErrorLog
           MetricNamespace: LogMetrics
           MetricValue: '1'
   AlarmLambdaMetricFilterError:

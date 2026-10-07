@@ -1400,7 +1400,7 @@ You can provide optional parameters as follows.
 | `MetricFilterPattern` | String | ?Error ?Exception | ○ | Metric filter pattern | 
 | `SNSTopicArn` | String | | ○ | The SNS topic ARN |
 | `TimeoutMilliseconds` | Integer | 24000 | ○ | The threshold of Duration |
-| `TreatMissingData` | breaching/notBreaching/ignore/missing | notBreaching | | How the alarms treat periods with no data |
+| `TreatMissingData` | breaching/notBreaching/ignore/missing | ignore | | How the alarms treat periods with no data |
 | `Environment` | String | production | | The value of `environment` tag |
 | `TagKey` | String | createdby | | A tag key |
 | `TagValue` | String | aws-cloudformation-templates | | A tag value |
