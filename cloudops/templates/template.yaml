@@ -10,6 +10,7 @@ Metadata:
         Parameters:
           - DevOpsAgent
           - DevOpsAgentMemberAccountIds
+          - DevOpsAgentWebhookMaxPerHour
           - DevOpsAgentWebhookMinimumPriority
       - Label:
           default: 'Resource Explorer Configuration'
@@ -74,6 +75,11 @@ Parameters:
     Type: String
     Default: ''
     Description: AgentSpace ID from the PRIMARY account (for MEMBER mode)
+  DevOpsAgentWebhookMaxPerHour:
+    Type: Number
+    Default: 20
+    MinValue: 0
+    Description: Maximum number of new non-critical incidents forwarded to DevOps Agent per hour. 0 disables the cap.
   DevOpsAgentWebhookMinimumPriority:
     Type: String
     Default: HIGH
@@ -195,6 +201,7 @@ Resources:
         Mode: !Ref DevOpsAgent
         PrimaryAccountId: !Ref DevOpsAgentPrimaryAccountId
         AgentSpaceId: !Ref DevOpsAgentSpaceId
+        WebhookMaxPerHour: !Ref DevOpsAgentWebhookMaxPerHour
         WebhookMinimumPriority: !Ref DevOpsAgentWebhookMinimumPriority
         SNSForAlertArn: !If
           - CreateSNSForAlert

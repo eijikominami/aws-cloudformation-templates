@@ -49,6 +49,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | DevOpsAgentMemberAccountIds | CommaDelimitedList | | | MEMBER アカウント ID のカンマ区切りリスト |
 | DevOpsAgentPrimaryAccountId | String | | conditional | PRIMARY アカウントの ID |
 | DevOpsAgentSpaceId | String | | conditional | PRIMARY アカウントの AgentSpace ID |
+| DevOpsAgentWebhookMaxPerHour | Number | 20 | | 1 時間に DevOps Agent へ転送する新規インシデント（CRITICAL を除く）の上限。0 で無効 |
 | DevOpsAgentWebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | DevOps Agent に転送する最低優先度 |
 | **ResourceExplorerIndexType** | AGGREGATOR / LOCAL | LOCAL | ○ | Resource Explorer のインデックスタイプ |
 | SSMAdminAccountId | String | | | SSM の管理を行う AWS アカウントの ID |
@@ -80,6 +81,7 @@ aws cloudformation deploy --template-file template.yaml --stack-name CloudOps --
 | MemberAccountIds | CommaDelimitedList | | ○ | MEMBER アカウント ID のカンマ区切りリスト |
 | Mode | PRIMARY / MEMBER | PRIMARY | ○ | PRIMARY は AgentSpace を作成、MEMBER は IAM ロールのみ作成 |
 | PrimaryAccountId | String | | conditional | AgentSpace を所有する PRIMARY アカウントの ID |
+| WebhookMaxPerHour | Number | 20 | | 1 時間に DevOps Agent へ転送する新規インシデント（CRITICAL を除く）の上限。0 で無効 |
 | WebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | DevOps Agent に転送する最低優先度 |
 
 #### Webhook Forwarder の優先度フィルタ
@@ -102,6 +104,10 @@ WebhookForwarder Lambda は SNS Alert トピックから全イベントを受信
 | AutoScaling / EBS / SSM の失敗 | ステータス = Failed または Timed Out | HIGH | ○ |
 
 上記のいずれにも該当しないイベント（EC2 状態変化、タグ変更、コンソールサインイン等）はスキップされます。
+
+#### Webhook Forwarder の転送上限
+
+WebhookForwarder Lambda は CRITICAL を除く新規インシデントの件数を 1 時間ごとに DynamoDB で数えます。`WebhookMaxPerHour` に達すると、その時間帯は新規インシデントを転送せず、SNS Alert トピックに通知を 1 回だけ送ります。通知には、同じアラームについて直近 14 日間に完了した最新の調査で特定された原因が含まれます。CRITICAL のインシデントと復旧イベントは常に転送されます。
 
 ### DevOps Guru
 

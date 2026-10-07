@@ -55,6 +55,7 @@ You can provide optional parameters as follows.
 | DevOpsAgentMemberAccountIds | CommaDelimitedList | | | Comma-separated list of MEMBER account IDs for cross-account webhook forwarding |
 | DevOpsAgentPrimaryAccountId | String | | conditional | Account ID of the PRIMARY account |
 | DevOpsAgentSpaceId | String | | conditional | AgentSpace ID from the PRIMARY account |
+| DevOpsAgentWebhookMaxPerHour | Number | 20 | | Maximum number of new non-critical incidents forwarded to DevOps Agent per hour (0 disables the cap) |
 | DevOpsAgentWebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | Minimum priority level to forward to DevOps Agent |
 | **ResourceExplorerIndexType** | AGGREGATOR / LOCAL | LOCAL | ○ | Resource Explorer index type |
 | SSMAdminAccountId | String | | | AWS Account ID of the primary account for AWS Systems Manager Automation |
@@ -84,6 +85,7 @@ This template creates ``AWS DevOps Agent`` Agent Space, IAM roles, and AWS accou
 | MemberAccountIds | CommaDelimitedList | | ○ | Comma-separated list of MEMBER account IDs for cross-account webhook forwarding |
 | Mode | PRIMARY / MEMBER | PRIMARY | ○ | PRIMARY creates AgentSpace, MEMBER creates IAM roles only |
 | PrimaryAccountId | String | | conditional | Account ID of the PRIMARY account that owns the AgentSpace |
+| WebhookMaxPerHour | Number | 20 | | Maximum number of new non-critical incidents forwarded to DevOps Agent per hour (0 disables the cap) |
 | WebhookMinimumPriority | CRITICAL / HIGH / MEDIUM / LOW | HIGH | | Minimum priority level to forward to DevOps Agent |
 
 #### Webhook Forwarder Priority Filtering
@@ -106,6 +108,10 @@ The WebhookForwarder Lambda receives all events from the SNS Alert topic and for
 | AutoScaling / EBS / SSM failure | Status = Failed or Timed Out | HIGH | ○ |
 
 Events not matching any of the above patterns (e.g., EC2 state changes, tag changes, console sign-ins) are skipped.
+
+#### Webhook Forwarder Hourly Cap
+
+The WebhookForwarder Lambda counts new non-critical incidents per hour in a DynamoDB table. Once `WebhookMaxPerHour` is reached, it stops forwarding new incidents for the rest of that hour and publishes one notice to the SNS Alert topic. The notice includes the root cause of the latest completed investigation for the same alarm within the last 14 days. CRITICAL incidents and recovery events are always forwarded.
 
 ### DevOps Guru
 
