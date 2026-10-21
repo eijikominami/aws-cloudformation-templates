@@ -9,6 +9,7 @@ Metadata:
           default: 'SIEM Configuration'
         Parameters:
           - SIEM
+          - SIEMDeploymentTarget
           - AllowedSourceIpAddressesForSIEM
           - SIEMControlTowerLogBucketNameList
           - SIEMControlTowerRoleArnForEsLoader
@@ -95,6 +96,13 @@ Parameters:
   SIEMControlTowerSqsForLogBuckets:
     Type: String
     Default: ''
+  SIEMDeploymentTarget:
+    Type: String
+    Default: opensearch_serverless
+    AllowedValues:
+      - opensearch_managed_cluster
+      - opensearch_serverless
+    Description: Where SIEM on Amazon OpenSearch Service is deployed [required]
   SIEMEmail:
     Type: String
     Default: ''
@@ -190,7 +198,7 @@ Resources:
         ControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
         ControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
         ControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
-        DeploymentTarget: opensearch_serverless
+        DeploymentTarget: !Ref SIEMDeploymentTarget
         GeoLite2LicenseKey: !Ref SIEMGeoLite2LicenseKey
         SecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
         SecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
