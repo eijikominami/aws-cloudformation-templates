@@ -41,6 +41,7 @@ Metadata:
           - SIEMControlTowerLogBucketNameList
           - SIEMControlTowerRoleArnForEsLoader
           - SIEMControlTowerSqsForLogBuckets
+          - SIEMDeploymentTarget
           - SIEMEsLoaderServiceRoleArn
           - SIEMGeoLite2LicenseKey
           - SIEMKmsKeyArn
@@ -235,6 +236,13 @@ Parameters:
     Default: ''
     AllowedPattern: ^(arn:aws[0-9a-zA-Z:/_-]*|)$
     Description: The SQS ARN for S3 log buckets in Log Archive Account
+  SIEMDeploymentTarget:
+    Type: String
+    Default: opensearch_serverless
+    AllowedValues:
+      - opensearch_managed_cluster
+      - opensearch_serverless
+    Description: Where SIEM on Amazon OpenSearch Service is deployed [required]
   SIEMEsLoaderServiceRoleArn:
     Type: String
     Default: ''
@@ -589,6 +597,7 @@ Resources:
         SIEMControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
         SIEMControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
         SIEMControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
+        SIEMDeploymentTarget: !Ref SIEMDeploymentTarget
         SIEMGeoLite2LicenseKey: !Ref SIEMGeoLite2LicenseKey
         SIEMSecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
         SIEMSecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
