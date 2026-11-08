@@ -94,6 +94,12 @@ Software installed on the management instance by hand therefore survives a repla
 
 The root volume is deleted on termination, so a replaced instance keeps nothing of its own. Two signs tell whether the new instance started from an AMI that already carried the software: the Windows computer name is the same as before, and the event log holds records that predate the launch time of the instance.
 
+### Sizing the management instance
+
+`EC2ImageId` defaults to a Server with Desktop Experience image, and [Microsoft documents 2 GB as the minimum memory for that installation option](https://learn.microsoft.com/en-us/windows-server/get-started/hardware-requirements?pivots=windows-server-2022&tabs=ram), against 1 GB for Server Core. `EC2InstanceType` therefore defaults to `t3.small`.
+
+That is a floor for the operating system and the administration tools alone. Software installed by hand raises it, and a host that is short of memory fails in ways that do not name memory as the cause: a service that cannot start, an agent that restarts in a loop, a connection that drops every few days. Size the instance for what the host actually runs rather than for what this template installs.
+
 ## Troubleshooting
 
 ### IAM Identity Center Issues
@@ -143,6 +149,24 @@ If Managed Microsoft AD is not functioning correctly:
 2. Check that security groups allow the necessary Active Directory ports
 3. Ensure that the domain name doesn't conflict with existing domains
 4. Verify that the password meets complexity requirements
+
+#### Changing the Password parameter replaces the directory
+
+`Password` is a create-only property of `AWS::DirectoryService::MicrosoftAD`, so changing the parameter deletes the directory and creates a new one, and every user, group and computer object in it is lost. The resource reference points at the [ResetUserPassword](https://docs.aws.amazon.com/directoryservice/latest/devguide/API_ResetUserPassword.html) API for this reason.
+
+Reset the password through that API and leave the parameter alone. The parameter then no longer states the password the directory holds, and that divergence is the safe state; an attempt to make the two agree by editing the parameter destroys the directory. The API accepts the value the account already holds, so resetting to the same string keeps them in agreement without touching the stack.
+
+#### An expired administrator password blocks every repair that needs a credential
+
+The default domain password policy of AWS Managed Microsoft AD sets a maximum password age, and the administrative account is subject to it. Once that password expires it is no longer accepted for authentication even though it is still the correct password, so `Reset-ComputerMachinePassword`, `netdom resetpwd` and `Add-Computer` all fail, and the failure reads as a wrong password rather than an expired one.
+
+`net use \\<domain controller>\IPC$ /user:<domain>\Admin <password>` separates the two cases: system error 2242 is an expired password and 1326 is a wrong one. Clear an expiry with `ResetUserPassword` before attempting any repair that supplies a credential.
+
+#### The domain join association does not repair a broken trust
+
+The management instance carries an `SsmAssociations` entry for `AWS-JoinDirectoryServiceDomain`. That document joins an instance which is not yet a member of the domain; on an instance that already reports domain membership it does nothing, reports success within a few seconds and leaves no domain join entry in the agent log. Re-running it is not a way to repair a machine account whose secure channel has broken.
+
+`nltest /sc_verify:<domain>` is the check to read. It names the trusted domain controller and returns `NERR_Success` once the trust is sound, while `Test-ComputerSecureChannel` can still answer `False` immediately after a successful repair.
 
 ### Domain Controller Access Issues
 
