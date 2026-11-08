@@ -51,6 +51,7 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | AccountIdForArchive | String | | | The AWS account id for log archive |
 | ActiveDirectoryEC2ImageId | String | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | The SSM parameter name that holds the EC2 Image Id |
+| ActiveDirectoryEC2InstanceType | String | t3.small | ○ | The EC2 Instance Type of the management instance |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
 | **ActiveDirectoryName** | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |

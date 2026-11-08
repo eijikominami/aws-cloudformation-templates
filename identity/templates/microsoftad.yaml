@@ -26,6 +26,7 @@ Metadata:
           default: 'Management Instance Configuration'
         Parameters: 
           - EC2ImageId
+          - EC2InstanceType
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -52,6 +53,12 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base
     Description: The EC2 Image Id [required]
+  EC2InstanceType:
+    Type: String
+    # The default AMI is Server with Desktop Experience, whose documented minimum is 2 GB.
+    Default: t3.small
+    AllowedPattern: .+
+    Description: The EC2 Instance Type [required]
   Edition:
     Type: String
     Default: Standard
@@ -423,7 +430,7 @@ Resources:
       ImageId: !Ref EC2ImageId
       IamInstanceProfile: !Ref IamInstanceProfileForIAMRoleForManagementInstance
       InstanceInitiatedShutdownBehavior: stop
-      InstanceType: t3.micro
+      InstanceType: !Ref EC2InstanceType
       KeyName: !Ref EC2KeyPair
       Monitoring: true
       SecurityGroupIds: 

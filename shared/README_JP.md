@@ -51,6 +51,7 @@ aws cloudformation deploy --template-file templates/template.yaml --stack-name S
 | --- | --- | --- | --- | --- |
 | AccountIdForArchive | String | | | ログアーカイブアカウント ID |
 | ActiveDirectoryEC2ImageId | String | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | EC2 イメージ ID を保持する SSM パラメータ名 |
+| ActiveDirectoryEC2InstanceType | String | t3.small | ○ | 管理インスタンスの EC2 インスタンスタイプ |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | Microsoft Active Directory を作成する AWS Directory Service のエディション |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Microsoft Active Directory を用いて SSO を有効化するかどうか |
 | ActiveDirectoryName | String | corp.example.com | ○ | AWS Managed Microsoft AD directory の　FQDN |

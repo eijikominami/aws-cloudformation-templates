@@ -9,6 +9,7 @@ Metadata:
           default: 'Microsoft Active Directory Configuration'
         Parameters: 
           - ActiveDirectoryEC2ImageId
+          - ActiveDirectoryEC2InstanceType
           - ActiveDirectoryEdition
           - ActiveDirectoryEnableSso
           - ActiveDirectoryName
@@ -78,6 +79,12 @@ Parameters:
     Default: /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base
     AllowedPattern: .+
     Description: The SSM parameter name that holds the EC2 Image Id [required]
+  ActiveDirectoryEC2InstanceType:
+    Type: String
+    # The default AMI is Server with Desktop Experience, whose documented minimum is 2 GB.
+    Default: t3.small
+    AllowedPattern: .+
+    Description: The EC2 Instance Type of the management instance [required]
   ActiveDirectoryEdition:
     Type: String
     Default: Standard
@@ -280,6 +287,7 @@ Resources:
       Parameters: 
         AlarmLevel: !Ref AlarmLevel
         EC2ImageId: !Ref ActiveDirectoryEC2ImageId
+        EC2InstanceType: !Ref ActiveDirectoryEC2InstanceType
         Edition: !Ref ActiveDirectoryEdition
         EnableSso: !Ref ActiveDirectoryEnableSso
         Environment: !Ref Environment
