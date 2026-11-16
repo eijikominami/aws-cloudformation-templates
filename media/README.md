@@ -26,6 +26,7 @@ If you just want to deploy the stack, click the button below.
 | Services | US East (Virginia) | Asia Pacific (Tokyo) |
 | --- | --- | --- |
 | Deadline Cloud | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DeadlineCloud&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/deadlinecloud.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DeadlineCloud&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/deadlinecloud.yaml) |
+| Elemental Inference | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=ElementalInference&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/elementalinference.yaml) | - |
 | IVS | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
 | MediaConnect | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=MediaConnect&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediaconnect.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaConnect&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediaconnect.yaml) |
 | MediaLive | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
@@ -38,6 +39,7 @@ Execute the command to deploy.
 
 ```bash
 aws cloudformation deploy --template-file templates/deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/elementalinference.yaml --stack-name ElementalInference
 aws cloudformation deploy --template-file templates/ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file templates/mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file templates/medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
@@ -54,6 +56,18 @@ You can provide optional parameters as follows.
 | **IdentityCenterInstanceArn** | String | | ○ | The ARN of the IAM Identity Center instance responsible for authenticating monitor users |
 | MaxWorkerCount | Number | 10 | ○ | The maximum number of workers specified in the fleet |
 | MinWorkerCount | Number | 0 | ○ | The minimum number of workers in the fleet |
+
+### Elemental Inference
+
+| Name | Type | Default | Required | Details |  
+| --- | --- | --- | --- | --- |
+| EventClipping | ENABLED or DISABLED | ENABLED | ○ | Enable or disable the event clipping output |
+| EventClippingCallbackMetadata | String | | | The metadata included in each clip event |
+| EventClippingFixtureId | String | | | The fixture ID whose event data is mapped onto the clip events |
+| SmartCrop | ENABLED or DISABLED | ENABLED | ○ | Enable or disable the smart crop output |
+| SmartSubtitles | ENABLED or DISABLED | ENABLED | ○ | Enable or disable the smart subtitles output |
+| SmartSubtitlesLanguage | eng, eng-au, eng-gb, eng-us, fra, ita, deu, spa or por | eng | ○ | The language of the source audio |
+| SmartSubtitlesProfanityFilter | DISABLED, CENSOR or DROP | DISABLED | ○ | How profanity in the subtitles is handled |
 
 ### IVS
 
@@ -140,6 +154,7 @@ You can provide optional parameters as follows.
 | H264Profile | String | HIGH | ○ | H.264 Profile |
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264 Level |
 | Height | Number | 540 | ○ | Output video height, in pixels |
+| InferenceFeedArn | String | | | The Elemental Inference feed ARN used by the channel |
 | InputType | String | RTMP | ○ | Input type |
 | InputStreamKey | String | stream | | A unique name for the location the RTMP stream is being pushed to |
 | VodSourceBucket | String | | | The S3 bucket Name VOD contents exist |
@@ -152,6 +167,12 @@ You can provide optional parameters as follows.
 | OutputRtmpStreamKey1 | String | | | The rtmp stream name a stream sends to |
 | OutputRtmpRtpUrl2 | String | | | The rtmp url a stream sends to |
 | OutputRtmpStreamKey2 | String | | | The rtmp stream name a stream sends to |
+| SmartCrop | ENABLED / DISABLED | DISABLED | ○ | Enable or disable the smart crop output |
+| SmartCropHeight | Number | 960 | ○ | Smart crop output video height, in pixels |
+| SmartCropWidth | Number | 540 | ○ | Smart crop output video width, in pixels |
+| SmartSubtitles | ENABLED / DISABLED | DISABLED | ○ | Enable or disable the smart subtitles output |
+| SmartSubtitlesFeedOutput | String | subtitling-eng | ○ | The name of the subtitling output in the Elemental Inference feed |
+| SmartSubtitlesLanguage | eng, spa, fra, deu, ita, por | eng | ○ | The language of the source audio |
 | VideoBitrate | Number | 2200000 | ○ | Average video bitrate in bits/second |
 | Width | Number | 960 | ○ | Output video width, in pixels |
 

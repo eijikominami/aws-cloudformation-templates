@@ -26,6 +26,7 @@
 | 作成されるAWSサービス | 米国東部 (バージニア北部) | アジアパシフィック (東京) |
 | --- | --- | --- |
 | Deadline Cloud | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=DeadlineCloud&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/deadlinecloud.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=DeadlineCloud&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/deadlinecloud.yaml) |
+| Elemental Inference | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=ElementalInference&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/elementalinference.yaml) | - |
 | IVS | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=IVS&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/ivs.yaml) |
 | MediaConnect | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=MediaConnect&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediaconnect.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaConnect&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/mediaconnect.yaml) |
 | MediaLive | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) | [![cloudformation-launch-stack](../images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-northeast-1#/stacks/create/review?stackName=MediaLive&templateURL=https://eijikominami.s3-ap-northeast-1.amazonaws.com/aws-cloudformation-templates/media/medialive.yaml) |
@@ -38,6 +39,7 @@
 
 ```bash
 aws cloudformation deploy --template-file templates/deadlinecloud.yaml --stack-name DeadlineCloud --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation deploy --template-file templates/elementalinference.yaml --stack-name ElementalInference
 aws cloudformation deploy --template-file templates/ivs.yaml --stack-name IVS --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file templates/mediaconnect.yaml --stack-name MediaConnect --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation deploy --template-file templates/medialive.yaml --stack-name MediaLive --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
@@ -54,6 +56,18 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | **IdentityCenterInstanceArn** | String | | ○ | IAM Identity Center の ARN |
 | MaxWorkerCount | Number | 10 | ○ | Fleet の Worker の最大数 |
 | MinWorkerCount | Number | 0 | ○ | Fleet の Worker の最小数 |
+
+### Elemental Inference
+
+| 名前 | タイプ | デフォルト値 | 必須 | 詳細 |
+| --- | --- | --- | --- | --- |
+| EventClipping | ENABLED or DISABLED | ENABLED | ○ | イベントクリッピングの出力の有効化 |
+| EventClippingCallbackMetadata | String | | | クリップイベントに含めるメタデータ |
+| EventClippingFixtureId | String | | | クリップイベントに対応付ける試合 (fixture) の ID |
+| SmartCrop | ENABLED or DISABLED | ENABLED | ○ | スマートクロップの出力の有効化 |
+| SmartSubtitles | ENABLED or DISABLED | ENABLED | ○ | スマート字幕の出力の有効化 |
+| SmartSubtitlesLanguage | eng, eng-au, eng-gb, eng-us, fra, ita, deu, spa or por | eng | ○ | 入力音声の言語 |
+| SmartSubtitlesProfanityFilter | DISABLED, CENSOR or DROP | DISABLED | ○ | 不適切な語の扱い |
 
 ### IVS
 
@@ -140,6 +154,7 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | H264Profile | String | HIGH | ○ | H.264プロファイル |
 | H264Level | String | H264_LEVEL_4_1 | ○ | H.264レベル |
 | Height | Number | 540 | ○ | ビデオの高さ（px）|
+| InferenceFeedArn | String | | | チャネルが使う Elemental Inference のフィード ARN |
 | InputType | String | RTMP | ○ | 入力タイプ |
 | InputStreamKey | String | stream | | ストリームキー |
 | InputWhitelistRules | String | 0.0.0.0/0 | ○ | 許可するIPアドレス範囲 |
@@ -151,6 +166,12 @@ aws cloudformation deploy --template-file templates/mediastore.yaml --stack-name
 | OutputRtmpStreamKey1 | String | | | 出力先のRTMPストリーム名1 |
 | OutputRtmpRtpUrl2 | String | | | 出力先のRTMP URL2 |
 | OutputRtmpStreamKey2 | String | | | 出力先のRTMPストリーム名2 |
+| SmartCrop | ENABLED / DISABLED | DISABLED | ○ | スマートクロップの出力を作成するかどうか |
+| SmartCropHeight | Number | 960 | ○ | スマートクロップの出力の高さ（px） |
+| SmartCropWidth | Number | 540 | ○ | スマートクロップの出力の幅（px） |
+| SmartSubtitles | ENABLED / DISABLED | DISABLED | ○ | スマート字幕の出力を作成するかどうか |
+| SmartSubtitlesFeedOutput | String | subtitling-eng | ○ | Elemental Inference のフィードにある字幕出力の名前 |
+| SmartSubtitlesLanguage | eng, spa, fra, deu, ita, por | eng | ○ | 入力音声の言語 |
 | VideoBitrate | Number | 2200000 | ○ | ビデオビットレート(bps) |
 | VodSourceBucket | String | | | VODのソースバケット名 |
 | Width | Number | 960 | ○ | ビデオの幅（px） |

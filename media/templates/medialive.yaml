@@ -43,6 +43,16 @@ Metadata:
           - OutputRtmpStreamKey1
           - OutputRtmpRtpUrl2
           - OutputRtmpStreamKey2
+      - Label:
+          default: 'Elemental Inference Configuration'
+        Parameters:
+          - InferenceFeedArn
+          - SmartCrop
+          - SmartCropHeight
+          - SmartCropWidth
+          - SmartSubtitles
+          - SmartSubtitlesFeedOutput
+          - SmartSubtitlesLanguage
       - Label: 
           default: 'Notification Configuration'
         Parameters: 
@@ -154,6 +164,10 @@ Parameters:
     Type: Number
     Default: 540
     Description: Output video height, in pixels [required]
+  InferenceFeedArn:
+    Type: String
+    Default: ''
+    Description: The Elemental Inference feed ARN used by the channel
   InputType:
     Type: String
     Default: RTMP
@@ -211,6 +225,43 @@ Parameters:
     Type: String
     Default: ''
     Description: The rtmp/rtp stream name a stream sends to [RTMP]
+  SmartCrop:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the smart crop output [required]
+  SmartCropHeight:
+    Type: Number
+    Default: 960
+    Description: Smart crop output video height, in pixels [required]
+  SmartCropWidth:
+    Type: Number
+    Default: 540
+    Description: Smart crop output video width, in pixels [required]
+  SmartSubtitles:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the smart subtitles output [required]
+  SmartSubtitlesFeedOutput:
+    Type: String
+    Default: subtitling-eng
+    Description: The name of the subtitling output in the Elemental Inference feed [required]
+  SmartSubtitlesLanguage:
+    Type: String
+    Default: eng
+    AllowedValues:
+      - eng
+      - spa
+      - fra
+      - deu
+      - ita
+      - por
+    Description: The language of the source audio [required]
   VideoBitrate:
     Type: Number
     Default: 2200000
@@ -271,6 +322,9 @@ Conditions:
   CreateVODWorkflow: !And [ !Or [ !Equals [ !Ref InputType, S3 ], !Equals [ !Ref InputType, RTMP_S3 ], !Equals [ !Ref InputType, ELEMENTAL_LINK_S3 ] ], !Not [ !Equals [ !Ref VodSourceBucket, '' ] ] ]
   CreateSNSForAlert: !Equals [ !Ref SNSForAlertArn, '']
   CreateSNSForDeployment: !Equals [ !Ref SNSForDeploymentArn, '']
+  EnableInference: !Not [ !Equals [ !Ref InferenceFeedArn, ''] ]
+  EnableSmartCrop: !And [ !Not [ !Equals [ !Ref InferenceFeedArn, ''] ], !Equals [ !Ref SmartCrop, ENABLED] ]
+  EnableSmartSubtitles: !And [ !Not [ !Equals [ !Ref InferenceFeedArn, ''] ], !Equals [ !Ref SmartSubtitles, ENABLED] ]
 
 Resources:
   # Nested Stack
@@ -280,7 +334,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       NotificationARNs:
         - !If
           - CreateSNSForDeployment
@@ -297,7 +351,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -363,6 +417,14 @@ Resources:
                 Action:
                   - mediapackage:DescribeChannel
                 Resource: '*'
+              - !If
+                - EnableInference
+                - Effect: Allow
+                  Action:
+                    - elemental-inference:GetMetadata
+                    - elemental-inference:PutMedia
+                  Resource: !Ref InferenceFeedArn
+                - !Ref AWS::NoValue
       RoleName: !Sub ${LogicalName}-MediaLive-${AWS::Region}
       Tags:
         - Key: environment
@@ -456,6 +518,15 @@ Resources:
                 Spec: MPEG4
             LanguageCodeControl: FOLLOW_INPUT
             Name: !Sub audio_2_aac${AudioBitrate}
+        CaptionDescriptions: !If
+          - EnableSmartSubtitles
+          - - CaptionSelectorName: SmartSubtitles
+              DestinationSettings:
+                WebvttDestinationSettings:
+                  StyleControl: NO_STYLE_DATA
+              LanguageCode: !Ref SmartSubtitlesLanguage
+              Name: smart_subtitles
+          - !Ref AWS::NoValue
         OutputGroups: 
           - !If
             - CreateDestinationForMediaPackage
@@ -471,6 +542,23 @@ Resources:
                   OutputSettings: 
                     MediaPackageOutputSettings: {}
                   VideoDescriptionName: !Sub video_${Width}_${Height}
+                - !If
+                  - EnableSmartCrop
+                  - AudioDescriptionNames:
+                      - !Sub audio_2_aac${AudioBitrate}
+                    OutputName: !Sub mediapackage_smartcrop_${SmartCropWidth}x${SmartCropHeight}_${VideoBitrate}
+                    OutputSettings:
+                      MediaPackageOutputSettings: {}
+                    VideoDescriptionName: !Sub video_smartcrop_${SmartCropWidth}_${SmartCropHeight}
+                  - !Ref AWS::NoValue
+                - !If
+                  - EnableSmartSubtitles
+                  - CaptionDescriptionNames:
+                      - smart_subtitles
+                    OutputName: mediapackage_smart_subtitles
+                    OutputSettings:
+                      MediaPackageOutputSettings: {}
+                  - !Ref AWS::NoValue
             - !Ref AWS::NoValue
           - !If
             - CreateDestinationForRTMP
@@ -614,6 +702,49 @@ Resources:
                             VideoPid: '481'
                       NameModifier: !Sub _${Width}_${Height}
                   VideoDescriptionName: !Sub video_${Width}_${Height}
+                - !If
+                  - EnableSmartCrop
+                  - AudioDescriptionNames:
+                      - !Sub audio_2_aac${AudioBitrate}
+                    OutputName: !Sub hls_smartcrop_${SmartCropWidth}x${SmartCropHeight}_${VideoBitrate}
+                    OutputSettings:
+                      HlsOutputSettings:
+                        H265PackagingType: HVC1
+                        HlsSettings:
+                          StandardHlsSettings:
+                            AudioRenditionSets: program_audio
+                            M3u8Settings:
+                              AudioFramesPerPes: 4
+                              AudioPids: 492-498
+                              EcmPid: '8182'
+                              NielsenId3Behavior: NO_PASSTHROUGH
+                              PcrControl: PCR_EVERY_PES_PACKET
+                              PmtPid: '480'
+                              ProgramNum: 1
+                              Scte35Behavior: !If
+                                - AdMarkerEnabled
+                                - PASSTHROUGH
+                                - NO_PASSTHROUGH
+                              Scte35Pid: '500'
+                              TimedMetadataBehavior: NO_PASSTHROUGH
+                              TimedMetadataPid: '502'
+                              TransportStreamId: 500
+                              VideoPid: '481'
+                        NameModifier: !Sub _smartcrop_${SmartCropWidth}_${SmartCropHeight}
+                    VideoDescriptionName: !Sub video_smartcrop_${SmartCropWidth}_${SmartCropHeight}
+                  - !Ref AWS::NoValue
+                - !If
+                  - EnableSmartSubtitles
+                  - CaptionDescriptionNames:
+                      - smart_subtitles
+                    OutputName: hls_smart_subtitles
+                    OutputSettings:
+                      HlsOutputSettings:
+                        HlsSettings:
+                          StandardHlsSettings:
+                            M3u8Settings: {}
+                        NameModifier: _subtitles
+                  - !Ref AWS::NoValue
             - !Ref AWS::NoValue     
           - !If
             - CreateDestinationForArchive
@@ -709,6 +840,48 @@ Resources:
             Name: !Sub video_${Width}_${Height}
             Sharpness: 50
             Width: !Ref Width
+          - !If
+            - EnableSmartCrop
+            - CodecSettings:
+                H264Settings:
+                  AdaptiveQuantization: HIGH
+                  AfdSignaling: NONE
+                  Bitrate: !Ref VideoBitrate
+                  ColorMetadata: INSERT
+                  EntropyEncoding: CABAC
+                  FlickerAq: ENABLED
+                  FramerateControl: SPECIFIED
+                  FramerateDenominator: !Ref FramerateDenominator
+                  FramerateNumerator: !Ref FramerateNumerator
+                  GopBReference: ENABLED
+                  GopClosedCadence: 1
+                  GopNumBFrames: !Ref GopNumBFrames
+                  GopSize: !Ref GopSize
+                  GopSizeUnits: FRAMES
+                  Level: !Ref H264Level
+                  LookAheadRateControl: HIGH
+                  MaxBitrate: !Ref VideoBitrate
+                  NumRefFrames: 1
+                  ParControl: SPECIFIED
+                  Profile: !Ref H264Profile
+                  RateControlMode: QVBR
+                  ScanType: PROGRESSIVE
+                  SceneChangeDetect: ENABLED
+                  SpatialAq: ENABLED
+                  SubgopLength: FIXED
+                  Syntax: DEFAULT
+                  TemporalAq: ENABLED
+                  TimecodeInsertion: DISABLED
+              Height: !Ref SmartCropHeight
+              Name: !Sub video_smartcrop_${SmartCropWidth}_${SmartCropHeight}
+              ScalingBehavior: SMART_CROP
+              Sharpness: 50
+              Width: !Ref SmartCropWidth
+            - !Ref AWS::NoValue
+      InferenceSettings: !If
+        - EnableInference
+        - FeedArn: !Ref InferenceFeedArn
+        - !Ref AWS::NoValue
       InputAttachments:
         - !If 
           - CreateRTMPLIVEWorkflow
@@ -732,6 +905,14 @@ Resources:
             InputAttachmentName: !Sub ${LogicalName}-Rtmp0
             InputId: !Ref MediaLiveInputRtmpPush0
             InputSettings: 
+              CaptionSelectors: !If
+                - EnableSmartSubtitles
+                - - LanguageCode: !Ref SmartSubtitlesLanguage
+                    Name: SmartSubtitles
+                    SelectorSettings:
+                      SmartSubtitleSourceSettings:
+                        InferenceFeedOutput: !Ref SmartSubtitlesFeedOutput
+                - !Ref AWS::NoValue
               DeblockFilter: DISABLED
               DenoiseFilter: DISABLED
               FilterStrength: 1
@@ -746,6 +927,14 @@ Resources:
               - InputAttachmentName: !Sub ${LogicalName}-Rtmp1
                 InputId: !Ref MediaLiveInputRtmpPush1
                 InputSettings: 
+                  CaptionSelectors: !If
+                    - EnableSmartSubtitles
+                    - - LanguageCode: !Ref SmartSubtitlesLanguage
+                        Name: SmartSubtitles
+                        SelectorSettings:
+                          SmartSubtitleSourceSettings:
+                            InferenceFeedOutput: !Ref SmartSubtitlesFeedOutput
+                    - !Ref AWS::NoValue
                   DeblockFilter: DISABLED
                   DenoiseFilter: DISABLED
                   FilterStrength: 1
@@ -774,6 +963,14 @@ Resources:
             InputAttachmentName: !Sub ${LogicalName}-ElementalLink
             InputId: !Ref MediaLiveInputElementalLink
             InputSettings: 
+              CaptionSelectors: !If
+                - EnableSmartSubtitles
+                - - LanguageCode: !Ref SmartSubtitlesLanguage
+                    Name: SmartSubtitles
+                    SelectorSettings:
+                      SmartSubtitleSourceSettings:
+                        InferenceFeedOutput: !Ref SmartSubtitlesFeedOutput
+                - !Ref AWS::NoValue
               DeblockFilter: DISABLED
               DenoiseFilter: DISABLED
               FilterStrength: 1
@@ -786,6 +983,14 @@ Resources:
           - InputAttachmentName: !Sub ${LogicalName}-Vod
             InputId: !Ref MediaLiveInputVod
             InputSettings: 
+              CaptionSelectors: !If
+                - EnableSmartSubtitles
+                - - LanguageCode: !Ref SmartSubtitlesLanguage
+                    Name: SmartSubtitles
+                    SelectorSettings:
+                      SmartSubtitleSourceSettings:
+                        InferenceFeedOutput: !Ref SmartSubtitlesFeedOutput
+                - !Ref AWS::NoValue
               DeblockFilter: DISABLED
               DenoiseFilter: DISABLED
               FilterStrength: 1
@@ -877,7 +1082,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -904,7 +1109,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-medialive
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -931,7 +1136,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment
@@ -957,7 +1162,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-elementallink
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       NotificationARNs: 
         - !If
           - CreateSNSForDeployment

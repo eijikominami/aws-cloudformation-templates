@@ -181,7 +181,7 @@ Resources:
       Period: 3600
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: ignore
       Tags: 
         - Key: environment
           Value: !Ref Environment

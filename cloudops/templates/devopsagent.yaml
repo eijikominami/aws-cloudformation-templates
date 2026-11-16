@@ -16,6 +16,7 @@ Metadata:
         Parameters:
           - MemberAccountIds
           - SNSForAlertArn
+          - WebhookMaxPerHour
           - WebhookMinimumPriority
       - Label:
           default: 'Tag Configuration'
@@ -59,6 +60,11 @@ Parameters:
     Type: String
     Default: ''
     Description: The Amazon SNS topic ARN for alert
+  WebhookMaxPerHour:
+    Type: Number
+    Default: 20
+    MinValue: 0
+    Description: Maximum number of new non-critical incidents forwarded to DevOps Agent per hour. 0 disables the cap.
   WebhookMinimumPriority:
     Type: String
     Default: HIGH
@@ -235,6 +241,25 @@ Resources:
                 Action:
                   - secretsmanager:GetSecretValue
                 Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AgentSpaceName}-WebhookCredentials-*
+        - PolicyName: HourlyCap
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt DynamoDBTableForWebhookCap.Arn
+              - Effect: Allow
+                Action:
+                  - aidevops:ListBacklogTasks
+                  - aidevops:ListJournalRecords
+                Resource:
+                  - !GetAtt DevOpsAgentAgentSpace.Arn
+                  - !Sub ${DevOpsAgentAgentSpace.Arn}/*
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref SNSForAlertArn
       RoleName: !Sub ${AgentSpaceName}-WebhookFwd-${AWS::Region}
       Tags:
         - Key: environment
@@ -373,6 +398,26 @@ Resources:
       ServiceTimeout: 300
 
   # --- Webhook Forwarder ---
+  DynamoDBTableForWebhookCap:
+    Condition: CreateWebhookForwarder
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: window
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: window
+          KeyType: HASH
+      TableName: !Sub ${AgentSpaceName}-WebhookCap
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
   LambdaFunctionForWebhookForwarder:
     Condition: CreateWebhookForwarder
     DependsOn: CustomResourceForWebhook
@@ -388,10 +433,12 @@ Resources:
           import hmac
           import json
           import os
+          import time
           import urllib.request
-          from datetime import datetime, timezone
+          from datetime import datetime, timedelta, timezone
 
           _cached = None
+          ddb = boto3.client('dynamodb')
 
           def get_credentials():
               global _cached
@@ -535,6 +582,102 @@ Resources:
 
               return None
 
+          def latest_root_cause(title):
+              # Latest completed investigation for the same title, within the last 14 days
+              client = boto3.client('devops-agent')
+              space_id = os.environ['AGENT_SPACE_ID']
+              since = datetime.now(timezone.utc) - timedelta(days=14)
+              token = None
+              for _ in range(5):
+                  kwargs = {
+                      'agentSpaceId': space_id,
+                      'filter': {'status': ['COMPLETED'], 'taskType': ['INVESTIGATION'], 'createdAfter': since},
+                      'sortField': 'CREATED_AT',
+                      'order': 'DESC',
+                      'limit': 100
+                  }
+                  if token:
+                      kwargs['nextToken'] = token
+                  resp = client.list_backlog_tasks(**kwargs)
+                  for task in resp.get('tasks', []):
+                      if task.get('title') != title or not task.get('executionId'):
+                          continue
+                      records = client.list_journal_records(
+                          agentSpaceId=space_id,
+                          executionId=task['executionId'],
+                          recordType='investigation_summary_md',
+                          limit=1
+                      ).get('records', [])
+                      if not records:
+                          continue
+                      content = records[0]['content']
+                      text = content if isinstance(content, str) else json.dumps(content, ensure_ascii=False)
+                      lines = text.splitlines()
+                      # Prefer the root cause; fall back to the first contributing cause
+                      causes = [line.split(':', 1)[1].strip() for line in lines if line.startswith('### Root Cause:')]
+                      causes += [line.split(':', 1)[1].strip() for line in lines if line.startswith('### Cause:')]
+                      if causes:
+                          return task['createdAt'], causes[0]
+                  token = resp.get('nextToken')
+                  if not token:
+                      break
+              return None
+
+          def notify_cap_reached(title, max_per_hour):
+              lines = [f"直近 1 時間に DevOps Agent へ転送したインシデントが {max_per_hour} 件に達したため、この時間帯は新規の調査を行いません。", f"対象: {title}"]
+              try:
+                  found = latest_root_cause(title)
+              except Exception as e:
+                  print(f"Root cause lookup failed: {e}")
+                  found = False
+              if found:
+                  lines.append(f"なお、直近の調査（{found[0].strftime('%Y-%m-%d %H:%M UTC')}）では「{found[1]}」が原因と特定されています。")
+              elif found is None:
+                  lines.append("なお、このアラームについて直近 14 日間に完了した調査はありません。")
+              boto3.client('sns').publish(
+                  TopicArn=os.environ['NOTIFICATION_TOPIC_ARN'],
+                  Subject='DevOps Agent の新規調査を停止しました',
+                  Message='\n'.join(lines)
+              )
+
+          def acquire_slot(title):
+              max_per_hour = int(os.environ.get('MAX_PER_HOUR', '0'))
+              if max_per_hour == 0:
+                  return True
+              window = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H')
+              key = {'window': {'S': window}}
+              try:
+                  # A conditional increment is atomic, so concurrent invocations cannot exceed the cap
+                  ddb.update_item(
+                      TableName=os.environ['TABLE_NAME'],
+                      Key=key,
+                      UpdateExpression='ADD sent :one SET expiresAt = :ttl',
+                      ConditionExpression='attribute_not_exists(sent) OR sent < :max',
+                      ExpressionAttributeValues={':one': {'N': '1'}, ':max': {'N': str(max_per_hour)}, ':ttl': {'N': str(int(time.time()) + 172800)}}
+                  )
+                  return True
+              except ddb.exceptions.ConditionalCheckFailedException:
+                  pass
+              except Exception as e:
+                  # Fail open: losing the cap is safer than losing an incident
+                  print(f"Cap check failed: {e}")
+                  return True
+              try:
+                  # Only the first suppressed incident in the window sends the notice
+                  ddb.update_item(
+                      TableName=os.environ['TABLE_NAME'],
+                      Key=key,
+                      UpdateExpression='SET notified = :t',
+                      ConditionExpression='attribute_not_exists(notified)',
+                      ExpressionAttributeValues={':t': {'BOOL': True}}
+                  )
+                  notify_cap_reached(title, max_per_hour)
+              except ddb.exceptions.ConditionalCheckFailedException:
+                  pass
+              except Exception as e:
+                  print(f"Cap notice failed: {e}")
+              return False
+
           def handler(event, context):
               creds = get_credentials()
               webhook_url = creds['webhookUrl']
@@ -559,6 +702,10 @@ Resources:
                       cur_idx = priority_order.index(transformed['priority']) if transformed['priority'] in priority_order else len(priority_order)
                       if cur_idx > min_idx:
                           print(f"Skipped: {transformed['title']} (priority={transformed['priority']}, minimum={min_priority})")
+                          continue
+                      # Only new non-critical incidents count toward the hourly cap
+                      if transformed['action'] == 'created' and transformed['priority'] != 'CRITICAL' and not acquire_slot(transformed['title']):
+                          print(f"Skipped: {transformed['title']} (hourly cap reached)")
                           continue
                       payload = json.dumps(transformed)
                   except (json.JSONDecodeError, KeyError) as e:
@@ -591,10 +738,16 @@ Resources:
       Description: !Sub Webhook Forwarder Lambda for DevOps Agent in ${AWS::StackName}
       Environment:
         Variables:
+          AGENT_SPACE_ID: !GetAtt DevOpsAgentAgentSpace.AgentSpaceId
+          MAX_PER_HOUR: !Ref WebhookMaxPerHour
           MINIMUM_PRIORITY: !Ref WebhookMinimumPriority
+          NOTIFICATION_TOPIC_ARN: !Ref SNSForAlertArn
           SECRET_NAME: !Sub ${AgentSpaceName}-WebhookCredentials
+          TABLE_NAME: !Ref DynamoDBTableForWebhookCap
       FunctionName: !Sub ${AgentSpaceName}-WebhookForwarder
       Handler: index.handler
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:boto3-latest:1
       Role: !GetAtt IAMRoleForWebhookForwarder.Arn
       Runtime: python3.13
       Tags:

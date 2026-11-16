@@ -66,10 +66,12 @@ aws cloudformation deploy --template-file templates/microsoftad.yaml --stack-nam
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | CloudWatch アラームのアラームレベル |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | EC2 のイメージ ID |
+| EC2InstanceType | String | t3.small | ○ | EC2 のインスタンスタイプ |
 | Edition | Standard / Enterprise | Standard | ○ | Microsoft Active Directory のエディション |
 | EnableSso | true / false | true | ○ | シングルサインオンを有効化するかどうか |
 | **Name** | String | corp.example.com | ○ | ドメイン名 |
 | Password | String | Password1+ | ○ | Admin ユーザーのパスワード |
+| ServicesToRepair | String | | | セキュアチャネルが健全になった時点で稼働している必要がある管理インスタンス上の Windows サービス（カンマ区切り） |
 | **ShortName** | String | CORP | ○ | NetBIOS 名 |
 | SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | AZ1 にあるプライベートサブネットの CIDR ブロック |
 | SubnetPrivateIdForAz1 | String | | 条件付き | AZ1 のプライベートサブネット ID |
@@ -106,35 +108,29 @@ IAM Identity Center が正しく動作しない場合は、以下を確認して
 3. 権限セットがユーザーとグループに正しく割り当てられているか
 4. SAML を使用する場合、外部 ID プロバイダーが正しく構成されているか
 
-#### ID ソースの変更でユーザー、グループ、割り当てがすべて削除される
+#### ID ソースを変更したらサインインできなくなった
 
-ID ソースを Active Directory と外部 ID プロバイダーの間で変更すると、そのインスタンスのユーザー、グループ、アカウント割り当てがすべて削除されます。CloudTrail には削除対象ごとに `allAssignmentsDeleted` が true の `DisassociateProfile` イベントが記録されます。このテンプレートが作成する割り当ては `AdministratorGroupId` と `ReadOnlyGroupId` で Identity Store のグループ ID を参照するため、変更前にグループ ID を記録してください。
+ID ソースを Active Directory と外部 ID プロバイダーの間で変更すると、ユーザー、グループ、アカウント割り当てがすべて削除されます。外部 ID プロバイダーの場合は SCIM でユーザーとグループを再度プロビジョニングし、新しいグループ ID を `AdministratorGroupId` と `ReadOnlyGroupId` に指定してスタックを更新してください。
 
-#### アカウント割り当ては更新できない
+#### 初回のデプロイが ConflictException で失敗する
 
-`AWS::SSO::Assignment` はすべてのプロパティが作成時のみ指定可能であり、更新ハンドラを持たないため、変更するとリソースが置き換えられます。スタックの外に同じ割り当てが既に存在する場合、作成は `ConflictException` で失敗します。CloudFormation で管理する最初のデプロイの前に、既存の割り当てを削除してください。
+同じアカウント割り当てがスタックの外に既に存在しています。既存の割り当てを削除してからデプロイしてください。`AWS::SSO::Assignment` は更新できず、変更すると置き換えになります。権限セットの名前を変更した場合も置き換えになり、その権限セットの割り当てはすべて削除されます。
 
-`AWS::SSO::PermissionSet` の `Name` も作成時のみ指定可能です。権限セットの名前を変更すると置き換えが発生し、その権限セットを参照する割り当てもすべて削除されます。
+#### 管理アカウントへの割り当てが明示的な拒否で失敗する
 
-#### 委任管理者からは管理アカウントへ権限を割り当てられない
+`sso.amazonaws.com` の委任管理者アカウントからは、管理アカウントへの割り当てを作成できません。Control Tower が作成した権限セットの割り当ても削除できません。管理アカウントから実行するか、委任管理者アカウントでは `ManagementAccountId` を空にしてください。
 
-`sso.amazonaws.com` の委任管理者であるアカウントからは、Organizations の管理アカウントを対象とする割り当てを作成できません。リソースベースポリシーによる明示的な拒否となり、IAM ポリシーを追加しても解除できません。Control Tower が作成した権限セットに対する割り当ての削除も同様に拒否されます。いずれも管理アカウントから実行してください。
+#### プロビジョニングのログに name: The attribute name is required が出続ける
 
-委任管理者のアカウントでこのスタックを実行する場合は `ManagementAccountId` を空にしてください。管理アカウント向けのリソースは作成されません。
+姓と名のどちらも持たないアカウントは、Microsoft Entra ID から IAM Identity Center にプロビジョニングできません。AWS Managed Microsoft AD の既定の管理者アカウントがこれに該当します。エンタープライズアプリケーションに割り当てたグループから、そのアカウントを外してください。
 
-#### 姓名を持たないユーザーはプロビジョニングされない
+#### ユーザーをテンプレートで作成できない
 
-IAM Identity Center の SCIM エンドポイントは `name` 属性を必須とし、存在しない場合は `name: The attribute name is required` として `400` を返します。Microsoft Entra ID は `givenName` と `surname` からこの属性を組み立てるため、どちらも持たないディレクトリのアカウントは作成されません。AWS Managed Microsoft AD の既定の管理者アカウントはこれに該当します。
+CloudFormation には Identity Store のユーザーのリソースがありません。外部 ID プロバイダーを使う場合は、ユーザーとグループを ID プロバイダー側で管理してください。
 
-プロビジョニングジョブは該当するエントリを毎サイクル再試行し、成功することはありません。失敗はエントリ単位に限定されるため `countSuccessiveCompleteFailures` は 0 のままでジョブは隔離されませんが、ログには同じエラーが記録され続けます。姓名を設定するのではなく、エンタープライズアプリケーションに割り当てられているグループから該当アカウントを外してください。
+#### Amazon Quick などのアプリケーションをテンプレートで作成できない
 
-#### Identity Store のユーザーは CloudFormation で作成できない
-
-`AWS::IdentityStore::Group` と `AWS::IdentityStore::GroupMembership` は存在しますが、ユーザーに対応するリソースはありません。外部 ID プロバイダーが SCIM でユーザーをプロビジョニングする場合、グループとメンバーシップもその ID プロバイダーが所有するため、ここで宣言すると同じオブジェクトに所有者が 2 つできます。
-
-#### AWS 管理アプリケーションは CloudFormation で作成できない
-
-`AWS::SSO::Application` は OAuth 2.0 のカスタマー管理アプリケーションのみをサポートします。Amazon Quick や Amazon CodeCatalyst のように AWS のサービスが自身で登録するアプリケーションは作成できず、SAML 2.0 のカスタマー管理アプリケーションも作成できません。`AWS::SSO::ApplicationAssignment` は既存のアプリケーションへプリンシパルを割り当てられますが、テンプレートがアプリケーションを作成しないため、その ARN はパラメータとして与える必要があります。
+`AWS::SSO::Application` が作成できるのは OAuth 2.0 のカスタマー管理アプリケーションだけです。AWS のサービスが登録するアプリケーションと SAML 2.0 のアプリケーションは、各サービスのコンソールで作成し、その ARN をパラメータに指定してください。
 
 ### AWS Managed Microsoft AD の問題
 
@@ -144,6 +140,22 @@ AWS Managed Microsoft AD が正しく動作しない場合は、以下を確認�
 2. セキュリティグループが Active Directory に必要なポートを許可しているか
 3. ドメイン名が既存のドメインと競合していないか
 4. パスワードが複雑さの要件を満たしているか
+
+#### Admin のパスワードがパラメータと一致しない
+
+`Password` パラメータは変更しないでください。作成時のみ指定できるプロパティのため、変更するとディレクトリが作り直され、中のユーザーやコンピューターがすべて失われます。パスワードは [ResetUserPassword](https://docs.aws.amazon.com/directoryservice/latest/devguide/API_ResetUserPassword.html) で変更してください。今と同じ値も指定できます。
+
+#### 正しいパスワードで認証できない
+
+Admin のパスワードが失効している可能性があります。既定のパスワードポリシーでは管理者アカウントにも有効期限があり、失効するとパスワードの誤りとして拒否されます。`net use \\<ドメインコントローラー>\IPC$ /user:<ドメイン>\Admin <パスワード>` を実行し、システムエラー 2242 なら失効、1326 なら誤りです。失効している場合は `ResetUserPassword` で再設定してください。
+
+#### 管理インスタンスでドメインアカウントのサービスが動かない
+
+管理インスタンスとドメインコントローラーの間のセキュアチャネルが壊れています。AMI から置き換えた直後や、通信が切れたあとに起きます。`SystemAssociationForRepairingDomainTrust` が 30 分ごとに `nltest /sc_reset` でチャネルを張り直し、`ServicesToRepair` のサービスを起動します。すぐに直す場合は、このアソシエーションを手動で実行してください。
+
+アソシエーションが失敗する場合は、機械アカウントのパスワードがディレクトリと食い違っています。ドメインの資格情報で `Reset-ComputerMachinePassword` を実行してください。`AWS-JoinDirectoryServiceDomain` を再実行しても、参加済みのインスタンスには何もしないため直りません。
+
+修復できたかどうかは `nltest /sc_verify:<ドメイン>` で確認してください。`NERR_Success` が返れば正常です。
 
 ### ドメインコントローラーへのアクセスの問題
 
