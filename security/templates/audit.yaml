@@ -9,6 +9,7 @@ Metadata:
           default: 'SIEM Configuration'
         Parameters:
           - SIEM
+          - SIEMDeploymentTarget
           - AllowedSourceIpAddressesForSIEM
           - SIEMControlTowerLogBucketNameList
           - SIEMControlTowerRoleArnForEsLoader
@@ -95,6 +96,13 @@ Parameters:
   SIEMControlTowerSqsForLogBuckets:
     Type: String
     Default: ''
+  SIEMDeploymentTarget:
+    Type: String
+    Default: opensearch_serverless
+    AllowedValues:
+      - opensearch_managed_cluster
+      - opensearch_serverless
+    Description: Where SIEM on Amazon OpenSearch Service is deployed [required]
   SIEMEmail:
     Type: String
     Default: ''
@@ -162,7 +170,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       Parameters:
         TopicName: !Sub Alert-createdby-${AWS::StackName}
       Tags:
@@ -174,7 +182,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/sns-topic
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       Parameters:
         TopicName: !Sub Deployment-createdby-${AWS::StackName}
       Tags:
@@ -190,7 +198,7 @@ Resources:
         ControlTowerLogBucketNameList: !Ref SIEMControlTowerLogBucketNameList
         ControlTowerRoleArnForEsLoader: !Ref SIEMControlTowerRoleArnForEsLoader
         ControlTowerSqsForLogBuckets: !Ref SIEMControlTowerSqsForLogBuckets
-        DeploymentTarget: opensearch_serverless
+        DeploymentTarget: !Ref SIEMDeploymentTarget
         GeoLite2LicenseKey: !Ref SIEMGeoLite2LicenseKey
         SecurityLakeSubscriberSqs: !Ref SIEMSecurityLakeSubscriberSqs
         SecurityLakeExternalId: !Ref SIEMSecurityLakeExternalId
@@ -208,7 +216,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:172664222583:applications/cloudwatch-alarm-about-siem
-        SemanticVersion: 2.2.27
+        SemanticVersion: 2.2.29
       Parameters:
         CustomAlarmName: !Ref AWS::StackName
         NoLogLoadAlarm: !Ref SIEMNoLogLoadAlarm

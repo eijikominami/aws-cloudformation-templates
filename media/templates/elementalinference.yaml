@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: aws-cloudformation-templates/media/elementalinference sets Elemental Inference.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'Event Clipping Configuration'
+        Parameters:
+          - EventClipping
+          - EventClippingCallbackMetadata
+          - EventClippingFixtureId
+      - Label:
+          default: 'Smart Crop Configuration'
+        Parameters:
+          - SmartCrop
+      - Label:
+          default: 'Smart Subtitles Configuration'
+        Parameters:
+          - SmartSubtitles
+          - SmartSubtitlesLanguage
+          - SmartSubtitlesProfanityFilter
+      - Label:
+          default: 'Tag Configuration'
+        Parameters:
+          - LogicalName
+          - Environment
+          - TagValue
+
+Parameters:
+  EventClipping:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the event clipping output [required]
+  EventClippingCallbackMetadata:
+    Type: String
+    Default: ''
+    AllowedPattern: ^[\w \-\.',@:;]*$
+    Description: The metadata included in each clip event
+  EventClippingFixtureId:
+    Type: String
+    Default: ''
+    Description: The fixture ID whose event data is mapped onto the clip events
+  SmartCrop:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the smart crop output [required]
+  SmartSubtitles:
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Description: Enable or disable the smart subtitles output [required]
+  SmartSubtitlesLanguage:
+    Type: String
+    Default: eng
+    AllowedValues:
+      - eng
+      - eng-au
+      - eng-gb
+      - eng-us
+      - fra
+      - ita
+      - deu
+      - spa
+      - por
+    Description: The language of the source audio [required]
+  SmartSubtitlesProfanityFilter:
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - DISABLED
+      - CENSOR
+      - DROP
+    Description: How profanity in the subtitles is handled [required]
+  LogicalName:
+    Type: String
+    Default: ElementalInference
+    AllowedPattern: ^[a-zA-Z0-9]([a-zA-Z0-9-_]{0,126}[a-zA-Z0-9])?$
+    Description: The custom prefix name [required]
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - test
+      - development
+  TagValue:
+    Type: String
+    Default: aws-cloudformation-templates
+    AllowedPattern: .+
+
+Conditions:
+  HasEventClippingCallbackMetadata: !Not [!Equals [!Ref EventClippingCallbackMetadata, '']]
+  HasEventClippingFixtureId: !Not [!Equals [!Ref EventClippingFixtureId, '']]
+
+Resources:
+  ElementalInferenceFeed:
+    Type: AWS::ElementalInference::Feed
+    Properties:
+      Name: !Ref LogicalName
+      Outputs:
+        - Name: event-clipping
+          OutputConfig:
+            Clipping:
+              CallbackMetadata: !If
+                - HasEventClippingCallbackMetadata
+                - !Ref EventClippingCallbackMetadata
+                - !Ref AWS::NoValue
+              DataSourceConfiguration: !If
+                - HasEventClippingFixtureId
+                - FixtureId: !Ref EventClippingFixtureId
+                - !Ref AWS::NoValue
+          Status: !Ref EventClipping
+        # MediaLive uses an existing cropping output as is, so the template owns it to avoid drift
+        - Name: smart-cropping
+          OutputConfig:
+            Cropping: {}
+          Status: !Ref SmartCrop
+        - Name: !Sub subtitling-${SmartSubtitlesLanguage}
+          OutputConfig:
+            Subtitling:
+              Language: !Ref SmartSubtitlesLanguage
+              ProfanityFilter: !Ref SmartSubtitlesProfanityFilter
+          Status: !Ref SmartSubtitles
+      Tags:
+        environment: !Ref Environment
+        createdby: !Ref TagValue
+
+Outputs:
+  FeedId:
+    Description: The feed ID
+    Value: !GetAtt ElementalInferenceFeed.Id
+  FeedArn:
+    Description: The feed ARN passed to InferenceSettings of MediaLive
+    Value: !GetAtt ElementalInferenceFeed.Arn
+  EventClippingOutputName:
+    Description: The name of the event clipping output
+    Value: event-clipping
+  SmartCropOutputName:
+    Description: The name of the smart crop output
+    Value: smart-cropping
+  SmartSubtitlesOutputName:
+    Description: The name of the smart subtitles output referenced by InferenceFeedOutput of MediaLive
+    Value: !Sub subtitling-${SmartSubtitlesLanguage}
+  DataEndpoints:
+    Description: The data endpoints of the feed
+    Value: !Join [',', !GetAtt ElementalInferenceFeed.DataEndpoints]

@@ -64,10 +64,12 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | AlarmLevel | NOTICE / WARNING | NOTICE | ○ | The alarm level of CloudWatch alarms |
 | EC2ImageId | AWS::SSM::Parameter::Value<AWS::EC2::Image::Id> | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | The EC2 Image Id |
+| EC2InstanceType | String | t3.small | ○ | The EC2 Instance Type |
 | Edition | Standard / Enterprise | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | EnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
 | **Name** | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
 | Password | String | Password1+ | ○ | The password for the default administrative user named Admin |
+| ServicesToRepair | String | | | A comma separated list of Windows services on the management instance that have to be running once the secure channel is sound |
 | **ShortName** | String | CORP | ○ | The NetBIOS name for your domain |
 | SubnetPrivateCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | The private subnet CIDR block at AZ1 |
 | SubnetPrivateIdForAz1 | String | | conditional | The private subnet id at AZ1 |
@@ -104,35 +106,29 @@ If IAM Identity Center is not working properly:
 3. Ensure that permission sets are correctly assigned to users and groups
 4. Verify that external identity providers are properly configured if using SAML
 
-#### Changing the identity source deletes every user, group and assignment
+#### Sign-in stops working after the identity source is changed
 
-Changing the identity source between Active Directory and an external identity provider deletes every user, every group and every account assignment in the instance. CloudTrail records a `DisassociateProfile` event with `allAssignmentsDeleted` set to true for each one. Record the group ids of the identity store before the change, because the assignments this template creates reference them through `AdministratorGroupId` and `ReadOnlyGroupId`.
+Changing the identity source between Active Directory and an external identity provider deletes every user, group and account assignment. With an external identity provider, provision the users and groups again through SCIM, then update the stack with the new group ids in `AdministratorGroupId` and `ReadOnlyGroupId`.
 
-#### An account assignment cannot be updated in place
+#### The first deployment fails with ConflictException
 
-`AWS::SSO::Assignment` declares every property as create-only and has no update handler, so any change replaces the resource. An assignment that already exists outside the stack makes the create fail with `ConflictException`. Delete the existing assignment before the first deployment that manages it.
+The same account assignment already exists outside the stack. Delete it before you deploy. `AWS::SSO::Assignment` cannot be updated, so any change replaces it. Renaming a permission set also replaces it and deletes every assignment on it.
 
-The same applies to the `Name` of `AWS::SSO::PermissionSet`. Renaming a permission set replaces it, which also deletes every assignment that references it.
+#### An assignment to the management account fails with an explicit deny
 
-#### A delegated administrator cannot assign access to the management account
+The delegated administrator account for `sso.amazonaws.com` cannot create an assignment to the management account, or delete an assignment on a permission set that Control Tower created. Run the stack from the management account, or leave `ManagementAccountId` empty in the delegated administrator account.
 
-An account that is the delegated administrator for `sso.amazonaws.com` cannot create an assignment that targets the Organizations management account. The call fails with an explicit deny in a resource-based policy that no IAM policy can override, and deleting an assignment on a permission set that Control Tower created is refused in the same way. Run both from the management account.
+#### The provisioning log keeps showing name: The attribute name is required
 
-Leave `ManagementAccountId` empty when the stack runs in a delegated administrator account. The resources for the management account are then not created.
+An account with neither a first name nor a last name cannot be provisioned from Microsoft Entra ID to IAM Identity Center. The default administrative account of AWS Managed Microsoft AD is one of them. Remove that account from the groups assigned to the enterprise application.
 
-#### A user without a first and last name fails to provision
+#### Users cannot be created by the template
 
-The SCIM endpoint of IAM Identity Center requires the `name` attribute and answers `400` with `name: The attribute name is required` when it is absent. Microsoft Entra ID builds that attribute from `givenName` and `surname`, so a directory account that has neither is never created. The default administrative account of AWS Managed Microsoft AD is one of them.
+CloudFormation has no resource for an identity store user. With an external identity provider, manage users and groups in the identity provider.
 
-The provisioning job retries such an entry every cycle without ever succeeding. The failure is scoped to the entry, so `countSuccessiveCompleteFailures` stays at zero and the job is not quarantined, but the log fills with the same error. Remove the account from the groups that are assigned to the enterprise application instead of giving it a name.
+#### Applications such as Amazon Quick cannot be created by the template
 
-#### An identity store user cannot be created by CloudFormation
-
-`AWS::IdentityStore::Group` and `AWS::IdentityStore::GroupMembership` exist, but there is no resource for a user. When an external identity provider provisions users through SCIM, the groups and the memberships are also owned by that provider, so declaring them here creates two owners for the same object.
-
-#### An AWS managed application cannot be created by CloudFormation
-
-`AWS::SSO::Application` only supports OAuth 2.0 customer managed applications. It cannot create the applications that AWS services register themselves, such as Amazon Quick or Amazon CodeCatalyst, and it cannot create a SAML 2.0 customer managed application. `AWS::SSO::ApplicationAssignment` can still assign principals to an application that already exists, but its ARN has to be supplied as a parameter because nothing in the template creates it.
+`AWS::SSO::Application` only creates OAuth 2.0 customer managed applications. Create applications that AWS services register, and SAML 2.0 applications, in the console of each service, and pass their ARN as a parameter.
 
 ### Managed Microsoft AD Issues
 
@@ -142,6 +138,22 @@ If Managed Microsoft AD is not functioning correctly:
 2. Check that security groups allow the necessary Active Directory ports
 3. Ensure that the domain name doesn't conflict with existing domains
 4. Verify that the password meets complexity requirements
+
+#### The Admin password no longer matches the parameter
+
+Do not change the `Password` parameter. It is a create-only property, so changing it replaces the directory and every user and computer in it is lost. Change the password with [ResetUserPassword](https://docs.aws.amazon.com/directoryservice/latest/devguide/API_ResetUserPassword.html) instead. It also accepts the current value.
+
+#### The correct password is refused
+
+The Admin password may have expired. The default password policy applies a maximum age to the administrative account as well, and an expired password is refused as a wrong password. Run `net use \\<domain controller>\IPC$ /user:<domain>\Admin <password>`: system error 2242 means expired and 1326 means wrong. If it has expired, set it again with `ResetUserPassword`.
+
+#### Services running as a domain account fail on the management instance
+
+The secure channel between the management instance and the domain controllers is broken. This happens right after the instance is replaced from an AMI, or after the connection drops. `SystemAssociationForRepairingDomainTrust` re-establishes the channel with `nltest /sc_reset` every 30 minutes and starts the services in `ServicesToRepair`. To repair it at once, run the association manually.
+
+If the association fails, the machine account password no longer matches the directory. Run `Reset-ComputerMachinePassword` with a domain credential. Running `AWS-JoinDirectoryServiceDomain` again does not help, because it does nothing on an instance that is already joined.
+
+Check the result with `nltest /sc_verify:<domain>`. `NERR_Success` means the channel is sound.
 
 ### Domain Controller Access Issues
 

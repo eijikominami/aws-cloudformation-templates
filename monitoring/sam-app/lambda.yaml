@@ -34,6 +34,15 @@ Parameters:
     Type: String
     AllowedPattern: .+
     Description: The SNS topic ARN [required]
+  TreatMissingData:
+    Type: String
+    Default: ignore
+    AllowedValues:
+      - breaching
+      - notBreaching
+      - ignore
+      - missing
+    Description: How the alarms treat periods with no data
   FunctionResouceName:
     Type: String
     AllowedPattern: .+
@@ -91,7 +100,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -104,7 +113,8 @@ Resources:
       FilterPattern: !Ref MetricFilterPattern
       LogGroupName: !Sub /aws/lambda/${FunctionResouceName}
       MetricTransformations:
-        - MetricName: !Sub ${FunctionResouceName}-ErrorLog
+        - DefaultValue: 0
+          MetricName: !Sub ${FunctionResouceName}-ErrorLog
           MetricNamespace: LogMetrics
           MetricValue: '1'
   AlarmLambdaMetricFilterError:
@@ -128,7 +138,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -161,7 +171,7 @@ Resources:
       Period: 60
       Statistic: Maximum
       Threshold: !Ref TimeoutMilliseconds
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment
@@ -193,7 +203,7 @@ Resources:
       Period: 60
       Statistic: Sum
       Threshold: 1
-      TreatMissingData: notBreaching
+      TreatMissingData: !Ref TreatMissingData
       Tags: 
         - Key: environment
           Value: !Ref Environment

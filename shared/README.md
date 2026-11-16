@@ -51,10 +51,12 @@ You can provide optional parameters as follows.
 | --- | --- | --- | --- | --- |
 | AccountIdForArchive | String | | | The AWS account id for log archive |
 | ActiveDirectoryEC2ImageId | String | /aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base | ○ | The SSM parameter name that holds the EC2 Image Id |
+| ActiveDirectoryEC2InstanceType | String | t3.small | ○ | The EC2 Instance Type of the management instance |
 | ActiveDirectoryEdition | Enterprise / Standard | Standard | ○ | The edition of AWS Directory Service for Microsoft Active Directory |
 | ActiveDirectoryEnableSso | true / false | true | ○ | Whether to enable single sign-on for a Microsoft Active Directory in AWS |
 | **ActiveDirectoryName** | String | corp.example.com | ○ | The fully qualified domain name for the AWS Managed Microsoft AD directory |
 | ActiveDirectoryPassword | String | Password1+ | ○ | The password for the default administrative user named Admin |
+| ActiveDirectoryServicesToRepair | CommaDelimitedList | | | The Windows services on the management instance that have to be running once the secure channel is sound |
 | **ActiveDirectoryShortName** | String | CORP | ○ | The NetBIOS name for your domain |
 | ActiveDirectorySubnetCidrBlockForAz1 | String | 10.3.0.0/26 | ○ | The public subnet CIDR block at AZ1 |
 | ActiveDirectorySubnetCidrBlockForAz2 | String | 10.3.64.0/26 | ○ | The public subnet CIDR block at AZ2 |
